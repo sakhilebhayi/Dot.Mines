@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ComprehensiveDataSeeder::class,
             OperatorFatigueSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 }
