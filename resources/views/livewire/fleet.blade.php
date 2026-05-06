@@ -1170,45 +1170,20 @@
 
     @endif
 </div>
-<style>
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.6s ease-out;
-}
-
-.animate-slide-down {
-    animation: slideDown 0.5s ease-out;
-}
-
-.animate-scale-in {
-    animation: scaleIn 0.4s ease-out forwards;
-    opacity: 0;
-}
-</style>
+<script>
+(function injectFleetStyles() {
+    if (document.getElementById('fleet-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'fleet-styles';
+    s.textContent = [
+        '@keyframes fadeIn{from{opacity:0}to{opacity:1}}',
+        '@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}',
+        '@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}',
+        '.animate-fade-in{animation:fadeIn 0.6s ease-out}',
+        '.animate-slide-down{animation:slideDown 0.5s ease-out}',
+        '.animate-scale-in{animation:scaleIn 0.4s ease-out forwards;opacity:0}',
+    ].join('');
+    document.head.appendChild(s);
+})();
+</script>
 </div>

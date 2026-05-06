@@ -576,75 +576,24 @@
     </div>
 </div>
 
-<style>
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
-}
-
-.animate-slide-in-left {
-    animation: slideInLeft 0.5s ease-out;
-}
-
-.animate-slide-in-right {
-    animation: slideInRight 0.5s ease-out;
-}
-
-.animate-slide-down {
-    animation: slideDown 0.3s ease-out;
-}
-
-.animate-scale-in {
-    animation: scaleIn 0.4s ease-out forwards;
-    opacity: 0;
-}
-</style>
+<script>
+(function injectAiDashboardStyles() {
+    if (document.getElementById('ai-dashboard-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'ai-dashboard-styles';
+    s.textContent = [
+        '@keyframes fadeIn{from{opacity:0}to{opacity:1}}',
+        '@keyframes slideInLeft{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}',
+        '@keyframes slideInRight{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}',
+        '@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}',
+        '@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}',
+        '.animate-fade-in{animation:fadeIn 0.5s ease-out}',
+        '.animate-slide-in-left{animation:slideInLeft 0.5s ease-out}',
+        '.animate-slide-in-right{animation:slideInRight 0.5s ease-out}',
+        '.animate-slide-down{animation:slideDown 0.3s ease-out}',
+        '.animate-scale-in{animation:scaleIn 0.4s ease-out forwards;opacity:0}',
+    ].join('');
+    document.head.appendChild(s);
+})();
+</script>
 </div>

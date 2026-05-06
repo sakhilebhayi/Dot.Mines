@@ -2,45 +2,39 @@
     <!-- Leaflet CSS - loaded directly in component -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     
-    <style>
-        /* Map specific styles */
-        #route-planning-map {
-            background: #1f2937;
+    <script>
+    (function injectRoutePlanningStyles() {
+        if (document.getElementById('route-planning-styles')) return;
+        var s = document.createElement('style');
+        s.id = 'route-planning-styles';
+        s.textContent = [
+            '#route-planning-map{background:#1f2937}',
+            '#route-planning-map.clickable-mode{cursor:crosshair!important}',
+            '#route-planning-map .leaflet-container{background:#1f2937}',
+            '.route-marker{border-radius:50%;box-shadow:0 4px 6px rgba(0,0,0,0.3)}',
+        ].join('');
+        document.head.appendChild(s);
+    })();
+    </script>
+    <script>
+    // Fallback: ensure the calculate form calls the Livewire method if submit interception fails
+    (function(){
+        try {
+            const componentId = @json($this->id ?? null);
+            if (!componentId) return;
+            const livewireComponent = Livewire.find(componentId);
+            const calcForm = document.querySelector('form[wire\:submit\.prevent="calculateRoute"]');
+            if (calcForm && livewireComponent) {
+                calcForm.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    livewireComponent.call('calculateRoute');
+                });
+            }
+        } catch (e) {
+            console.warn('RoutePlanning fallback binding failed', e);
         }
-        
-        <script>
-            // Fallback: ensure the calculate form calls the Livewire method if submit interception fails
-            (function(){
-                try {
-                    const componentId = @json($this->id ?? null);
-                    if (!componentId) return;
-                    const livewireComponent = Livewire.find(componentId);
-                    const calcForm = document.querySelector('form[wire\\:submit\\.prevent="calculateRoute"]');
-                    if (calcForm && livewireComponent) {
-                        calcForm.addEventListener('submit', function(e){
-                            e.preventDefault();
-                            livewireComponent.call('calculateRoute');
-                        });
-                    }
-                } catch (e) {
-                    console.warn('RoutePlanning fallback binding failed', e);
-                }
-            })();
-        </script>
-        #route-planning-map.clickable-mode {
-            cursor: crosshair !important;
-        }
-        
-        #route-planning-map .leaflet-container {
-            background: #1f2937;
-        }
-        
-        /* Custom marker styles */
-        .route-marker {
-            border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-    </style>
+    })();
+    </script>
     
     <!-- Header & Controls -->
     <div class="bg-gray-800 border-b border-gray-700 p-6">

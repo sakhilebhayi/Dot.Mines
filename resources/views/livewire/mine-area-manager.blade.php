@@ -3,23 +3,22 @@
     <link rel="stylesheet" href="/vendor/leaflet.css" />
     <link rel="stylesheet" href="/vendor/leaflet-draw/leaflet.draw.css" />
 
-    <style>
-        #mine-area-map,
-        #mine-area-draw-map {
-            background: #1f2937;
-            min-height: 400px;
-            height: 100%;
-            width: 100%;
-        }
-
-        .leaflet-container {
-            background: #1f2937 !important;
-        }
-
-        .mine-area-search-input {
-            @apply w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none;
-        }
-    </style>
+    <script>
+    (function injectMineAreaStyles() {
+        if (document.getElementById('mine-area-styles')) return;
+        var s = document.createElement('style');
+        s.id = 'mine-area-styles';
+        s.textContent = [
+            '#mine-area-map,#mine-area-draw-map{background:#1f2937;min-height:400px;height:100%;width:100%}',
+            '.leaflet-container{background:#1f2937!important}',
+            '.mine-area-search-input{width:100%;padding:0.5rem 1rem;border:1px solid #4b5563;border-radius:0.5rem;background-color:#374151;color:#111827;outline:none}',
+            '.dark .mine-area-search-input{color:#fff}',
+            '.mine-area-search-input::placeholder{color:#9ca3af;opacity:1}',
+            '.mine-area-search-input:focus{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,0.4)}',
+        ].join('');
+        document.head.appendChild(s);
+    })();
+    </script>
 
     <!-- Header -->
     <div class="bg-gray-800 border-b border-gray-700 p-6">

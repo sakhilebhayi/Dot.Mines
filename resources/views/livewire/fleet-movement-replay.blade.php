@@ -7,19 +7,6 @@
     <!-- Leaflet CSS - loaded directly in component -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     
-    <style>
-        /* Map specific styles */
-        #replay-map {
-            background: #1f2937;
-        }
-        
-        #replay-map .leaflet-container {
-            background: #1f2937;
-            height: 100%;
-            width: 100%;
-        }
-    </style>
-    
     <!-- Header -->
     <div class="bg-gray-800 border-b border-gray-700 p-6">
         <div class="max-w-7xl mx-auto">
@@ -1778,95 +1765,29 @@
         });
     </script>
     
-    <style>
-        @keyframes pulse-marker {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.6);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 6px 16px rgba(59, 130, 246, 0.8);
-            }
-        }
-
-        @keyframes shimmer {
-            0% {
-                transform: translateX(-100%);
-            }
-            100% {
-                transform: translateX(100%);
-            }
-        }
-
-        .animate-shimmer {
-            animation: shimmer 3s infinite;
-        }
-
-        .replay-marker {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        /* Custom Range Slider Styling */
-        input[type="range"].slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-            cursor: pointer;
-        }
-
-        input[type="range"].slider-thumb::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            cursor: grab;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.6);
-            border: 3px solid white;
-            transition: all 0.2s ease;
-        }
-
-        input[type="range"].slider-thumb::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.8);
-        }
-
-        input[type="range"].slider-thumb::-webkit-slider-thumb:active {
-            cursor: grabbing;
-            transform: scale(1.1);
-        }
-
-        input[type="range"].slider-thumb::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            cursor: grab;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.6);
-            border: 3px solid white;
-            transition: all 0.2s ease;
-        }
-
-        input[type="range"].slider-thumb::-moz-range-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.8);
-        }
-
-        input[type="range"].slider-thumb::-moz-range-thumb:active {
-            cursor: grabbing;
-            transform: scale(1.1);
-        }
-    </style>
+    <script>
+    (function injectReplayStyles() {
+        if (document.getElementById('replay-styles')) return;
+        var s = document.createElement('style');
+        s.id = 'replay-styles';
+        s.textContent = [
+            '#replay-map{background:#1f2937}',
+            '#replay-map .leaflet-container{background:#1f2937;height:100%;width:100%}',
+            '@keyframes pulse-marker{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(59,130,246,0.6)}50%{transform:scale(1.05);box-shadow:0 6px 16px rgba(59,130,246,0.8)}}',
+            '@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}',
+            '@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}',
+            '.animate-shimmer{animation:shimmer 3s infinite}',
+            '.replay-marker{animation:pulse 2s infinite}',
+            'input[type="range"].slider-thumb{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}',
+            'input[type="range"].slider-thumb::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);cursor:grab;box-shadow:0 4px 12px rgba(245,158,11,0.6);border:3px solid white;transition:all 0.2s ease}',
+            'input[type="range"].slider-thumb::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 6px 16px rgba(245,158,11,0.8)}',
+            'input[type="range"].slider-thumb::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.1)}',
+            'input[type="range"].slider-thumb::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);cursor:grab;box-shadow:0 4px 12px rgba(245,158,11,0.6);border:3px solid white;transition:all 0.2s ease}',
+            'input[type="range"].slider-thumb::-moz-range-thumb:hover{transform:scale(1.2);box-shadow:0 6px 16px rgba(245,158,11,0.8)}',
+            'input[type="range"].slider-thumb::-moz-range-thumb:active{cursor:grabbing;transform:scale(1.1)}',
+        ].join('');
+        document.head.appendChild(s);
+    })();
+    </script>
 </div>
 </div>
