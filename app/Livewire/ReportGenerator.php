@@ -209,7 +209,7 @@ class ReportGenerator extends Component
     {
         $this->selectedMachines = $this->getMachines()
             ->pluck('id')
-            ->map(fn ($id) => (int) $id)
+            ->map(fn ($id) => (string) $id)
             ->values()
             ->all();
     }
@@ -223,7 +223,7 @@ class ReportGenerator extends Component
     {
         $this->selectedGeofences = $this->getGeofences()
             ->pluck('id')
-            ->map(fn ($id) => (int) $id)
+            ->map(fn ($id) => (string) $id)
             ->values()
             ->all();
     }
@@ -235,12 +235,12 @@ class ReportGenerator extends Component
 
     public function toggleMachine($machineId)
     {
-        $machineId = (int) $machineId;
+        $machineId = (string) $machineId;
 
         if (in_array($machineId, $this->selectedMachines, true)) {
             $this->selectedMachines = array_values(array_filter(
                 $this->selectedMachines,
-                fn ($id) => (int) $id !== $machineId
+                fn ($id) => (string) $id !== $machineId
             ));
         } else {
             $this->selectedMachines[] = $machineId;

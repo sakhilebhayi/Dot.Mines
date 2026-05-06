@@ -147,7 +147,7 @@
                                     <label wire:key="machine-checkbox-{{ $machine->id }}" class="flex items-center gap-2 p-2 rounded hover:bg-slate-700/50 cursor-pointer">
                                         <input 
                                             type="checkbox" 
-                                            wire:model.number="selectedMachines" 
+                                            wire:model="selectedMachines" 
                                             value="{{ $machine->id }}"
                                             class="rounded bg-slate-600 border-slate-500"
                                         >
@@ -186,7 +186,7 @@
                                     <label wire:key="geofence-checkbox-{{ $geofence->id }}" class="flex items-center gap-2 p-2 rounded hover:bg-slate-700/50 cursor-pointer">
                                         <input 
                                             type="checkbox" 
-                                            wire:model.number="selectedGeofences" 
+                                            wire:model="selectedGeofences" 
                                             value="{{ $geofence->id }}"
                                             class="rounded bg-slate-600 border-slate-500"
                                         >
