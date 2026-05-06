@@ -82,7 +82,7 @@
 
             {{-- ── Map Panel (3/5) ── --}}
             <div class="lg:col-span-3 relative border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700"
-                 style="min-height:420px">
+                 style="min-height:420px" wire:ignore>
                 <div id="haul-dispatch-map" class="absolute inset-0 w-full h-full"></div>
 
                 {{-- Map legend overlay --}}
@@ -289,7 +289,14 @@ function haulDispatchMap() {
         initMap() {
             if (typeof L === 'undefined') return;
             const el = document.getElementById('haul-dispatch-map');
-            if (!el || this.initialized) return;
+            // Reset if the element was removed/re-created by Livewire
+            if (!el) { this.initialized = false; return; }
+            if (this.initialized && this.map) return;
+            // If a stale Leaflet instance exists on a new element, clean it up
+            if (this.map) {
+                try { this.map.remove(); } catch (_) {}
+                this.map = null;
+            }
 
             this.map = L.map('haul-dispatch-map', {
                 center: [-28.4793, 24.6727],
@@ -528,10 +535,10 @@ function haulDispatchMap() {
 
         // ── Event Handlers ─────────────────────────────────────────────────
         updateMapData(dispatches) {
-            if (!this.initialized) {
+            if (!this.initialized || !this.map) {
                 this.$nextTick(() => {
                     this.initMap();
-                    if (Array.isArray(dispatches) && dispatches.length) {
+                    if (this.initialized && Array.isArray(dispatches) && dispatches.length) {
                         this.renderDispatches(dispatches);
                     }
                 });

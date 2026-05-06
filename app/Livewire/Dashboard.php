@@ -38,7 +38,6 @@ class Dashboard extends Component
 
     public function loadDashboardData(): void
     {
-        $this->isLoading = true;
         $team = Auth::user()->currentTeam;
 
         if ($team === null) {
@@ -118,12 +117,9 @@ class Dashboard extends Component
 
     public function loadDispatches(): void
     {
-        $this->haulDispatchLoading = true;
-
         $team = Auth::user()->currentTeam;
 
         if ($team === null) {
-            $this->haulDispatchLoading = false;
             return;
         }
 
@@ -190,8 +186,6 @@ class Dashboard extends Component
         ], $this->activeDispatches);
 
         $this->dispatch('haul-dispatch:map-data', dispatches: $this->mapDispatches);
-
-        $this->haulDispatchLoading = false;
     }
 
     public function filterByStatus(string $status): void
