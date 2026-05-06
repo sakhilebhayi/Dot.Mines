@@ -20,7 +20,6 @@ use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\ProductionRecord;
 use App\Models\ShiftTemplate;
-use App\Models\UserFeedPreference;
 use App\Services\MentionParser;
 use App\Traits\RealtimeUpdates;
 use Illuminate\Support\Facades\Auth;
@@ -68,10 +67,6 @@ class Feed extends Component
     public ?int   $rejectPostId       = null;
     public string $rejectReason       = '';
 
-    // ── Onboarding overlay ────────────────────────────────────────────────────
-    public bool   $showOnboarding     = false;
-    public int    $onboardingStep     = 0;
-
     protected function rules(): array
     {
         return [
@@ -95,13 +90,6 @@ class Feed extends Component
         $user = Auth::user();
         $this->composeShift = $this->detectCurrentShift();
         $this->composeMineAreaId = $user->currentTeam?->mineAreas()->first()?->id;
-
-        // ── Onboarding: show if the user hasn't seen it yet for this team ─────
-        $pref = UserFeedPreference::firstOrCreate(
-            ['user_id' => $user->id, 'team_id' => $user->current_team_id],
-            ['category_preferences' => [], 'notify_on_comment' => true, 'notify_on_reply' => true, 'notify_on_approval' => true, 'notify_on_mention' => true],
-        );
-        $this->showOnboarding = ($pref->seen_onboarding_at === null);
 
         // ── Auto welcome post: create once when a new team has no posts ───────
         if ($user->hasRole('admin') && FeedPost::count() === 0) {
@@ -599,22 +587,6 @@ class Feed extends Component
         $approval->refresh();
         FeedPostStatusChanged::dispatch($post, $approval);
         $this->dispatch('notify', type: 'success', message: 'Approval overridden to ' . $status . '.');
-    }
-
-    // ── Onboarding ────────────────────────────────────────────────────────────
-
-    public function nextOnboardingStep(): void
-    {
-        $this->onboardingStep++;
-    }
-
-    public function dismissOnboarding(): void
-    {
-        $user = Auth::user();
-        UserFeedPreference::where('user_id', $user->id)
-            ->where('team_id', $user->current_team_id)
-            ->update(['seen_onboarding_at' => now()]);
-        $this->showOnboarding = false;
     }
 
     public function updatingFilterCategory(): void  { $this->resetPage(); }
