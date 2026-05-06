@@ -297,6 +297,9 @@
         </div>
     </div>
 
+    {{-- ── Haul Dispatch Tracker ────────────────────────────────────────── --}}
+    @livewire('haul-dispatch-dashboard')
+
     @endif
     <style>
     @keyframes fadeIn {

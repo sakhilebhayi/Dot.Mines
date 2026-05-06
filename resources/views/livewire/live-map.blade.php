@@ -50,6 +50,23 @@
                                         TMP {{ $showTMP ? '(On)' : '(Off)' }}
                                     </span>
                                 </button>
+                                <button wire:click="toggleHeatMap" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showHeatMap ? 'bg-rose-600 hover:bg-rose-700 ring-2 ring-rose-300' : 'bg-gray-700 hover:bg-gray-600' }} text-white text-sm">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
+                                        </svg>
+                                        Heat Map {{ $showHeatMap ? '(On)' : '(Off)' }}
+                                    </span>
+                                </button>
+                                <button wire:click="toggleEvents" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showEvents ? 'bg-teal-600 hover:bg-teal-700 ring-2 ring-teal-300' : 'bg-gray-700 hover:bg-gray-600' }} text-white text-sm">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        Events {{ $showEvents ? '(On)' : '(Off)' }}
+                                    </span>
+                                </button>
                         </div>
                     </div>
                     <div class="flex flex-col md:flex-row gap-4 mb-4">
@@ -134,7 +151,96 @@
                         </div>
                     </div>
 
+                    {{-- ── Map Events Filter Bar (shown when events layer is on) ── --}}
+                    @if ($showEvents)
+                    <div class="bg-gray-900/60 border border-teal-800/60 rounded-lg px-4 py-2.5 mb-4">
+                        <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                            <p class="text-xs font-semibold text-teal-300 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Map Events · last 12 h
+                                <span class="ml-1 bg-teal-700/70 text-teal-200 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                                    {{ count($mapEvents) }}
+                                </span>
+                            </p>
+                            {{-- Per-type filter pills --}}
+                            <div class="flex flex-wrap gap-1">
+                                <button wire:click="filterEventType('all')"
+                                        class="text-[10px] px-2 py-0.5 rounded-full font-semibold transition-all
+                                            {{ $eventTypeFilter === 'all' ? 'bg-teal-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }}">
+                                    All
+                                </button>
+                                @foreach($eventTypeConfig as $typeKey => $cfg)
+                                    <button wire:click="filterEventType('{{ $typeKey }}')"
+                                            class="text-[10px] px-2 py-0.5 rounded-full font-semibold transition-all
+                                                {{ $eventTypeFilter === $typeKey ? 'text-white shadow' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }}"
+                                            @if($eventTypeFilter === $typeKey) style="background-color:{{ $cfg['color'] }}" @endif>
+                                        {{ $cfg['emoji'] }} {{ $cfg['label'] }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- Scrollable mini event feed --}}
+                        @if (count($mapEvents) > 0)
+                        <div class="max-h-28 overflow-y-auto space-y-1 pr-1 map-events-feed">
+                            @foreach (array_slice($mapEvents, 0, 20) as $ev)
+                            <div class="flex items-start gap-2 text-[11px] py-1 border-b border-gray-700/50 last:border-0 cursor-pointer hover:bg-white/5 rounded px-1 transition-colors"
+                                 onclick="window.mapFocusEvent({{ $ev['id'] }})">
+                                <span class="text-base leading-none shrink-0 mt-0.5">{{ $ev['emoji'] }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-semibold text-white truncate">{{ $ev['title'] }}</p>
+                                    <p class="text-gray-400 truncate">
+                                        {{ $ev['machine_name'] }}
+                                        @if($ev['mine_area'] !== '—') · {{ $ev['mine_area'] }}@endif
+                                    </p>
+                                </div>
+                                <span class="text-gray-500 shrink-0 whitespace-nowrap">{{ $ev['occurred_human'] }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+                        @else
+                        <p class="text-xs text-gray-500 mt-1">No events recorded in this period.</p>
+                        @endif
+                    </div>
+                    @endif
+
+                    <div class="relative">
                     <div wire:ignore id="map" class="w-full h-[36rem] rounded-lg shadow-lg bg-gray-900"></div>
+
+                    {{-- Heat Map Legend (shown only when heat map is active, toggled by JS) --}}
+                    <div id="heatmap-legend" class="absolute bottom-10 right-3 z-[1000] rounded-lg overflow-hidden shadow-lg pointer-events-none
+                         {{ $showHeatMap ? '' : 'hidden' }}" style="min-width:130px">
+                        <div class="bg-gray-900/90 backdrop-blur-sm px-3 pt-2 pb-1">
+                            <p class="text-xs font-semibold text-white mb-1.5 flex items-center gap-1">
+                                <svg class="w-3 h-3 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                                </svg>
+                                Activity Intensity
+                            </p>
+                            {{-- Gradient bar --}}
+                            <div class="w-full h-3 rounded-full mb-1" style="background:linear-gradient(to right,#0000ff,#00ff00,#ffff00,#ff8000,#ff0000)"></div>
+                            <div class="flex justify-between text-[9px] text-gray-400 mb-1">
+                                <span>Low</span>
+                                <span>Med</span>
+                                <span>High</span>
+                            </div>
+                            <div class="mt-1.5 space-y-0.5 border-t border-gray-700 pt-1.5">
+                                <div class="flex items-center gap-1.5 text-[9px] text-gray-300">
+                                    <span class="w-2 h-2 rounded-full inline-block" style="background:#ff0000"></span>Active trucks / dump zones
+                                </div>
+                                <div class="flex items-center gap-1.5 text-[9px] text-gray-300">
+                                    <span class="w-2 h-2 rounded-full inline-block" style="background:#ffff00"></span>Loading areas
+                                </div>
+                                <div class="flex items-center gap-1.5 text-[9px] text-gray-300">
+                                    <span class="w-2 h-2 rounded-full inline-block" style="background:#0000ff"></span>Idle / offline
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
                     <div id="map-toast" class="hidden fixed top-4 right-4 z-50 pointer-events-none">
                         <div class="bg-amber-600 text-white px-4 py-2 rounded shadow-lg text-sm message"></div>
                     </div>
@@ -162,6 +268,8 @@
     <!-- Leaflet JS - loaded directly in component -->
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.13.0/leaflet-providers.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Leaflet.heat – canvas-based heat map plugin -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js" crossorigin=""></script>
     
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
     document.addEventListener('DOMContentLoaded', function() {
@@ -184,6 +292,15 @@
         let tmpRoutesData = @json($tmpRoutes ?? []);
         let tmpGeofencesData = @json($geofences); // reuse geofences (now include geofence_type)
         let tmpLayerGroup = null;
+        // ── Heat map state ────────────────────────────────────────────────────
+        let showHeatMapData = @js($showHeatMap);
+        let heatLayer = null;
+        // ── Map events state ──────────────────────────────────────────────────
+        let showEventsData  = @js($showEvents);
+        let eventsData      = @json($mapEvents);
+        let eventTypeConfig = @json($eventTypeConfig);
+        let eventMarkers    = {};    // id → L.Marker
+        let eventLayerGroup = null;
         // Keep a copy of the original machines list for client-side filtering
         let originalMachinesData = Array.isArray(machinesData) ? JSON.parse(JSON.stringify(machinesData)) : [];
         let mapStyleData = @js($mapStyle);
@@ -311,6 +428,11 @@
                     addTMPLayer(tmpRoutesData, tmpGeofencesData);
                 }
 
+                // Events layer — render on mount
+                if (showEventsData && eventsData.length > 0) {
+                    addEventMarkers(eventsData);
+                }
+
                 // Listen for Livewire events
                 window.addEventListener('map-updated', (event) => {
                     debugLog('Livewire map-updated event received', event.detail);
@@ -326,6 +448,52 @@
                     clearTMPLayer();
                     if (showTMPData) addTMPLayer(tmpRoutesData, tmpGeofencesData);
                 });
+
+                // Heat map toggle event
+                window.addEventListener('heatmap-toggle', (event) => {
+                    const payload = event.detail?.[0] ?? event.detail ?? {};
+                    showHeatMapData = !!payload.show;
+                    clearHeatMap();
+                    if (showHeatMapData && Array.isArray(payload.points) && payload.points.length > 0) {
+                        addHeatMap(payload.points);
+                    }
+                    // Show/hide the legend DOM element
+                    const legend = document.getElementById('heatmap-legend');
+                    if (legend) legend.classList.toggle('hidden', !showHeatMapData);
+                });
+
+                // Events layer toggle / filter event
+                window.addEventListener('events-layer-toggle', (event) => {
+                    const payload = event.detail?.[0] ?? event.detail ?? {};
+                    showEventsData = !!payload.show;
+                    clearEventMarkers();
+                    if (showEventsData && Array.isArray(payload.events) && payload.events.length > 0) {
+                        addEventMarkers(payload.events);
+                        eventsData = payload.events;
+                    }
+                });
+
+                // Real-time: new map event pushed via WebSocket (Laravel Echo / Reverb)
+                if (window.Echo) {
+                    const teamId = document.querySelector('[data-team-id]')?.dataset?.teamId
+                        ?? @js(Auth::user()?->currentTeam?->id ?? 0);
+                    if (teamId) {
+                        window.Echo.private(`team.${teamId}`)
+                            .listen('.map-event.recorded', (payload) => {
+                                if (!showEventsData) return;
+                                if (payload.latitude == null || payload.longitude == null) return;
+                                // Append and render the new marker immediately
+                                eventsData.unshift(payload);
+                                addSingleEventMarker(payload, true);
+                            });
+                    }
+                }
+
+                // Render heat map on initial load if the toggle was persisted on
+                if (showHeatMapData) {
+                    // Data must be fetched from server on first render via Livewire poll
+                    // Dispatch a synthetic event from Livewire on mount is handled server-side
+                }
 
                 debugLog('Map initialization complete');
             } catch (error) {
@@ -775,6 +943,203 @@
             tmpLayerGroup = null;
         }
 
+        // ─── Map Events layer ─────────────────────────────────────────────────
+
+        /**
+         * Build an SVG event-pin icon for a given event type.
+         *
+         * @param {string} color     Hex colour
+         * @param {string} emoji     Emoji character
+         * @param {boolean} pulse    Whether to animate (new real-time event)
+         */
+        function buildEventIcon(color, emoji, pulse) {
+            const ring = pulse
+                ? `<circle cx="16" cy="16" r="14" fill="none" stroke="${color}" stroke-width="2" opacity="0.5">
+                       <animate attributeName="r"       values="12;20;12" dur="1.8s" repeatCount="3"/>
+                       <animate attributeName="opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="3"/>
+                   </circle>`
+                : '';
+
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
+                ${ring}
+                <defs>
+                    <filter id="shadow-ev" x="-30%" y="-30%" width="160%" height="160%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.45"/>
+                    </filter>
+                </defs>
+                <path d="M16 0C7.16 0 0 7.16 0 16c0 11.2 16 26 16 26s16-14.8 16-26C32 7.16 24.84 0 16 0z"
+                      fill="${color}" filter="url(#shadow-ev)"/>
+                <circle cx="16" cy="16" r="10" fill="rgba(255,255,255,0.2)"/>
+                <text x="16" y="21" text-anchor="middle" font-size="13">${emoji}</text>
+            </svg>`;
+
+            return L.divIcon({
+                html: svg,
+                className: '',
+                iconSize: [32, 42],
+                iconAnchor: [16, 42],
+                popupAnchor: [0, -44],
+            });
+        }
+
+        /**
+         * Render a detailed popup for an event marker.
+         */
+        function buildEventPopup(ev) {
+            const cfg      = eventTypeConfig[ev.event_type] ?? { label: 'Event', color: '#94a3b8', emoji: '📍' };
+            const when     = ev.occurred_human || new Date(ev.occurred_at).toLocaleString();
+            const meta     = ev.metadata && typeof ev.metadata === 'object' ? ev.metadata : {};
+            const metaRows = Object.entries(meta)
+                .map(([k, v]) => `<tr><td class="pr-2 text-gray-400 capitalize">${k.replace(/_/g,' ')}</td><td class="font-medium text-gray-200">${v}</td></tr>`)
+                .join('');
+
+            return `<div style="font-family:system-ui,sans-serif;min-width:200px;max-width:260px;padding:2px 0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #374151">
+                    <span style="font-size:20px">${cfg.emoji}</span>
+                    <div>
+                        <strong style="font-size:13px;color:#f3f4f6;display:block">${ev.title}</strong>
+                        <span style="font-size:10px;background:${cfg.color};color:#fff;
+                              padding:1px 7px;border-radius:9999px;font-weight:700">
+                            ${cfg.label}
+                        </span>
+                    </div>
+                </div>
+                <table style="width:100%;font-size:11px;border-collapse:collapse">
+                    <tr>
+                        <td style="padding-right:8px;color:#9ca3af">Machine</td>
+                        <td style="font-weight:600;color:#e5e7eb">${ev.machine_name || '—'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-right:8px;color:#9ca3af">Area</td>
+                        <td style="color:#e5e7eb">${ev.mine_area || '—'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-right:8px;color:#9ca3af">When</td>
+                        <td style="color:#e5e7eb">${when}</td>
+                    </tr>
+                    ${metaRows}
+                </table>
+                ${ev.notes ? `<p style="margin-top:6px;font-size:11px;color:#d1d5db;border-top:1px solid #374151;padding-top:5px">${ev.notes}</p>` : ''}
+            </div>`;
+        }
+
+        /**
+         * Add a single event marker to the map.
+         *
+         * @param {object}  ev     Event data object
+         * @param {boolean} pulse  Animate for real-time arrivals
+         */
+        function addSingleEventMarker(ev, pulse = false) {
+            if (!map) return;
+            const lat = parseFloat(ev.latitude);
+            const lng = parseFloat(ev.longitude);
+            if (!isFinite(lat) || !isFinite(lng)) return;
+
+            // Remove stale marker with same id if re-rendering
+            if (eventMarkers[ev.id]) {
+                try { map.removeLayer(eventMarkers[ev.id]); } catch (_) {}
+            }
+
+            const cfg    = eventTypeConfig[ev.event_type] ?? { color: '#94a3b8', emoji: '📍' };
+            const marker = L.marker([lat, lng], {
+                icon: buildEventIcon(cfg.color, cfg.emoji, pulse),
+                zIndexOffset: 200,
+            })
+            .bindPopup(buildEventPopup(ev), {
+                className: 'map-event-popup',
+                maxWidth: 260,
+            });
+
+            if (!eventLayerGroup) {
+                eventLayerGroup = L.layerGroup().addTo(map);
+            }
+            marker.addTo(eventLayerGroup);
+            eventMarkers[ev.id] = marker;
+        }
+
+        /**
+         * Render all event markers at once.
+         */
+        function addEventMarkers(events) {
+            if (!map) return;
+            clearEventMarkers();
+            eventLayerGroup = L.layerGroup().addTo(map);
+            events.forEach(ev => addSingleEventMarker(ev, false));
+            debugLog('[Events] rendered', events.length, 'event markers');
+        }
+
+        function clearEventMarkers() {
+            if (eventLayerGroup && map && map.hasLayer(eventLayerGroup)) {
+                map.removeLayer(eventLayerGroup);
+            }
+            eventLayerGroup = null;
+            eventMarkers    = {};
+        }
+
+        /**
+         * Pan map to and open popup for a specific event.
+         * Called from the inline event feed (Blade side).
+         */
+        window.mapFocusEvent = function (id) {
+            const marker = eventMarkers[id];
+            if (!marker || !map) return;
+            map.flyTo(marker.getLatLng(), 16, { duration: 0.7 });
+            marker.openPopup();
+        };
+
+        // ─── Heat Map layer ───────────────────────────────────────────────────────
+
+        /**
+         * Render a Leaflet.heat layer from weighted lat/lng points.
+         *
+         * @param {Array<[number, number, number]>} points  [[lat, lng, weight], ...]
+         */
+        function addHeatMap(points) {
+            if (!map) return;
+            clearHeatMap();
+
+            if (typeof L.heatLayer === 'undefined') {
+                console.warn('[LiveMap] Leaflet.heat plugin not loaded — heat map unavailable.');
+                showToast('Heat map plugin not available.');
+                return;
+            }
+
+            // Validate & normalise points
+            const validPoints = points
+                .map(p => [parseFloat(p[0]), parseFloat(p[1]), parseFloat(p[2] ?? 0.5)])
+                .filter(p => isFinite(p[0]) && isFinite(p[1]));
+
+            if (validPoints.length === 0) {
+                showToast('No location data available for heat map.');
+                return;
+            }
+
+            heatLayer = L.heatLayer(validPoints, {
+                radius: 35,          // influence radius per point (px)
+                blur: 25,            // gaussian blur (px)
+                maxZoom: 18,
+                max: 1.0,
+                minOpacity: 0.35,
+                gradient: {          // blue → green → yellow → orange → red
+                    0.0:  '#0000ff',
+                    0.25: '#00aaff',
+                    0.5:  '#00ff88',
+                    0.7:  '#ffff00',
+                    0.85: '#ff8000',
+                    1.0:  '#ff0000',
+                },
+            }).addTo(map);
+
+            debugLog('[HeatMap] rendered', validPoints.length, 'points');
+        }
+
+        function clearHeatMap() {
+            if (heatLayer && map && map.hasLayer(heatLayer)) {
+                map.removeLayer(heatLayer);
+            }
+            heatLayer = null;
+        }
+
         // ─────────────────────────────────────────────────────────────────────────
 
         function centerToMineArea(areaId) {
@@ -1059,6 +1424,30 @@
     .geofence-polygon:hover {
         fill-opacity: 0.2 !important;
     }
+    /* Map event popups — dark theme */
+    .map-event-popup .leaflet-popup-content-wrapper {
+        background: #1f2937 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid #374151 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+        padding: 0 !important;
+    }
+    .map-event-popup .leaflet-popup-content {
+        margin: 10px 12px !important;
+    }
+    .map-event-popup .leaflet-popup-tip {
+        background: #1f2937 !important;
+    }
+    .map-event-popup .leaflet-popup-close-button {
+        color: #9ca3af !important;
+        top: 6px !important;
+        right: 8px !important;
+    }
+    /* Events mini-feed scrollbar */
+    .map-events-feed::-webkit-scrollbar { width: 4px; }
+    .map-events-feed::-webkit-scrollbar-track { background: transparent; }
+    .map-events-feed::-webkit-scrollbar-thumb { background: #374151; border-radius: 9999px; }
     .leaflet-control-zoom {
         background-color: rgba(31, 41, 55, 0.9) !important;
         border: 1px solid rgba(107, 114, 128, 0.5) !important;

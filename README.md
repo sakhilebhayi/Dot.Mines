@@ -71,6 +71,36 @@
 
 ## 🆕 Latest Updates (May 2026)
 
+### Haul Dispatch Tracking
+
+- Added a **Haul Dispatch Dashboard** widget to the main dashboard for live haul truck tracking
+- Tracks each truck from loading point through to dump point with real-time position, heading, and speed
+- Displays origin / destination pins, a dashed amber route line, and a GPS breadcrumb trail on an embedded Leaflet map
+- Animated SVG truck markers pulse when a truck is actively hauling
+- Truck cards show current tonnage and fuel level progress bars, ETA, and route summary
+- Fleet totals footer summarises active, idle, and completed dispatches
+- Real-time updates broadcast over WebSockets (`HaulDispatchUpdated` event on `team.{id}` private channel)
+
+### Live Map Heat Map Layer
+
+- Added a **Heat Map** toggle button on the Live Map toolbar
+- Machine density weighted by operational status: active (1.0), idle (0.4), maintenance (0.2), offline (0.1)
+- Geofence centres weighted by type: dump (0.9), loading (0.85), pit (0.7), haul road (0.5), others (0.3)
+- Gradient legend overlay (`low → medium → high`) displayed in the bottom-right corner
+- Powered by `Leaflet.heat 0.2.0`; toggles without a page reload
+
+### Map Events Layer
+
+- Added an **Events** toggle and real-time event layer to the Live Map
+- Events are recorded via `MapEventService::record()` from observers, jobs, or controllers
+- Supported event types: `loading`, `dumping`, `breakdown`, `idling`, `maintenance`, `fueling`, `geofence_entry`, `geofence_exit`, `speed_violation`, `status_change`, `other`
+- Each type has a distinct colour-coded animated SVG pin with an emoji icon
+- Clickable popups show event title, type badge, machine name, mine area, notes, and timestamp
+- Scrollable mini event feed below the toolbar with clickable rows to fly to the marker on the map
+- Type-pill filter bar to show only specific event categories
+- New events appear in real time via WebSockets (`MapEventRecorded` event) without a page refresh
+- Convenience helper `MapEventService::recordStatusChange($machine, $old, $new)` for status transitions
+
 ### Report Generation Reliability
 
 - Fixed report lifecycle handling so status transitions are explicit: `pending` → `processing` → `completed` / `failed`
@@ -96,6 +126,9 @@
 | Capability | Description |
 |---|---|
 | 🗺️ **Live Fleet Tracking** | Real-time GPS machine positions on interactive maps |
+| 🚛 **Haul Dispatch** | Live haul truck routing from loading to dump with ETA and fuel tracking |
+| 🌡️ **Heat Map Layer** | Toggle machine density heat map weighted by operational status |
+| 📍 **Map Events Layer** | Real-time operational event pins (breakdowns, loading, fueling, etc.) on the live map |
 | 🤖 **AI Optimization** | Multi-agent AI with anomaly detection and predictive maintenance |
 | 📡 **Operations Feed** | Structured real-time comms to replace WhatsApp channels |
 | ⛽ **Fuel Management** | Tank management, allocation, forecasting, and budget tracking |
@@ -128,6 +161,8 @@
 - Toggle map layers: machines, geofences, route waypoints
 - Click machine markers to view detailed machine panels
 - Real-time machine position updates with auto-refresh
+- **Heat Map** — toggle a density heat map of fleet activity; machines weighted by status, geofences weighted by type; gradient legend displayed in-map
+- **Events Layer** — toggle operational event pins on the map with type-pill filters and a scrollable mini feed; events broadcast in real time via WebSockets
 - **Mine Area Management** — define operational boundaries with exactly 4 coordinate points
   - Visual drawing tool for placing boundary points
   - Real-time preview of boundary as it's drawn
@@ -306,7 +341,7 @@ Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
 | **Database** | PostgreSQL 16+ |
 | **Styling** | Tailwind CSS 3.x, DaisyUI 5.x |
 | **Charts** | ApexCharts 5.x, Chart.js 4.x |
-| **Maps** | Leaflet 1.9.x, Leaflet Draw, Esri/OSM providers |
+| **Maps** | Leaflet 1.9.x, Leaflet Draw, Leaflet.heat 0.2.x, Esri/OSM providers |
 | **Real-time** | Laravel Reverb (WebSockets), Laravel Echo, Pusher.js |
 | **Queue** | Laravel Queue (database driver) |
 | **Auth** | Laravel Jetstream + Sanctum |
@@ -570,6 +605,8 @@ Navigate to the **Live Map** to view real-time fleet locations:
 - **Route Waypoints**: Click the Routes button to display sequenced waypoints start to finish
 - **Traffic Management Plan**: Manage traffic plans directly from the map
 - **Auto-refresh**: Map updates automatically with latest data
+- **Heat Map**: Click the Heat Map button to overlay a machine density layer weighted by operational status. A gradient legend appears in the bottom-right corner. Click again to remove it.
+- **Events Layer**: Click Events to show real-time operational event markers (breakdowns, loading, fueling, etc.). Use the type-pill filter bar to narrow event types. Click any event in the mini feed to fly to it on the map. New events appear automatically without a page refresh.
 
 ### Mine Area Management
 

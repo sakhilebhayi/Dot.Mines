@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Machine;
 use App\Models\Geofence;
+use App\Models\MapEvent;
 use App\Models\Route;
 use App\Traits\RealtimeUpdates;
 use Livewire\Component;
@@ -23,6 +24,9 @@ class LiveMap extends Component
     public bool $showMachines = true;
     public bool $showRoutes = false;
     public bool $showTMP = false;
+    public bool $showHeatMap  = false;
+    public bool $showEvents   = true;
+    public string $eventTypeFilter = 'all';
     public string $selectedStatus = '';
     public ?int $selectedMineAreaId = null;
 
@@ -110,6 +114,150 @@ class LiveMap extends Component
             'routes'     => $this->getRoutes(),
             'geofences'  => $this->getGeofencesWithType(),
         ]);
+    }
+
+    // ─── Map Events layer ─────────────────────────────────────────────────────
+
+    public function toggleEvents(): void
+    {
+        $this->showEvents = !$this->showEvents;
+        $this->dispatch('events-layer-toggle', [
+            'show'   => $this->showEvents,
+            'events' => $this->showEvents ? $this->getMapEvents() : [],
+        ]);
+    }
+
+    public function filterEventType(string $type): void
+    {
+        $allowed = array_merge(['all'], array_keys(MapEvent::TYPE_CONFIG));
+        if (!in_array($type, $allowed, true)) {
+            return;
+        }
+        $this->eventTypeFilter = $type;
+        if ($this->showEvents) {
+            $this->dispatch('events-layer-toggle', [
+                'show'   => true,
+                'events' => $this->getMapEvents(),
+            ]);
+        }
+    }
+
+    /**
+     * Return the last 12 hours of geo-located map events for the current team.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getMapEvents(): array
+    {
+        $team = Auth::user()->currentTeam;
+
+        $query = MapEvent::forTeam($team->id)
+            ->withLocation()
+            ->recent(12)
+            ->with(['machine', 'mineArea'])
+            ->latest('occurred_at')
+            ->limit(200);
+
+        if ($this->eventTypeFilter !== 'all') {
+            $query->ofType($this->eventTypeFilter);
+        }
+
+        return $query->get()->map(function (MapEvent $e): array {
+            $cfg = MapEvent::TYPE_CONFIG[$e->event_type]
+                ?? ['label' => 'Event', 'color' => '#94a3b8', 'emoji' => '📍'];
+
+            return [
+                'id'             => $e->id,
+                'event_type'     => $e->event_type,
+                'type_label'     => $cfg['label'],
+                'color'          => $cfg['color'],
+                'emoji'          => $cfg['emoji'],
+                'title'          => $e->title,
+                'notes'          => $e->notes,
+                'latitude'       => $e->latitude,
+                'longitude'      => $e->longitude,
+                'occurred_at'    => $e->occurred_at->toIso8601String(),
+                'occurred_human' => $e->occurred_at->diffForHumans(),
+                'machine_id'     => $e->machine_id,
+                'machine_name'   => $e->machine?->name ?? '—',
+                'mine_area'      => $e->mineArea?->name ?? '—',
+                'metadata'       => $e->metadata ?? [],
+            ];
+        })->toArray();
+    }
+
+    // ─── Heat Map layer ───────────────────────────────────────────────────────
+
+    public function toggleHeatMap(): void
+    {
+        $this->showHeatMap = !$this->showHeatMap;
+        $this->dispatch('heatmap-toggle', [
+            'show'   => $this->showHeatMap,
+            'points' => $this->showHeatMap ? $this->getHeatMapPoints() : [],
+        ]);
+    }
+
+    /**
+     * Build a weighted point cloud for Leaflet.heat.
+     *
+     * Each entry is [lat, lng, intensity (0.0–1.0)].
+     * Sources:
+     *   - Machine last-known positions (weight ∝ activity level)
+     *   - Geofence centres (weight ∝ zone type: dump/loading > pit > stockpile)
+     *
+     * @return array<int, array{float, float, float}>
+     */
+    public function getHeatMapPoints(): array
+    {
+        $team   = Auth::user()->currentTeam;
+        $points = [];
+
+        // ── Machine positions ──────────────────────────────────────────────
+        $statusWeights = [
+            'active'      => 1.0,
+            'idle'        => 0.4,
+            'maintenance' => 0.2,
+            'offline'     => 0.1,
+        ];
+
+        Machine::where('team_id', $team->id)
+            ->whereNotNull('last_location_latitude')
+            ->whereNotNull('last_location_longitude')
+            ->get(['status', 'last_location_latitude', 'last_location_longitude'])
+            ->each(function ($m) use (&$points, $statusWeights): void {
+                $weight   = $statusWeights[$m->status] ?? 0.3;
+                $points[] = [
+                    (float) $m->last_location_latitude,
+                    (float) $m->last_location_longitude,
+                    $weight,
+                ];
+            });
+
+        // ── Geofence centres ───────────────────────────────────────────────
+        $geofenceWeights = [
+            'dump'       => 0.9,
+            'loading'    => 0.85,
+            'pit'        => 0.7,
+            'stockpile'  => 0.6,
+            'facility'   => 0.45,
+            'restricted' => 0.3,
+            'safe'       => 0.2,
+        ];
+
+        Geofence::where('team_id', $team->id)
+            ->whereNotNull('center_latitude')
+            ->whereNotNull('center_longitude')
+            ->get(['type', 'center_latitude', 'center_longitude'])
+            ->each(function ($g) use (&$points, $geofenceWeights): void {
+                $weight   = $geofenceWeights[$g->type] ?? 0.4;
+                $points[] = [
+                    (float) $g->center_latitude,
+                    (float) $g->center_longitude,
+                    $weight,
+                ];
+            });
+
+        return $points;
     }
 
     public function changeMapStyle(string $style): void
@@ -287,6 +435,11 @@ class LiveMap extends Component
             'routes'          => $routes,
             'showRoutes'      => $this->showRoutes,
             'showTMP'         => $this->showTMP,
+            'showHeatMap'     => $this->showHeatMap,
+            'showEvents'      => $this->showEvents,
+            'eventTypeFilter' => $this->eventTypeFilter,
+            'mapEvents'       => $this->showEvents ? $this->getMapEvents() : [],
+            'eventTypeConfig' => MapEvent::TYPE_CONFIG,
             'tmpRoutes'       => $this->getRoutes(),
             'trafficPlanData' => $this->getTrafficPlanData(),
             'machineStatuses' => $machineStatuses,
