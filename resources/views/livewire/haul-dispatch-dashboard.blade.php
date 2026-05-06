@@ -552,20 +552,19 @@ function haulDispatchMap() {
             }
         },
     };
-    </script>
+}
 
-    <style>
-    .haul-tooltip {
-        background: rgba(17,24,39,0.85) !important;
-        color: #f3f4f6 !important;
-        border: none !important;
-        border-radius: 6px !important;
-        font-size: 11px !important;
-        padding: 5px 8px !important;
-        backdrop-filter: blur(4px);
-    }
-    .haul-tooltip.leaflet-tooltip-top::before {
-        border-top-color: rgba(17,24,39,0.85) !important;
-    }
-    </style>
+(function injectHaulTooltipStyles() {
+    if (document.getElementById('haul-dispatch-styles')) return;
+    const s = document.createElement('style');
+    s.id = 'haul-dispatch-styles';
+    s.textContent = [
+        '.haul-tooltip{background:rgba(17,24,39,0.85)!important;color:#f3f4f6!important;',
+        'border:none!important;border-radius:6px!important;font-size:11px!important;',
+        'padding:5px 8px!important;backdrop-filter:blur(4px)}',
+        '.haul-tooltip.leaflet-tooltip-top::before{border-top-color:rgba(17,24,39,0.85)!important}',
+    ].join('');
+    document.head.appendChild(s);
+})();
+    </script>
 </div>
