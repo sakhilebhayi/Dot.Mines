@@ -298,7 +298,7 @@
     </div>
 
     {{-- ── Haul Dispatch Tracker ────────────────────────────────────────── --}}
-    @livewire('haul-dispatch-dashboard')
+    @include('livewire.haul-dispatch-dashboard', ['isLoading' => $haulDispatchLoading])
 
     @endif
     <script>
