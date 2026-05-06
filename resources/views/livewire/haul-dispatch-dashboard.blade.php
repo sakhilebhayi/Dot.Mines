@@ -262,12 +262,11 @@
             </div>
         </div>
     @endif
-</div>
 
-{{-- ═══════════════════════════════════════════════════════════════════════════
-     Alpine.js Leaflet Map Controller
-     ══════════════════════════════════════════════════════════════════════════ --}}
-<script>
+    {{-- ═══════════════════════════════════════════════════════════════════════════
+         Alpine.js Leaflet Map Controller
+         ══════════════════════════════════════════════════════════════════════════ --}}
+    <script>
 function haulDispatchMap() {
     return {
         map: null,
@@ -553,20 +552,20 @@ function haulDispatchMap() {
             }
         },
     };
-}
-</script>
+    </script>
 
-<style>
-.haul-tooltip {
-    background: rgba(17,24,39,0.85) !important;
-    color: #f3f4f6 !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    padding: 5px 8px !important;
-    backdrop-filter: blur(4px);
-}
-.haul-tooltip.leaflet-tooltip-top::before {
-    border-top-color: rgba(17,24,39,0.85) !important;
-}
-</style>
+    <style>
+    .haul-tooltip {
+        background: rgba(17,24,39,0.85) !important;
+        color: #f3f4f6 !important;
+        border: none !important;
+        border-radius: 6px !important;
+        font-size: 11px !important;
+        padding: 5px 8px !important;
+        backdrop-filter: blur(4px);
+    }
+    .haul-tooltip.leaflet-tooltip-top::before {
+        border-top-color: rgba(17,24,39,0.85) !important;
+    }
+    </style>
+</div>
