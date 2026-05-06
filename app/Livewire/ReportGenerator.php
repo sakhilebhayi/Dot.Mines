@@ -209,6 +209,7 @@ class ReportGenerator extends Component
     {
         $this->selectedMachines = $this->getMachines()
             ->pluck('id')
+            ->map(fn ($id) => (string) $id)
             ->values()
             ->all();
     }
@@ -222,6 +223,7 @@ class ReportGenerator extends Component
     {
         $this->selectedGeofences = $this->getGeofences()
             ->pluck('id')
+            ->map(fn ($id) => (string) $id)
             ->values()
             ->all();
     }
