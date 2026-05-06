@@ -32,6 +32,7 @@ class HaulDispatchDashboard extends Component
         $team = Auth::user()->currentTeam;
 
         if ($team === null) {
+            $this->isLoading = false;
             return;
         }
 
@@ -101,6 +102,8 @@ class HaulDispatchDashboard extends Component
 
         // Push updated map data to Alpine
         $this->dispatch('haul-dispatch:map-data', dispatches: $this->mapDispatches);
+
+        $this->isLoading = false;
     }
 
     // ─── Actions ──────────────────────────────────────────────────────────────

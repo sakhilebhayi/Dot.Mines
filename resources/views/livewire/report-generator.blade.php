@@ -125,7 +125,7 @@
                             <div class="flex gap-2">
                                 <button 
                                     type="button"
-                                    wire:click="selectAllMachines"
+                                    wire:click.prevent="selectAllMachines"
                                     wire:loading.attr="disabled"
                                     wire:target="selectAllMachines"
                                     class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded transition"
@@ -134,7 +134,7 @@
                                 </button>
                                 <button 
                                     type="button"
-                                    wire:click="clearMachines"
+                                    wire:click.prevent="clearMachines"
                                     wire:loading.attr="disabled"
                                     wire:target="clearMachines"
                                     class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded transition"
@@ -147,7 +147,7 @@
                                     <label wire:key="machine-checkbox-{{ $machine->id }}" class="flex items-center gap-2 p-2 rounded hover:bg-slate-700/50 cursor-pointer">
                                         <input 
                                             type="checkbox" 
-                                            wire:model="selectedMachines" 
+                                            wire:model.number="selectedMachines" 
                                             value="{{ $machine->id }}"
                                             class="rounded bg-slate-600 border-slate-500"
                                         >
@@ -164,7 +164,7 @@
                             <div class="flex gap-2">
                                 <button 
                                     type="button"
-                                    wire:click="selectAllGeofences"
+                                    wire:click.prevent="selectAllGeofences"
                                     wire:loading.attr="disabled"
                                     wire:target="selectAllGeofences"
                                     class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded transition"
@@ -173,7 +173,7 @@
                                 </button>
                                 <button 
                                     type="button"
-                                    wire:click="clearGeofences"
+                                    wire:click.prevent="clearGeofences"
                                     wire:loading.attr="disabled"
                                     wire:target="clearGeofences"
                                     class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded transition"
@@ -186,7 +186,7 @@
                                     <label wire:key="geofence-checkbox-{{ $geofence->id }}" class="flex items-center gap-2 p-2 rounded hover:bg-slate-700/50 cursor-pointer">
                                         <input 
                                             type="checkbox" 
-                                            wire:model="selectedGeofences" 
+                                            wire:model.number="selectedGeofences" 
                                             value="{{ $geofence->id }}"
                                             class="rounded bg-slate-600 border-slate-500"
                                         >
