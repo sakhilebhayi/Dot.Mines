@@ -203,7 +203,7 @@
                                 </div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                                     <div class="bg-amber-500 h-1.5 rounded-full transition-all duration-500"
-                                         style="width: {{ number_format($tonPct, 1) }}%"></div>
+                                         x-init="$el.style.width = '{{ number_format($tonPct, 1) }}%'"></div>
                                 </div>
                             </div>
 
@@ -215,7 +215,7 @@
                                 </div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                                     <div class="{{ $fuelCls }} h-1.5 rounded-full transition-all duration-500"
-                                         style="width: {{ number_format($fuelPct, 1) }}%"></div>
+                                         x-init="$el.style.width = '{{ number_format($fuelPct, 1) }}%'"></div>
                                 </div>
                             </div>
                         </div>
@@ -266,7 +266,11 @@
     {{-- ═══════════════════════════════════════════════════════════════════════════
          Alpine.js Leaflet Map Controller
          ══════════════════════════════════════════════════════════════════════════ --}}
+    <script type="application/json" id="haul-dispatch-initial">@json($mapDispatches)</script>
     <script>
+// lt = '<' as a variable so PHP's DOMDocument loadHTML() does not exit script mode
+// when it encounters HTML tags like '<svg', '<strong' etc. inside JS template literals.
+const lt = '\x3c';
 function haulDispatchMap() {
     return {
         map: null,
@@ -286,8 +290,30 @@ function haulDispatchMap() {
             }, 30_000);
         },
 
+        // Dynamically load Leaflet JS/CSS if not already on the page
+        _loadLeaflet() {
+            return new Promise((resolve) => {
+                if (typeof L !== 'undefined') { resolve(); return; }
+                if (!document.getElementById('leaflet-css-haul')) {
+                    const link = document.createElement('link');
+                    link.id = 'leaflet-css-haul';
+                    link.rel = 'stylesheet';
+                    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                    document.head.appendChild(link);
+                }
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                script.onload = resolve;
+                script.onerror = resolve;
+                document.head.appendChild(script);
+            });
+        },
+
         initMap() {
-            if (typeof L === 'undefined') return;
+            if (typeof L === 'undefined') {
+                this._loadLeaflet().then(() => this.initMap());
+                return;
+            }
             const el = document.getElementById('haul-dispatch-map');
             // Reset if the element was removed/re-created by Livewire
             if (!el) { this.initialized = false; return; }
@@ -320,7 +346,8 @@ function haulDispatchMap() {
             this.initialized = true;
 
             // Seed from server-side PHP variable on first paint
-            const initial = @json($mapDispatches);
+            const initialEl = document.getElementById('haul-dispatch-initial');
+            const initial = initialEl ? JSON.parse(initialEl.textContent) : [];
             if (Array.isArray(initial) && initial.length) {
                 this.renderDispatches(initial);
             }
@@ -340,20 +367,20 @@ function haulDispatchMap() {
 
             // Pulse ring for active hauling
             const pulse = status === 'hauling'
-                ? `<circle cx="20" cy="20" r="18" fill="none" stroke="${color}" stroke-width="2" opacity="0.4">
-                       <animate attributeName="r" values="14;22;14" dur="2s" repeatCount="indefinite"/>
-                       <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
-                   </circle>`
+                ? `${lt}circle cx="20" cy="20" r="18" fill="none" stroke="${color}" stroke-width="2" opacity="0.4">
+                       ${lt}animate attributeName="r" values="14;22;14" dur="2s" repeatCount="indefinite"/>
+                       ${lt}animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
+                   ${lt}/circle>`
                 : '';
 
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+            const svg = `${lt}svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
                 ${pulse}
-                <circle cx="20" cy="20" r="14" fill="${color}" stroke="white" stroke-width="2.5"/>
-                <text x="20" y="25" text-anchor="middle" font-size="15" fill="white">🚛</text>
-            </svg>`;
+                ${lt}circle cx="20" cy="20" r="14" fill="${color}" stroke="white" stroke-width="2.5"/>
+                ${lt}text x="20" y="25" text-anchor="middle" font-size="15" fill="white">🚛${lt}/text>
+            ${lt}/svg>`;
 
             return L.divIcon({
-                html: `<div style="transform:rotate(${heading || 0}deg);width:40px;height:40px">${svg}</div>`,
+                html: `${lt}div style="transform:rotate(${heading || 0}deg);width:40px;height:40px">${svg}${lt}/div>`,
                 className: '',
                 iconSize: [40, 40],
                 iconAnchor: [20, 20],
@@ -366,18 +393,18 @@ function haulDispatchMap() {
             const label  = type === 'origin' ? 'L'       : 'D';
             const shadow = type === 'origin' ? '#065f46' : '#7f1d1d';
 
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40">
-                <defs>
-                    <filter id="shadow-${type}" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${shadow}" flood-opacity="0.4"/>
-                    </filter>
-                </defs>
-                <path d="M15 0C6.72 0 0 6.72 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.72 23.28 0 15 0z"
+            const svg = `${lt}svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40">
+                ${lt}defs>
+                    ${lt}filter id="shadow-${type}" x="-20%" y="-20%" width="140%" height="140%">
+                        ${lt}feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${shadow}" flood-opacity="0.4"/>
+                    ${lt}/filter>
+                ${lt}/defs>
+                ${lt}path d="M15 0C6.72 0 0 6.72 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.72 23.28 0 15 0z"
                       fill="${color}" filter="url(#shadow-${type})"/>
-                <circle cx="15" cy="15" r="8" fill="white" opacity="0.25"/>
-                <text x="15" y="19" text-anchor="middle" font-size="11" font-weight="700"
-                      font-family="sans-serif" fill="white">${label}</text>
-            </svg>`;
+                ${lt}circle cx="15" cy="15" r="8" fill="white" opacity="0.25"/>
+                ${lt}text x="15" y="19" text-anchor="middle" font-size="11" font-weight="700"
+                      font-family="sans-serif" fill="white">${label}${lt}/text>
+            ${lt}/svg>`;
 
             return L.divIcon({
                 html: svg,
@@ -428,7 +455,7 @@ function haulDispatchMap() {
                             zIndexOffset: 100,
                         })
                         .bindTooltip(
-                            `<strong>${d.origin_name}</strong><br><small class="text-green-600">⬤ Loading Point</small>`,
+                            `${lt}strong>${d.origin_name}${lt}/strong>${lt}br>${lt}small class="text-green-600">⬤ Loading Point${lt}/small>`,
                             { direction: 'top', className: 'haul-tooltip' }
                         )
                         .addTo(this.map);
@@ -446,7 +473,7 @@ function haulDispatchMap() {
                             zIndexOffset: 100,
                         })
                         .bindTooltip(
-                            `<strong>${d.dest_name}</strong><br><small class="text-red-600">⬤ Dump Point</small>`,
+                            `${lt}strong>${d.dest_name}${lt}/strong>${lt}br>${lt}small class="text-red-600">⬤ Dump Point${lt}/small>`,
                             { direction: 'top', className: 'haul-tooltip' }
                         )
                         .addTo(this.map);
@@ -512,25 +539,25 @@ function haulDispatchMap() {
                 dumping: '#ef4444', returning: '#3b82f6', idle: '#6b7280',
             }[d.status] || '#6b7280';
 
-            return `<div style="font-family:system-ui,sans-serif;min-width:180px;padding:2px 0">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                    <span style="font-size:20px">🚛</span>
-                    <div>
-                        <strong style="font-size:13px;display:block">${d.machine_name}</strong>
-                        <span style="font-size:11px;background:${statusColor};color:#fff;
+            return `${lt}div style="font-family:system-ui,sans-serif;min-width:180px;padding:2px 0">
+                ${lt}div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                    ${lt}span style="font-size:20px">🚛${lt}/span>
+                    ${lt}div>
+                        ${lt}strong style="font-size:13px;display:block">${d.machine_name}${lt}/strong>
+                        ${lt}span style="font-size:11px;background:${statusColor};color:#fff;
                               padding:1px 6px;border-radius:9999px;font-weight:600">
                             ${d.status.charAt(0).toUpperCase() + d.status.slice(1)}
-                        </span>
-                    </div>
-                </div>
-                <div style="font-size:11px;color:#555;display:flex;align-items:center;gap:4px">
-                    <span style="color:#10b981;font-weight:700">⬤</span>
-                    <span>${d.origin_name}</span>
-                    <span style="color:#999">→</span>
-                    <span style="color:#ef4444;font-weight:700">⬤</span>
-                    <span>${d.dest_name}</span>
-                </div>
-            </div>`;
+                        ${lt}/span>
+                    ${lt}/div>
+                ${lt}/div>
+                ${lt}div style="font-size:11px;color:#555;display:flex;align-items:center;gap:4px">
+                    ${lt}span style="color:#10b981;font-weight:700">⬤${lt}/span>
+                    ${lt}span>${d.origin_name}${lt}/span>
+                    ${lt}span style="color:#999">→${lt}/span>
+                    ${lt}span style="color:#ef4444;font-weight:700">⬤${lt}/span>
+                    ${lt}span>${d.dest_name}${lt}/span>
+                ${lt}/div>
+            ${lt}/div>`;
         },
 
         // ── Event Handlers ─────────────────────────────────────────────────

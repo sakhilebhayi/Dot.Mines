@@ -366,6 +366,11 @@ parameters:
 			path: app/Events/GeofenceExitDetected.php
 
 		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Events/HaulDispatchUpdated.php
+
+		-
 			message: "#^Method App\\\\Events\\\\MachineLocationUpdated\\:\\:__construct\\(\\) has parameter \\$location with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Events/MachineLocationUpdated.php
@@ -684,11 +689,6 @@ parameters:
 			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:summary\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\Controller\\:\\:middleware\\(\\)\\.$#"
-			count: 2
-			path: app/Http/Controllers/Api/Controller.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$critical\\.$#"
@@ -1266,6 +1266,11 @@ parameters:
 			path: app/Http/Controllers/WebhookController.php
 
 		-
+			message: "#^PHPDoc tag @var for variable \\$eventData has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Http/Controllers/WebhookController.php
+
+		-
 			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Routing\\\\Route\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Http/Middleware/EnforceDownloadRateLimit.php
@@ -1317,6 +1322,11 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:generatePdf\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Jobs/GenerateReportJob.php
+
+		-
+			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:generateXlsx\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Jobs/GenerateReportJob.php
 
@@ -1387,6 +1397,16 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryTireCondition\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Jobs/GenerateReportJob.php
+
+		-
+			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:xlsxRows\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Jobs/GenerateReportJob.php
+
+		-
+			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:xlsxRows\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Jobs/GenerateReportJob.php
 
@@ -1700,15 +1720,7 @@ parameters:
 			count: 1
 			path: app/Livewire/AIOptimizationDashboard.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:getOverviewDataProperty\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -1845,15 +1857,7 @@ parameters:
 			count: 1
 			path: app/Livewire/Alerts.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:getAlerts\\(\\) has no return type specified\\.$#"
@@ -2126,11 +2130,6 @@ parameters:
 			path: app/Livewire/Documentation.php
 
 		-
-			message: "#^Cannot call method hasRole\\(\\) on Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\|null\\.$#"
-			count: 3
-			path: app/Livewire/Feed.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\Feed\\:\\:getComments\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
@@ -2142,6 +2141,11 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Feed\\:\\:getCurrentUser\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/Feed.php
+
+		-
+			message: "#^Method App\\\\Livewire\\\\Feed\\:\\:getDailyProductionStats\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
@@ -2202,6 +2206,16 @@ parameters:
 
 		-
 			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$replyTo type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Livewire/Feed.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>machine_type\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Livewire/Feed.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
@@ -2570,15 +2584,7 @@ parameters:
 			count: 1
 			path: app/Livewire/FuelManagement.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:getDateRange\\(\\) has no return type specified\\.$#"
@@ -2701,6 +2707,26 @@ parameters:
 			path: app/Livewire/GeofenceManager.php
 
 		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>capacity\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Livewire/HaulDispatchDashboard.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>fuel_capacity\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Livewire/HaulDispatchDashboard.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>machine_type\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Livewire/HaulDispatchDashboard.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 2
+			path: app/Livewire/HaulDispatchDashboard.php
+
+		-
 			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:closeAddModal\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/IntegrationManager.php
@@ -2720,15 +2746,7 @@ parameters:
 			count: 1
 			path: app/Livewire/IntegrationManager.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:loadAvailableManufacturers\\(\\) has no return type specified\\.$#"
@@ -2867,6 +2885,11 @@ parameters:
 
 		-
 			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
+			count: 2
+			path: app/Livewire/LiveMap.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 2
 			path: app/Livewire/LiveMap.php
 
@@ -3525,15 +3548,7 @@ parameters:
 			count: 1
 			path: app/Livewire/ReportGenerator.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:generateReport\\(\\) has no return type specified\\.$#"
@@ -3635,15 +3650,7 @@ parameters:
 			count: 1
 			path: app/Livewire/Reports.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:downloadReport\\(\\) has no return type specified\\.$#"
@@ -3702,11 +3709,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:setSortBy\\(\\) has parameter \\$column with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method Illuminate\\\\Database\\\\Query\\\\Builder\\:\\:select\\(\\) invoked with 2 parameters, 0\\-1 required\\.$#"
 			count: 1
 			path: app/Livewire/Reports.php
 
@@ -3855,15 +3857,7 @@ parameters:
 			count: 2
 			path: app/Livewire/RoutePlanning.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
 
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:getCurrencies\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -5906,6 +5900,66 @@ parameters:
 			path: app/Models/GeofenceEntry.php
 
 		-
+			message: "#^Class App\\\\Models\\\\HaulDispatch has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Class App\\\\Models\\\\HaulDispatch has PHPDoc tag @property for property \\$path_coordinates with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Property App\\\\Models\\\\HaulDispatch\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>fuel_capacity\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Models/HaulDispatch.php
+
+		-
 			message: "#^Access to an undefined property App\\\\Models\\\\HealthMetric\\:\\:\\$deviation\\.$#"
 			count: 1
 			path: app/Models/HealthMetric.php
@@ -7014,6 +7068,86 @@ parameters:
 			message: "#^Property App\\\\Models\\\\MaintenanceSchedule\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
+
+		-
+			message: "#^Class App\\\\Models\\\\MapEvent has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeOfType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeOfType\\(\\) has parameter \\$types with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeOfType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeOfType\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Eloquent\\\\Builder\\|Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeRecent\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeRecent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeWithLocation\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeWithLocation\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeWithLocation\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/MapEvent.php
+
+		-
+			message: "#^Property App\\\\Models\\\\MapEvent\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/MapEvent.php
 
 		-
 			message: "#^Class App\\\\Models\\\\MineArea has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
@@ -8659,11 +8793,6 @@ parameters:
 			message: "#^Access to an undefined property App\\\\Models\\\\AIRecommendation\\:\\:\\$team_id\\.$#"
 			count: 3
 			path: app/Policies/AIRecommendationPolicy.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$currentTeam\\.$#"
-			count: 3
-			path: app/Policies/NotificationPolicy.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$email\\.$#"
@@ -10876,41 +11005,6 @@ parameters:
 			path: app/Services/ShiftService.php
 
 		-
-			message: "#^Access to property \\$billingPortal on an unknown class Stripe\\\\StripeClient\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Access to property \\$checkout on an unknown class Stripe\\\\StripeClient\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Access to property \\$customers on an unknown class Stripe\\\\StripeClient\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Access to property \\$subscriptions on an unknown class Stripe\\\\StripeClient\\.$#"
-			count: 3
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Call to method getMessage\\(\\) on an unknown class Stripe\\\\Exception\\\\ApiErrorException\\.$#"
-			count: 5
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Caught class Stripe\\\\Exception\\\\ApiErrorException not found\\.$#"
-			count: 5
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Instantiated class Stripe\\\\StripeClient not found\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\StripeService\\:\\:createCheckoutSession\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/StripeService.php
@@ -10936,9 +11030,14 @@ parameters:
 			path: app/Services/StripeService.php
 
 		-
-			message: "#^Property App\\\\Services\\\\StripeService\\:\\:\\$stripe has unknown class Stripe\\\\StripeClient as its type\\.$#"
+			message: "#^Method App\\\\Support\\\\Reports\\\\ReportGeneration\\:\\:normalizeFilters\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: app/Services/StripeService.php
+			path: app/Support/Reports/ReportGeneration.php
+
+		-
+			message: "#^Method App\\\\Support\\\\Reports\\\\ReportGeneration\\:\\:supportedTypes\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Support/Reports/ReportGeneration.php
 
 		-
 			message: "#^Trait App\\\\Traits\\\\PhpStanEloquentStubs is used zero times and is not analysed\\.$#"
@@ -11079,6 +11178,76 @@ parameters:
 			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
+
+		-
+			message: "#^Match arm comparison between 'returning' and 'returning' is always true\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedFeedPosts\\(\\) has parameter \\$areas with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedFeedPosts\\(\\) has parameter \\$machines with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedFeedPosts\\(\\) has parameter \\$users with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedFuelTanks\\(\\) has parameter \\$areas with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedHaulDispatches\\(\\) has parameter \\$areas with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedHaulDispatches\\(\\) has parameter \\$machines with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedIncidents\\(\\) has parameter \\$areas with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedIncidents\\(\\) has parameter \\$machines with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedIncidents\\(\\) has parameter \\$users with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedMapEvents\\(\\) has parameter \\$areas with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Method Database\\\\Seeders\\\\DemoDataSeeder\\:\\:seedMapEvents\\(\\) has parameter \\$machines with no type specified\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Offset 'meta' on array\\{category\\: 'breakdown', priority\\: 'critical', shift\\: 'B', body\\: 'Komatsu PC1250…', meta\\: array\\{machine_id\\: mixed, failure_type\\: 'engine', estimated_downtime_hours\\: 12\\}, approval\\: 'approved', comments\\: array\\{'Area cordoned off\\.', 'OEM on call — ETA 3…'\\}, days_ago\\: 2\\}\\|array\\{category\\: 'breakdown', priority\\: 'high', shift\\: 'A', body\\: 'CAT 793F \\(TRK\\-012\\)…', meta\\: array\\{machine_id\\: mixed, failure_type\\: 'hydraulic', estimated_downtime_hours\\: 4\\}, approval\\: 'approved', comments\\: array\\{'Maintenance crew on…', 'Parts ordered from…'\\}, days_ago\\: 1\\}\\|array\\{category\\: 'breakdown', priority\\: 'normal', shift\\: 'C', body\\: 'Grader \\(GRD\\-007\\)…', meta\\: array\\{machine_id\\: mixed, failure_type\\: 'tyre', estimated_downtime_hours\\: 1\\}, approval\\: 'approved', comments\\: array\\{\\}, days_ago\\: 3\\}\\|array\\{category\\: 'breakdown', priority\\: 'normal', shift\\: 'C', body\\: 'TRK\\-021 showing…', meta\\: array\\{machine_id\\: mixed, failure_type\\: 'engine', estimated_downtime_hours\\: 2\\}, approval\\: 'pending', comments\\: array\\{\\}, days_ago\\: 0\\}\\|array\\{category\\: 'general', priority\\: 'normal', shift\\: 'A', body\\: 'New site induction…', meta\\: array\\{\\}, approval\\: 'approved', comments\\: array\\{\\}, days_ago\\: 2\\}\\|array\\{category\\: 'general', priority\\: 'normal', shift\\: 'B', body\\: 'Haul road…', meta\\: array\\{\\}, approval\\: 'approved', comments\\: array\\{'Good news\\!'\\}, days_ago\\: 6\\}\\|array\\{category\\: 'production', priority\\: 'normal', shift\\: 'A', body\\: 'Monthly production…', meta\\: array\\{target_tonnes\\: 180000, actual_tonnes\\: 183240, period\\: 'monthly'\\}, approval\\: 'approved', comments\\: array\\{'Congratulations…', 'Best month this…'\\}, days_ago\\: 5, \\.\\.\\.\\}\\|array\\{category\\: 'production', priority\\: 'normal', shift\\: 'C', body\\: 'Waste stripping in…', meta\\: array\\{activity\\: 'waste_stripping', volume_m3\\: 12000\\}, approval\\: 'approved', comments\\: array\\{\\}, days_ago\\: 1\\}\\|array\\{category\\: 'safety_alert', priority\\: 'critical', shift\\: 'A', body\\: '⚠️ SAFETY ALERT\\:…', meta\\: array\\{hazard_type\\: 'near_miss', location\\: 'HR\\-3 / ST…'\\}, approval\\: 'approved', comments\\: array\\{'Briefing scheduled…', 'Acknowledged by all…'\\}, days_ago\\: 3, \\.\\.\\.\\}\\|array\\{category\\: 'safety_alert', priority\\: 'high', shift\\: 'B', body\\: 'Blasting scheduled…', meta\\: array\\{hazard_type\\: 'blasting', location\\: 'North Pit'\\}, approval\\: 'approved', comments\\: array\\{'Blasting complete —…'\\}, days_ago\\: 4\\}\\|array\\{category\\: 'shift_update', priority\\: 'high', shift\\: 'C', body\\: 'Night shift \\(C\\)…', meta\\: array\\{loads_per_hour\\: 8\\.5, total_tonnage\\: 2720, headcount\\: 16\\}, approval\\: 'approved', comments\\: array\\{'Understood\\.…'\\}, days_ago\\: 2\\}\\|array\\{category\\: 'shift_update', priority\\: 'normal', shift\\: 'A', body\\: 'Shift A handover —…', meta\\: array\\{loads_per_hour\\: 10\\.9, total_tonnage\\: 3480, headcount\\: 18\\}, approval\\: 'approved', comments\\: array\\{'Good shift team\\!'\\}, days_ago\\: 1\\}\\|array\\{category\\: 'shift_update', priority\\: 'normal', shift\\: 'B', body\\: 'Shift B update mid…', meta\\: array\\{loads_per_hour\\: 11\\.2, total_tonnage\\: 2080, headcount\\: 20\\}, approval\\: 'approved', comments\\: array\\{\\}, days_ago\\: 0\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between 'approved'\\|'pending' and 'rejected' will always evaluate to false\\.$#"
+			count: 1
+			path: database/seeders/DemoDataSeeder.php
 
 		-
 			message: "#^Cannot access property \\$id on Illuminate\\\\Database\\\\Eloquent\\\\Model\\|null\\.$#"
