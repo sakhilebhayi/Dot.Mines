@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * OperatorFatigue Model
- * 
+ *
  * Tracks machine operator fatigue levels and work hours to ensure safety
  * and compliance with rest requirements.
  *
@@ -64,20 +64,26 @@ class OperatorFatigue extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'shift_date' => 'date',
-        'shift_start' => 'datetime:H:i',
-        'shift_end' => 'datetime:H:i',
-        'hours_worked' => 'float',
-        'consecutive_days' => 'float',
-        'fatigue_score' => 'integer',
-        'break_time_minutes' => 'float',
-        'incidents_count' => 'integer',
-        'is_rested' => 'boolean',
-        'metadata' => 'json',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'shift_date' => 'date',
+            'shift_start' => 'datetime:H:i',
+            'shift_end' => 'datetime:H:i',
+            'hours_worked' => 'float',
+            'consecutive_days' => 'float',
+            'fatigue_score' => 'integer',
+            'break_time_minutes' => 'float',
+            'incidents_count' => 'integer',
+            'is_rested' => 'boolean',
+            'metadata' => 'json',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the user (operator) this fatigue record belongs to.
@@ -171,8 +177,8 @@ class OperatorFatigue extends Model
      */
     public function needsRest(): bool
     {
-        return $this->fatigue_score >= 60 || 
-               $this->consecutive_days >= 6 || 
+        return $this->fatigue_score >= 60 ||
+               $this->consecutive_days >= 6 ||
                $this->hours_worked >= 12;
     }
 }

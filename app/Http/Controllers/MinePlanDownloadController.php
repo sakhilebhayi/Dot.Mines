@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MinePlanDownloadController extends Controller
 {
@@ -14,7 +16,7 @@ class MinePlanDownloadController extends Controller
      * Serve a signed download for a mine plan file.
      * The route should be signed and authorized prior to calling this method.
      */
-    public function __invoke(Request $request, $minePlanId)
+    public function __invoke(Request $request, int $minePlanId): RedirectResponse|StreamedResponse
     {
         if (! $request->hasValidSignature()) {
             abort(403);
@@ -40,21 +42,21 @@ class MinePlanDownloadController extends Controller
             abort(403, 'Forbidden');
         }
 
-        // Optional model-level authorization: if a MinePlan model exists, verify ownership
-        if (class_exists(\App\Models\MinePlan::class)) {
-            $minePlan = \App\Models\MinePlan::find($minePlanId);
-            if (! $minePlan || $minePlan->team_id !== auth()->user()->current_team_id) {
-                abort(403);
-            }
+        // Optional model-level authorization: if a MinePlanUpload record exists, verify ownership
+        $minePlanUpload = \App\Models\MinePlanUpload::find($minePlanId);
+        if ($minePlanUpload && $minePlanUpload->team_id !== Auth::user()->current_team_id) {
+            abort(403);
         }
 
-        // Serve via Storage APIs to avoid raw stream passthroughs and to support S3.
-        if (! Storage::disk($disk)->exists($normalized)) {
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $storageDisk */
+        $storageDisk = Storage::disk($disk);
+
+        if (! $storageDisk->exists($normalized)) {
             abort(404);
         }
 
         // For S3, redirect to a short-lived temporary URL; for local/private disks, use Storage::download
-        $mime = Storage::disk($disk)->mimeType($normalized) ?? 'application/octet-stream';
+        $mime = $storageDisk->mimeType($normalized) ?? 'application/octet-stream';
         $filename = basename($normalized);
 
         $securityHeaders = [
@@ -63,13 +65,16 @@ class MinePlanDownloadController extends Controller
         ];
 
         if ($disk === 's3') {
-            $url = Storage::disk('s3')->temporaryUrl($normalized, now()->addMinutes(15));
+            /** @var \Illuminate\Filesystem\FilesystemAdapter $s3Disk */
+            $s3Disk = Storage::disk('s3');
+            $url = $s3Disk->temporaryUrl($normalized, now()->addMinutes(15));
+
             return redirect()->away($url);
         }
 
-        return Storage::disk($disk)->download($normalized, $filename, array_merge($securityHeaders, [
+        return $storageDisk->download($normalized, $filename, array_merge($securityHeaders, [
             'Content-Type' => $mime,
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]));
     }
 }

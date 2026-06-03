@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Immutable log of admin actions on feed content.
  *
- * @property int    $id
- * @property int    $team_id
- * @property int    $actor_id
- * @property string $action         pin|unpin|admin_delete|override_approval|invite_sent|go_live_set|bulk_approve|bulk_reject|export|settings_changed
+ * @property int $id
+ * @property int $team_id
+ * @property int $actor_id
+ * @property string $action pin|unpin|admin_delete|override_approval|invite_sent|go_live_set|bulk_approve|bulk_reject|export|settings_changed
  * @property string $subject_type
- * @property int    $subject_id
+ * @property int $subject_id
  * @property array|null $meta
  * @property string|null $ip_address
  * @property \Carbon\Carbon $created_at
@@ -25,16 +25,16 @@ class FeedAuditLog extends Model
     public $timestamps = false;
 
     public const ACTIONS = [
-        'pin'               => 'Pinned post',
-        'unpin'             => 'Unpinned post',
-        'admin_delete'      => 'Admin deleted post',
+        'pin' => 'Pinned post',
+        'unpin' => 'Unpinned post',
+        'admin_delete' => 'Admin deleted post',
         'override_approval' => 'Overrode approval',
-        'invite_sent'       => 'Sent onboarding invite',
-        'go_live_set'       => 'Set go-live date',
-        'bulk_approve'      => 'Bulk approved posts',
-        'bulk_reject'       => 'Bulk rejected posts',
-        'export'            => 'Exported feed data',
-        'settings_changed'  => 'Changed feed settings',
+        'invite_sent' => 'Sent onboarding invite',
+        'go_live_set' => 'Set go-live date',
+        'bulk_approve' => 'Bulk approved posts',
+        'bulk_reject' => 'Bulk rejected posts',
+        'export' => 'Exported feed data',
+        'settings_changed' => 'Changed feed settings',
     ];
 
     protected $fillable = [
@@ -47,10 +47,16 @@ class FeedAuditLog extends Model
         'ip_address',
     ];
 
-    protected $casts = [
-        'meta'       => 'array',
-        'created_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'meta' => 'array',
+            'created_at' => 'datetime',
+        ];
+    }
 
     public function actor(): BelongsTo
     {
@@ -74,13 +80,13 @@ class FeedAuditLog extends Model
         }
 
         return static::create([
-            'team_id'      => auth()->user()->current_team_id,
-            'actor_id'     => auth()->id(),
-            'action'       => $action,
+            'team_id' => auth()->user()->current_team_id,
+            'actor_id' => auth()->id(),
+            'action' => $action,
             'subject_type' => get_class($subject),
-            'subject_id'   => $subject->getKey(),
-            'meta'         => $meta,
-            'ip_address'   => $ip,
+            'subject_id' => $subject->getKey(),
+            'meta' => $meta,
+            'ip_address' => $ip,
         ]);
     }
 }

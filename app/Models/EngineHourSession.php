@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,12 +34,18 @@ class EngineHourSession extends Model
         'duration_seconds',
     ];
 
-    protected $casts = [
-        'ignition_on_at'  => 'datetime',
-        'ignition_off_at' => 'datetime',
-        'created_at'      => 'datetime',
-        'updated_at'      => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'ignition_on_at' => 'datetime',
+            'ignition_off_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     // ── Relationships ─────────────────────────────────────────────────────────
 
@@ -55,13 +62,13 @@ class EngineHourSession extends Model
     // ── Scopes ────────────────────────────────────────────────────────────────
 
     /** Sessions that started today (from midnight). */
-    public function scopeToday($query)
+    public function scopeToday(Builder $query): Builder
     {
         return $query->where('ignition_on_at', '>=', now()->startOfDay());
     }
 
     /** Sessions that are currently open (engine is running). */
-    public function scopeRunning($query)
+    public function scopeRunning(Builder $query): Builder
     {
         return $query->whereNull('ignition_off_at');
     }
@@ -101,8 +108,8 @@ class EngineHourSession extends Model
         }
 
         return static::create([
-            'team_id'       => $machine->team_id,
-            'machine_id'    => $machine->id,
+            'team_id' => $machine->team_id,
+            'machine_id' => $machine->id,
             'ignition_on_at' => now(),
         ]);
     }
@@ -124,7 +131,7 @@ class EngineHourSession extends Model
 
         $off = now();
         $session->update([
-            'ignition_off_at'  => $off,
+            'ignition_off_at' => $off,
             'duration_seconds' => (int) $session->ignition_on_at->diffInSeconds($off),
         ]);
 

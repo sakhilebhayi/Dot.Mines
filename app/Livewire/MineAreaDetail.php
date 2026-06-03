@@ -10,70 +10,101 @@ use App\Models\MineArea;
 use App\Models\MinePlanUpload;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 
 class MineAreaDetail extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     public MineArea $mineArea;
+
     public string $activeTab = 'overview';
 
     // Machine Assignment
     public bool $showAssignModal = false;
+
     public ?int $selectedMachineId = null;
+
     public string $assignmentReason = '';
 
     // Production Tracking
     public bool $showProductionModal = false;
+
     public string $productionDate = '';
+
     public string $productionShift = 'day';
+
     public ?float $quantityProduced = null;
+
     public ?float $systemQuantity = null;
+
     public ?float $targetQuantity = null;
+
     public string $productionUnit = 'tonnes';
+
     public ?int $productionMachineId = null;
+
     public string $productionNotes = '';
+
     public string $productionPeriod = 'week'; // week, month, quarter
 
     // Production comparison filters
     public string $comparisonPeriod = '30'; // days: 7, 14, 30, 90
+
     public string $comparisonMachineId = ''; // '' = all machines
 
     // Production Target
     public bool $showTargetModal = false;
+
     public string $targetPeriodType = 'monthly';
+
     public string $targetStartDate = '';
+
     public string $targetEndDate = '';
+
     public ?float $targetValue = null;
+
     public string $targetUnit = 'tonnes';
+
     public string $targetDescription = '';
 
     // Mine Plan Upload
     public bool $showUploadModal = false;
+
     public string $planTitle = '';
+
     public string $planDescription = '';
+
     public ?\Illuminate\Http\UploadedFile $planFile = null;
+
     public string $planFileType = 'pdf';
+
     public string $planVersion = '1.0';
+
     public string $planStatus = 'draft';
+
     public string $planEffectiveDate = '';
 
     // Area Alert
     public bool $showAlertModal = false;
+
     public string $alertTitle = '';
+
     public string $alertDescription = '';
+
     public string $alertType = 'area';
+
     public string $alertPriority = 'medium';
 
     // Geofence linking
     public bool $showGeofenceModal = false;
+
     public ?int $selectedGeofenceId = null;
 
     protected function rules()
@@ -187,6 +218,7 @@ class MineAreaDetail extends Component
         } else {
             // No other active area exists — do not allow unassigning to null to preserve invariant
             $this->dispatchBrowserEvent('notify', ['message' => "Cannot unassign {$machine->name}; at least one active mine area must be set. Assign to another area first.", 'type' => 'error']);
+
             return;
         }
     }
@@ -306,7 +338,7 @@ class MineAreaDetail extends Component
         $file = $this->planFile;
 
         try {
-            $uploader = new \App\Services\FileUploadService();
+            $uploader = new \App\Services\FileUploadService;
             $result = $uploader->storeMinePlan($file, $team->id, $this->mineArea->id);
 
             // Map extension to type
@@ -348,7 +380,7 @@ class MineAreaDetail extends Component
 
         } catch (\Exception $e) {
             Log::error('Failed to upload mine plan', ['error' => $e->getMessage()]);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to upload mine plan: ' . $e->getMessage(), 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to upload mine plan: '.$e->getMessage(), 'type' => 'error']);
         }
     }
 
@@ -482,7 +514,7 @@ class MineAreaDetail extends Component
 
     // === RENDER ===
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         $team = Auth::user()->currentTeam;
 
@@ -556,7 +588,7 @@ class MineAreaDetail extends Component
 
         $activeAlertCount = $areaAlerts->where('status', 'active')->count();
 
-        // Linked geofences  
+        // Linked geofences
         $linkedGeofences = Geofence::where('mine_area_id', $this->mineArea->id)
             ->where('team_id', $team->id)
             ->withCount('entries')
@@ -668,12 +700,12 @@ class MineAreaDetail extends Component
             }
 
             $rows[] = [
-                'date'          => $key,
-                'label'         => $d->format('d M'),
-                'operator'      => round($operator, 2),
-                'system'        => $hasSystem ? round((float) $systemSum, 2) : null,
-                'variance_pct'  => $variance,  // positive = operator over-reports, negative = under-reports
-                'has_system'    => $hasSystem,
+                'date' => $key,
+                'label' => $d->format('d M'),
+                'operator' => round($operator, 2),
+                'system' => $hasSystem ? round((float) $systemSum, 2) : null,
+                'variance_pct' => $variance,  // positive = operator over-reports, negative = under-reports
+                'has_system' => $hasSystem,
             ];
         }
 
@@ -693,8 +725,8 @@ class MineAreaDetail extends Component
 
         return [
             'has_system_data' => $hasSystemData,
-            'rows'            => $rows,
-            'machines'        => $machines,
+            'rows' => $rows,
+            'machines' => $machines,
         ];
     }
 }

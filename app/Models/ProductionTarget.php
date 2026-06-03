@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,12 +47,18 @@ class ProductionTarget extends Model
         'is_active',
     ];
 
-    protected $casts = [
-        'target_quantity' => 'decimal:2',
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'is_active' => 'boolean',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'target_quantity' => 'decimal:2',
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'is_active' => 'boolean',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -63,17 +70,17 @@ class ProductionTarget extends Model
         return $this->belongsTo(MineArea::class);
     }
 
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam(Builder $query, $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    public function scopeByPeriod($query, $periodType)
+    public function scopeByPeriod(Builder $query, $periodType): Builder
     {
         return $query->where('period_type', $periodType);
     }

@@ -19,11 +19,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $team_id
  * @property int $author_id
  * @property int|null $mine_area_id
- * @property string|null $shift  A | B | C
- * @property string $category  breakdown | shift_update | safety_alert | production | general
- * @property string $priority  normal | high | critical
+ * @property string|null $shift A | B | C
+ * @property string $category breakdown | shift_update | safety_alert | production | general
+ * @property string $priority normal | high | critical
  * @property string $body
- * @property array|null $meta  Category-specific structured fields
+ * @property array|null $meta Category-specific structured fields
  * @property int $like_count
  * @property int $comment_count
  * @property int $acknowledgement_count
@@ -69,16 +69,22 @@ class FeedPost extends Model
         'is_pinned',
     ];
 
-    protected $casts = [
-        'meta' => 'array',
-        'is_pinned' => 'boolean',
-        'like_count' => 'integer',
-        'comment_count' => 'integer',
-        'acknowledgement_count' => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'meta' => 'array',
+            'is_pinned' => 'boolean',
+            'like_count' => 'integer',
+            'comment_count' => 'integer',
+            'acknowledgement_count' => 'integer',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
+        ];
+    }
 
     // ── Relationships ──────────────────────────────────────────────────────────
 

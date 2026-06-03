@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeamFilters;
 
 class AiRecommendationAction extends Model
 {
@@ -23,9 +23,15 @@ class AiRecommendationAction extends Model
         'performance_impact',
     ];
 
-    protected $casts = [
-        'recommendation' => 'json',
-        'performance_impact' => 'json',
-        'actioned_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'recommendation' => 'json',
+            'performance_impact' => 'json',
+            'actioned_at' => 'datetime',
+        ];
+    }
 }

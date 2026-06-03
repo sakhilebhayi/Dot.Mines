@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,17 +62,23 @@ class FuelTank extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'capacity_liters' => 'decimal:2',
-        'current_level_liters' => 'decimal:2',
-        'minimum_level_liters' => 'decimal:2',
-        'location_latitude' => 'decimal:8',
-        'location_longitude' => 'decimal:8',
-        'last_inspection_date' => 'date',
-        'next_inspection_date' => 'date',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'capacity_liters' => 'decimal:2',
+            'current_level_liters' => 'decimal:2',
+            'minimum_level_liters' => 'decimal:2',
+            'location_latitude' => 'decimal:8',
+            'location_longitude' => 'decimal:8',
+            'last_inspection_date' => 'date',
+            'next_inspection_date' => 'date',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -104,6 +111,7 @@ class FuelTank extends Model
         if ($this->capacity_liters == 0) {
             return 0;
         }
+
         return round(($this->current_level_liters / $this->capacity_liters) * 100, 2);
     }
 
@@ -134,7 +142,7 @@ class FuelTank extends Model
     /**
      * Scope for active tanks
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
@@ -142,7 +150,7 @@ class FuelTank extends Model
     /**
      * Scope for low fuel tanks
      */
-    public function scopeLowFuel($query)
+    public function scopeLowFuel(Builder $query): Builder
     {
         return $query->whereRaw('current_level_liters < minimum_level_liters');
     }
@@ -150,7 +158,7 @@ class FuelTank extends Model
     /**
      * Scope for critical fuel tanks
      */
-    public function scopeCritical($query)
+    public function scopeCritical(Builder $query): Builder
     {
         return $query->whereRaw('(current_level_liters / capacity_liters) < 0.1');
     }

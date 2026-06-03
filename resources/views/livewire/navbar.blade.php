@@ -67,6 +67,70 @@
                 </div>
             @endif
 
+            <!-- Theme Toggle -->
+            <div
+                x-data="{
+                    mode: localStorage.getItem('theme-mode') || 'system',
+                    theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+                    cycle() {
+                        const next = this.mode === 'system'
+                            ? (this.theme === 'dark' ? 'light' : 'dark')
+                            : (this.mode === 'dark' ? 'light' : 'dark');
+                        this.mode = next;
+                        window.ThemeController.setMode(next);
+                    },
+                    label() {
+                        if (this.mode === 'system') return 'Theme: System (' + this.theme + ')';
+                        return this.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+                    }
+                }"
+                x-init="$el.addEventListener('theme-changed', e => { theme = e.detail.theme; })"
+                @theme-changed.window="theme = $event.detail.theme; mode = $event.detail.mode"
+                class="flex items-center"
+            >
+                {{-- 3-state cycle: system → dark → light → dark … --}}
+                <button
+                    @click="cycle()"
+                    :aria-label="label()"
+                    :title="label()"
+                    class="relative flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                >
+                    {{-- Sun icon — shown in dark mode (click → go light) --}}
+                    <svg
+                        x-show="theme === 'dark'"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 rotate-90 scale-75"
+                        x-transition:enter-end="opacity-100 rotate-0 scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 rotate-0 scale-100"
+                        x-transition:leave-end="opacity-0 -rotate-90 scale-75"
+                        class="w-5 h-5 text-amber-400"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+
+                    {{-- Moon icon — shown in light mode (click → go dark) --}}
+                    <svg
+                        x-show="theme === 'light'"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 rotate-90 scale-75"
+                        x-transition:enter-end="opacity-100 rotate-0 scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 rotate-0 scale-100"
+                        x-transition:leave-end="opacity-0 -rotate-90 scale-75"
+                        class="w-5 h-5 text-slate-500"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+            </div>
+
             <!-- Notifications -->
             <button wire:click="toggleNotifications" class="relative p-2 text-gray-400 hover:text-white transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

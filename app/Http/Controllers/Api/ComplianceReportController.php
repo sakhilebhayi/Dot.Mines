@@ -3,18 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\MineArea;
 use App\Models\ComplianceReport;
+use App\Models\MineArea;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class ComplianceReportController extends Controller
 {
     /**
      * Generate compliance report
      */
-    public function generate(Request $request, MineArea $mineArea)
+    public function generate(Request $request, MineArea $mineArea): JsonResponse
     {
         $this->authorize('update', $mineArea);
 
@@ -27,7 +28,7 @@ class ComplianceReportController extends Controller
             'mine_area_id' => $mineArea->id,
             'report_type' => $validated['report_type'],
             'report_date' => $validated['report_date'],
-            'generated_by' => auth()->id(),
+            'generated_by' => Auth::id(),
             'status' => 'draft',
             'data' => $this->generateReportData($mineArea, $validated['report_type']),
             'compliance_score' => $this->calculateCompliance($mineArea, $validated['report_type']),
@@ -39,15 +40,21 @@ class ComplianceReportController extends Controller
     /**
      * Get all compliance reports
      */
-    public function index(Request $request, MineArea $mineArea)
+    public function index(Request $request, MineArea $mineArea): JsonResponse
     {
         $this->authorize('view', $mineArea);
 
+        $validated = $request->validate([
+            'type' => 'nullable|string|in:environmental,safety,production,equipment,custom',
+            'status' => 'nullable|string|in:draft,pending_review,approved',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $reports = ComplianceReport::where('mine_area_id', $mineArea->id)
-            ->when($request->has('type'), fn($q) => $q->where('report_type', $request->type))
-            ->when($request->has('status'), fn($q) => $q->where('status', $request->status))
+            ->when(! empty($validated['type']), fn ($q) => $q->where('report_type', $validated['type']))
+            ->when(! empty($validated['status']), fn ($q) => $q->where('status', $validated['status']))
             ->orderBy('report_date', 'desc')
-            ->paginate($request->get('per_page', 15));
+            ->paginate($validated['per_page'] ?? 15);
 
         return response()->json($reports);
     }
@@ -55,7 +62,7 @@ class ComplianceReportController extends Controller
     /**
      * Get report details
      */
-    public function show(ComplianceReport $report)
+    public function show(ComplianceReport $report): JsonResponse
     {
         $this->authorize('view', $report->mineArea);
 
@@ -65,7 +72,7 @@ class ComplianceReportController extends Controller
     /**
      * Submit report for review
      */
-    public function submit(ComplianceReport $report)
+    public function submit(ComplianceReport $report): JsonResponse
     {
         $this->authorize('update', $report->mineArea);
 
@@ -77,7 +84,7 @@ class ComplianceReportController extends Controller
     /**
      * Approve report
      */
-    public function approve(Request $request, ComplianceReport $report)
+    public function approve(Request $request, ComplianceReport $report): JsonResponse
     {
         $this->authorize('update', $report->mineArea);
 
@@ -96,25 +103,25 @@ class ComplianceReportController extends Controller
     /**
      * Export report
      */
-    public function export(Request $request, ComplianceReport $report)
+    public function export(Request $request, ComplianceReport $report): JsonResponse|\Illuminate\Http\Response
     {
         $this->authorize('view', $report->mineArea);
 
         $format = $request->get('format', 'pdf');
 
         if ($format === 'csv') {
-            $csv = "Compliance Report - " . $report->report_type . "\n";
-            $csv .= "Generated: " . $report->created_at->format('Y-m-d H:i:s') . "\n\n";
-            $csv .= "Report Date," . $report->report_date . "\n";
-            $csv .= "Area," . $report->mineArea->name . "\n";
-            $csv .= "Type," . $report->report_type . "\n";
-            $csv .= "Status," . $report->status . "\n";
-            $csv .= "Compliance Score," . $report->compliance_score . "\n\n";
+            $csv = 'Compliance Report - '.$report->report_type."\n";
+            $csv .= 'Generated: '.$report->created_at->format('Y-m-d H:i:s')."\n\n";
+            $csv .= 'Report Date,'.$report->report_date."\n";
+            $csv .= 'Area,'.$report->mineArea->name."\n";
+            $csv .= 'Type,'.$report->report_type."\n";
+            $csv .= 'Status,'.$report->status."\n";
+            $csv .= 'Compliance Score,'.$report->compliance_score."\n\n";
 
             if ($report->issues) {
                 $csv .= "Issues\n";
                 foreach ($report->issues as $issue) {
-                    $csv .= "- " . $issue . "\n";
+                    $csv .= '- '.$issue."\n";
                 }
             }
 
@@ -130,11 +137,12 @@ class ComplianceReportController extends Controller
     /**
      * Get compliance summary
      */
-    public function summary(Request $request, MineArea $mineArea)
+    public function summary(Request $request, MineArea $mineArea): JsonResponse
     {
         $this->authorize('view', $mineArea);
 
-        $days = $request->get('days', 90);
+        $validated = $request->validate(['days' => 'nullable|integer|min:1|max:365']);
+        $days = $validated['days'] ?? 90;
 
         $reports = ComplianceReport::where('mine_area_id', $mineArea->id)
             ->whereDate('created_at', '>=', now()->subDays($days))

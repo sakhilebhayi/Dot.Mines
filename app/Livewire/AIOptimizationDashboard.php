@@ -2,35 +2,37 @@
 
 namespace App\Livewire;
 
-use App\Models\AIRecommendation;
 use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
-use App\Models\Machine;
-use App\Models\MachineMetric;
-use App\Models\MaintenanceRecord;
-use App\Models\FuelTransaction;
-use App\Models\ProductionRecord;
+use App\Models\AIRecommendation;
 use App\Services\AI\AIOptimizationService;
+use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Traits\BrowserEventBridge;
 
 class AIOptimizationDashboard extends Component
 {
-    use WithPagination, BrowserEventBridge;
+    use BrowserEventBridge, WithPagination;
 
     public string $activeTab = 'overview';
+
     public string $selectedCategory = 'all';
+
     public string $selectedPriority = 'all';
+
     public array $filters = [
         'category' => '',
         'priority' => '',
         'status' => '',
     ];
+
     public bool $analysisRunning = false;
+
     public ?int $pendingRecommendationId = null;
+
     public ?string $pendingRecommendationAction = null; // 'implement'|'reject'
+
     public bool $showRecommendationConfirm = false;
 
     protected $aiService;
@@ -48,7 +50,7 @@ class AIOptimizationDashboard extends Component
             ->latest()
             ->first() : null;
 
-        if (!$lastRecommendation || $lastRecommendation->created_at->diffInHours(now()) > 24) {
+        if (! $lastRecommendation || $lastRecommendation->created_at->diffInHours(now()) > 24) {
             $this->runAnalysis();
         }
     }
@@ -56,7 +58,7 @@ class AIOptimizationDashboard extends Component
     public function runAnalysis()
     {
         $this->analysisRunning = true;
-        
+
         try {
             $this->aiService->runComprehensiveAnalysis(
                 Auth::user()->currentTeam,
@@ -66,7 +68,7 @@ class AIOptimizationDashboard extends Component
             $this->dispatch('analysis-completed');
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'AI analysis completed successfully!']);
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Analysis failed: ' . $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Analysis failed: '.$e->getMessage()]);
         }
 
         $this->analysisRunning = false;
@@ -97,6 +99,7 @@ class AIOptimizationDashboard extends Component
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'implemented']);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to implement this recommendation.']);
+
             return;
         }
     }
@@ -114,6 +117,7 @@ class AIOptimizationDashboard extends Component
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'rejected']);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to reject this recommendation.']);
+
             return;
         }
     }
@@ -131,6 +135,7 @@ class AIOptimizationDashboard extends Component
             $this->showRecommendationConfirm = false;
             $this->pendingRecommendationId = null;
             $this->pendingRecommendationAction = null;
+
             return;
         }
 
@@ -163,9 +168,9 @@ class AIOptimizationDashboard extends Component
         $alert = \App\Models\AIPredictiveAlert::where('team_id', $team->id)->findOrFail($alertId);
 
         $alert->update([
-            'is_acknowledged'  => true,
-            'acknowledged_by'  => Auth::id(),
-            'acknowledged_at'  => now(),
+            'is_acknowledged' => true,
+            'acknowledged_by' => Auth::id(),
+            'acknowledged_at' => now(),
         ]);
 
         $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Alert acknowledged.']);
@@ -175,10 +180,10 @@ class AIOptimizationDashboard extends Component
     {
         $team = Auth::user()->currentTeam;
 
-        $allRecs     = \App\Models\AIRecommendation::where('team_id', $team->id)->get();
-        $pending     = $allRecs->where('status', 'pending');
+        $allRecs = \App\Models\AIRecommendation::where('team_id', $team->id)->get();
+        $pending = $allRecs->where('status', 'pending');
         $implemented = $allRecs->where('status', 'implemented');
-        $total       = $allRecs->count();
+        $total = $allRecs->count();
 
         $implementationRate = $total > 0
             ? round(($implemented->count() / $total) * 100, 1)
@@ -189,13 +194,13 @@ class AIOptimizationDashboard extends Component
         foreach ($categories as $cat) {
             $catRecs = $allRecs->where('category', $cat);
             $catTotal = $catRecs->count();
-            $catImpl  = $catRecs->where('status', 'implemented')->count();
+            $catImpl = $catRecs->where('status', 'implemented')->count();
             $byCategory[$cat] = [
-                'label'          => ucfirst($cat),
-                'total'          => $catTotal,
-                'pending'        => $catRecs->where('status', 'pending')->count(),
-                'implemented'    => $catImpl,
-                'impl_rate_pct'  => $catTotal > 0 ? round(($catImpl / $catTotal) * 100) : 0,
+                'label' => ucfirst($cat),
+                'total' => $catTotal,
+                'pending' => $catRecs->where('status', 'pending')->count(),
+                'implemented' => $catImpl,
+                'impl_rate_pct' => $catTotal > 0 ? round(($catImpl / $catTotal) * 100) : 0,
                 'avg_confidence' => $catRecs->isNotEmpty()
                     ? round($catRecs->avg('confidence_score') * 100, 0)
                     : 0,
@@ -209,22 +214,22 @@ class AIOptimizationDashboard extends Component
         $teamId = $team->id;
         $dataPoints = [
             'production_records' => \App\Models\ProductionRecord::where('team_id', $teamId)->count(),
-            'machines'           => \App\Models\Machine::where('team_id', $teamId)->count(),
+            'machines' => \App\Models\Machine::where('team_id', $teamId)->count(),
             'maintenance_records' => \App\Models\MaintenanceRecord::where('team_id', $teamId)->count(),
-            'fuel_transactions'  => \App\Models\FuelTransaction::where('team_id', $teamId)->count(),
-            'machine_metrics'    => \App\Models\MachineMetric::where('team_id', $teamId)->count(),
+            'fuel_transactions' => \App\Models\FuelTransaction::where('team_id', $teamId)->count(),
+            'machine_metrics' => \App\Models\MachineMetric::where('team_id', $teamId)->count(),
         ];
 
         return [
-            'implementation_rate'  => $implementationRate,
-            'realized_savings'     => round($implemented->sum('estimated_savings'), 0),
-            'potential_savings'    => round($pending->sum('estimated_savings'), 0),
-            'critical_pending'     => $pending->where('priority', 'critical')->count(),
-            'avg_confidence'       => $total > 0 ? round($allRecs->avg('confidence_score') * 100, 0) : 0,
-            'by_category'          => $byCategory,
-            'agents'               => $agents,
-            'top_opportunity'      => $pending->sortByDesc('estimated_savings')->first(),
-            'data_points'          => $dataPoints,
+            'implementation_rate' => $implementationRate,
+            'realized_savings' => round($implemented->sum('estimated_savings'), 0),
+            'potential_savings' => round($pending->sum('estimated_savings'), 0),
+            'critical_pending' => $pending->where('priority', 'critical')->count(),
+            'avg_confidence' => $total > 0 ? round($allRecs->avg('confidence_score') * 100, 0) : 0,
+            'by_category' => $byCategory,
+            'agents' => $agents,
+            'top_opportunity' => $pending->sortByDesc('estimated_savings')->first(),
+            'data_points' => $dataPoints,
         ];
     }
 
@@ -239,7 +244,7 @@ class AIOptimizationDashboard extends Component
         $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Insight marked as read.']);
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         $team = Auth::user()->currentTeam;
 
@@ -250,21 +255,21 @@ class AIOptimizationDashboard extends Component
         $recommendationsQuery = AIRecommendation::where('team_id', $team->id)
             ->with(['aiAgent', 'machine', 'mineArea', 'route']);
         // Status filter: default to 'pending' when no status filter provided
-        if (!empty($this->filters['status'])) {
+        if (! empty($this->filters['status'])) {
             $recommendationsQuery->where('status', $this->filters['status']);
         } else {
             $recommendationsQuery->where('status', 'pending');
         }
 
         // Category filter (supports backward-compatible selectedCategory)
-        if (!empty($this->filters['category'])) {
+        if (! empty($this->filters['category'])) {
             $recommendationsQuery->where('category', $this->filters['category']);
         } elseif ($this->selectedCategory !== 'all') {
             $recommendationsQuery->where('category', $this->selectedCategory);
         }
 
         // Priority filter (supports backward-compatible selectedPriority)
-        if (!empty($this->filters['priority'])) {
+        if (! empty($this->filters['priority'])) {
             $recommendationsQuery->where('priority', $this->filters['priority']);
         } elseif ($this->selectedPriority !== 'all') {
             $recommendationsQuery->where('priority', $this->selectedPriority);
@@ -285,11 +290,11 @@ class AIOptimizationDashboard extends Component
             ->get();
 
         return view('livewire.ai-optimization-dashboard', [
-            'stats'            => $dashboardData['stats'],
-            'insights'         => $dashboardData['insights'],
-            'recommendations'  => $recommendations,
+            'stats' => $dashboardData['stats'],
+            'insights' => $dashboardData['insights'],
+            'recommendations' => $recommendations,
             'predictiveAlerts' => $predictiveAlerts,
-            'overviewData'     => $this->overviewData,
+            'overviewData' => $this->overviewData,
         ]);
     }
 }

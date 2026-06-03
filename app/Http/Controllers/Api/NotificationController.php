@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Notification;
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
@@ -13,29 +14,36 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
-        $teamId = auth()->user()->current_team_id 
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
-        
-        if (!$teamId) {
+        $teamId = Auth::user()->current_team_id
+            ?? (Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null);
+
+        if (! $teamId) {
             return response()->json(['data' => [], 'meta' => ['total' => 0]]);
         }
-        
+
+        $validated = $request->validate([
+            'type' => 'nullable|string|max:100|alpha_dash',
+            'alert_level' => 'nullable|array',
+            'alert_level.*' => 'string|in:critical,high,warning,info',
+            'unread_only' => 'nullable|boolean',
+        ]);
+
         $query = Notification::where('team_id', $teamId);
 
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
+        if (! empty($validated['type'])) {
+            $query->where('type', $validated['type']);
         }
 
-        if ($request->has('alert_level')) {
-            $query->whereIn('alert_level', (array)$request->alert_level);
+        if (! empty($validated['alert_level'])) {
+            $query->whereIn('alert_level', $validated['alert_level']);
         }
 
-        if ($request->get('unread_only') === 'true') {
+        if ($request->boolean('unread_only')) {
             $query->where('is_read', false);
         }
 
         $notifications = $query->latest()->paginate(20);
-        
+
         return response()->json([
             'data' => $notifications->items(),
             'meta' => [
@@ -43,7 +51,7 @@ class NotificationController extends Controller
                 'last_page' => $notifications->lastPage(),
                 'total' => $notifications->total(),
                 'per_page' => $notifications->perPage(),
-            ]
+            ],
         ]);
     }
 
@@ -52,9 +60,9 @@ class NotificationController extends Controller
      */
     public function unread(Request $request)
     {
-        $userId = auth()->user()->id;
-        $teamId = auth()->user()->current_team_id 
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
+        $userId = Auth::user()->id;
+        $teamId = Auth::user()->current_team_id
+            ?? (Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null);
 
         $unread = Notification::where('team_id', $teamId)
             ->where('is_read', false)
@@ -68,7 +76,7 @@ class NotificationController extends Controller
                 'last_page' => $unread->lastPage(),
                 'total' => $unread->total(),
                 'per_page' => $unread->perPage(),
-            ]
+            ],
         ]);
     }
 
@@ -94,8 +102,8 @@ class NotificationController extends Controller
             'notification_ids.*' => 'exists:notifications,id',
         ]);
 
-        $teamId = auth()->user()->current_team_id 
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
+        $teamId = Auth::user()->current_team_id
+            ?? (Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null);
 
         Notification::whereIn('id', $validated['notification_ids'])
             ->where('team_id', $teamId)
@@ -109,9 +117,9 @@ class NotificationController extends Controller
      */
     public function stats(Request $request)
     {
-        $teamId = auth()->user()->current_team_id 
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
-        $days = $request->get('days', 7);
+        $teamId = Auth::user()->current_team_id
+            ?? (Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null);
+        $days = (int) $request->validate(['days' => 'nullable|integer|min:1|max:365'])['days'] ?? 7;
         $fromDate = now()->subDays($days);
 
         $alerts = Notification::where('team_id', $teamId)
@@ -145,13 +153,13 @@ class NotificationController extends Controller
     public function clear(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'string|nullable',
-            'alert_level' => 'string|nullable',
-            'days_old' => 'integer|min:1|nullable',
+            'type' => 'nullable|string|max:100|alpha_dash',
+            'alert_level' => 'nullable|string|in:critical,high,warning,info',
+            'days_old' => 'nullable|integer|min:1|max:365',
         ]);
 
-        $teamId = auth()->user()->current_team_id 
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
+        $teamId = Auth::user()->current_team_id
+            ?? (Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null);
         $query = Notification::where('team_id', $teamId);
 
         if ($validated['type'] ?? false) {

@@ -7,50 +7,79 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Subscription;
 use App\Services\AI\FleetOptimizerAgent;
-use Livewire\Component;
-use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class Fleet extends Component
 {
-public array $activityFeed = [];
-public bool $isLoading = true;
-use WithPagination;
+    public array $activityFeed = [];
+
+    public bool $isLoading = true;
+
+    use WithPagination;
 
     // AI recommendation interaction state
     public array $lastAiRecommendations = [];
+
     public ?int $pendingRecommendationIndex = null;
+
     public bool $showRejectRecommendationModal = false;
+
     public string $rejectReason = '';
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $sortBy = 'name';
+
     public string $sortDirection = 'asc';
+
     public bool $showCreateModal = false;
+
     public bool $showAssignModal = false;
+
     public ?int $assigningMachineId = null;
+
     public ?int $selectedExcavatorId = null;
+
     public array $selectedAdtIds = [];
+
     public string $assignMode = 'assign_to_excavator';
+
     public bool $showMineAreaAssignModal = false;
+
     public ?int $assigningMineAreaMachineId = null;
+
     public ?int $selectedMineAreaId = null;
 
     // Create/Edit form properties
     public ?int $editingMachineId = null;
+
     public string $name = '';
+
     public string $model = '';
+
     public string $manufacturer = '';
+
     public string $machineType = '';
+
     public string $status = 'active';
+
     public string $serialNumber = '';
+
     public float $capacity = 0;
+
     public float $latitude = 0;
+
     public float $longitude = 0;
+
     public int $cycleTimeMinutes = 0;
+
     public int $queueTimeMinutes = 0;
+
     public int $loadingTimeMinutes = 0;
 
     protected $listeners = ['machineCreated' => 'machineCreated', 'machineDeleted' => 'machineDeleted'];
@@ -67,6 +96,10 @@ use WithPagination;
 
     public function toggleSort(string $column): void
     {
+        $allowed = ['name', 'manufacturer', 'status', 'created_at'];
+        if (! in_array($column, $allowed, true)) {
+            return;
+        }
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -75,13 +108,26 @@ use WithPagination;
         }
     }
 
+    public function updatedSortBy(string $value): void
+    {
+        $allowed = ['name', 'manufacturer', 'status', 'created_at'];
+        if (! in_array($value, $allowed, true)) {
+            $this->sortBy = 'name';
+        }
+    }
+
+    public function updatedSortDirection(string $value): void
+    {
+        if (! in_array($value, ['asc', 'desc'], true)) {
+            $this->sortDirection = 'asc';
+        }
+    }
+
     public function openCreateModal(): void
     {
         if ($this->isFleetFull()) {
-            $this->dispatchBrowserEvent('notify', [
-                'message' => 'Fleet slot limit reached for your subscription plan. Upgrade to add more machines.',
-                'type'    => 'error',
-            ]);
+            $this->dispatch('notify', message: 'Fleet slot limit reached for your subscription plan. Upgrade to add more machines.', type: 'error');
+
             return;
         }
         $this->resetForm();
@@ -95,6 +141,11 @@ use WithPagination;
     private function isFleetFull(): bool
     {
         $team = Auth::user()->currentTeam;
+
+        if ($team === null) {
+            return false;
+        }
+
         return Subscription::teamHasReachedMachineLimit($team->id);
     }
 
@@ -104,11 +155,12 @@ use WithPagination;
     public function fleetUsage(): array
     {
         $team = Auth::user()->currentTeam;
-        $current = Machine::where('team_id', $team->id)->count();
+        $teamId = $team?->id ?? 0;
+        $current = Machine::where('team_id', $teamId)->count();
 
         $subscription = Subscription::with('plan')
             ->active()
-            ->where('team_id', $team->id)
+            ->where('team_id', $teamId)
             ->first();
 
         $max = $subscription?->plan?->max_machines ?? null;
@@ -192,11 +244,12 @@ use WithPagination;
                 'queue_time_minutes' => $this->queueTimeMinutes ?: null,
                 'loading_time_minutes' => $this->loadingTimeMinutes ?: null,
             ]);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Machine updated successfully', 'type' => 'success']);
+            $this->dispatch('notify', message: 'Machine updated successfully', type: 'success');
         } else {
             // Guard: enforce subscription fleet slot limit
             if ($this->isFleetFull()) {
                 $this->addError('name', 'Fleet slot limit reached for your subscription plan.');
+
                 return;
             }
 
@@ -215,7 +268,7 @@ use WithPagination;
                 'queue_time_minutes' => $this->queueTimeMinutes ?: null,
                 'loading_time_minutes' => $this->loadingTimeMinutes ?: null,
             ]);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Machine created successfully', 'type' => 'success']);
+            $this->dispatch('notify', message: 'Machine created successfully', type: 'success');
         }
 
         $this->closeModal();
@@ -229,7 +282,7 @@ use WithPagination;
 
         $machineName = $machine->name;
         $machine->delete();
-        $this->dispatchBrowserEvent('notify', ['message' => "Machine '{$machineName}' deleted successfully", 'type' => 'success']);
+        $this->dispatch('notify', message: "Machine '{$machineName}' deleted successfully", type: 'success');
     }
 
     public function openAssignModal(int $machineId): void
@@ -240,8 +293,9 @@ use WithPagination;
         $this->assignMode = 'assign_to_excavator';
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($machineId);
-        if (!$machine) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Machine not found', 'type' => 'error']);
+        if (! $machine) {
+            $this->dispatch('notify', message: 'Machine not found', type: 'error');
+
             return;
         }
 
@@ -253,7 +307,7 @@ use WithPagination;
                 ->where('excavator_id', $machine->id)
                 ->where('machine_type', 'adt')
                 ->pluck('id')
-                ->map(fn($id) => (int) $id)
+                ->map(fn ($id) => (int) $id)
                 ->toArray();
         } else {
             // For ADTs and other machines, allow selecting a single excavator
@@ -280,55 +334,60 @@ use WithPagination;
         // If in ADT assignment mode, route to assignAdtsToExcavator
         if ($this->assignMode === 'assign_adts_to_excavator') {
             $this->assignAdtsToExcavator();
+
             return;
         }
 
-        if (!$this->assigningMachineId || !$this->selectedExcavatorId) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Please select an excavator', 'type' => 'error']);
+        if (! $this->assigningMachineId || ! $this->selectedExcavatorId) {
+            $this->dispatch('notify', message: 'Please select an excavator', type: 'error');
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($this->assigningMachineId);
         $excavator = Machine::where('team_id', $team->id)->find($this->selectedExcavatorId);
-        
-        if (!$machine || $machine->team_id !== Auth::user()->currentTeam->id) {
+
+        if (! $machine || $machine->team_id !== Auth::user()->currentTeam->id) {
             abort(403);
         }
 
-        if (!$excavator || $excavator->team_id !== Auth::user()->currentTeam->id) {
+        if (! $excavator || $excavator->team_id !== Auth::user()->currentTeam->id) {
             abort(403);
         }
 
         // Prevent assigning a machine to itself
         if ($machine->id === $excavator->id) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Cannot assign a machine to itself', 'type' => 'error']);
+            $this->dispatch('notify', message: 'Cannot assign a machine to itself', type: 'error');
+
             return;
         }
 
         // Prevent assigning big machines (excavator/dozer/loader/etc.) to another big machine
         $bigTypes = ['excavator', 'dozer', 'loader', 'grader', 'bulldozer'];
         if (in_array($machine->machine_type, $bigTypes) && in_array($excavator->machine_type, $bigTypes)) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Cannot assign an excavator or big machine to another big machine', 'type' => 'error']);
+            $this->dispatch('notify', message: 'Cannot assign an excavator or big machine to another big machine', type: 'error');
+
             return;
         }
 
         // Assign
         $machine->assignToExcavator($this->selectedExcavatorId);
-        $this->dispatchBrowserEvent('notify', ['message' => "Machine '{$machine->name}' assigned to '{$excavator->name}'", 'type' => 'success']);
+        $this->dispatch('notify', message: "Machine '{$machine->name}' assigned to '{$excavator->name}'", type: 'success');
         $this->closeAssignModal();
     }
 
     public function assignAdtsToExcavator(): void
     {
-        if (!$this->assigningMachineId) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Excavator not specified', 'type' => 'error']);
+        if (! $this->assigningMachineId) {
+            $this->dispatch('notify', message: 'Excavator not specified', type: 'error');
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $excavator = Machine::where('team_id', $team->id)->find($this->assigningMachineId);
-        if (!$excavator) {
+        if (! $excavator) {
             abort(403);
         }
 
@@ -349,7 +408,7 @@ use WithPagination;
         // Assign selected ADTs
         Machine::whereIn('id', $validAdts)->update(['excavator_id' => $excavator->id, 'assigned_to_excavator_at' => now()]);
 
-        $this->dispatchBrowserEvent('notify', ['message' => 'Assigned ADTs updated successfully', 'type' => 'success']);
+        $this->dispatch('notify', message: 'Assigned ADTs updated successfully', type: 'success');
         $this->closeAssignModal();
     }
 
@@ -357,15 +416,15 @@ use WithPagination;
     {
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($machineId);
-        
-        if (!$machine) {
+
+        if (! $machine) {
             abort(403);
         }
 
         $machineName = $machine->name;
         $machine->unassignFromExcavator();
-        
-        $this->dispatchBrowserEvent('notify', ['message' => "Machine '{$machineName}' unassigned from excavator", 'type' => 'success']);
+
+        $this->dispatch('notify', message: "Machine '{$machineName}' unassigned from excavator", type: 'success');
     }
 
     public function openMineAreaAssignModal(int $machineId): void
@@ -384,72 +443,77 @@ use WithPagination;
 
     public function assignToMineArea(): void
     {
-        if (!$this->assigningMineAreaMachineId || !$this->selectedMineAreaId) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Please select a mine area', 'type' => 'error']);
+        if (! $this->assigningMineAreaMachineId || ! $this->selectedMineAreaId) {
+            $this->dispatch('notify', message: 'Please select a mine area', type: 'error');
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($this->assigningMineAreaMachineId);
-        
-        if (!$machine) {
+
+        if (! $machine) {
             abort(403);
         }
 
         $mineArea = MineArea::where('team_id', $team->id)->find($this->selectedMineAreaId);
-        if (!$mineArea) {
+        if (! $mineArea) {
             abort(403);
         }
 
         // Update machine's mine_area_id field
         $machine->update(['mine_area_id' => $this->selectedMineAreaId]);
-        
-        $this->dispatchBrowserEvent('notify', ['message' => "Machine '{$machine->name}' assigned to '{$mineArea->name}'", 'type' => 'success']);
-        
+
+        $this->dispatch('notify', message: "Machine '{$machine->name}' assigned to '{$mineArea->name}'", type: 'success');
+
         $this->closeMineAreaAssignModal();
     }
 
     private function calculateMachinePerformance(int $teamId): array
     {
-        $machines = Machine::where('team_id', $teamId)->get();
+        $machines = Machine::where('team_id', $teamId)->get()->keyBy('id');
+
+        if ($machines->isEmpty()) {
+            return [];
+        }
+
+        // Single aggregating query instead of N per-machine queries
+        $aggregates = DB::table('machine_metrics')
+            ->whereIn('machine_id', $machines->keys())
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('machine_id')
+            ->selectRaw('machine_id,
+                AVG(fuel_consumption_rate) as avg_fuel,
+                AVG(total_hours)           as avg_hours,
+                AVG(idle_hours)            as avg_idle,
+                AVG(payload_capacity_used) as avg_payload,
+                AVG(speed)                 as avg_speed,
+                COUNT(*)                   as row_count')
+            ->get()
+            ->keyBy('machine_id');
+
         $performanceData = [];
 
-        foreach ($machines as $machine) {
-            // Get metrics from last 30 days
-            $metrics = DB::table('machine_metrics')
-                ->where('machine_id', $machine->id)
-                ->where('created_at', '>=', now()->subDays(30))
-                ->get();
-
-            if ($metrics->isEmpty()) {
+        foreach ($aggregates as $machineId => $agg) {
+            if (! isset($machines[$machineId])) {
                 continue;
             }
 
-            $avgFuelConsumption = $metrics->avg('fuel_consumption_rate') ?? 0;
-            $avgTotalHours = $metrics->avg('total_hours') ?? 0;
-            $avgIdleHours = $metrics->avg('idle_hours') ?? 0;
-            $avgPayloadUsage = $metrics->avg('payload_capacity_used') ?? 0;
-            $avgSpeed = $metrics->avg('speed') ?? 0;
+            $machine = $machines[$machineId];
+            $avgFuelConsumption = (float) ($agg->avg_fuel ?? 0);
+            $avgTotalHours = (float) ($agg->avg_hours ?? 0);
+            $avgIdleHours = (float) ($agg->avg_idle ?? 0);
+            $avgPayloadUsage = (float) ($agg->avg_payload ?? 0);
 
-            // Calculate utilization rate (0-100)
-            $utilizationRate = $avgTotalHours > 0 
-                ? (($avgTotalHours - $avgIdleHours) / $avgTotalHours) * 100 
+            $utilizationRate = $avgTotalHours > 0
+                ? (($avgTotalHours - $avgIdleHours) / $avgTotalHours) * 100
                 : 0;
 
-            // Calculate efficiency score (lower fuel consumption per hour is better)
             $fuelEfficiency = $avgTotalHours > 0 && $avgFuelConsumption > 0
-                ? (1 / ($avgFuelConsumption / $avgTotalHours)) * 10 // Normalized to 0-100 scale
-                : 50; // Default neutral score
+                ? (1 / ($avgFuelConsumption / $avgTotalHours)) * 10
+                : 50;
 
-            // Calculate productivity score based on payload usage
-            $productivityScore = $avgPayloadUsage;
-
-            // Overall performance score (weighted average)
-            $performanceScore = (
-                ($utilizationRate * 0.4) + 
-                ($fuelEfficiency * 0.3) + 
-                ($productivityScore * 0.3)
-            );
+            $performanceScore = ($utilizationRate * 0.4) + ($fuelEfficiency * 0.3) + ($avgPayloadUsage * 0.3);
 
             $performanceData[] = [
                 'machine_id' => $machine->id,
@@ -459,7 +523,7 @@ use WithPagination;
                 'performance_score' => round($performanceScore, 1),
                 'utilization_rate' => round($utilizationRate, 1),
                 'fuel_efficiency' => round($fuelEfficiency, 1),
-                'productivity_score' => round($productivityScore, 1),
+                'productivity_score' => round($avgPayloadUsage, 1),
                 'avg_hours' => round($avgTotalHours, 1),
                 'status' => $machine->status,
             ];
@@ -478,7 +542,6 @@ use WithPagination;
      * the elapsed time since ignition_on_at is included in the total.
      *
      * @param  int[]  $machineIds  IDs of machines currently visible on the page
-     * @param  int    $teamId
      * @return array<int, array{today_hours: float, is_running: bool}>
      */
     /**
@@ -492,8 +555,8 @@ use WithPagination;
         $machines = Machine::where('team_id', $teamId)
             ->where(function ($q) {
                 $q->whereNotNull('cycle_time_minutes')
-                  ->orWhereNotNull('queue_time_minutes')
-                  ->orWhereNotNull('loading_time_minutes');
+                    ->orWhereNotNull('queue_time_minutes')
+                    ->orWhereNotNull('loading_time_minutes');
             })
             ->orderBy('name')
             ->get(['id', 'name', 'machine_type', 'cycle_time_minutes', 'queue_time_minutes', 'loading_time_minutes']);
@@ -503,23 +566,23 @@ use WithPagination;
         }
 
         $rows = $machines->map(fn ($m) => [
-            'name'    => $m->name,
-            'type'    => $m->machine_type ?? '',
-            'cycle'   => $m->cycle_time_minutes ?? 0,
-            'queue'   => $m->queue_time_minutes ?? 0,
+            'name' => $m->name,
+            'type' => $m->machine_type ?? '',
+            'cycle' => $m->cycle_time_minutes ?? 0,
+            'queue' => $m->queue_time_minutes ?? 0,
             'loading' => $m->loading_time_minutes ?? 0,
-            'total'   => ($m->cycle_time_minutes ?? 0) + ($m->queue_time_minutes ?? 0) + ($m->loading_time_minutes ?? 0),
+            'total' => ($m->cycle_time_minutes ?? 0) + ($m->queue_time_minutes ?? 0) + ($m->loading_time_minutes ?? 0),
         ])->values()->toArray();
 
-        $avgCycle   = $machines->whereNotNull('cycle_time_minutes')->avg('cycle_time_minutes');
-        $avgQueue   = $machines->whereNotNull('queue_time_minutes')->avg('queue_time_minutes');
+        $avgCycle = $machines->whereNotNull('cycle_time_minutes')->avg('cycle_time_minutes');
+        $avgQueue = $machines->whereNotNull('queue_time_minutes')->avg('queue_time_minutes');
         $avgLoading = $machines->whereNotNull('loading_time_minutes')->avg('loading_time_minutes');
 
         return [
-            'avg_cycle'   => $avgCycle   !== null ? round($avgCycle, 1)   : null,
-            'avg_queue'   => $avgQueue   !== null ? round($avgQueue, 1)   : null,
+            'avg_cycle' => $avgCycle !== null ? round($avgCycle, 1) : null,
+            'avg_queue' => $avgQueue !== null ? round($avgQueue, 1) : null,
             'avg_loading' => $avgLoading !== null ? round($avgLoading, 1) : null,
-            'machines'    => $rows,
+            'machines' => $rows,
         ];
     }
 
@@ -543,7 +606,7 @@ use WithPagination;
 
                 if ($session->ignition_off_at === null) {
                     // Engine is currently running — include live elapsed time
-                    $map[$id]['is_running']    = true;
+                    $map[$id]['is_running'] = true;
                     $map[$id]['today_seconds'] += (int) $session->ignition_on_at->diffInSeconds(now());
                 } else {
                     $map[$id]['today_seconds'] += $session->duration_seconds
@@ -560,12 +623,13 @@ use WithPagination;
         return $map;
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         $this->isLoading = true;
         $team = Auth::user()->currentTeam;
+        $teamId = $team?->id ?? 0;
 
-        $machinesQuery = Machine::where('team_id', $team->id)
+        $machinesQuery = Machine::where('team_id', $teamId)
             ->with('excavator')
             ->when($this->search, function ($query) {
                 return $query->where('name', 'like', "%{$this->search}%")
@@ -579,38 +643,38 @@ use WithPagination;
             ->paginate(10);
 
         // Get all excavators for assignment dropdown
-        $excavators = Machine::where('team_id', $team->id)
+        $excavators = Machine::where('team_id', $teamId)
             ->whereIn('machine_type', ['excavator', 'digger', 'loader'])
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
 
         // Get all ADTs for potential assignment to excavators
-        $adts = Machine::where('team_id', $team->id)
+        $adts = Machine::where('team_id', $teamId)
             ->where('machine_type', 'adt')
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
 
         // Get all mine areas for assignment dropdown
-        $mineAreas = MineArea::where('team_id', $team->id)
+        $mineAreas = MineArea::where('team_id', $teamId)
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
 
         $statusStats = [
-            'active' => Machine::where('team_id', $team->id)->where('status', 'active')->count(),
-            'idle' => Machine::where('team_id', $team->id)->where('status', 'idle')->count(),
-            'maintenance' => Machine::where('team_id', $team->id)->where('status', 'maintenance')->count(),
+            'active' => Machine::where('team_id', $teamId)->where('status', 'active')->count(),
+            'idle' => Machine::where('team_id', $teamId)->where('status', 'idle')->count(),
+            'maintenance' => Machine::where('team_id', $teamId)->where('status', 'maintenance')->count(),
         ];
 
         // Calculate machine performance based on recent metrics (last 30 days)
-        $performanceData = $this->calculateMachinePerformance($team->id);
+        $performanceData = $this->calculateMachinePerformance($teamId);
         $topPerformers = collect($performanceData)->sortByDesc('performance_score')->take(5)->values();
         $worstPerformers = collect($performanceData)->sortBy('performance_score')->take(5)->values();
 
         // Activity Feed
-        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $team->id)
+        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $teamId)
             ->with('user')
             ->latest('created_at')
             ->take(10)
@@ -624,13 +688,13 @@ use WithPagination;
             ->toArray();
 
         // AI Fleet Optimization Analysis
-        $aiAgent = new FleetOptimizerAgent();
+        $aiAgent = new FleetOptimizerAgent;
         $aiAnalysis = $aiAgent->analyze($team);
         $aiRecommendations = collect($aiAnalysis['recommendations'])->take(5);
         $aiInsights = collect($aiAnalysis['insights'])->take(3);
 
         // Keep a serializable copy to reference in action handlers (Livewire methods)
-        $this->lastAiRecommendations = $aiRecommendations->values()->map(fn($r) => (array) $r)->toArray();
+        $this->lastAiRecommendations = $aiRecommendations->values()->map(fn ($r) => (array) $r)->toArray();
 
         $this->isLoading = false;
 
@@ -639,27 +703,27 @@ use WithPagination;
         // Engine hours per machine for the current page (today's sessions)
         $engineHoursMap = $this->buildEngineHoursMap(
             $machinesQuery->pluck('id')->toArray(),
-            $team->id
+            $teamId
         );
 
         // Timing analytics across all fleet machines (not just current page)
-        $timingAnalytics = $this->buildTimingAnalytics($team->id);
+        $timingAnalytics = $this->buildTimingAnalytics($teamId);
 
         return view('livewire.fleet', [
-            'machines'          => $machinesQuery,
-            'excavators'        => $excavators,
-            'adts'              => $adts,
-            'mineAreas'         => $mineAreas,
-            'statusStats'       => $statusStats,
-            'topPerformers'     => $topPerformers,
-            'worstPerformers'   => $worstPerformers,
+            'machines' => $machinesQuery,
+            'excavators' => $excavators,
+            'adts' => $adts,
+            'mineAreas' => $mineAreas,
+            'statusStats' => $statusStats,
+            'topPerformers' => $topPerformers,
+            'worstPerformers' => $worstPerformers,
             'aiRecommendations' => $aiRecommendations,
-            'aiInsights'        => $aiInsights,
-            'activityFeed'      => $this->activityFeed,
-            'isLoading'         => $this->isLoading,
-            'fleetUsage'        => $fleetUsage,
-            'engineHoursMap'    => $engineHoursMap,
-            'timingAnalytics'   => $timingAnalytics,
+            'aiInsights' => $aiInsights,
+            'activityFeed' => $this->activityFeed,
+            'isLoading' => $this->isLoading,
+            'fleetUsage' => $fleetUsage,
+            'engineHoursMap' => $engineHoursMap,
+            'timingAnalytics' => $timingAnalytics,
         ]);
     }
 
@@ -668,7 +732,8 @@ use WithPagination;
         $team = Auth::user()->currentTeam;
         $rec = $this->lastAiRecommendations[$index] ?? null;
         if (! $rec) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
+            $this->dispatch('notify', message: 'Recommendation not found', type: 'error');
+
             return;
         }
 
@@ -686,7 +751,7 @@ use WithPagination;
         ]);
 
         // Apply operational adjustment (best-effort): if recommendation references a machine, create an activity log and tag machine
-        if (!empty($rec['related_machine_id'])) {
+        if (! empty($rec['related_machine_id'])) {
             $machine = Machine::where('team_id', $team->id)->find($rec['related_machine_id']);
             if ($machine) {
                 \App\Models\ActivityLog::create([
@@ -706,7 +771,7 @@ use WithPagination;
         }
 
         // Dispatch a success notification and record that performance tracking should occur (placeholder)
-        $this->dispatchBrowserEvent('notify', ['message' => 'Recommendation implemented. Performance will be tracked.', 'type' => 'success']);
+        $this->dispatch('notify', message: 'Recommendation implemented. Performance will be tracked.', type: 'success');
     }
 
     public function openRejectRecommendation(int $index)
@@ -719,15 +784,17 @@ use WithPagination;
     public function confirmRejectRecommendation()
     {
         if (empty(trim($this->rejectReason))) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Please provide a reason for rejection', 'type' => 'error']);
+            $this->dispatch('notify', message: 'Please provide a reason for rejection', type: 'error');
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $rec = $this->lastAiRecommendations[$this->pendingRecommendationIndex] ?? null;
         if (! $rec) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
+            $this->dispatch('notify', message: 'Recommendation not found', type: 'error');
             $this->showRejectRecommendationModal = false;
+
             return;
         }
 
@@ -754,6 +821,6 @@ use WithPagination;
         $this->pendingRecommendationIndex = null;
         $this->rejectReason = '';
 
-        $this->dispatchBrowserEvent('notify', ['message' => 'Recommendation rejected and logged', 'type' => 'success']);
+        $this->dispatch('notify', message: 'Recommendation rejected and logged', type: 'success');
     }
 }

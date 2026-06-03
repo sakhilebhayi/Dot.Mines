@@ -13,9 +13,15 @@ class DigestSubscription extends Model
         'enabled',
     ];
 
-    protected $casts = [
-        'enabled' => 'boolean',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'enabled' => 'boolean',
+        ];
+    }
 
     public function user(): BelongsTo
     {

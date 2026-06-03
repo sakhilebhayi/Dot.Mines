@@ -4,14 +4,13 @@ namespace App\Services;
 
 use App\Models\IoTSensor;
 use App\Models\SensorReading;
-use Illuminate\Support\Collection;
 
 class IoTSensorService
 {
     /**
      * Get sensor readings with statistics
      */
-    public function getReadingStats(IoTSensor $sensor, $days = 7): array
+    public function getReadingStats(IoTSensor $sensor, int $days = 7): array
     {
         $readings = $sensor->readings()
             ->whereDate('timestamp', '>=', now()->subDays($days)->startOfDay())
@@ -29,7 +28,7 @@ class IoTSensorService
         }
 
         $values = $readings->pluck('value')->toArray();
-        
+
         return [
             'count' => count($values),
             'average' => array_sum($values) / count($values),
@@ -38,7 +37,7 @@ class IoTSensorService
             'latest' => $readings->last()->value,
             'unit' => $readings->first()->unit,
             'trend' => $this->calculateTrend($values),
-            'readings' => $readings->map(fn($r) => [
+            'readings' => $readings->map(fn ($r) => [
                 'value' => $r->value,
                 'timestamp' => $r->timestamp,
                 'quality' => $r->quality_score,
@@ -53,8 +52,8 @@ class IoTSensorService
     {
         $isOnline = $sensor->isOnline();
         $latestReading = $sensor->readings()->latest()->first();
-        
-        $lastReadingAge = $latestReading?->timestamp 
+
+        $lastReadingAge = $latestReading?->timestamp
             ? now()->diffInMinutes($latestReading->timestamp)
             : null;
 
@@ -77,8 +76,8 @@ class IoTSensorService
             return 'insufficient_data';
         }
 
-        $firstHalf = array_slice($values, 0, (int)(count($values) / 2));
-        $secondHalf = array_slice($values, (int)(count($values) / 2));
+        $firstHalf = array_slice($values, 0, (int) (count($values) / 2));
+        $secondHalf = array_slice($values, (int) (count($values) / 2));
 
         $firstAvg = array_sum($firstHalf) / count($firstHalf);
         $secondAvg = array_sum($secondHalf) / count($secondHalf);
@@ -90,7 +89,23 @@ class IoTSensorService
         } elseif ($change < -5) {
             return 'decreasing';
         }
+
         return 'stable';
+    }
+
+    /**
+     * Record a new sensor reading
+     */
+    public function recordReading(IoTSensor $sensor, array $data): SensorReading
+    {
+        return $sensor->readings()->create([
+            'iot_sensor_id' => $sensor->id,
+            'sensor_type' => $sensor->sensor_type,
+            'value' => $data['value'],
+            'unit' => $data['unit'],
+            'timestamp' => $data['timestamp'] ?? now(),
+            'quality_score' => $data['quality_score'] ?? null,
+        ]);
     }
 
     /**

@@ -4,9 +4,9 @@ namespace App\Livewire;
 
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Models\MineArea;
 use App\Models\Route;
 use App\Models\Waypoint;
-use App\Models\MineArea;
 use App\Services\RoutePlanningService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,48 +15,71 @@ use Livewire\Component;
 class RoutePlanning extends Component
 {
     public string $name = '';
+
     public string $description = '';
+
     public ?int $machineId = null;
+
     public ?int $mineAreaId = null;
+
     public string $routeType = 'optimal';
+
     public ?float $speedLimit = null;
 
     // Traffic Management Plan settings
     public bool $tmpEnable = true;
+
     public bool $tmpAvoidRestricted = true;
+
     public bool $tmpPreferSafe = true;
+
     public bool $tmpEnforceOneWay = true;
+
     public bool $tmpApplyAreaSpeedLimits = true;
+
     public ?int $tmpHaulRoadSpeedLimit = 40;
+
     public ?int $tmpLoadingZoneSpeedLimit = 20;
+
     public ?int $tmpSharedZoneSpeedLimit = 15;
-    
+
     // Route coordinates
     public ?float $startLat = null;
+
     public ?float $startLon = null;
+
     public ?float $endLat = null;
+
     public ?float $endLon = null;
-    
+
     // Calculated route data
     public mixed $calculatedRoute = null;
+
     public mixed $savedRoute = null;
-    
+
     // UI State
     public bool $showCalculatedRoute = false;
+
     public bool $isCalculating = false;
+
     public bool $routeSaved = false;
+
     public bool $isLoading = false;
-    
+
     // Map settings
     public float $centerLat = -26.2041;
+
     public float $centerLng = 28.0473;
+
     public int $zoomLevel = 10;
-    
+
     // View mode
     public string $viewMode = 'create'; // create, view
+
     public array $routes = [];
+
     public ?int $selectedRouteId = null;
-    
+
     protected $rules = [
         'name' => 'required|min:3|max:255',
         'machineId' => 'nullable|exists:machines,id',
@@ -71,29 +94,30 @@ class RoutePlanning extends Component
         'tmpLoadingZoneSpeedLimit' => 'nullable|integer|min:1|max:80',
         'tmpSharedZoneSpeedLimit' => 'nullable|integer|min:1|max:80',
     ];
-    
+
     public function mount()
     {
         $this->isLoading = true;
         $this->loadRoutes();
         $this->isLoading = false;
     }
-    
-    public function render()
+
+    public function render(): \Illuminate\View\View
     {
         $team = Auth::user()->currentTeam;
+        $teamId = $team?->id ?? 0;
 
-        $machines = Machine::where('team_id', $team->id)
+        $machines = Machine::where('team_id', $teamId)
             ->orderBy('name')
             ->get();
 
         // Fetch mine areas for the current team
-        $mineAreas = MineArea::where('team_id', $team->id)
+        $mineAreas = MineArea::where('team_id', $teamId)
             ->orderBy('name')
             ->get();
 
         // Convert geofences to plain array for safe JavaScript serialization
-        $geofences = Geofence::where('team_id', $team->id)
+        $geofences = Geofence::where('team_id', $teamId)
             ->get()
             ->map(function ($geofence) {
                 // Ensure coordinates are in the right format
@@ -113,38 +137,38 @@ class RoutePlanning extends Component
             ->toArray();
 
         // All active routes for the TMP overlay layer (client-side toggle, no Livewire roundtrip)
-        $tmpActiveRoutes = Route::where('team_id', $team->id)
+        $tmpActiveRoutes = Route::where('team_id', $teamId)
             ->where('status', 'active')
-            ->with(['waypoints' => fn($q) => $q->orderBy('sequence_order')])
+            ->with(['waypoints' => fn ($q) => $q->orderBy('sequence_order')])
             ->get()
-            ->map(fn($route) => [
-                'id'              => $route->id,
-                'name'            => $route->name,
-                'start_latitude'  => (float) $route->start_latitude,
+            ->map(fn ($route) => [
+                'id' => $route->id,
+                'name' => $route->name,
+                'start_latitude' => (float) $route->start_latitude,
                 'start_longitude' => (float) $route->start_longitude,
-                'end_latitude'    => (float) $route->end_latitude,
-                'end_longitude'   => (float) $route->end_longitude,
-                'total_distance'  => (float) $route->total_distance,
-                'speed_limit'     => $route->speed_limit ? (float) $route->speed_limit : null,
-                'route_geometry'  => $route->route_geometry,
-                'waypoints'       => $route->waypoints->map(fn($w) => [
+                'end_latitude' => (float) $route->end_latitude,
+                'end_longitude' => (float) $route->end_longitude,
+                'total_distance' => (float) $route->total_distance,
+                'speed_limit' => $route->speed_limit ? (float) $route->speed_limit : null,
+                'route_geometry' => $route->route_geometry,
+                'waypoints' => $route->waypoints->map(fn ($w) => [
                     'sequence_order' => $w->sequence_order,
-                    'latitude'       => (float) $w->latitude,
-                    'longitude'      => (float) $w->longitude,
-                    'waypoint_type'  => $w->waypoint_type,
-                    'name'           => $w->name,
+                    'latitude' => (float) $w->latitude,
+                    'longitude' => (float) $w->longitude,
+                    'waypoint_type' => $w->waypoint_type,
+                    'name' => $w->name,
                 ])->toArray(),
             ])
             ->toArray();
 
         return view('livewire.route-planning', [
-            'machines'        => $machines,
-            'mineAreas'       => $mineAreas,
-            'geofences'       => $geofences,
+            'machines' => $machines,
+            'mineAreas' => $mineAreas,
+            'geofences' => $geofences,
             'tmpActiveRoutes' => $tmpActiveRoutes,
         ]);
     }
-    
+
     public function calculateRoute()
     {
         // Validate only the fields required for route calculation (name is not required here)
@@ -157,14 +181,14 @@ class RoutePlanning extends Component
             'speedLimit' => 'nullable|integer|min:1|max:200',
             'machineId' => 'nullable|exists:machines,id',
         ]);
-        
+
         $this->isCalculating = true;
         $this->routeSaved = false;
-        
+
         try {
             $team = Auth::user()->currentTeam;
-            $service = new RoutePlanningService();
-            
+            $service = new RoutePlanningService;
+
             $this->calculatedRoute = $service->calculateOptimalRoute(
                 $this->startLat,
                 $this->startLon,
@@ -181,13 +205,13 @@ class RoutePlanning extends Component
             if ($this->tmpEnable && $this->speedLimit === null && $this->tmpHaulRoadSpeedLimit) {
                 $this->speedLimit = (float) $this->tmpHaulRoadSpeedLimit;
             }
-            
+
             $this->showCalculatedRoute = true;
             // Dispatch a browser event so frontend code can react
             $this->dispatch('routeCalculated', $this->calculatedRoute);
-            
+
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to calculate route: ' . $e->getMessage());
+            session()->flash('error', 'Failed to calculate route: '.$e->getMessage());
         } finally {
             $this->isCalculating = false;
         }
@@ -195,18 +219,19 @@ class RoutePlanning extends Component
 
     public function saveRoute()
     {
-        if (!$this->calculatedRoute) {
+        if (! $this->calculatedRoute) {
             session()->flash('error', 'Please calculate a route first.');
+
             return;
         }
-        
+
         $this->validate(['name' => 'required|min:3|max:255']);
-        
+
         try {
             $team = Auth::user()->currentTeam;
-            
+
             DB::beginTransaction();
-            
+
             // Create the route
             $route = Route::create([
                 'team_id' => $team->id,
@@ -229,7 +254,7 @@ class RoutePlanning extends Component
                     'traffic_plan' => $this->calculatedRoute['traffic_plan'] ?? $this->buildTrafficPlanSummary($team->id),
                 ],
             ]);
-            
+
             // Create waypoints
             foreach ($this->calculatedRoute['waypoints'] as $waypointData) {
                 Waypoint::create([
@@ -243,24 +268,24 @@ class RoutePlanning extends Component
                     'estimated_time_from_previous' => $waypointData['estimated_time_from_previous'] ?? null,
                 ]);
             }
-            
+
             DB::commit();
-            
+
             $this->savedRoute = $route;
             $this->routeSaved = true;
             $this->loadRoutes();
-            
+
             session()->flash('success', 'Route saved successfully!');
-            
+
             // Reset form
             $this->reset(['name', 'description', 'speedLimit', 'calculatedRoute', 'showCalculatedRoute']);
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Failed to save route: ' . $e->getMessage());
+            session()->flash('error', 'Failed to save route: '.$e->getMessage());
         }
     }
-    
+
     public function loadRoutes()
     {
         $team = Auth::user()->currentTeam;
@@ -270,7 +295,7 @@ class RoutePlanning extends Component
             ->get()
             ->toArray();
     }
-    
+
     public function viewRoute($routeId)
     {
         $team = Auth::user()->currentTeam;
@@ -278,7 +303,7 @@ class RoutePlanning extends Component
             ->where('id', $routeId)
             ->with('waypoints')
             ->first();
-        
+
         if ($route) {
             // Keep the list visible — do not switch to a hidden 'view' state.
             $this->selectedRouteId = $routeId;
@@ -298,7 +323,7 @@ class RoutePlanning extends Component
                 'estimated_fuel' => $route->estimated_fuel,
                 'route_geometry' => $route->route_geometry,
                 'traffic_plan' => data_get($route->metadata, 'traffic_plan'),
-                'waypoints' => $route->waypoints->map(fn($w) => [
+                'waypoints' => $route->waypoints->map(fn ($w) => [
                     'latitude' => $w->latitude,
                     'longitude' => $w->longitude,
                     'name' => $w->name,
@@ -307,54 +332,54 @@ class RoutePlanning extends Component
                     'estimated_time_from_previous' => $w->estimated_time_from_previous,
                 ])->toArray(),
             ];
-            
+
             // Dispatch as browser event for frontend listeners
             $this->dispatch('viewRoute', $routeData);
         }
     }
-    
+
     public function deleteRoute($routeId)
     {
         $team = Auth::user()->currentTeam;
         $route = Route::where('team_id', $team->id)
             ->where('id', $routeId)
             ->first();
-        
+
         if ($route) {
             $route->delete();
-            
+
             // Reset component state properly after delete
             $this->reset([
                 'selectedRouteId',
-                'calculatedRoute', 
-                'showCalculatedRoute', 
-                'savedRoute', 
+                'calculatedRoute',
+                'showCalculatedRoute',
+                'savedRoute',
                 'routeSaved',
                 'startLat',
                 'startLon',
                 'endLat',
-                'endLon'
+                'endLon',
             ]);
-            
+
             $this->loadRoutes();
-            
-                // Clear map markers via JavaScript (dispatch browser event)
-                    $this->dispatch('clearMapMarkers');
-            
+
+            // Clear map markers via JavaScript (dispatch browser event)
+            $this->dispatch('clearMapMarkers');
+
             session()->flash('success', 'Route deleted successfully.');
         }
     }
-    
+
     public function switchToCreateMode()
     {
         $this->viewMode = 'create';
-        
+
         // Reset all form and state variables
         $this->reset([
             'selectedRouteId',
-            'calculatedRoute', 
-            'showCalculatedRoute', 
-            'savedRoute', 
+            'calculatedRoute',
+            'showCalculatedRoute',
+            'savedRoute',
             'routeSaved',
             'startLat',
             'startLon',
@@ -364,28 +389,28 @@ class RoutePlanning extends Component
             'description',
             'machineId',
             'mineAreaId',
-            'routeType'
+            'routeType',
         ]);
-        
+
         // Set default route type
         $this->routeType = 'optimal';
-        
+
         // Clear map markers
-            $this->dispatch('clearMapMarkers');
+        $this->dispatch('clearMapMarkers');
     }
-    
+
     public function updateStartPoint($lat, $lon)
     {
         $this->startLat = $lat;
         $this->startLon = $lon;
     }
-    
+
     public function updateEndPoint($lat, $lon)
     {
         $this->endLat = $lat;
         $this->endLon = $lon;
     }
-    
+
     public function clearPoints()
     {
         $this->startLat = null;
@@ -394,7 +419,7 @@ class RoutePlanning extends Component
         $this->endLon = null;
         $this->calculatedRoute = null;
         $this->showCalculatedRoute = false;
-            $this->dispatch('clearMapMarkers');
+        $this->dispatch('clearMapMarkers');
     }
 
     protected function buildTrafficPlanSummary(int $teamId): array

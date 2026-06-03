@@ -17,13 +17,19 @@ class UserFeedPreference extends Model
         'notify_on_mention',
     ];
 
-    protected $casts = [
-        'category_preferences' => 'array',
-        'notify_on_comment'    => 'boolean',
-        'notify_on_reply'      => 'boolean',
-        'notify_on_approval'   => 'boolean',
-        'notify_on_mention'    => 'boolean',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'category_preferences' => 'array',
+            'notify_on_comment' => 'boolean',
+            'notify_on_reply' => 'boolean',
+            'notify_on_approval' => 'boolean',
+            'notify_on_mention' => 'boolean',
+        ];
+    }
 
     public function user(): BelongsTo
     {
@@ -38,6 +44,7 @@ class UserFeedPreference extends Model
     public function wantsCategory(string $category): bool
     {
         $prefs = $this->category_preferences ?? [];
+
         // default to true if not explicitly set
         return (bool) ($prefs[$category] ?? true);
     }

@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\MaintenanceRecord;
-use App\Models\Machine;
-use App\Services\AuditService;
 use App\Models\AuditLog;
+use App\Models\Machine;
+use App\Models\MaintenanceRecord;
+use App\Services\AuditService;
 use App\Services\MaintenanceHealthService;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MaintenanceRecordController extends Controller
 {
@@ -23,35 +23,39 @@ class MaintenanceRecordController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'machine_id' => 'nullable|integer|min:1',
+            'status' => 'nullable|string|in:scheduled,in_progress,completed,cancelled',
+            'maintenance_type' => 'nullable|string|in:preventive,predictive,corrective,routine,emergency',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'assigned_to' => 'nullable|integer|min:1',
+        ]);
+
         $query = MaintenanceRecord::with(['machine', 'team', 'assignedTo', 'completedBy'])
             ->where('team_id', $request->user()->current_team_id);
 
-        // Filter by machine
-        if ($request->filled('machine_id')) {
-            $query->where('machine_id', $request->machine_id);
+        if (! empty($validated['machine_id'])) {
+            $query->where('machine_id', $validated['machine_id']);
         }
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
         }
 
-        // Filter by maintenance type
-        if ($request->filled('maintenance_type')) {
-            $query->where('maintenance_type', $request->maintenance_type);
+        if (! empty($validated['maintenance_type'])) {
+            $query->where('maintenance_type', $validated['maintenance_type']);
         }
 
-        // Filter by date range
-        if ($request->filled('start_date')) {
-            $query->where('scheduled_at', '>=', $request->start_date);
+        if (! empty($validated['start_date'])) {
+            $query->where('scheduled_at', '>=', $validated['start_date']);
         }
-        if ($request->filled('end_date')) {
-            $query->where('scheduled_at', '<=', $request->end_date);
+        if (! empty($validated['end_date'])) {
+            $query->where('scheduled_at', '<=', $validated['end_date']);
         }
 
-        // Filter by assigned user
-        if ($request->filled('assigned_to')) {
-            $query->where('assigned_to', $request->assigned_to);
+        if (! empty($validated['assigned_to'])) {
+            $query->where('assigned_to', $validated['assigned_to']);
         }
 
         $records = $query->latest('scheduled_at')->paginate(50);
@@ -170,10 +174,10 @@ class MaintenanceRecordController extends Controller
             "Completed maintenance work order: {$completedRecord->title} (machine #{$completedRecord->machine_id})",
             $completedRecord,
             [
-                'machine_id'    => $completedRecord->machine_id,
-                'labor_hours'   => $validated['labor_hours'],
-                'total_cost'    => $validated['total_cost'],
-                'completed_by'  => $validated['completed_by'],
+                'machine_id' => $completedRecord->machine_id,
+                'labor_hours' => $validated['labor_hours'],
+                'total_cost' => $validated['total_cost'],
+                'completed_by' => $validated['completed_by'],
             ]
         );
 
@@ -238,14 +242,14 @@ class MaintenanceRecordController extends Controller
             ->with(['machine', 'assignedTo', 'completedBy'])
             ->whereBetween('completed_at', [
                 $validated['start_date'],
-                $validated['end_date']
+                $validated['end_date'],
             ])
             ->completed()
             ->get();
 
         if ($request->input('format', 'json') === 'csv') {
             $csv = "Work Order,Machine,Type,Status,Scheduled,Completed,Duration,Labor Cost,Parts Cost,Total Cost\n";
-            
+
             foreach ($records as $record) {
                 $csv .= implode(',', [
                     $record->work_order_number,
@@ -258,7 +262,7 @@ class MaintenanceRecordController extends Controller
                     $record->labor_cost,
                     $record->parts_cost,
                     $record->total_cost,
-                ]) . "\n";
+                ])."\n";
             }
 
             return response()->json([

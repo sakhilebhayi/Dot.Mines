@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,7 +46,6 @@ class FuelTransaction extends Model
      * @method static FuelTransaction findOrFail(mixed $id, array $columns = ['*'])
      * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
      */
-
     protected $fillable = [
         'team_id',
         'monthly_allocation_id',
@@ -68,16 +68,22 @@ class FuelTransaction extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'quantity_liters' => 'decimal:2',
-        'unit_price' => 'decimal:2',
-        'total_cost' => 'decimal:2',
-        'odometer_reading' => 'decimal:2',
-        'machine_hours' => 'decimal:2',
-        'transaction_date' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'quantity_liters' => 'decimal:2',
+            'unit_price' => 'decimal:2',
+            'total_cost' => 'decimal:2',
+            'odometer_reading' => 'decimal:2',
+            'machine_hours' => 'decimal:2',
+            'transaction_date' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -114,16 +120,17 @@ class FuelTransaction extends Model
      */
     public function getCostPerLiterAttribute(): ?float
     {
-        if ($this->quantity_liters == 0 || !$this->total_cost) {
+        if ($this->quantity_liters == 0 || ! $this->total_cost) {
             return null;
         }
+
         return round($this->total_cost / $this->quantity_liters, 2);
     }
 
     /**
      * Scope for specific transaction type
      */
-    public function scopeOfType($query, string $type)
+    public function scopeOfType(Builder $query, string $type): Builder
     {
         return $query->where('transaction_type', $type);
     }
@@ -131,7 +138,7 @@ class FuelTransaction extends Model
     /**
      * Scope for date range
      */
-    public function scopeDateRange($query, $startDate, $endDate)
+    public function scopeDateRange(Builder $query, $startDate, $endDate): Builder
     {
         return $query->whereBetween('transaction_date', [$startDate, $endDate]);
     }
@@ -139,7 +146,7 @@ class FuelTransaction extends Model
     /**
      * Scope for specific fuel type
      */
-    public function scopeFuelType($query, string $type)
+    public function scopeFuelType(Builder $query, string $type): Builder
     {
         return $query->where('fuel_type', $type);
     }

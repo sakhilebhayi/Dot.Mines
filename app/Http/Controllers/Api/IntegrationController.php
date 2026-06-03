@@ -2,31 +2,32 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
-use App\Jobs\SyncIntegrationMachinesJob;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Integration API Controller
- * 
+ *
  * Handles manufacturer API integrations (Volvo, CAT, etc.)
  */
 class IntegrationController extends Controller
 {
-    public function __construct(protected IntegrationService $integrationService)
-    {}
+    public function __construct(protected IntegrationService $integrationService) {}
 
     /**
      * List all integrations for current team
-     * 
+     *
      * GET /api/integrations
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $integrations = Integration::where('team_id', auth()->user()->current_team_id)
+        $integrations = Integration::where('team_id', Auth::user()->current_team_id)
             ->select('id', 'provider', 'name', 'status', 'last_sync_at', 'last_sync_status', 'machines_count', 'last_error')
             ->get();
 
@@ -38,10 +39,10 @@ class IntegrationController extends Controller
 
     /**
      * Get a single integration
-     * 
+     *
      * GET /api/integrations/{id}
      */
-    public function show(Integration $integration)
+    public function show(Integration $integration): JsonResponse
     {
         $this->authorizeTeam($integration);
 
@@ -64,10 +65,10 @@ class IntegrationController extends Controller
 
     /**
      * Create a new integration
-     * 
+     *
      * POST /api/integrations
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'provider' => 'required|string|in:volvo,cat,komatsu,bell,ctrack',
@@ -85,7 +86,7 @@ class IntegrationController extends Controller
         }
 
         // Check if integration for this provider already exists
-        if (Integration::where('team_id', auth()->user()->current_team_id)
+        if (Integration::where('team_id', Auth::user()->current_team_id)
             ->where('provider', $request->provider)
             ->exists()) {
             return response()->json([
@@ -96,7 +97,7 @@ class IntegrationController extends Controller
 
         try {
             $integration = Integration::create([
-                'team_id' => auth()->user()->current_team_id,
+                'team_id' => Auth::user()->current_team_id,
                 'provider' => $request->provider,
                 'name' => $request->name,
                 'credentials' => $request->credentials,
@@ -114,19 +115,21 @@ class IntegrationController extends Controller
                 ],
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
+            report($e);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to create integration: ' . $e->getMessage(),
+                'error' => 'Failed to create integration. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Update an integration
-     * 
+     *
      * PUT /api/integrations/{id}
      */
-    public function update(Request $request, Integration $integration)
+    public function update(Request $request, Integration $integration): JsonResponse
     {
         $this->authorizeTeam($integration);
 
@@ -156,19 +159,21 @@ class IntegrationController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
+            report($e);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to update integration: ' . $e->getMessage(),
+                'error' => 'Failed to update integration. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Delete an integration
-     * 
+     *
      * DELETE /api/integrations/{id}
      */
-    public function destroy(Integration $integration)
+    public function destroy(Integration $integration): JsonResponse
     {
         $this->authorizeTeam($integration);
 
@@ -180,19 +185,21 @@ class IntegrationController extends Controller
                 'message' => 'Integration deleted successfully',
             ]);
         } catch (\Exception $e) {
+            report($e);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to delete integration: ' . $e->getMessage(),
+                'error' => 'Failed to delete integration. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Test connection to manufacturer API
-     * 
+     *
      * POST /api/integrations/{id}/test
      */
-    public function test(Integration $integration)
+    public function test(Integration $integration): JsonResponse
     {
         $this->authorizeTeam($integration);
 
@@ -213,10 +220,10 @@ class IntegrationController extends Controller
 
     /**
      * Trigger manual sync for integration
-     * 
+     *
      * POST /api/integrations/{id}/sync
      */
-    public function sync(Integration $integration)
+    public function sync(Integration $integration): JsonResponse
     {
         $this->authorizeTeam($integration);
 
@@ -228,19 +235,21 @@ class IntegrationController extends Controller
                 'message' => 'Sync job dispatched successfully',
             ]);
         } catch (\Exception $e) {
+            report($e);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to dispatch sync: ' . $e->getMessage(),
+                'error' => 'Failed to dispatch sync. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Get machines synced from this integration
-     * 
+     *
      * GET /api/integrations/{id}/machines
      */
-    public function machines(Integration $integration)
+    public function machines(Integration $integration): JsonResponse
     {
         $this->authorizeTeam($integration);
 
@@ -256,10 +265,10 @@ class IntegrationController extends Controller
 
     /**
      * Get available manufacturers
-     * 
+     *
      * GET /api/integrations/manufacturers
      */
-    public function manufacturers()
+    public function manufacturers(): JsonResponse
     {
         return response()->json([
             'success' => true,
@@ -270,11 +279,10 @@ class IntegrationController extends Controller
     /**
      * Verify team ownership
      */
-    protected function authorizeTeam(Integration $integration)
+    protected function authorizeTeam(Integration $integration): void
     {
-        if ($integration->team_id !== auth()->user()->current_team_id) {
+        if ($integration->team_id !== Auth::user()->current_team_id) {
             abort(403, 'Unauthorized');
         }
     }
 }
-

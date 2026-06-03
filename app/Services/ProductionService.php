@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\ProductionForecast;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
-use App\Models\ProductionForecast;
 use Carbon\Carbon;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
 class ProductionService
@@ -14,7 +13,7 @@ class ProductionService
     /**
      * @return \Illuminate\Pagination\Paginator<ProductionRecord>
      */
-    public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null)
+    public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $startDate = $startDate ?? Carbon::now()->subDays(30);
         $endDate = $endDate ?? Carbon::now();
@@ -67,7 +66,7 @@ class ProductionService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function createProductionRecord(int $teamId, array $data): ProductionRecord
     {
@@ -87,15 +86,16 @@ class ProductionService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function updateProductionRecord(ProductionRecord $record, array $data): ProductionRecord
     {
         $record->update($data);
+
         return $record;
     }
 
-    public function deleteProductionRecord(ProductionRecord $record): bool|null
+    public function deleteProductionRecord(ProductionRecord $record): ?bool
     {
         return $record->delete();
     }
@@ -112,7 +112,7 @@ class ProductionService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function createTarget(int $teamId, array $data): ProductionTarget
     {
@@ -162,6 +162,7 @@ class ProductionService
 
         return $records->groupBy('mine_area_id')->map(function ($areaRecords) {
             $area = $areaRecords->first()?->mineArea;
+
             return [
                 'mine_area_id' => $area?->id,
                 'mine_area_name' => $area?->name ?? 'Unknown',

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -28,12 +29,18 @@ class MinePlanUpload extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'file_size' => 'integer',
-        'effective_date' => 'date',
-        'expiry_date' => 'date',
-        'metadata' => 'array',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'file_size' => 'integer',
+            'effective_date' => 'date',
+            'expiry_date' => 'date',
+            'metadata' => 'array',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -44,7 +51,6 @@ class MinePlanUpload extends Model
      * Build a temporary signed download URL for this mine plan.
      *
      * @param  \DateTimeInterface|int|null  $expires
-     * @return string
      */
     public function signedDownloadUrl($expires = null): string
     {
@@ -72,17 +78,17 @@ class MinePlanUpload extends Model
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam(Builder $query, $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
 
-    public function scopeByType($query, $type)
+    public function scopeByType(Builder $query, $type): Builder
     {
         return $query->where('file_type', $type);
     }
@@ -94,13 +100,14 @@ class MinePlanUpload extends Model
     {
         $bytes = $this->file_size;
         if ($bytes >= 1073741824) {
-            return number_format($bytes / 1073741824, 2) . ' GB';
+            return number_format($bytes / 1073741824, 2).' GB';
         } elseif ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
+            return number_format($bytes / 1048576, 2).' MB';
         } elseif ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
+            return number_format($bytes / 1024, 2).' KB';
         }
-        return $bytes . ' bytes';
+
+        return $bytes.' bytes';
     }
 
     /**
@@ -116,9 +123,16 @@ class MinePlanUpload extends Model
      */
     public function getIsEffectiveAttribute(): bool
     {
-        if ($this->status !== 'active') return false;
-        if ($this->effective_date && $this->effective_date->isFuture()) return false;
-        if ($this->expiry_date && $this->expiry_date->isPast()) return false;
+        if ($this->status !== 'active') {
+            return false;
+        }
+        if ($this->effective_date && $this->effective_date->isFuture()) {
+            return false;
+        }
+        if ($this->expiry_date && $this->expiry_date->isPast()) {
+            return false;
+        }
+
         return true;
     }
 }

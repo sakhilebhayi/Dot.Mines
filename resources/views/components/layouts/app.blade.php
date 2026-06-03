@@ -9,6 +9,29 @@
         <meta name="team-id" content="{{ Auth::user()->current_team_id ?? Auth::user()->team_id }}">
         @endauth
 
+        {{-- Anti-FOUC: apply correct theme class before CSS loads --}}
+        <script>
+            (function () {
+                var mode = localStorage.getItem('theme-mode');
+                var isDark;
+                if (mode === 'dark') {
+                    isDark = true;
+                } else if (mode === 'light') {
+                    isDark = false;
+                } else {
+                    isDark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
+                }
+                var html = document.documentElement;
+                if (isDark) {
+                    html.classList.add('dark');
+                    html.setAttribute('data-theme', 'dark');
+                } else {
+                    html.classList.remove('dark');
+                    html.setAttribute('data-theme', 'light');
+                }
+            }());
+        </script>
+
         <title>@hasSection('title')@yield('title') | {{ config('app.name', 'Mines') }}@else{{ config('app.name', 'Mines') }}@endif</title>
         <meta name="description" content="@yield('description', 'Mines mining operations management platform.')">
         <meta name="robots" content="noindex, nofollow">
@@ -27,7 +50,7 @@
         <!-- Styles -->
         @livewireStyles
     </head>
-    <body class="font-sans antialiased bg-gray-900 text-gray-100">
+    <body class="font-sans antialiased">
         <div class="min-h-screen flex">
             <!-- Sidebar Navigation -->
             @livewire('sidebar')

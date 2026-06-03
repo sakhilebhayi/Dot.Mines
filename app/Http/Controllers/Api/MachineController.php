@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\AuditLog;
 use App\Models\Machine;
 use App\Services\AuditService;
-use App\Models\AuditLog;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Machine API Controller
- * 
+ *
  * Handles all machine-related API endpoints
  * GET, POST, PUT, DELETE operations
  */
@@ -18,11 +20,11 @@ class MachineController extends Controller
 {
     /**
      * List all machines for current team
-     * 
+     *
      * GET /api/machines
      * Query params: page, per_page, sort, filter
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'page' => 'nullable|integer|min:1',
@@ -79,11 +81,13 @@ class MachineController extends Controller
 
     /**
      * Get a single machine by ID
-     * 
+     *
      * GET /api/machines/{id}
      */
-    public function show(Machine $machine)
+    public function show(Machine $machine): JsonResponse
     {
+        $this->authorize('view', $machine);
+
         return response()->json([
             'data' => $machine->load('metrics', 'alerts', 'geofenceEntries', 'integration'),
         ]);
@@ -91,10 +95,10 @@ class MachineController extends Controller
 
     /**
      * Create a new machine
-     * 
+     *
      * POST /api/machines
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('create', Machine::class);
 
@@ -110,7 +114,7 @@ class MachineController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $validated['team_id'] = auth()->user()->current_team_id;
+        $validated['team_id'] = Auth::user()->current_team_id;
         $validated['status'] = 'active';
 
         $machine = Machine::create($validated);
@@ -130,10 +134,10 @@ class MachineController extends Controller
 
     /**
      * Update a machine
-     * 
+     *
      * PUT /api/machines/{id}
      */
-    public function update(Request $request, Machine $machine)
+    public function update(Request $request, Machine $machine): JsonResponse
     {
         $this->authorize('update', $machine);
 
@@ -164,10 +168,10 @@ class MachineController extends Controller
 
     /**
      * Delete a machine
-     * 
+     *
      * DELETE /api/machines/{id}
      */
-    public function destroy(Machine $machine)
+    public function destroy(Machine $machine): JsonResponse
     {
         $this->authorize('delete', $machine);
 
@@ -187,11 +191,13 @@ class MachineController extends Controller
 
     /**
      * Get latest metrics for a machine
-     * 
+     *
      * GET /api/machines/{id}/metrics
      */
-    public function metrics(Request $request, Machine $machine)
+    public function metrics(Request $request, Machine $machine): JsonResponse
     {
+        $this->authorize('view', $machine);
+
         $validated = $request->validate([
             'limit' => 'nullable|integer|min:1|max:1000',
             'hours_back' => 'nullable|integer|min:1|max:720', // up to 30 days
@@ -215,11 +221,13 @@ class MachineController extends Controller
 
     /**
      * Update machine location
-     * 
+     *
      * POST /api/machines/{id}/location
      */
-    public function updateLocation(Request $request, Machine $machine)
+    public function updateLocation(Request $request, Machine $machine): JsonResponse
     {
+        $this->authorize('update', $machine);
+
         $validated = $request->validate([
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
@@ -235,11 +243,13 @@ class MachineController extends Controller
 
     /**
      * Get active alerts for a machine
-     * 
+     *
      * GET /api/machines/{id}/alerts
      */
-    public function alerts(Machine $machine)
+    public function alerts(Machine $machine): JsonResponse
     {
+        $this->authorize('view', $machine);
+
         $alerts = $machine->activeAlerts()
             ->orderBy('priority', 'desc')
             ->get();

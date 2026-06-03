@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Events\SensorReadingRecorded;
-use App\Events\MaintenanceAlertTriggered;
 use App\Events\ComplianceViolationDetected;
+use App\Events\MaintenanceAlertTriggered;
+use App\Events\SensorReadingRecorded;
 use App\Events\SensorStatusChanged;
 use App\Models\IoTSensor;
 use App\Models\Machine;
@@ -50,7 +50,7 @@ class RealTimeAlertService
             'team_id' => $teamId,
             'type' => 'maintenance_alert',
             'title' => "Maintenance Alert: {$machine->name}",
-            'message' => "Predicted maintenance needed on " . $predictedDate->format('M d, Y'),
+            'message' => 'Predicted maintenance needed on '.$predictedDate->format('M d, Y'),
             'alert_level' => $severity,
             'data' => [
                 'machine_id' => $machine->id,
@@ -67,9 +67,9 @@ class RealTimeAlertService
     /**
      * Dispatch compliance violation alert
      *
-     * @param array<string, mixed>|\stdClass|object $violation
+     * @param  array<string, mixed>|\stdClass|object  $violation
      */
-    public function dispatchComplianceAlert($violation, int $teamId): void
+    public function dispatchComplianceAlert(array|object $violation, int $teamId): void
     {
         $severityMap = [
             'critical' => 'critical',
@@ -102,7 +102,7 @@ class RealTimeAlertService
         ]);
 
         // Broadcast via WebSocket only if we have a violation object
-        if (!$isArray) {
+        if (! $isArray) {
             ComplianceViolationDetected::dispatch($violation, $teamId);
         }
     }
@@ -119,7 +119,7 @@ class RealTimeAlertService
             'team_id' => $teamId,
             'type' => 'sensor_status_changed',
             'title' => "Sensor Status Change: {$sensor->name}",
-            'message' => "Status changed from " . ucfirst($oldStatus) . " to " . ucfirst($newStatus),
+            'message' => 'Status changed from '.ucfirst($oldStatus).' to '.ucfirst($newStatus),
             'alert_level' => $alertLevel,
             'data' => [
                 'sensor_id' => $sensor->id,
@@ -171,15 +171,17 @@ class RealTimeAlertService
         if ($notification) {
             $notification->readBy()->attach($userId);
             $notification->update(['is_read' => true, 'read_at' => now()]);
+
             return true;
         }
+
         return false;
     }
 
     /**
      * Batch mark alerts as read
      *
-     * @param array<int> $notificationIds
+     * @param  array<int>  $notificationIds
      */
     public function markMultipleAsRead(array $notificationIds, int $userId): int
     {
@@ -189,6 +191,7 @@ class RealTimeAlertService
             $notification->update(['is_read' => true, 'read_at' => now()]);
             $count++;
         });
+
         return $count;
     }
 

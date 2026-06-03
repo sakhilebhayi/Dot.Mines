@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -38,12 +39,18 @@ class ProductionForecast extends Model
         'forecast_method',
     ];
 
-    protected $casts = [
-        'forecasted_quantity' => 'decimal:2',
-        'confidence_level' => 'decimal:2',
-        'forecast_date' => 'date',
-        'forecast_method' => 'array',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'forecasted_quantity' => 'decimal:2',
+            'confidence_level' => 'decimal:2',
+            'forecast_date' => 'date',
+            'forecast_method' => 'array',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -55,17 +62,17 @@ class ProductionForecast extends Model
         return $this->belongsTo(MineArea::class);
     }
 
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam(Builder $query, $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
-    public function scopeForDate($query, $date)
+    public function scopeForDate(Builder $query, $date): Builder
     {
         return $query->where('forecast_date', $date);
     }
 
-    public function scopeHighConfidence($query, $threshold = 80)
+    public function scopeHighConfidence(Builder $query, $threshold = 80): Builder
     {
         return $query->where('confidence_level', '>=', $threshold);
     }

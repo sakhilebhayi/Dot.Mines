@@ -2,38 +2,59 @@
 
 namespace App\Livewire;
 
-use App\Models\Machine;
 use App\Models\Geofence;
+use App\Models\Machine;
 use App\Models\MapEvent;
 use App\Models\Route;
 use App\Traits\RealtimeUpdates;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class LiveMap extends Component
 {
     use RealtimeUpdates;
 
     public float $centerLat = -28.4793; // South Africa center latitude
+
     public array $activityFeed = [];
+
     public bool $isLoading = true;
+
     public float $centerLng = 24.6727; // South Africa center longitude
+
     public int $zoomLevel = 12;
+
     public string $mapStyle = 'satellite'; // 'osm' or 'satellite'
+
     public bool $showGeofences = true;
+
     public bool $showMachines = true;
+
     public bool $showRoutes = false;
+
     public bool $showTMP = false;
-    public bool $showHeatMap  = false;
-    public bool $showEvents   = true;
+
+    public bool $showHeatMap = false;
+
+    public bool $showEvents = true;
+
     public string $eventTypeFilter = 'all';
+
     public string $selectedStatus = '';
+
     public ?int $selectedMineAreaId = null;
 
     public function mount(): void
     {
         // Try to center on first machine location if available, else default to South Africa
         $team = Auth::user()->currentTeam;
+
+        if ($team === null) {
+            $this->isLoading = false;
+
+            return;
+        }
+
         $firstMachine = Machine::where('team_id', $team->id)
             ->whereNotNull('last_location_latitude')
             ->whereNotNull('last_location_longitude')
@@ -60,6 +81,13 @@ class LiveMap extends Component
     public function loadActivityFeed()
     {
         $team = Auth::user()->currentTeam;
+
+        if ($team === null) {
+            $this->activityFeed = [];
+
+            return;
+        }
+
         $this->activityFeed = \App\Models\ActivityLog::where('team_id', $team->id)
             ->latest('created_at')
             ->take(10)
@@ -75,44 +103,44 @@ class LiveMap extends Component
 
     public function toggleGeofences(): void
     {
-        $this->showGeofences = !$this->showGeofences;
+        $this->showGeofences = ! $this->showGeofences;
         $this->dispatch('map-updated', [
-            'mapStyle'  => $this->mapStyle,
+            'mapStyle' => $this->mapStyle,
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
-            'machines'  => $this->showMachines ? $this->getMachines() : [],
-            'routes'    => $this->showRoutes ? $this->getRoutes() : [],
+            'machines' => $this->showMachines ? $this->getMachines() : [],
+            'routes' => $this->showRoutes ? $this->getRoutes() : [],
         ]);
     }
 
     public function toggleMachines(): void
     {
-        $this->showMachines = !$this->showMachines;
+        $this->showMachines = ! $this->showMachines;
         $this->dispatch('map-updated', [
-            'mapStyle'  => $this->mapStyle,
-            'machines'  => $this->showMachines ? $this->getMachines() : [],
+            'mapStyle' => $this->mapStyle,
+            'machines' => $this->showMachines ? $this->getMachines() : [],
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
-            'routes'    => $this->showRoutes ? $this->getRoutes() : [],
+            'routes' => $this->showRoutes ? $this->getRoutes() : [],
         ]);
     }
 
     public function toggleRoutes(): void
     {
-        $this->showRoutes = !$this->showRoutes;
+        $this->showRoutes = ! $this->showRoutes;
         $this->dispatch('map-updated', [
-            'mapStyle'  => $this->mapStyle,
-            'machines'  => $this->showMachines ? $this->getMachines() : [],
+            'mapStyle' => $this->mapStyle,
+            'machines' => $this->showMachines ? $this->getMachines() : [],
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
-            'routes'    => $this->showRoutes ? $this->getRoutes() : [],
+            'routes' => $this->showRoutes ? $this->getRoutes() : [],
         ]);
     }
 
     public function toggleTMP(): void
     {
-        $this->showTMP = !$this->showTMP;
+        $this->showTMP = ! $this->showTMP;
         $this->dispatch('tmp-layer-toggle', [
-            'show'       => $this->showTMP,
-            'routes'     => $this->getRoutes(),
-            'geofences'  => $this->getGeofencesWithType(),
+            'show' => $this->showTMP,
+            'routes' => $this->getRoutes(),
+            'geofences' => $this->getGeofencesWithType(),
         ]);
     }
 
@@ -120,9 +148,9 @@ class LiveMap extends Component
 
     public function toggleEvents(): void
     {
-        $this->showEvents = !$this->showEvents;
+        $this->showEvents = ! $this->showEvents;
         $this->dispatch('events-layer-toggle', [
-            'show'   => $this->showEvents,
+            'show' => $this->showEvents,
             'events' => $this->showEvents ? $this->getMapEvents() : [],
         ]);
     }
@@ -130,13 +158,13 @@ class LiveMap extends Component
     public function filterEventType(string $type): void
     {
         $allowed = array_merge(['all'], array_keys(MapEvent::TYPE_CONFIG));
-        if (!in_array($type, $allowed, true)) {
+        if (! in_array($type, $allowed, true)) {
             return;
         }
         $this->eventTypeFilter = $type;
         if ($this->showEvents) {
             $this->dispatch('events-layer-toggle', [
-                'show'   => true,
+                'show' => true,
                 'events' => $this->getMapEvents(),
             ]);
         }
@@ -167,21 +195,21 @@ class LiveMap extends Component
                 ?? ['label' => 'Event', 'color' => '#94a3b8', 'emoji' => '📍'];
 
             return [
-                'id'             => $e->id,
-                'event_type'     => $e->event_type,
-                'type_label'     => $cfg['label'],
-                'color'          => $cfg['color'],
-                'emoji'          => $cfg['emoji'],
-                'title'          => $e->title,
-                'notes'          => $e->notes,
-                'latitude'       => $e->latitude,
-                'longitude'      => $e->longitude,
-                'occurred_at'    => $e->occurred_at->toIso8601String(),
+                'id' => $e->id,
+                'event_type' => $e->event_type,
+                'type_label' => $cfg['label'],
+                'color' => $cfg['color'],
+                'emoji' => $cfg['emoji'],
+                'title' => $e->title,
+                'notes' => $e->notes,
+                'latitude' => $e->latitude,
+                'longitude' => $e->longitude,
+                'occurred_at' => $e->occurred_at->toIso8601String(),
                 'occurred_human' => $e->occurred_at->diffForHumans(),
-                'machine_id'     => $e->machine_id,
-                'machine_name'   => $e->machine?->name ?? '—',
-                'mine_area'      => $e->mineArea?->name ?? '—',
-                'metadata'       => $e->metadata ?? [],
+                'machine_id' => $e->machine_id,
+                'machine_name' => $e->machine?->name ?? '—',
+                'mine_area' => $e->mineArea?->name ?? '—',
+                'metadata' => $e->metadata ?? [],
             ];
         })->toArray();
     }
@@ -190,9 +218,9 @@ class LiveMap extends Component
 
     public function toggleHeatMap(): void
     {
-        $this->showHeatMap = !$this->showHeatMap;
+        $this->showHeatMap = ! $this->showHeatMap;
         $this->dispatch('heatmap-toggle', [
-            'show'   => $this->showHeatMap,
+            'show' => $this->showHeatMap,
             'points' => $this->showHeatMap ? $this->getHeatMapPoints() : [],
         ]);
     }
@@ -209,15 +237,15 @@ class LiveMap extends Component
      */
     public function getHeatMapPoints(): array
     {
-        $team   = Auth::user()->currentTeam;
+        $team = Auth::user()->currentTeam;
         $points = [];
 
         // ── Machine positions ──────────────────────────────────────────────
         $statusWeights = [
-            'active'      => 1.0,
-            'idle'        => 0.4,
+            'active' => 1.0,
+            'idle' => 0.4,
             'maintenance' => 0.2,
-            'offline'     => 0.1,
+            'offline' => 0.1,
         ];
 
         Machine::where('team_id', $team->id)
@@ -225,7 +253,7 @@ class LiveMap extends Component
             ->whereNotNull('last_location_longitude')
             ->get(['status', 'last_location_latitude', 'last_location_longitude'])
             ->each(function ($m) use (&$points, $statusWeights): void {
-                $weight   = $statusWeights[$m->status] ?? 0.3;
+                $weight = $statusWeights[$m->status] ?? 0.3;
                 $points[] = [
                     (float) $m->last_location_latitude,
                     (float) $m->last_location_longitude,
@@ -235,13 +263,13 @@ class LiveMap extends Component
 
         // ── Geofence centres ───────────────────────────────────────────────
         $geofenceWeights = [
-            'dump'       => 0.9,
-            'loading'    => 0.85,
-            'pit'        => 0.7,
-            'stockpile'  => 0.6,
-            'facility'   => 0.45,
+            'dump' => 0.9,
+            'loading' => 0.85,
+            'pit' => 0.7,
+            'stockpile' => 0.6,
+            'facility' => 0.45,
             'restricted' => 0.3,
-            'safe'       => 0.2,
+            'safe' => 0.2,
         ];
 
         Geofence::where('team_id', $team->id)
@@ -249,7 +277,7 @@ class LiveMap extends Component
             ->whereNotNull('center_longitude')
             ->get(['type', 'center_latitude', 'center_longitude'])
             ->each(function ($g) use (&$points, $geofenceWeights): void {
-                $weight   = $geofenceWeights[$g->type] ?? 0.4;
+                $weight = $geofenceWeights[$g->type] ?? 0.4;
                 $points[] = [
                     (float) $g->center_latitude,
                     (float) $g->center_longitude,
@@ -264,10 +292,10 @@ class LiveMap extends Component
     {
         $this->mapStyle = $style;
         $this->dispatch('map-updated', [
-            'mapStyle'  => $style,
-            'machines'  => $this->showMachines ? $this->getMachines() : [],
+            'mapStyle' => $style,
+            'machines' => $this->showMachines ? $this->getMachines() : [],
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
-            'routes'    => $this->showRoutes ? $this->getRoutes() : [],
+            'routes' => $this->showRoutes ? $this->getRoutes() : [],
         ]);
     }
 
@@ -293,6 +321,7 @@ class LiveMap extends Component
     public function getMineAreas()
     {
         $team = Auth::user()->currentTeam;
+
         // Return active mine areas with coordinates decoded for client-side use
         return \App\Models\MineArea::forTeam($team->id)
             ->byStatus('active')
@@ -312,10 +341,10 @@ class LiveMap extends Component
     {
         // When user selects a mine area, push an update to the map with filtered machines
         $this->dispatch('map-updated', [
-            'mapStyle'           => $this->mapStyle,
-            'machines'           => $this->getMachines(),
-            'geofences'          => $this->showGeofences ? $this->getGeofences() : [],
-            'routes'             => $this->showRoutes ? $this->getRoutes() : [],
+            'mapStyle' => $this->mapStyle,
+            'machines' => $this->getMachines(),
+            'geofences' => $this->showGeofences ? $this->getGeofences() : [],
+            'routes' => $this->showRoutes ? $this->getRoutes() : [],
             'selectedMineAreaId' => $value,
         ]);
     }
@@ -328,12 +357,12 @@ class LiveMap extends Component
             ->get()
             ->map(function ($geofence) {
                 return [
-                    'id'               => $geofence->id,
-                    'name'             => $geofence->name,
-                    'geofence_type'    => $geofence->geofence_type ?? 'warning',
-                    'center_latitude'  => (float) $geofence->center_latitude,
+                    'id' => $geofence->id,
+                    'name' => $geofence->name,
+                    'geofence_type' => $geofence->geofence_type ?? 'warning',
+                    'center_latitude' => (float) $geofence->center_latitude,
                     'center_longitude' => (float) $geofence->center_longitude,
-                    'coordinates'      => is_string($geofence->coordinates)
+                    'coordinates' => is_string($geofence->coordinates)
                         ? json_decode($geofence->coordinates, true)
                         : $geofence->coordinates ?? [],
                 ];
@@ -351,25 +380,25 @@ class LiveMap extends Component
 
         return Route::where('team_id', $team->id)
             ->where('status', 'active')
-            ->with(['waypoints' => fn($q) => $q->orderBy('sequence_order')])
+            ->with(['waypoints' => fn ($q) => $q->orderBy('sequence_order')])
             ->get()
-            ->map(fn($route) => [
-                'id'              => $route->id,
-                'name'            => $route->name,
-                'start_latitude'  => (float) $route->start_latitude,
+            ->map(fn ($route) => [
+                'id' => $route->id,
+                'name' => $route->name,
+                'start_latitude' => (float) $route->start_latitude,
                 'start_longitude' => (float) $route->start_longitude,
-                'end_latitude'    => (float) $route->end_latitude,
-                'end_longitude'   => (float) $route->end_longitude,
-                'total_distance'  => (float) $route->total_distance,
-                'estimated_time'  => (int) $route->estimated_time,
-                'route_geometry'  => $route->route_geometry,
-                'waypoints'       => $route->waypoints->map(fn($w) => [
-                    'sequence_order'               => $w->sequence_order,
-                    'latitude'                     => (float) $w->latitude,
-                    'longitude'                    => (float) $w->longitude,
-                    'waypoint_type'                => $w->waypoint_type,
-                    'name'                         => $w->name,
-                    'distance_from_previous'       => $w->distance_from_previous,
+                'end_latitude' => (float) $route->end_latitude,
+                'end_longitude' => (float) $route->end_longitude,
+                'total_distance' => (float) $route->total_distance,
+                'estimated_time' => (int) $route->estimated_time,
+                'route_geometry' => $route->route_geometry,
+                'waypoints' => $route->waypoints->map(fn ($w) => [
+                    'sequence_order' => $w->sequence_order,
+                    'latitude' => (float) $w->latitude,
+                    'longitude' => (float) $w->longitude,
+                    'waypoint_type' => $w->waypoint_type,
+                    'name' => $w->name,
+                    'distance_from_previous' => $w->distance_from_previous,
                     'estimated_time_from_previous' => $w->estimated_time_from_previous,
                 ])->toArray(),
             ])
@@ -418,7 +447,7 @@ class LiveMap extends Component
         ];
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         $machines = $this->getMachines();
         $geofences = $this->getGeofences();
@@ -430,20 +459,20 @@ class LiveMap extends Component
             ->toArray();
 
         return view('livewire.live-map', [
-            'machines'        => $machines,
-            'geofences'       => $geofences,
-            'routes'          => $routes,
-            'showRoutes'      => $this->showRoutes,
-            'showTMP'         => $this->showTMP,
-            'showHeatMap'     => $this->showHeatMap,
-            'showEvents'      => $this->showEvents,
+            'machines' => $machines,
+            'geofences' => $geofences,
+            'routes' => $routes,
+            'showRoutes' => $this->showRoutes,
+            'showTMP' => $this->showTMP,
+            'showHeatMap' => $this->showHeatMap,
+            'showEvents' => $this->showEvents,
             'eventTypeFilter' => $this->eventTypeFilter,
-            'mapEvents'       => $this->showEvents ? $this->getMapEvents() : [],
+            'mapEvents' => $this->showEvents ? $this->getMapEvents() : [],
             'eventTypeConfig' => MapEvent::TYPE_CONFIG,
-            'tmpRoutes'       => $this->getRoutes(),
+            'tmpRoutes' => $this->getRoutes(),
             'trafficPlanData' => $this->getTrafficPlanData(),
             'machineStatuses' => $machineStatuses,
-            'mineAreas'       => $this->getMineAreas(),
+            'mineAreas' => $this->getMineAreas(),
         ]);
     }
 }

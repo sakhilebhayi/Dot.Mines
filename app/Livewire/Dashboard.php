@@ -2,22 +2,29 @@
 
 namespace App\Livewire;
 
-use App\Models\Machine;
 use App\Models\Alert;
 use App\Models\Geofence;
+use App\Models\Machine;
 use App\Services\QueryCacheService;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class Dashboard extends Component
 {
     public int $totalMachines = 0;
+
     public int $activeMachines = 0;
+
     public int $activeAlerts = 0;
+
     public int $totalGeofences = 0;
+
     public array $recentAlerts = [];
+
     public array $machineStatus = [];
+
     public array $activityFeed = [];
+
     public bool $isLoading = true;
 
     public function mount(): void
@@ -31,6 +38,7 @@ class Dashboard extends Component
 
         if ($team === null) {
             $this->isLoading = false;
+
             return;
         }
 
@@ -120,7 +128,7 @@ class Dashboard extends Component
         $this->dispatch('alert-updated', message: 'Alert acknowledged successfully');
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         return view('livewire.dashboard');
     }

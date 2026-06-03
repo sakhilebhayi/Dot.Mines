@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * MineArea Model
- * 
+ *
  * Represents a mining area/site within a team
  *
  * @property int $id
@@ -40,7 +42,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class MineArea extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'team_id',
@@ -59,14 +61,20 @@ class MineArea extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'latitude' => 'float',
-        'longitude' => 'float',
-        'center_latitude' => 'float',
-        'center_longitude' => 'float',
-        'area_size_hectares' => 'float',
-        'metadata' => 'array',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'center_latitude' => 'float',
+            'center_longitude' => 'float',
+            'area_size_hectares' => 'float',
+            'metadata' => 'array',
+        ];
+    }
 
     /**
      * Get the team this mine area belongs to
@@ -151,7 +159,7 @@ class MineArea extends Model
     /**
      * Scope to filter by team
      */
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam(Builder $query, $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
@@ -159,7 +167,7 @@ class MineArea extends Model
     /**
      * Scope to filter by status
      */
-    public function scopeByStatus($query, $status)
+    public function scopeByStatus(Builder $query, $status): Builder
     {
         return $query->where('status', $status);
     }

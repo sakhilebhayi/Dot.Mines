@@ -19,9 +19,15 @@ class FeedMention extends Model
         'created_at',
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+        ];
+    }
 
     public function mentionable(): MorphTo
     {

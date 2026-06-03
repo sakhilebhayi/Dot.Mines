@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Waypoint Model
- * 
+ *
  * Represents a point along a route
  * Waypoints are ordered and define the path a machine should follow
  *
@@ -50,15 +50,21 @@ class Waypoint extends Model
         'distance_from_previous',
     ];
 
-    protected $casts = [
-        'sequence_order' => 'integer',
-        'latitude' => 'float',
-        'longitude' => 'float',
-        'estimated_time_from_previous' => 'integer',
-        'distance_from_previous' => 'float',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'sequence_order' => 'integer',
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'estimated_time_from_previous' => 'integer',
+            'distance_from_previous' => 'float',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the route that owns the waypoint.
@@ -73,7 +79,7 @@ class Waypoint extends Model
      */
     public function getIconAttribute(): string
     {
-        return match($this->waypoint_type) {
+        return match ($this->waypoint_type) {
             'fuel_station' => '⛽',
             'loading_point' => '📦',
             'dump_point' => '🚮',
@@ -87,7 +93,7 @@ class Waypoint extends Model
      */
     public function getColorAttribute(): string
     {
-        return match($this->waypoint_type) {
+        return match ($this->waypoint_type) {
             'fuel_station' => 'yellow',
             'loading_point' => 'blue',
             'dump_point' => 'red',

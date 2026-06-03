@@ -15,17 +15,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Always use the `url` accessor instead of `file_url` directly so that both
  * storage backends resolve to a valid, routable URL.
  *
- * @property int         $id
- * @property int         $post_id
- * @property int|null    $uploader_id
- * @property string      $storage_type   'db' | 's3'
- * @property string|null $file_url       populated for legacy S3 records only
- * @property string|null $file_data      raw binary content (DB storage only)
- * @property string      $file_type      server-verified MIME type
- * @property string|null $file_name      sanitised original filename
- * @property int|null    $file_size      bytes
+ * @property int $id
+ * @property int $post_id
+ * @property int|null $uploader_id
+ * @property string $storage_type 'db' | 's3'
+ * @property string|null $file_url populated for legacy S3 records only
+ * @property string|null $file_data raw binary content (DB storage only)
+ * @property string $file_type server-verified MIME type
+ * @property string|null $file_name sanitised original filename
+ * @property int|null $file_size bytes
  * @property \Carbon\Carbon $uploaded_at
- *
  * @property-read string $url            routable URL for serving or downloading this attachment
  * @property-read \App\Models\FeedPost $post
  * @property-read \App\Models\User|null $uploader
@@ -46,10 +45,16 @@ class FeedAttachment extends Model
         'uploaded_at',
     ];
 
-    protected $casts = [
-        'file_size'   => 'integer',
-        'uploaded_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'file_size' => 'integer',
+            'uploaded_at' => 'datetime',
+        ];
+    }
 
     /**
      * Never expose the raw binary blob in JSON serialisation or array output.
@@ -114,14 +119,13 @@ class FeedAttachment extends Model
 
         $units = ['B', 'KB', 'MB', 'GB'];
         $bytes = $this->file_size;
-        $i     = 0;
+        $i = 0;
 
         while ($bytes >= 1024 && $i < count($units) - 1) {
             $bytes /= 1024;
             $i++;
         }
 
-        return round($bytes, 1) . ' ' . $units[$i];
+        return round($bytes, 1).' '.$units[$i];
     }
 }
-

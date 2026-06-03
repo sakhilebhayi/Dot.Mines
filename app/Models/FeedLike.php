@@ -23,9 +23,15 @@ class FeedLike extends Model
         'liked_at',
     ];
 
-    protected $casts = [
-        'liked_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'liked_at' => 'datetime',
+        ];
+    }
 
     public function post(): BelongsTo
     {

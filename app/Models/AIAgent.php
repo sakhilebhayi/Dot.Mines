@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class AIAgent extends Model
 {
     use HasFactory;
+
     protected $table = 'ai_agents';
 
     protected $fillable = [
@@ -48,20 +50,32 @@ class AIAgent extends Model
         'last_trained_at',
     ];
 
-    protected $casts = [
-        'configuration' => 'array',
-        'capabilities' => 'array',
-        'accuracy_score' => 'float',
-        'last_trained_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'configuration' => 'array',
+            'capabilities' => 'array',
+            'accuracy_score' => 'float',
+            'last_trained_at' => 'datetime',
+        ];
+    }
 
     // Agent types
     const TYPE_FLEET_OPTIMIZER = 'fleet_optimizer';
+
     const TYPE_ROUTE_ADVISOR = 'route_advisor';
+
     const TYPE_FUEL_PREDICTOR = 'fuel_predictor';
+
     const TYPE_MAINTENANCE_PREDICTOR = 'maintenance_predictor';
+
     const TYPE_PRODUCTION_OPTIMIZER = 'production_optimizer';
+
     const TYPE_COST_ANALYZER = 'cost_analyzer';
+
     const TYPE_ANOMALY_DETECTOR = 'anomaly_detector';
 
     public function recommendations(): HasMany
@@ -90,9 +104,9 @@ class AIAgent extends Model
         if ($wasSuccessful) {
             $this->increment('successful_predictions');
         }
-        
-        $this->accuracy_score = $this->predictions_made > 0 
-            ? $this->successful_predictions / $this->predictions_made 
+
+        $this->accuracy_score = $this->predictions_made > 0
+            ? $this->successful_predictions / $this->predictions_made
             : 0;
         $this->save();
     }
@@ -102,12 +116,12 @@ class AIAgent extends Model
         return $this->status === 'active';
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
 
-    public function scopeByType($query, string $type)
+    public function scopeByType(Builder $query, string $type): Builder
     {
         return $query->where('type', $type);
     }

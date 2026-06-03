@@ -2,64 +2,77 @@
 
 namespace App\Livewire;
 
-use App\Jobs\GenerateReportJob;
-use App\Models\Report;
 use App\Models\Machine;
+use App\Models\Report;
 use App\Support\Reports\ReportGeneration;
-use Livewire\Component;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 
 class ReportGenerator extends Component
 {
     use BrowserEventBridge;
+
     public int $step = 1;
+
     public string $reportName = '';
+
     public string $reportType = 'production';
+
     public string $description = '';
+
     public string $startDate = '';
+
     public string $endDate = '';
+
     public string $format = 'pdf';
+
     public array $selectedMachines = [];
+
     public array $selectedGeofences = [];
+
     public bool $includeMetrics = true;
+
     public bool $includeAlerts = true;
+
     public bool $includeChart = true;
+
     public bool $autoSchedule = false;
+
     public string $scheduleFrequency = 'weekly';
 
     protected $reportTypes = [
         'production' => [
             'label' => 'Production Summary',
             'description' => 'Total material extracted, production rates, and efficiency metrics',
-            'icon' => '📊'
+            'icon' => '📊',
         ],
         'fleet_utilization' => [
             'label' => 'Fleet Utilization',
             'description' => 'Machine availability, usage hours, and capacity utilization',
-            'icon' => '🚜'
+            'icon' => '🚜',
         ],
         'maintenance_schedule' => [
             'label' => 'Maintenance Schedule',
             'description' => 'Scheduled maintenance, service history, and upcoming services',
-            'icon' => '🔧'
+            'icon' => '🔧',
         ],
         'fuel_consumption' => [
             'label' => 'Fuel Consumption',
             'description' => 'Fuel usage, consumption rates, and cost analysis',
-            'icon' => '⛽'
+            'icon' => '⛽',
         ],
         'material_tracking' => [
             'label' => 'Material Tracking',
             'description' => 'Material movement, geofence entries/exits, and inventory',
-            'icon' => '📦'
+            'icon' => '📦',
         ],
         'downtime_analysis' => [
             'label' => 'Downtime Analysis',
             'description' => 'Machine downtime events, root causes, and impact analysis',
-            'icon' => '⏸️'
+            'icon' => '⏸️',
         ],
     ];
 
@@ -90,12 +103,14 @@ class ReportGenerator extends Component
     public function getMachines()
     {
         $team = Auth::user()->currentTeam;
+
         return Machine::where('team_id', $team->id)->get();
     }
 
     public function getGeofences()
     {
         $team = Auth::user()->currentTeam;
+
         return DB::table('geofences')->where('team_id', $team->id)->get();
     }
 
@@ -127,26 +142,27 @@ class ReportGenerator extends Component
     public function generateReport()
     {
         $this->validate();
-        
+
         $user = Auth::user();
         $team = $user->currentTeam;
-        
-        if (!$team) {
+
+        if (! $team) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'No team selected']);
+
             return;
         }
-        
+
         // Verify selected machines belong to team
-        if (!empty($this->selectedMachines)) {
+        if (! empty($this->selectedMachines)) {
             $validMachineIds = Machine::where('team_id', $team->id)
                 ->whereIn('id', $this->selectedMachines)
                 ->pluck('id')
                 ->toArray();
             $this->selectedMachines = $validMachineIds;
         }
-        
+
         // Verify selected geofences belong to team
-        if (!empty($this->selectedGeofences)) {
+        if (! empty($this->selectedGeofences)) {
             $validGeofenceIds = DB::table('geofences')
                 ->where('team_id', $team->id)
                 ->whereIn('id', $this->selectedGeofences)
@@ -180,7 +196,7 @@ class ReportGenerator extends Component
                 'status' => 'pending',
                 'filters' => $filters,
             ]);
-            
+
             ReportGeneration::dispatch($report);
 
             Log::info('User generated report', [
@@ -193,14 +209,15 @@ class ReportGenerator extends Component
 
             // Use Livewire redirect without the `navigate` flag to avoid relying on Alpine.navigate
             $this->redirect(route('reports'));
+
             return;
-            
+
         } catch (\Exception $e) {
             Log::error('Failed to generate report', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to generate report']);
         }
     }
@@ -219,7 +236,7 @@ class ReportGenerator extends Component
         $this->selectedMachines = [];
     }
 
-    public function selectAllGeofences()
+    public function selectAllGeofences(): void
     {
         $this->selectedGeofences = $this->getGeofences()
             ->pluck('id')
@@ -228,7 +245,7 @@ class ReportGenerator extends Component
             ->all();
     }
 
-    public function clearGeofences()
+    public function clearGeofences(): void
     {
         $this->selectedGeofences = [];
     }
@@ -247,7 +264,7 @@ class ReportGenerator extends Component
         }
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         return view('livewire.report-generator', [
             'reportTypes' => $this->reportTypes,

@@ -7,18 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int         $id
- * @property int         $team_id
- * @property int|null    $machine_id
- * @property int|null    $mine_area_id
- * @property int|null    $reported_by
- * @property int|null    $resolved_by
- * @property string      $category    safety|mechanical|delay|environmental|equipment_damage|near_miss|other
- * @property string      $severity    low|medium|high|critical
- * @property string      $title
- * @property string      $description
+ * @property int $id
+ * @property int $team_id
+ * @property int|null $machine_id
+ * @property int|null $mine_area_id
+ * @property int|null $reported_by
+ * @property int|null $resolved_by
+ * @property string $category safety|mechanical|delay|environmental|equipment_damage|near_miss|other
+ * @property string $severity low|medium|high|critical
+ * @property string $title
+ * @property string $description
  * @property \Carbon\Carbon $occurred_at
- * @property string      $status      open|investigating|resolved|closed
+ * @property string $status open|investigating|resolved|closed
  * @property string|null $resolution_notes
  * @property \Carbon\Carbon|null $resolved_at
  * @property \Carbon\Carbon $created_at
@@ -29,27 +29,27 @@ class Incident extends Model
     use HasFactory;
 
     public const CATEGORIES = [
-        'safety'           => 'Safety',
-        'mechanical'       => 'Mechanical',
-        'delay'            => 'Delay',
-        'environmental'    => 'Environmental',
+        'safety' => 'Safety',
+        'mechanical' => 'Mechanical',
+        'delay' => 'Delay',
+        'environmental' => 'Environmental',
         'equipment_damage' => 'Equipment Damage',
-        'near_miss'        => 'Near Miss',
-        'other'            => 'Other',
+        'near_miss' => 'Near Miss',
+        'other' => 'Other',
     ];
 
     public const SEVERITIES = [
-        'low'      => 'Low',
-        'medium'   => 'Medium',
-        'high'     => 'High',
+        'low' => 'Low',
+        'medium' => 'Medium',
+        'high' => 'High',
         'critical' => 'Critical',
     ];
 
     public const STATUSES = [
-        'open'          => 'Open',
+        'open' => 'Open',
         'investigating' => 'Investigating',
-        'resolved'      => 'Resolved',
-        'closed'        => 'Closed',
+        'resolved' => 'Resolved',
+        'closed' => 'Closed',
     ];
 
     protected $fillable = [
@@ -68,10 +68,16 @@ class Incident extends Model
         'resolved_at',
     ];
 
-    protected $casts = [
-        'occurred_at' => 'datetime',
-        'resolved_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'occurred_at' => 'datetime',
+            'resolved_at' => 'datetime',
+        ];
+    }
 
     // ── Relationships ──────────────────────────────────────────────────────────
 
@@ -116,9 +122,9 @@ class Incident extends Model
     {
         return match ($this->severity) {
             'critical' => 'red',
-            'high'     => 'orange',
-            'medium'   => 'amber',
-            default    => 'slate',
+            'high' => 'orange',
+            'medium' => 'amber',
+            default => 'slate',
         };
     }
 

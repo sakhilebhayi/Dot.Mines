@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Route Model
- * 
+ *
  * Represents a planned route for a machine from point A to point B
  * Includes waypoints, distance, fuel consumption, and time estimates
  *
@@ -68,20 +68,26 @@ class Route extends Model
         'route_geometry',
     ];
 
-    protected $casts = [
-        'start_latitude' => 'float',
-        'start_longitude' => 'float',
-        'end_latitude' => 'float',
-        'end_longitude' => 'float',
-        'total_distance' => 'float',
-        'estimated_time' => 'integer',
-        'estimated_fuel' => 'float',
-        'speed_limit' => 'integer',
-        'metadata' => 'array',
-        'route_geometry' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'start_latitude' => 'float',
+            'start_longitude' => 'float',
+            'end_latitude' => 'float',
+            'end_longitude' => 'float',
+            'total_distance' => 'float',
+            'estimated_time' => 'integer',
+            'estimated_fuel' => 'float',
+            'speed_limit' => 'integer',
+            'metadata' => 'array',
+            'route_geometry' => 'array',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team that owns the route.
@@ -130,7 +136,7 @@ class Route extends Model
 
         // Assume average fuel consumption of 0.4L/km
         $directFuel = $directDistance * 0.4;
-        
+
         return max(0, $directFuel - $this->estimated_fuel);
     }
 
@@ -149,8 +155,8 @@ class Route extends Model
 
         // Assume average speed of 40 km/h
         $directTime = ($directDistance / 40) * 60; // in minutes
-        
-        return max(0, (int)($directTime - $this->estimated_time));
+
+        return max(0, (int) ($directTime - $this->estimated_time));
     }
 
     /**

@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $created_by
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read \App\Models\Team $team
  * @property-read \App\Models\User $creator
  */
@@ -35,9 +34,15 @@ class ShiftTemplate extends Model
         'created_by',
     ];
 
-    protected $casts = [
-        'required_fields' => 'array',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'required_fields' => 'array',
+        ];
+    }
 
     public function team(): BelongsTo
     {

@@ -2,39 +2,38 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @property int    $id
- * @property int    $team_id
- * @property int    $machine_id
+ * @property int $id
+ * @property int $team_id
+ * @property int $machine_id
  * @property int|null $mine_area_id
  * @property string $status
  * @property string|null $origin_name
- * @property float|null  $origin_latitude
- * @property float|null  $origin_longitude
+ * @property float|null $origin_latitude
+ * @property float|null $origin_longitude
  * @property string|null $destination_name
- * @property float|null  $destination_latitude
- * @property float|null  $destination_longitude
- * @property float|null  $current_latitude
- * @property float|null  $current_longitude
- * @property float|null  $current_heading
- * @property float       $current_speed_kmh
- * @property float       $current_tonnage
- * @property float|null  $current_fuel_level_litres
- * @property float|null  $fuel_capacity_litres
- * @property float|null  $total_distance_km
- * @property float|null  $distance_remaining_km
+ * @property float|null $destination_latitude
+ * @property float|null $destination_longitude
+ * @property float|null $current_latitude
+ * @property float|null $current_longitude
+ * @property float|null $current_heading
+ * @property float $current_speed_kmh
+ * @property float $current_tonnage
+ * @property float|null $current_fuel_level_litres
+ * @property float|null $fuel_capacity_litres
+ * @property float|null $total_distance_km
+ * @property float|null $distance_remaining_km
  * @property \Carbon\Carbon|null $started_at
  * @property \Carbon\Carbon|null $estimated_arrival_at
  * @property \Carbon\Carbon|null $completed_at
- * @property array|null  $path_coordinates
- * @property array|null  $metadata
+ * @property array|null $path_coordinates
+ * @property array|null $metadata
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read Machine $machine
  * @property-read MineArea|null $mineArea
  * @property-read float $fuel_percentage
@@ -69,26 +68,32 @@ class HaulDispatch extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'origin_latitude'           => 'float',
-        'origin_longitude'          => 'float',
-        'destination_latitude'      => 'float',
-        'destination_longitude'     => 'float',
-        'current_latitude'          => 'float',
-        'current_longitude'         => 'float',
-        'current_heading'           => 'float',
-        'current_speed_kmh'         => 'float',
-        'current_tonnage'           => 'float',
-        'current_fuel_level_litres' => 'float',
-        'fuel_capacity_litres'      => 'float',
-        'total_distance_km'         => 'float',
-        'distance_remaining_km'     => 'float',
-        'started_at'                => 'datetime',
-        'estimated_arrival_at'      => 'datetime',
-        'completed_at'              => 'datetime',
-        'path_coordinates'          => 'array',
-        'metadata'                  => 'array',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'origin_latitude' => 'float',
+            'origin_longitude' => 'float',
+            'destination_latitude' => 'float',
+            'destination_longitude' => 'float',
+            'current_latitude' => 'float',
+            'current_longitude' => 'float',
+            'current_heading' => 'float',
+            'current_speed_kmh' => 'float',
+            'current_tonnage' => 'float',
+            'current_fuel_level_litres' => 'float',
+            'fuel_capacity_litres' => 'float',
+            'total_distance_km' => 'float',
+            'distance_remaining_km' => 'float',
+            'started_at' => 'datetime',
+            'estimated_arrival_at' => 'datetime',
+            'completed_at' => 'datetime',
+            'path_coordinates' => 'array',
+            'metadata' => 'array',
+        ];
+    }
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
@@ -130,7 +135,7 @@ class HaulDispatch extends Model
      */
     public function getEtaFormattedAttribute(): string
     {
-        if (!$this->estimated_arrival_at) {
+        if (! $this->estimated_arrival_at) {
             return 'N/A';
         }
 
@@ -145,7 +150,7 @@ class HaulDispatch extends Model
         }
 
         $hours = intdiv($diffMins, 60);
-        $mins  = $diffMins % 60;
+        $mins = $diffMins % 60;
 
         return $mins > 0 ? "{$hours}h {$mins}m" : "{$hours}h";
     }

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * GeofenceEntry Model
- * 
+ *
  * Records machine entry and exit times from geofenced areas
  * Tracks tonnage and material movement
  *
@@ -55,17 +55,23 @@ class GeofenceEntry extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'entry_time' => 'datetime',
-        'exit_time' => 'datetime',
-        'entry_latitude' => 'float',
-        'entry_longitude' => 'float',
-        'exit_latitude' => 'float',
-        'exit_longitude' => 'float',
-        'tonnage_loaded' => 'float',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'entry_time' => 'datetime',
+            'exit_time' => 'datetime',
+            'entry_latitude' => 'float',
+            'entry_longitude' => 'float',
+            'exit_latitude' => 'float',
+            'exit_longitude' => 'float',
+            'tonnage_loaded' => 'float',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the machine for this entry
@@ -94,9 +100,9 @@ class GeofenceEntry extends Model
     /**
      * Calculate duration in minutes
      */
-    public function getDurationMinutes()
+    public function getDurationMinutes(): ?int
     {
-        if (!$this->exit_time) {
+        if (! $this->exit_time) {
             return null;
         }
 
@@ -106,10 +112,10 @@ class GeofenceEntry extends Model
     /**
      * Get duration formatted as HH:MM
      */
-    public function getFormattedDuration()
+    public function getFormattedDuration(): string
     {
         $minutes = $this->getDurationMinutes();
-        if (!$minutes) {
+        if (! $minutes) {
             return 'Active';
         }
 

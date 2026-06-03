@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * HasTeamFilters Trait
- * 
+ *
  * Automatically scopes all queries to the current team/tenant
  * Prevents cross-tenant data leakage by applying team_id filter globally
  */
@@ -16,14 +16,16 @@ trait HasTeamFilters
 {
     /**
      * Boot the trait
-     * 
+     *
      * @return void
      */
     protected static function bootHasTeamFilters()
     {
         // Add global scope for team filtering
         static::addGlobalScope('team', function (Builder $builder) {
-            $teamId = Auth::user()?->current_team_id;
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+            $teamId = $user?->current_team_id;
 
             // Allow non-HTTP contexts (jobs/commands) to set the current team
             if (empty($teamId) && app()->has('current_team_id')) {
@@ -32,6 +34,7 @@ trait HasTeamFilters
 
             if ($teamId) {
                 $builder->where('team_id', $teamId);
+
                 return;
             }
 
@@ -47,7 +50,7 @@ trait HasTeamFilters
     /**
      * Get all models without team filtering
      * Use with caution - only for admin operations
-     * 
+     *
      * @return Builder
      */
     public static function withoutTeamFilter()
@@ -57,7 +60,7 @@ trait HasTeamFilters
 
     /**
      * Get the team ID for this model
-     * 
+     *
      * @return int|null
      */
     public function getTeamId()
@@ -67,9 +70,8 @@ trait HasTeamFilters
 
     /**
      * Scope to a specific team
-     * 
-     * @param Builder $query
-     * @param int $teamId
+     *
+     * @param  int  $teamId
      * @return Builder
      */
     public function scopeForTeam(Builder $query, $teamId)

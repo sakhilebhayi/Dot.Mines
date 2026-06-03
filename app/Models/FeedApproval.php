@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $post_id
  * @property int $approver_id
- * @property string $status  pending | approved | rejected
- * @property string|null $reason  Required when rejected
+ * @property string $status pending | approved | rejected
+ * @property string|null $reason Required when rejected
  * @property \Carbon\Carbon|null $reviewed_at
  */
 class FeedApproval extends Model
@@ -31,9 +31,15 @@ class FeedApproval extends Model
         'reviewed_at',
     ];
 
-    protected $casts = [
-        'reviewed_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'reviewed_at' => 'datetime',
+        ];
+    }
 
     public function post(): BelongsTo
     {

@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\FuelTransaction;
 use App\Services\FuelManagementService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FuelTransactionController extends Controller
 {
@@ -18,39 +20,48 @@ class FuelTransactionController extends Controller
     /**
      * Get all fuel transactions for team
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $teamId = $request->user()->currentTeam->id;
-        
+
+        $validated = $request->validate([
+            'transaction_type' => 'nullable|string|in:refill,dispensing,delivery,transfer,adjustment,theft,spillage',
+            'fuel_type' => 'nullable|string|in:diesel,petrol,biodiesel,lpg,cng,electric',
+            'fuel_tank_id' => 'nullable|integer|min:1',
+            'machine_id' => 'nullable|integer|min:1',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'supplier' => 'nullable|string|max:255',
+        ]);
+
         $query = FuelTransaction::where('team_id', $teamId)
             ->with(['fuelTank:id,name', 'machine:id,name', 'user:id,name']);
 
-        // Filters
-        if ($request->has('transaction_type')) {
-            $query->where('transaction_type', $request->transaction_type);
+        if (! empty($validated['transaction_type'])) {
+            $query->where('transaction_type', $validated['transaction_type']);
         }
 
-        if ($request->has('fuel_type')) {
-            $query->where('fuel_type', $request->fuel_type);
+        if (! empty($validated['fuel_type'])) {
+            $query->where('fuel_type', $validated['fuel_type']);
         }
 
-        if ($request->has('fuel_tank_id')) {
-            $query->where('fuel_tank_id', $request->fuel_tank_id);
+        if (! empty($validated['fuel_tank_id'])) {
+            $query->where('fuel_tank_id', $validated['fuel_tank_id']);
         }
 
-        if ($request->has('machine_id')) {
-            $query->where('machine_id', $request->machine_id);
+        if (! empty($validated['machine_id'])) {
+            $query->where('machine_id', $validated['machine_id']);
         }
 
-        if ($request->has('start_date') && $request->has('end_date')) {
+        if (! empty($validated['start_date']) && ! empty($validated['end_date'])) {
             $query->whereBetween('transaction_date', [
-                $request->start_date,
-                $request->end_date
+                $validated['start_date'],
+                $validated['end_date'],
             ]);
         }
 
-        if ($request->has('supplier')) {
-            $query->where('supplier', 'like', "%{$request->supplier}%");
+        if (! empty($validated['supplier'])) {
+            $query->where('supplier', 'like', '%'.$validated['supplier'].'%');
         }
 
         $transactions = $query->latest('transaction_date')->paginate(50);
@@ -61,7 +72,7 @@ class FuelTransactionController extends Controller
     /**
      * Create new fuel transaction
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'fuel_tank_id' => 'nullable|exists:fuel_tanks,id',
@@ -92,13 +103,13 @@ class FuelTransactionController extends Controller
         $data['transaction_date'] = $data['transaction_date'] ?? now();
 
         // Calculate total cost if not provided
-        if (!isset($data['total_cost']) && isset($data['unit_price'])) {
+        if (! isset($data['total_cost']) && isset($data['unit_price'])) {
             $data['total_cost'] = $data['quantity_liters'] * $data['unit_price'];
         }
 
-        // Handle receipt file upload
+        // Handle receipt file upload — store on private disk so files are not web-accessible
         if ($request->hasFile('receipt_file')) {
-            $path = $request->file('receipt_file')->store('fuel-receipts', 'public');
+            $path = $request->file('receipt_file')->store('fuel-receipts', 'local');
             $data['receipt_file_path'] = $path;
         }
 
@@ -111,7 +122,7 @@ class FuelTransactionController extends Controller
     /**
      * Get single fuel transaction
      */
-    public function show(Request $request, FuelTransaction $fuelTransaction)
+    public function show(Request $request, FuelTransaction $fuelTransaction): JsonResponse
     {
         // Authorization check
         if ($fuelTransaction->team_id !== $request->user()->currentTeam->id) {
@@ -126,7 +137,7 @@ class FuelTransactionController extends Controller
     /**
      * Update fuel transaction
      */
-    public function update(Request $request, FuelTransaction $fuelTransaction)
+    public function update(Request $request, FuelTransaction $fuelTransaction): JsonResponse
     {
         // Authorization check
         if ($fuelTransaction->team_id !== $request->user()->currentTeam->id) {
@@ -156,7 +167,7 @@ class FuelTransactionController extends Controller
     /**
      * Delete fuel transaction
      */
-    public function destroy(Request $request, FuelTransaction $fuelTransaction)
+    public function destroy(Request $request, FuelTransaction $fuelTransaction): JsonResponse
     {
         // Authorization check
         if ($fuelTransaction->team_id !== $request->user()->currentTeam->id) {
@@ -165,9 +176,9 @@ class FuelTransactionController extends Controller
 
         // Note: Deleting might affect tank levels - consider reverting the transaction
         // For now, we'll just delete the record
-        
+
         if ($fuelTransaction->receipt_file_path) {
-            Storage::disk('public')->delete($fuelTransaction->receipt_file_path);
+            Storage::disk('local')->delete($fuelTransaction->receipt_file_path);
         }
 
         $fuelTransaction->delete();
@@ -178,11 +189,15 @@ class FuelTransactionController extends Controller
     /**
      * Get transaction statistics
      */
-    public function statistics(Request $request)
+    public function statistics(Request $request): JsonResponse
     {
         $teamId = $request->user()->currentTeam->id;
-        $startDate = $request->input('start_date', now()->subDays(30));
-        $endDate = $request->input('end_date', now());
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+        $startDate = $validated['start_date'] ?? now()->subDays(30)->toDateString();
+        $endDate = $validated['end_date'] ?? now()->toDateString();
 
         $analytics = $this->fuelService->getTeamAnalytics($teamId, $startDate, $endDate);
 
@@ -192,24 +207,24 @@ class FuelTransactionController extends Controller
     /**
      * Export transactions to CSV
      */
-    public function export(Request $request)
+    public function export(Request $request): StreamedResponse
     {
         $teamId = $request->user()->currentTeam->id;
-        
+
         $query = FuelTransaction::where('team_id', $teamId)
             ->with(['fuelTank:id,name', 'machine:id,name', 'user:id,name']);
 
         if ($request->has('start_date') && $request->has('end_date')) {
             $query->whereBetween('transaction_date', [
                 $request->start_date,
-                $request->end_date
+                $request->end_date,
             ]);
         }
 
-        $transactions = $query->latest('transaction_date')->get();
+        $transactions = $query->latest('transaction_date')->limit(5000)->get();
 
-        $filename = 'fuel-transactions-' . now()->format('Y-m-d') . '.csv';
-        
+        $filename = 'fuel-transactions-'.now()->format('Y-m-d').'.csv';
+
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
@@ -217,11 +232,11 @@ class FuelTransactionController extends Controller
 
         $callback = function () use ($transactions) {
             $file = fopen('php://output', 'w');
-            
+
             // Headers
             fputcsv($file, [
-                'Date', 'Type', 'Tank', 'Machine', 'Fuel Type', 'Quantity (L)', 
-                'Unit Price', 'Total Cost', 'Supplier', 'Invoice', 'User', 'Notes'
+                'Date', 'Type', 'Tank', 'Machine', 'Fuel Type', 'Quantity (L)',
+                'Unit Price', 'Total Cost', 'Supplier', 'Invoice', 'User', 'Notes',
             ]);
 
             // Data

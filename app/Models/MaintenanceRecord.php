@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,6 +48,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static MaintenanceRecord|null find(mixed $id, array $columns = ['*'])
  * @method static MaintenanceRecord findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ *
  * @property-read \App\Models\Machine $machine
  * @property-read \App\Models\MaintenanceSchedule|null $maintenanceSchedule
  */
@@ -83,29 +85,35 @@ class MaintenanceRecord extends Model
         'machine_operational',
     ];
 
-    protected $casts = [
-        'scheduled_date' => 'datetime',
-        'started_at' => 'datetime',
-        'completed_at' => 'datetime',
-        'labor_hours' => 'decimal:2',
-        'labor_cost' => 'decimal:2',
-        'parts_cost' => 'decimal:2',
-        'total_cost' => 'decimal:2',
-        'parts_used' => 'json',
-        'fault_codes_cleared' => 'json',
-        'attachments' => 'json',
-        'machine_operational' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'scheduled_date' => 'datetime',
+            'started_at' => 'datetime',
+            'completed_at' => 'datetime',
+            'labor_hours' => 'decimal:2',
+            'labor_cost' => 'decimal:2',
+            'parts_cost' => 'decimal:2',
+            'total_cost' => 'decimal:2',
+            'parts_used' => 'json',
+            'fault_codes_cleared' => 'json',
+            'attachments' => 'json',
+            'machine_operational' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($record) {
-            if (!$record->work_order_number) {
-                $record->work_order_number = 'WO-' . strtoupper(uniqid());
+            if (! $record->work_order_number) {
+                $record->work_order_number = 'WO-'.strtoupper(uniqid());
             }
         });
 
@@ -176,16 +184,17 @@ class MaintenanceRecord extends Model
      */
     public function getDurationAttribute(): ?float
     {
-        if (!$this->started_at || !$this->completed_at) {
+        if (! $this->started_at || ! $this->completed_at) {
             return null;
         }
+
         return $this->started_at->diffInHours($this->completed_at, true);
     }
 
     /**
      * Scope for completed records
      */
-    public function scopeCompleted($query)
+    public function scopeCompleted(Builder $query): Builder
     {
         return $query->where('status', 'completed');
     }
@@ -193,7 +202,7 @@ class MaintenanceRecord extends Model
     /**
      * Scope for in progress
      */
-    public function scopeInProgress($query)
+    public function scopeInProgress(Builder $query): Builder
     {
         return $query->where('status', 'in_progress');
     }

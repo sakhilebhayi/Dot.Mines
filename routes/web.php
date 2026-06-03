@@ -1,12 +1,11 @@
 <?php
 
+use App\Models\Geofence;
+use App\Models\Machine;
+use App\Models\Report;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
-use App\Models\Machine;
-use App\Models\Geofence;
-use App\Models\Report;
-use App\Http\Controllers\ReportController;
 
 // Test session routes are restricted to non-production local environments only.
 if (app()->environment('local') && config('app.debug')) {
@@ -15,7 +14,7 @@ if (app()->environment('local') && config('app.debug')) {
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
 // Sitemap
 Route::get('/sitemap.xml', function () {
@@ -26,16 +25,17 @@ Route::get('/sitemap.xml', function () {
         ['loc' => route('terms.show'), 'changefreq' => 'yearly', 'priority' => '0.3'],
         ['loc' => route('policy.show'), 'changefreq' => 'yearly', 'priority' => '0.3'],
     ];
-    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-        . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+        .'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
     foreach ($urls as $url) {
         $xml .= "  <url>\n";
-        $xml .= "    <loc>" . e($url['loc']) . "</loc>\n";
+        $xml .= '    <loc>'.e($url['loc'])."</loc>\n";
         $xml .= "    <changefreq>{$url['changefreq']}</changefreq>\n";
         $xml .= "    <priority>{$url['priority']}</priority>\n";
         $xml .= "  </url>\n";
     }
     $xml .= '</urlset>';
+
     return Response::make($xml, 200, ['Content-Type' => 'application/xml']);
 })->name('sitemap');
 
@@ -120,6 +120,7 @@ Route::middleware([
             Auth::user()->current_team_id === $report->team_id,
             403
         );
+
         return view('reports.show', ['report' => $report]);
     })->name('reports.show');
 
@@ -160,6 +161,7 @@ Route::middleware([
             Auth::user()->current_team_id === $integration->team_id,
             403
         );
+
         return view('integrations.show', ['integration' => $integration]);
     })->name('integrations.show');
 
@@ -167,8 +169,17 @@ Route::middleware([
     Route::get('/billing', App\Livewire\BillingPortal::class)
         ->name('billing.index');
 
-    Route::get('/billing/success', function () {
-        return redirect()->route('billing.index')->with('success', 'Subscription activated successfully!');
+    Route::get('/billing/success', function (\Illuminate\Http\Request $request) {
+        $reference = $request->query('reference') ?? $request->query('trxref');
+        if ($reference) {
+            // Paystack redirects here after payment. Subscription is processed via webhook;
+            // we just confirm the redirect and show a friendly message.
+            return redirect()->route('billing.index')
+                ->with('success', 'Payment received! Your subscription will be activated shortly.');
+        }
+
+        return redirect()->route('billing.index')
+            ->with('success', 'Subscription activated successfully!');
     })->name('billing.success');
 
     // Feed
@@ -205,10 +216,10 @@ Route::middleware([
     })->name('team.settings');
 });
 
-// Stripe Webhooks (signature verified inside controller; rate limited by IP)
-Route::post('/webhooks/stripe', [App\Http\Controllers\WebhookController::class, 'handleStripe'])
+// Paystack Webhooks (HMAC-SHA512 signature verified inside controller; rate limited by IP)
+Route::post('/webhooks/paystack', [App\Http\Controllers\WebhookController::class, 'handlePaystack'])
     ->middleware('throttle:webhooks')
-    ->name('webhooks.stripe');
+    ->name('webhooks.paystack');
 
 // Public marketing/outer pages
 Route::view('/features', 'pages.features')->name('features');
@@ -228,4 +239,3 @@ Route::prefix('core-features')->group(function () {
 Route::post('/livewire/update', [\Livewire\Mechanisms\HandleRequests\HandleRequests::class, 'handleUpdate'])
     ->middleware('web')
     ->name('default.livewire.update');
-

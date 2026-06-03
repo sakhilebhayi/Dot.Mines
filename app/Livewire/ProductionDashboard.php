@@ -2,44 +2,61 @@
 
 namespace App\Livewire;
 
-use App\Services\ProductionService;
-use App\Models\ProductionRecord;
-use App\Models\ProductionTarget;
-use App\Models\MineArea;
 use App\Models\Machine;
 use App\Models\MachineMetric;
+use App\Models\MineArea;
+use App\Models\ProductionRecord;
+use App\Services\ProductionService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class ProductionDashboard extends Component
 {
     use WithPagination;
 
     public string $viewMode = 'overview'; // overview, records, targets, analytics
+
     public string $search = '';
+
     public string $dateFilter = 'month';
+
     public ?string $startDate = null;
+
     public ?string $endDate = null;
+
     public ?int $mineAreaFilter = null;
+
     public string $statusFilter = '';
+
     public bool $showCreateModal = false;
+
     public bool $showEditModal = false;
+
     public ?int $editingRecordId = null;
 
     // Form fields
     public ?string $record_date = null;
+
     public string $shift = 'day';
+
     public string $quantity_produced = '';
+
     public string $target_quantity = '';
+
     public ?int $mine_area_id = null;
+
     public ?int $machine_id = null;
+
     public string $status = 'completed';
+
     public string $notes = '';
 
     protected $productionService;
+
     protected $team;
+
     public int $teamId = 0;
 
     public function mount()
@@ -68,10 +85,10 @@ class ProductionDashboard extends Component
     public function updatedDateFilter(string $value): void
     {
         match ($value) {
-            'day'   => [$this->startDate, $this->endDate] = [Carbon::today()->format('Y-m-d'), Carbon::today()->format('Y-m-d')],
-            'week'  => [$this->startDate, $this->endDate] = [Carbon::today()->startOfWeek()->format('Y-m-d'), Carbon::today()->endOfWeek()->format('Y-m-d')],
+            'day' => [$this->startDate, $this->endDate] = [Carbon::today()->format('Y-m-d'), Carbon::today()->format('Y-m-d')],
+            'week' => [$this->startDate, $this->endDate] = [Carbon::today()->startOfWeek()->format('Y-m-d'), Carbon::today()->endOfWeek()->format('Y-m-d')],
             'month' => [$this->startDate, $this->endDate] = [Carbon::today()->startOfMonth()->format('Y-m-d'), Carbon::today()->endOfMonth()->format('Y-m-d')],
-            'year'  => [$this->startDate, $this->endDate] = [Carbon::today()->startOfYear()->format('Y-m-d'), Carbon::today()->endOfYear()->format('Y-m-d')],
+            'year' => [$this->startDate, $this->endDate] = [Carbon::today()->startOfYear()->format('Y-m-d'), Carbon::today()->endOfYear()->format('Y-m-d')],
             default => null,
         };
     }
@@ -113,6 +130,7 @@ class ProductionDashboard extends Component
     public function getTrendProperty()
     {
         $days = (int) Carbon::parse($this->startDate)->diffInDays(Carbon::parse($this->endDate)) + 1;
+
         return $this->productionService->getProductionTrend($this->teamId, max($days, 1));
     }
 
@@ -130,7 +148,7 @@ class ProductionDashboard extends Component
     {
         $stats = $this->statistics;
         $activeAreas = MineArea::forTeam($this->teamId)->where('status', 'active')->count();
-        
+
         return [
             'total_loads' => $stats['total_records'] ?? 0,
             'total_cycles' => $stats['completed_records'] ?? 0,
@@ -153,7 +171,7 @@ class ProductionDashboard extends Component
     public function getDailyChartProperty()
     {
         $trend = $this->trend;
-        if (!$trend || $trend->isEmpty()) {
+        if (! $trend || $trend->isEmpty()) {
             return [];
         }
 
@@ -205,19 +223,20 @@ class ProductionDashboard extends Component
 
         $daily = $records->groupBy(fn ($r) => $r->record_date->format('Y-m-d'))
             ->map(fn ($day) => [
-                'date'    => $day->first()->record_date->format('M d'),
+                'date' => $day->first()->record_date->format('M d'),
                 'tonnage' => round((float) $day->sum('quantity_produced'), 2),
-                'target'  => round((float) $day->sum('target_quantity'), 2),
-                'loads'   => $day->count(),
+                'target' => round((float) $day->sum('target_quantity'), 2),
+                'loads' => $day->count(),
             ])->values()->toArray();
 
         $perMachine = $records->groupBy('machine_id')
             ->map(function ($machineRecords) {
                 $machine = $machineRecords->first()->machine;
+
                 return [
                     'machine_name' => $machine?->name ?? 'Unassigned',
-                    'tonnage'      => round((float) $machineRecords->sum('quantity_produced'), 2),
-                    'loads'        => $machineRecords->count(),
+                    'tonnage' => round((float) $machineRecords->sum('quantity_produced'), 2),
+                    'loads' => $machineRecords->count(),
                 ];
             })->values()->toArray();
 
@@ -256,7 +275,7 @@ class ProductionDashboard extends Component
             ->keyBy('id');
 
         return $machineIds->map(function ($machineId) use ($reported, $recorded, $machines) {
-            $machine         = $machines->get($machineId);
+            $machine = $machines->get($machineId);
             $reportedRecords = $reported->get($machineId, collect());
             $recordedMetrics = $recorded->get($machineId, collect());
 
@@ -264,14 +283,14 @@ class ProductionDashboard extends Component
             $recordedTonnage = round((float) $recordedMetrics->sum('load_weight'), 2);
 
             return [
-                'machine_id'       => $machineId,
-                'machine_name'     => $machine?->name ?? "Machine #{$machineId}",
-                'machine_type'     => $machine?->machine_type ?? 'unknown',
-                'reported_loads'   => $reportedRecords->count(),
+                'machine_id' => $machineId,
+                'machine_name' => $machine?->name ?? "Machine #{$machineId}",
+                'machine_type' => $machine?->machine_type ?? 'unknown',
+                'reported_loads' => $reportedRecords->count(),
                 'reported_tonnage' => $reportedTonnage,
-                'recorded_loads'   => $recordedMetrics->count(),
+                'recorded_loads' => $recordedMetrics->count(),
                 'recorded_tonnage' => $recordedTonnage,
-                'variance'         => round($reportedTonnage - $recordedTonnage, 2),
+                'variance' => round($reportedTonnage - $recordedTonnage, 2),
             ];
         })->values()->toArray();
     }
@@ -279,12 +298,12 @@ class ProductionDashboard extends Component
     public function getAreaPerformanceProperty()
     {
         $mineAreas = $this->mineAreas;
-        if (!$mineAreas || $mineAreas->isEmpty()) {
+        if (! $mineAreas || $mineAreas->isEmpty()) {
             return [];
         }
 
         return $mineAreas->map(function ($area) {
-                $records = ProductionRecord::where('team_id', $this->teamId)
+            $records = ProductionRecord::where('team_id', $this->teamId)
                 ->where('mine_area_id', $area->id)
                 ->betweenDates(Carbon::parse($this->startDate), Carbon::parse($this->endDate))
                 ->get();
@@ -391,24 +410,24 @@ class ProductionDashboard extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         return view('livewire.production-dashboard', [
-            'records'             => $this->productionRecords,
-            'summary'             => $this->summary,
-            'statistics'          => $this->statistics,
-            'trend'               => $this->trend,
-            'targets'             => $this->targets,
-            'forecasts'           => $this->forecasts,
-            'mineAreas'           => $this->mineAreas,
-            'machines'            => $this->machines,
-            'dailyChart'          => $this->dailyChart,
-            'materialBreakdown'   => $this->materialBreakdown,
-            'fatigueData'         => $this->fatigueData,
-            'fatigueStats'        => $this->fatigueStats,
-            'areaPerformance'     => $this->areaPerformance,
+            'records' => $this->productionRecords,
+            'summary' => $this->summary,
+            'statistics' => $this->statistics,
+            'trend' => $this->trend,
+            'targets' => $this->targets,
+            'forecasts' => $this->forecasts,
+            'mineAreas' => $this->mineAreas,
+            'machines' => $this->machines,
+            'dailyChart' => $this->dailyChart,
+            'materialBreakdown' => $this->materialBreakdown,
+            'fatigueData' => $this->fatigueData,
+            'fatigueStats' => $this->fatigueStats,
+            'areaPerformance' => $this->areaPerformance,
             'productionChartData' => $this->productionChartData,
-            'loadComparisonData'  => $this->loadComparisonData,
+            'loadComparisonData' => $this->loadComparisonData,
         ]);
     }
 }

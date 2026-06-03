@@ -6,13 +6,12 @@ use App\Events\FeedAcknowledgementUpdated;
 use App\Events\FeedPostCreated;
 use App\Events\FeedPostLiked;
 use App\Events\FeedPostStatusChanged;
+use App\Models\AuditLog;
 use App\Models\FeedAcknowledgement;
 use App\Models\FeedApproval;
-use App\Models\FeedAttachment;
 use App\Models\FeedLike;
 use App\Models\FeedPost;
 use App\Services\AuditService;
-use App\Models\AuditLog;
 use App\Services\MentionParser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -39,16 +38,16 @@ class FeedController extends Controller
         $this->authorize('viewAny', FeedPost::class);
 
         $validated = $request->validate([
-            'per_page'        => 'nullable|integer|min:1|max:100',
-            'mine_area_id'    => 'nullable|integer|exists:mine_areas,id',
-            'category'        => ['nullable', Rule::in(FeedPost::CATEGORIES)],
-            'shift'           => ['nullable', Rule::in(FeedPost::SHIFTS)],
-            'priority'        => ['nullable', Rule::in(FeedPost::PRIORITIES)],
-            'date_from'       => 'nullable|date',
-            'date_to'         => 'nullable|date|after_or_equal:date_from',
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'mine_area_id' => 'nullable|integer|exists:mine_areas,id',
+            'category' => ['nullable', Rule::in(FeedPost::CATEGORIES)],
+            'shift' => ['nullable', Rule::in(FeedPost::SHIFTS)],
+            'priority' => ['nullable', Rule::in(FeedPost::PRIORITIES)],
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
             'approval_status' => ['nullable', Rule::in(FeedApproval::STATUSES)],
             // Reconnection catch-up: return only posts created strictly after this ISO timestamp
-            'since'           => 'nullable|date',
+            'since' => 'nullable|date',
         ]);
 
         $query = FeedPost::with(['author', 'mineArea', 'attachments', 'approval'])
@@ -97,8 +96,8 @@ class FeedController extends Controller
 
         // Pinned critical posts float to the top
         $query->orderByDesc('is_pinned')
-              ->orderByRaw("CASE WHEN priority = 'critical' THEN 0 WHEN priority = 'high' THEN 1 ELSE 2 END")
-              ->orderByDesc('created_at');
+            ->orderByRaw("CASE WHEN priority = 'critical' THEN 0 WHEN priority = 'high' THEN 1 ELSE 2 END")
+            ->orderByDesc('created_at');
 
         $perPage = $validated['per_page'] ?? 25;
         $posts = $query->paginate($perPage);
@@ -106,10 +105,10 @@ class FeedController extends Controller
         return response()->json([
             'data' => $posts->items(),
             'pagination' => [
-                'total'        => $posts->total(),
-                'per_page'     => $posts->perPage(),
+                'total' => $posts->total(),
+                'per_page' => $posts->perPage(),
                 'current_page' => $posts->currentPage(),
-                'last_page'    => $posts->lastPage(),
+                'last_page' => $posts->lastPage(),
             ],
         ]);
     }
@@ -125,11 +124,11 @@ class FeedController extends Controller
 
         $base = $request->validate([
             'mine_area_id' => 'nullable|integer|exists:mine_areas,id',
-            'shift'        => ['nullable', Rule::in(FeedPost::SHIFTS)],
-            'category'     => ['required', Rule::in(FeedPost::CATEGORIES)],
-            'priority'     => ['nullable', Rule::in(FeedPost::PRIORITIES)],
-            'body'         => 'required|string|max:5000',
-            'meta'         => 'nullable|array',
+            'shift' => ['nullable', Rule::in(FeedPost::SHIFTS)],
+            'category' => ['required', Rule::in(FeedPost::CATEGORIES)],
+            'priority' => ['nullable', Rule::in(FeedPost::PRIORITIES)],
+            'body' => 'required|string|max:5000',
+            'meta' => 'nullable|array',
         ]);
 
         // Category-specific meta validation
@@ -140,23 +139,23 @@ class FeedController extends Controller
             $base['priority'] = 'critical';
         }
 
-        $base['team_id']   = Auth::user()->current_team_id;
+        $base['team_id'] = Auth::user()->current_team_id;
         $base['author_id'] = Auth::id();
-        $base['priority']  = $base['priority'] ?? 'normal';
+        $base['priority'] = $base['priority'] ?? 'normal';
 
         $post = FeedPost::create($base);
 
         // Create a pending approval record for posts that require moderation
         FeedApproval::create([
-            'post_id'     => $post->id,
+            'post_id' => $post->id,
             'approver_id' => Auth::id(), // placeholder, updated when reviewed
-            'status'      => 'pending',
+            'status' => 'pending',
         ]);
 
         $post->load('author', 'mineArea', 'attachments', 'approval');
 
         // Parse @mentions after post is created
-        app(MentionParser::class)->parseSave($post, $post->body, Auth::id(), $post->team_id);
+        app(MentionParser::class)->parseSave($post, $post->body, (int) Auth::id(), $post->team_id);
 
         FeedPostCreated::dispatch($post);
 
@@ -212,8 +211,8 @@ class FeedController extends Controller
 
         DB::transaction(function () use ($post, $userId) {
             FeedAcknowledgement::create([
-                'post_id'         => $post->id,
-                'user_id'         => $userId,
+                'post_id' => $post->id,
+                'user_id' => $userId,
                 'acknowledged_at' => now(),
             ]);
             $post->increment('acknowledgement_count');
@@ -223,7 +222,7 @@ class FeedController extends Controller
         FeedAcknowledgementUpdated::dispatch($post);
 
         return response()->json([
-            'message'               => 'Acknowledged.',
+            'message' => 'Acknowledged.',
             'acknowledgement_count' => $post->acknowledgement_count,
         ]);
     }
@@ -268,7 +267,9 @@ class FeedController extends Controller
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         } catch (\RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            report($e);
+
+            return response()->json(['message' => 'Failed to store attachment. Please try again.'], 500);
         }
 
         // Return the attachment without file_data (hidden on model)
@@ -297,8 +298,8 @@ class FeedController extends Controller
                 $post->decrement('like_count');
             } else {
                 FeedLike::create([
-                    'post_id'  => $post->id,
-                    'user_id'  => $userId,
+                    'post_id' => $post->id,
+                    'user_id' => $userId,
                     'liked_at' => now(),
                 ]);
                 $post->increment('like_count');
@@ -309,7 +310,7 @@ class FeedController extends Controller
         FeedPostLiked::dispatch($post);
 
         return response()->json([
-            'liked'      => ! $like,
+            'liked' => ! $like,
             'like_count' => $post->like_count,
         ]);
     }
@@ -336,15 +337,15 @@ class FeedController extends Controller
         $this->authorize('approve', $post);
 
         $approval = $post->approval ?? FeedApproval::create([
-            'post_id'     => $post->id,
+            'post_id' => $post->id,
             'approver_id' => Auth::id(),
-            'status'      => 'pending',
+            'status' => 'pending',
         ]);
 
         $approval->update([
             'approver_id' => Auth::id(),
-            'status'      => 'approved',
-            'reason'      => null,
+            'status' => 'approved',
+            'reason' => null,
             'reviewed_at' => now(),
         ]);
 
@@ -373,15 +374,15 @@ class FeedController extends Controller
         ]);
 
         $approval = $post->approval ?? FeedApproval::create([
-            'post_id'     => $post->id,
+            'post_id' => $post->id,
             'approver_id' => Auth::id(),
-            'status'      => 'pending',
+            'status' => 'pending',
         ]);
 
         $approval->update([
             'approver_id' => Auth::id(),
-            'status'      => 'rejected',
-            'reason'      => $validated['reason'],
+            'status' => 'rejected',
+            'reason' => $validated['reason'],
             'reviewed_at' => now(),
         ]);
 
@@ -404,14 +405,14 @@ class FeedController extends Controller
     {
         match ($category) {
             'breakdown' => $request->validate([
-                'meta.machine_id'        => 'required|string|max:100',
-                'meta.failure_type'      => 'required|string|max:255',
+                'meta.machine_id' => 'required|string|max:100',
+                'meta.failure_type' => 'required|string|max:255',
                 'meta.estimated_downtime' => 'required|string|max:100',
             ]),
             'shift_update' => $request->validate([
-                'meta.section'         => 'required|string|max:100',
-                'meta.shift'           => ['required', Rule::in(FeedPost::SHIFTS)],
-                'meta.loads_per_hour'  => 'required|numeric|min:0',
+                'meta.section' => 'required|string|max:100',
+                'meta.shift' => ['required', Rule::in(FeedPost::SHIFTS)],
+                'meta.loads_per_hour' => 'required|numeric|min:0',
             ]),
             default => null,
         };

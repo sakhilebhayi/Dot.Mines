@@ -2,18 +2,18 @@
 
 namespace App\Livewire;
 
-use App\Models\User;
-use Livewire\Component;
-use App\Traits\BrowserEventBridge;
-use Livewire\Attributes\Validate;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\DigestSubscription;
+use App\Models\User;
 use App\Models\UserFeedPreference;
+use App\Traits\BrowserEventBridge;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class Settings extends Component
 {
     use BrowserEventBridge;
+
     public string $activeTab = 'general';
 
     // General Settings
@@ -34,31 +34,44 @@ class Settings extends Component
 
     // Users & Roles
     public array $teamMembers = [];
+
     public string $inviteEmail = '';
+
     public string $selectedRole = 'operator';
+
     public bool $showInviteForm = false;
 
     // Notification Settings
     public bool $emailAlerts = true;
+
     public bool $emailReports = true;
+
     public bool $inAppAlerts = true;
+
     public string $quietHoursStart = '22:00';
+
     public string $quietHoursEnd = '08:00';
+
     public bool $quietHoursEnabled = false;
 
     // Feed Notification Preferences
     public array $feedCategoryPrefs = [
-        'breakdown'    => true,
+        'breakdown' => true,
         'shift_update' => true,
         'safety_alert' => true,
-        'production'   => true,
-        'general'      => false,
+        'production' => true,
+        'general' => false,
     ];
-    public bool $feedNotifyOnComment  = true;
-    public bool $feedNotifyOnReply    = true;
+
+    public bool $feedNotifyOnComment = true;
+
+    public bool $feedNotifyOnReply = true;
+
     public bool $feedNotifyOnApproval = true;
-    public bool $feedNotifyOnMention  = true;
-    public bool $digestSubscribed     = false;
+
+    public bool $feedNotifyOnMention = true;
+
+    public bool $digestSubscribed = false;
 
     protected $rules = [
         'teamName' => 'required|string|max:255',
@@ -70,7 +83,12 @@ class Settings extends Component
 
     public function mount()
     {
-        $team = auth()->user()->currentTeam;
+        $team = Auth::user()->currentTeam;
+
+        if ($team === null) {
+            return;
+        }
+
         $this->teamName = $team->name;
         $this->teamEmail = $team->email ?? '';
         $this->timezone = $team->timezone ?? 'UTC';
@@ -81,7 +99,7 @@ class Settings extends Component
         $this->loadFeedPreferences();
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         return view('livewire.settings', [
             'roles' => $this->getRoles(),
@@ -102,7 +120,7 @@ class Settings extends Component
     {
         $this->validate();
 
-        $team = auth()->user()->currentTeam;
+        $team = Auth::user()->currentTeam;
         $team->update([
             'name' => $this->teamName,
             'email' => $this->teamEmail,
@@ -118,7 +136,7 @@ class Settings extends Component
 
     public function loadTeamMembers()
     {
-        $team = auth()->user()->currentTeam;
+        $team = Auth::user()->currentTeam;
         $this->teamMembers = $team->users()
             ->with('roles')
             ->get()
@@ -136,8 +154,8 @@ class Settings extends Component
 
     public function toggleInviteForm()
     {
-        $this->showInviteForm = !$this->showInviteForm;
-        if (!$this->showInviteForm) {
+        $this->showInviteForm = ! $this->showInviteForm;
+        if (! $this->showInviteForm) {
             $this->inviteEmail = '';
             $this->selectedRole = 'operator';
         }
@@ -151,18 +169,19 @@ class Settings extends Component
         ]);
 
         try {
-            $team = auth()->user()->currentTeam;
-            
+            $team = Auth::user()->currentTeam;
+
             // Check if user already invited/member
             $existingUser = User::where('email', $this->inviteEmail)->first();
             if ($existingUser && $team->users->contains($existingUser->id)) {
                 $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User is already a team member']);
+
                 return;
             }
 
             // In production, would send actual invitation email
             // For now, create the user if they don't exist
-            if (!$existingUser) {
+            if (! $existingUser) {
                 $existingUser = User::create([
                     'name' => explode('@', $this->inviteEmail)[0],
                     'email' => $this->inviteEmail,
@@ -185,19 +204,20 @@ class Settings extends Component
             $this->selectedRole = 'operator';
             $this->loadTeamMembers();
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to invite user: ' . $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to invite user: '.$e->getMessage()]);
         }
     }
 
     public function removeUser($userId)
     {
         try {
-            $team = auth()->user()->currentTeam;
-            $currentUser = auth()->user();
+            $team = Auth::user()->currentTeam;
+            $currentUser = Auth::user();
 
             // Prevent removing self
             if ($userId === $currentUser->id) {
                 $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Cannot remove yourself from the team']);
+
                 return;
             }
 
@@ -212,19 +232,20 @@ class Settings extends Component
     public function updateUserRole($userId, $newRole)
     {
         try {
-            $team = auth()->user()->currentTeam;
+            $team = Auth::user()->currentTeam;
 
             // Ensure the user is a member of this team
             if (! $team->users()->where('id', $userId)->exists()) {
                 $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User is not a member of this team']);
+
                 return;
             }
 
-            $team = auth()->user()->currentTeam;
+            $team = Auth::user()->currentTeam;
             $user = $team->users()->findOrFail($userId);
             // Remove old roles
             $user->roles()->detach();
-            
+
             // Add new role
             $role = \App\Models\Role::where('name', $newRole)->first();
             if ($role) {
@@ -242,7 +263,7 @@ class Settings extends Component
 
     public function loadFeedPreferences(): void
     {
-        $user   = auth()->user();
+        $user = Auth::user();
         $teamId = $user->current_team_id;
 
         $pref = UserFeedPreference::where('user_id', $user->id)
@@ -250,11 +271,11 @@ class Settings extends Component
             ->first();
 
         if ($pref) {
-            $this->feedCategoryPrefs  = array_merge($this->feedCategoryPrefs, $pref->category_preferences ?? []);
-            $this->feedNotifyOnComment  = $pref->notify_on_comment;
-            $this->feedNotifyOnReply    = $pref->notify_on_reply;
+            $this->feedCategoryPrefs = array_merge($this->feedCategoryPrefs, $pref->category_preferences ?? []);
+            $this->feedNotifyOnComment = $pref->notify_on_comment;
+            $this->feedNotifyOnReply = $pref->notify_on_reply;
             $this->feedNotifyOnApproval = $pref->notify_on_approval;
-            $this->feedNotifyOnMention  = $pref->notify_on_mention;
+            $this->feedNotifyOnMention = $pref->notify_on_mention;
         }
 
         $this->digestSubscribed = DigestSubscription::where('user_id', $user->id)
@@ -265,17 +286,17 @@ class Settings extends Component
 
     public function saveFeedPreferences(): void
     {
-        $user   = auth()->user();
+        $user = Auth::user();
         $teamId = $user->current_team_id;
 
         UserFeedPreference::updateOrCreate(
             ['user_id' => $user->id, 'team_id' => $teamId],
             [
                 'category_preferences' => $this->feedCategoryPrefs,
-                'notify_on_comment'    => $this->feedNotifyOnComment,
-                'notify_on_reply'      => $this->feedNotifyOnReply,
-                'notify_on_approval'   => $this->feedNotifyOnApproval,
-                'notify_on_mention'    => $this->feedNotifyOnMention,
+                'notify_on_comment' => $this->feedNotifyOnComment,
+                'notify_on_reply' => $this->feedNotifyOnReply,
+                'notify_on_approval' => $this->feedNotifyOnApproval,
+                'notify_on_mention' => $this->feedNotifyOnMention,
             ]
         );
 
@@ -293,7 +314,7 @@ class Settings extends Component
     {
         try {
             // Store in user preferences
-            $user = auth()->user();
+            $user = Auth::user();
             $preferences = [
                 'email_alerts' => $this->emailAlerts,
                 'email_reports' => $this->emailReports,
@@ -305,7 +326,7 @@ class Settings extends Component
 
             // Store preferences (would use a proper preferences table in production)
             // For now, just dispatch success
-            
+
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Notification settings saved']);
         } catch (\Exception $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to save settings']);

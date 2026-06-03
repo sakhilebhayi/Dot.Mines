@@ -3,14 +3,15 @@
 namespace App\Services;
 
 use App\Models\MineArea;
-use Illuminate\Pagination\Paginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class MineAreaService
 {
     /**
      * Get all mine areas for a team
      */
-    public function getAllForTeam($teamId, $perPage = 15)
+    public function getAllForTeam(int $teamId, int $perPage = 15): LengthAwarePaginator
     {
         return MineArea::forTeam($teamId)
             ->orderBy('created_at', 'desc')
@@ -20,7 +21,7 @@ class MineAreaService
     /**
      * Get active mine areas for a team
      */
-    public function getActiveForTeam($teamId)
+    public function getActiveForTeam(int $teamId): Collection
     {
         return MineArea::forTeam($teamId)
             ->byStatus('active')
@@ -31,12 +32,12 @@ class MineAreaService
     /**
      * Create a new mine area
      */
-    public function create($teamId, array $data): MineArea
+    public function create(int $teamId, array $data): MineArea
     {
         $data['team_id'] = $teamId;
         // Ensure legacy columns expected by current schema are populated when possible
-        if (!array_key_exists('coordinates', $data)) {
-            if (!empty($data['metadata']['boundary_coordinates'] ?? null)) {
+        if (! array_key_exists('coordinates', $data)) {
+            if (! empty($data['metadata']['boundary_coordinates'] ?? null)) {
                 $data['coordinates'] = json_encode($data['metadata']['boundary_coordinates']);
             } else {
                 $data['coordinates'] = json_encode([]);
@@ -44,7 +45,7 @@ class MineAreaService
         }
 
         // Try to ensure center_latitude/center_longitude are populated to avoid DB NOT NULL issues.
-        if (!array_key_exists('center_latitude', $data) || !array_key_exists('center_longitude', $data)) {
+        if (! array_key_exists('center_latitude', $data) || ! array_key_exists('center_longitude', $data)) {
             $centerLat = null;
             $centerLng = null;
 
@@ -84,10 +85,10 @@ class MineAreaService
             }
 
             // Final fallback to 0.0 to satisfy non-null DB columns
-            if (!array_key_exists('center_latitude', $data)) {
+            if (! array_key_exists('center_latitude', $data)) {
                 $data['center_latitude'] = $centerLat !== null ? $centerLat : 0.0;
             }
-            if (!array_key_exists('center_longitude', $data)) {
+            if (! array_key_exists('center_longitude', $data)) {
                 $data['center_longitude'] = $centerLng !== null ? $centerLng : 0.0;
             }
         }
@@ -101,6 +102,7 @@ class MineAreaService
     public function update(MineArea $mineArea, array $data): MineArea
     {
         $mineArea->update($data);
+
         return $mineArea->fresh();
     }
 
@@ -115,7 +117,7 @@ class MineAreaService
     /**
      * Get mine area by ID with authorization check
      */
-    public function getById($id, $teamId)
+    public function getById(int $id, int $teamId): ?MineArea
     {
         return MineArea::forTeam($teamId)->find($id);
     }
@@ -123,7 +125,7 @@ class MineAreaService
     /**
      * Get statistics for a team's mine areas
      */
-    public function getTeamStatistics($teamId)
+    public function getTeamStatistics(int $teamId): array
     {
         $areas = MineArea::forTeam($teamId)->get();
 

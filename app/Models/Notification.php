@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -46,11 +46,17 @@ class Notification extends Model
         'read_at',
     ];
 
-    protected $casts = [
-        'data' => 'json',
-        'is_read' => 'boolean',
-        'read_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'data' => 'json',
+            'is_read' => 'boolean',
+            'read_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -63,7 +69,7 @@ class Notification extends Model
             ->withPivot('read_at');
     }
 
-    public function markAsRead($userId)
+    public function markAsRead(int $userId): void
     {
         $this->readBy()->attach($userId);
         $this->update(['is_read' => true, 'read_at' => now()]);

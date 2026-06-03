@@ -8,6 +8,30 @@
         <meta name="team-id" content="{{ Auth::user()?->current_team_id ?? Auth::user()?->team_id }}">
         @php($machines = $machines ?? [])
 
+        {{-- Anti-FOUC: apply the correct theme class before ANY CSS or JS is parsed. --}}
+        <script>
+            (function () {
+                var mode = localStorage.getItem('theme-mode');
+                var isDark;
+                if (mode === 'dark') {
+                    isDark = true;
+                } else if (mode === 'light') {
+                    isDark = false;
+                } else {
+                    // 'system' or not set — follow OS preference, defaulting to dark.
+                    isDark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
+                }
+                var html = document.documentElement;
+                if (isDark) {
+                    html.classList.add('dark');
+                    html.setAttribute('data-theme', 'dark');
+                } else {
+                    html.classList.remove('dark');
+                    html.setAttribute('data-theme', 'light');
+                }
+            }());
+        </script>
+
         <title>@hasSection('title')@yield('title') | {{ config('app.name', 'Mines') }}@else{{ config('app.name', 'Mines') }}@endif</title>
         <meta name="description" content="@yield('description', 'Mines mining operations management platform.')">
         <meta name="robots" content="noindex, nofollow">
@@ -60,7 +84,7 @@
             }
         </style>
     </head>
-    <body class="font-sans antialiased bg-gray-900 text-gray-100">
+    <body class="font-sans antialiased">
         <x-banner />
         
         <!-- Notification System -->

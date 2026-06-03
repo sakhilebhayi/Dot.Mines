@@ -14,10 +14,13 @@ use Livewire\Component;
 
 class WhatsAppMigration extends Component
 {
-    public string $goLiveDate    = '';
-    public string $goLiveTime    = '06:00';
+    public string $goLiveDate = '';
+
+    public string $goLiveTime = '06:00';
+
     public string $inviteMessage = '';
-    public bool   $inviteSending = false;
+
+    public bool $inviteSending = false;
 
     public function mount(): void
     {
@@ -43,22 +46,22 @@ class WhatsAppMigration extends Component
         $team->update(['feed_go_live_at' => $dt]);
 
         FeedAuditLog::create([
-            'team_id'      => $team->id,
-            'actor_id'     => Auth::id(),
-            'action'       => 'go_live_set',
+            'team_id' => $team->id,
+            'actor_id' => Auth::id(),
+            'action' => 'go_live_set',
             'subject_type' => Team::class,
-            'subject_id'   => $team->id,
-            'meta'         => ['go_live_at' => $dt->toIso8601String()],
+            'subject_id' => $team->id,
+            'meta' => ['go_live_at' => $dt->toIso8601String()],
         ]);
 
-        $this->dispatch('notify', type: 'success', message: 'Go-live date saved: ' . $dt->format('M d, Y H:i'));
+        $this->dispatch('notify', type: 'success', message: 'Go-live date saved: '.$dt->format('M d, Y H:i'));
     }
 
     public function sendInvites(): void
     {
         $this->validate(['inviteMessage' => 'required|string|max:1000']);
 
-        $team  = Auth::user()->currentTeam;
+        $team = Auth::user()->currentTeam;
         $users = User::whereHas('teams', fn ($q) => $q->where('teams.id', $team->id))
             ->where('id', '!=', Auth::id())
             ->get();
@@ -69,12 +72,12 @@ class WhatsAppMigration extends Component
             try {
                 Mail::to($user->email)->queue(new FeedOnboardingInvite($user, $team, $this->inviteMessage));
                 FeedAuditLog::create([
-                    'team_id'      => $team->id,
-                    'actor_id'     => Auth::id(),
-                    'action'       => 'invite_sent',
+                    'team_id' => $team->id,
+                    'actor_id' => Auth::id(),
+                    'action' => 'invite_sent',
                     'subject_type' => User::class,
-                    'subject_id'   => $user->id,
-                    'meta'         => ['email' => $user->email],
+                    'subject_id' => $user->id,
+                    'meta' => ['email' => $user->email],
                 ]);
                 $sent++;
             } catch (\Exception $e) {
@@ -90,9 +93,9 @@ class WhatsAppMigration extends Component
         $this->dispatch('notify', type: 'success', message: $msg);
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
-        $team  = Auth::user()->currentTeam;
+        $team = Auth::user()->currentTeam;
         $users = User::whereHas('teams', fn ($q) => $q->where('teams.id', $team->id))
             ->select('id', 'name', 'email', 'last_login_at')
             ->orderByDesc('last_login_at')
@@ -104,8 +107,8 @@ class WhatsAppMigration extends Component
             ->unique();
 
         return view('livewire.whatsapp-migration', [
-            'team'        => $team,
-            'users'       => $users,
+            'team' => $team,
+            'users' => $users,
             'invitesSent' => $invitesSent,
         ])->layout('layouts.app');
     }

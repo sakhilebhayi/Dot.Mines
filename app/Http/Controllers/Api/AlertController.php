@@ -3,30 +3,32 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Alert;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Alert API Controller
- * 
+ *
  * Handles alert management and actions
  */
 class AlertController extends Controller
 {
     /**
      * List all alerts for current team
-     * 
+     *
      * GET /api/alerts
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'page' => 'nullable|integer|min:1',
             'per_page' => 'nullable|integer|min:1|max:100',
             'status' => 'nullable|string|in:active,acknowledged,resolved',
             'priority' => 'nullable|string|in:critical,high,medium,low',
-            'type' => 'nullable|string',
-            'machine_id' => 'nullable|integer',
+            'type' => 'nullable|string|max:100|alpha_dash',
+            'machine_id' => 'nullable|integer|min:1',
         ]);
 
         $query = Alert::query();
@@ -65,11 +67,13 @@ class AlertController extends Controller
 
     /**
      * Get a single alert
-     * 
+     *
      * GET /api/alerts/{id}
      */
-    public function show(Alert $alert)
+    public function show(Alert $alert): JsonResponse
     {
+        $this->authorize('view', $alert);
+
         return response()->json([
             'data' => $alert->load('machine', 'acknowledgedBy', 'resolvedBy'),
         ]);
@@ -77,10 +81,10 @@ class AlertController extends Controller
 
     /**
      * Create a new alert (usually triggered by system)
-     * 
+     *
      * POST /api/alerts
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('manage', Alert::class);
 
@@ -93,7 +97,7 @@ class AlertController extends Controller
             'metadata' => 'nullable|json',
         ]);
 
-        $validated['team_id'] = auth()->user()->current_team_id;
+        $validated['team_id'] = Auth::user()->current_team_id;
         $validated['status'] = 'active';
 
         $alert = Alert::create($validated);
@@ -106,14 +110,14 @@ class AlertController extends Controller
 
     /**
      * Acknowledge an alert
-     * 
+     *
      * POST /api/alerts/{id}/acknowledge
      */
-    public function acknowledge(Alert $alert)
+    public function acknowledge(Alert $alert): JsonResponse
     {
         $this->authorize('acknowledge', $alert);
-        
-        $alert->acknowledge(auth()->id());
+
+        $alert->acknowledge(Auth::id());
 
         return response()->json([
             'data' => $alert,
@@ -123,14 +127,14 @@ class AlertController extends Controller
 
     /**
      * Resolve an alert
-     * 
+     *
      * POST /api/alerts/{id}/resolve
      */
-    public function resolve(Alert $alert)
+    public function resolve(Alert $alert): JsonResponse
     {
         $this->authorize('resolve', $alert);
-        
-        $alert->resolve(auth()->id());
+
+        $alert->resolve(Auth::id());
 
         return response()->json([
             'data' => $alert,
@@ -140,10 +144,10 @@ class AlertController extends Controller
 
     /**
      * Get active alerts count
-     * 
+     *
      * GET /api/alerts/stats/active
      */
-    public function activeCount()
+    public function activeCount(): JsonResponse
     {
         $counts = [
             'critical' => Alert::where('status', 'active')
@@ -169,15 +173,26 @@ class AlertController extends Controller
 
     /**
      * Get alerts for machine
-     * 
+     *
      * GET /api/alerts/machine/{machineId}
      */
-    public function machineAlerts(Request $request, $machineId)
+    public function machineAlerts(Request $request, int $machineId): JsonResponse
     {
+        $validated = $request->validate([
+            'machineId' => 'integer|min:1',
+            'status' => 'nullable|string|in:active,acknowledged,resolved',
+        ]);
+
+        $machineId = (int) $machineId;
+
+        // Verify the machine exists within the current team (global scope enforces team isolation)
+        $machine = \App\Models\Machine::findOrFail($machineId);
+        $this->authorize('view', $machine);
+
         $query = Alert::where('machine_id', $machineId);
 
-        if ($request->input('status')) {
-            $query->where('status', $request->input('status'));
+        if ($request->filled('status')) {
+            $query->where('status', $validated['status']);
         }
 
         $alerts = $query->orderBy('triggered_at', 'desc')->limit(50)->get();

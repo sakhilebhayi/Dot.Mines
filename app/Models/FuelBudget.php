@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,16 +50,22 @@ class FuelBudget extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'budgeted_amount' => 'decimal:2',
-        'budgeted_liters' => 'decimal:2',
-        'actual_spent' => 'decimal:2',
-        'actual_liters' => 'decimal:2',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'budgeted_amount' => 'decimal:2',
+            'budgeted_liters' => 'decimal:2',
+            'actual_spent' => 'decimal:2',
+            'actual_liters' => 'decimal:2',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -73,6 +80,7 @@ class FuelBudget extends Model
         if ($this->budgeted_amount == 0) {
             return 0;
         }
+
         return round(($this->actual_spent / $this->budgeted_amount) * 100, 2);
     }
 
@@ -89,9 +97,10 @@ class FuelBudget extends Model
      */
     public function getVolumeUtilizationAttribute(): ?float
     {
-        if (!$this->budgeted_liters || $this->budgeted_liters == 0) {
+        if (! $this->budgeted_liters || $this->budgeted_liters == 0) {
             return null;
         }
+
         return round(($this->actual_liters / $this->budgeted_liters) * 100, 2);
     }
 
@@ -114,7 +123,7 @@ class FuelBudget extends Model
     /**
      * Scope for active budgets
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
@@ -122,7 +131,7 @@ class FuelBudget extends Model
     /**
      * Scope for exceeded budgets
      */
-    public function scopeExceeded($query)
+    public function scopeExceeded(Builder $query): Builder
     {
         return $query->whereRaw('actual_spent > budgeted_amount');
     }
@@ -130,9 +139,10 @@ class FuelBudget extends Model
     /**
      * Scope for current period
      */
-    public function scopeCurrent($query)
+    public function scopeCurrent(Builder $query): Builder
     {
         $now = now();
+
         return $query->where('start_date', '<=', $now)
             ->where('end_date', '>=', $now);
     }

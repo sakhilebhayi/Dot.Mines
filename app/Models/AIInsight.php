@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 class AIInsight extends Model
 {
     use HasFactory, HasTeamFilters;
-    
+
     protected $table = 'ai_insights';
+
     protected $fillable = [
         'team_id',
         'insight_type',
@@ -25,32 +27,38 @@ class AIInsight extends Model
         'valid_until',
     ];
 
-    protected $casts = [
-        'data' => 'array',
-        'visualization_data' => 'array',
-        'is_read' => 'boolean',
-        'valid_until' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'data' => 'array',
+            'visualization_data' => 'array',
+            'is_read' => 'boolean',
+            'valid_until' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    public function scopeUnread($query)
+    public function scopeUnread(Builder $query): Builder
     {
         return $query->where('is_read', false);
     }
 
-    public function scopeValid($query)
+    public function scopeValid(Builder $query): Builder
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $q->whereNull('valid_until')
-              ->orWhere('valid_until', '>', now());
+                ->orWhere('valid_until', '>', now());
         });
     }
 
-    public function scopeBySeverity($query, string $severity)
+    public function scopeBySeverity(Builder $query, string $severity): Builder
     {
         return $query->where('severity', $severity);
     }

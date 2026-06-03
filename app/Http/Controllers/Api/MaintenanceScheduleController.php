@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\MaintenanceSchedule;
 use App\Models\Machine;
+use App\Models\MaintenanceSchedule;
 use App\Services\MaintenanceHealthService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MaintenanceScheduleController extends Controller
 {
@@ -20,30 +20,34 @@ class MaintenanceScheduleController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'machine_id' => 'nullable|integer|min:1',
+            'status' => 'nullable|string|in:active,due,overdue,completed,cancelled',
+            'schedule_type' => 'nullable|string|in:hours,kilometers,calendar,condition',
+            'maintenance_type' => 'nullable|string|in:preventive,predictive,corrective,routine,emergency',
+            'due_only' => 'nullable|boolean',
+            'overdue_only' => 'nullable|boolean',
+        ]);
+
         $query = MaintenanceSchedule::with(['machine', 'team'])
             ->where('team_id', $request->user()->current_team_id);
 
-        // Filter by machine
-        if ($request->filled('machine_id')) {
-            $query->where('machine_id', $request->machine_id);
+        if (! empty($validated['machine_id'])) {
+            $query->where('machine_id', $validated['machine_id']);
         }
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
         }
 
-        // Filter by schedule type
-        if ($request->filled('schedule_type')) {
-            $query->where('schedule_type', $request->schedule_type);
+        if (! empty($validated['schedule_type'])) {
+            $query->where('schedule_type', $validated['schedule_type']);
         }
 
-        // Filter by maintenance type
-        if ($request->filled('maintenance_type')) {
-            $query->where('maintenance_type', $request->maintenance_type);
+        if (! empty($validated['maintenance_type'])) {
+            $query->where('maintenance_type', $validated['maintenance_type']);
         }
 
-        // Filter due/overdue
         if ($request->boolean('due_only')) {
             $query->due();
         }

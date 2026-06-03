@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -42,10 +43,16 @@ class MachineAreaAssignment extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'assigned_at' => 'datetime',
-        'unassigned_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'assigned_at' => 'datetime',
+            'unassigned_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -67,12 +74,12 @@ class MachineAreaAssignment extends Model
         return $this->belongsTo(User::class, 'assigned_by');
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->whereNull('unassigned_at');
     }
 
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam(Builder $query, $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }

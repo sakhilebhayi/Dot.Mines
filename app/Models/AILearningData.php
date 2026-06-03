@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 class AILearningData extends Model
 {
     use HasFactory, HasTeamFilters;
-    
+
     protected $table = 'ai_learning_data';
+
     protected $fillable = [
         'ai_agent_id',
         'team_id',
@@ -25,13 +26,19 @@ class AILearningData extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'input_data' => 'array',
-        'predicted_output' => 'array',
-        'actual_output' => 'array',
-        'accuracy' => 'float',
-        'was_accurate' => 'boolean',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'input_data' => 'array',
+            'predicted_output' => 'array',
+            'actual_output' => 'array',
+            'accuracy' => 'float',
+            'was_accurate' => 'boolean',
+        ];
+    }
 
     public function aiAgent(): BelongsTo
     {

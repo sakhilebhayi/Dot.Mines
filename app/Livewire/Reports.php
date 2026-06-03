@@ -2,21 +2,21 @@
 
 namespace App\Livewire;
 
-use App\Models\Report;
-use App\Models\MineArea;
+use App\Models\FeedPost;
 use App\Models\Geofence;
 use App\Models\Machine;
-use App\Models\FeedPost;
+use App\Models\MineArea;
+use App\Models\Report;
 use App\Models\User;
 use App\Support\Reports\ReportGeneration;
-use Livewire\Component;
 use App\Traits\BrowserEventBridge;
-use Livewire\WithPagination;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class Reports extends Component
 {
@@ -25,15 +25,25 @@ class Reports extends Component
 
     // ── Generated Reports tab ──────────────────────────────────────────────────
     public string $search = '';
+
     public string $sortBy = 'created_at';
+
     public string $sortDirection = 'desc';
+
     public string $selectedType = 'all';
+
     public string $selectedStatus = 'all';
+
     public string $selectedMineAreaId = '';
+
     public string $selectedGeofenceId = '';
+
     public string $selectedMachineId = '';
+
     public ?\Illuminate\Support\Collection $machinesList = null;
+
     public bool $showDeleteConfirm = false;
+
     public ?int $deleteReportId = null;
 
     // ── Tab navigation ─────────────────────────────────────────────────────────
@@ -41,25 +51,36 @@ class Reports extends Component
 
     // ── 3.1 Shift Reports ──────────────────────────────────────────────────────
     public string $shiftReportShift = '';
+
     public string $shiftReportDate = '';
 
     // ── 3.2 Breakdown Analytics ────────────────────────────────────────────────
     public string $breakdownDateFrom = '';
+
     public string $breakdownDateTo = '';
 
     // ── 3.3 Production Analytics ───────────────────────────────────────────────
     public string $productionShift = '';
+
     public string $productionDateFrom = '';
+
     public string $productionDateTo = '';
+
     public string $productionMineAreaId = '';
 
     // ── 3.4 Historical Log ─────────────────────────────────────────────────────
     public string $historySearch = '';
+
     public string $historyCategory = '';
+
     public string $historyDateFrom = '';
+
     public string $historyDateTo = '';
+
     public string $historyAuthorId = '';
+
     public string $historyShift = '';
+
     public string $historyApproval = '';
 
     protected $reportTypes = [
@@ -83,8 +104,15 @@ class Reports extends Component
     }
 
     // ── Pagination reset on filter change ──────────────────────────────────────
-    public function updatingSearch(): void    { $this->resetPage(); }
-    public function updatingHistorySearch(): void { $this->resetPage('history_page'); }
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingHistorySearch(): void
+    {
+        $this->resetPage('history_page');
+    }
 
     // ── Generated Reports ──────────────────────────────────────────────────────
 
@@ -92,7 +120,7 @@ class Reports extends Component
     {
         $team = Auth::user()->currentTeam;
 
-        if (!$team) {
+        if (! $team) {
             return collect();
         }
 
@@ -101,8 +129,8 @@ class Reports extends Component
         return Report::where('team_id', $team->id)
             ->when($searchTerm, function ($query) use ($searchTerm) {
                 $query->where(function ($searchQuery) use ($searchTerm) {
-                    $searchQuery->where('title', 'like', '%' . $searchTerm . '%')
-                        ->orWhere('filters->description', 'like', '%' . $searchTerm . '%');
+                    $searchQuery->where('title', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('filters->description', 'like', '%'.$searchTerm.'%');
                 });
             })
             ->when($this->selectedMineAreaId, function ($query) {
@@ -143,6 +171,10 @@ class Reports extends Component
 
     public function setSortBy($column)
     {
+        $allowed = ['title', 'created_at', 'type'];
+        if (! in_array($column, $allowed, true)) {
+            return;
+        }
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -153,17 +185,19 @@ class Reports extends Component
 
     public function deleteReport($reportId)
     {
-        if (!is_numeric($reportId)) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Invalid report ID']);
+        if (! is_numeric($reportId)) {
+            $this->dispatch('notify', type: 'error', message: 'Invalid report ID');
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $report = Report::where('team_id', $team->id)->find($reportId);
 
-        if (!$report) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
+        if (! $report) {
+            $this->dispatch('notify', type: 'error', message: 'Report not found or access denied');
             $this->showDeleteConfirm = false;
+
             return;
         }
 
@@ -183,7 +217,7 @@ class Reports extends Component
                 'report_type' => $report->type,
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Report deleted successfully']);
+            $this->dispatch('notify', type: 'success', message: 'Report deleted successfully');
         } catch (\Exception $e) {
             Log::error('Failed to delete report', [
                 'user_id' => Auth::id(),
@@ -191,7 +225,7 @@ class Reports extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to delete report']);
+            $this->dispatch('notify', type: 'error', message: 'Failed to delete report');
         }
 
         $this->showDeleteConfirm = false;
@@ -212,25 +246,28 @@ class Reports extends Component
 
     public function downloadReport($reportId)
     {
-        if (!is_numeric($reportId)) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Invalid report ID']);
+        if (! is_numeric($reportId)) {
+            $this->dispatch('notify', type: 'error', message: 'Invalid report ID');
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $report = Report::where('team_id', $team->id)->find($reportId);
 
-        if (!$report) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
+        if (! $report) {
+            $this->dispatch('notify', type: 'error', message: 'Report not found or access denied');
+
             return;
         }
 
         if ($report->status !== 'completed') {
-            $this->dispatchBrowserEvent('notify', ['type' => 'warning', 'message' => 'Report is not ready for download']);
+            $this->dispatch('notify', type: 'warning', message: 'Report is not ready for download');
+
             return;
         }
 
-        if ($report->file_path && !str_contains($report->file_path, '..')) {
+        if ($report->file_path && ! str_contains($report->file_path, '..')) {
             /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
             $disk = Storage::disk(config('reports.disk', 'local'));
 
@@ -240,25 +277,22 @@ class Reports extends Component
                     'report_id' => $reportId,
                 ]);
 
-                return $disk->download($report->file_path, $report->title . '.' . $report->format);
+                return $disk->download($report->file_path, $report->title.'.'.$report->format);
             }
         }
 
-        $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Report file not found']);
+        $this->dispatch('notify', type: 'error', message: 'Report file not found');
     }
 
-    public function retryReport($reportId)
+    public function retryReport(int $reportId): void
     {
-        if (!is_numeric($reportId)) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Invalid report ID']);
-            return;
-        }
-
         $team = Auth::user()->currentTeam;
+        /** @var \App\Models\Report|null $report */
         $report = Report::where('team_id', $team->id)->find($reportId);
 
-        if (!$report) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
+        if (! $report) {
+            $this->dispatch('notify', type: 'error', message: 'Report not found or access denied');
+
             return;
         }
 
@@ -269,16 +303,16 @@ class Reports extends Component
             'generated_at' => null,
         ]);
 
-        ReportGeneration::dispatch($report->fresh());
+        ReportGeneration::dispatch($report);
 
-        $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Report generation restarted']);
+        $this->dispatch('notify', type: 'success', message: 'Report generation restarted');
     }
 
     public function hasInFlightReports(): bool
     {
         $team = Auth::user()->currentTeam;
 
-        if (!$team) {
+        if (! $team) {
             return false;
         }
 
@@ -291,7 +325,7 @@ class Reports extends Component
 
     public function getShiftReportData(): array
     {
-        if (!$this->shiftReportShift || !$this->shiftReportDate) {
+        if (! $this->shiftReportShift || ! $this->shiftReportDate) {
             return [];
         }
 
@@ -312,12 +346,12 @@ class Reports extends Component
         }
 
         $unresolvedBreakdowns = $posts->where('category', 'breakdown')->filter(
-            fn($p) => !$p->approval || $p->approval->status !== 'approved'
+            fn ($p) => ! $p->approval || $p->approval->status !== 'approved'
         )->count();
 
         $topPosts = $posts->sortByDesc(
-            fn($p) => $p->like_count + $p->comment_count
-        )->take(5)->values()->map(fn($p) => [
+            fn ($p) => $p->like_count + $p->comment_count
+        )->take(5)->values()->map(fn ($p) => [
             'id' => $p->id,
             'body' => Str::limit($p->body, 80),
             'category' => $p->category,
@@ -326,28 +360,28 @@ class Reports extends Component
             'acks' => $p->acknowledgement_count,
         ])->toArray();
 
-        $approvalItems = $posts->filter(fn($p) => $p->approval);
+        $approvalItems = $posts->filter(fn ($p) => $p->approval);
         $approvalStats = [
-            'approved' => $approvalItems->filter(fn($p) => $p->approval->status === 'approved')->count(),
-            'rejected' => $approvalItems->filter(fn($p) => $p->approval->status === 'rejected')->count(),
-            'pending'  => $approvalItems->filter(fn($p) => $p->approval->status === 'pending')->count(),
+            'approved' => $approvalItems->filter(fn ($p) => $p->approval->status === 'approved')->count(),
+            'rejected' => $approvalItems->filter(fn ($p) => $p->approval->status === 'rejected')->count(),
+            'pending' => $approvalItems->filter(fn ($p) => $p->approval->status === 'pending')->count(),
         ];
 
         return [
-            'total'                => $posts->count(),
-            'by_category'          => $categoryData,
-            'total_likes'          => $posts->sum('like_count'),
-            'total_comments'       => $posts->sum('comment_count'),
-            'total_acks'           => $posts->sum('acknowledgement_count'),
-            'unresolved_breakdowns'=> $unresolvedBreakdowns,
-            'top_posts'            => $topPosts,
-            'approval_stats'       => $approvalStats,
+            'total' => $posts->count(),
+            'by_category' => $categoryData,
+            'total_likes' => $posts->sum('like_count'),
+            'total_comments' => $posts->sum('comment_count'),
+            'total_acks' => $posts->sum('acknowledgement_count'),
+            'unresolved_breakdowns' => $unresolvedBreakdowns,
+            'top_posts' => $topPosts,
+            'approval_stats' => $approvalStats,
         ];
     }
 
     public function exportShiftReportCsv()
     {
-        if (!$this->shiftReportShift || !$this->shiftReportDate) {
+        if (! $this->shiftReportShift || ! $this->shiftReportDate) {
             return;
         }
 
@@ -357,7 +391,7 @@ class Reports extends Component
         }
 
         $shift = $this->shiftReportShift;
-        $date  = $this->shiftReportDate;
+        $date = $this->shiftReportDate;
 
         return response()->streamDownload(function () use ($data, $shift, $date) {
             $handle = fopen('php://output', 'w');
@@ -409,43 +443,43 @@ class Reports extends Component
     {
         $posts = FeedPost::where('category', 'breakdown')
             ->with(['mineArea:id,name', 'approval'])
-            ->when($this->breakdownDateFrom, fn($q) => $q->whereDate('created_at', '>=', $this->breakdownDateFrom))
-            ->when($this->breakdownDateTo,   fn($q) => $q->whereDate('created_at', '<=', $this->breakdownDateTo))
+            ->when($this->breakdownDateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->breakdownDateFrom))
+            ->when($this->breakdownDateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->breakdownDateTo))
             ->orderBy('created_at')
             ->get();
 
         // Frequency per machine
         $byMachine = $posts
-            ->filter(fn($p) => !empty($p->meta['machine_id']))
-            ->groupBy(fn($p) => $p->meta['machine_id'])
-            ->map(fn($g) => $g->count())
-            ->sortByDesc(fn($v) => $v);
+            ->filter(fn ($p) => ! empty($p->meta['machine_id']))
+            ->groupBy(fn ($p) => $p->meta['machine_id'])
+            ->map(fn ($g) => $g->count())
+            ->sortByDesc(fn ($v) => $v);
 
         // Frequency per section
         $bySection = $posts
-            ->filter(fn($p) => $p->mine_area_id)
-            ->groupBy(fn($p) => $p->mineArea?->name ?? 'Unknown')
-            ->map(fn($g) => $g->count())
-            ->sortByDesc(fn($v) => $v);
+            ->filter(fn ($p) => $p->mine_area_id)
+            ->groupBy(fn ($p) => $p->mineArea?->name ?? 'Unknown')
+            ->map(fn ($g) => $g->count())
+            ->sortByDesc(fn ($v) => $v);
 
         // MTTR: diff from breakdown post created_at → approval reviewed_at
         $mttrValues = $posts
-            ->filter(fn($p) => $p->approval && $p->approval->status === 'approved' && $p->approval->reviewed_at)
-            ->map(fn($p) => max(0, $p->created_at->diffInMinutes($p->approval->reviewed_at)));
+            ->filter(fn ($p) => $p->approval && $p->approval->status === 'approved' && $p->approval->reviewed_at)
+            ->map(fn ($p) => max(0, $p->created_at->diffInMinutes($p->approval->reviewed_at)));
 
         $avgMttr = $mttrValues->isNotEmpty() ? round($mttrValues->avg()) : null;
 
         return [
-            'total'              => $posts->count(),
-            'resolved_count'     => $posts->filter(fn($p) => $p->approval && $p->approval->status === 'approved')->count(),
-            'unresolved_count'   => $posts->filter(fn($p) => !$p->approval || $p->approval->status !== 'approved')->count(),
-            'avg_mttr_minutes'   => $avgMttr,
-            'by_machine'         => $byMachine->toArray(),
-            'by_section'         => $bySection->toArray(),
-            'chart_labels'       => $byMachine->keys()->values()->toArray(),
-            'chart_values'       => $byMachine->values()->toArray(),
-            'section_labels'     => $bySection->keys()->values()->toArray(),
-            'section_values'     => $bySection->values()->toArray(),
+            'total' => $posts->count(),
+            'resolved_count' => $posts->filter(fn ($p) => $p->approval && $p->approval->status === 'approved')->count(),
+            'unresolved_count' => $posts->filter(fn ($p) => ! $p->approval || $p->approval->status !== 'approved')->count(),
+            'avg_mttr_minutes' => $avgMttr,
+            'by_machine' => $byMachine->toArray(),
+            'by_section' => $bySection->toArray(),
+            'chart_labels' => $byMachine->keys()->values()->toArray(),
+            'chart_values' => $byMachine->values()->toArray(),
+            'section_labels' => $bySection->keys()->values()->toArray(),
+            'section_values' => $bySection->values()->toArray(),
         ];
     }
 
@@ -455,55 +489,55 @@ class Reports extends Component
     {
         $posts = FeedPost::where('category', 'shift_update')
             ->with(['mineArea:id,name'])
-            ->when($this->productionShift,       fn($q) => $q->where('shift', $this->productionShift))
-            ->when($this->productionDateFrom,    fn($q) => $q->whereDate('created_at', '>=', $this->productionDateFrom))
-            ->when($this->productionDateTo,      fn($q) => $q->whereDate('created_at', '<=', $this->productionDateTo))
-            ->when($this->productionMineAreaId,  fn($q) => $q->where('mine_area_id', $this->productionMineAreaId))
+            ->when($this->productionShift, fn ($q) => $q->where('shift', $this->productionShift))
+            ->when($this->productionDateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->productionDateFrom))
+            ->when($this->productionDateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->productionDateTo))
+            ->when($this->productionMineAreaId, fn ($q) => $q->where('mine_area_id', $this->productionMineAreaId))
             ->orderBy('created_at')
             ->get();
 
         // Per-shift aggregates
         $byShift = [];
         foreach (FeedPost::SHIFTS as $shift) {
-            $sp   = $posts->where('shift', $shift);
-            $lph  = $sp->filter(fn($p) => isset($p->meta['loads_per_hour']))->map(fn($p) => (float) $p->meta['loads_per_hour']);
-            $ton  = $sp->filter(fn($p) => isset($p->meta['tonnage']))->map(fn($p) => (float) $p->meta['tonnage']);
+            $sp = $posts->where('shift', $shift);
+            $lph = $sp->filter(fn ($p) => isset($p->meta['loads_per_hour']))->map(fn ($p) => (float) $p->meta['loads_per_hour']);
+            $ton = $sp->filter(fn ($p) => isset($p->meta['tonnage']))->map(fn ($p) => (float) $p->meta['tonnage']);
             $byShift[$shift] = [
-                'count'            => $sp->count(),
+                'count' => $sp->count(),
                 'avg_loads_per_hour' => $lph->isNotEmpty() ? round($lph->avg(), 2) : null,
-                'total_tonnage'    => $ton->isNotEmpty()  ? round($ton->sum(), 2)  : null,
+                'total_tonnage' => $ton->isNotEmpty() ? round($ton->sum(), 2) : null,
             ];
         }
 
         // Week-on-week
         $cwStart = now()->startOfWeek();
         $lwStart = now()->subWeek()->startOfWeek();
-        $lwEnd   = now()->subWeek()->endOfWeek();
+        $lwEnd = now()->subWeek()->endOfWeek();
 
         $cwPosts = FeedPost::where('category', 'shift_update')->whereDate('created_at', '>=', $cwStart)->get();
         $lwPosts = FeedPost::where('category', 'shift_update')->whereDate('created_at', '>=', $lwStart)->whereDate('created_at', '<=', $lwEnd)->get();
 
-        $cwLph = $cwPosts->filter(fn($p) => isset($p->meta['loads_per_hour']))->avg(fn($p) => (float) $p->meta['loads_per_hour']) ?? 0;
-        $lwLph = $lwPosts->filter(fn($p) => isset($p->meta['loads_per_hour']))->avg(fn($p) => (float) $p->meta['loads_per_hour']) ?? 0;
+        $cwLph = $cwPosts->filter(fn ($p) => isset($p->meta['loads_per_hour']))->avg(fn ($p) => (float) $p->meta['loads_per_hour']) ?? 0;
+        $lwLph = $lwPosts->filter(fn ($p) => isset($p->meta['loads_per_hour']))->avg(fn ($p) => (float) $p->meta['loads_per_hour']) ?? 0;
 
         // Month-on-month
         $cmStart = now()->startOfMonth();
         $lmStart = now()->subMonth()->startOfMonth();
-        $lmEnd   = now()->subMonth()->endOfMonth();
+        $lmEnd = now()->subMonth()->endOfMonth();
 
         $cmPosts = FeedPost::where('category', 'shift_update')->whereDate('created_at', '>=', $cmStart)->get();
         $lmPosts = FeedPost::where('category', 'shift_update')->whereDate('created_at', '>=', $lmStart)->whereDate('created_at', '<=', $lmEnd)->get();
 
-        $cmLph = $cmPosts->filter(fn($p) => isset($p->meta['loads_per_hour']))->avg(fn($p) => (float) $p->meta['loads_per_hour']) ?? 0;
-        $lmLph = $lmPosts->filter(fn($p) => isset($p->meta['loads_per_hour']))->avg(fn($p) => (float) $p->meta['loads_per_hour']) ?? 0;
+        $cmLph = $cmPosts->filter(fn ($p) => isset($p->meta['loads_per_hour']))->avg(fn ($p) => (float) $p->meta['loads_per_hour']) ?? 0;
+        $lmLph = $lmPosts->filter(fn ($p) => isset($p->meta['loads_per_hour']))->avg(fn ($p) => (float) $p->meta['loads_per_hour']) ?? 0;
 
         // Daily timeline for chart
         $rangeStart = $this->productionDateFrom ? Carbon::parse($this->productionDateFrom) : now()->subDays(13);
-        $rangeEnd   = $this->productionDateTo   ? Carbon::parse($this->productionDateTo)   : now();
+        $rangeEnd = $this->productionDateTo ? Carbon::parse($this->productionDateTo) : now();
 
         $timelinePosts = FeedPost::where('category', 'shift_update')
-            ->when($this->productionShift,      fn($q) => $q->where('shift', $this->productionShift))
-            ->when($this->productionMineAreaId, fn($q) => $q->where('mine_area_id', $this->productionMineAreaId))
+            ->when($this->productionShift, fn ($q) => $q->where('shift', $this->productionShift))
+            ->when($this->productionMineAreaId, fn ($q) => $q->where('mine_area_id', $this->productionMineAreaId))
             ->whereDate('created_at', '>=', $rangeStart)
             ->whereDate('created_at', '<=', $rangeEnd)
             ->orderBy('created_at')
@@ -513,24 +547,24 @@ class Reports extends Component
         $timelineValues = [];
         $day = $rangeStart->copy()->startOfDay();
         while ($day->lte($rangeEnd)) {
-            $dp  = $timelinePosts->filter(fn($p) => $p->created_at->isSameDay($day));
-            $lph = $dp->filter(fn($p) => isset($p->meta['loads_per_hour']))->avg(fn($p) => (float) $p->meta['loads_per_hour']);
+            $dp = $timelinePosts->filter(fn ($p) => $p->created_at->isSameDay($day));
+            $lph = $dp->filter(fn ($p) => isset($p->meta['loads_per_hour']))->avg(fn ($p) => (float) $p->meta['loads_per_hour']);
             $timelineLabels[] = $day->format('M d');
             $timelineValues[] = $lph ? round($lph, 1) : 0;
             $day->addDay();
         }
 
         return [
-            'total'            => $posts->count(),
-            'by_shift'         => $byShift,
-            'wow_current'      => round($cwLph, 2),
-            'wow_last'         => round($lwLph, 2),
-            'wow_change'       => $lwLph > 0 ? round((($cwLph - $lwLph) / $lwLph) * 100, 1) : null,
-            'mom_current'      => round($cmLph, 2),
-            'mom_last'         => round($lmLph, 2),
-            'mom_change'       => $lmLph > 0 ? round((($cmLph - $lmLph) / $lmLph) * 100, 1) : null,
-            'timeline_labels'  => $timelineLabels,
-            'timeline_values'  => $timelineValues,
+            'total' => $posts->count(),
+            'by_shift' => $byShift,
+            'wow_current' => round($cwLph, 2),
+            'wow_last' => round($lwLph, 2),
+            'wow_change' => $lwLph > 0 ? round((($cwLph - $lwLph) / $lwLph) * 100, 1) : null,
+            'mom_current' => round($cmLph, 2),
+            'mom_last' => round($lmLph, 2),
+            'mom_change' => $lmLph > 0 ? round((($cmLph - $lmLph) / $lmLph) * 100, 1) : null,
+            'timeline_labels' => $timelineLabels,
+            'timeline_values' => $timelineValues,
         ];
     }
 
@@ -543,22 +577,22 @@ class Reports extends Component
         return FeedPost::withTrashed()
             ->with(['author:id,name', 'mineArea:id,name', 'approval'])
             ->when($term, function ($query) use ($term) {
-                $safe = '%' . addcslashes($term, '%_\\') . '%';
+                $safe = '%'.addcslashes($term, '%_\\').'%';
                 $query->where(function ($q) use ($safe) {
                     $q->whereRaw('body ILIKE ?', [$safe])
-                      ->orWhereHas('allComments', fn($c) => $c->whereRaw('body ILIKE ?', [$safe]));
+                        ->orWhereHas('allComments', fn ($c) => $c->whereRaw('body ILIKE ?', [$safe]));
                 });
             })
-            ->when($this->historyCategory,  fn($q) => $q->where('category', $this->historyCategory))
-            ->when($this->historyDateFrom,  fn($q) => $q->whereDate('created_at', '>=', $this->historyDateFrom))
-            ->when($this->historyDateTo,    fn($q) => $q->whereDate('created_at', '<=', $this->historyDateTo))
-            ->when($this->historyAuthorId,  fn($q) => $q->where('author_id', $this->historyAuthorId))
-            ->when($this->historyShift,     fn($q) => $q->where('shift', $this->historyShift))
+            ->when($this->historyCategory, fn ($q) => $q->where('category', $this->historyCategory))
+            ->when($this->historyDateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->historyDateFrom))
+            ->when($this->historyDateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->historyDateTo))
+            ->when($this->historyAuthorId, fn ($q) => $q->where('author_id', $this->historyAuthorId))
+            ->when($this->historyShift, fn ($q) => $q->where('shift', $this->historyShift))
             ->when($this->historyApproval, function ($query) {
                 if ($this->historyApproval === 'none') {
                     $query->doesntHave('approval');
                 } else {
-                    $query->whereHas('approval', fn($q) => $q->where('status', $this->historyApproval));
+                    $query->whereHas('approval', fn ($q) => $q->where('status', $this->historyApproval));
                 }
             })
             ->orderByDesc('created_at')
@@ -567,27 +601,27 @@ class Reports extends Component
 
     // ── Render ─────────────────────────────────────────────────────────────────
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         $team = Auth::user()->currentTeam;
 
         $mineAreas = $team ? MineArea::where('team_id', $team->id)->get() : collect();
         $geofences = $team ? Geofence::where('team_id', $team->id)->get() : collect();
-        $this->machinesList = $team ? Machine::where('team_id', $team->id)->select('id', 'name')->get() : collect();
-        $teamUsers = $team ? User::whereHas('teams', fn($q) => $q->where('teams.id', $team->id))->select('id', 'name')->orderBy('name')->get() : collect();
+        $this->machinesList = $team ? Machine::where('team_id', $team->id)->select(['id', 'name'])->get() : collect();
+        $teamUsers = $team ? User::whereHas('teams', fn ($q) => $q->where('teams.id', $team->id))->select(['id', 'name'])->orderBy('name')->get() : collect();
 
         return view('livewire.reports', [
-            'reports'        => $this->activeTab === 'generated' ? $this->getReports() : collect(),
-            'reportTypes'    => $this->reportTypes,
+            'reports' => $this->activeTab === 'generated' ? $this->getReports() : collect(),
+            'reportTypes' => $this->reportTypes,
             'hasInFlightReports' => $this->activeTab === 'generated' ? $this->hasInFlightReports() : false,
-            'mineAreas'      => $mineAreas,
-            'geofences'      => $geofences,
-            'machinesList'   => $this->machinesList,
-            'shiftReportData'=> $this->activeTab === 'shift_reports' ? $this->getShiftReportData() : [],
-            'breakdownData'  => $this->activeTab === 'breakdown'     ? $this->getBreakdownData()   : [],
-            'productionData' => $this->activeTab === 'production'    ? $this->getProductionData()  : [],
-            'history'        => $this->activeTab === 'history'       ? $this->getHistory()         : null,
-            'teamUsers'      => $teamUsers,
+            'mineAreas' => $mineAreas,
+            'geofences' => $geofences,
+            'machinesList' => $this->machinesList,
+            'shiftReportData' => $this->activeTab === 'shift_reports' ? $this->getShiftReportData() : [],
+            'breakdownData' => $this->activeTab === 'breakdown' ? $this->getBreakdownData() : [],
+            'productionData' => $this->activeTab === 'production' ? $this->getProductionData() : [],
+            'history' => $this->activeTab === 'history' ? $this->getHistory() : null,
+            'teamUsers' => $teamUsers,
         ]);
     }
 }

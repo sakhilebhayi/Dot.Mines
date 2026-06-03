@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,14 +57,20 @@ class FuelAlert extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'triggered_at' => 'datetime',
-        'acknowledged_at' => 'datetime',
-        'resolved_at' => 'datetime',
-        'metadata' => 'json',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'triggered_at' => 'datetime',
+            'acknowledged_at' => 'datetime',
+            'resolved_at' => 'datetime',
+            'metadata' => 'json',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -93,7 +100,7 @@ class FuelAlert extends Model
     /**
      * Scope for active alerts
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
@@ -101,7 +108,7 @@ class FuelAlert extends Model
     /**
      * Scope for critical alerts
      */
-    public function scopeCritical($query)
+    public function scopeCritical(Builder $query): Builder
     {
         return $query->where('severity', 'critical');
     }
@@ -109,7 +116,7 @@ class FuelAlert extends Model
     /**
      * Scope for unacknowledged alerts
      */
-    public function scopeUnacknowledged($query)
+    public function scopeUnacknowledged(Builder $query): Builder
     {
         return $query->whereNull('acknowledged_at');
     }

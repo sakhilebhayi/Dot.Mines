@@ -4,13 +4,15 @@ namespace App\Models;
 
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Alert Model
- * 
+ *
  * Represents system alerts triggered by rules
  * Can be about machines, maintenance, fuel, or custom conditions
  *
@@ -60,14 +62,20 @@ class Alert extends Model
         'metadata', // JSON for rule details
     ];
 
-    protected $casts = [
-        'triggered_at' => 'datetime',
-        'acknowledged_at' => 'datetime',
-        'resolved_at' => 'datetime',
-        'metadata' => 'json',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'triggered_at' => 'datetime',
+            'acknowledged_at' => 'datetime',
+            'resolved_at' => 'datetime',
+            'metadata' => 'json',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * The "booted" method of the model.
@@ -111,7 +119,7 @@ class Alert extends Model
     /**
      * Get the user who acknowledged this alert
      */
-    public function acknowledgedBy()
+    public function acknowledgedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
@@ -119,7 +127,7 @@ class Alert extends Model
     /**
      * Get the user who resolved this alert
      */
-    public function resolvedBy()
+    public function resolvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');
     }
@@ -127,31 +135,31 @@ class Alert extends Model
     /**
      * Acknowledge this alert
      */
-    public function acknowledge($userId = null)
+    public function acknowledge(?int $userId = null): bool
     {
         return $this->update([
             'status' => 'acknowledged',
             'acknowledged_at' => now(),
-            'acknowledged_by' => $userId ?? auth()->id(),
+            'acknowledged_by' => $userId ?? Auth::id(),
         ]);
     }
 
     /**
      * Resolve this alert
      */
-    public function resolve($userId = null)
+    public function resolve(?int $userId = null): bool
     {
         return $this->update([
             'status' => 'resolved',
             'resolved_at' => now(),
-            'resolved_by' => $userId ?? auth()->id(),
+            'resolved_by' => $userId ?? Auth::id(),
         ]);
     }
 
     /**
      * Scope to active alerts
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
@@ -159,7 +167,7 @@ class Alert extends Model
     /**
      * Scope to critical alerts
      */
-    public function scopeCritical($query)
+    public function scopeCritical(Builder $query): Builder
     {
         return $query->where('priority', 'critical');
     }

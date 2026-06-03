@@ -23,9 +23,15 @@ class FeedAcknowledgement extends Model
         'acknowledged_at',
     ];
 
-    protected $casts = [
-        'acknowledged_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'acknowledged_at' => 'datetime',
+        ];
+    }
 
     public function post(): BelongsTo
     {

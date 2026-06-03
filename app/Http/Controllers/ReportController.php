@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\MineArea;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Models\MineArea;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    public function view2(Request $request)
+    public function view2(Request $request): View
     {
         $user = Auth::user();
 
@@ -25,18 +27,18 @@ class ReportController extends Controller
         } else {
             $mineAreas = collect();
             $geofences = collect();
-            $machines  = collect();
+            $machines = collect();
         }
 
         return view('reports.view-2', compact('mineAreas', 'geofences', 'machines'));
     }
 
-    public function generate(Request $request)
+    public function generate(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'mine_area_id' => 'nullable|exists:mine_areas,id',
             'geofence_id' => 'nullable|exists:geofences,id',
-            'machine_id' => 'nullable|exists:machines,id'
+            'machine_id' => 'nullable|exists:machines,id',
         ]);
 
         // Placeholder: implement actual report generation logic here.

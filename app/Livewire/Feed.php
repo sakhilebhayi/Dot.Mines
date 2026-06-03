@@ -15,16 +15,15 @@ use App\Models\FeedAuditLog;
 use App\Models\FeedComment;
 use App\Models\FeedLike;
 use App\Models\FeedPost;
-use App\Models\MineArea;
-use App\Models\Machine;
 use App\Models\MachineMetric;
+use App\Models\MineArea;
 use App\Models\ProductionRecord;
 use App\Models\ShiftTemplate;
 use App\Services\MentionParser;
 use App\Traits\RealtimeUpdates;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -34,48 +33,67 @@ use Livewire\WithPagination;
 #[Layout('layouts.app')]
 class Feed extends Component
 {
-    use WithPagination, WithFileUploads, RealtimeUpdates;
+    use RealtimeUpdates, WithFileUploads, WithPagination;
 
     // ── Filter state ──────────────────────────────────────────────────────────
-    public string $filterCategory     = 'all';
-    public string $filterSection      = 'all';
-    public string $filterShift        = 'all';
-    public string $filterPriority     = 'all';
-    public string $filterApproval     = 'all';
-    public string $filterDateFrom     = '';
-    public string $filterDateTo       = '';
+    public string $filterCategory = 'all';
+
+    public string $filterSection = 'all';
+
+    public string $filterShift = 'all';
+
+    public string $filterPriority = 'all';
+
+    public string $filterApproval = 'all';
+
+    public string $filterDateFrom = '';
+
+    public string $filterDateTo = '';
 
     // ── Compose state─────────────────────────────────────────────────────────
-    public bool   $showCompose        = false;
-    public string $composeCategory    = '';
-    public string $composeBody        = '';
-    public string $composeShift       = '';
-    public ?int   $composeMineAreaId  = null;
-    public string $composePriority    = 'normal';
-    public array  $composeMeta        = [];
-    public $composeAttachments        = [];   // uploaded files (Livewire temp)
-    public array  $categoryTemplates  = [];   // templates for current category
+    public bool $showCompose = false;
+
+    public string $composeCategory = '';
+
+    public string $composeBody = '';
+
+    public string $composeShift = '';
+
+    public ?int $composeMineAreaId = null;
+
+    public string $composePriority = 'normal';
+
+    public array $composeMeta = [];
+
+    public $composeAttachments = [];   // uploaded files (Livewire temp)
+
+    public array $categoryTemplates = [];   // templates for current category
 
     // ── Comment state ─────────────────────────────────────────────────────────
-    public array  $expandedComments   = [];   // post IDs with comments open
-    public array  $commentBody        = [];   // [post_id => text]
-    public array  $replyTo            = [];   // [post_id => comment_id]
-    public array  $editingComment     = [];   // [comment_id => text]
+    public array $expandedComments = [];   // post IDs with comments open
+
+    public array $commentBody = [];   // [post_id => text]
+
+    public array $replyTo = [];   // [post_id => comment_id]
+
+    public array $editingComment = [];   // [comment_id => text]
 
     // ── Rejection modal ───────────────────────────────────────────────────────
-    public bool   $showRejectModal    = false;
-    public ?int   $rejectPostId       = null;
-    public string $rejectReason       = '';
+    public bool $showRejectModal = false;
+
+    public ?int $rejectPostId = null;
+
+    public string $rejectReason = '';
 
     protected function rules(): array
     {
         return [
-            'composeCategory'   => 'required|in:breakdown,shift_update,safety_alert,production,general',
-            'composeBody'       => 'required|string|max:5000',
-            'composeShift'      => 'nullable|in:A,B,C',
+            'composeCategory' => 'required|in:breakdown,shift_update,safety_alert,production,general',
+            'composeBody' => 'required|string|max:5000',
+            'composeShift' => 'nullable|in:A,B,C',
             'composeMineAreaId' => 'nullable|integer|exists:mine_areas,id',
-            'composePriority'   => 'required|in:normal,high,critical',
-            'composeMeta'       => 'nullable|array',
+            'composePriority' => 'required|in:normal,high,critical',
+            'composeMeta' => 'nullable|array',
             'composeAttachments.*' => 'nullable|file|max:51200|mimes:jpeg,jpg,png,gif,webp,mp3,m4a,ogg,wav,pdf',
         ];
     }
@@ -94,11 +112,11 @@ class Feed extends Component
         // ── Auto welcome post: create once when a new team has no posts ───────
         if ($user->hasRole('admin') && FeedPost::count() === 0) {
             $post = FeedPost::create([
-                'team_id'   => $user->current_team_id,
+                'team_id' => $user->current_team_id,
                 'author_id' => $user->id,
-                'category'  => 'general',
-                'priority'  => 'normal',
-                'body'      => "👋 Welcome to the Mine Operations Feed!\n\nThis is your team's real-time activity stream. Use it to:\n• Report equipment breakdowns with structured details\n• Post shift updates (loads/hour, tonnage, headcount)\n• Share safety alerts that auto-notify the whole team\n• Log production updates and general operational notes\n\nPosts require approval before they're visible to the full team. Supervisors and managers can approve or reject from this feed.\n\nGet started by clicking **New Post** above. 🚀",
+                'category' => 'general',
+                'priority' => 'normal',
+                'body' => "👋 Welcome to the Mine Operations Feed!\n\nThis is your team's real-time activity stream. Use it to:\n• Report equipment breakdowns with structured details\n• Post shift updates (loads/hour, tonnage, headcount)\n• Share safety alerts that auto-notify the whole team\n• Log production updates and general operational notes\n\nPosts require approval before they're visible to the full team. Supervisors and managers can approve or reject from this feed.\n\nGet started by clicking **New Post** above. 🚀",
             ]);
             FeedApproval::create(['post_id' => $post->id, 'approver_id' => $user->id, 'status' => 'approved', 'reviewed_at' => now()]);
         }
@@ -113,7 +131,7 @@ class Feed extends Component
         $query = FeedPost::with(['author', 'mineArea', 'attachments', 'approval'])
             ->withCount([
                 'acknowledgements as user_has_acknowledged' => fn ($q) => $q->where('user_id', $user->id),
-                'likes as user_has_liked'                   => fn ($q) => $q->where('user_id', $user->id),
+                'likes as user_has_liked' => fn ($q) => $q->where('user_id', $user->id),
             ]);
 
         if ($this->filterCategory !== 'all') {
@@ -183,21 +201,21 @@ class Feed extends Component
 
         $post = DB::transaction(function () use ($user) {
             $post = FeedPost::create([
-                'team_id'      => $user->current_team_id,
-                'author_id'    => $user->id,
+                'team_id' => $user->current_team_id,
+                'author_id' => $user->id,
                 'mine_area_id' => $this->composeMineAreaId,
-                'shift'        => $this->composeShift ?: null,
-                'category'     => $this->composeCategory,
-                'priority'     => $this->composePriority,
-                'body'         => $this->composeBody,
-                'meta'         => $this->composeMeta ?: null,
+                'shift' => $this->composeShift ?: null,
+                'category' => $this->composeCategory,
+                'priority' => $this->composePriority,
+                'body' => $this->composeBody,
+                'meta' => $this->composeMeta ?: null,
             ]);
 
             // Create pending approval record
             FeedApproval::create([
-                'post_id'     => $post->id,
+                'post_id' => $post->id,
                 'approver_id' => $user->id,
-                'status'      => 'pending',
+                'status' => 'pending',
             ]);
 
             // Handle file attachments — stored in DB, not AWS
@@ -244,8 +262,8 @@ class Feed extends Component
 
         DB::transaction(function () use ($postId, $userId) {
             FeedAcknowledgement::create([
-                'post_id'         => $postId,
-                'user_id'         => $userId,
+                'post_id' => $postId,
+                'user_id' => $userId,
                 'acknowledged_at' => now(),
             ]);
             FeedPost::find($postId)->increment('acknowledgement_count');
@@ -319,10 +337,10 @@ class Feed extends Component
 
         $comment = DB::transaction(function () use ($postId, $body, $parentId) {
             $comment = FeedComment::create([
-                'post_id'           => $postId,
+                'post_id' => $postId,
                 'parent_comment_id' => $parentId,
-                'author_id'         => Auth::id(),
-                'body'              => $body,
+                'author_id' => Auth::id(),
+                'body' => $body,
             ]);
 
             if ($parentId === null) {
@@ -342,7 +360,7 @@ class Feed extends Component
         FeedCommentCreated::dispatch($comment, $post);
 
         $this->commentBody[$postId] = '';
-        $this->replyTo[$postId]     = null;
+        $this->replyTo[$postId] = null;
     }
 
     public function startEditComment(int $commentId): void
@@ -365,6 +383,7 @@ class Feed extends Component
 
         if (! $comment || ! $comment->isEditableBy(Auth::user())) {
             $this->dispatch('notify', type: 'error', message: 'Comment can no longer be edited.');
+
             return;
         }
 
@@ -385,7 +404,7 @@ class Feed extends Component
 
         $this->authorize('delete', $comment);
 
-        $post      = $comment->post;
+        $post = $comment->post;
         $isTopLevel = $comment->parent_comment_id === null;
 
         DB::transaction(function () use ($comment, $post, $isTopLevel) {
@@ -408,15 +427,15 @@ class Feed extends Component
         $this->authorize('approve', $post);
 
         $approval = $post->approval ?? FeedApproval::create([
-            'post_id'     => $postId,
+            'post_id' => $postId,
             'approver_id' => Auth::id(),
-            'status'      => 'pending',
+            'status' => 'pending',
         ]);
 
         $approval->update([
             'approver_id' => Auth::id(),
-            'status'      => 'approved',
-            'reason'      => null,
+            'status' => 'approved',
+            'reason' => null,
             'reviewed_at' => now(),
         ]);
 
@@ -428,8 +447,8 @@ class Feed extends Component
 
     public function openRejectModal(int $postId): void
     {
-        $this->rejectPostId  = $postId;
-        $this->rejectReason  = '';
+        $this->rejectPostId = $postId;
+        $this->rejectReason = '';
         $this->showRejectModal = true;
     }
 
@@ -441,15 +460,15 @@ class Feed extends Component
         $this->authorize('approve', $post);
 
         $approval = $post->approval ?? FeedApproval::create([
-            'post_id'     => $this->rejectPostId,
+            'post_id' => $this->rejectPostId,
             'approver_id' => Auth::id(),
-            'status'      => 'pending',
+            'status' => 'pending',
         ]);
 
         $approval->update([
             'approver_id' => Auth::id(),
-            'status'      => 'rejected',
-            'reason'      => $this->rejectReason,
+            'status' => 'rejected',
+            'reason' => $this->rejectReason,
             'reviewed_at' => now(),
         ]);
 
@@ -457,8 +476,8 @@ class Feed extends Component
         FeedPostStatusChanged::dispatch($post, $approval);
 
         $this->showRejectModal = false;
-        $this->rejectPostId    = null;
-        $this->rejectReason    = '';
+        $this->rejectPostId = null;
+        $this->rejectReason = '';
 
         $this->dispatch('notify', type: 'success', message: 'Post rejected.');
     }
@@ -492,14 +511,14 @@ class Feed extends Component
 
     private function resetCompose(): void
     {
-        $this->composeCategory   = '';
-        $this->composeBody       = '';
-        $this->composeShift      = $this->detectCurrentShift();
+        $this->composeCategory = '';
+        $this->composeBody = '';
+        $this->composeShift = $this->detectCurrentShift();
         $this->composeMineAreaId = Auth::user()->currentTeam?->mineAreas()->first()?->id;
-        $this->composePriority   = 'normal';
-        $this->composeMeta       = [];
+        $this->composePriority = 'normal';
+        $this->composeMeta = [];
         $this->composeAttachments = [];
-        $this->categoryTemplates  = [];
+        $this->categoryTemplates = [];
     }
 
     private function detectCurrentShift(): string
@@ -507,9 +526,9 @@ class Feed extends Component
         $hour = (int) now()->format('H');
 
         return match (true) {
-            $hour >= 6  && $hour < 14 => 'A',
+            $hour >= 6 && $hour < 14 => 'A',
             $hour >= 14 && $hour < 22 => 'B',
-            default                   => 'C',
+            default => 'C',
         };
     }
 
@@ -517,6 +536,7 @@ class Feed extends Component
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+
         return $user->hasRole(['admin', 'supervisor', 'manager', 'safety_officer']);
     }
 
@@ -524,6 +544,7 @@ class Feed extends Component
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+
         return $user->hasRole('admin');
     }
 
@@ -554,8 +575,8 @@ class Feed extends Component
         abort_if(! $this->isAdmin(), 403);
         $post = FeedPost::findOrFail($postId);
         FeedAuditLog::record('admin_delete', $post, [
-            'category'     => $post->category,
-            'author_id'    => $post->author_id,
+            'category' => $post->category,
+            'author_id' => $post->author_id,
             'body_preview' => \Illuminate\Support\Str::limit($post->body, 120),
         ]);
         $post->delete();
@@ -569,33 +590,60 @@ class Feed extends Component
         abort_if(! $this->isAdmin(), 403);
         abort_if(! in_array($status, ['approved', 'rejected'], true), 422);
 
-        $post     = FeedPost::findOrFail($postId);
+        $post = FeedPost::findOrFail($postId);
         $approval = $post->approval ?? FeedApproval::create([
-            'post_id'     => $postId,
+            'post_id' => $postId,
             'approver_id' => Auth::id(),
-            'status'      => 'pending',
+            'status' => 'pending',
         ]);
 
         $approval->update([
             'approver_id' => Auth::id(),
-            'status'      => $status,
-            'reason'      => $status === 'rejected' ? '[Admin override]' : null,
+            'status' => $status,
+            'reason' => $status === 'rejected' ? '[Admin override]' : null,
             'reviewed_at' => now(),
         ]);
 
         FeedAuditLog::record('override_approval', $post, ['new_status' => $status]);
         $approval->refresh();
         FeedPostStatusChanged::dispatch($post, $approval);
-        $this->dispatch('notify', type: 'success', message: 'Approval overridden to ' . $status . '.');
+        $this->dispatch('notify', type: 'success', message: 'Approval overridden to '.$status.'.');
     }
 
-    public function updatingFilterCategory(): void  { $this->resetPage(); }
-    public function updatingFilterSection(): void   { $this->resetPage(); }
-    public function updatingFilterShift(): void     { $this->resetPage(); }
-    public function updatingFilterPriority(): void  { $this->resetPage(); }
-    public function updatingFilterApproval(): void  { $this->resetPage(); }
-    public function updatingFilterDateFrom(): void  { $this->resetPage(); }
-    public function updatingFilterDateTo(): void    { $this->resetPage(); }
+    public function updatingFilterCategory(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterSection(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterShift(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterPriority(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterApproval(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterDateFrom(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterDateTo(): void
+    {
+        $this->resetPage();
+    }
 
     /**
      * Called by JS (via `feed:reconnected` dispatch) when the WebSocket
@@ -613,9 +661,9 @@ class Feed extends Component
     public function getDailyProductionStats(): array
     {
         /** @var \App\Models\User $user */
-        $user   = Auth::user();
+        $user = Auth::user();
         $teamId = (int) $user->current_team_id;
-        $today  = Carbon::today();
+        $today = Carbon::today();
 
         // Today's production records for this team
         $records = ProductionRecord::where('team_id', $teamId)
@@ -623,10 +671,10 @@ class Feed extends Component
             ->with('machine:id,name,machine_type')
             ->get();
 
-        $totalLoads    = $records->count();
-        $totalTonnage  = round((float) $records->sum('quantity_produced'), 2);
-        $totalTarget   = round((float) $records->sum('target_quantity'), 2);
-        $achievement   = $totalTarget > 0 ? round(($totalTonnage / $totalTarget) * 100, 1) : null;
+        $totalLoads = $records->count();
+        $totalTonnage = round((float) $records->sum('quantity_produced'), 2);
+        $totalTarget = round((float) $records->sum('target_quantity'), 2);
+        $achievement = $totalTarget > 0 ? round(($totalTonnage / $totalTarget) * 100, 1) : null;
 
         // Sensor-based cycle count for today
         $totalCycles = MachineMetric::where('team_id', $teamId)
@@ -639,12 +687,15 @@ class Feed extends Component
             ->whereNotNull('machine_id')
             ->groupBy('machine_id')
             ->map(function ($machineRecords) {
-                $machine = $machineRecords->first()->machine;
+                /** @var \App\Models\ProductionRecord $first */
+                $first = $machineRecords->first();
+                $machine = $first->machine;
+
                 return [
-                    'name'    => $machine?->name ?? 'Unknown',
-                    'type'    => $machine?->machine_type ?? '',
+                    'name' => $machine?->name ?? 'Unknown',
+                    'type' => $machine?->machine_type ?? '',
                     'tonnage' => round((float) $machineRecords->sum('quantity_produced'), 2),
-                    'loads'   => $machineRecords->count(),
+                    'loads' => $machineRecords->count(),
                 ];
             })
             ->sortByDesc('tonnage')
@@ -654,38 +705,38 @@ class Feed extends Component
 
         // Current shift detection
         $hour = now()->hour;
-        $currentShift = match(true) {
-            $hour >= 6  && $hour < 18 => 'Day',
-            default                   => 'Night',
+        $currentShift = match (true) {
+            $hour >= 6 && $hour < 18 => 'Day',
+            default => 'Night',
         };
 
-        $shiftRecords  = $records->where('shift', strtolower($currentShift));
-        $shiftTonnage  = round((float) $shiftRecords->sum('quantity_produced'), 2);
-        $shiftLoads    = $shiftRecords->count();
+        $shiftRecords = $records->where('shift', strtolower($currentShift));
+        $shiftTonnage = round((float) $shiftRecords->sum('quantity_produced'), 2);
+        $shiftLoads = $shiftRecords->count();
 
         return [
-            'total_loads'    => $totalLoads,
-            'total_cycles'   => $totalCycles,
-            'total_tonnage'  => $totalTonnage,
-            'total_target'   => $totalTarget,
-            'achievement'    => $achievement,
-            'best_trucks'    => $bestTrucks,
-            'current_shift'  => $currentShift,
-            'shift_tonnage'  => $shiftTonnage,
-            'shift_loads'    => $shiftLoads,
-            'as_of'          => now()->format('H:i'),
+            'total_loads' => $totalLoads,
+            'total_cycles' => $totalCycles,
+            'total_tonnage' => $totalTonnage,
+            'total_target' => $totalTarget,
+            'achievement' => $achievement,
+            'best_trucks' => $bestTrucks,
+            'current_shift' => $currentShift,
+            'shift_tonnage' => $shiftTonnage,
+            'shift_loads' => $shiftLoads,
+            'as_of' => now()->format('H:i'),
         ];
     }
 
     // ── Render ────────────────────────────────────────────────────────────────
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         return view('livewire.feed', [
-            'posts'           => $this->getPosts(),
-            'mineAreas'       => $this->getMineAreas(),
-            'canApprove'      => $this->canApprove(),
-            'dailyStats'      => $this->getDailyProductionStats(),
+            'posts' => $this->getPosts(),
+            'mineAreas' => $this->getMineAreas(),
+            'canApprove' => $this->canApprove(),
+            'dailyStats' => $this->getDailyProductionStats(),
         ]);
     }
 }

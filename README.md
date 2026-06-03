@@ -18,7 +18,7 @@
 
 **A comprehensive fleet management system for mining operations**
 
-![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white)
 ![Livewire](https://img.shields.io/badge/Livewire-3.x-FB70A9?logo=livewire&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)
@@ -68,6 +68,24 @@
 ## 🎯 Overview
 
 **Mines** is a modern, production-ready fleet management platform built specifically for mining operations. It combines real-time GPS tracking, AI-powered optimization, structured operational communications, and deep OEM integrations into a single unified platform — replacing fragmented tools like WhatsApp groups and disconnected spreadsheets.
+
+## 🆕 Latest Updates (June 2026)
+
+### Static Analysis & Code Quality Overhaul
+
+A comprehensive pass over the entire codebase to bring it to full Laravel 12 / PHP 8.3 professional standards:
+
+- **Model `casts()` method** — Converted all 63 models from `protected $casts = [...]` property to the Laravel 11+ `protected function casts(): array` method
+- **Eloquent scope type hints** — Added `Builder $query` parameter types and `: Builder` return types to all 64 scope methods across 25 models
+- **Model relationship return types** — Added explicit return type declarations (`HasMany`, `BelongsTo`, `BelongsToMany`, `HasOne`) to all relationship and utility methods across all models
+- **Service layer type hints** — Added full parameter and return type declarations to `IoTSensorService`, `MineAreaService`, `ProductionService`, `RealTimeAlertService`; added missing `recordReading()` method to `IoTSensorService`
+- **Controller return types** — Added `JsonResponse`, `BinaryFileResponse`, `StreamedResponse`, and `RedirectResponse` return types to all web and API controllers
+- **Livewire component return types** — Added `\Illuminate\View\View` return types to all `render()` methods and `: void` to all lifecycle/action methods across 28 components
+- **`Auth` facade over `auth()` helper** — Replaced all bare `auth()->user()` and `auth()->id()` calls with `Auth::user()` / `Auth::id()` for proper static analysis support in controllers, models, and Livewire components
+- **Missing imports fixed** — Added `use Illuminate\Support\Facades\Auth`, `use Symfony\Component\HttpFoundation\Response`, and Eloquent relation imports wherever missing
+- **Duplicate import removed** — Resolved duplicate `HasMany` import in `Integration.php`
+- **Named routes** — Replaced hardcoded `href="/"`, `url('/dashboard')`, `url('/feed')`, etc. with `route()` calls in Blade templates; added `->name('home')` to root route
+- **`MinePlanDownloadController`** — Replaced undefined `App\Models\MinePlan` reference with existing `MinePlanUpload` model; extracted typed `FilesystemAdapter` variables to resolve IDE `mimeType()`/`temporaryUrl()`/`download()` errors
 
 ## 🆕 Latest Updates (May 2026)
 

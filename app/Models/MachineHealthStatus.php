@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,7 +44,6 @@ class MachineHealthStatus extends Model
      * @method static MachineHealthStatus findOrFail(mixed $id, array $columns = ['*'])
      * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
      */
-
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -62,13 +62,19 @@ class MachineHealthStatus extends Model
         'recommendations',
     ];
 
-    protected $casts = [
-        'component_scores' => 'json',
-        'active_fault_codes' => 'json',
-        'last_diagnostic_scan' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'component_scores' => 'json',
+            'active_fault_codes' => 'json',
+            'last_diagnostic_scan' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -99,8 +105,8 @@ class MachineHealthStatus extends Model
             $this->cooling_system_health,
         ];
 
-        $validComponents = array_filter($components, fn($val) => !is_null($val));
-        
+        $validComponents = array_filter($components, fn ($val) => ! is_null($val));
+
         if (empty($validComponents)) {
             return 100;
         }
@@ -113,7 +119,7 @@ class MachineHealthStatus extends Model
      */
     public function determineHealthStatus(): string
     {
-        return match(true) {
+        return match (true) {
             $this->overall_health_score >= 90 => 'excellent',
             $this->overall_health_score >= 75 => 'good',
             $this->overall_health_score >= 60 => 'fair',
@@ -133,18 +139,18 @@ class MachineHealthStatus extends Model
     /**
      * Scope for machines needing attention
      */
-    public function scopeNeedsAttention($query)
+    public function scopeNeedsAttention(Builder $query): Builder
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $q->where('overall_health_score', '<', 70)
-              ->orWhere('fault_code_count', '>', 0);
+                ->orWhere('fault_code_count', '>', 0);
         });
     }
 
     /**
      * Scope for critical health
      */
-    public function scopeCritical($query)
+    public function scopeCritical(Builder $query): Builder
     {
         return $query->where('health_status', 'critical')
             ->orWhere('overall_health_score', '<', 40);

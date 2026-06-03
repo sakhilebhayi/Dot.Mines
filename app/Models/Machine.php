@@ -4,18 +4,15 @@ namespace App\Models;
 
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
-use Illuminate\Validation\ValidationException;
-use App\Models\MineArea;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Machine Model
- * 
+ *
  * Represents a mining machine (Volvo, CAT, Komatsu, Bell truck, etc.)
  * Tracks metadata, status, and integrations with manufacturer systems
  *
@@ -85,19 +82,25 @@ class Machine extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'capacity' => 'float',
-        'fuel_capacity' => 'float',
-        'cycle_time_minutes' => 'integer',
-        'queue_time_minutes' => 'integer',
-        'loading_time_minutes' => 'integer',
-        'hours_meter' => 'float',
-        'last_location_latitude' => 'float',
-        'last_location_longitude' => 'float',
-        'last_location_update' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'capacity' => 'float',
+            'fuel_capacity' => 'float',
+            'cycle_time_minutes' => 'integer',
+            'queue_time_minutes' => 'integer',
+            'loading_time_minutes' => 'integer',
+            'hours_meter' => 'float',
+            'last_location_latitude' => 'float',
+            'last_location_longitude' => 'float',
+            'last_location_update' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * The "booted" method of the model.
@@ -248,8 +251,6 @@ class Machine extends Model
 
     /**
      * Get active alerts for this machine
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function activeAlerts(): \Illuminate\Database\Eloquent\Builder
     {
@@ -270,8 +271,6 @@ class Machine extends Model
 
     /**
      * Get latest metric
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
      */
     public function getLatestMetric(): ?\Illuminate\Database\Eloquent\Model
     {

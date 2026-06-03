@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 /**
  * HealthMetric Model
@@ -54,13 +55,19 @@ class HealthMetric extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'value' => 'float',
-        'normal_min' => 'float',
-        'normal_max' => 'float',
-        'is_normal' => 'boolean',
-        'recorded_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'value' => 'float',
+            'normal_min' => 'float',
+            'normal_max' => 'float',
+            'is_normal' => 'boolean',
+            'recorded_at' => 'datetime',
+        ];
+    }
 
     /**
      * Relationships
@@ -78,27 +85,27 @@ class HealthMetric extends Model
     /**
      * Scopes
      */
-    public function scopeAbnormal($query)
+    public function scopeAbnormal(Builder $query): Builder
     {
         return $query->where('is_normal', false);
     }
 
-    public function scopeCritical($query)
+    public function scopeCritical(Builder $query): Builder
     {
         return $query->where('severity', 'critical');
     }
 
-    public function scopeComponent($query, string $component)
+    public function scopeComponent(Builder $query, string $component): Builder
     {
         return $query->where('component', $component);
     }
 
-    public function scopeMetricType($query, string $type)
+    public function scopeMetricType(Builder $query, string $type): Builder
     {
         return $query->where('metric_type', $type);
     }
 
-    public function scopeRecent($query, int $days = 7)
+    public function scopeRecent(Builder $query, int $days = 7): Builder
     {
         return $query->where('recorded_at', '>=', now()->subDays($days));
     }
@@ -108,11 +115,12 @@ class HealthMetric extends Model
      */
     public function getDeviationAttribute(): ?float
     {
-        if (!$this->normal_min || !$this->normal_max) {
+        if (! $this->normal_min || ! $this->normal_max) {
             return null;
         }
 
         $normalMid = ($this->normal_min + $this->normal_max) / 2;
+
         return $this->value - $normalMid;
     }
 
@@ -121,7 +129,7 @@ class HealthMetric extends Model
      */
     public function getDeviationPercentageAttribute(): ?float
     {
-        if (!$this->normal_min || !$this->normal_max) {
+        if (! $this->normal_min || ! $this->normal_max) {
             return null;
         }
 
@@ -131,6 +139,7 @@ class HealthMetric extends Model
         }
 
         $deviation = abs($this->deviation);
+
         return ($deviation / $normalRange) * 100;
     }
 }

@@ -99,7 +99,7 @@
 
         {{-- CTA --}}
         <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid #334155;">
-            <a href="{{ config('app.url') }}/feed"
+            <a href="{{ route('feed') }}"
                style="display: inline-block; background: #2563eb; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 600;">
                 View Feed
             </a>
@@ -107,7 +107,7 @@
 
         <p style="color: #475569; font-size: 12px; text-align: center; margin-top: 20px;">
             — {{ config('app.name') }}<br>
-            <a href="{{ config('app.url') }}/settings" style="color: #475569;">Manage notification preferences</a>
+            <a href="{{ route('settings') }}" style="color: #475569;">Manage notification preferences</a>
         </p>
     </div>
 </div>

@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportDownloadController
 {
-    public function download(Request $request, Report $report)
+    public function download(Request $request, Report $report): StreamedResponse
     {
         // Accept both permanent and temporary (expiring) signed URLs.
         if (! $request->hasValidSignature() && ! $request->hasValidRelativeSignature()) {
@@ -37,6 +38,6 @@ class ReportDownloadController
             abort(404);
         }
 
-        return $disk->download($report->file_path, $report->title . '.' . $report->format);
+        return $disk->download($report->file_path, $report->title.'.'.$report->format);
     }
 }

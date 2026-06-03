@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
+use App\Mail\ReportReadyMail;
 use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use App\Mail\ReportReadyMail;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Report Model
- * 
+ *
  * Stores generated reports with configuration and file storage
  *
  * @property int $id
@@ -55,13 +55,19 @@ class Report extends Model
         'expires_at',
     ];
 
-    protected $casts = [
-        'filters' => 'json',
-        'generated_at' => 'datetime',
-        'expires_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'filters' => 'json',
+            'generated_at' => 'datetime',
+            'expires_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team this report belongs to
@@ -74,7 +80,7 @@ class Report extends Model
     /**
      * Get the user who generated this report
      */
-    public function generatedBy()
+    public function generatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');
     }
@@ -98,7 +104,7 @@ class Report extends Model
     /**
      * Mark report as processing
      */
-    public function markProcessing()
+    public function markProcessing(): static
     {
         $this->update([
             'status' => 'processing',
@@ -110,7 +116,7 @@ class Report extends Model
     /**
      * Mark report as completed
      */
-    public function markCompleted($filePath, $fileSize = null)
+    public function markCompleted(string $filePath, ?int $fileSize = null): static
     {
         $this->update([
             'status' => 'completed',
@@ -123,7 +129,7 @@ class Report extends Model
         try {
             if ($this->team) {
                 $emails = $this->team->users()->pluck('email')->filter()->unique()->toArray();
-                if (!empty($emails)) {
+                if (! empty($emails)) {
                     foreach (array_chunk($emails, 50) as $batch) {
                         Mail::to($batch)->queue(new ReportReadyMail($this));
                     }
@@ -139,7 +145,7 @@ class Report extends Model
     /**
      * Mark report as failed
      */
-    public function markFailed(?string $reason = null)
+    public function markFailed(?string $reason = null): bool
     {
         if ($reason) {
             Log::warning('Report generation failed', [

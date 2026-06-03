@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,15 +10,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Subscription Model
- * 
+ *
  * Represents a team's subscription to a plan
  * Tracks billing cycle, status, and Stripe integration
  *
  * @property int $id
  * @property int $team_id
  * @property int $subscription_plan_id
- * @property string|null $stripe_subscription_id
- * @property string|null $stripe_customer_id
+ * @property string|null $paystack_subscription_code
+ * @property string|null $paystack_customer_code
+ * @property string|null $paystack_email_token
  * @property string $status
  * @property string $billing_cycle
  * @property \Carbon\Carbon|null $trial_ends_at
@@ -46,8 +47,9 @@ class Subscription extends Model
     protected $fillable = [
         'team_id',
         'subscription_plan_id',
-        'stripe_subscription_id',
-        'stripe_customer_id',
+        'paystack_subscription_code',
+        'paystack_customer_code',
+        'paystack_email_token',
         'status',
         'billing_cycle',
         'trial_ends_at',
@@ -58,16 +60,22 @@ class Subscription extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'trial_ends_at' => 'datetime',
-        'current_period_start' => 'datetime',
-        'current_period_end' => 'datetime',
-        'canceled_at' => 'datetime',
-        'ends_at' => 'datetime',
-        'metadata' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'trial_ends_at' => 'datetime',
+            'current_period_start' => 'datetime',
+            'current_period_end' => 'datetime',
+            'canceled_at' => 'datetime',
+            'ends_at' => 'datetime',
+            'metadata' => 'array',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team that owns the subscription.
@@ -106,8 +114,8 @@ class Subscription extends Model
      */
     public function onTrial(): bool
     {
-        return $this->status === 'trial' && 
-               $this->trial_ends_at && 
+        return $this->status === 'trial' &&
+               $this->trial_ends_at &&
                $this->trial_ends_at->isFuture();
     }
 
@@ -132,7 +140,7 @@ class Subscription extends Model
      */
     public function isExpired(): bool
     {
-        return $this->status === 'expired' || 
+        return $this->status === 'expired' ||
                ($this->ends_at && $this->ends_at->isPast());
     }
 
@@ -149,7 +157,7 @@ class Subscription extends Model
      */
     public function trialDaysRemaining(): int
     {
-        if (!$this->onTrial()) {
+        if (! $this->onTrial()) {
             return 0;
         }
 
@@ -161,7 +169,7 @@ class Subscription extends Model
      */
     public function daysRemainingInPeriod(): int
     {
-        if (!$this->current_period_end) {
+        if (! $this->current_period_end) {
             return 0;
         }
 
@@ -173,7 +181,7 @@ class Subscription extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'trial' => 'blue',
             'active' => 'green',
             'past_due' => 'yellow',
@@ -188,7 +196,7 @@ class Subscription extends Model
      */
     public function getStatusTextAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'trial' => 'Trial',
             'active' => 'Active',
             'past_due' => 'Past Due',
@@ -201,7 +209,7 @@ class Subscription extends Model
     /**
      * Scope query to active subscriptions
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->whereIn('status', ['trial', 'active']);
     }
@@ -209,10 +217,10 @@ class Subscription extends Model
     /**
      * Scope query to trial subscriptions
      */
-    public function scopeOnTrial($query)
+    public function scopeOnTrial(Builder $query): Builder
     {
         return $query->where('status', 'trial')
-                    ->where('trial_ends_at', '>', now());
+            ->where('trial_ends_at', '>', now());
     }
 
     /**

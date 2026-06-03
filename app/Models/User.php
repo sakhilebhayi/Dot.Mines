@@ -3,7 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -29,6 +33,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property \Carbon\Carbon $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Team> $ownedTeams
+ * @property-read \App\Models\Team|null $currentTeam
  */
 class User extends Authenticatable
 {
@@ -36,6 +41,7 @@ class User extends Authenticatable
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
+
     use HasProfilePhoto;
     use HasTeams;
     use Notifiable;
@@ -90,7 +96,7 @@ class User extends Authenticatable
     /**
      * Get roles for current team
      */
-    public function roles()
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user');
     }
@@ -98,7 +104,7 @@ class User extends Authenticatable
     /**
      * Get permissions through roles for current team
      */
-    public function permissions()
+    public function permissions(): \Illuminate\Database\Query\Builder
     {
         // Return a query builder for permissions granted to this user via their roles.
         // We join through permission_role -> roles -> role_user so callers can further
@@ -115,7 +121,7 @@ class User extends Authenticatable
     /**
      * Check if user has a specific role in current team
      */
-    public function hasRole($role): bool
+    public function hasRole(string|array $role): bool
     {
         if (is_string($role)) {
             return $this->roles()
@@ -133,7 +139,7 @@ class User extends Authenticatable
     /**
      * Check if user has a specific permission
      */
-    public function hasPermission($permission): bool
+    public function hasPermission(string $permission): bool
     {
         if ($this->hasRole('admin')) {
             return true; // Admins have all permissions
@@ -147,7 +153,7 @@ class User extends Authenticatable
     /**
      * Check if user has any of the given permissions
      */
-    public function hasAnyPermission($permissions): bool
+    public function hasAnyPermission(string|array $permissions): bool
     {
         if ($this->hasRole('admin')) {
             return true;
@@ -161,7 +167,7 @@ class User extends Authenticatable
     /**
      * Check if user has all of the given permissions
      */
-    public function hasAllPermissions($permissions): bool
+    public function hasAllPermissions(string|array $permissions): bool
     {
         if ($this->hasRole('admin')) {
             return true;
@@ -177,7 +183,7 @@ class User extends Authenticatable
     /**
      * Get all roles for user
      */
-    public function getAllRoles()
+    public function getAllRoles(): Collection
     {
         return $this->roles()
             ->where('team_id', $this->current_team_id)
@@ -187,7 +193,7 @@ class User extends Authenticatable
     /**
      * Assign a role to user
      */
-    public function assignRole($role)
+    public function assignRole(string|Role $role): bool|array
     {
         if (is_string($role)) {
             $role = Role::where('team_id', $this->current_team_id)
@@ -195,7 +201,7 @@ class User extends Authenticatable
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
@@ -205,7 +211,7 @@ class User extends Authenticatable
     /**
      * Remove a role from user
      */
-    public function removeRole($role)
+    public function removeRole(string|Role $role): bool|int
     {
         if (is_string($role)) {
             $role = Role::where('team_id', $this->current_team_id)
@@ -213,7 +219,7 @@ class User extends Authenticatable
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
@@ -225,7 +231,7 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<Team>
      */
-    public function ownedTeams()
+    public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'user_id');
     }
@@ -235,8 +241,12 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Team>
      */
-    public function currentTeam()
+    public function currentTeam(): BelongsTo
     {
+        if (is_null($this->current_team_id) && $this->id) {
+            $this->switchTeam($this->personalTeam());
+        }
+
         return $this->belongsTo(Team::class, 'current_team_id');
     }
 }

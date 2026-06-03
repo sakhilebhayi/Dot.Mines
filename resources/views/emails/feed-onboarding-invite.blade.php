@@ -89,7 +89,7 @@
             @endif
 
             <div class="cta-wrapper">
-                <a href="{{ url('/feed') }}" class="cta-btn">Open the Operations Feed →</a>
+                <a href="{{ route('feed') }}" class="cta-btn">Open the Operations Feed →</a>
             </div>
 
             <p style="color:#64748b;font-size:13px;text-align:center;margin:0;">
@@ -101,7 +101,7 @@
         {{-- Footer --}}
         <div class="footer">
             <p>This email was sent on behalf of <strong>{{ $team->name }}</strong></p>
-            <p>You're receiving this because you're a team member. <a href="{{ url('/') }}">View platform</a></p>
+            <p>You're receiving this because you're a team member. <a href="{{ route('home') }}">View platform</a></p>
         </div>
     </div>
 </div>

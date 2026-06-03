@@ -3,30 +3,40 @@
 namespace App\Livewire;
 
 use App\Models\Geofence;
-use App\Models\GeofenceEntry;
 use App\Models\MineArea;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
 
 class GeofenceManager extends Component
 {
     use WithPagination;
 
     public string $search = '';
+
     public string $sortBy = 'name';
+
     public string $sortDirection = 'asc';
+
     public bool $showCreateModal = false;
 
     // Form properties
     public ?int $editingGeofenceId = null;
+
     public ?int $teamId = null;
+
     public ?int $mineAreaId = null;
+
     public string $name = '';
+
     public string $description = '';
+
     public string $type = 'pit';
+
     public float $centerLatitude = 0;
+
     public float $centerLongitude = 0;
+
     public array $coordinates = [];
 
     protected $listeners = ['geofenceCreated' => 'geofenceCreated'];
@@ -43,6 +53,10 @@ class GeofenceManager extends Component
 
     public function toggleSort(string $column): void
     {
+        $allowed = ['name', 'created_at'];
+        if (! in_array($column, $allowed, true)) {
+            return;
+        }
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -139,7 +153,7 @@ class GeofenceManager extends Component
         $this->dispatchBrowserEvent('notify', ['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         $team = Auth::user()->currentTeam;
 

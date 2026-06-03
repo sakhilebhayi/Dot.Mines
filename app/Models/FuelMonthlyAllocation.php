@@ -38,19 +38,25 @@ class FuelMonthlyAllocation extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'year' => 'integer',
-        'month' => 'integer',
-        'allocated_liters' => 'decimal:2',
-        'fuel_price_per_liter' => 'decimal:2',
-        'total_budget_zar' => 'decimal:2',
-        'consumed_liters' => 'decimal:2',
-        'remaining_liters' => 'decimal:2',
-        'spent_zar' => 'decimal:2',
-        'remaining_budget_zar' => 'decimal:2',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'year' => 'integer',
+            'month' => 'integer',
+            'allocated_liters' => 'decimal:2',
+            'fuel_price_per_liter' => 'decimal:2',
+            'total_budget_zar' => 'decimal:2',
+            'consumed_liters' => 'decimal:2',
+            'remaining_liters' => 'decimal:2',
+            'spent_zar' => 'decimal:2',
+            'remaining_budget_zar' => 'decimal:2',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -86,6 +92,7 @@ class FuelMonthlyAllocation extends Model
         if ($this->allocated_liters == 0) {
             return 0;
         }
+
         return round(($this->consumed_liters / $this->allocated_liters) * 100, 2);
     }
 
@@ -97,6 +104,7 @@ class FuelMonthlyAllocation extends Model
         if ($this->total_budget_zar == 0) {
             return 0;
         }
+
         return round(($this->spent_zar / $this->total_budget_zar) * 100, 2);
     }
 
@@ -124,21 +132,21 @@ class FuelMonthlyAllocation extends Model
         $this->consumed_liters = $this->transactions()
             ->where('transaction_type', 'dispensing')
             ->sum('quantity_liters');
-        
+
         $this->spent_zar = $this->transactions()
             ->where('transaction_type', 'dispensing')
             ->sum('total_cost');
-        
+
         $this->remaining_liters = max(0, $this->allocated_liters - $this->consumed_liters);
         $this->remaining_budget_zar = max(0, $this->total_budget_zar - $this->spent_zar);
-        
+
         // Update status
         if ($this->consumed_liters > $this->allocated_liters) {
             $this->status = 'exceeded';
         } elseif ($this->consumed_liters >= $this->allocated_liters * 0.95) {
             $this->status = 'active';
         }
-        
+
         $this->save();
     }
 }

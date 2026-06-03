@@ -38,12 +38,18 @@ class FeedComment extends Model
         'is_edited',
     ];
 
-    protected $casts = [
-        'is_edited' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_edited' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
+        ];
+    }
 
     // ── Relationships ──────────────────────────────────────────────────────────
 

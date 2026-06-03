@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Integration Model
- * 
+ *
  * Represents a connection to a manufacturer API (Volvo, CAT, Komatsu, Bell, C-track)
  * Stores credentials and configuration for syncing data
  *
@@ -59,13 +59,19 @@ class Integration extends Model
         'webhook_secret',
     ];
 
-    protected $casts = [
-        'last_sync_at' => 'datetime',
-        'credentials' => 'json',
-        'config' => 'json',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'last_sync_at' => 'datetime',
+            'credentials' => 'json',
+            'config' => 'json',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team this integration belongs to
@@ -94,7 +100,7 @@ class Integration extends Model
     /**
      * Mark integration as synced
      */
-    public function markSynced()
+    public function markSynced(): bool
     {
         return $this->update([
             'last_sync_at' => now(),
@@ -106,7 +112,7 @@ class Integration extends Model
     /**
      * Mark integration as errored
      */
-    public function markError($error)
+    public function markError(string $error): bool
     {
         return $this->update([
             'last_error' => $error,

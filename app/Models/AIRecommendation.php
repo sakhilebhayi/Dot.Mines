@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AIRecommendation extends Model
 {
     use HasFactory, HasTeamFilters;
-    
+
     protected $table = 'ai_recommendations';
+
     protected $fillable = [
         'team_id',
         'ai_agent_id',
@@ -34,14 +36,20 @@ class AIRecommendation extends Model
         'implementation_notes',
     ];
 
-    protected $casts = [
-        'data' => 'array',
-        'impact_analysis' => 'array',
-        'confidence_score' => 'float',
-        'estimated_savings' => 'decimal:2',
-        'estimated_efficiency_gain' => 'decimal:2',
-        'implemented_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'data' => 'array',
+            'impact_analysis' => 'array',
+            'confidence_score' => 'float',
+            'estimated_savings' => 'decimal:2',
+            'estimated_efficiency_gain' => 'decimal:2',
+            'implemented_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -78,17 +86,17 @@ class AIRecommendation extends Model
         return $this->belongsTo(User::class, 'implemented_by');
     }
 
-    public function scopePending($query)
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', 'pending');
     }
 
-    public function scopeHighPriority($query)
+    public function scopeHighPriority(Builder $query): Builder
     {
         return $query->whereIn('priority', ['critical', 'high']);
     }
 
-    public function scopeByCategory($query, string $category)
+    public function scopeByCategory(Builder $query, string $category): Builder
     {
         return $query->where('category', $category);
     }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
@@ -61,7 +63,7 @@ class Team extends JetstreamTeam
     /**
      * Get the roles for this team.
      */
-    public function roles()
+    public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
     }
@@ -71,7 +73,7 @@ class Team extends JetstreamTeam
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User>
      */
-    public function owner()
+    public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -79,7 +81,7 @@ class Team extends JetstreamTeam
     /**
      * Get the permissions for this team.
      */
-    public function permissions()
+    public function permissions(): HasMany
     {
         return $this->hasMany(Permission::class);
     }
@@ -87,7 +89,7 @@ class Team extends JetstreamTeam
     /**
      * Get the machines for this team.
      */
-    public function machines()
+    public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
     }
@@ -95,7 +97,7 @@ class Team extends JetstreamTeam
     /**
      * Get the geofences for this team.
      */
-    public function geofences()
+    public function geofences(): HasMany
     {
         return $this->hasMany(Geofence::class);
     }
@@ -103,7 +105,7 @@ class Team extends JetstreamTeam
     /**
      * Get the alerts for this team.
      */
-    public function alerts()
+    public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
     }
@@ -111,7 +113,7 @@ class Team extends JetstreamTeam
     /**
      * Get the integrations for this team.
      */
-    public function integrations()
+    public function integrations(): HasMany
     {
         return $this->hasMany(Integration::class);
     }
@@ -119,7 +121,7 @@ class Team extends JetstreamTeam
     /**
      * Get the mine areas for this team.
      */
-    public function mineAreas()
+    public function mineAreas(): HasMany
     {
         return $this->hasMany(MineArea::class);
     }

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Geofence Model
- * 
+ *
  * Represents a pit or work area defined by coordinates
  * Used for geofencing, entry/exit tracking, and material tracking
  *
@@ -56,15 +56,21 @@ class Geofence extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'coordinates' => 'array',
-        'center_latitude' => 'float',
-        'center_longitude' => 'float',
-        'area_sqm' => 'float',
-        'perimeter_m' => 'float',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'coordinates' => 'array',
+            'center_latitude' => 'float',
+            'center_longitude' => 'float',
+            'area_sqm' => 'float',
+            'perimeter_m' => 'float',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team that owns this geofence
@@ -93,7 +99,7 @@ class Geofence extends Model
     /**
      * Get all active machines currently in this geofence
      */
-    public function activeMachines()
+    public function activeMachines(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->entries()
             ->where('exit_time', null)
@@ -105,7 +111,7 @@ class Geofence extends Model
     /**
      * Get today's entry records
      */
-    public function getTodayEntries()
+    public function getTodayEntries(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->entries()
             ->whereDate('entry_time', today())
@@ -115,7 +121,7 @@ class Geofence extends Model
     /**
      * Calculate total tonnage for a date range
      */
-    public function getTonnageForDateRange($startDate, $endDate)
+    public function getTonnageForDateRange(\Carbon\Carbon|string $startDate, \Carbon\Carbon|string $endDate): float|int
     {
         return $this->entries()
             ->whereBetween('created_at', [$startDate, $endDate])

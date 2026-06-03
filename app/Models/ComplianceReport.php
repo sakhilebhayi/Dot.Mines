@@ -19,15 +19,20 @@ class ComplianceReport extends Model
         'issues',
     ];
 
-    protected $casts = [
-        'data' => 'json',
-        'issues' => 'json',
-        'report_date' => 'date',
-        'compliance_score' => 'float',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'data' => 'json',
+            'issues' => 'json',
+            'report_date' => 'date',
+            'compliance_score' => 'float',
+        ];
+    }
 
-
-    public function generator()
+    public function generator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');
     }

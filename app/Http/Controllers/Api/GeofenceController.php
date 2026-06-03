@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Geofence;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Geofence API Controller
- * 
+ *
  * Handles pit/stockpile area management
  * CRUD operations and statistics
  */
@@ -16,10 +18,10 @@ class GeofenceController extends Controller
 {
     /**
      * List all geofences for current team
-     * 
+     *
      * GET /api/geofences
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'page' => 'nullable|integer|min:1',
@@ -56,11 +58,13 @@ class GeofenceController extends Controller
 
     /**
      * Get a single geofence
-     * 
+     *
      * GET /api/geofences/{id}
      */
-    public function show(Geofence $geofence)
+    public function show(Geofence $geofence): JsonResponse
     {
+        $this->authorize('view', $geofence);
+
         $activeMachines = $geofence->activeMachines()->map(function ($machine) {
             return [
                 'id' => $machine->id,
@@ -79,10 +83,10 @@ class GeofenceController extends Controller
 
     /**
      * Create a new geofence
-     * 
+     *
      * POST /api/geofences
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('create', Geofence::class);
 
@@ -97,7 +101,7 @@ class GeofenceController extends Controller
             'perimeter_m' => 'nullable|numeric|min:0',
         ]);
 
-        $validated['team_id'] = auth()->user()->current_team_id;
+        $validated['team_id'] = Auth::user()->current_team_id;
         $validated['status'] = 'active';
         $validated['coordinates'] = json_decode($request->input('coordinates'), true);
 
@@ -111,10 +115,10 @@ class GeofenceController extends Controller
 
     /**
      * Update a geofence
-     * 
+     *
      * PUT /api/geofences/{id}
      */
-    public function update(Request $request, Geofence $geofence)
+    public function update(Request $request, Geofence $geofence): JsonResponse
     {
         $this->authorize('update', $geofence);
 
@@ -143,10 +147,10 @@ class GeofenceController extends Controller
 
     /**
      * Delete a geofence
-     * 
+     *
      * DELETE /api/geofences/{id}
      */
-    public function destroy(Geofence $geofence)
+    public function destroy(Geofence $geofence): JsonResponse
     {
         $this->authorize('delete', $geofence);
 
@@ -159,11 +163,13 @@ class GeofenceController extends Controller
 
     /**
      * Get entry/exit records for a geofence
-     * 
+     *
      * GET /api/geofences/{id}/entries
      */
-    public function entries(Request $request, Geofence $geofence)
+    public function entries(Request $request, Geofence $geofence): JsonResponse
     {
+        $this->authorize('view', $geofence);
+
         $validated = $request->validate([
             'date_from' => 'nullable|date',
             'date_to' => 'nullable|date',
@@ -190,11 +196,13 @@ class GeofenceController extends Controller
 
     /**
      * Get tonnage statistics for date range
-     * 
+     *
      * GET /api/geofences/{id}/tonnage-stats
      */
-    public function tonnageStats(Request $request, Geofence $geofence)
+    public function tonnageStats(Request $request, Geofence $geofence): JsonResponse
     {
+        $this->authorize('view', $geofence);
+
         $validated = $request->validate([
             'date_from' => 'required|date',
             'date_to' => 'required|date',
@@ -232,11 +240,13 @@ class GeofenceController extends Controller
 
     /**
      * Get machines currently in geofence
-     * 
+     *
      * GET /api/geofences/{id}/active-machines
      */
-    public function activeMachines(Geofence $geofence)
+    public function activeMachines(Geofence $geofence): JsonResponse
     {
+        $this->authorize('view', $geofence);
+
         $machines = $geofence->activeMachines();
 
         return response()->json([

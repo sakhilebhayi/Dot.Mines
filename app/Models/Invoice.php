@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Invoice Model
- * 
+ *
  * Represents a billing invoice
  * Tracks line items and payment status
  *
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $subscription_id
  * @property int|null $payment_id
  * @property string $invoice_number
- * @property string|null $stripe_invoice_id
+ * @property string|null $paystack_invoice_code
  * @property float $subtotal
  * @property float $tax
  * @property float $total
@@ -47,7 +48,7 @@ class Invoice extends Model
         'subscription_id',
         'payment_id',
         'invoice_number',
-        'stripe_invoice_id',
+        'paystack_invoice_code',
         'subtotal',
         'tax',
         'total',
@@ -60,17 +61,23 @@ class Invoice extends Model
         'line_items',
     ];
 
-    protected $casts = [
-        'subtotal' => 'float',
-        'tax' => 'float',
-        'total' => 'float',
-        'issued_at' => 'datetime',
-        'due_at' => 'datetime',
-        'paid_at' => 'datetime',
-        'line_items' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'subtotal' => 'float',
+            'tax' => 'float',
+            'total' => 'float',
+            'issued_at' => 'datetime',
+            'due_at' => 'datetime',
+            'paid_at' => 'datetime',
+            'line_items' => 'array',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team that owns the invoice.
@@ -101,7 +108,7 @@ class Invoice extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return 'R' . number_format($this->total, 2);
+        return 'R'.number_format($this->total, 2);
     }
 
     /**
@@ -109,7 +116,7 @@ class Invoice extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'paid' => 'green',
             'open' => 'yellow',
             'draft' => 'blue',
@@ -124,15 +131,15 @@ class Invoice extends Model
      */
     public function isOverdue(): bool
     {
-        return $this->status === 'open' && 
-               $this->due_at && 
+        return $this->status === 'open' &&
+               $this->due_at &&
                $this->due_at->isPast();
     }
 
     /**
      * Scope query to paid invoices
      */
-    public function scopePaid($query)
+    public function scopePaid(Builder $query): Builder
     {
         return $query->where('status', 'paid');
     }
@@ -140,7 +147,7 @@ class Invoice extends Model
     /**
      * Scope query to unpaid invoices
      */
-    public function scopeUnpaid($query)
+    public function scopeUnpaid(Builder $query): Builder
     {
         return $query->where('status', 'open');
     }

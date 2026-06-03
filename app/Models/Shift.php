@@ -45,12 +45,18 @@ class Shift extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'started_at' => 'datetime',
-        'ended_at' => 'datetime',
-        'previous_assignments' => 'array',
-        'productivity_metrics' => 'array',
-        'performance_summary' => 'array',
-        'metadata' => 'array',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
+            'previous_assignments' => 'array',
+            'productivity_metrics' => 'array',
+            'performance_summary' => 'array',
+            'metadata' => 'array',
+        ];
+    }
 }

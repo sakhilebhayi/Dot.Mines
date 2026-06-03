@@ -43,13 +43,19 @@ class ReportGeneratorComponentTest extends TestCase
 
         $this->actingAs($user);
 
+        // Livewire 3 uses strict (===) JS comparison between checkbox value attributes
+        // (always strings in the DOM) and the PHP array. Select All must store string IDs
+        // so Alpine marks the boxes as checked after the server round-trip.
+        $machineStringIds = $machines->pluck('id')->map(fn ($id) => (string) $id)->values()->all();
+        $geofenceStringIds = $geofences->pluck('id')->map(fn ($id) => (string) $id)->values()->all();
+
         Livewire::test(ReportGenerator::class)
             ->call('selectAllMachines')
-            ->assertSet('selectedMachines', $machines->pluck('id')->values()->all())
+            ->assertSet('selectedMachines', $machineStringIds)
             ->call('clearMachines')
             ->assertSet('selectedMachines', [])
             ->call('selectAllGeofences')
-            ->assertSet('selectedGeofences', $geofences->pluck('id')->values()->all())
+            ->assertSet('selectedGeofences', $geofenceStringIds)
             ->call('clearGeofences')
             ->assertSet('selectedGeofences', []);
     }

@@ -35,11 +35,17 @@ class SensorReading extends Model
         'quality_score',
     ];
 
-    protected $casts = [
-        'value' => 'float',
-        'quality_score' => 'float',
-        'timestamp' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'value' => 'float',
+            'quality_score' => 'float',
+            'timestamp' => 'datetime',
+        ];
+    }
 
     public function sensor(): BelongsTo
     {

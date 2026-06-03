@@ -1,9 +1,32 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        {{-- Anti-FOUC: apply correct theme class before CSS loads --}}
+        <script>
+            (function () {
+                var mode = localStorage.getItem('theme-mode');
+                var isDark;
+                if (mode === 'dark') {
+                    isDark = true;
+                } else if (mode === 'light') {
+                    isDark = false;
+                } else {
+                    isDark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
+                }
+                var html = document.documentElement;
+                if (isDark) {
+                    html.classList.add('dark');
+                    html.setAttribute('data-theme', 'dark');
+                } else {
+                    html.classList.remove('dark');
+                    html.setAttribute('data-theme', 'light');
+                }
+            }());
+        </script>
 
         @php
             $appName = config('app.name', 'Mines');

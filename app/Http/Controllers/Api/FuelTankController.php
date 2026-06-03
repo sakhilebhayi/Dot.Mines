@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\FuelTank;
 use App\Services\FuelManagementService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,32 +18,39 @@ class FuelTankController extends Controller
     /**
      * Get all fuel tanks for team
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $teamId = $request->user()->currentTeam->id;
-        
+
+        $validated = $request->validate([
+            'status' => 'nullable|string|in:active,maintenance,inactive,decommissioned',
+            'fuel_type' => 'nullable|string|in:diesel,petrol,biodiesel,lpg,cng,electric',
+            'low_fuel' => 'nullable|boolean',
+            'critical' => 'nullable|boolean',
+            'mine_area_id' => 'nullable|integer|min:1',
+        ]);
+
         $query = FuelTank::where('team_id', $teamId)
             ->with(['mineArea:id,name']);
 
-        // Filters
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
         }
 
-        if ($request->has('fuel_type')) {
-            $query->where('fuel_type', $request->fuel_type);
+        if (! empty($validated['fuel_type'])) {
+            $query->where('fuel_type', $validated['fuel_type']);
         }
 
-        if ($request->has('low_fuel') && $request->low_fuel) {
+        if ($request->boolean('low_fuel')) {
             $query->lowFuel();
         }
 
-        if ($request->has('critical') && $request->critical) {
+        if ($request->boolean('critical')) {
             $query->critical();
         }
 
-        if ($request->has('mine_area_id')) {
-            $query->where('mine_area_id', $request->mine_area_id);
+        if (! empty($validated['mine_area_id'])) {
+            $query->where('mine_area_id', $validated['mine_area_id']);
         }
 
         $tanks = $query->latest()->paginate(20);
@@ -53,6 +61,7 @@ class FuelTankController extends Controller
             $tank->available_capacity = $tank->available_capacity;
             $tank->is_critical = $tank->isCritical();
             $tank->is_below_minimum = $tank->isBelowMinimum();
+
             return $tank;
         });
 
@@ -62,7 +71,7 @@ class FuelTankController extends Controller
     /**
      * Create new fuel tank
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -97,7 +106,7 @@ class FuelTankController extends Controller
     /**
      * Get single fuel tank
      */
-    public function show(Request $request, FuelTank $fuelTank)
+    public function show(Request $request, FuelTank $fuelTank): JsonResponse
     {
         // Authorization check
         if ($fuelTank->team_id !== $request->user()->currentTeam->id) {
@@ -120,7 +129,7 @@ class FuelTankController extends Controller
     /**
      * Update fuel tank
      */
-    public function update(Request $request, FuelTank $fuelTank)
+    public function update(Request $request, FuelTank $fuelTank): JsonResponse
     {
         // Authorization check
         if ($fuelTank->team_id !== $request->user()->currentTeam->id) {
@@ -155,7 +164,7 @@ class FuelTankController extends Controller
     /**
      * Delete fuel tank
      */
-    public function destroy(Request $request, FuelTank $fuelTank)
+    public function destroy(Request $request, FuelTank $fuelTank): JsonResponse
     {
         // Authorization check
         if ($fuelTank->team_id !== $request->user()->currentTeam->id) {
@@ -170,15 +179,20 @@ class FuelTankController extends Controller
     /**
      * Get tank statistics
      */
-    public function statistics(Request $request, FuelTank $fuelTank)
+    public function statistics(Request $request, FuelTank $fuelTank): JsonResponse
     {
         // Authorization check
         if ($fuelTank->team_id !== $request->user()->currentTeam->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $startDate = $request->input('start_date', now()->subDays(30));
-        $endDate = $request->input('end_date', now());
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $startDate = $validated['start_date'] ?? now()->subDays(30)->toDateString();
+        $endDate = $validated['end_date'] ?? now()->toDateString();
 
         $transactions = $fuelTank->transactions()
             ->whereBetween('transaction_date', [$startDate, $endDate])

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Role Model
- * 
+ *
  * Represents user roles within a team (Admin, Fleet Manager, Operator, Viewer)
  * Used for role-based access control throughout the application
  *
@@ -38,10 +38,16 @@ class Role extends Model
         'description',
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team that owns this role
@@ -54,7 +60,7 @@ class Role extends Model
     /**
      * Get all permissions for this role
      */
-    public function permissions()
+    public function permissions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Permission::class);
     }
@@ -62,7 +68,7 @@ class Role extends Model
     /**
      * Check if role has a permission
      */
-    public function hasPermission($permission)
+    public function hasPermission(string $permission): bool
     {
         return $this->permissions()->where('name', $permission)->exists();
     }

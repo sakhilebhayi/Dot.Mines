@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $team_id
  * @property int $mine_area_id
  * @property int $machine_id
+ * @property-read \App\Models\Machine|null $machine
  * @property string|\Carbon\Carbon $record_date
  * @property string $shift
  * @property string|float $quantity_produced
@@ -56,13 +57,19 @@ class ProductionRecord extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'quantity_produced' => 'decimal:2',
-        'system_quantity'   => 'decimal:2',
-        'target_quantity'   => 'decimal:2',
-        'record_date'       => 'date',
-        'metadata'          => 'array',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'quantity_produced' => 'decimal:2',
+            'system_quantity' => 'decimal:2',
+            'target_quantity' => 'decimal:2',
+            'record_date' => 'date',
+            'metadata' => 'array',
+        ];
+    }
 
     /**
      * Variance between system-recorded and operator-reported quantities.
@@ -96,39 +103,41 @@ class ProductionRecord extends Model
         return $this->belongsTo(Machine::class);
     }
 
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam(Builder $query, $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
-    public function scopeByStatus($query, $status)
+    public function scopeByStatus(Builder $query, $status): Builder
     {
         return $query->where('status', $status);
     }
 
-    public function scopeBetweenDates($query, $startDate, $endDate)
+    public function scopeBetweenDates(Builder $query, $startDate, $endDate): Builder
     {
         return $query->whereBetween('record_date', [$startDate, $endDate]);
     }
 
-    public function scopeForMineArea($query, $mineAreaId)
+    public function scopeForMineArea(Builder $query, $mineAreaId): Builder
     {
         return $query->where('mine_area_id', $mineAreaId);
     }
 
     public function getVariancePercentageAttribute(): float
     {
-        if (!$this->target_quantity || $this->target_quantity == 0) {
+        if (! $this->target_quantity || $this->target_quantity == 0) {
             return 0;
         }
+
         return (($this->quantity_produced - $this->target_quantity) / $this->target_quantity) * 100;
     }
 
     public function getIsAboveTargetAttribute(): bool
     {
-        if (!$this->target_quantity) {
+        if (! $this->target_quantity) {
             return false;
         }
+
         return $this->quantity_produced >= $this->target_quantity;
     }
 }

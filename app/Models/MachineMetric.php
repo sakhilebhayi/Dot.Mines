@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * MachineMetric Model
- * 
+ *
  * Stores real-time metrics from machines
  * Includes engine data, fuel, temperature, and other sensor readings
  *
@@ -83,34 +83,40 @@ class MachineMetric extends Model
         'recorded_at',
     ];
 
-    protected $casts = [
-        'latitude' => 'float',
-        'longitude' => 'float',
-        'speed' => 'float',
-        'heading' => 'float',
-        'altitude' => 'float',
-        'engine_rpm' => 'float',
-        'engine_temperature' => 'float',
-        'coolant_temperature' => 'float',
-        'oil_pressure' => 'float',
-        'fuel_level' => 'float',
-        'fuel_consumption_rate' => 'float',
-        'throttle_position' => 'float',
-        'battery_voltage' => 'float',
-        'total_hours' => 'float',
-        'idle_hours' => 'float',
-        'load_weight' => 'float',
-        'payload_capacity_used' => 'float',
-        'tire_pressure_front_left' => 'float',
-        'tire_pressure_front_right' => 'float',
-        'tire_pressure_rear_left' => 'float',
-        'tire_pressure_rear_right' => 'float',
-        'operating_hours' => 'float',
-        'raw_data' => 'json',
-        'recorded_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'speed' => 'float',
+            'heading' => 'float',
+            'altitude' => 'float',
+            'engine_rpm' => 'float',
+            'engine_temperature' => 'float',
+            'coolant_temperature' => 'float',
+            'oil_pressure' => 'float',
+            'fuel_level' => 'float',
+            'fuel_consumption_rate' => 'float',
+            'throttle_position' => 'float',
+            'battery_voltage' => 'float',
+            'total_hours' => 'float',
+            'idle_hours' => 'float',
+            'load_weight' => 'float',
+            'payload_capacity_used' => 'float',
+            'tire_pressure_front_left' => 'float',
+            'tire_pressure_front_right' => 'float',
+            'tire_pressure_rear_left' => 'float',
+            'tire_pressure_rear_right' => 'float',
+            'operating_hours' => 'float',
+            'raw_data' => 'json',
+            'recorded_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the machine this metric belongs to

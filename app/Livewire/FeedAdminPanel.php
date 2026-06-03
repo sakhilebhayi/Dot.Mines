@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Models\FeedAuditLog;
 use App\Models\MineArea;
-use App\Models\Team;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
@@ -63,7 +62,7 @@ class FeedAdminPanel extends Component
 
     // ── Render ─────────────────────────────────────────────────────────────────
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         $team = Auth::user()->currentTeam;
 
@@ -74,12 +73,12 @@ class FeedAdminPanel extends Component
             ->paginate(25);
 
         $query = MineArea::where('team_id', $team->id);
-        
+
         // Only count machines if the mine_area_id column exists
         if (Schema::hasColumn('machines', 'mine_area_id')) {
             $query->withCount('machines');
         }
-        
+
         $mineAreas = $query->orderBy('name')->get();
 
         return view('livewire.feed-admin-panel', [

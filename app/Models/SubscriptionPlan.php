@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Subscription Plan Model
- * 
+ *
  * Represents available subscription tiers (Basic, Pro, Enterprise)
  * Defines features and limits for each plan
  *
@@ -18,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $description
  * @property float $price
  * @property float|null $yearly_price
- * @property string|null $stripe_price_id
- * @property string|null $stripe_yearly_price_id
+ * @property string|null $paystack_plan_code
+ * @property string|null $paystack_yearly_plan_code
  * @property array|null $features
  * @property int|null $max_machines
  * @property int|null $max_users
@@ -50,8 +51,8 @@ class SubscriptionPlan extends Model
         'description',
         'price',
         'yearly_price',
-        'stripe_price_id',
-        'stripe_yearly_price_id',
+        'paystack_plan_code',
+        'paystack_yearly_plan_code',
         'features',
         'max_machines',
         'max_users',
@@ -64,22 +65,28 @@ class SubscriptionPlan extends Model
         'sort_order',
     ];
 
-    protected $casts = [
-        'price' => 'float',
-        'yearly_price' => 'float',
-        'features' => 'array',
-        'max_machines' => 'integer',
-        'max_users' => 'integer',
-        'max_geofences' => 'integer',
-        'max_mine_areas' => 'integer',
-        'has_advanced_analytics' => 'boolean',
-        'has_api_access' => 'boolean',
-        'has_priority_support' => 'boolean',
-        'is_active' => 'boolean',
-        'sort_order' => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'price' => 'float',
+            'yearly_price' => 'float',
+            'features' => 'array',
+            'max_machines' => 'integer',
+            'max_users' => 'integer',
+            'max_geofences' => 'integer',
+            'max_mine_areas' => 'integer',
+            'has_advanced_analytics' => 'boolean',
+            'has_api_access' => 'boolean',
+            'has_priority_support' => 'boolean',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get subscriptions for this plan.
@@ -94,13 +101,13 @@ class SubscriptionPlan extends Model
      */
     public function getYearlySavingsPercentageAttribute(): int
     {
-        if (!$this->yearly_price || $this->price <= 0) {
+        if (! $this->yearly_price || $this->price <= 0) {
             return 0;
         }
 
         $monthlyTotal = $this->price * 12;
         $savings = $monthlyTotal - $this->yearly_price;
-        
+
         return (int) round(($savings / $monthlyTotal) * 100);
     }
 
@@ -123,7 +130,7 @@ class SubscriptionPlan extends Model
     /**
      * Scope query to active plans only
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true)->orderBy('sort_order');
     }

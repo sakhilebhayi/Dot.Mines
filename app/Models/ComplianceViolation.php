@@ -46,14 +46,20 @@ class ComplianceViolation extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'detected_at' => 'datetime',
-        'remediation_deadline' => 'datetime',
-        'resolved_at' => 'datetime',
-        'metadata' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'detected_at' => 'datetime',
+            'remediation_deadline' => 'datetime',
+            'resolved_at' => 'datetime',
+            'metadata' => 'array',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team that owns the violation.
@@ -76,7 +82,7 @@ class ComplianceViolation extends Model
      */
     public function isResolved(): bool
     {
-        return !is_null($this->resolved_at);
+        return ! is_null($this->resolved_at);
     }
 
     /**
@@ -84,8 +90,8 @@ class ComplianceViolation extends Model
      */
     public function isOverdue(): bool
     {
-        return !$this->isResolved() 
-            && $this->remediation_deadline 
+        return ! $this->isResolved()
+            && $this->remediation_deadline
             && $this->remediation_deadline->isPast();
     }
 }

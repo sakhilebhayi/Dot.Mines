@@ -1,3 +1,7 @@
+// Theme must be initialised before Alpine mounts so components read
+// the correct dark/light class from the start.
+import './theme';
+
 import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 

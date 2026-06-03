@@ -2,18 +2,20 @@
 
 namespace App\Livewire;
 
-use App\Models\AIRecommendation;
-use App\Models\AIInsight;
-use App\Models\AIPredictiveAlert;
 use App\Models\AIAgent;
 use App\Models\AIAnalysisSession;
+use App\Models\AIInsight;
+use App\Models\AIPredictiveAlert;
+use App\Models\AIRecommendation;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-use Carbon\Carbon;
 
 class AIAnalytics extends Component
 {
     public string $timeRange = '30'; // days
+
     public string $selectedAgent = 'all';
+
     public bool $showDetails = true;
 
     public function mount(): void
@@ -33,14 +35,15 @@ class AIAnalytics extends Component
 
     public function render(): \Illuminate\View\View
     {
-        $team = auth()->user()->currentTeam;
-        $startDate = now()->subDays((int)$this->timeRange);
+        $team = Auth::user()->currentTeam;
+        $teamId = $team?->id ?? 0;
+        $startDate = now()->subDays((int) $this->timeRange);
 
         // Get agents
         $agents = AIAgent::all();
 
         // Recommendations over time
-        $recommendationsTimeline = AIRecommendation::where('team_id', $team->id)
+        $recommendationsTimeline = AIRecommendation::where('team_id', $teamId)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count, status')
             ->groupBy('date', 'status')
@@ -49,22 +52,22 @@ class AIAnalytics extends Component
             ->groupBy('date');
 
         // Category breakdown
-        $categoryBreakdown = AIRecommendation::where('team_id', $team->id)
+        $categoryBreakdown = AIRecommendation::where('team_id', $teamId)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('category, COUNT(*) as count, SUM(estimated_savings) as savings')
             ->groupBy('category')
             ->get();
 
         // Priority distribution
-        $priorityDistribution = AIRecommendation::where('team_id', $team->id)
+        $priorityDistribution = AIRecommendation::where('team_id', $teamId)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('priority, COUNT(*) as count')
             ->groupBy('priority')
             ->get();
 
         // Agent performance
-        $agentPerformance = $agents->map(function ($agent) use ($team, $startDate) {
-            $recommendations = AIRecommendation::where('team_id', $team->id)
+        $agentPerformance = $agents->map(function ($agent) use ($startDate, $teamId) {
+            $recommendations = AIRecommendation::where('team_id', $teamId)
                 ->where('ai_agent_id', $agent->id)
                 ->where('created_at', '>=', $startDate)
                 ->get();
@@ -81,7 +84,7 @@ class AIAnalytics extends Component
         });
 
         // Implementation rate over time
-        $implementationRate = AIRecommendation::where('team_id', $team->id)
+        $implementationRate = AIRecommendation::where('team_id', $teamId)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('DATE(created_at) as date, 
                         COUNT(*) as total,
@@ -91,11 +94,12 @@ class AIAnalytics extends Component
             ->get()
             ->map(function ($item) {
                 $item->rate = $item->total > 0 ? ($item->implemented / $item->total) * 100 : 0;
+
                 return $item;
             });
 
         // Savings over time
-        $savingsTimeline = AIRecommendation::where('team_id', $team->id)
+        $savingsTimeline = AIRecommendation::where('team_id', $teamId)
             ->where('status', 'implemented')
             ->where('implemented_at', '>=', $startDate)
             ->selectRaw('DATE(implemented_at) as date, SUM(estimated_savings) as savings')
@@ -104,7 +108,7 @@ class AIAnalytics extends Component
             ->get();
 
         // Top recommendations by savings
-        $topRecommendations = AIRecommendation::where('team_id', $team->id)
+        $topRecommendations = AIRecommendation::where('team_id', $teamId)
             ->where('status', 'implemented')
             ->where('implemented_at', '>=', $startDate)
             ->orderByDesc('estimated_savings')
@@ -113,7 +117,7 @@ class AIAnalytics extends Component
             ->get();
 
         // Analysis sessions
-        $recentSessions = AIAnalysisSession::where('team_id', $team->id)
+        $recentSessions = AIAnalysisSession::where('team_id', $teamId)
             ->where('created_at', '>=', $startDate)
             ->with('aiAgent')
             ->orderByDesc('created_at')
@@ -121,7 +125,7 @@ class AIAnalytics extends Component
             ->get();
 
         // Alert statistics
-        $alertStats = AIPredictiveAlert::where('team_id', $team->id)
+        $alertStats = AIPredictiveAlert::where('team_id', $teamId)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('alert_type, severity, COUNT(*) as count, 
                         SUM(CASE WHEN is_acknowledged THEN 1 ELSE 0 END) as acknowledged,
@@ -130,7 +134,7 @@ class AIAnalytics extends Component
             ->get();
 
         // Insights by category
-        $insightsByCategory = AIInsight::where('team_id', $team->id)
+        $insightsByCategory = AIInsight::where('team_id', $teamId)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('category, insight_type, COUNT(*) as count')
             ->groupBy('category', 'insight_type')

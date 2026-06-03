@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 /**
  * MaintenanceAlert Model
@@ -56,11 +56,17 @@ class MaintenanceAlert extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'triggered_at' => 'datetime',
-        'acknowledged_at' => 'datetime',
-        'resolved_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'triggered_at' => 'datetime',
+            'acknowledged_at' => 'datetime',
+            'resolved_at' => 'datetime',
+        ];
+    }
 
     /**
      * Relationships
@@ -160,7 +166,7 @@ class MaintenanceAlert extends Model
      */
     public function getIsStaleAttribute(): bool
     {
-        return !$this->acknowledged_at && $this->age_hours > 24;
+        return ! $this->acknowledged_at && $this->age_hours > 24;
     }
 
     /**
@@ -171,7 +177,7 @@ class MaintenanceAlert extends Model
         $score = 0;
 
         // Severity weight
-        $score += match($this->severity) {
+        $score += match ($this->severity) {
             'critical' => 100,
             'warning' => 50,
             'info' => 10,
@@ -182,7 +188,7 @@ class MaintenanceAlert extends Model
         $score += min($this->age_hours, 48);
 
         // Unacknowledged weight
-        if (!$this->acknowledged_at) {
+        if (! $this->acknowledged_at) {
             $score += 30;
         }
 

@@ -4,24 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\IoTSensor;
-use App\Models\SensorReading;
 use App\Services\IoTSensorService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class IoTSensorController extends Controller
 {
-    protected IoTSensorService $service;
-
-    public function __construct(IoTSensorService $service)
-    {
-        $this->service = $service;
-    }
+    public function __construct(protected IoTSensorService $service) {}
 
     /**
      * Get sensor details with health check
      */
-    public function show(IoTSensor $sensor)
+    public function show(IoTSensor $sensor): JsonResponse
     {
         $this->authorize('view', $sensor);
 
@@ -38,7 +33,7 @@ class IoTSensorController extends Controller
     /**
      * Record sensor reading
      */
-    public function recordReading(Request $request, IoTSensor $sensor)
+    public function recordReading(Request $request, IoTSensor $sensor): JsonResponse
     {
         $this->authorize('update', $sensor);
         $validated = $request->validate([
@@ -56,11 +51,18 @@ class IoTSensorController extends Controller
     /**
      * Get readings for sensor
      */
-    public function readings(Request $request, IoTSensor $sensor)
+    public function readings(Request $request, IoTSensor $sensor): JsonResponse
     {
         $this->authorize('view', $sensor);
-        $days = $request->get('days', 7);
-        $type = $request->get('type', 'all');
+
+        $validated = $request->validate([
+            'days' => 'nullable|integer|min:1|max:365',
+            'type' => 'nullable|string|max:100|alpha_dash',
+            'per_page' => 'nullable|integer|min:1|max:200',
+        ]);
+
+        $days = $validated['days'] ?? 7;
+        $type = $validated['type'] ?? 'all';
 
         $query = $sensor->readings()
             ->whereDate('timestamp', '>=', now()->subDays($days))
@@ -70,7 +72,7 @@ class IoTSensorController extends Controller
             $query->where('sensor_type', $type);
         }
 
-        $readings = $query->paginate($request->get('per_page', 50));
+        $readings = $query->paginate($validated['per_page'] ?? 50);
 
         return response()->json($readings);
     }
@@ -78,10 +80,12 @@ class IoTSensorController extends Controller
     /**
      * Get reading statistics
      */
-    public function statistics(Request $request, IoTSensor $sensor)
+    public function statistics(Request $request, IoTSensor $sensor): JsonResponse
     {
         $this->authorize('view', $sensor);
-        $days = $request->get('days', 7);
+
+        $validated = $request->validate(['days' => 'nullable|integer|min:1|max:365']);
+        $days = $validated['days'] ?? 7;
         $stats = $this->service->getReadingStats($sensor, $days);
 
         return response()->json($stats);
@@ -90,7 +94,7 @@ class IoTSensorController extends Controller
     /**
      * Deactivate sensor
      */
-    public function deactivate(IoTSensor $sensor)
+    public function deactivate(IoTSensor $sensor): JsonResponse
     {
         $this->authorize('update', $sensor);
 
@@ -102,15 +106,22 @@ class IoTSensorController extends Controller
     /**
      * Export sensor data
      */
-    public function export(Request $request, IoTSensor $sensor)
+    public function export(Request $request, IoTSensor $sensor): JsonResponse|\Illuminate\Http\Response
     {
         $this->authorize('view', $sensor);
-        $days = $request->get('days', 30);
-        $format = $request->get('format', 'csv');
+
+        $validated = $request->validate([
+            'days' => 'nullable|integer|min:1|max:365',
+            'format' => 'nullable|string|in:csv,json',
+        ]);
+
+        $days = $validated['days'] ?? 30;
+        $format = $validated['format'] ?? 'csv';
 
         $readings = $sensor->readings()
             ->whereDate('timestamp', '>=', now()->subDays($days))
             ->orderBy('timestamp')
+            ->limit(50000)
             ->get();
 
         if ($format === 'csv') {

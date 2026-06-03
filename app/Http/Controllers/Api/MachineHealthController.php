@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\MachineHealthStatus;
 use App\Models\Machine;
+use App\Models\MachineHealthStatus;
 use App\Services\MaintenanceHealthService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MachineHealthController extends Controller
 {
@@ -20,28 +20,32 @@ class MachineHealthController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'health_status' => 'nullable|string|in:excellent,good,fair,poor,critical',
+            'min_score' => 'nullable|numeric|min:0|max:100',
+            'max_score' => 'nullable|numeric|min:0|max:100',
+            'needs_attention' => 'nullable|boolean',
+            'critical_only' => 'nullable|boolean',
+        ]);
+
         $query = MachineHealthStatus::with(['machine', 'team'])
             ->where('team_id', $request->user()->current_team_id);
 
-        // Filter by health status
-        if ($request->filled('health_status')) {
-            $query->where('health_status', $request->health_status);
+        if (! empty($validated['health_status'])) {
+            $query->where('health_status', $validated['health_status']);
         }
 
-        // Filter by score range
-        if ($request->filled('min_score')) {
-            $query->where('overall_health_score', '>=', $request->min_score);
+        if (isset($validated['min_score'])) {
+            $query->where('overall_health_score', '>=', $validated['min_score']);
         }
-        if ($request->filled('max_score')) {
-            $query->where('overall_health_score', '<=', $request->max_score);
+        if (isset($validated['max_score'])) {
+            $query->where('overall_health_score', '<=', $validated['max_score']);
         }
 
-        // Filter machines needing attention
         if ($request->boolean('needs_attention')) {
             $query->needsAttention();
         }
 
-        // Filter critical
         if ($request->boolean('critical_only')) {
             $query->critical();
         }

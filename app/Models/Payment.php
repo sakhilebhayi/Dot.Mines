@@ -2,21 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Payment Model
- * 
+ *
  * Represents a payment transaction
  * Tracks Stripe payment intents and status
  *
  * @property int $id
  * @property int $team_id
  * @property int|null $subscription_id
- * @property string|null $stripe_payment_intent_id
- * @property string|null $stripe_invoice_id
+ * @property string|null $paystack_reference
+ * @property string|null $paystack_invoice_id
  * @property float $amount
  * @property string $currency
  * @property string $status
@@ -42,8 +43,8 @@ class Payment extends Model
     protected $fillable = [
         'team_id',
         'subscription_id',
-        'stripe_payment_intent_id',
-        'stripe_invoice_id',
+        'paystack_reference',
+        'paystack_invoice_id',
         'amount',
         'currency',
         'status',
@@ -54,13 +55,19 @@ class Payment extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'amount' => 'float',
-        'paid_at' => 'datetime',
-        'metadata' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'float',
+            'paid_at' => 'datetime',
+            'metadata' => 'array',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the team that owns the payment.
@@ -91,7 +98,7 @@ class Payment extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return 'R' . number_format($this->amount, 2);
+        return 'R'.number_format($this->amount, 2);
     }
 
     /**
@@ -99,7 +106,7 @@ class Payment extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'succeeded' => 'green',
             'pending' => 'yellow',
             'failed' => 'red',
@@ -111,7 +118,7 @@ class Payment extends Model
     /**
      * Scope query to successful payments
      */
-    public function scopeSucceeded($query)
+    public function scopeSucceeded(Builder $query): Builder
     {
         return $query->where('status', 'succeeded');
     }
@@ -119,7 +126,7 @@ class Payment extends Model
     /**
      * Scope query to failed payments
      */
-    public function scopeFailed($query)
+    public function scopeFailed(Builder $query): Builder
     {
         return $query->where('status', 'failed');
     }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,16 +74,22 @@ class MaintenanceSchedule extends Model
         'auto_generate_work_order',
     ];
 
-    protected $casts = [
-        'last_service_date' => 'date',
-        'next_service_date' => 'date',
-        'estimated_cost' => 'decimal:2',
-        'required_parts' => 'json',
-        'required_tools' => 'json',
-        'auto_generate_work_order' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'last_service_date' => 'date',
+            'next_service_date' => 'date',
+            'estimated_cost' => 'decimal:2',
+            'required_parts' => 'json',
+            'required_tools' => 'json',
+            'auto_generate_work_order' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function team(): BelongsTo
     {
@@ -104,7 +111,7 @@ class MaintenanceSchedule extends Model
      */
     public function isDue(Machine $machine): bool
     {
-        return match($this->schedule_type) {
+        return match ($this->schedule_type) {
             'hours' => $machine->operating_hours >= $this->next_service_hours,
             'kilometers' => $machine->odometer >= $this->next_service_km,
             'calendar' => now()->gte($this->next_service_date),
@@ -117,7 +124,7 @@ class MaintenanceSchedule extends Model
      */
     public function isOverdue(Machine $machine): bool
     {
-        return match($this->schedule_type) {
+        return match ($this->schedule_type) {
             'hours' => $machine->operating_hours > ($this->next_service_hours + ($this->interval_hours * 0.1)),
             'kilometers' => $machine->odometer > ($this->next_service_km + ($this->interval_km * 0.1)),
             'calendar' => now()->gt($this->next_service_date->addDays(7)),
@@ -128,7 +135,7 @@ class MaintenanceSchedule extends Model
     /**
      * Scope for due schedules
      */
-    public function scopeDue($query)
+    public function scopeDue(Builder $query): Builder
     {
         return $query->where('status', 'due');
     }
@@ -136,7 +143,7 @@ class MaintenanceSchedule extends Model
     /**
      * Scope for overdue schedules
      */
-    public function scopeOverdue($query)
+    public function scopeOverdue(Builder $query): Builder
     {
         return $query->where('status', 'overdue');
     }
