@@ -801,16 +801,6 @@ parameters:
 			path: app/Jobs/AlertGenerationJob.php
 
 		-
-			message: "#^Parameter \\#1 \\$machine of method App\\\\Jobs\\\\AlertGenerationJob\\:\\:createOrUpdateAlert\\(\\) expects App\\\\Models\\\\Machine, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
-			count: 1
-			path: app/Jobs/AlertGenerationJob.php
-
-		-
-			message: "#^Parameter \\#1 \\$machine of method App\\\\Jobs\\\\AlertGenerationJob\\:\\:generateAlertsForMachine\\(\\) expects App\\\\Models\\\\Machine, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
-			count: 1
-			path: app/Jobs/AlertGenerationJob.php
-
-		-
 			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:buildReportHtml\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Jobs/GenerateReportJob.php
@@ -921,6 +911,11 @@ parameters:
 			path: app/Jobs/GenerateReportJob.php
 
 		-
+			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$exited_at\\.$#"
+			count: 2
+			path: app/Jobs/GeofenceCrossingDetectionJob.php
+
+		-
 			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$machine\\.$#"
 			count: 1
 			path: app/Jobs/GeofenceCrossingDetectionJob.php
@@ -932,11 +927,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#1 \\$machine of method App\\\\Jobs\\\\GeofenceCrossingDetectionJob\\:\\:recordGeofenceEntry\\(\\) expects App\\\\Models\\\\Machine, stdClass given\\.$#"
-			count: 1
-			path: app/Jobs/GeofenceCrossingDetectionJob.php
-
-		-
-			message: "#^Parameter \\#2 \\$geofence of method App\\\\Jobs\\\\GeofenceCrossingDetectionJob\\:\\:recordGeofenceEntry\\(\\) expects App\\\\Models\\\\Geofence, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
 			count: 1
 			path: app/Jobs/GeofenceCrossingDetectionJob.php
 
@@ -2071,7 +2061,7 @@ parameters:
 			path: app/Livewire/GeofenceDetail.php
 
 		-
-			message: "#^Method Illuminate\\\\Database\\\\Query\\\\Builder\\:\\:select\\(\\) invoked with 2 parameters, 0\\-1 required\\.$#"
+			message: "#^Method App\\\\Models\\\\Machine\\:\\:select\\(\\) invoked with 2 parameters, 0\\-1 required\\.$#"
 			count: 1
 			path: app/Livewire/GeofenceDetail.php
 
@@ -3396,26 +3386,6 @@ parameters:
 			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:analysisSessions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:learningData\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:predictiveAlerts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:recommendations\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
 			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIAgent.php
@@ -3776,11 +3746,6 @@ parameters:
 			path: app/Models/ActivityLog.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ActivityLog\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ActivityLog.php
-
-		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\ActivityLog\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/ActivityLog.php
@@ -3886,26 +3851,6 @@ parameters:
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:acknowledgedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:resolvedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Alert.php
@@ -3936,11 +3881,6 @@ parameters:
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Alert\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Alert.php
@@ -3966,62 +3906,7 @@ parameters:
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AuditLog\\:\\:actor\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AuditLog.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AuditLog\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AuditLog.php
-
-		-
-			message: "#^Method App\\\\Models\\\\BellEquipment\\:\\:currentStatus\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/BellEquipment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\BellEquipment\\:\\:dailyKpis\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/BellEquipment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\BellEquipment\\:\\:telemetryHistory\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/BellEquipment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\BellEquipmentCurrentStatus\\:\\:equipment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/BellEquipmentCurrentStatus.php
-
-		-
-			message: "#^Method App\\\\Models\\\\BellEquipmentDailyKpi\\:\\:equipment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/BellEquipmentDailyKpi.php
-
-		-
-			message: "#^Method App\\\\Models\\\\BellEquipmentTelemetryHistory\\:\\:equipment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/BellEquipmentTelemetryHistory.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ComplianceReport\\:\\:generator\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ComplianceReport.php
-
-		-
 			message: "#^Class App\\\\Models\\\\ComplianceViolation uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/ComplianceViolation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ComplianceViolation\\:\\:resolver\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ComplianceViolation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ComplianceViolation\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/ComplianceViolation.php
 
@@ -4076,16 +3961,6 @@ parameters:
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ComponentReplacement.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:maintenanceRecord\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ComponentReplacement.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeComponent\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
@@ -4126,32 +4001,12 @@ parameters:
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ComponentReplacement.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\DigestSubscription\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/DigestSubscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\DigestSubscription\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/DigestSubscription.php
-
-		-
 			message: "#^Class App\\\\Models\\\\EngineHourSession uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/EngineHourSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/EngineHourSession.php
 
@@ -4181,122 +4036,12 @@ parameters:
 			path: app/Models/EngineHourSession.php
 
 		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/EngineHourSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedAcknowledgement\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedAcknowledgement.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedAcknowledgement\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedAcknowledgement.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedApproval\\:\\:approver\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedApproval.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedApproval\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedApproval.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedAttachment\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedAttachment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedAttachment\\:\\:uploader\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedAttachment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedAuditLog\\:\\:actor\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedAuditLog.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FeedAuditLog\\:\\:record\\(\\) has parameter \\$meta with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/FeedAuditLog.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FeedAuditLog\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedAuditLog.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedComment\\:\\:author\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedComment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedComment\\:\\:parent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedComment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedComment\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedComment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedComment\\:\\:replies\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedComment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedLike\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedLike.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedLike\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedLike.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedMention\\:\\:mentionable\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedMention.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedMention\\:\\:mentionedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedMention.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedMention\\:\\:mentionedUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedMention.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedMention\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedMention.php
-
-		-
 			message: "#^Class App\\\\Models\\\\FeedPost uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/FeedPost.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:acknowledgements\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedPost.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:allComments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedPost.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:approval\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedPost.php
 
@@ -4306,22 +4051,7 @@ parameters:
 			path: app/Models/FeedPost.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:author\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedPost.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:comments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedPost.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:likes\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedPost.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedPost.php
 
@@ -4332,11 +4062,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FeedPost.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FeedPost\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedPost.php
 
@@ -4367,26 +4092,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\FuelAlert uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:acknowledgedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:fuelTank\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:resolvedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
@@ -4432,11 +4137,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
@@ -4521,11 +4221,6 @@ parameters:
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelBudget.php
@@ -4566,22 +4261,12 @@ parameters:
 			path: app/Models/FuelConsumptionMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelConsumptionMetric\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelConsumptionMetric.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelConsumptionMetric\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelConsumptionMetric.php
 
 		-
 			message: "#^Method App\\\\Models\\\\FuelConsumptionMetric\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelConsumptionMetric.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelConsumptionMetric\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FuelConsumptionMetric.php
 
@@ -4666,27 +4351,12 @@ parameters:
 			path: app/Models/FuelMonthlyAllocation.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelMonthlyAllocation.php
 
 		-
 			message: "#^Method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:transactions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FuelMonthlyAllocation.php
 
@@ -4756,16 +4426,6 @@ parameters:
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:alerts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTank.php
@@ -4816,16 +4476,6 @@ parameters:
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:transactions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTank.php
@@ -4862,21 +4512,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\FuelTransaction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:fromTank\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:fuelTank\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
@@ -4926,21 +4561,6 @@ parameters:
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:toTank\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
@@ -4961,11 +4581,6 @@ parameters:
 			path: app/Models/Geofence.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:entries\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTodayEntries\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/Geofence.php
@@ -4976,22 +4591,12 @@ parameters:
 			path: app/Models/Geofence.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Geofence\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Geofence.php
 
 		-
 			message: "#^Method App\\\\Models\\\\Geofence\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Geofence.php
 
@@ -5041,17 +4646,7 @@ parameters:
 			path: app/Models/GeofenceEntry.php
 
 		-
-			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:geofence\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/GeofenceEntry.php
-
-		-
 			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:getDurationMinutes\\(\\) should return int\\|null but returns float\\.$#"
-			count: 1
-			path: app/Models/GeofenceEntry.php
-
-		-
-			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/GeofenceEntry.php
 
@@ -5062,11 +4657,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/GeofenceEntry.php
-
-		-
-			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/GeofenceEntry.php
 
@@ -5096,16 +4686,6 @@ parameters:
 			path: app/Models/GeofenceEntry.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
 			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HaulDispatch.php
@@ -5131,22 +4711,12 @@ parameters:
 			path: app/Models/HaulDispatch.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\HealthMetric\\:\\:\\$deviation\\.$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
 			message: "#^Class App\\\\Models\\\\HealthMetric uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/HealthMetric.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
@@ -5211,11 +4781,6 @@ parameters:
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/HealthMetric.php
-
-		-
 			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
@@ -5241,37 +4806,7 @@ parameters:
 			path: app/Models/Incident.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Incident\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Incident.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Incident\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Incident.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Incident\\:\\:reportedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Incident.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Incident\\:\\:resolvedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Incident.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Incident\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Incident.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Integration uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/Integration.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Integration\\:\\:machines\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Integration.php
 
@@ -5282,11 +4817,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\Integration\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Integration.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Integration\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Integration.php
 
@@ -5321,11 +4851,6 @@ parameters:
 			path: app/Models/Invoice.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:payment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopePaid\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Invoice.php
@@ -5342,16 +4867,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopeUnpaid\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:subscription\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Invoice.php
 
@@ -5451,77 +4966,12 @@ parameters:
 			path: app/Models/Machine.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:activeEngineSession\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:alerts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:areaAssignments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:assignedMachines\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:engineHourSessions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:excavator\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:geofenceEntries\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:healthStatus\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:integration\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:maintenanceRecords\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:metrics\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Machine\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Machine.php
 
 		-
 			message: "#^Method App\\\\Models\\\\Machine\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Machine.php
 
@@ -5581,21 +5031,6 @@ parameters:
 			path: app/Models/MachineAreaAssignment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:assignedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
@@ -5617,11 +5052,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
 
@@ -5691,16 +5121,6 @@ parameters:
 			path: app/Models/MachineHealthStatus.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:healthMetrics\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineHealthStatus.php
@@ -5727,11 +5147,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeNeedsAttention\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/MachineHealthStatus.php
 
@@ -5766,22 +5181,12 @@ parameters:
 			path: app/Models/MachineMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineMetric\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MachineMetric.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MachineMetric\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineMetric.php
 
 		-
 			message: "#^Method App\\\\Models\\\\MachineMetric\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineMetric.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineMetric\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/MachineMetric.php
 
@@ -5817,26 +5222,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\MaintenanceAlert uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/MaintenanceAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceAlert\\:\\:acknowledgedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceAlert\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceAlert\\:\\:maintenanceSchedule\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceAlert\\:\\:resolvedByUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/MaintenanceAlert.php
 
@@ -5921,11 +5306,6 @@ parameters:
 			path: app/Models/MaintenanceAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceAlert\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceAlert.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MaintenanceAlert\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceAlert.php
@@ -5971,26 +5351,6 @@ parameters:
 			path: app/Models/MaintenanceRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:assignedTo\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:completedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:maintenanceSchedule\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeCompleted\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
@@ -6017,11 +5377,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeInProgress\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
 
@@ -6091,16 +5446,6 @@ parameters:
 			path: app/Models/MaintenanceSchedule.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:maintenanceRecords\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeDue\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
@@ -6127,11 +5472,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeOverdue\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
 
@@ -6164,16 +5504,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$date of method Carbon\\\\CarbonInterface\\:\\:gte\\(\\) expects DateTimeInterface\\|string, Carbon\\\\Carbon\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MapEvent.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MapEvent.php
 
 		-
 			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
@@ -6231,11 +5561,6 @@ parameters:
 			path: app/Models/MapEvent.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MapEvent.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MineArea has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MineArea.php
@@ -6261,51 +5586,6 @@ parameters:
 			path: app/Models/MineArea.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:alerts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:geofences\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:machineAssignments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:machines\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:minePlanUploads\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:productionForecasts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:productionRecords\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:productionTargets\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:routes\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MineArea.php
@@ -6322,11 +5602,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/MineArea.php
 
@@ -6391,11 +5666,6 @@ parameters:
 			path: app/Models/MinePlanUpload.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
@@ -6426,16 +5696,6 @@ parameters:
 			path: app/Models/MinePlanUpload.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:uploader\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Notification has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Notification.php
@@ -6457,16 +5717,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Notification uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:readBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Notification.php
 
@@ -6516,21 +5766,6 @@ parameters:
 			path: app/Models/OperatorFatigue.php
 
 		-
-			message: "#^Method App\\\\Models\\\\OperatorFatigue\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/OperatorFatigue.php
-
-		-
-			message: "#^Method App\\\\Models\\\\OperatorFatigue\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/OperatorFatigue.php
-
-		-
-			message: "#^Method App\\\\Models\\\\OperatorFatigue\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/OperatorFatigue.php
-
-		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\OperatorFatigue\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/OperatorFatigue.php
@@ -6576,11 +5811,6 @@ parameters:
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:invoice\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeFailed\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Payment.php
@@ -6597,16 +5827,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeSucceeded\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:subscription\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Payment.php
 
@@ -6656,16 +5876,6 @@ parameters:
 			path: app/Models/Permission.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Permission\\:\\:roles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#"
-			count: 1
-			path: app/Models/Permission.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Permission\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Permission.php
-
-		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Permission\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/Permission.php
@@ -6706,11 +5916,6 @@ parameters:
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
@@ -6737,11 +5942,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
@@ -6791,16 +5991,6 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
@@ -6846,11 +6036,6 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\ProductionRecord\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
@@ -6891,11 +6076,6 @@ parameters:
 			path: app/Models/ProductionTarget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
@@ -6922,11 +6102,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
@@ -6981,22 +6156,12 @@ parameters:
 			path: app/Models/Report.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Report\\:\\:generatedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Report\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Report.php
 
 		-
 			message: "#^Method App\\\\Models\\\\Report\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Report\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Report.php
 
@@ -7056,11 +6221,6 @@ parameters:
 			path: app/Models/Role.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Role\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Role.php
-
-		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Role\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/Role.php
@@ -7082,16 +6242,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Route uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/Route.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Route\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Route.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Route\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Route.php
 
@@ -7126,11 +6276,6 @@ parameters:
 			path: app/Models/Route.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Route\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Route.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Route\\:\\:waypoints\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Route.php
@@ -7154,11 +6299,6 @@ parameters:
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Route\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Route.php
-
-		-
-			message: "#^Method App\\\\Models\\\\SensorReading\\:\\:sensor\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/SensorReading.php
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\SensorReading\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
@@ -7211,22 +6351,12 @@ parameters:
 			path: app/Models/Shift.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ShiftTemplate\\:\\:creator\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ShiftTemplate.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ShiftTemplate\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ShiftTemplate.php
 
 		-
 			message: "#^Method App\\\\Models\\\\ShiftTemplate\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ShiftTemplate.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ShiftTemplate\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/ShiftTemplate.php
 
@@ -7266,21 +6396,6 @@ parameters:
 			path: app/Models/Subscription.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:invoices\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:payments\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:plan\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Subscription.php
@@ -7302,11 +6417,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Subscription.php
 
@@ -7386,11 +6496,6 @@ parameters:
 			path: app/Models/SubscriptionPlan.php
 
 		-
-			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:subscriptions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/SubscriptionPlan.php
-
-		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\SubscriptionPlan\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/SubscriptionPlan.php
@@ -7411,51 +6516,6 @@ parameters:
 			path: app/Models/SubscriptionPlan.php
 
 		-
-			message: "#^Generic type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User\\> in PHPDoc tag @return does not specify all template types of class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:alerts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:geofences\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:integrations\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:machines\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:mineAreas\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:owner\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User, \\$this\\(App\\\\Models\\\\Team\\)\\>\\.$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:permissions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:roles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/Team.php
-
-		-
 			message: "#^Method App\\\\Models\\\\TeamInvitation\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/TeamInvitation.php
@@ -7471,22 +6531,7 @@ parameters:
 			path: app/Models/TeamInvitation.php
 
 		-
-			message: "#^Generic type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\Team\\> in PHPDoc tag @return does not specify all template types of class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Generic type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Team\\> in PHPDoc tag @return does not specify all template types of class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
 			message: "#^Method App\\\\Models\\\\User\\:\\:assignRole\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:currentTeam\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\Team\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\Team, \\$this\\(App\\\\Models\\\\User\\)\\>\\.$#"
 			count: 1
 			path: app/Models/User.php
 
@@ -7511,26 +6556,6 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:ownedTeams\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Team\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Team, \\$this\\(App\\\\Models\\\\User\\)\\>\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:roles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\UserFeedPreference\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/UserFeedPreference.php
-
-		-
-			message: "#^Method App\\\\Models\\\\UserFeedPreference\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/UserFeedPreference.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Waypoint has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Waypoint.php
@@ -7552,11 +6577,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Waypoint uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/Waypoint.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Waypoint\\:\\:route\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Waypoint.php
 

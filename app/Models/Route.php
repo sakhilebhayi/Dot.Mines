@@ -92,6 +92,7 @@ class Route extends Model
     /**
      * Get the team that owns the route.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -100,6 +101,7 @@ class Route extends Model
     /**
      * Get the machine this route is planned for.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -108,6 +110,7 @@ class Route extends Model
     /**
      * Get the mine area this route belongs to.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);

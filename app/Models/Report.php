@@ -72,6 +72,7 @@ class Report extends Model
     /**
      * Get the team this report belongs to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -80,6 +81,7 @@ class Report extends Model
     /**
      * Get the user who generated this report
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function generatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');

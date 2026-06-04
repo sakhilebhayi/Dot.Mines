@@ -69,6 +69,7 @@ class Waypoint extends Model
     /**
      * Get the route that owns the waypoint.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Route, $this> */
     public function route(): BelongsTo
     {
         return $this->belongsTo(Route::class);

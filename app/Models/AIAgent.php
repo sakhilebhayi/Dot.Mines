@@ -78,21 +78,25 @@ class AIAgent extends Model
 
     const TYPE_ANOMALY_DETECTOR = 'anomaly_detector';
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AIRecommendation, $this> */
     public function recommendations(): HasMany
     {
         return $this->hasMany(AIRecommendation::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AIAnalysisSession, $this> */
     public function analysisSessions(): HasMany
     {
         return $this->hasMany(AIAnalysisSession::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AILearningData, $this> */
     public function learningData(): HasMany
     {
         return $this->hasMany(AILearningData::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AIPredictiveAlert, $this> */
     public function predictiveAlerts(): HasMany
     {
         return $this->hasMany(AIPredictiveAlert::class);

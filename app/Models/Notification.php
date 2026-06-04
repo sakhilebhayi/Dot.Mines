@@ -58,11 +58,13 @@ class Notification extends Model
         ];
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\User, $this> */
     public function readBy(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'notification_read')

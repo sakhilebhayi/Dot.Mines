@@ -76,6 +76,7 @@ class Integration extends Model
     /**
      * Get the team this integration belongs to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -84,6 +85,7 @@ class Integration extends Model
     /**
      * Get all machines synced from this integration
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Machine, $this> */
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);

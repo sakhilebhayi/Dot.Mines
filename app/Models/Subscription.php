@@ -80,6 +80,7 @@ class Subscription extends Model
     /**
      * Get the team that owns the subscription.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -88,6 +89,7 @@ class Subscription extends Model
     /**
      * Get the plan for this subscription.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\SubscriptionPlan, $this> */
     public function plan(): BelongsTo
     {
         return $this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id');
@@ -96,6 +98,7 @@ class Subscription extends Model
     /**
      * Get payments for this subscription.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Payment, $this> */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
@@ -104,6 +107,7 @@ class Subscription extends Model
     /**
      * Get invoices for this subscription.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Invoice, $this> */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);

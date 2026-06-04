@@ -88,21 +88,25 @@ class FeedPost extends Model
 
     // ── Relationships ──────────────────────────────────────────────────────────
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class, 'mine_area_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FeedAcknowledgement, $this> */
     public function acknowledgements(): HasMany
     {
         return $this->hasMany(FeedAcknowledgement::class, 'post_id');
@@ -125,16 +129,19 @@ class FeedPost extends Model
         return $this->hasMany(FeedComment::class, 'post_id')->whereNull('parent_comment_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FeedComment, $this> */
     public function allComments(): HasMany
     {
         return $this->hasMany(FeedComment::class, 'post_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FeedLike, $this> */
     public function likes(): HasMany
     {
         return $this->hasMany(FeedLike::class, 'post_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\FeedApproval, $this> */
     public function approval(): HasOne
     {
         return $this->hasOne(FeedApproval::class, 'post_id');

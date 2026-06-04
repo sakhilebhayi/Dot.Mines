@@ -48,11 +48,13 @@ class FuelConsumptionMetric extends Model
         ];
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);

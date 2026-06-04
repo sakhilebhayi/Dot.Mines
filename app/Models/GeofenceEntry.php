@@ -76,6 +76,7 @@ class GeofenceEntry extends Model
     /**
      * Get the machine for this entry
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -84,6 +85,7 @@ class GeofenceEntry extends Model
     /**
      * Get the geofence for this entry
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Geofence, $this> */
     public function geofence(): BelongsTo
     {
         return $this->belongsTo(Geofence::class);
@@ -92,6 +94,7 @@ class GeofenceEntry extends Model
     /**
      * Get the team for this entry
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

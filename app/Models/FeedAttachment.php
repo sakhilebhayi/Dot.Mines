@@ -64,11 +64,13 @@ class FeedAttachment extends Model
 
     // ── Relationships ─────────────────────────────────────────────────────────
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FeedPost, $this> */
     public function post(): BelongsTo
     {
         return $this->belongsTo(FeedPost::class, 'post_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploader_id');

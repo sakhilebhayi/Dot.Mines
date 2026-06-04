@@ -63,6 +63,7 @@ class Team extends JetstreamTeam
     /**
      * Get the roles for this team.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Role, $this> */
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
@@ -73,6 +74,7 @@ class Team extends JetstreamTeam
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User>
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -81,6 +83,7 @@ class Team extends JetstreamTeam
     /**
      * Get the permissions for this team.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Permission, $this> */
     public function permissions(): HasMany
     {
         return $this->hasMany(Permission::class);
@@ -89,6 +92,7 @@ class Team extends JetstreamTeam
     /**
      * Get the machines for this team.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Machine, $this> */
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
@@ -97,6 +101,7 @@ class Team extends JetstreamTeam
     /**
      * Get the geofences for this team.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Geofence, $this> */
     public function geofences(): HasMany
     {
         return $this->hasMany(Geofence::class);
@@ -105,6 +110,7 @@ class Team extends JetstreamTeam
     /**
      * Get the alerts for this team.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Alert, $this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
@@ -113,6 +119,7 @@ class Team extends JetstreamTeam
     /**
      * Get the integrations for this team.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Integration, $this> */
     public function integrations(): HasMany
     {
         return $this->hasMany(Integration::class);
@@ -121,6 +128,7 @@ class Team extends JetstreamTeam
     /**
      * Get the mine areas for this team.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MineArea, $this> */
     public function mineAreas(): HasMany
     {
         return $this->hasMany(MineArea::class);

@@ -47,6 +47,7 @@ class SensorReading extends Model
         ];
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\IoTSensor, $this> */
     public function sensor(): BelongsTo
     {
         return $this->belongsTo(IoTSensor::class);

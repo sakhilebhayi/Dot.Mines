@@ -91,6 +91,7 @@ class SubscriptionPlan extends Model
     /**
      * Get subscriptions for this plan.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Subscription, $this> */
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);

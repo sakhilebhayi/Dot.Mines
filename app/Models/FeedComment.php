@@ -53,21 +53,25 @@ class FeedComment extends Model
 
     // ── Relationships ──────────────────────────────────────────────────────────
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FeedPost, $this> */
     public function post(): BelongsTo
     {
         return $this->belongsTo(FeedPost::class, 'post_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FeedComment, $this> */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(FeedComment::class, 'parent_comment_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FeedComment, $this> */
     public function replies(): HasMany
     {
         return $this->hasMany(FeedComment::class, 'parent_comment_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');

@@ -82,6 +82,7 @@ class Invoice extends Model
     /**
      * Get the team that owns the invoice.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -90,6 +91,7 @@ class Invoice extends Model
     /**
      * Get the subscription for this invoice.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Subscription, $this> */
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
@@ -98,6 +100,7 @@ class Invoice extends Model
     /**
      * Get the payment for this invoice.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Payment, $this> */
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class);

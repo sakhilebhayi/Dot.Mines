@@ -64,6 +64,7 @@ class ComplianceViolation extends Model
     /**
      * Get the team that owns the violation.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -72,6 +73,7 @@ class ComplianceViolation extends Model
     /**
      * Get the user who resolved the violation.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function resolver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

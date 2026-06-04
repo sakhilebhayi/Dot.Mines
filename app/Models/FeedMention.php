@@ -29,21 +29,25 @@ class FeedMention extends Model
         ];
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\MorphTo<\Illuminate\Database\Eloquent\Model, $this> */
     public function mentionable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function mentionedUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentioned_user_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function mentionedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentioned_by_user_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

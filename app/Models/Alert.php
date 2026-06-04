@@ -95,6 +95,7 @@ class Alert extends Model
     /**
      * Get the machine this alert is about
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -103,6 +104,7 @@ class Alert extends Model
     /**
      * Get the mine area this alert is about
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
@@ -111,6 +113,7 @@ class Alert extends Model
     /**
      * Get the team this alert belongs to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -119,6 +122,7 @@ class Alert extends Model
     /**
      * Get the user who acknowledged this alert
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function acknowledgedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
@@ -127,6 +131,7 @@ class Alert extends Model
     /**
      * Get the user who resolved this alert
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function resolvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

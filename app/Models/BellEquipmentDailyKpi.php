@@ -57,6 +57,7 @@ class BellEquipmentDailyKpi extends Model
         ];
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\BellEquipment, $this> */
     public function equipment(): BelongsTo
     {
         return $this->belongsTo(BellEquipment::class, 'equipment_key', 'equipment_key');

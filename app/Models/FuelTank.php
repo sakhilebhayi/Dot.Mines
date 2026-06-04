@@ -80,16 +80,19 @@ class FuelTank extends Model
         ];
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FuelTransaction, $this> */
     public function transactions(): HasMany
     {
         return $this->hasMany(FuelTransaction::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FuelAlert, $this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(FuelAlert::class);
@@ -98,6 +101,7 @@ class FuelTank extends Model
     /**
      * Belongs to a mine area (optional)
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class, 'mine_area_id');

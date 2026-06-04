@@ -96,6 +96,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get roles for current team
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Role, $this> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user');
@@ -231,6 +232,7 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<Team>
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Team, $this> */
     public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'user_id');
@@ -241,6 +243,7 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Team>
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function currentTeam(): BelongsTo
     {
         if (is_null($this->current_team_id) && $this->id) {

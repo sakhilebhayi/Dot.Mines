@@ -121,6 +121,7 @@ class MachineMetric extends Model
     /**
      * Get the machine this metric belongs to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -129,6 +130,7 @@ class MachineMetric extends Model
     /**
      * Get the team this metric belongs to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

@@ -88,6 +88,7 @@ class OperatorFatigue extends Model
     /**
      * Get the user (operator) this fatigue record belongs to.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -96,6 +97,7 @@ class OperatorFatigue extends Model
     /**
      * Get the team this fatigue record belongs to.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -104,6 +106,7 @@ class OperatorFatigue extends Model
     /**
      * Get the machine this fatigue record is associated with.
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);

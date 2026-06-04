@@ -44,16 +44,19 @@ class BellEquipment extends Model
         ];
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\BellEquipmentCurrentStatus, $this> */
     public function currentStatus(): HasOne
     {
         return $this->hasOne(BellEquipmentCurrentStatus::class, 'equipment_key', 'equipment_key');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\BellEquipmentTelemetryHistory, $this> */
     public function telemetryHistory(): HasMany
     {
         return $this->hasMany(BellEquipmentTelemetryHistory::class, 'equipment_key', 'equipment_key');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\BellEquipmentDailyKpi, $this> */
     public function dailyKpis(): HasMany
     {
         return $this->hasMany(BellEquipmentDailyKpi::class, 'equipment_key', 'equipment_key');

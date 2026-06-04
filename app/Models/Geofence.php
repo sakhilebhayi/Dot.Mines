@@ -75,6 +75,7 @@ class Geofence extends Model
     /**
      * Get the team that owns this geofence
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -83,6 +84,7 @@ class Geofence extends Model
     /**
      * Get the mine area this geofence belongs to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
@@ -91,6 +93,7 @@ class Geofence extends Model
     /**
      * Get all entry/exit records for this geofence
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\GeofenceEntry, $this> */
     public function entries(): HasMany
     {
         return $this->hasMany(GeofenceEntry::class);

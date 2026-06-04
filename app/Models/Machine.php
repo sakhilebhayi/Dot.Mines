@@ -122,6 +122,7 @@ class Machine extends Model
     /**
      * Get the team that owns this machine
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -130,6 +131,7 @@ class Machine extends Model
     /**
      * Get the integration this machine belongs to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Integration, $this> */
     public function integration(): BelongsTo
     {
         return $this->belongsTo(Integration::class);
@@ -138,6 +140,7 @@ class Machine extends Model
     /**
      * Get all metrics for this machine
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MachineMetric, $this> */
     public function metrics(): HasMany
     {
         return $this->hasMany(MachineMetric::class);
@@ -146,6 +149,7 @@ class Machine extends Model
     /**
      * Get all alerts for this machine
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Alert, $this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
@@ -154,6 +158,7 @@ class Machine extends Model
     /**
      * Get all geofence entries for this machine
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\GeofenceEntry, $this> */
     public function geofenceEntries(): HasMany
     {
         return $this->hasMany(GeofenceEntry::class);
@@ -162,6 +167,7 @@ class Machine extends Model
     /**
      * Get the mine area this machine is assigned to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
@@ -170,6 +176,7 @@ class Machine extends Model
     /**
      * Get assignment history for this machine
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MachineAreaAssignment, $this> */
     public function areaAssignments(): HasMany
     {
         return $this->hasMany(MachineAreaAssignment::class);
@@ -178,6 +185,7 @@ class Machine extends Model
     /**
      * Get all engine hour sessions for this machine
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\EngineHourSession, $this> */
     public function engineHourSessions(): HasMany
     {
         return $this->hasMany(EngineHourSession::class);
@@ -186,6 +194,7 @@ class Machine extends Model
     /**
      * Get the currently running engine session (if any)
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\EngineHourSession, $this> */
     public function activeEngineSession(): HasOne
     {
         return $this->hasOne(EngineHourSession::class)
@@ -198,6 +207,7 @@ class Machine extends Model
     /**
      * Get the excavator this machine is assigned to
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
     public function excavator(): BelongsTo
     {
         return $this->belongsTo(Machine::class, 'excavator_id');
@@ -206,6 +216,7 @@ class Machine extends Model
     /**
      * Get all machines assigned to this excavator
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Machine, $this> */
     public function assignedMachines(): HasMany
     {
         return $this->hasMany(Machine::class, 'excavator_id');
@@ -214,6 +225,7 @@ class Machine extends Model
     /**
      * Get all maintenance records for this machine
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MaintenanceRecord, $this> */
     public function maintenanceRecords(): HasMany
     {
         return $this->hasMany(MaintenanceRecord::class);
@@ -222,6 +234,7 @@ class Machine extends Model
     /**
      * Get the health status for this machine
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\MachineHealthStatus, $this> */
     public function healthStatus(): HasOne
     {
         return $this->hasOne(MachineHealthStatus::class);

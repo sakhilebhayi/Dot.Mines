@@ -55,6 +55,7 @@ class Permission extends Model
     /**
      * Get the team that owns this permission
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -63,6 +64,7 @@ class Permission extends Model
     /**
      * Get all roles with this permission
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Role, $this> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);

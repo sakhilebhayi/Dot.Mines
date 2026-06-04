@@ -52,6 +52,7 @@ class Role extends Model
     /**
      * Get the team that owns this role
      */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
