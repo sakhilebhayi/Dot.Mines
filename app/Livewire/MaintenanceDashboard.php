@@ -8,12 +8,15 @@ use App\Models\MaintenanceAlert;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use App\Services\AI\MaintenancePredictorAgent;
+use App\Traits\BrowserEventBridge;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class MaintenanceDashboard extends Component
 {
+    use BrowserEventBridge;
+
     public string $selectedPeriod = 'month';
 
     public bool $showCriticalOnly = false;

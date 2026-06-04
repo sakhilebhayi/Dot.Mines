@@ -344,7 +344,7 @@ class ProductionDashboard extends Component
         $this->mine_area_id = $record->mine_area_id;
         $this->machine_id = $record->machine_id;
         $this->status = $record->status;
-        $this->notes = $record->notes;
+        $this->notes = $record->notes ?? '';
         $this->showEditModal = true;
     }
 
