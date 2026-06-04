@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $description
  * @property string|null $failure_reason
  * @property \Carbon\Carbon|null $paid_at
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  *

@@ -52,6 +52,7 @@ class MineAreaManager extends Component
     public string $manager_contact = '';
 
     // Map properties
+    /** @var array<string, mixed> */
     public ?array $boundaryCoordinates = null;
 
     public float $centerLat = -26.2041;

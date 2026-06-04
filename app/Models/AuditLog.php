@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $ip_address
  * @property string|null $subject_type
  * @property int|null $subject_id
- * @property array|null $meta
+ * @property array<string, mixed>|null $meta
  * @property \Carbon\Carbon $created_at
  */
 class AuditLog extends Model

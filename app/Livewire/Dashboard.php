@@ -19,10 +19,13 @@ class Dashboard extends Component
 
     public int $totalGeofences = 0;
 
+    /** @var array<string, mixed> */
     public array $recentAlerts = [];
 
+    /** @var array<string, mixed> */
     public array $machineStatus = [];
 
+    /** @var array<string, mixed> */
     public array $activityFeed = [];
 
     public bool $isLoading = true;

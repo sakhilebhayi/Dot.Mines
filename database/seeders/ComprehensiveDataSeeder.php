@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Alert;
+use App\Models\ActivityLog;
 use App\Models\AIAgent;
 use App\Models\AIRecommendation;
-use App\Models\ActivityLog;
+use App\Models\Alert;
 use App\Models\FuelTransaction;
 use App\Models\Geofence;
 use App\Models\Machine;
@@ -14,97 +14,107 @@ use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use App\Models\MineArea;
 use App\Models\ProductionRecord;
+use App\Models\Role;
 use App\Models\Route;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\Waypoint;
-use App\Models\Role;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
 class ComprehensiveDataSeeder extends Seeder
 {
     private Team $team;
+
     private $aiAgent;
+
+    /** @var array<string, mixed> */
     private array $machines = [];
+
+    /** @var array<string, mixed> */
     private array $mineAreas = [];
+
+    /** @var array<string, mixed> */
     private array $excavators = [];
+
+    /** @var array<string, mixed> */
     private array $haulers = [];
+
+    /** @var array<string, mixed> */
     private array $users = [];
-    
+
+    /** @var array<string, mixed> */
     private array $allTeams = [];
-    
+
     /**
      * Run the database seeds - Creates realistic, correlated mining operation data
      */
     public function run(): void
     {
         $this->command->info('🚀 Starting comprehensive multi-team data seeding...');
-        
+
         // Define multiple teams to create
         $teamConfigs = $this->getTeamConfigurations();
-        
+
         foreach ($teamConfigs as $config) {
             $this->command->info('');
             $this->command->info('═══════════════════════════════════════════');
             $this->command->info("🏢 Creating data for: {$config['name']}");
             $this->command->info('═══════════════════════════════════════════');
-            
+
             // Reset arrays for this team
             $this->machines = [];
             $this->mineAreas = [];
             $this->excavators = [];
             $this->haulers = [];
             $this->users = [];
-            
+
             // Step 1: Create team and users
             $this->createTeamAndUsers($config);
-            
+
             // Step 2: Create mine areas (pits, stockpiles, dumps)
             $this->createMineAreas($config['areas']);
-            
+
             // Step 3: Create machines (excavators, haulers, dozers, etc.)
             $this->createMachines($config['machines']);
-            
+
             // Step 4: Assign machines to mine areas and excavators
             $this->assignMachines();
-            
+
             // Step 5: Create geofences around mine areas
             $this->createGeofences();
-            
+
             // Step 6: Create routes for haulers
             $this->createRoutes();
-            
+
             // Step 7: Generate machine metrics (last 30 days)
             $this->generateMachineMetrics();
-            
+
             // Step 8: Generate production data (correlated with machine activity)
             $this->generateProductionData();
-            
+
             // Step 9: Create fuel transactions
             $this->generateFuelData();
-            
+
             // Step 10: Create realistic alerts based on machine status
             $this->generateAlerts();
-            
+
             // Step 11: Assign machines to operators
             $this->assignMachineOperators();
-            
+
             // Step 12: Create maintenance schedules
             $this->createMaintenanceSchedules();
-            
+
             // Step 13: Generate maintenance records
             $this->generateMaintenanceRecords();
-            
+
             // Step 14: Create activity logs for users
             $this->generateActivityLogs();
-            
+
             // Step 15: Generate AI recommendations
             $this->generateAIRecommendations();
-            
+
             $this->allTeams[] = [
                 'team' => $this->team,
                 'users' => count($this->users),
@@ -117,7 +127,7 @@ class ComprehensiveDataSeeder extends Seeder
         // This gives seeded users realistic access boundaries for live testing.
         $this->call([RolePermissionSeeder::class]);
         $this->assignRolesToTeamUsers();
-        
+
         $this->command->info('');
         $this->command->info('✅ Multi-team data seeding completed successfully!');
         $this->printSummary();
@@ -161,7 +171,7 @@ class ComprehensiveDataSeeder extends Seeder
 
         $this->command->info('✓ Roles assigned for seeded team users');
     }
-    
+
     private function getTeamConfigurations(): array
     {
         // Roles are globally unique in this schema, so we seed one rich demo team
@@ -185,15 +195,15 @@ class ComprehensiveDataSeeder extends Seeder
             ],
         ];
     }
-    
+
     private function createTeamAndUsers($config): void
     {
         $this->command->info('Creating team and users...');
-        
+
         // Get first user for team ownership
         $firstUserEmail = $config['users'][0]['email'];
         $firstUser = User::where('email', $firstUserEmail)->first();
-        
+
         // Create team
         $this->team = Team::firstOrCreate(
             ['name' => $config['name']],
@@ -202,7 +212,7 @@ class ComprehensiveDataSeeder extends Seeder
                 'personal_team' => false,
             ]
         );
-        
+
         // Create users
         foreach ($config['users'] as $index => $userData) {
             $user = User::firstOrCreate(
@@ -213,28 +223,28 @@ class ComprehensiveDataSeeder extends Seeder
                     'password' => Hash::make('password'),
                 ]
             );
-            
-            if (!$user->teams->contains($this->team->id)) {
+
+            if (! $user->teams->contains($this->team->id)) {
                 $user->teams()->attach($this->team->id);
             }
-            
+
             $this->users[] = $user;
-            
+
             $user->update(['current_team_id' => $this->team->id]);
-            
+
             // Set first user as team owner
             if ($index === 0) {
                 $this->team->update(['user_id' => $user->id]);
             }
         }
-        
-        $this->command->info('✓ Created team and ' . count($config['users']) . ' users');
+
+        $this->command->info('✓ Created team and '.count($config['users']).' users');
     }
-    
+
     private function createMineAreas($areaCount): void
     {
         $this->command->info('Creating mine areas...');
-        
+
         // Get base coordinates from team config
         $teamLatLonMap = [
             'Platinum Mining Corporation' => [-25.8906, 28.2341],
@@ -242,9 +252,9 @@ class ComprehensiveDataSeeder extends Seeder
             'Diamond Extraction Co' => [-28.75, 24.75],
             'Coal Mining Solutions' => [-25.85, 29.15],
         ];
-        
+
         [$baseLat, $baseLon] = $teamLatLonMap[$this->team->name] ?? [-26.0, 28.0];
-        
+
         $areaTypes = [
             ['type' => 'pit', 'name' => 'North Pit', 'material' => 'Ore'],
             ['type' => 'pit', 'name' => 'South Pit', 'material' => 'Ore'],
@@ -253,17 +263,17 @@ class ComprehensiveDataSeeder extends Seeder
             ['type' => 'dump', 'name' => 'Waste Dump', 'material' => 'Waste'],
             ['type' => 'processing', 'name' => 'Processing Plant', 'material' => null],
         ];
-        
+
         for ($i = 0; $i < $areaCount; $i++) {
             $template = $areaTypes[$i % count($areaTypes)];
-            $number = $i > 0 && $template['type'] === 'pit' ? ' #' . ($i + 1) : '';
-            
+            $number = $i > 0 && $template['type'] === 'pit' ? ' #'.($i + 1) : '';
+
             $latOffset = (($i % 3) - 1) * 0.003;
             $lonOffset = (floor($i / 3) - 1) * 0.003;
-            
+
             $centerLat = $baseLat + $latOffset;
             $centerLon = $baseLon + $lonOffset;
-            
+
             $areaSqm = rand(5000, 15000);
             $areaMetadata = [
                 'area_type' => $template['type'],
@@ -281,8 +291,8 @@ class ComprehensiveDataSeeder extends Seeder
 
             $areaData = [
                 'team_id' => $this->team->id,
-                'name' => $template['name'] . $number,
-                'description' => ucfirst($template['type']) . ' area for ' . ($template['material'] ?? 'operations'),
+                'name' => $template['name'].$number,
+                'description' => ucfirst($template['type']).' area for '.($template['material'] ?? 'operations'),
                 'status' => 'active',
                 'location' => $this->team->name,
                 'center_latitude' => $centerLat,
@@ -293,18 +303,18 @@ class ComprehensiveDataSeeder extends Seeder
                 'area_size_hectares' => round($areaSqm / 10000, 2),
                 'metadata' => $areaMetadata,
             ];
-            
+
             $area = MineArea::create($areaData);
             $this->mineAreas[] = $area;
         }
-        
-        $this->command->info('✓ Created ' . count($this->mineAreas) . ' mine areas');
+
+        $this->command->info('✓ Created '.count($this->mineAreas).' mine areas');
     }
-    
+
     private function createMachines($machineConfig): void
     {
         $this->command->info('Creating fleet machines...');
-        
+
         $manufacturers = [
             'excavator' => [
                 ['name' => 'CAT', 'models' => ['390F', '6030', '374F'], 'capacity' => [2500, 3000, 2200], 'fuel' => [1350, 1800, 1200]],
@@ -329,23 +339,23 @@ class ComprehensiveDataSeeder extends Seeder
                 ['name' => 'Ford', 'models' => ['Ranger', 'F-150'], 'capacity' => [1000, 1100], 'fuel' => [80, 98]],
             ],
         ];
-        
+
         $machineNumber = 100;
-        
+
         // Create excavators
         for ($i = 0; $i < $machineConfig['excavators']; $i++) {
             $mfg = $manufacturers['excavator'][array_rand($manufacturers['excavator'])];
             $modelIdx = array_rand($mfg['models']);
-            
+
             $machine = Machine::create([
                 'team_id' => $this->team->id,
-                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #" . (++$machineNumber),
+                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #".(++$machineNumber),
                 'machine_type' => 'excavator',
                 'manufacturer' => $mfg['name'],
                 'model' => $mfg['models'][$modelIdx],
                 'year_of_manufacture' => rand(2020, 2023),
-                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)) . '-' . $mfg['models'][$modelIdx] . '-' . $machineNumber,
-                'serial_number' => strtoupper($mfg['name'] . $mfg['models'][$modelIdx]) . rand(2020, 2023) . $machineNumber,
+                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)).'-'.$mfg['models'][$modelIdx].'-'.$machineNumber,
+                'serial_number' => strtoupper($mfg['name'].$mfg['models'][$modelIdx]).rand(2020, 2023).$machineNumber,
                 'capacity' => $mfg['capacity'][$modelIdx],
                 'fuel_capacity' => $mfg['fuel'][$modelIdx],
                 'hours_meter' => rand(1000, 5000) + (rand(0, 99) / 10),
@@ -354,25 +364,25 @@ class ComprehensiveDataSeeder extends Seeder
                 'last_location_longitude' => $this->mineAreas[0]->center_longitude + (rand(-10, 10) / 10000),
                 'last_location_update' => now()->subMinutes(rand(1, 30)),
             ]);
-            
+
             $this->machines[] = $machine;
             $this->excavators[] = $machine;
         }
-        
+
         // Create haulers
         for ($i = 0; $i < $machineConfig['haulers']; $i++) {
             $mfg = $manufacturers['hauler'][array_rand($manufacturers['hauler'])];
             $modelIdx = array_rand($mfg['models']);
-            
+
             $machine = Machine::create([
                 'team_id' => $this->team->id,
-                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #" . (++$machineNumber),
+                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #".(++$machineNumber),
                 'machine_type' => 'articulated_hauler',
                 'manufacturer' => $mfg['name'],
                 'model' => $mfg['models'][$modelIdx],
                 'year_of_manufacture' => rand(2020, 2023),
-                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)) . '-' . $mfg['models'][$modelIdx] . '-' . $machineNumber,
-                'serial_number' => strtoupper($mfg['name'] . $mfg['models'][$modelIdx]) . rand(2020, 2023) . $machineNumber,
+                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)).'-'.$mfg['models'][$modelIdx].'-'.$machineNumber,
+                'serial_number' => strtoupper($mfg['name'].$mfg['models'][$modelIdx]).rand(2020, 2023).$machineNumber,
                 'capacity' => $mfg['capacity'][$modelIdx],
                 'fuel_capacity' => $mfg['fuel'][$modelIdx],
                 'hours_meter' => rand(1000, 5000) + (rand(0, 99) / 10),
@@ -381,25 +391,25 @@ class ComprehensiveDataSeeder extends Seeder
                 'last_location_longitude' => $this->mineAreas[0]->center_longitude + (rand(-10, 10) / 10000),
                 'last_location_update' => now()->subMinutes(rand(1, 30)),
             ]);
-            
+
             $this->machines[] = $machine;
             $this->haulers[] = $machine;
         }
-        
+
         // Create dozers
         for ($i = 0; $i < $machineConfig['dozers']; $i++) {
             $mfg = $manufacturers['dozer'][array_rand($manufacturers['dozer'])];
             $modelIdx = array_rand($mfg['models']);
-            
+
             $machine = Machine::create([
                 'team_id' => $this->team->id,
-                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #" . (++$machineNumber),
+                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #".(++$machineNumber),
                 'machine_type' => 'dozer',
                 'manufacturer' => $mfg['name'],
                 'model' => $mfg['models'][$modelIdx],
                 'year_of_manufacture' => rand(2020, 2023),
-                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)) . '-' . $mfg['models'][$modelIdx] . '-' . $machineNumber,
-                'serial_number' => strtoupper($mfg['name'] . $mfg['models'][$modelIdx]) . rand(2020, 2023) . $machineNumber,
+                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)).'-'.$mfg['models'][$modelIdx].'-'.$machineNumber,
+                'serial_number' => strtoupper($mfg['name'].$mfg['models'][$modelIdx]).rand(2020, 2023).$machineNumber,
                 'capacity' => $mfg['capacity'][$modelIdx],
                 'fuel_capacity' => $mfg['fuel'][$modelIdx],
                 'hours_meter' => rand(1000, 5000) + (rand(0, 99) / 10),
@@ -408,24 +418,24 @@ class ComprehensiveDataSeeder extends Seeder
                 'last_location_longitude' => $this->mineAreas[0]->center_longitude + (rand(-10, 10) / 10000),
                 'last_location_update' => now()->subMinutes(rand(1, 30)),
             ]);
-            
+
             $this->machines[] = $machine;
         }
-        
+
         // Create graders
         for ($i = 0; $i < $machineConfig['graders']; $i++) {
             $mfg = $manufacturers['grader'][array_rand($manufacturers['grader'])];
             $modelIdx = array_rand($mfg['models']);
-            
+
             $machine = Machine::create([
                 'team_id' => $this->team->id,
-                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #" . (++$machineNumber),
+                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #".(++$machineNumber),
                 'machine_type' => 'grader',
                 'manufacturer' => $mfg['name'],
                 'model' => $mfg['models'][$modelIdx],
                 'year_of_manufacture' => rand(2020, 2023),
-                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)) . '-' . $mfg['models'][$modelIdx] . '-' . $machineNumber,
-                'serial_number' => strtoupper($mfg['name'] . $mfg['models'][$modelIdx]) . rand(2020, 2023) . $machineNumber,
+                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)).'-'.$mfg['models'][$modelIdx].'-'.$machineNumber,
+                'serial_number' => strtoupper($mfg['name'].$mfg['models'][$modelIdx]).rand(2020, 2023).$machineNumber,
                 'capacity' => $mfg['capacity'][$modelIdx],
                 'fuel_capacity' => $mfg['fuel'][$modelIdx],
                 'hours_meter' => rand(1000, 5000) + (rand(0, 99) / 10),
@@ -434,24 +444,24 @@ class ComprehensiveDataSeeder extends Seeder
                 'last_location_longitude' => $this->mineAreas[0]->center_longitude + (rand(-10, 10) / 10000),
                 'last_location_update' => now()->subMinutes(rand(1, 30)),
             ]);
-            
+
             $this->machines[] = $machine;
         }
-        
+
         // Create support vehicles
         for ($i = 0; $i < $machineConfig['support']; $i++) {
             $mfg = $manufacturers['support'][array_rand($manufacturers['support'])];
             $modelIdx = array_rand($mfg['models']);
-            
+
             $machine = Machine::create([
                 'team_id' => $this->team->id,
-                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #" . (++$machineNumber),
+                'name' => "{$mfg['name']} {$mfg['models'][$modelIdx]} #".(++$machineNumber),
                 'machine_type' => 'support_vehicle',
                 'manufacturer' => $mfg['name'],
                 'model' => $mfg['models'][$modelIdx],
                 'year_of_manufacture' => rand(2020, 2023),
-                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)) . '-' . substr($mfg['models'][$modelIdx], 0, 3) . '-' . $machineNumber,
-                'serial_number' => strtoupper($mfg['name'] . str_replace(' ', '', $mfg['models'][$modelIdx])) . rand(2020, 2023) . $machineNumber,
+                'registration_number' => strtoupper(substr($mfg['name'], 0, 3)).'-'.substr($mfg['models'][$modelIdx], 0, 3).'-'.$machineNumber,
+                'serial_number' => strtoupper($mfg['name'].str_replace(' ', '', $mfg['models'][$modelIdx])).rand(2020, 2023).$machineNumber,
                 'capacity' => $mfg['capacity'][$modelIdx],
                 'fuel_capacity' => $mfg['fuel'][$modelIdx],
                 'hours_meter' => rand(500, 2000) + (rand(0, 99) / 10),
@@ -460,13 +470,13 @@ class ComprehensiveDataSeeder extends Seeder
                 'last_location_longitude' => $this->mineAreas[0]->center_longitude + (rand(-10, 10) / 10000),
                 'last_location_update' => now()->subMinutes(rand(1, 30)),
             ]);
-            
+
             $this->machines[] = $machine;
         }
-        
-        $this->command->info('✓ Created ' . count($this->machines) . ' machines');
+
+        $this->command->info('✓ Created '.count($this->machines).' machines');
     }
-    
+
     private function assignMachines(): void
     {
         $this->command->info('Assigning machines to mine areas...');
@@ -474,10 +484,10 @@ class ComprehensiveDataSeeder extends Seeder
         $hasMineAreaColumn = Schema::hasColumn('machines', 'mine_area_id');
         $hasExcavatorColumn = Schema::hasColumn('machines', 'excavator_id');
         $hasAssignedAtColumn = Schema::hasColumn('machines', 'assigned_to_excavator_at');
-        
+
         // Assign excavators to pits
-        $pits = array_filter($this->mineAreas, fn($area) => $this->getMineAreaType($area) === 'pit');
-        
+        $pits = array_filter($this->mineAreas, fn ($area) => $this->getMineAreaType($area) === 'pit');
+
         foreach ($this->excavators as $index => $excavator) {
             $pit = $pits[array_rand($pits)];
             if ($hasMineAreaColumn) {
@@ -485,10 +495,10 @@ class ComprehensiveDataSeeder extends Seeder
             }
 
         }
-        
+
         // Assign haulers to excavators and mine areas
         foreach ($this->haulers as $index => $hauler) {
-            if ($hauler->status === 'active' && !empty($this->excavators)) {
+            if ($hauler->status === 'active' && ! empty($this->excavators)) {
                 $excavator = $this->excavators[array_rand($this->excavators)];
                 $updateData = [];
                 if ($hasExcavatorColumn) {
@@ -500,24 +510,24 @@ class ComprehensiveDataSeeder extends Seeder
                 if ($hasAssignedAtColumn) {
                     $updateData['assigned_to_excavator_at'] = now()->subDays(rand(5, 60));
                 }
-                if (!empty($updateData)) {
+                if (! empty($updateData)) {
                     $hauler->update($updateData);
                 }
-                
+
             }
         }
 
-        if (!$hasMineAreaColumn || !$hasExcavatorColumn) {
+        if (! $hasMineAreaColumn || ! $hasExcavatorColumn) {
             $this->command->warn('⚠ Machines table missing mine_area_id/excavator_id; assignments were partially skipped.');
         }
-        
+
         $this->command->info('✓ Assigned machines to mine areas');
     }
-    
+
     private function createGeofences(): void
     {
         $this->command->info('Creating geofences...');
-        
+
         foreach ($this->mineAreas as $area) {
             $geofence = Geofence::create([
                 'team_id' => $this->team->id,
@@ -533,18 +543,18 @@ class ComprehensiveDataSeeder extends Seeder
                 'status' => 'active',
             ]);
         }
-        
+
         $this->command->info('✓ Created geofences for all mine areas');
     }
-    
+
     private function createRoutes(): void
     {
         $this->command->info('Creating routes for haulers...');
-        
+
         $routeCount = 0;
-        
-        $pits = array_values(array_filter($this->mineAreas, fn($area) => $this->getMineAreaType($area) === 'pit'));
-        $dumps = array_values(array_filter($this->mineAreas, fn($area) => in_array($this->getMineAreaType($area), ['stockpile', 'dump'])));
+
+        $pits = array_values(array_filter($this->mineAreas, fn ($area) => $this->getMineAreaType($area) === 'pit'));
+        $dumps = array_values(array_filter($this->mineAreas, fn ($area) => in_array($this->getMineAreaType($area), ['stockpile', 'dump'])));
 
         foreach ($this->haulers as $hauler) {
             if ($hauler->status !== 'active' || empty($pits) || empty($dumps)) {
@@ -553,11 +563,11 @@ class ComprehensiveDataSeeder extends Seeder
 
             $loadingPoint = $pits[array_rand($pits)];
             $dumpPoint = $dumps[array_rand($dumps)];
-            
-            if (!$loadingPoint || !$dumpPoint) {
+
+            if (! $loadingPoint || ! $dumpPoint) {
                 continue;
             }
-            
+
             $route = Route::create([
                 'team_id' => $this->team->id,
                 'machine_id' => $hauler->id,
@@ -575,57 +585,57 @@ class ComprehensiveDataSeeder extends Seeder
                 'speed_limit' => rand(30, 50),
                 'status' => 'active',
             ]);
-            
+
             // Create 2-4 waypoints
             $waypointCount = rand(2, 4);
             for ($i = 1; $i <= $waypointCount; $i++) {
                 $fraction = $i / ($waypointCount + 1);
                 Waypoint::create([
                     'route_id' => $route->id,
-                    'latitude' => $loadingPoint->center_latitude + 
+                    'latitude' => $loadingPoint->center_latitude +
                                  ($dumpPoint->center_latitude - $loadingPoint->center_latitude) * $fraction,
-                    'longitude' => $loadingPoint->center_longitude + 
+                    'longitude' => $loadingPoint->center_longitude +
                                   ($dumpPoint->center_longitude - $loadingPoint->center_longitude) * $fraction,
                     'sequence_order' => $i,
                     'waypoint_type' => 'standard',
                 ]);
             }
-            
+
             $routeCount++;
         }
-        
+
         $this->command->info("✓ Created $routeCount routes");
     }
-    
+
     private function generateMachineMetrics(): void
     {
         $this->command->info('Generating machine metrics (30 days)...');
-        
+
         $metricsCount = 0;
-        
+
         foreach ($this->machines as $machine) {
             // Generate metrics for last 30 days
             for ($day = 30; $day >= 0; $day--) {
                 $date = now()->subDays($day);
-                
+
                 // Skip some days randomly for maintenance machines
                 if ($machine->status === 'maintenance' && rand(1, 3) === 1) {
                     continue;
                 }
-                
+
                 // Generate 3-8 metrics per day (one every few hours)
                 $metricsPerDay = $machine->status === 'active' ? rand(6, 12) : rand(2, 5);
-                
+
                 for ($i = 0; $i < $metricsPerDay; $i++) {
                     $timestamp = $date->copy()->addHours($i * (24 / $metricsPerDay));
-                    
+
                     // Base metrics on machine type
                     $speed = 0;
                     $fuelLevel = rand(20, 95);
                     $temperature = rand(75, 95);
-                    
+
                     if ($machine->status === 'active') {
-                        $speed = match($machine->machine_type) {
+                        $speed = match ($machine->machine_type) {
                             'excavator' => 0, // Excavators don't move much
                             'articulated_hauler' => rand(15, 45),
                             'dozer' => rand(5, 15),
@@ -634,7 +644,7 @@ class ComprehensiveDataSeeder extends Seeder
                             default => 0,
                         };
                     }
-                    
+
                     MachineMetric::create([
                         'team_id' => $this->team->id,
                         'machine_id' => $machine->id,
@@ -646,66 +656,66 @@ class ComprehensiveDataSeeder extends Seeder
                         'total_hours' => $machine->hours_meter - ((30 - $day) * 8 / 30),
                         'idle_hours' => rand(0, 2) / 10,
                         'operating_hours' => rand(6, 9) / 10,
-                        'load_weight' => $machine->machine_type === 'articulated_hauler' ? 
-                                       rand(25000, (int)$machine->capacity) : null,
+                        'load_weight' => $machine->machine_type === 'articulated_hauler' ?
+                                       rand(25000, (int) $machine->capacity) : null,
                         'payload_capacity_used' => $machine->machine_type === 'articulated_hauler' ?
                                                    rand(60, 95) : null,
                         'created_at' => $timestamp,
                         'updated_at' => $timestamp,
                     ]);
-                    
+
                     $metricsCount++;
                 }
             }
         }
-        
+
         $this->command->info("✓ Generated $metricsCount machine metrics");
     }
-    
+
     private function generateProductionData(): void
     {
         $this->command->info('Generating production data...');
 
         $hasMineAreaColumn = Schema::hasColumn('machines', 'mine_area_id');
-        
+
         $productionCount = 0;
-        
+
         // Get only pit mine areas
-        $pits = array_filter($this->mineAreas, fn($area) => $this->getMineAreaType($area) === 'pit');
-        
+        $pits = array_filter($this->mineAreas, fn ($area) => $this->getMineAreaType($area) === 'pit');
+
         // Generate production for last 30 days
         for ($day = 30; $day >= 0; $day--) {
             $date = now()->subDays($day);
-            
+
             foreach ($pits as $pit) {
                 // Get machines assigned to this pit
                 $pitMachines = $hasMineAreaColumn
                     ? array_filter(
                         $this->machines,
-                        fn($m) => $m->mine_area_id === $pit->id && $m->status === 'active'
+                        fn ($m) => $m->mine_area_id === $pit->id && $m->status === 'active'
                     )
                     : array_filter(
                         $this->machines,
-                        fn($m) => in_array($m->machine_type, ['excavator', 'articulated_hauler']) && $m->status === 'active'
+                        fn ($m) => in_array($m->machine_type, ['excavator', 'articulated_hauler']) && $m->status === 'active'
                     );
-                
+
                 if (empty($pitMachines)) {
                     continue;
                 }
-                
+
                 // Calculate realistic production based on number of active machines
                 $machineCount = count($pitMachines);
                 $baseTonnage = $machineCount * rand(150, 300); // Per machine per day
-                
+
                 // Get material types for this pit
                 $materials = data_get($pit->metadata, 'material_types', ['Platinum Ore']);
                 $material = $materials[array_rand($materials)];
-                
+
                 $loads = $machineCount * rand(20, 40);
                 $cycles = $machineCount * rand(15, 30);
                 $tonnage = $baseTonnage + rand(-200, 200);
                 $bcm = $tonnage * rand(0.7, 0.9); // BCM typically less than tonnage
-                
+
                 $sampleMachine = array_values($pitMachines)[0] ?? null;
 
                 ProductionRecord::create([
@@ -723,41 +733,41 @@ class ComprehensiveDataSeeder extends Seeder
                         'loads' => $loads,
                         'cycles' => $cycles,
                         'bcm' => $bcm,
-                        'machines_used' => array_map(fn($m) => $m->id, $pitMachines),
+                        'machines_used' => array_map(fn ($m) => $m->id, $pitMachines),
                     ],
                     'created_at' => $date,
                     'updated_at' => $date,
                 ]);
-                
+
                 $productionCount++;
             }
         }
-        
+
         $this->command->info("✓ Generated $productionCount production records");
     }
-    
+
     private function generateFuelData(): void
     {
         $this->command->info('Generating fuel transactions...');
-        
+
         $transactionCount = 0;
-        
+
         foreach ($this->machines as $machine) {
             // Generate 3-8 refueling events over past 30 days
             $refuelCount = rand(3, 8);
-            
+
             for ($i = 0; $i < $refuelCount; $i++) {
                 $daysAgo = rand(1, 30);
                 $timestamp = now()->subDays($daysAgo)->subHours(rand(0, 23));
-                
+
                 $litersFilled = rand(
-                    (int)($machine->fuel_capacity * 0.4),
-                    (int)($machine->fuel_capacity * 0.9)
+                    (int) ($machine->fuel_capacity * 0.4),
+                    (int) ($machine->fuel_capacity * 0.9)
                 );
-                
+
                 $unitPrice = rand(1850, 2150) / 100; // R18.50 - R21.50
                 $machineHours = $machine->hours_meter - (30 - $daysAgo) * 8;
-                
+
                 FuelTransaction::create([
                     'team_id' => $this->team->id,
                     'machine_id' => $machine->id,
@@ -775,20 +785,20 @@ class ComprehensiveDataSeeder extends Seeder
                     'created_at' => $timestamp,
                     'updated_at' => $timestamp,
                 ]);
-                
+
                 $transactionCount++;
             }
         }
-        
+
         $this->command->info("✓ Generated $transactionCount fuel transactions");
     }
-    
+
     private function generateAlerts(): void
     {
         $this->command->info('Generating realistic alerts...');
-        
+
         $alertCount = 0;
-        
+
         foreach ($this->machines as $machine) {
             // Machines in maintenance should have maintenance alerts
             if ($machine->status === 'maintenance') {
@@ -808,7 +818,7 @@ class ComprehensiveDataSeeder extends Seeder
                 ]);
                 $alertCount++;
             }
-            
+
             // Generate some random operational alerts for active machines
             if ($machine->status === 'active' && rand(1, 3) === 1) {
                 $alertTypes = [
@@ -831,21 +841,21 @@ class ComprehensiveDataSeeder extends Seeder
                         'priority' => 'low',
                     ],
                 ];
-                
+
                 $alert = $alertTypes[array_rand($alertTypes)];
                 $alert['team_id'] = $this->team->id;
                 $alert['machine_id'] = $machine->id;
                 $alert['status'] = rand(1, 4) === 1 ? 'resolved' : 'active';
                 $alert['triggered_at'] = now()->subHours(rand(1, 48));
-                
+
                 if ($alert['status'] === 'resolved') {
                     $alert['resolved_at'] = now()->subHours(rand(1, 24));
                 }
-                
+
                 Alert::create($alert);
                 $alertCount++;
             }
-            
+
             // Idle machines might have idle alerts
             if ($machine->status === 'idle') {
                 Alert::create([
@@ -864,14 +874,14 @@ class ComprehensiveDataSeeder extends Seeder
                 $alertCount++;
             }
         }
-        
+
         $this->command->info("✓ Generated $alertCount alerts");
     }
-    
+
     private function generateAIRecommendations(): void
     {
         $this->command->info('Generating AI recommendations...');
-        
+
         // Create an AI agent if one doesn't exist
         $this->aiAgent = AIAgent::firstOrCreate(
             ['name' => 'Mining Operations Optimizer'],
@@ -884,7 +894,7 @@ class ComprehensiveDataSeeder extends Seeder
                 'configuration' => [],
             ]
         );
-        
+
         $recommendations = [
             [
                 'category' => 'fleet',
@@ -932,46 +942,46 @@ class ComprehensiveDataSeeder extends Seeder
                 'confidence_score' => 0.74,
             ],
         ];
-        
+
         foreach ($recommendations as $rec) {
             $rec['team_id'] = $this->team->id;
             $rec['ai_agent_id'] = $this->aiAgent->id;
             AIRecommendation::create($rec);
         }
-        
-        $this->command->info('✓ Generated ' . count($recommendations) . ' AI recommendations');
+
+        $this->command->info('✓ Generated '.count($recommendations).' AI recommendations');
     }
-    
+
     private function assignMachineOperators(): void
     {
         $this->command->info('Assigning machine operators...');
-        
+
         $operatorCount = 0;
-        
+
         // Assign primary operators to machines
         foreach ($this->machines as $machine) {
             $operator = $this->users[array_rand($this->users)];
-            
+
             // Update machine notes with operator assignment
             $currentNotes = $machine->notes ?? '';
             $operatorNote = "Primary Operator: {$operator->name}";
-            
+
             $machine->update([
-                'notes' => $currentNotes ? $currentNotes . "\n" . $operatorNote : $operatorNote
+                'notes' => $currentNotes ? $currentNotes."\n".$operatorNote : $operatorNote,
             ]);
-            
+
             $operatorCount++;
         }
-        
+
         $this->command->info("✓ Assigned {$operatorCount} operators to machines");
     }
-    
+
     private function createMaintenanceSchedules(): void
     {
         $this->command->info('Creating maintenance schedules...');
-        
+
         $scheduleCount = 0;
-        
+
         $maintenanceTypes = [
             [
                 'type' => 'preventive',
@@ -1006,15 +1016,15 @@ class ComprehensiveDataSeeder extends Seeder
                 'parts' => [],
             ],
         ];
-        
+
         foreach ($this->machines as $machine) {
             foreach ($maintenanceTypes as $maintenance) {
                 $lastServiceHours = $machine->hours_meter - rand(50, 200);
                 $nextServiceHours = $lastServiceHours + ($maintenance['interval_hours'] ?? 0);
-                
+
                 $lastServiceDate = now()->subDays(rand(5, 25));
                 $nextServiceDate = $lastServiceDate->copy()->addDays($maintenance['interval_days'] ?? 30);
-                
+
                 MaintenanceSchedule::create([
                     'team_id' => $this->team->id,
                     'machine_id' => $machine->id,
@@ -1035,41 +1045,41 @@ class ComprehensiveDataSeeder extends Seeder
                     'required_parts' => $maintenance['parts'],
                     'auto_generate_work_order' => true,
                 ]);
-                
+
                 $scheduleCount++;
             }
         }
-        
+
         $this->command->info("✓ Created {$scheduleCount} maintenance schedules");
     }
-    
+
     private function generateMaintenanceRecords(): void
     {
         $this->command->info('Generating maintenance records...');
-        
+
         $recordCount = 0;
-        
+
         $maintenanceTypes = ['preventive', 'corrective', 'inspection', 'breakdown'];
         $statuses = ['completed', 'completed', 'completed', 'in_progress', 'scheduled'];
-        
+
         foreach ($this->machines as $machine) {
             // Generate 3-7 historical maintenance records
             $records = rand(3, 7);
-            
+
             for ($i = 0; $i < $records; $i++) {
                 $daysAgo = rand(1, 90);
                 $assignedToUser = $this->users[array_rand($this->users)];
                 $completedByUser = $this->users[array_rand($this->users)];
                 $status = $statuses[array_rand($statuses)];
-                
+
                 $scheduledDate = now()->subDays($daysAgo);
                 $startedAt = $status !== 'scheduled' ? $scheduledDate->copy()->addHours(rand(1, 3)) : null;
                 $completedAt = $status === 'completed' ? $startedAt->copy()->addHours(rand(1, 8)) : null;
-                
+
                 $laborHours = $completedAt ? $completedAt->diffInHours($startedAt) + (rand(0, 30) / 10) : rand(2, 8);
                 $laborCost = $laborHours * rand(350, 500); // R350-R500 per hour
                 $partsCost = rand(500, 5000);
-                
+
                 MaintenanceRecord::create([
                     'team_id' => $this->team->id,
                     'machine_id' => $machine->id,
@@ -1094,20 +1104,20 @@ class ComprehensiveDataSeeder extends Seeder
                     'technician_notes' => $status === 'completed' ? 'Work completed successfully. Machine tested and operational.' : 'Scheduled maintenance',
                     'machine_operational' => $status === 'completed',
                 ]);
-                
+
                 $recordCount++;
             }
         }
-        
+
         $this->command->info("✓ Generated {$recordCount} maintenance records");
     }
-    
+
     private function generateActivityLogs(): void
     {
         $this->command->info('Generating user activity logs...');
-        
+
         $logCount = 0;
-        
+
         $activities = [
             ['action' => 'login', 'description' => 'User logged into system'],
             ['action' => 'view_dashboard', 'description' => 'Viewed main dashboard'],
@@ -1120,15 +1130,15 @@ class ComprehensiveDataSeeder extends Seeder
             ['action' => 'view_map', 'description' => 'Viewed live tracking map'],
             ['action' => 'create_route', 'description' => 'Created new route'],
         ];
-        
+
         foreach ($this->users as $user) {
             // Generate 15-30 activity logs per user over past 30 days
             $activityCount = rand(15, 30);
-            
+
             for ($i = 0; $i < $activityCount; $i++) {
                 $activity = $activities[array_rand($activities)];
                 $daysAgo = rand(0, 30);
-                
+
                 ActivityLog::create([
                     'team_id' => $this->team->id,
                     'user_id' => $user->id,
@@ -1136,14 +1146,14 @@ class ComprehensiveDataSeeder extends Seeder
                     'description' => $activity['description'],
                     'created_at' => now()->subDays($daysAgo)->subHours(rand(0, 23)),
                 ]);
-                
+
                 $logCount++;
             }
         }
-        
+
         $this->command->info("✓ Generated {$logCount} activity logs");
     }
-    
+
     private function getRandomMaintenanceTitle(): string
     {
         $titles = [
@@ -1160,10 +1170,10 @@ class ComprehensiveDataSeeder extends Seeder
             'Emergency Repair',
             'Component Replacement',
         ];
-        
+
         return $titles[array_rand($titles)];
     }
-    
+
     private function getRandomMaintenanceDescription(): string
     {
         $descriptions = [
@@ -1176,10 +1186,10 @@ class ComprehensiveDataSeeder extends Seeder
             'Safety compliance inspection',
             'Pre-season maintenance check',
         ];
-        
+
         return $descriptions[array_rand($descriptions)];
     }
-    
+
     private function getRandomWorkPerformed(): string
     {
         $work = [
@@ -1192,48 +1202,48 @@ class ComprehensiveDataSeeder extends Seeder
             'Serviced cooling system. Replaced thermostat and coolant.',
             'Diagnosed and repaired transmission issue. Replaced clutch assembly.',
         ];
-        
+
         return $work[array_rand($work)];
     }
-    
+
     private function getRandomPartsUsed(): array
     {
         $partsSets = [
             [
-                ['name' => 'Engine Oil Filter', 'part_number' => 'EO-' . rand(1000, 9999), 'quantity' => 1, 'cost' => rand(200, 400)],
-                ['name' => 'Air Filter', 'part_number' => 'AF-' . rand(1000, 9999), 'quantity' => 1, 'cost' => rand(150, 300)],
+                ['name' => 'Engine Oil Filter', 'part_number' => 'EO-'.rand(1000, 9999), 'quantity' => 1, 'cost' => rand(200, 400)],
+                ['name' => 'Air Filter', 'part_number' => 'AF-'.rand(1000, 9999), 'quantity' => 1, 'cost' => rand(150, 300)],
             ],
             [
-                ['name' => 'Hydraulic Filter', 'part_number' => 'HF-' . rand(1000, 9999), 'quantity' => 2, 'cost' => rand(300, 600)],
-                ['name' => 'Hydraulic Oil 20L', 'part_number' => 'HO-' . rand(1000, 9999), 'quantity' => 3, 'cost' => rand(800, 1200)],
+                ['name' => 'Hydraulic Filter', 'part_number' => 'HF-'.rand(1000, 9999), 'quantity' => 2, 'cost' => rand(300, 600)],
+                ['name' => 'Hydraulic Oil 20L', 'part_number' => 'HO-'.rand(1000, 9999), 'quantity' => 3, 'cost' => rand(800, 1200)],
             ],
             [
-                ['name' => 'Brake Pads', 'part_number' => 'BP-' . rand(1000, 9999), 'quantity' => 4, 'cost' => rand(2000, 3500)],
+                ['name' => 'Brake Pads', 'part_number' => 'BP-'.rand(1000, 9999), 'quantity' => 4, 'cost' => rand(2000, 3500)],
             ],
             [
-                ['name' => 'Tire 26.5R25', 'part_number' => 'TY-' . rand(1000, 9999), 'quantity' => 1, 'cost' => rand(15000, 25000)],
+                ['name' => 'Tire 26.5R25', 'part_number' => 'TY-'.rand(1000, 9999), 'quantity' => 1, 'cost' => rand(15000, 25000)],
             ],
             [],
         ];
-        
+
         return $partsSets[array_rand($partsSets)];
     }
-    
+
     private function generatePolygonCoordinates(float $centerLat, float $centerLon, float $radius): array
     {
         $coordinates = [];
         $points = 6; // Hexagon
-        
+
         for ($i = 0; $i < $points; $i++) {
             $angle = ($i / $points) * 2 * pi();
             $lat = $centerLat + ($radius * cos($angle));
             $lon = $centerLon + ($radius * sin($angle));
             $coordinates[] = ['lat' => $lat, 'lng' => $lon];
         }
-        
+
         // Close the polygon
         $coordinates[] = $coordinates[0];
-        
+
         return $coordinates;
     }
 
@@ -1241,36 +1251,36 @@ class ComprehensiveDataSeeder extends Seeder
     {
         return (string) data_get($area->metadata, 'area_type', 'pit');
     }
-    
+
     private function printSummary(): void
     {
         $this->command->info('');
         $this->command->info('═══════════════════════════════════════════');
         $this->command->info('📊 Multi-Team Data Seeding Summary');
         $this->command->info('═══════════════════════════════════════════');
-        $this->command->info('Total Teams: ' . count($this->allTeams));
-        $this->command->info('Total Users: ' . User::count());
+        $this->command->info('Total Teams: '.count($this->allTeams));
+        $this->command->info('Total Users: '.User::count());
         $this->command->info('');
-        
+
         foreach ($this->allTeams as $teamData) {
             $team = $teamData['team'];
             $this->command->info("🏢 {$team->name}:");
-            $this->command->info("   Users: " . $teamData['users']);
-            $this->command->info("   Mine Areas: " . $teamData['areas']);
-            $this->command->info("   Machines: " . $teamData['machines']);
-            $this->command->info("   Geofences: " . Geofence::where('team_id', $team->id)->count());
-            $this->command->info("   Routes: " . Route::where('team_id', $team->id)->count());
-            $this->command->info("   Alerts: " . Alert::where('team_id', $team->id)->count());
-            $this->command->info("   Maintenance Records: " . MaintenanceRecord::where('team_id', $team->id)->count());
+            $this->command->info('   Users: '.$teamData['users']);
+            $this->command->info('   Mine Areas: '.$teamData['areas']);
+            $this->command->info('   Machines: '.$teamData['machines']);
+            $this->command->info('   Geofences: '.Geofence::where('team_id', $team->id)->count());
+            $this->command->info('   Routes: '.Route::where('team_id', $team->id)->count());
+            $this->command->info('   Alerts: '.Alert::where('team_id', $team->id)->count());
+            $this->command->info('   Maintenance Records: '.MaintenanceRecord::where('team_id', $team->id)->count());
             $this->command->info('');
         }
-        
+
         $this->command->info('═══════════════════════════════════════════');
         $this->command->info('Total Database Records:');
-        $this->command->info("  Machine Metrics: " . MachineMetric::count());
-        $this->command->info("  Production Records: " . ProductionRecord::count());
-        $this->command->info("  Fuel Transactions: " . FuelTransaction::count());
-        $this->command->info("  Activity Logs: " . ActivityLog::count());
+        $this->command->info('  Machine Metrics: '.MachineMetric::count());
+        $this->command->info('  Production Records: '.ProductionRecord::count());
+        $this->command->info('  Fuel Transactions: '.FuelTransaction::count());
+        $this->command->info('  Activity Logs: '.ActivityLog::count());
         $this->command->info('═══════════════════════════════════════════');
     }
 }

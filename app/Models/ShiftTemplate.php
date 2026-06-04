@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $category
  * @property string $title
  * @property string $template_body
- * @property array|null $required_fields
+ * @property array<string, mixed>|null $required_fields
  * @property int $created_by
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at

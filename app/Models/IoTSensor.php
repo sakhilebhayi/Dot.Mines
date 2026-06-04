@@ -12,21 +12,21 @@ use Illuminate\Database\Eloquent\Model;
  * @property float|null $compliance_score
  * @property float $confidence_score
  * @property \Carbon\Carbon $created_at
- * @property array|null $data
+ * @property array<string, mixed>|null $data
  * @property mixed $device_id
- * @property array|null $factors
+ * @property array<string, mixed>|null $factors
  * @property string|null $file_path
  * @property mixed $forecast_date
  * @property mixed $generated_by
  * @property int $id
  * @property mixed $iot_sensor_id
- * @property array|null $issues
- * @property array|null $last_reading
+ * @property array<string, mixed>|null $issues
+ * @property array<string, mixed>|null $last_reading
  * @property \Carbon\Carbon|null $last_reading_at
  * @property float|null $location_latitude
  * @property float|null $location_longitude
  * @property string $material_name
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property mixed|null $mine_area_id
  * @property string $model_version
  * @property string $name

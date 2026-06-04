@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|float $target_quantity
  * @property string|null $notes
  * @property string $status
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property float $variance_percentage
  * @property bool $is_above_target
  * @property float|null $system_variance_percentage
@@ -103,22 +103,22 @@ class ProductionRecord extends Model
         return $this->belongsTo(Machine::class);
     }
 
-    public function scopeForTeam(Builder $query, $teamId): Builder
+    public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
-    public function scopeByStatus(Builder $query, $status): Builder
+    public function scopeByStatus(Builder $query, string $status): Builder
     {
         return $query->where('status', $status);
     }
 
-    public function scopeBetweenDates(Builder $query, $startDate, $endDate): Builder
+    public function scopeBetweenDates(Builder $query, string $startDate, string $endDate): Builder
     {
         return $query->whereBetween('record_date', [$startDate, $endDate]);
     }
 
-    public function scopeForMineArea(Builder $query, $mineAreaId): Builder
+    public function scopeForMineArea(Builder $query, int $mineAreaId): Builder
     {
         return $query->where('mine_area_id', $mineAreaId);
     }

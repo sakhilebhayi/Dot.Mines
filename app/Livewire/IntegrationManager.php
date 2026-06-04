@@ -15,8 +15,10 @@ class IntegrationManager extends Component
 
     public mixed $team = null;
 
+    /** @var array<string, mixed> */
     public array $integrations = [];
 
+    /** @var array<string, mixed> */
     public array $availableManufacturers = [];
 
     public bool $showAddModal = false;
@@ -27,6 +29,7 @@ class IntegrationManager extends Component
 
     public mixed $testResult = null;
 
+    /** @var array<string, mixed> */
     public array $formData = [
         'provider' => '',
         'name' => '',

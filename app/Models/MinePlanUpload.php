@@ -78,7 +78,7 @@ class MinePlanUpload extends Model
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
-    public function scopeForTeam(Builder $query, $teamId): Builder
+    public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
@@ -88,7 +88,7 @@ class MinePlanUpload extends Model
         return $query->where('status', 'active');
     }
 
-    public function scopeByType(Builder $query, $type): Builder
+    public function scopeByType(Builder $query, string $type): Builder
     {
         return $query->where('file_type', $type);
     }

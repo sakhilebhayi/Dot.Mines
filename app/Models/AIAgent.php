@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $type
  * @property string|null $description
  * @property string $status
- * @property array|null $configuration
- * @property array|null $capabilities
+ * @property array<string, mixed>|null $configuration
+ * @property array<string, mixed>|null $capabilities
  * @property float $accuracy_score
  * @property int $predictions_made
  * @property int $successful_predictions

@@ -76,6 +76,7 @@ class RoutePlanning extends Component
     // View mode
     public string $viewMode = 'create'; // create, view
 
+    /** @var array<string, mixed> */
     public array $routes = [];
 
     public ?int $selectedRouteId = null;

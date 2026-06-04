@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $name
  * @property string|null $description
  * @property string|null $location
- * @property array|null $coordinates
+ * @property array<string, mixed>|null $coordinates
  * @property float|null $center_latitude
  * @property float|null $center_longitude
  * @property float|null $latitude
@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $status
  * @property string|null $manager_name
  * @property string|null $manager_contact
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property \Carbon\Carbon|null $deleted_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
@@ -159,7 +159,7 @@ class MineArea extends Model
     /**
      * Scope to filter by team
      */
-    public function scopeForTeam(Builder $query, $teamId): Builder
+    public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
@@ -167,7 +167,7 @@ class MineArea extends Model
     /**
      * Scope to filter by status
      */
-    public function scopeByStatus(Builder $query, $status): Builder
+    public function scopeByStatus(Builder $query, string $status): Builder
     {
         return $query->where('status', $status);
     }

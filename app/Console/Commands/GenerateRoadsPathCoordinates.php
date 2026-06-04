@@ -5,11 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\Route;
-use App\Models\Waypoint;
 use App\Services\RoutePlanningService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class GenerateRoadsPathCoordinates extends Command
@@ -37,8 +35,12 @@ class GenerateRoadsPathCoordinates extends Command
      * Coordinate generation settings
      */
     protected int $teamId;
+
     protected int $count;
+
     protected int $days;
+
+    /** @var array<string, mixed> */
     protected array $stats = [
         'created' => 0,
         'deleted' => 0,
@@ -61,8 +63,9 @@ class GenerateRoadsPathCoordinates extends Command
 
         // Get team
         $team = \App\Models\Team::find($this->teamId);
-        if (!$team) {
+        if (! $team) {
             $this->error("❌ Team with ID {$this->teamId} not found");
+
             return self::FAILURE;
         }
 
@@ -75,15 +78,16 @@ class GenerateRoadsPathCoordinates extends Command
 
         // Get machines
         $machinesQuery = Machine::where('team_id', $this->teamId);
-        
+
         if ($specificMachineId) {
             $machinesQuery->where('id', $specificMachineId);
         }
-        
+
         $machines = $machinesQuery->get();
 
         if ($machines->isEmpty()) {
             $this->warn('No machines found for this team');
+
             return self::SUCCESS;
         }
 
@@ -137,8 +141,9 @@ class GenerateRoadsPathCoordinates extends Command
             ->orWhere('name', 'like', '%Komatsu PC800%')
             ->first();
 
-        if (!$komatsu) {
+        if (! $komatsu) {
             $this->info('   Machine not found (may already be deleted)');
+
             return;
         }
 
@@ -166,7 +171,7 @@ class GenerateRoadsPathCoordinates extends Command
         // Select best route for this machine
         $route = $this->selectBestRoute($machine, $routes);
 
-        if (!$route) {
+        if (! $route) {
             // Generate circular fallback path
             return $this->generateDefaultCoordinates($machine);
         }
@@ -190,6 +195,7 @@ class GenerateRoadsPathCoordinates extends Command
         $machineSpecificRoute = $routes->where('machine_id', $machine->id)->first();
         if ($machineSpecificRoute && $machineSpecificRoute->waypoints->isNotEmpty()) {
             $this->info("  → Using machine-specific route: {$machineSpecificRoute->name}");
+
             return $machineSpecificRoute;
         }
 
@@ -204,22 +210,23 @@ class GenerateRoadsPathCoordinates extends Command
     protected function generateCoordinatesAlongRoute(Machine $machine, Route $route): int
     {
         $waypoints = $route->waypoints->sortBy('sequence_order')->values();
-        
+
         if ($waypoints->count() < 2) {
-            $this->warn("  → Route has too few waypoints, using OSRM fallback");
+            $this->warn('  → Route has too few waypoints, using OSRM fallback');
+
             return $this->generateDefaultCoordinates($machine);
         }
 
         $this->info("  → Using route: {$route->name} with {$waypoints->count()} waypoints");
-        
+
         $allCoordinates = [];
-        $routePlanningService = new RoutePlanningService();
-        
+        $routePlanningService = new RoutePlanningService;
+
         // For each segment between waypoints, calculate road-based route using OSRM
         for ($i = 0; $i < $waypoints->count() - 1; $i++) {
             $startWaypoint = $waypoints[$i];
             $endWaypoint = $waypoints[$i + 1];
-            
+
             try {
                 // Use OSRM to get actual road path between waypoints
                 $segmentRoute = $routePlanningService->calculateOptimalRoute(
@@ -230,8 +237,8 @@ class GenerateRoadsPathCoordinates extends Command
                     $machine->id,
                     $machine->team_id
                 );
-                
-                if ($segmentRoute && !empty($segmentRoute['route_geometry'])) {
+
+                if ($segmentRoute && ! empty($segmentRoute['route_geometry'])) {
                     // Add all points from this segment (they're all on roads)
                     foreach ($segmentRoute['route_geometry'] as $point) {
                         $allCoordinates[] = [
@@ -239,7 +246,7 @@ class GenerateRoadsPathCoordinates extends Command
                             'lng' => $point[1],
                         ];
                     }
-                    $this->info("  → Segment {$i}: Added " . count($segmentRoute['route_geometry']) . " road points");
+                    $this->info("  → Segment {$i}: Added ".count($segmentRoute['route_geometry']).' road points');
                 } else {
                     // Fallback to straight line for this segment only
                     $this->warn("  → Segment {$i}: OSRM failed, using straight line");
@@ -269,22 +276,23 @@ class GenerateRoadsPathCoordinates extends Command
         // Now sample exactly $this->count points from all collected coordinates
         // CRITICAL: Only sample existing OSRM points, NEVER interpolate between them
         // to guarantee all coordinates stay on actual roads
-        $this->info("  → Total road points collected: " . count($allCoordinates));
-        
+        $this->info('  → Total road points collected: '.count($allCoordinates));
+
         if (count($allCoordinates) == 0) {
-            $this->warn("  → No coordinates collected, using fallback");
+            $this->warn('  → No coordinates collected, using fallback');
+
             return $this->generateDefaultCoordinates($machine);
         }
-        
+
         // Sample from actual OSRM points only - no interpolation
         $coordinates = $this->sampleRoutePoints($allCoordinates, $this->count);
-        
-        $this->info("  → Final coordinates: " . count($coordinates) . " (sampled from roads only)");
+
+        $this->info('  → Final coordinates: '.count($coordinates).' (sampled from roads only)');
 
         // Save coordinates to database with timing and metrics
         return $this->saveCoordinatesToDatabase($machine, $coordinates);
     }
-    
+
     /**
      * Sample exact points from OSRM route - NO interpolation
      * This guarantees all coordinates are on actual roads
@@ -292,27 +300,28 @@ class GenerateRoadsPathCoordinates extends Command
     protected function sampleRoutePoints(array $routePoints, int $targetCount): array
     {
         $totalPoints = count($routePoints);
-        
+
         if ($totalPoints == 0) {
             return [];
         }
-        
+
         if ($totalPoints <= $targetCount) {
             // Use all points we have, even if less than target
-            $this->info("  → Using all " . $totalPoints . " OSRM points (target was " . $targetCount . ")");
+            $this->info('  → Using all '.$totalPoints.' OSRM points (target was '.$targetCount.')');
+
             return $routePoints;
         }
-        
+
         // Sample evenly-spaced points from the OSRM route
         $sampled = [];
         $step = ($totalPoints - 1) / ($targetCount - 1);
-        
+
         for ($i = 0; $i < $targetCount; $i++) {
-            $index = (int)round($i * $step);
+            $index = (int) round($i * $step);
             $index = min($index, $totalPoints - 1); // Ensure we don't exceed bounds
             $sampled[] = $routePoints[$index];
         }
-        
+
         return $sampled;
     }
 
@@ -330,7 +339,7 @@ class GenerateRoadsPathCoordinates extends Command
 
         for ($i = 0; $i < $numPoints; $i++) {
             $progress = $i / max(1, $numPoints - 1);
-            
+
             $lat = $startLat + ($endLat - $startLat) * $progress;
             $lng = $startLng + ($endLng - $startLng) * $progress;
 
@@ -368,25 +377,25 @@ class GenerateRoadsPathCoordinates extends Command
             ['lat' => -25.5366, 'lng' => 29.7684, 'name' => 'Middelburg'],
             ['lat' => -27.4467, 'lng' => 27.9669, 'name' => 'Welkom'],
         ];
-        
+
         // Select unique start and end points for this machine based on machine ID
         // Ensures different machines get different routes
         $startIndex = ($machine->id * 2) % count($southAfricaRoadPoints);
         $endIndex = ($machine->id * 2 + 5) % count($southAfricaRoadPoints);
-        
+
         // Ensure start and end are different
         if ($startIndex === $endIndex) {
             $endIndex = ($endIndex + 1) % count($southAfricaRoadPoints);
         }
-        
+
         $startPoint = $southAfricaRoadPoints[$startIndex];
         $endPoint = $southAfricaRoadPoints[$endIndex];
-        
+
         $this->info("  → {$machine->name}: Calculating route from {$startPoint['name']} to {$endPoint['name']}");
-        
+
         // Use OSRM to calculate road-based route
         try {
-            $routePlanningService = new RoutePlanningService();
+            $routePlanningService = new RoutePlanningService;
             $calculatedRoute = $routePlanningService->calculateOptimalRoute(
                 $startPoint['lat'],
                 $startPoint['lng'],
@@ -395,35 +404,36 @@ class GenerateRoadsPathCoordinates extends Command
                 $machine->id,
                 $machine->team_id
             );
-            
-            if ($calculatedRoute && !empty($calculatedRoute['route_geometry'])) {
+
+            if ($calculatedRoute && ! empty($calculatedRoute['route_geometry'])) {
                 $routeGeometry = $calculatedRoute['route_geometry'];
-                $this->info("  → OSRM route calculated: " . count($routeGeometry) . " points, {$calculatedRoute['total_distance']} km");
-                
+                $this->info('  → OSRM route calculated: '.count($routeGeometry)." points, {$calculatedRoute['total_distance']} km");
+
                 // Convert OSRM geometry to our format
-                $roadPoints = array_map(function($point) {
+                $roadPoints = array_map(function ($point) {
                     return [
                         'lat' => $point[0],
                         'lng' => $point[1],
                     ];
                 }, $routeGeometry);
-                
+
                 // Sample from OSRM points only - NO interpolation to stay on roads
                 $coordinates = $this->sampleRoutePoints($roadPoints, $this->count);
-                
-                $this->info("  → Sampled " . count($coordinates) . " coordinates from road (no interpolation)");
+
+                $this->info('  → Sampled '.count($coordinates).' coordinates from road (no interpolation)');
+
                 return $this->saveCoordinatesToDatabase($machine, $coordinates);
             } else {
-                $this->warn("  → OSRM route empty, falling back to straight line");
+                $this->warn('  → OSRM route empty, falling back to straight line');
             }
         } catch (\Exception $e) {
             $this->warn("  → OSRM failed: {$e->getMessage()}, falling back to straight line");
-            Log::warning('OSRM route generation failed for machine ' . $machine->id, [
+            Log::warning('OSRM route generation failed for machine '.$machine->id, [
                 'machine' => $machine->name,
                 'error' => $e->getMessage(),
             ]);
         }
-        
+
         // Fallback: straight line between start and end (still better than circular)
         $this->info("  → Generating straight-line fallback between {$startPoint['name']} and {$endPoint['name']}");
         $coordinates = $this->interpolateAlongRoute(
@@ -433,15 +443,15 @@ class GenerateRoadsPathCoordinates extends Command
             $endPoint['lng'],
             $this->count
         );
-        
-        return $this->saveCoordinatesToDatabase($machine, array_map(function($coord) {
+
+        return $this->saveCoordinatesToDatabase($machine, array_map(function ($coord) {
             return [
                 'lat' => $coord['lat'],
                 'lng' => $coord['lng'],
             ];
         }, $coordinates));
     }
-    
+
     /**
      * Interpolate OSRM route geometry to get exact number of coordinates
      * Uses distance-based sampling to ensure we follow road curves precisely
@@ -452,73 +462,73 @@ class GenerateRoadsPathCoordinates extends Command
         if (empty($routeGeometry)) {
             return [];
         }
-        
+
         $sourceCount = count($routeGeometry);
-        
+
         if ($sourceCount == 1) {
             // Only one point available
             return array_fill(0, $targetCount, $routeGeometry[0]);
         }
-        
+
         // If source has fewer points than target, we need to densify the route
         if ($sourceCount < $targetCount) {
             return $this->densifyRouteGeometry($routeGeometry, $targetCount);
         }
-        
+
         // Calculate cumulative distances along the route
         // This ensures we sample by distance, not by point index
         $distances = [0]; // Start at 0
         $totalDistance = 0;
-        
+
         for ($i = 1; $i < $sourceCount; $i++) {
             $prevPoint = $routeGeometry[$i - 1];
             $currPoint = $routeGeometry[$i];
-            
+
             // Handle both array formats: ['lat' => ..., 'lng' => ...] and [lat, lng]
             $prevLat = is_array($prevPoint) ? ($prevPoint['lat'] ?? $prevPoint[0]) : 0;
             $prevLng = is_array($prevPoint) ? ($prevPoint['lng'] ?? $prevPoint[1]) : 0;
             $currLat = is_array($currPoint) ? ($currPoint['lat'] ?? $currPoint[0]) : 0;
             $currLng = is_array($currPoint) ? ($currPoint['lng'] ?? $currPoint[1]) : 0;
-            
+
             $segmentDistance = $this->calculateDistance($prevLat, $prevLng, $currLat, $currLng);
-            
+
             $totalDistance += $segmentDistance;
             $distances[] = $totalDistance;
         }
-        
+
         if ($totalDistance == 0) {
             // All points are identical
             return array_fill(0, $targetCount, $routeGeometry[0]);
         }
-        
+
         // Sample points at evenly-spaced distances along the route
         $coordinates = [];
         $distanceStep = $totalDistance / ($targetCount - 1);
-        
+
         for ($i = 0; $i < $targetCount; $i++) {
             $targetDistance = $i * $distanceStep;
-            
+
             // Find the segment that contains this target distance
             for ($j = 0; $j < $sourceCount - 1; $j++) {
                 if ($distances[$j] <= $targetDistance && $targetDistance <= $distances[$j + 1]) {
                     // Interpolate between these two points
                     $segmentStart = $routeGeometry[$j];
                     $segmentEnd = $routeGeometry[$j + 1];
-                    
+
                     // Handle both coordinate formats
                     $startLat = is_array($segmentStart) ? ($segmentStart['lat'] ?? $segmentStart[0]) : 0;
                     $startLng = is_array($segmentStart) ? ($segmentStart['lng'] ?? $segmentStart[1]) : 0;
                     $endLat = is_array($segmentEnd) ? ($segmentEnd['lat'] ?? $segmentEnd[0]) : 0;
                     $endLng = is_array($segmentEnd) ? ($segmentEnd['lng'] ?? $segmentEnd[1]) : 0;
-                    
+
                     $segmentDistance = $distances[$j + 1] - $distances[$j];
                     $distanceInSegment = $targetDistance - $distances[$j];
                     $fraction = $segmentDistance > 0 ? $distanceInSegment / $segmentDistance : 0;
-                    
+
                     // Linear interpolation along the road segment
                     $lat = $startLat + ($endLat - $startLat) * $fraction;
                     $lng = $startLng + ($endLng - $startLng) * $fraction;
-                    
+
                     $coordinates[] = [
                         'lat' => $lat,
                         'lng' => $lng,
@@ -527,14 +537,14 @@ class GenerateRoadsPathCoordinates extends Command
                 }
             }
         }
-        
+
         // Ensure we have exactly targetCount points
         if (count($coordinates) < $targetCount) {
             // Add the last point if missing
             $lastPoint = $routeGeometry[$sourceCount - 1];
             $lastLat = is_array($lastPoint) ? ($lastPoint['lat'] ?? $lastPoint[0]) : 0;
             $lastLng = is_array($lastPoint) ? ($lastPoint['lng'] ?? $lastPoint[1]) : 0;
-            
+
             while (count($coordinates) < $targetCount) {
                 $coordinates[] = [
                     'lat' => $lastLat,
@@ -542,10 +552,10 @@ class GenerateRoadsPathCoordinates extends Command
                 ];
             }
         }
-        
+
         return array_slice($coordinates, 0, $targetCount);
     }
-    
+
     /**
      * Densify route geometry by interpolating between points
      * Used when OSRM returns fewer points than we need
@@ -553,61 +563,61 @@ class GenerateRoadsPathCoordinates extends Command
     protected function densifyRouteGeometry(array $routeGeometry, int $targetCount): array
     {
         $sourceCount = count($routeGeometry);
-        
+
         if ($sourceCount == 0) {
             return [];
         }
-        
+
         if ($sourceCount == 1) {
             // Only one point - duplicate it to reach target
             return array_fill(0, $targetCount, $routeGeometry[0]);
         }
-        
+
         $coordinates = [];
-        
+
         // Calculate how many intermediate points we need per segment
         $totalSegments = $sourceCount - 1;
-        $pointsPerSegment = (int)ceil($targetCount / $totalSegments);
-        
+        $pointsPerSegment = (int) ceil($targetCount / $totalSegments);
+
         for ($i = 0; $i < $totalSegments; $i++) {
             $start = $routeGeometry[$i];
             $end = $routeGeometry[$i + 1];
-            
+
             // Ensure we have valid coordinate format
-            if (!isset($start['lat']) || !isset($start['lng']) || 
-                !isset($end['lat']) || !isset($end['lng'])) {
+            if (! isset($start['lat']) || ! isset($start['lng']) ||
+                ! isset($end['lat']) || ! isset($end['lng'])) {
                 continue;
             }
-            
+
             $segmentPoints = $pointsPerSegment;
             // Last segment gets remaining points
             if ($i === $totalSegments - 1) {
                 $segmentPoints = max(1, $targetCount - count($coordinates));
             }
-            
+
             // Interpolate points along this road segment
             for ($j = 0; $j < $segmentPoints && count($coordinates) < $targetCount; $j++) {
                 $fraction = $segmentPoints > 1 ? $j / ($segmentPoints - 1) : 0;
                 $lat = $start['lat'] + ($end['lat'] - $start['lat']) * $fraction;
                 $lng = $start['lng'] + ($end['lng'] - $start['lng']) * $fraction;
-                
+
                 $coordinates[] = [
                     'lat' => $lat,
                     'lng' => $lng,
                 ];
             }
         }
-        
+
         // Ensure we have at least 1 coordinate
-        if (empty($coordinates) && !empty($routeGeometry)) {
+        if (empty($coordinates) && ! empty($routeGeometry)) {
             $coordinates[] = $routeGeometry[0];
         }
-        
+
         // Pad with last coordinate if needed
-        while (count($coordinates) < $targetCount && !empty($coordinates)) {
+        while (count($coordinates) < $targetCount && ! empty($coordinates)) {
             $coordinates[] = end($coordinates);
         }
-        
+
         return array_slice($coordinates, 0, $targetCount);
     }
 
@@ -677,10 +687,10 @@ class GenerateRoadsPathCoordinates extends Command
 
         $y = sin($dLng) * cos($lat2Rad);
         $x = cos($lat1Rad) * sin($lat2Rad) - sin($lat1Rad) * cos($lat2Rad) * cos($dLng);
-        
+
         $bearing = atan2($y, $x);
         $bearingDegrees = rad2deg($bearing);
-        
+
         // Normalize to 0-360
         return fmod(($bearingDegrees + 360), 360);
     }
@@ -727,14 +737,14 @@ class GenerateRoadsPathCoordinates extends Command
         // Show per-machine breakdown
         $this->newLine();
         $this->info('📋 Per-Machine Breakdown:');
-        
+
         $machineStats = [];
         foreach ($machines as $machine) {
             $metricsCount = MachineMetric::where('machine_id', $machine->id)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
                 ->count();
-            
+
             $machineStats[] = [
                 'name' => $machine->name,
                 'coordinates' => $metricsCount,
@@ -748,7 +758,7 @@ class GenerateRoadsPathCoordinates extends Command
         );
 
         $this->newLine();
-        
+
         if ($this->stats['errors'] === 0) {
             $this->info('Status: ✅ SUCCESS');
         } else {

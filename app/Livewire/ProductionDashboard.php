@@ -206,6 +206,7 @@ class ProductionDashboard extends Component
         ];
     }
 
+    /** @return array<string, mixed> */
     public function getProductionChartDataProperty(): array
     {
         $startDate = Carbon::parse($this->startDate);
@@ -243,6 +244,7 @@ class ProductionDashboard extends Component
         return ['daily' => $daily, 'per_machine' => $perMachine];
     }
 
+    /** @return array<string, mixed> */
     public function getLoadComparisonDataProperty(): array
     {
         $startDate = Carbon::parse($this->startDate);

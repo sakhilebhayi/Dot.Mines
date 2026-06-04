@@ -13,8 +13,10 @@ class FleetMovementReplay extends Component
 {
     public ?int $selectedMachine = null;
 
+    /** @var array<string, mixed> */
     public array $activityFeed = [];
 
+    /** @var array<string, mixed> */
     public array $machineActivities = [];
 
     public bool $showActivities = false;

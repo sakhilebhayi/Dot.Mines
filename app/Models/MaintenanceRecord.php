@@ -31,12 +31,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|float $labor_cost
  * @property string|float $parts_cost
  * @property string|float $total_cost
- * @property array|null $parts_used
- * @property array|null $fault_codes_cleared
+ * @property array<string, mixed>|null $parts_used
+ * @property array<string, mixed>|null $fault_codes_cleared
  * @property int|null $odometer_reading
  * @property int|null $hour_meter_reading
  * @property string|null $technician_notes
- * @property array|null $attachments
+ * @property array<string, mixed>|null $attachments
  * @property bool $machine_operational
  * @property float|null $duration
  * @property \Carbon\Carbon $created_at

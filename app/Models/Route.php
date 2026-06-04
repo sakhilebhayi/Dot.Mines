@@ -30,8 +30,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $route_type
  * @property int|null $speed_limit
  * @property string $status
- * @property array|null $metadata
- * @property array|null $route_geometry
+ * @property array<string, mixed>|null $metadata
+ * @property array<string, mixed>|null $route_geometry
  * @property float $fuel_savings
  * @property int $time_savings
  * @property \Carbon\Carbon $created_at

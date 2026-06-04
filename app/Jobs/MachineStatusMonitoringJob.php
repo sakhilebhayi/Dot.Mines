@@ -18,8 +18,12 @@ class MachineStatusMonitoringJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Integration $integration;
+
     public int $tries = 2;
+
     public int $timeout = 60;
+
+    /** @var array<int> */
     public array $backoff = [30, 120]; // 30s, 2 mins
 
     /**
@@ -51,6 +55,7 @@ class MachineStatusMonitoringJob implements ShouldQueue
                 Log::warning('Integration not connected, skipping status monitoring', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -62,6 +67,7 @@ class MachineStatusMonitoringJob implements ShouldQueue
                 Log::debug('No machines found for integration', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -75,6 +81,7 @@ class MachineStatusMonitoringJob implements ShouldQueue
                 Log::debug('No status data received from integration', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -84,7 +91,7 @@ class MachineStatusMonitoringJob implements ShouldQueue
             foreach ($statuses as $status) {
                 $machine = $machines->firstWhere('manufacturer_id', $status['manufacturer_id'] ?? null);
 
-                if (!$machine) {
+                if (! $machine) {
                     continue;
                 }
 
@@ -153,7 +160,7 @@ class MachineStatusMonitoringJob implements ShouldQueue
     private function determineStatus(array $status, Machine $machine): string
     {
         // Check if integration reports the machine as offline/disconnected
-        if (isset($status['online']) && !$status['online']) {
+        if (isset($status['online']) && ! $status['online']) {
             return 'offline';
         }
 

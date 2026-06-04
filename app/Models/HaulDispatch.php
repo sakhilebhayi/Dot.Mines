@@ -30,8 +30,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Carbon\Carbon|null $started_at
  * @property \Carbon\Carbon|null $estimated_arrival_at
  * @property \Carbon\Carbon|null $completed_at
- * @property array|null $path_coordinates
- * @property array|null $metadata
+ * @property array<string, mixed>|null $path_coordinates
+ * @property array<string, mixed>|null $metadata
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read Machine $machine

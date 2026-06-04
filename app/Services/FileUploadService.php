@@ -10,6 +10,7 @@ use Symfony\Component\Process\Process;
 
 class FileUploadService
 {
+    /** @var array<string, mixed> */
     protected array $allowedExtensions = [
         'pdf', 'dwg', 'dxf', 'kml', 'kmz', 'shp', 'zip', 'gz', 'tar',
         'png', 'jpg', 'jpeg', 'gif', 'tif', 'tiff',

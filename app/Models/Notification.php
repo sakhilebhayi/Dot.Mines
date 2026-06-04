@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $title
  * @property string $message
  * @property string $alert_level
- * @property array|null $data
+ * @property array<string, mixed>|null $data
  * @property string|null $action_url
  * @property bool $is_read
  * @property \Carbon\Carbon|null $read_at

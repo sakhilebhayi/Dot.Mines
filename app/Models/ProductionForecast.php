@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|float $forecasted_quantity
  * @property string $unit
  * @property string|float $confidence_level
- * @property array|null $forecast_method
+ * @property array<string, mixed>|null $forecast_method
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  *
@@ -62,17 +62,17 @@ class ProductionForecast extends Model
         return $this->belongsTo(MineArea::class);
     }
 
-    public function scopeForTeam(Builder $query, $teamId): Builder
+    public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
-    public function scopeForDate(Builder $query, $date): Builder
+    public function scopeForDate(Builder $query, string $date): Builder
     {
         return $query->where('forecast_date', $date);
     }
 
-    public function scopeHighConfidence(Builder $query, $threshold = 80): Builder
+    public function scopeHighConfidence(Builder $query, int $threshold = 80): Builder
     {
         return $query->where('confidence_level', '>=', $threshold);
     }

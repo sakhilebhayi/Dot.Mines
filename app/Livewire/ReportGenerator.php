@@ -29,8 +29,10 @@ class ReportGenerator extends Component
 
     public string $format = 'pdf';
 
+    /** @var array<string, mixed> */
     public array $selectedMachines = [];
 
+    /** @var array<string, mixed> */
     public array $selectedGeofences = [];
 
     public bool $includeMetrics = true;

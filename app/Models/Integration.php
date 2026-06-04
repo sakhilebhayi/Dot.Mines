@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string|null $api_key
  * @property string|null $api_secret
- * @property array|null $credentials
+ * @property array<string, mixed>|null $credentials
  * @property string|null $webhook_url
  * @property string|null $webhook_secret
  * @property string $status
@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $last_sync_status
  * @property string|null $last_error
  * @property int $machines_count
- * @property array|null $config
+ * @property array<string, mixed>|null $config
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */

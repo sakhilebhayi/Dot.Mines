@@ -2,24 +2,21 @@
 
 namespace App\Services\Integration;
 
+use App\Contracts\ManufacturerServiceInterface;
+use App\Models\Alert;
 use App\Models\Integration;
 use App\Models\Machine;
 use App\Models\MachineMetric;
-use App\Models\Alert;
-use App\Contracts\ManufacturerServiceInterface;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class IntegrationService
 {
+    /** @var array<string, mixed> */
     protected array $services = [];
 
     /**
      * Register a manufacturer service
-     *
-     * @param string $name
-     * @param ManufacturerServiceInterface $service
-     * @return void
      */
     public function register(string $name, ManufacturerServiceInterface $service): void
     {
@@ -28,9 +25,6 @@ class IntegrationService
 
     /**
      * Get a registered service
-     *
-     * @param string $name
-     * @return ManufacturerServiceInterface|null
      */
     public function get(string $name): ?ManufacturerServiceInterface
     {
@@ -39,8 +33,6 @@ class IntegrationService
 
     /**
      * Get all registered services
-     *
-     * @return array
      */
     public function all(): array
     {
@@ -49,16 +41,13 @@ class IntegrationService
 
     /**
      * Test connection to a manufacturer API
-     *
-     * @param Integration $integration
-     * @return array
      */
     public function testConnection(Integration $integration): array
     {
         try {
             $service = $this->getServiceForIntegration($integration);
-            
-            if (!$service) {
+
+            if (! $service) {
                 return [
                     'success' => false,
                     'error' => "Service not found for manufacturer: {$integration->provider}",
@@ -70,7 +59,7 @@ class IntegrationService
             return [
                 'success' => $result,
                 'message' => $result ? 'Connection successful' : 'Connection failed',
-                'error' => !$result ? $service->getLastError() : null,
+                'error' => ! $result ? $service->getLastError() : null,
             ];
         } catch (\Exception $e) {
             Log::error('Integration test connection failed', [
@@ -87,16 +76,13 @@ class IntegrationService
 
     /**
      * Sync all machines for an integration
-     *
-     * @param Integration $integration
-     * @return array
      */
     public function syncMachines(Integration $integration): array
     {
         try {
             $service = $this->getServiceForIntegration($integration);
-            
-            if (!$service) {
+
+            if (! $service) {
                 return ['success' => false, 'error' => 'Service not found'];
             }
 
@@ -138,17 +124,13 @@ class IntegrationService
 
     /**
      * Sync a single machine
-     *
-     * @param Integration $integration
-     * @param array $machineData
-     * @return Machine|null
      */
     public function syncMachine(Integration $integration, array $machineData): ?Machine
     {
         try {
             $externalId = $machineData['external_id'] ?? $machineData['id'] ?? null;
 
-            if (!$externalId) {
+            if (! $externalId) {
                 return null;
             }
 
@@ -158,7 +140,7 @@ class IntegrationService
                 ->where('manufacturer', $integration->provider)
                 ->first();
 
-            if (!$machine) {
+            if (! $machine) {
                 $machine = Machine::create([
                     'team_id' => $integration->team_id,
                     'name' => $machineData['model'] ?? 'Unknown Machine',
@@ -181,12 +163,12 @@ class IntegrationService
             }
 
             // Sync metrics if available
-            if (!empty($machineData['metrics'])) {
+            if (! empty($machineData['metrics'])) {
                 $this->syncMachineMetrics($machine, $machineData['metrics']);
             }
 
             // Sync alerts if available
-            if (!empty($machineData['alerts'])) {
+            if (! empty($machineData['alerts'])) {
                 $this->syncMachineAlerts($machine, $machineData['alerts']);
             }
 
@@ -203,10 +185,6 @@ class IntegrationService
 
     /**
      * Sync machine metrics
-     *
-     * @param Machine $machine
-     * @param array $metrics
-     * @return void
      */
     protected function syncMachineMetrics(Machine $machine, array $metrics): void
     {
@@ -225,10 +203,6 @@ class IntegrationService
 
     /**
      * Sync machine alerts
-     *
-     * @param Machine $machine
-     * @param array $alerts
-     * @return void
      */
     protected function syncMachineAlerts(Machine $machine, array $alerts): void
     {
@@ -236,7 +210,7 @@ class IntegrationService
             foreach ($alerts as $alertData) {
                 $externalId = $alertData['external_id'] ?? null;
 
-                if (!$externalId) {
+                if (! $externalId) {
                     continue;
                 }
 
@@ -245,7 +219,7 @@ class IntegrationService
                     ->where('external_id', $externalId)
                     ->first();
 
-                if (!$existing) {
+                if (! $existing) {
                     Alert::create([
                         'team_id' => $machine->team_id,
                         'machine_id' => $machine->id,
@@ -268,13 +242,11 @@ class IntegrationService
 
     /**
      * Get service instance for an integration
-     *
-     * @param Integration $integration
-     * @return ManufacturerServiceInterface|null
      */
     protected function getServiceForIntegration(Integration $integration): ?ManufacturerServiceInterface
     {
         $credentials = json_decode($integration->credentials, true) ?? [];
+
         return match ($integration->provider) {
             'volvo' => app(\App\Services\Integration\VolvoService::class, ['credentials' => $credentials]),
             'cat' => app(\App\Services\Integration\CATService::class, ['credentials' => $credentials]),
@@ -307,50 +279,45 @@ class IntegrationService
 
     /**
      * Get available manufacturers
-     *
-     * @return array
      */
     public function getAvailableManufacturers(): array
     {
         return [
-            'volvo' => [ 'name' => 'Volvo', 'icon' => '🔵', 'description' => 'Volvo Heavy Equipment', 'status' => 'available' ],
-            'cat' => [ 'name' => 'Caterpillar', 'icon' => '🟡', 'description' => 'Caterpillar Heavy Equipment', 'status' => 'available' ],
-            'komatsu' => [ 'name' => 'Komatsu', 'icon' => '🔶', 'description' => 'Komatsu Heavy Equipment', 'status' => 'available' ],
-            'bell' => [ 'name' => 'Bell', 'icon' => '🟠', 'description' => 'Bell Haul Trucks', 'status' => 'available' ],
-            'hitachi' => [ 'name' => 'Hitachi', 'icon' => '🟧', 'description' => 'Hitachi Construction Machinery', 'status' => 'available' ],
-            'john-deere' => [ 'name' => 'John Deere', 'icon' => '🟩', 'description' => 'John Deere Equipment', 'status' => 'available' ],
-            'liebherr' => [ 'name' => 'Liebherr', 'icon' => '🟨', 'description' => 'Liebherr Mining Equipment', 'status' => 'available' ],
-            'hyundai' => [ 'name' => 'Hyundai', 'icon' => '🟦', 'description' => 'Hyundai Construction Equipment', 'status' => 'available' ],
-            'doosan' => [ 'name' => 'Doosan', 'icon' => '🟧', 'description' => 'Doosan Heavy Equipment', 'status' => 'available' ],
-            'jcb' => [ 'name' => 'JCB', 'icon' => '🟨', 'description' => 'JCB Construction Equipment', 'status' => 'available' ],
-            'case' => [ 'name' => 'CASE', 'icon' => '🟫', 'description' => 'CASE Construction Equipment', 'status' => 'available' ],
-            'sany' => [ 'name' => 'Sany', 'icon' => '🟥', 'description' => 'Sany Heavy Equipment', 'status' => 'available' ],
-            'xcmg' => [ 'name' => 'XCMG', 'icon' => '🟦', 'description' => 'XCMG Construction Equipment', 'status' => 'available' ],
-            'kobelco' => [ 'name' => 'Kobelco', 'icon' => '🟦', 'description' => 'Kobelco Construction Machinery', 'status' => 'available' ],
-            'new-holland' => [ 'name' => 'New Holland', 'icon' => '🟨', 'description' => 'New Holland Equipment', 'status' => 'available' ],
-            'takeuchi' => [ 'name' => 'Takeuchi', 'icon' => '🟥', 'description' => 'Takeuchi Compact Equipment', 'status' => 'available' ],
-            'kubota' => [ 'name' => 'Kubota', 'icon' => '🟧', 'description' => 'Kubota Construction Equipment', 'status' => 'available' ],
-            'bobcat' => [ 'name' => 'Bobcat', 'icon' => '⬜', 'description' => 'Bobcat Compact Equipment', 'status' => 'available' ],
-            'yanmar' => [ 'name' => 'Yanmar', 'icon' => '🟨', 'description' => 'Yanmar Mini Excavators', 'status' => 'available' ],
-            'atlas-copco' => [ 'name' => 'Atlas Copco', 'icon' => '🟡', 'description' => 'Atlas Copco Drilling Equipment', 'status' => 'available' ],
-            'sandvik' => [ 'name' => 'Sandvik', 'icon' => '🟥', 'description' => 'Sandvik Mining Equipment', 'status' => 'available' ],
-            'epiroc' => [ 'name' => 'Epiroc', 'icon' => '🟦', 'description' => 'Epiroc Drilling Equipment', 'status' => 'available' ],
-            'ctrack' => [ 'name' => 'C-Track', 'icon' => '📍', 'description' => 'C-Track GPS Tracking', 'status' => 'available' ],
-            'roundebult' => [ 'name' => 'Roundebult', 'icon' => '⛏️', 'description' => 'Roundebult Mining Machines', 'status' => 'available' ],
-            'kawasaki' => [ 'name' => 'Kawasaki', 'icon' => '🏗️', 'description' => 'Kawasaki Mining Equipment', 'status' => 'available' ],
+            'volvo' => ['name' => 'Volvo', 'icon' => '🔵', 'description' => 'Volvo Heavy Equipment', 'status' => 'available'],
+            'cat' => ['name' => 'Caterpillar', 'icon' => '🟡', 'description' => 'Caterpillar Heavy Equipment', 'status' => 'available'],
+            'komatsu' => ['name' => 'Komatsu', 'icon' => '🔶', 'description' => 'Komatsu Heavy Equipment', 'status' => 'available'],
+            'bell' => ['name' => 'Bell', 'icon' => '🟠', 'description' => 'Bell Haul Trucks', 'status' => 'available'],
+            'hitachi' => ['name' => 'Hitachi', 'icon' => '🟧', 'description' => 'Hitachi Construction Machinery', 'status' => 'available'],
+            'john-deere' => ['name' => 'John Deere', 'icon' => '🟩', 'description' => 'John Deere Equipment', 'status' => 'available'],
+            'liebherr' => ['name' => 'Liebherr', 'icon' => '🟨', 'description' => 'Liebherr Mining Equipment', 'status' => 'available'],
+            'hyundai' => ['name' => 'Hyundai', 'icon' => '🟦', 'description' => 'Hyundai Construction Equipment', 'status' => 'available'],
+            'doosan' => ['name' => 'Doosan', 'icon' => '🟧', 'description' => 'Doosan Heavy Equipment', 'status' => 'available'],
+            'jcb' => ['name' => 'JCB', 'icon' => '🟨', 'description' => 'JCB Construction Equipment', 'status' => 'available'],
+            'case' => ['name' => 'CASE', 'icon' => '🟫', 'description' => 'CASE Construction Equipment', 'status' => 'available'],
+            'sany' => ['name' => 'Sany', 'icon' => '🟥', 'description' => 'Sany Heavy Equipment', 'status' => 'available'],
+            'xcmg' => ['name' => 'XCMG', 'icon' => '🟦', 'description' => 'XCMG Construction Equipment', 'status' => 'available'],
+            'kobelco' => ['name' => 'Kobelco', 'icon' => '🟦', 'description' => 'Kobelco Construction Machinery', 'status' => 'available'],
+            'new-holland' => ['name' => 'New Holland', 'icon' => '🟨', 'description' => 'New Holland Equipment', 'status' => 'available'],
+            'takeuchi' => ['name' => 'Takeuchi', 'icon' => '🟥', 'description' => 'Takeuchi Compact Equipment', 'status' => 'available'],
+            'kubota' => ['name' => 'Kubota', 'icon' => '🟧', 'description' => 'Kubota Construction Equipment', 'status' => 'available'],
+            'bobcat' => ['name' => 'Bobcat', 'icon' => '⬜', 'description' => 'Bobcat Compact Equipment', 'status' => 'available'],
+            'yanmar' => ['name' => 'Yanmar', 'icon' => '🟨', 'description' => 'Yanmar Mini Excavators', 'status' => 'available'],
+            'atlas-copco' => ['name' => 'Atlas Copco', 'icon' => '🟡', 'description' => 'Atlas Copco Drilling Equipment', 'status' => 'available'],
+            'sandvik' => ['name' => 'Sandvik', 'icon' => '🟥', 'description' => 'Sandvik Mining Equipment', 'status' => 'available'],
+            'epiroc' => ['name' => 'Epiroc', 'icon' => '🟦', 'description' => 'Epiroc Drilling Equipment', 'status' => 'available'],
+            'ctrack' => ['name' => 'C-Track', 'icon' => '📍', 'description' => 'C-Track GPS Tracking', 'status' => 'available'],
+            'roundebult' => ['name' => 'Roundebult', 'icon' => '⛏️', 'description' => 'Roundebult Mining Machines', 'status' => 'available'],
+            'kawasaki' => ['name' => 'Kawasaki', 'icon' => '🏗️', 'description' => 'Kawasaki Mining Equipment', 'status' => 'available'],
         ];
     }
 
     /**
      * Get integration status
-     *
-     * @param Integration $integration
-     * @return array
      */
     public function getStatus(Integration $integration): array
     {
         $cacheKey = "integration_{$integration->id}_status";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($integration) {
             return [
                 'id' => $integration->id,

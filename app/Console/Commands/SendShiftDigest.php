@@ -9,8 +9,8 @@ use App\Models\Team;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SendShiftDigest extends Command
 {
@@ -22,6 +22,7 @@ class SendShiftDigest extends Command
 
     protected $description = 'Send shift summary email digest to subscribed supervisors/managers';
 
+    /** @var array<string, array{start: int, end: int}> */
     private array $shiftWindows = [
         'A' => ['start' => ['H' => 6,  'i' => 0],  'end' => ['H' => 14, 'i' => 0]],
         'B' => ['start' => ['H' => 14, 'i' => 0],  'end' => ['H' => 22, 'i' => 0]],
@@ -34,6 +35,7 @@ class SendShiftDigest extends Command
 
         if (! array_key_exists($shift, $this->shiftWindows)) {
             $this->error("Invalid shift '{$shift}'. Use A, B or C.");
+
             return self::FAILURE;
         }
 
@@ -49,12 +51,13 @@ class SendShiftDigest extends Command
             } catch (\Exception $e) {
                 Log::error('Shift digest failed for team', [
                     'team_id' => $team->id,
-                    'error'   => $e->getMessage(),
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
 
         $this->info('Digest dispatch complete.');
+
         return self::SUCCESS;
     }
 
@@ -94,9 +97,9 @@ class SendShiftDigest extends Command
         $breakdownCount = $posts->where('category', 'breakdown')->count();
 
         $stats = [
-            'by_category'           => $byCategory,
+            'by_category' => $byCategory,
             'unacknowledged_critical' => $unacknowledgedCritical,
-            'breakdown_count'       => $breakdownCount,
+            'breakdown_count' => $breakdownCount,
         ];
 
         // Top posts by engagement
@@ -105,9 +108,9 @@ class SendShiftDigest extends Command
             ->take(5)
             ->map(fn ($p) => [
                 'category' => $p->category,
-                'body'     => $p->body,
-                'author'   => $p->author?->name,
-                'likes'    => $p->likes_count,
+                'body' => $p->body,
+                'author' => $p->author?->name,
+                'likes' => $p->likes_count,
                 'comments' => $p->comment_count,
             ])
             ->values()
@@ -119,8 +122,8 @@ class SendShiftDigest extends Command
             ->take(10)
             ->map(fn ($p) => [
                 'category' => $p->category,
-                'body'     => $p->body,
-                'author'   => $p->author?->name,
+                'body' => $p->body,
+                'author' => $p->author?->name,
             ])
             ->values()
             ->toArray();
@@ -138,10 +141,10 @@ class SendShiftDigest extends Command
 
         foreach ($recipients as $recipient) {
             Mail::to($recipient->email)->queue(new ShiftDigestMail(
-                shift:            $shift,
-                teamName:         $team->name,
-                stats:            $stats,
-                topPosts:         $topPosts,
+                shift: $shift,
+                teamName: $team->name,
+                stats: $stats,
+                topPosts: $topPosts,
                 pendingApprovals: $pendingApprovals,
             ));
         }
@@ -160,10 +163,10 @@ class SendShiftDigest extends Command
         // At 14:00 → shift A just ended
         // At 22:00 → shift B just ended
         return match (true) {
-            $hour === 6  => 'C',
+            $hour === 6 => 'C',
             $hour === 14 => 'A',
             $hour === 22 => 'B',
-            default      => 'A',
+            default => 'A',
         };
     }
 
@@ -172,7 +175,7 @@ class SendShiftDigest extends Command
      */
     private function shiftTimeRange(string $shift): array
     {
-        $now   = now();
+        $now = now();
         $today = $now->toDateString();
 
         return match ($shift) {

@@ -20,8 +20,12 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Team $team;
+
     public int $tries = 2;
+
     public int $timeout = 90;
+
+    /** @var array<int> */
     public array $backoff = [30, 120]; // 30s, 2 mins
 
     /**
@@ -56,6 +60,7 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
                 Log::debug('No active geofences found for team', [
                     'team_id' => $this->team->id,
                 ]);
+
                 return;
             }
 
@@ -70,6 +75,7 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
                 Log::debug('No machines with locations found', [
                     'team_id' => $this->team->id,
                 ]);
+
                 return;
             }
 
@@ -89,14 +95,14 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
                         ->first();
 
                     // Detect entry
-                    if ($isInside && (!$lastEntry || $lastEntry->exited_at)) {
+                    if ($isInside && (! $lastEntry || $lastEntry->exited_at)) {
                         $entry = $this->recordGeofenceEntry($machine, $geofence);
                         $this->broadcastGeofenceEntry($entry);
                         $entryCount++;
                     }
 
                     // Detect exit
-                    if (!$isInside && $lastEntry && !$lastEntry->exited_at) {
+                    if (! $isInside && $lastEntry && ! $lastEntry->exited_at) {
                         $this->recordGeofenceExit($lastEntry);
                         $this->broadcastGeofenceExit($lastEntry);
                         $exitCount++;
@@ -123,10 +129,9 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
     /**
      * Determine if a point is inside a polygon using ray casting algorithm.
      *
-     * @param float $lat Point latitude
-     * @param float $lon Point longitude
-     * @param array $polygon Array of coordinates [[lat, lon], [lat, lon], ...]
-     * @return bool
+     * @param  float  $lat  Point latitude
+     * @param  float  $lon  Point longitude
+     * @param  array  $polygon  Array of coordinates [[lat, lon], [lat, lon], ...]
      */
     private function isPointInPolygon(float $lat, float $lon, array $polygon): bool
     {
@@ -147,7 +152,7 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
                     if ($lon <= max($p1Lon, $p2Lon)) {
                         $xinters = ($lat - $p1Lat) * ($p2Lon - $p1Lon) / ($p2Lat - $p1Lat) + $p1Lon;
                         if ($p1Lon == $p2Lon || $lon <= $xinters) {
-                            $inside = !$inside;
+                            $inside = ! $inside;
                         }
                     }
                 }

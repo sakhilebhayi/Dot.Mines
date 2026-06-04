@@ -33,6 +33,7 @@ class Settings extends Component
     public string $currency = 'USD';
 
     // Users & Roles
+    /** @var array<string, mixed> */
     public array $teamMembers = [];
 
     public string $inviteEmail = '';
@@ -55,6 +56,7 @@ class Settings extends Component
     public bool $quietHoursEnabled = false;
 
     // Feed Notification Preferences
+    /** @var array<string, mixed> */
     public array $feedCategoryPrefs = [
         'breakdown' => true,
         'shift_update' => true,

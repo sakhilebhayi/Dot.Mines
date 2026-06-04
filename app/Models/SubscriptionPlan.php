@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float|null $yearly_price
  * @property string|null $paystack_plan_code
  * @property string|null $paystack_yearly_plan_code
- * @property array|null $features
+ * @property array<string, mixed>|null $features
  * @property int|null $max_machines
  * @property int|null $max_users
  * @property int|null $max_geofences

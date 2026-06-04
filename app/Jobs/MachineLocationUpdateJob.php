@@ -18,8 +18,12 @@ class MachineLocationUpdateJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Integration $integration;
+
     public int $tries = 3;
+
     public int $timeout = 120;
+
+    /** @var array<int> */
     public array $backoff = [30, 90, 300]; // 30s, 90s, 5 mins
 
     /**
@@ -52,6 +56,7 @@ class MachineLocationUpdateJob implements ShouldQueue
                 Log::warning('Integration not connected, skipping location update', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -64,6 +69,7 @@ class MachineLocationUpdateJob implements ShouldQueue
                 Log::info('No active machines found for integration', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -77,6 +83,7 @@ class MachineLocationUpdateJob implements ShouldQueue
                 Log::debug('No location data received from integration', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -85,14 +92,14 @@ class MachineLocationUpdateJob implements ShouldQueue
             foreach ($locations as $location) {
                 $machine = $machines->firstWhere('manufacturer_id', $location['manufacturer_id'] ?? null);
 
-                if (!$machine) {
+                if (! $machine) {
                     continue;
                 }
 
                 // Check if location has actually changed
                 $hasChanged = $this->hasLocationChanged($machine, $location);
 
-                if (!$hasChanged) {
+                if (! $hasChanged) {
                     continue;
                 }
 
@@ -160,7 +167,7 @@ class MachineLocationUpdateJob implements ShouldQueue
     private function hasLocationChanged(Machine $machine, array $newLocation): bool
     {
         // Always update if no previous location
-        if (!$machine->last_location_latitude || !$machine->last_location_longitude) {
+        if (! $machine->last_location_latitude || ! $machine->last_location_longitude) {
             return true;
         }
 
@@ -218,7 +225,7 @@ class MachineLocationUpdateJob implements ShouldQueue
 
         // Mark integration as having issues
         $this->integration->update([
-            'last_error' => 'Location update failed: ' . $exception->getMessage(),
+            'last_error' => 'Location update failed: '.$exception->getMessage(),
             'last_error_at' => now(),
         ]);
     }

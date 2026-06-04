@@ -16,6 +16,7 @@ class LiveMap extends Component
 
     public float $centerLat = -28.4793; // South Africa center latitude
 
+    /** @var array<string, mixed> */
     public array $activityFeed = [];
 
     public bool $isLoading = true;

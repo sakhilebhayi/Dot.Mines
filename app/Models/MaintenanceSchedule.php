@@ -32,8 +32,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $status
  * @property string|float|null $estimated_cost
  * @property float|null $estimated_duration_hours
- * @property array|null $required_parts
- * @property array|null $required_tools
+ * @property array<string, mixed>|null $required_parts
+ * @property array<string, mixed>|null $required_tools
  * @property bool $auto_generate_work_order
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at

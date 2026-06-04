@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Mail;
  * @property string|null $file_path
  * @property int|null $file_size
  * @property string|null $format
- * @property array|null $filters
+ * @property array<string, mixed>|null $filters
  * @property int|string|null $generated_by
  * @property \Carbon\Carbon|null $generated_at
  * @property \Carbon\Carbon|null $expires_at

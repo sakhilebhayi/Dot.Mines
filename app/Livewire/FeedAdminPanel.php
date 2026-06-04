@@ -19,6 +19,7 @@ class FeedAdminPanel extends Component
     public string $auditAction = '';
 
     // ── Active shifts state ────────────────────────────────────────────────────
+    /** @var array<string, mixed> */
     public array $activeShifts = ['A', 'B', 'C'];
 
     public function mount(): void

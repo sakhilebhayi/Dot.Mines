@@ -106,11 +106,6 @@ parameters:
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
 
 		-
-			message: "#^Property App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:\\$stats type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
 			message: "#^Method App\\\\Console\\\\Commands\\\\PerformShiftChange\\:\\:handle\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Console/Commands/PerformShiftChange.php
@@ -151,7 +146,7 @@ parameters:
 			path: app/Console/Commands/SendShiftDigest.php
 
 		-
-			message: "#^Property App\\\\Console\\\\Commands\\\\SendShiftDigest\\:\\:\\$shiftWindows type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Console\\\\Commands\\\\SendShiftDigest\\:\\:\\$shiftWindows \\(array\\<string, array\\{start\\: int, end\\: int\\}\\>\\) does not accept default value of type array\\{A\\: array\\{start\\: array\\{H\\: 6, i\\: 0\\}, end\\: array\\{H\\: 14, i\\: 0\\}\\}, B\\: array\\{start\\: array\\{H\\: 14, i\\: 0\\}, end\\: array\\{H\\: 22, i\\: 0\\}\\}, C\\: array\\{start\\: array\\{H\\: 22, i\\: 0\\}, end\\: array\\{H\\: 6, i\\: 0\\}\\}\\}\\.$#"
 			count: 1
 			path: app/Console/Commands/SendShiftDigest.php
 
@@ -164,11 +159,6 @@ parameters:
 			message: "#^Part \\$disk \\(array\\|bool\\|float\\|int\\|string\\) of encapsed string cannot be cast to string\\.$#"
 			count: 3
 			path: app/Console/Commands/VerifyS3Storage.php
-
-		-
-			message: "#^Property App\\\\Console\\\\Kernel\\:\\:\\$commands type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Kernel.php
 
 		-
 			message: "#^Method App\\\\Contracts\\\\ManufacturerServiceInterface\\:\\:fetchMachineAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -381,11 +371,6 @@ parameters:
 			path: app/Events/MachineLocationUpdated.php
 
 		-
-			message: "#^Property App\\\\Events\\\\MachineLocationUpdated\\:\\:\\$location type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Events/MachineLocationUpdated.php
-
-		-
 			message: "#^Property App\\\\Events\\\\MachineLocationUpdated\\:\\:\\$timestamp \\(DateTime\\) does not accept Carbon\\\\CarbonInterface\\.$#"
 			count: 1
 			path: app/Events/MachineLocationUpdated.php
@@ -402,11 +387,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Events\\\\MachineOffline\\:\\:broadcastWith\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Events/MachineOffline.php
-
-		-
-			message: "#^Property App\\\\Events\\\\MachineOffline\\:\\:\\$lastLocation type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Events/MachineOffline.php
 
@@ -806,16 +786,6 @@ parameters:
 			path: app/Http/Middleware/TrustProxies.php
 
 		-
-			message: "#^PHPDoc type array\\|string\\|null of property App\\\\Http\\\\Middleware\\\\TrustProxies\\:\\:\\$proxies is not covariant with PHPDoc type array\\<int, string\\>\\|string\\|null of overridden property Illuminate\\\\Http\\\\Middleware\\\\TrustProxies\\:\\:\\$proxies\\.$#"
-			count: 1
-			path: app/Http/Middleware/TrustProxies.php
-
-		-
-			message: "#^Property App\\\\Http\\\\Middleware\\\\TrustProxies\\:\\:\\$proxies type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Http/Middleware/TrustProxies.php
-
-		-
 			message: "#^Method App\\\\Jobs\\\\AlertGenerationJob\\:\\:createOrUpdateAlert\\(\\) has parameter \\$alertData with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Jobs/AlertGenerationJob.php
@@ -837,11 +807,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#1 \\$machine of method App\\\\Jobs\\\\AlertGenerationJob\\:\\:generateAlertsForMachine\\(\\) expects App\\\\Models\\\\Machine, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
-			count: 1
-			path: app/Jobs/AlertGenerationJob.php
-
-		-
-			message: "#^Property App\\\\Jobs\\\\AlertGenerationJob\\:\\:\\$backoff type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Jobs/AlertGenerationJob.php
 
@@ -976,11 +941,6 @@ parameters:
 			path: app/Jobs/GeofenceCrossingDetectionJob.php
 
 		-
-			message: "#^Property App\\\\Jobs\\\\GeofenceCrossingDetectionJob\\:\\:\\$backoff type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GeofenceCrossingDetectionJob.php
-
-		-
 			message: "#^Method App\\\\Jobs\\\\MachineIdleMonitoringJob\\:\\:checkMachineIdleStatus\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Jobs/MachineIdleMonitoringJob.php
@@ -1031,11 +991,6 @@ parameters:
 			path: app/Jobs/MachineLocationUpdateJob.php
 
 		-
-			message: "#^Property App\\\\Jobs\\\\MachineLocationUpdateJob\\:\\:\\$backoff type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/MachineLocationUpdateJob.php
-
-		-
 			message: "#^Call to an undefined method App\\\\Services\\\\Integration\\\\IntegrationService\\:\\:getMachineStatuses\\(\\)\\.$#"
 			count: 1
 			path: app/Jobs/MachineStatusMonitoringJob.php
@@ -1071,11 +1026,6 @@ parameters:
 			path: app/Jobs/MachineStatusMonitoringJob.php
 
 		-
-			message: "#^Property App\\\\Jobs\\\\MachineStatusMonitoringJob\\:\\:\\$backoff type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/MachineStatusMonitoringJob.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\Route\\:\\:\\$machine\\.$#"
 			count: 1
 			path: app/Jobs/RouteSpeedMonitoringJob.php
@@ -1089,16 +1039,6 @@ parameters:
 			message: "#^Method App\\\\Jobs\\\\SendFeedNotificationJob\\:\\:__construct\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Jobs/SendFeedNotificationJob.php
-
-		-
-			message: "#^Property App\\\\Jobs\\\\SendFeedNotificationJob\\:\\:\\$backoff type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/SendFeedNotificationJob.php
-
-		-
-			message: "#^Property App\\\\Jobs\\\\SyncIntegrationMachinesJob\\:\\:\\$backoff type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/SyncIntegrationMachinesJob.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Models\\\\Machine\\:\\:\\$external_id\\.$#"
@@ -1226,11 +1166,6 @@ parameters:
 			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:getOverviewDataProperty\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:implementRecommendation\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/AIOptimizationDashboard.php
@@ -1316,8 +1251,8 @@ parameters:
 			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:\\$filters type has no value type specified in iterable type array\\.$#"
-			count: 1
+			message: "#^Undefined variable\\: \\$team$#"
+			count: 2
 			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
@@ -1471,7 +1406,7 @@ parameters:
 			path: app/Livewire/Alerts.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Alerts\\:\\:\\$recentlyDismissedUnresolved type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Alerts\\:\\:\\$recentlyDismissedUnresolved \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Alerts.php
 
@@ -1581,17 +1516,12 @@ parameters:
 			path: app/Livewire/BillingPortal.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\BillingPortal\\:\\:\\$availablePlans type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\BillingPortal\\:\\:\\$recentInvoices \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/BillingPortal.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\BillingPortal\\:\\:\\$recentInvoices type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/BillingPortal.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\BillingPortal\\:\\:\\$recentPayments type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\BillingPortal\\:\\:\\$recentPayments \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/BillingPortal.php
 
@@ -1601,17 +1531,17 @@ parameters:
 			path: app/Livewire/Dashboard.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Dashboard\\:\\:\\$activityFeed type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Dashboard\\:\\:\\$activityFeed \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Dashboard.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Dashboard\\:\\:\\$machineStatus type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Dashboard\\:\\:\\$machineStatus \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Dashboard.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Dashboard\\:\\:\\$recentAlerts type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Dashboard\\:\\:\\$recentAlerts \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Dashboard.php
 
@@ -1629,6 +1559,11 @@ parameters:
 			message: "#^Method App\\\\Livewire\\\\Documentation\\:\\:setSection\\(\\) has parameter \\$section with no type specified\\.$#"
 			count: 1
 			path: app/Livewire/Documentation.php
+
+		-
+			message: "#^Cannot unset offset int on array\\<string, mixed\\>\\.$#"
+			count: 1
+			path: app/Livewire/Feed.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Feed\\:\\:getComments\\(\\) has no return type specified\\.$#"
@@ -1676,12 +1611,7 @@ parameters:
 			path: app/Livewire/Feed.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$categoryTemplates type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$commentBody type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$commentBody \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
@@ -1691,22 +1621,22 @@ parameters:
 			path: app/Livewire/Feed.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$composeMeta type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$editingComment \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$editingComment type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$expandedComments \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$expandedComments type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$expandedComments \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$replyTo type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$replyTo \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
@@ -1716,7 +1646,17 @@ parameters:
 			path: app/Livewire/FeedAdminPanel.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\FeedAdminPanel\\:\\:\\$activeShifts type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\FeedAdminPanel\\:\\:\\$activeShifts \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
+			count: 1
+			path: app/Livewire/FeedAdminPanel.php
+
+		-
+			message: "#^Property App\\\\Livewire\\\\FeedAdminPanel\\:\\:\\$activeShifts \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
+			count: 1
+			path: app/Livewire/FeedAdminPanel.php
+
+		-
+			message: "#^Property App\\\\Livewire\\\\FeedAdminPanel\\:\\:\\$activeShifts \\(array\\<string, mixed\\>\\) does not accept default value of type array\\<int, string\\>\\.$#"
 			count: 1
 			path: app/Livewire/FeedAdminPanel.php
 
@@ -1771,22 +1711,17 @@ parameters:
 			path: app/Livewire/Fleet.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$activityFeed type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$activityFeed \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Fleet.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$lastAiRecommendations type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$lastAiRecommendations \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Fleet.php
 
 		-
 			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$listeners has no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Fleet.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$selectedAdtIds type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/Fleet.php
 
@@ -1936,7 +1871,7 @@ parameters:
 			path: app/Livewire/FleetMovementReplay.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\FleetMovementReplay\\:\\:\\$activityFeed type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\FleetMovementReplay\\:\\:\\$activityFeed \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/FleetMovementReplay.php
 
@@ -1946,7 +1881,7 @@ parameters:
 			path: app/Livewire/FleetMovementReplay.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\FleetMovementReplay\\:\\:\\$machineActivities type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\FleetMovementReplay\\:\\:\\$machineActivities \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/FleetMovementReplay.php
 
@@ -2146,11 +2081,6 @@ parameters:
 			path: app/Livewire/GeofenceManager.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\GeofenceManager\\:\\:\\$coordinates type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/GeofenceManager.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\GeofenceManager\\:\\:\\$listeners has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/GeofenceManager.php
@@ -2236,21 +2166,6 @@ parameters:
 			path: app/Livewire/IntegrationManager.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\IntegrationManager\\:\\:\\$availableManufacturers type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\IntegrationManager\\:\\:\\$formData type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\IntegrationManager\\:\\:\\$integrations type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\IntegrationManager\\:\\:\\$listeners has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/IntegrationManager.php
@@ -2316,7 +2231,7 @@ parameters:
 			path: app/Livewire/LiveMap.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\LiveMap\\:\\:\\$activityFeed type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\LiveMap\\:\\:\\$activityFeed \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/LiveMap.php
 
@@ -2372,6 +2287,16 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:completeScheduledMaintenance\\(\\) has parameter \\$recordId with no type specified\\.$#"
+			count: 1
+			path: app/Livewire/MaintenanceDashboard.php
+
+		-
+			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/MaintenanceDashboard.php
+
+		-
+			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/MaintenanceDashboard.php
 
@@ -2711,11 +2636,6 @@ parameters:
 			path: app/Livewire/MineAreaManager.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\MineAreaManager\\:\\:\\$boundaryCoordinates type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/MineAreaManager.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\MineAreaManager\\:\\:\\$rules has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/MineAreaManager.php
@@ -2851,11 +2771,6 @@ parameters:
 			path: app/Livewire/ProductionDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:getLoadComparisonDataProperty\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:getMachinesProperty\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/ProductionDashboard.php
@@ -2867,11 +2782,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:getMineAreasProperty\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:getProductionChartDataProperty\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/ProductionDashboard.php
 
@@ -3041,12 +2951,12 @@ parameters:
 			path: app/Livewire/ReportGenerator.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\ReportGenerator\\:\\:\\$selectedGeofences type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\ReportGenerator\\:\\:\\$selectedMachines \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/ReportGenerator.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\ReportGenerator\\:\\:\\$selectedMachines type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\ReportGenerator\\:\\:\\$selectedMachines \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/ReportGenerator.php
 
@@ -3271,7 +3181,7 @@ parameters:
 			path: app/Livewire/RoutePlanning.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\RoutePlanning\\:\\:\\$routes type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\RoutePlanning\\:\\:\\$routes \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/RoutePlanning.php
 
@@ -3381,17 +3291,7 @@ parameters:
 			path: app/Livewire/Settings.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\Settings\\:\\:\\$feedCategoryPrefs type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\Settings\\:\\:\\$rules has no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Settings\\:\\:\\$teamMembers type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/Settings.php
 
@@ -3407,11 +3307,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\ShiftTemplateManager\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/ShiftTemplateManager.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\ShiftTemplateManager\\:\\:\\$formRequired type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/ShiftTemplateManager.php
 
@@ -3492,16 +3387,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\AIAgent has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAgent has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAgent has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/AIAgent.php
 
@@ -3591,66 +3476,6 @@ parameters:
 			path: app/Models/AIAnalysisSession.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
 			message: "#^Class App\\\\Models\\\\AIAnalysisSession uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/AIAnalysisSession.php
@@ -3707,66 +3532,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
@@ -3831,66 +3596,6 @@ parameters:
 			path: app/Models/AILearningData.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
 			message: "#^Class App\\\\Models\\\\AILearningData uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/AILearningData.php
@@ -3951,66 +3656,6 @@ parameters:
 			path: app/Models/AIPredictiveAlert.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
 			message: "#^Class App\\\\Models\\\\AIPredictiveAlert uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/AIPredictiveAlert.php
@@ -4067,66 +3712,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/AIRecommendation.php
 
@@ -4236,16 +3821,6 @@ parameters:
 			path: app/Models/AiRecommendationAction.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AiRecommendationAction has PHPDoc tag @property for property \\$performance_impact with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AiRecommendationAction.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AiRecommendationAction has PHPDoc tag @property for property \\$recommendation with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AiRecommendationAction.php
-
-		-
 			message: "#^Class App\\\\Models\\\\AiRecommendationAction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/AiRecommendationAction.php
@@ -4302,11 +3877,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Alert has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Alert has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Alert.php
 
@@ -4396,11 +3966,6 @@ parameters:
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AuditLog has PHPDoc tag @property for property \\$meta with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AuditLog.php
-
-		-
 			message: "#^Method App\\\\Models\\\\AuditLog\\:\\:actor\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/AuditLog.php
@@ -4444,11 +4009,6 @@ parameters:
 			message: "#^Method App\\\\Models\\\\ComplianceReport\\:\\:generator\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/ComplianceReport.php
-
-		-
-			message: "#^Class App\\\\Models\\\\ComplianceViolation has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/ComplianceViolation.php
 
 		-
 			message: "#^Class App\\\\Models\\\\ComplianceViolation uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -4656,11 +4216,6 @@ parameters:
 			path: app/Models/FeedAttachment.php
 
 		-
-			message: "#^Class App\\\\Models\\\\FeedAuditLog has PHPDoc tag @property for property \\$meta with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FeedAuditLog.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FeedAuditLog\\:\\:actor\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedAuditLog.php
@@ -4724,11 +4279,6 @@ parameters:
 			message: "#^Method App\\\\Models\\\\FeedMention\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedMention.php
-
-		-
-			message: "#^Class App\\\\Models\\\\FeedPost has PHPDoc tag @property for property \\$meta with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FeedPost.php
 
 		-
 			message: "#^Class App\\\\Models\\\\FeedPost uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -4812,11 +4362,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\FuelAlert has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\FuelAlert has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
@@ -5336,17 +4881,7 @@ parameters:
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$endDate with no type specified\\.$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$startDate with no type specified\\.$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
@@ -5409,11 +4944,6 @@ parameters:
 			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Geofence has PHPDoc tag @property for property \\$coordinates with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Geofence.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Geofence uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -5564,16 +5094,6 @@ parameters:
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\GeofenceEntry\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/GeofenceEntry.php
-
-		-
-			message: "#^Class App\\\\Models\\\\HaulDispatch has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
-			message: "#^Class App\\\\Models\\\\HaulDispatch has PHPDoc tag @property for property \\$path_coordinates with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
 
 		-
 			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
@@ -5746,16 +5266,6 @@ parameters:
 			path: app/Models/Incident.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Integration has PHPDoc tag @property for property \\$config with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Integration.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Integration has PHPDoc tag @property for property \\$credentials with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Integration.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Integration uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/Integration.php
@@ -5802,11 +5312,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Invoice has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Invoice has PHPDoc tag @property for property \\$line_items with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Invoice.php
 
@@ -5887,31 +5392,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$factors with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$issues with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$last_reading with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/IoTSensor.php
 
@@ -6136,11 +5616,6 @@ parameters:
 			path: app/Models/MachineAreaAssignment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
@@ -6282,11 +5757,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\MachineMetric has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MachineMetric.php
-
-		-
-			message: "#^Class App\\\\Models\\\\MachineMetric has PHPDoc tag @property for property \\$raw_data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MachineMetric.php
 
@@ -6496,21 +5966,6 @@ parameters:
 			path: app/Models/MaintenanceRecord.php
 
 		-
-			message: "#^Class App\\\\Models\\\\MaintenanceRecord has PHPDoc tag @property for property \\$attachments with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Class App\\\\Models\\\\MaintenanceRecord has PHPDoc tag @property for property \\$fault_codes_cleared with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Class App\\\\Models\\\\MaintenanceRecord has PHPDoc tag @property for property \\$parts_used with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MaintenanceRecord uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
@@ -6631,16 +6086,6 @@ parameters:
 			path: app/Models/MaintenanceSchedule.php
 
 		-
-			message: "#^Class App\\\\Models\\\\MaintenanceSchedule has PHPDoc tag @property for property \\$required_parts with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Class App\\\\Models\\\\MaintenanceSchedule has PHPDoc tag @property for property \\$required_tools with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MaintenanceSchedule uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
@@ -6719,11 +6164,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$date of method Carbon\\\\CarbonInterface\\:\\:gte\\(\\) expects DateTimeInterface\\|string, Carbon\\\\Carbon\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Class App\\\\Models\\\\MapEvent has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MapEvent.php
 
 		-
 			message: "#^Method App\\\\Models\\\\MapEvent\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
@@ -6816,16 +6256,6 @@ parameters:
 			path: app/Models/MineArea.php
 
 		-
-			message: "#^Class App\\\\Models\\\\MineArea has PHPDoc tag @property for property \\$coordinates with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Class App\\\\Models\\\\MineArea has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MineArea uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/MineArea.php
@@ -6881,22 +6311,12 @@ parameters:
 			path: app/Models/MineArea.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) has parameter \\$status with no type specified\\.$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MineArea.php
 
 		-
 			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
 			count: 1
 			path: app/Models/MineArea.php
 
@@ -6991,22 +6411,12 @@ parameters:
 			path: app/Models/MinePlanUpload.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeByType\\(\\) has parameter \\$type with no type specified\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeByType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
 		-
 			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
@@ -7042,11 +6452,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Notification has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Notification has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Notification.php
 
@@ -7102,11 +6507,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\OperatorFatigue has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/OperatorFatigue.php
-
-		-
-			message: "#^Class App\\\\Models\\\\OperatorFatigue has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/OperatorFatigue.php
 
@@ -7167,11 +6567,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Payment has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Payment has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Payment.php
 
@@ -7311,17 +6706,7 @@ parameters:
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Class App\\\\Models\\\\ProductionForecast has PHPDoc tag @property for property \\$forecast_method with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) has parameter \\$date with no type specified\\.$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
@@ -7341,22 +6726,12 @@ parameters:
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
 		-
 			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) has parameter \\$threshold with no type specified\\.$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
@@ -7416,11 +6791,6 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Class App\\\\Models\\\\ProductionRecord has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
@@ -7431,17 +6801,7 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) has parameter \\$endDate with no type specified\\.$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) has parameter \\$startDate with no type specified\\.$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
@@ -7461,17 +6821,7 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeByStatus\\(\\) has parameter \\$status with no type specified\\.$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeByStatus\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForMineArea\\(\\) has parameter \\$mineAreaId with no type specified\\.$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
@@ -7487,11 +6837,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
@@ -7561,11 +6906,6 @@ parameters:
 			path: app/Models/ProductionTarget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeByPeriod\\(\\) has parameter \\$periodType with no type specified\\.$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeByPeriod\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
@@ -7577,11 +6917,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
@@ -7637,11 +6972,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Report has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Report has PHPDoc tag @property for property \\$filters with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Report.php
 
@@ -7749,16 +7079,6 @@ parameters:
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Role\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Role.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Route has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Route.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Route has PHPDoc tag @property for property \\$route_geometry with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Route.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Route uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -7871,26 +7191,6 @@ parameters:
 			path: app/Models/Shift.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Shift has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Shift.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Shift has PHPDoc tag @property for property \\$performance_summary with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Shift.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Shift has PHPDoc tag @property for property \\$previous_assignments with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Shift.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Shift has PHPDoc tag @property for property \\$productivity_metrics with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Shift.php
-
-		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Shift\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/Shift.php
@@ -7909,11 +7209,6 @@ parameters:
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Shift\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Shift.php
-
-		-
-			message: "#^Class App\\\\Models\\\\ShiftTemplate has PHPDoc tag @property for property \\$required_fields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/ShiftTemplate.php
 
 		-
 			message: "#^Method App\\\\Models\\\\ShiftTemplate\\:\\:creator\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
@@ -7957,11 +7252,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\Subscription has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Subscription has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Subscription.php
 
@@ -8072,11 +7362,6 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\SubscriptionPlan has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/SubscriptionPlan.php
-
-		-
-			message: "#^Class App\\\\Models\\\\SubscriptionPlan has PHPDoc tag @property for property \\$features with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/SubscriptionPlan.php
 
@@ -8347,11 +7632,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Services\\\\AI\\\\AIOptimizationService\\:\\:runComprehensiveAnalysis\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/AI/AIOptimizationService.php
-
-		-
-			message: "#^Property App\\\\Services\\\\AI\\\\AIOptimizationService\\:\\:\\$agents type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/AI/AIOptimizationService.php
 
@@ -8676,7 +7956,7 @@ parameters:
 			path: app/Services/FileUploadService.php
 
 		-
-			message: "#^Property App\\\\Services\\\\FileUploadService\\:\\:\\$allowedExtensions type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Services\\\\FileUploadService\\:\\:\\$allowedExtensions \\(array\\<string, mixed\\>\\) does not accept default value of type array\\<int, string\\>\\.$#"
 			count: 1
 			path: app/Services/FileUploadService.php
 
@@ -9411,12 +8691,7 @@ parameters:
 			path: app/Services/Integration/IntegrationService.php
 
 		-
-			message: "#^Parameter \\#1 \\$json of function json_decode expects string, array\\|null given\\.$#"
-			count: 1
-			path: app/Services/Integration/IntegrationService.php
-
-		-
-			message: "#^Property App\\\\Services\\\\Integration\\\\IntegrationService\\:\\:\\$services type has no value type specified in iterable type array\\.$#"
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, array\\<string, mixed\\>\\|null given\\.$#"
 			count: 1
 			path: app/Services/Integration/IntegrationService.php
 
@@ -10611,6 +9886,11 @@ parameters:
 			path: database/seeders/ComprehensiveDataSeeder.php
 
 		-
+			message: "#^Offset 0 does not exist on array\\<string, mixed\\>\\.$#"
+			count: 10
+			path: database/seeders/ComprehensiveDataSeeder.php
+
+		-
 			message: "#^Parameter \\#1 \\$min of function rand expects int, float given\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
@@ -10626,32 +9906,32 @@ parameters:
 			path: database/seeders/ComprehensiveDataSeeder.php
 
 		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$allTeams type has no value type specified in iterable type array\\.$#"
+			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$allTeams \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
 
 		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$excavators type has no value type specified in iterable type array\\.$#"
+			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$excavators \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
 
 		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$haulers type has no value type specified in iterable type array\\.$#"
+			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$haulers \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
 
 		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$machines type has no value type specified in iterable type array\\.$#"
+			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$machines \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
+			count: 5
+			path: database/seeders/ComprehensiveDataSeeder.php
+
+		-
+			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$mineAreas \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
 
 		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$mineAreas type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$users type has no value type specified in iterable type array\\.$#"
+			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$users \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
 

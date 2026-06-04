@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $action pin|unpin|admin_delete|override_approval|invite_sent|go_live_set|bulk_approve|bulk_reject|export|settings_changed
  * @property string $subject_type
  * @property int $subject_id
- * @property array|null $meta
+ * @property array<string, mixed>|null $meta
  * @property string|null $ip_address
  * @property \Carbon\Carbon $created_at
  */

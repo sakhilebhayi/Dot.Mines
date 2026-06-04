@@ -14,6 +14,7 @@ use Livewire\WithPagination;
 
 class Fleet extends Component
 {
+    /** @var array<string, mixed> */
     public array $activityFeed = [];
 
     public bool $isLoading = true;
@@ -21,6 +22,7 @@ class Fleet extends Component
     use WithPagination;
 
     // AI recommendation interaction state
+    /** @var array<string, mixed> */
     public array $lastAiRecommendations = [];
 
     public ?int $pendingRecommendationIndex = null;
@@ -45,6 +47,7 @@ class Fleet extends Component
 
     public ?int $selectedExcavatorId = null;
 
+    /** @var array<string, mixed> */
     public array $selectedAdtIds = [];
 
     public string $assignMode = 'assign_to_excavator';

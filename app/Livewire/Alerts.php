@@ -38,6 +38,7 @@ class Alerts extends Component
     public bool $showDismissConfirm = false;
 
     // Track when a dismissed-unresolved alert was created so UI can render specially
+    /** @var array<string, mixed> */
     public array $recentlyDismissedUnresolved = [];
 
     // Tab navigation

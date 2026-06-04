@@ -37,6 +37,7 @@ class GeofenceManager extends Component
 
     public float $centerLongitude = 0;
 
+    /** @var array<string, mixed> */
     public array $coordinates = [];
 
     protected $listeners = ['geofenceCreated' => 'geofenceCreated'];

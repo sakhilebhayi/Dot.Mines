@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string|null $description
  * @property string $type
- * @property array $coordinates
+ * @property array<string, mixed> $coordinates
  * @property float $center_latitude
  * @property float $center_longitude
  * @property float $area_sqm

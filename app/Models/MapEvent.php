@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $longitude
  * @property \Carbon\Carbon $occurred_at
  * @property \Carbon\Carbon|null $resolved_at
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read Machine|null  $machine

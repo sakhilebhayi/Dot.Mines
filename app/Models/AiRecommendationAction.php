@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property mixed|null $actioned_by
  * @property \Carbon\Carbon $created_at
  * @property int $id
- * @property array|null $performance_impact
- * @property array $recommendation
+ * @property array<string, mixed>|null $performance_impact
+ * @property array<string, mixed> $recommendation
  * @property string $recommendation_hash
  * @property string|null $reject_reason
  * @property string $status

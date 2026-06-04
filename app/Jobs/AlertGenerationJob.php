@@ -18,8 +18,12 @@ class AlertGenerationJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Team $team;
+
     public int $tries = 2;
+
     public int $timeout = 60;
+
+    /** @var array<int> */
     public array $backoff = [30, 120]; // 30s, 2 mins
 
     /**
@@ -83,7 +87,7 @@ class AlertGenerationJob implements ShouldQueue
             ->latest()
             ->first();
 
-        if (!$metrics) {
+        if (! $metrics) {
             return $alerts;
         }
 
@@ -293,13 +297,14 @@ class AlertGenerationJob implements ShouldQueue
 
         $interval = $maintenanceSchedule[strtolower($machine->machine_type)] ?? null;
 
-        if (!$interval) {
+        if (! $interval) {
             return null;
         }
 
         // Calculate based on some baseline (you'd store last maintenance time)
         // For now, use modulo to calculate next interval
         $hoursIntoInterval = $machine->hours_meter % $interval;
+
         return $interval - $hoursIntoInterval;
     }
 

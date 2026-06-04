@@ -38,7 +38,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $tire_pressure_front_right
  * @property float|null $tire_pressure_rear_left
  * @property float|null $tire_pressure_rear_right
- * @property array|null $raw_data
+ * @property array<string, mixed>|null $raw_data
  * @property \Carbon\Carbon $recorded_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at

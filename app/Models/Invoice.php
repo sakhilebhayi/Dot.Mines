@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Carbon\Carbon|null $due_at
  * @property \Carbon\Carbon|null $paid_at
  * @property string|null $pdf_url
- * @property array|null $line_items
+ * @property array<string, mixed>|null $line_items
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  *

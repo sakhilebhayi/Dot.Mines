@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $category breakdown | shift_update | safety_alert | production | general
  * @property string $priority normal | high | critical
  * @property string $body
- * @property array|null $meta Category-specific structured fields
+ * @property array<string, mixed>|null $meta Category-specific structured fields
  * @property int $like_count
  * @property int $comment_count
  * @property int $acknowledgement_count

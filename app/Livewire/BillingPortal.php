@@ -43,6 +43,7 @@ class BillingPortal extends Component
 
     public mixed $currentPlan = null;
 
+    /** @var array<string, mixed> */
     public array $availablePlans = [];
 
     public ?int $selectedPlanId = null;
@@ -72,8 +73,10 @@ class BillingPortal extends Component
     public int $BIG_MACHINE_PRICE = 2500; // R2,500 per bigger machine
 
     // Recent activity
+    /** @var array<string, mixed> */
     public array $recentPayments = [];
 
+    /** @var array<string, mixed> */
     public array $recentInvoices = [];
 
     public function mount()

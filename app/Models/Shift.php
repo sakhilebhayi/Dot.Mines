@@ -13,10 +13,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $shift_type
  * @property \Carbon\Carbon $started_at
  * @property \Carbon\Carbon|null $ended_at
- * @property array|null $previous_assignments
- * @property array|null $productivity_metrics
- * @property array|null $performance_summary
- * @property array|null $metadata
+ * @property array<string, mixed>|null $previous_assignments
+ * @property array<string, mixed>|null $productivity_metrics
+ * @property array<string, mixed>|null $performance_summary
+ * @property array<string, mixed>|null $metadata
  * @property \Carbon\Carbon|null $deleted_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at

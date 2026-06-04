@@ -23,7 +23,7 @@ class MachineHealthStatus extends Model
      * @property int $machine_id
      * @property int $overall_health_score
      * @property string $health_status
-     * @property array|null $component_scores
+     * @property array<string, mixed>|null $component_scores
      * @property int|null $engine_health
      * @property int|null $transmission_health
      * @property int|null $hydraulics_health
@@ -31,7 +31,7 @@ class MachineHealthStatus extends Model
      * @property int|null $brakes_health
      * @property int|null $cooling_system_health
      * @property \Carbon\Carbon|null $last_diagnostic_scan
-     * @property array|null $active_fault_codes
+     * @property array<string, mixed>|null $active_fault_codes
      * @property int $fault_code_count
      * @property string|null $recommendations
      * @property \Carbon\Carbon $created_at

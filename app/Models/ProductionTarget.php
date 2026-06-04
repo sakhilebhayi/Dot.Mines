@@ -70,7 +70,7 @@ class ProductionTarget extends Model
         return $this->belongsTo(MineArea::class);
     }
 
-    public function scopeForTeam(Builder $query, $teamId): Builder
+    public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
@@ -80,7 +80,7 @@ class ProductionTarget extends Model
         return $query->where('is_active', true);
     }
 
-    public function scopeByPeriod(Builder $query, $periodType): Builder
+    public function scopeByPeriod(Builder $query, string $periodType): Builder
     {
         return $query->where('period_type', $periodType);
     }

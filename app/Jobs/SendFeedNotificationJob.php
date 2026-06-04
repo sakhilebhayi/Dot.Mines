@@ -16,7 +16,10 @@ class SendFeedNotificationJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 2;
+
     public int $timeout = 30;
+
+    /** @var array<int> */
     public array $backoff = [30, 120];
 
     /**
@@ -39,24 +42,24 @@ class SendFeedNotificationJob implements ShouldQueue
         try {
             // Create a single in-app notification record for the team
             $notification = Notification::create([
-                'team_id'     => $this->payload['team_id'],
-                'type'        => $this->payload['type'],
-                'title'       => $this->payload['title'],
-                'message'     => $this->payload['message'],
+                'team_id' => $this->payload['team_id'],
+                'type' => $this->payload['type'],
+                'title' => $this->payload['title'],
+                'message' => $this->payload['message'],
                 'alert_level' => $this->payload['alert_level'],
-                'data'        => $this->payload['data'] ?? null,
-                'action_url'  => $this->payload['action_url'] ?? null,
-                'is_read'     => false,
+                'data' => $this->payload['data'] ?? null,
+                'action_url' => $this->payload['action_url'] ?? null,
+                'is_read' => false,
             ]);
 
             Log::info('Feed notification created', [
                 'notification_id' => $notification->id,
-                'recipients'      => count($this->recipientIds),
-                'type'            => $this->payload['type'],
+                'recipients' => count($this->recipientIds),
+                'type' => $this->payload['type'],
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to send feed notification', [
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'payload' => $this->payload,
             ]);
             throw $e;

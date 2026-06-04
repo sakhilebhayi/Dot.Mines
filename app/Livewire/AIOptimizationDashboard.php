@@ -21,6 +21,7 @@ class AIOptimizationDashboard extends Component
 
     public string $selectedPriority = 'all';
 
+    /** @var array<string, mixed> */
     public array $filters = [
         'category' => '',
         'priority' => '',
@@ -176,9 +177,9 @@ class AIOptimizationDashboard extends Component
         $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Alert acknowledged.']);
     }
 
+    /** @return array<string, mixed> */
     public function getOverviewDataProperty(): array
     {
-        $team = Auth::user()->currentTeam;
 
         $allRecs = \App\Models\AIRecommendation::where('team_id', $team->id)->get();
         $pending = $allRecs->where('status', 'pending');

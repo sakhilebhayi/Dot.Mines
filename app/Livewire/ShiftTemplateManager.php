@@ -22,6 +22,7 @@ class ShiftTemplateManager extends Component
 
     public string $formBody = '';
 
+    /** @var array<string, mixed> */
     public array $formRequired = [];
 
     protected function rules(): array
