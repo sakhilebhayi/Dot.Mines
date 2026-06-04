@@ -443,6 +443,10 @@ class FleetMovementReplay extends Component
         $filename = 'replay_'.$machine->name.'_'.now()->format('Y-m-d_His').'.csv';
         $handle = fopen('php://temp', 'r+');
 
+        if ($handle === false) {
+            return response()->streamDownload(function () {}, $filename, ['Content-Type' => 'text/csv']);
+        }
+
         foreach ($csvData as $row) {
             fputcsv($handle, $row);
         }

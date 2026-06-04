@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use Illuminate\Queue\Events\JobFailed;
-use Psr\Log\LogLevel;
 
 class NotifyOnJobFailed
 {
@@ -28,7 +27,7 @@ class NotifyOnJobFailed
 
         // Send to Sentry if available and configured
         try {
-            if (env('SENTRY_DSN') && class_exists('\\Sentry\\State\\HubInterface')) {
+            if (config('services.sentry.dsn') && class_exists('\\Sentry\\State\\HubInterface')) {
                 // safe-call Sentry capture if SDK is installed
                 if (function_exists('\\Sentry\\captureException')) {
                     \Sentry\captureException($event->exception);

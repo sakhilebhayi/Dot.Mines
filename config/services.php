@@ -35,6 +35,10 @@ return [
         ],
     ],
 
+    'sentry' => [
+        'dsn' => env('SENTRY_DSN'),
+    ],
+
     'paystack' => [
         'secret' => env('PAYSTACK_SECRET_KEY'),
         'public_key' => env('PAYSTACK_PUBLIC_KEY'),

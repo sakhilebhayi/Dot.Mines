@@ -230,6 +230,7 @@ class Fleet extends Component
 
         if ($this->editingMachineId) {
             $machine = Machine::where('team_id', $team->id)->findOrFail($this->editingMachineId);
+            $this->authorize('update', $machine);
             $machine->update([
                 'name' => $this->name,
                 'model' => $this->model,
@@ -252,6 +253,8 @@ class Fleet extends Component
 
                 return;
             }
+
+            $this->authorize('create', Machine::class);
 
             Machine::create([
                 'team_id' => $team->id,
@@ -280,6 +283,7 @@ class Fleet extends Component
             abort(403);
         }
 
+        $this->authorize('delete', $machine);
         $machineName = $machine->name;
         $machine->delete();
         $this->dispatch('notify', message: "Machine '{$machineName}' deleted successfully", type: 'success');

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -47,3 +49,40 @@ use Illuminate\Database\Eloquent\Model;
  * @method static IoTSensor findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
+class IoTSensor extends Model
+{
+    use HasFactory, HasTeamFilters;
+
+    protected $fillable = [
+        'team_id',
+        'mine_area_id',
+        'name',
+        'sensor_type',
+        'device_id',
+        'status',
+        'last_reading',
+        'last_reading_at',
+        'location_latitude',
+        'location_longitude',
+        'metadata',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'last_reading' => 'array',
+            'metadata' => 'array',
+            'last_reading_at' => 'datetime',
+            'location_latitude' => 'float',
+            'location_longitude' => 'float',
+        ];
+    }
+
+    public function readings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SensorReading::class);
+    }
+}

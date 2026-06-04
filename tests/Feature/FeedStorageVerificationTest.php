@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
@@ -39,10 +40,10 @@ class FeedStorageVerificationTest extends TestCase
     {
         return base64_decode(
             '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8U'
-            . 'HRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAARCAABAAEDASIA'
-            . 'AhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAU'
-            . 'AQEAAAAAAAAAAAAAAAAAAAAA/8QAFREBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A'
-            . 'JQAB/9k='
+            .'HRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAARCAABAAEDASIA'
+            .'AhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAU'
+            .'AQEAAAAAAAAAAAAAAAAAAAAA/8QAFREBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A'
+            .'JQAB/9k='
         );
     }
 
@@ -53,7 +54,7 @@ class FeedStorageVerificationTest extends TestCase
     {
         return base64_decode(
             'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA'
-            . 'WjR9awAAAABJRU5ErkJggg=='
+            .'WjR9awAAAABJRU5ErkJggg=='
         );
     }
 
@@ -63,10 +64,10 @@ class FeedStorageVerificationTest extends TestCase
     private function minimalPdf(): string
     {
         return "%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
-            . "2 0 obj\n<< /Type /Pages /Kids [] /Count 0 >>\nendobj\n"
-            . "xref\n0 3\n0000000000 65535 f \n0000000009 00000 n \n"
-            . "0000000058 00000 n \ntrailer\n<< /Size 3 /Root 1 0 R >>\n"
-            . "startxref\n110\n%%EOF\n";
+            ."2 0 obj\n<< /Type /Pages /Kids [] /Count 0 >>\nendobj\n"
+            ."xref\n0 3\n0000000000 65535 f \n0000000009 00000 n \n"
+            ."0000000058 00000 n \ntrailer\n<< /Size 3 /Root 1 0 R >>\n"
+            ."startxref\n110\n%%EOF\n";
     }
 
     /** Create an UploadedFile from raw binary bytes. */
@@ -74,6 +75,7 @@ class FeedStorageVerificationTest extends TestCase
     {
         $tmp = tempnam(sys_get_temp_dir(), 'ftest_');
         file_put_contents($tmp, $contents);
+
         return new UploadedFile($tmp, $filename, $mime, null, true);
     }
 
@@ -84,6 +86,7 @@ class FeedStorageVerificationTest extends TestCase
         $team = Team::factory()->create(['personal_team' => false]);
         $user = User::factory()->create(['current_team_id' => $team->id]);
         $team->users()->attach($user, ['role' => 'editor']);
+
         return [$team, $user];
     }
 
@@ -91,11 +94,11 @@ class FeedStorageVerificationTest extends TestCase
     {
         // create() only runs an INSERT — team global scope only affects SELECTs
         return FeedPost::create([
-            'team_id'   => $team->id,
+            'team_id' => $team->id,
             'author_id' => $user->id,
-            'category'  => 'general',
-            'priority'  => 'normal',
-            'body'      => 'Test post body.',
+            'category' => 'general',
+            'priority' => 'normal',
+            'body' => 'Test post body.',
         ]);
     }
 
@@ -103,22 +106,22 @@ class FeedStorageVerificationTest extends TestCase
     // 1. UPLOAD WORKS
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[Test]
     public function upload_stores_binary_in_database_with_correct_metadata(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
         $post = $this->makePost($team, $user);
 
-        $file       = $this->makeFakeFile($this->minimalJpeg(), 'photo.jpg', 'image/jpeg');
-        $service    = app(FeedAttachmentService::class);
+        $file = $this->makeFakeFile($this->minimalJpeg(), 'photo.jpg', 'image/jpeg');
+        $service = app(FeedAttachmentService::class);
         $attachment = $service->store($file, $post, $user);
 
         $this->assertDatabaseHas('feed_attachments', [
-            'id'           => $attachment->id,
-            'post_id'      => $post->id,
-            'uploader_id'  => $user->id,
+            'id' => $attachment->id,
+            'post_id' => $post->id,
+            'uploader_id' => $user->id,
             'storage_type' => 'db',
-            'file_url'     => null,
+            'file_url' => null,
         ]);
 
         // Actual binary was persisted
@@ -133,11 +136,11 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertSame($user->id, $attachment->uploader_id);
     }
 
-    /** @test */
+    #[Test]
     public function upload_sanitises_path_traversal_in_filename(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post    = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $service = app(FeedAttachmentService::class);
 
         $file = $this->makeFakeFile(
@@ -152,11 +155,11 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertNotEmpty($attachment->file_name);
     }
 
-    /** @test */
+    #[Test]
     public function upload_sanitises_null_bytes_in_filename(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post    = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $service = app(FeedAttachmentService::class);
 
         $file = $this->makeFakeFile(
@@ -168,11 +171,11 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertStringNotContainsString("\x00", $attachment->file_name);
     }
 
-    /** @test */
+    #[Test]
     public function upload_rejects_disallowed_mime_php_script(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post    = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $service = app(FeedAttachmentService::class);
 
         $file = $this->makeFakeFile(
@@ -184,11 +187,11 @@ class FeedStorageVerificationTest extends TestCase
         $service->store($file, $post, $user);
     }
 
-    /** @test */
+    #[Test]
     public function upload_rejects_html_xss_file(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post    = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $service = app(FeedAttachmentService::class);
 
         $file = $this->makeFakeFile(
@@ -199,11 +202,11 @@ class FeedStorageVerificationTest extends TestCase
         $service->store($file, $post, $user);
     }
 
-    /** @test */
+    #[Test]
     public function upload_rejects_empty_file(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post    = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $service = app(FeedAttachmentService::class);
 
         $file = $this->makeFakeFile('', 'empty.jpg', null);
@@ -212,11 +215,11 @@ class FeedStorageVerificationTest extends TestCase
         $service->store($file, $post, $user);
     }
 
-    /** @test */
+    #[Test]
     public function upload_accepts_jpeg_png_and_pdf(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post    = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $service = app(FeedAttachmentService::class);
 
         $pairs = [
@@ -240,11 +243,11 @@ class FeedStorageVerificationTest extends TestCase
     // 2. RETRIEVAL WORKS
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[Test]
     public function serve_endpoint_streams_db_file_with_correct_headers(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post       = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $attachment = app(FeedAttachmentService::class)->store(
             $this->makeFakeFile($this->minimalJpeg(), 'photo.jpg', 'image/jpeg'),
             $post, $user
@@ -262,11 +265,11 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertNotNull($response->headers->get('Content-Length'));
     }
 
-    /** @test */
+    #[Test]
     public function serve_endpoint_uses_inline_disposition_for_images(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post       = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $attachment = app(FeedAttachmentService::class)->store(
             $this->makeFakeFile($this->minimalJpeg(), 'photo.jpg', 'image/jpeg'),
             $post, $user
@@ -279,11 +282,11 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertStringStartsWith('inline', $disposition);
     }
 
-    /** @test */
+    #[Test]
     public function serve_endpoint_uses_attachment_disposition_for_pdf(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post       = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $attachment = app(FeedAttachmentService::class)->store(
             $this->makeFakeFile($this->minimalPdf(), 'report.pdf', 'application/pdf'),
             $post, $user
@@ -296,7 +299,7 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertStringStartsWith('attachment', $disposition);
     }
 
-    /** @test */
+    #[Test]
     public function serve_endpoint_returns_404_for_nonexistent_id(): void
     {
         [, $user] = $this->makeTeamWithUser();
@@ -306,11 +309,11 @@ class FeedStorageVerificationTest extends TestCase
             ->assertNotFound();
     }
 
-    /** @test */
+    #[Test]
     public function url_accessor_for_db_record_returns_serve_route(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post       = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $attachment = app(FeedAttachmentService::class)->store(
             $this->makeFakeFile($this->minimalPng(), 'img.png', 'image/png'),
             $post, $user
@@ -324,41 +327,41 @@ class FeedStorageVerificationTest extends TestCase
     // 3. LEGACY S3 BACKWARD COMPATIBILITY
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[Test]
     public function legacy_s3_url_accessor_returns_original_s3_url(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post  = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
 
         $s3Url = 'https://my-bucket.s3.amazonaws.com/feed/attachments/old-file.jpg';
-        $att   = FeedAttachment::create([
-            'post_id'      => $post->id,
+        $att = FeedAttachment::create([
+            'post_id' => $post->id,
             'storage_type' => 's3',
-            'file_url'     => $s3Url,
-            'file_name'    => 'old-file.jpg',
-            'file_type'    => 'image/jpeg',
-            'file_size'    => 204800,
-            'uploaded_at'  => now()->subDays(30),
+            'file_url' => $s3Url,
+            'file_name' => 'old-file.jpg',
+            'file_type' => 'image/jpeg',
+            'file_size' => 204800,
+            'uploaded_at' => now()->subDays(30),
         ]);
 
         $this->assertSame($s3Url, $att->url);
     }
 
-    /** @test */
+    #[Test]
     public function serve_endpoint_redirects_legacy_s3_record_to_s3_url(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post  = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
 
         $s3Url = 'https://my-bucket.s3.amazonaws.com/feed/attachments/doc.pdf';
-        $att   = FeedAttachment::create([
-            'post_id'      => $post->id,
+        $att = FeedAttachment::create([
+            'post_id' => $post->id,
             'storage_type' => 's3',
-            'file_url'     => $s3Url,
-            'file_name'    => 'doc.pdf',
-            'file_type'    => 'application/pdf',
-            'file_size'    => 512000,
-            'uploaded_at'  => now()->subDays(60),
+            'file_url' => $s3Url,
+            'file_name' => 'doc.pdf',
+            'file_type' => 'application/pdf',
+            'file_size' => 512000,
+            'uploaded_at' => now()->subDays(60),
         ]);
 
         $this->actingAs($user)
@@ -366,21 +369,21 @@ class FeedStorageVerificationTest extends TestCase
             ->assertRedirect($s3Url);
     }
 
-    /** @test */
+    #[Test]
     public function s3_and_db_records_coexist_in_same_post(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post  = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
 
         // Legacy S3 record
         FeedAttachment::create([
-            'post_id'      => $post->id,
+            'post_id' => $post->id,
             'storage_type' => 's3',
-            'file_url'     => 'https://s3.example.com/old.jpg',
-            'file_name'    => 'old.jpg',
-            'file_type'    => 'image/jpeg',
-            'file_size'    => 50000,
-            'uploaded_at'  => now()->subMonth(),
+            'file_url' => 'https://s3.example.com/old.jpg',
+            'file_name' => 'old.jpg',
+            'file_type' => 'image/jpeg',
+            'file_size' => 50000,
+            'uploaded_at' => now()->subMonth(),
         ]);
 
         // New DB record
@@ -405,7 +408,7 @@ class FeedStorageVerificationTest extends TestCase
     // 4. SCALABILITY — BLOB EXCLUDED FROM LISTINGS
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[Test]
     public function attachments_relation_does_not_load_file_data_blob(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
@@ -432,7 +435,7 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertArrayHasKey('file_size', $attributes);
     }
 
-    /** @test */
+    #[Test]
     public function paginated_feed_listing_avoids_n_plus_1_queries(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
@@ -446,7 +449,9 @@ class FeedStorageVerificationTest extends TestCase
         }
 
         $queryCount = 0;
-        DB::listen(function () use (&$queryCount) { $queryCount++; });
+        DB::listen(function () use (&$queryCount) {
+            $queryCount++;
+        });
 
         FeedPost::withoutGlobalScope('team')
             ->with(['attachments'])
@@ -460,7 +465,7 @@ class FeedStorageVerificationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function formatted_size_returns_human_readable_string(): void
     {
         $cases = [
@@ -478,7 +483,7 @@ class FeedStorageVerificationTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function is_image_and_is_pdf_helpers_work_correctly(): void
     {
         $jpg = new FeedAttachment(['file_type' => 'image/jpeg', 'storage_type' => 'db']);
@@ -497,11 +502,11 @@ class FeedStorageVerificationTest extends TestCase
     // 5. SECURITY CONTROLS
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[Test]
     public function serve_endpoint_requires_authentication(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post       = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $attachment = app(FeedAttachmentService::class)->store(
             $this->makeFakeFile($this->minimalJpeg(), 'secret.jpg', 'image/jpeg'),
             $post, $user
@@ -512,11 +517,11 @@ class FeedStorageVerificationTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    #[Test]
     public function serve_endpoint_denies_user_from_different_team(): void
     {
         [$team, $owner] = $this->makeTeamWithUser();
-        $post       = $this->makePost($team, $owner);
+        $post = $this->makePost($team, $owner);
         $attachment = app(FeedAttachmentService::class)->store(
             $this->makeFakeFile($this->minimalJpeg(), 'confidential.jpg', 'image/jpeg'),
             $post, $owner
@@ -524,7 +529,7 @@ class FeedStorageVerificationTest extends TestCase
 
         // Attacker belongs to a completely different team
         $otherTeam = Team::factory()->create(['personal_team' => false]);
-        $attacker  = User::factory()->create(['current_team_id' => $otherTeam->id]);
+        $attacker = User::factory()->create(['current_team_id' => $otherTeam->id]);
         $otherTeam->users()->attach($attacker, ['role' => 'editor']);
 
         $response = $this->actingAs($attacker)
@@ -537,18 +542,18 @@ class FeedStorageVerificationTest extends TestCase
             'Cross-team file serve must be denied (403 or 404 accepted)');
     }
 
-    /** @test */
+    #[Test]
     public function file_data_blob_is_hidden_from_toarray_and_tojson(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
-        $post       = $this->makePost($team, $user);
+        $post = $this->makePost($team, $user);
         $attachment = app(FeedAttachmentService::class)->store(
             $this->makeFakeFile($this->minimalJpeg(), 'photo.jpg', 'image/jpeg'),
             $post, $user
         );
 
         // Neither toArray() nor toJson() must expose the raw binary
-        $arr  = $attachment->toArray();
+        $arr = $attachment->toArray();
         $json = json_decode($attachment->toJson(), true);
 
         $this->assertArrayNotHasKey('file_data', $arr,
@@ -559,7 +564,7 @@ class FeedStorageVerificationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function upload_service_is_the_only_write_path_for_new_attachments(): void
     {
         // Verify allowed MIME types list is complete and does NOT include executables
@@ -578,7 +583,7 @@ class FeedStorageVerificationTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function upload_rate_limiter_is_registered(): void
     {
         $this->assertNotNull(
@@ -587,7 +592,7 @@ class FeedStorageVerificationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function feed_post_rate_limiter_is_registered(): void
     {
         $this->assertNotNull(
@@ -596,7 +601,7 @@ class FeedStorageVerificationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function api_upload_route_enforces_10_per_minute_rate_limit(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
@@ -620,7 +625,7 @@ class FeedStorageVerificationTest extends TestCase
             'uploads rate limiter must key on the authenticated user ID');
     }
 
-    /** @test */
+    #[Test]
     public function cross_tenant_api_upload_is_blocked_by_policy(): void
     {
         [$team, $owner] = $this->makeTeamWithUser();
@@ -628,7 +633,7 @@ class FeedStorageVerificationTest extends TestCase
 
         // Attacker on a different team
         $otherTeam = Team::factory()->create(['personal_team' => false]);
-        $attacker  = User::factory()->create(['current_team_id' => $otherTeam->id]);
+        $attacker = User::factory()->create(['current_team_id' => $otherTeam->id]);
         $otherTeam->users()->attach($attacker, ['role' => 'editor']);
 
         $response = $this->actingAs($attacker, 'sanctum')
@@ -648,7 +653,7 @@ class FeedStorageVerificationTest extends TestCase
     // 6. AUDIT LOGGING
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[Test]
     public function upload_creates_audit_log_row(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
@@ -660,14 +665,14 @@ class FeedStorageVerificationTest extends TestCase
         );
 
         $this->assertDatabaseHas('audit_logs', [
-            'action'       => AuditLog::FEED_ATTACHMENT_UPLOAD,
-            'actor_id'     => $user->id,
-            'team_id'      => $team->id,
+            'action' => AuditLog::FEED_ATTACHMENT_UPLOAD,
+            'actor_id' => $user->id,
+            'team_id' => $team->id,
             'subject_type' => FeedAttachment::class,
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function audit_service_never_throws_even_on_write_failure(): void
     {
         // Temporarily rename the table so that the INSERT will fail
@@ -684,7 +689,7 @@ class FeedStorageVerificationTest extends TestCase
                 '127.0.0.1'
             );
         } catch (\Throwable $e) {
-            $this->fail('AuditService::log() must never throw — got: ' . $e->getMessage());
+            $this->fail('AuditService::log() must never throw — got: '.$e->getMessage());
         } finally {
             DB::statement('ALTER TABLE audit_logs_bak RENAME TO audit_logs');
         }
@@ -692,7 +697,7 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertTrue(true); // reached here without exception
     }
 
-    /** @test */
+    #[Test]
     public function audit_log_record_has_correct_structure(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
@@ -722,7 +727,7 @@ class FeedStorageVerificationTest extends TestCase
         $this->assertSame('maintenance', $meta['to']);
     }
 
-    /** @test */
+    #[Test]
     public function audit_log_table_has_no_updated_at_column(): void
     {
         [$team, $user] = $this->makeTeamWithUser();
@@ -735,7 +740,7 @@ class FeedStorageVerificationTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function audit_log_captures_all_required_action_constants(): void
     {
         $required = [
@@ -767,4 +772,3 @@ class FeedStorageVerificationTest extends TestCase
         }
     }
 }
-

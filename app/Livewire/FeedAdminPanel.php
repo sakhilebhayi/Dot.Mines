@@ -23,7 +23,7 @@ class FeedAdminPanel extends Component
 
     public function mount(): void
     {
-        abort_if(! Auth::user()->hasRole('admin'), 403);
+        abort_if(! Auth::user()?->hasRole('admin'), 403);
 
         $team = Auth::user()->currentTeam;
         $stored = $team->active_shifts ? json_decode($team->active_shifts, true) : ['A', 'B', 'C'];

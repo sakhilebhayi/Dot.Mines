@@ -491,11 +491,6 @@ parameters:
 			path: app/Events/SensorReadingRecorded.php
 
 		-
-			message: "#^Parameter \\$sensor of method App\\\\Events\\\\SensorReadingRecorded\\:\\:__construct\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Events/SensorReadingRecorded.php
-
-		-
 			message: "#^Property App\\\\Events\\\\SensorReadingRecorded\\:\\:\\$reading has no type specified\\.$#"
 			count: 1
 			path: app/Events/SensorReadingRecorded.php
@@ -646,16 +641,6 @@ parameters:
 			path: app/Http/Controllers/Api/FuelTransactionController.php
 
 		-
-			message: "#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|false given\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function fputcsv expects resource, resource\\|false given\\.$#"
-			count: 2
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
 			message: "#^Cannot access property \\$machine on stdClass\\|null\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/GeofenceController.php
@@ -689,46 +674,6 @@ parameters:
 			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$provider\\.$#"
 			count: 3
 			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Access to property \\$id on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Call to method readings\\(\\) on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 2
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:deactivate\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:export\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:readings\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:recordReading\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:show\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:statistics\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
 
 		-
 			message: "#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<App\\\\Models\\\\MachineHealthStatus\\>\\:\\:critical\\(\\)\\.$#"
@@ -1766,7 +1711,7 @@ parameters:
 			path: app/Livewire/Feed.php
 
 		-
-			message: "#^Cannot call method hasRole\\(\\) on Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\|null\\.$#"
+			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:hasRole\\(\\)\\.$#"
 			count: 1
 			path: app/Livewire/FeedAdminPanel.php
 
@@ -1987,26 +1932,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|false given\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function fputcsv expects resource, resource\\|false given\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function rewind expects resource, resource\\|false given\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Parameter \\#1 \\$stream of function stream_get_contents expects resource, resource\\|false given\\.$#"
 			count: 1
 			path: app/Livewire/FleetMovementReplay.php
 
@@ -3471,7 +3396,7 @@ parameters:
 			path: app/Livewire/Settings.php
 
 		-
-			message: "#^Cannot call method hasRole\\(\\) on Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\|null\\.$#"
+			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:hasRole\\(\\)\\.$#"
 			count: 1
 			path: app/Livewire/ShiftTemplateManager.php
 
@@ -3496,7 +3421,7 @@ parameters:
 			path: app/Livewire/Sidebar.php
 
 		-
-			message: "#^Cannot call method hasRole\\(\\) on Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\|null\\.$#"
+			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:hasRole\\(\\)\\.$#"
 			count: 1
 			path: app/Livewire/WhatsAppMigration.php
 
@@ -3586,26 +3511,6 @@ parameters:
 			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession not found\\.$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData not found\\.$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert not found\\.$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation not found\\.$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
 			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:analysisSessions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/AIAgent.php
@@ -3666,14 +3571,604 @@ parameters:
 			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Parameter \\#1 \\$related of method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:hasMany\\(\\) expects class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>, string given\\.$#"
-			count: 4
-			path: app/Models/AIAgent.php
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
 
 		-
-			message: "#^Unable to resolve the template type TRelatedModel in call to method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:hasMany\\(\\)$#"
-			count: 4
-			path: app/Models/AIAgent.php
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @method for method find\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @method for method findOrFail\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIAnalysisSession\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIAnalysisSession\\:\\:orderBy\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIAnalysisSession\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIAnalysisSession\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIAnalysisSession.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @method for method find\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @method for method findOrFail\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIInsight uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIInsight\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIInsight\\:\\:orderBy\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIInsight\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIInsight\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIInsight.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @method for method find\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @method for method findOrFail\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AILearningData\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AILearningData\\:\\:orderBy\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AILearningData\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AILearningData\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AILearningData.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @method for method find\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @method for method findOrFail\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIPredictiveAlert\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIPredictiveAlert\\:\\:orderBy\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIPredictiveAlert\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIPredictiveAlert\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIPredictiveAlert.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @method for method find\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @method for method findOrFail\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$actual_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$capabilities with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$configuration with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$impact_analysis with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$input_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$input_parameters with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$predicted_output with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$predictions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$recommended_actions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$results with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation has PHPDoc tag @property for property \\$visualization_data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIRecommendation\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIRecommendation\\:\\:orderBy\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIRecommendation\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIRecommendation\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
 
 		-
 			message: "#^Class App\\\\Models\\\\ActivityLog has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
@@ -3719,6 +4214,76 @@ parameters:
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\ActivityLog\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ActivityLog.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AiRecommendationAction has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AiRecommendationAction has PHPDoc tag @method for method find\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AiRecommendationAction has PHPDoc tag @method for method findOrFail\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AiRecommendationAction has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AiRecommendationAction has PHPDoc tag @property for property \\$performance_impact with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AiRecommendationAction has PHPDoc tag @property for property \\$recommendation with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AiRecommendationAction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AiRecommendationAction\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AiRecommendationAction\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AiRecommendationAction\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AiRecommendationAction\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AiRecommendationAction\\:\\:orderBy\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AiRecommendationAction\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AiRecommendationAction\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AiRecommendationAction.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Alert has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
@@ -5304,6 +5869,96 @@ parameters:
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Invoice\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Invoice.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @method for method find\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @method for method findOrFail\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$factors with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$issues with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$last_reading with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:readings\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\IoTSensor\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\IoTSensor\\:\\:orderBy\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\IoTSensor\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/IoTSensor.php
+
+		-
+			message: "#^PHPDoc tag @method for method App\\\\Models\\\\IoTSensor\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/IoTSensor.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Machine uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -7181,11 +7836,6 @@ parameters:
 			path: app/Models/Route.php
 
 		-
-			message: "#^Class App\\\\Models\\\\IoTSensor not found\\.$#"
-			count: 1
-			path: app/Models/SensorReading.php
-
-		-
 			message: "#^Method App\\\\Models\\\\SensorReading\\:\\:sensor\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/SensorReading.php
@@ -7197,16 +7847,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\SensorReading\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/SensorReading.php
-
-		-
-			message: "#^Parameter \\#1 \\$related of method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:belongsTo\\(\\) expects class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>, string given\\.$#"
-			count: 1
-			path: app/Models/SensorReading.php
-
-		-
-			message: "#^Unable to resolve the template type TRelatedModel in call to method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:belongsTo\\(\\)$#"
 			count: 1
 			path: app/Models/SensorReading.php
 
@@ -7656,26 +8296,6 @@ parameters:
 			path: app/Models/Waypoint.php
 
 		-
-			message: "#^Access to property \\$team_id on an unknown class App\\\\Models\\\\AIRecommendation\\.$#"
-			count: 3
-			path: app/Policies/AIRecommendationPolicy.php
-
-		-
-			message: "#^Parameter \\$recommendation of method App\\\\Policies\\\\AIRecommendationPolicy\\:\\:delete\\(\\) has invalid type App\\\\Models\\\\AIRecommendation\\.$#"
-			count: 1
-			path: app/Policies/AIRecommendationPolicy.php
-
-		-
-			message: "#^Parameter \\$recommendation of method App\\\\Policies\\\\AIRecommendationPolicy\\:\\:update\\(\\) has invalid type App\\\\Models\\\\AIRecommendation\\.$#"
-			count: 1
-			path: app/Policies/AIRecommendationPolicy.php
-
-		-
-			message: "#^Parameter \\$recommendation of method App\\\\Policies\\\\AIRecommendationPolicy\\:\\:view\\(\\) has invalid type App\\\\Models\\\\AIRecommendation\\.$#"
-			count: 1
-			path: app/Policies/AIRecommendationPolicy.php
-
-		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$email\\.$#"
 			count: 1
 			path: app/Providers/AppServiceProvider.php
@@ -7694,16 +8314,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$user of class App\\\\Mail\\\\WelcomeMail constructor expects App\\\\Models\\\\User, Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable given\\.$#"
 			count: 1
 			path: app/Providers/AppServiceProvider.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation not found\\.$#"
-			count: 1
-			path: app/Providers/AuthServiceProvider.php
-
-		-
-			message: "#^Property App\\\\Providers\\\\AuthServiceProvider\\:\\:\\$policies \\(array\\<class\\-string, class\\-string\\>\\) does not accept default value of type array\\<string, string\\>\\.$#"
-			count: 1
-			path: app/Providers/AuthServiceProvider.php
 
 		-
 			message: "#^Method App\\\\Services\\\\AI\\\\AIOptimizationService\\:\\:generateSummary\\(\\) has parameter \\$insights with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#"
@@ -9521,36 +10131,6 @@ parameters:
 			path: app/Services/Integration/XCMGService.php
 
 		-
-			message: "#^Access to property \\$id on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Access to property \\$sensor_type on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Access to property \\$status on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Call to method isOnline\\(\\) on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Call to method readings\\(\\) on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 3
-			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Call to method update\\(\\) on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:calculateTrend\\(\\) has parameter \\$values with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
@@ -9571,22 +10151,17 @@ parameters:
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Parameter \\$sensor of method App\\\\Services\\\\IoTSensorService\\:\\:checkSensorHealth\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) should return App\\\\Models\\\\SensorReading but returns Illuminate\\\\Database\\\\Eloquent\\\\Model\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Parameter \\$sensor of method App\\\\Services\\\\IoTSensorService\\:\\:deactivateSensor\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function max expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Parameter \\$sensor of method App\\\\Services\\\\IoTSensorService\\:\\:getReadingStats\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function min expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
@@ -9841,16 +10416,6 @@ parameters:
 			path: app/Services/RealTimeAlertService.php
 
 		-
-			message: "#^Access to property \\$id on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 4
-			path: app/Services/RealTimeAlertService.php
-
-		-
-			message: "#^Access to property \\$name on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
-			count: 2
-			path: app/Services/RealTimeAlertService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\RealTimeAlertService\\:\\:dispatchSensorAlert\\(\\) has parameter \\$reading with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/RealTimeAlertService.php
@@ -9862,16 +10427,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Services\\\\RealTimeAlertService\\:\\:getUnreadAlerts\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, App\\\\Models\\\\Notification\\> but returns Illuminate\\\\Support\\\\Collection\\<int, stdClass\\>\\.$#"
-			count: 1
-			path: app/Services/RealTimeAlertService.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Services\\\\RealTimeAlertService\\:\\:dispatchSensorAlert\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: app/Services/RealTimeAlertService.php
-
-		-
-			message: "#^Parameter \\$sensor of method App\\\\Services\\\\RealTimeAlertService\\:\\:dispatchSensorStatusAlert\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Services/RealTimeAlertService.php
 
@@ -9981,24 +10536,9 @@ parameters:
 			path: database/factories/AIAgentFactory.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AIInsight not found\\.$#"
-			count: 1
-			path: database/factories/AIInsightFactory.php
-
-		-
 			message: "#^Class Database\\\\Factories\\\\AIInsightFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
 			count: 1
 			path: database/factories/AIInsightFactory.php
-
-		-
-			message: "#^Property Database\\\\Factories\\\\AIInsightFactory\\:\\:\\$model \\(class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\) does not accept default value of type string\\.$#"
-			count: 1
-			path: database/factories/AIInsightFactory.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert not found\\.$#"
-			count: 1
-			path: database/factories/AIPredictiveAlertFactory.php
 
 		-
 			message: "#^Class Database\\\\Factories\\\\AIPredictiveAlertFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
@@ -10006,22 +10546,7 @@ parameters:
 			path: database/factories/AIPredictiveAlertFactory.php
 
 		-
-			message: "#^Property Database\\\\Factories\\\\AIPredictiveAlertFactory\\:\\:\\$model \\(class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\) does not accept default value of type string\\.$#"
-			count: 1
-			path: database/factories/AIPredictiveAlertFactory.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation not found\\.$#"
-			count: 1
-			path: database/factories/AIRecommendationFactory.php
-
-		-
 			message: "#^Class Database\\\\Factories\\\\AIRecommendationFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
-			count: 1
-			path: database/factories/AIRecommendationFactory.php
-
-		-
-			message: "#^Property Database\\\\Factories\\\\AIRecommendationFactory\\:\\:\\$model \\(class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\) does not accept default value of type string\\.$#"
 			count: 1
 			path: database/factories/AIRecommendationFactory.php
 
@@ -10029,26 +10554,6 @@ parameters:
 			message: "#^Binary operation \"\\.\" between array\\|string and ' Zone' results in an error\\.$#"
 			count: 1
 			path: database/factories/GeofenceFactory.php
-
-		-
-			message: "#^Class App\\\\Models\\\\IoTSensor not found\\.$#"
-			count: 1
-			path: database/factories/IoTSensorFactory.php
-
-		-
-			message: "#^PHPDoc tag @extends has invalid type App\\\\Models\\\\IoTSensor\\.$#"
-			count: 1
-			path: database/factories/IoTSensorFactory.php
-
-		-
-			message: "#^Property Database\\\\Factories\\\\IoTSensorFactory\\:\\:\\$model has unknown class App\\\\Models\\\\IoTSensor as its type\\.$#"
-			count: 1
-			path: database/factories/IoTSensorFactory.php
-
-		-
-			message: "#^Type App\\\\Models\\\\IoTSensor in generic type Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\<App\\\\Models\\\\IoTSensor\\> in PHPDoc tag @extends is not subtype of template type TModel of Illuminate\\\\Database\\\\Eloquent\\\\Model of class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\.$#"
-			count: 1
-			path: database/factories/IoTSensorFactory.php
 
 		-
 			message: "#^Binary operation \"\\.\" between array\\|string and ' Mine Area' results in an error\\.$#"

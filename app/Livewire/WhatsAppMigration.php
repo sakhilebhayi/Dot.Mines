@@ -24,7 +24,7 @@ class WhatsAppMigration extends Component
 
     public function mount(): void
     {
-        abort_if(! Auth::user()->hasRole('admin'), 403);
+        abort_if(! Auth::user()?->hasRole('admin'), 403);
 
         $team = Auth::user()->currentTeam;
         if ($team->feed_go_live_at) {

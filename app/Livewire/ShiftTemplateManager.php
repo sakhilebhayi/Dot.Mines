@@ -38,7 +38,7 @@ class ShiftTemplateManager extends Component
     public function mount(): void
     {
         abort_unless(
-            Auth::user()->hasRole(['admin', 'supervisor', 'manager', 'safety_officer']),
+            Auth::user()?->hasRole(['admin', 'supervisor', 'manager', 'safety_officer']),
             403
         );
     }

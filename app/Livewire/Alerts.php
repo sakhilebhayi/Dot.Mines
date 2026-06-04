@@ -150,8 +150,8 @@ class Alerts extends Component
         $alert = Alert::where('team_id', $team->id)->find($alertId);
 
         if ($alert) {
+            $this->authorize('acknowledge', $alert);
             $alert->update([
-                'status' => 'acknowledged',
                 'acknowledged_by' => Auth::id(),
                 'acknowledged_at' => now(),
             ]);
@@ -165,6 +165,7 @@ class Alerts extends Component
         $alert = Alert::where('team_id', $team->id)->find($alertId);
 
         if ($alert) {
+            $this->authorize('resolve', $alert);
             $alert->update([
                 'status' => 'resolved',
                 'resolved_by' => Auth::id(),

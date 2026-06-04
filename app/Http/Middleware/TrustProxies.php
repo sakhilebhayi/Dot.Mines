@@ -25,7 +25,7 @@ class TrustProxies extends Middleware
 
     public function __construct()
     {
-        $proxies = env('TRUSTED_PROXIES', null);
+        $proxies = config('app.trusted_proxies');
 
         if ($proxies === '*') {
             $this->proxies = '*';
