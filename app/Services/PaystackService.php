@@ -119,7 +119,7 @@ class PaystackService
             'email' => $team->owner->email,
             'amount' => $amount,
             'plan' => $planCode,
-            'callback_url' => route('billing.success'),
+            'callback_url' => config('services.paystack.callback_url', route('billing.success')),
             'metadata' => [
                 'team_id' => (string) $team->id,
                 'plan_id' => (string) $plan->id,

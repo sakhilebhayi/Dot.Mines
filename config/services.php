@@ -38,6 +38,8 @@ return [
     'paystack' => [
         'secret' => env('PAYSTACK_SECRET_KEY'),
         'public_key' => env('PAYSTACK_PUBLIC_KEY'),
+        'callback_url' => env('PAYSTACK_CALLBACK_URL', env('APP_URL').'/billing/success'),
+        'webhook_url' => env('PAYSTACK_WEBHOOK_URL', env('APP_URL').'/webhooks/paystack'),
 
         // Paystack Plan Codes for subscription tiers
         'basic_monthly_plan_code' => env('PAYSTACK_BASIC_MONTHLY_PLAN_CODE'),
