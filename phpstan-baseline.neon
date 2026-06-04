@@ -371,11 +371,6 @@ parameters:
 			path: app/Events/GeofenceExitDetected.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Events/HaulDispatchUpdated.php
-
-		-
 			message: "#^Method App\\\\Events\\\\MachineLocationUpdated\\:\\:__construct\\(\\) has parameter \\$location with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Events/MachineLocationUpdated.php
@@ -492,6 +487,11 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Events\\\\SensorReadingRecorded\\:\\:broadcastWith\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Events/SensorReadingRecorded.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Events\\\\SensorReadingRecorded\\:\\:__construct\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Events/SensorReadingRecorded.php
 
@@ -691,7 +691,42 @@ parameters:
 			path: app/Http/Controllers/Api/IntegrationController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$id\\.$#"
+			message: "#^Access to property \\$id on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/IoTSensorController.php
+
+		-
+			message: "#^Call to method readings\\(\\) on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/IoTSensorController.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:deactivate\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/IoTSensorController.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:export\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/IoTSensorController.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:readings\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/IoTSensorController.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:recordReading\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/IoTSensorController.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:show\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/IoTSensorController.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:statistics\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/IoTSensorController.php
 
@@ -819,11 +854,6 @@ parameters:
 			message: "#^Parameter \\#2 \\$user_string of function hash_equals expects string, array\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Http/Controllers/WebhookController.php
-
-		-
-			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Routing\\\\Route\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Http/Middleware/EnforceDownloadRateLimit.php
 
 		-
 			message: "#^Access to undefined constant Illuminate\\\\Http\\\\Request\\:\\:HEADER_X_FORWARDED_ALL\\.$#"
@@ -977,46 +1007,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#5 \\$actorId of static method App\\\\Services\\\\AuditService\\:\\:log\\(\\) expects int\\|null, int\\|string\\|null given\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>engine_rpm\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>engine_temperature\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>fuel_level\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>idle_hours\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 6
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>operating_hours\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>registration_number\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 4
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>total_hours\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Jobs/GenerateReportJob.php
 
@@ -1196,22 +1186,12 @@ parameters:
 			path: app/Listeners/NotifyOnJobFailed.php
 
 		-
-			message: "#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Contracts\\\\Queue\\\\Job\\. Use \\-\\> instead\\.$#"
-			count: 3
-			path: app/Listeners/NotifyOnJobFailed.php
-
-		-
 			message: "#^Method App\\\\Listeners\\\\SendFeedCommentNotification\\:\\:applyCommentPreferences\\(\\) has parameter \\$userIds with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Listeners/SendFeedCommentNotification.php
 
 		-
 			message: "#^Method App\\\\Listeners\\\\SendFeedCommentNotification\\:\\:applyCommentPreferences\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Listeners/SendFeedCommentNotification.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Listeners/SendFeedCommentNotification.php
 
@@ -1236,11 +1216,6 @@ parameters:
 			path: app/Listeners/SendFeedPostNotification.php
 
 		-
-			message: "#^Using nullsafe property access on non\\-nullable type App\\\\Models\\\\User\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Listeners/SendFeedPostNotification.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\AIAnalytics\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/AIAnalytics.php
@@ -1252,11 +1227,6 @@ parameters:
 
 		-
 			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
-			count: 1
-			path: app/Livewire/AIAnalytics.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Livewire/AIAnalytics.php
 
@@ -1561,11 +1531,6 @@ parameters:
 			path: app/Livewire/Alerts.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 2
-			path: app/Livewire/Alerts.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Livewire\\\\BillingPortal\\:\\:\\$userSelectedMonthlyTotal\\.$#"
 			count: 2
 			path: app/Livewire/BillingPortal.php
@@ -1801,16 +1766,6 @@ parameters:
 			path: app/Livewire/Feed.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>machine_type\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
 			message: "#^Cannot call method hasRole\\(\\) on Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\|null\\.$#"
 			count: 1
 			path: app/Livewire/FeedAdminPanel.php
@@ -1871,11 +1826,6 @@ parameters:
 			path: app/Livewire/Fleet.php
 
 		-
-			message: "#^Parameter \\#1 \\$string of function md5 expects string, string\\|false given\\.$#"
-			count: 2
-			path: app/Livewire/Fleet.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$activityFeed type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/Fleet.php
@@ -1908,16 +1858,6 @@ parameters:
 		-
 			message: "#^Unable to resolve the template type TValue in call to function collect$#"
 			count: 2
-			path: app/Livewire/Fleet.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 2
-			path: app/Livewire/Fleet.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>max_machines\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
 			path: app/Livewire/Fleet.php
 
 		-
@@ -2087,16 +2027,6 @@ parameters:
 
 		-
 			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 3
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Livewire/FleetMovementReplay.php
 
@@ -2281,7 +2211,7 @@ parameters:
 			path: app/Livewire/GeofenceDetail.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:select\\(\\) invoked with 2 parameters, 0\\-1 required\\.$#"
+			message: "#^Method Illuminate\\\\Database\\\\Query\\\\Builder\\:\\:select\\(\\) invoked with 2 parameters, 0\\-1 required\\.$#"
 			count: 1
 			path: app/Livewire/GeofenceDetail.php
 
@@ -2299,26 +2229,6 @@ parameters:
 			message: "#^Property App\\\\Livewire\\\\GeofenceManager\\:\\:\\$listeners has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/GeofenceManager.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>capacity\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Livewire/HaulDispatchDashboard.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>fuel_capacity\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Livewire/HaulDispatchDashboard.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>machine_type\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Livewire/HaulDispatchDashboard.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 2
-			path: app/Livewire/HaulDispatchDashboard.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:closeAddModal\\(\\) has no return type specified\\.$#"
@@ -2487,11 +2397,6 @@ parameters:
 
 		-
 			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
-			count: 2
-			path: app/Livewire/LiveMap.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 2
 			path: app/Livewire/LiveMap.php
 
@@ -3131,21 +3036,6 @@ parameters:
 			path: app/Livewire/ProductionDashboard.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 2
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>machine_type\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 2
-			path: app/Livewire/ProductionDashboard.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:clearMachines\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/ReportGenerator.php
@@ -3341,11 +3231,6 @@ parameters:
 			path: app/Livewire/Reports.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:buildTrafficPlanSummary\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/RoutePlanning.php
@@ -3476,11 +3361,6 @@ parameters:
 			path: app/Livewire/RoutePlanning.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/Settings.php
@@ -3587,11 +3467,6 @@ parameters:
 
 		-
 			message: "#^Property App\\\\Livewire\\\\Settings\\:\\:\\$teamMembers type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Livewire/Settings.php
 
@@ -3711,6 +3586,26 @@ parameters:
 			path: app/Models/AIAgent.php
 
 		-
+			message: "#^Class App\\\\Models\\\\AIAnalysisSession not found\\.$#"
+			count: 1
+			path: app/Models/AIAgent.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AILearningData not found\\.$#"
+			count: 1
+			path: app/Models/AIAgent.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert not found\\.$#"
+			count: 1
+			path: app/Models/AIAgent.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation not found\\.$#"
+			count: 1
+			path: app/Models/AIAgent.php
+
+		-
 			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:analysisSessions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/AIAgent.php
@@ -3771,299 +3666,14 @@ parameters:
 			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\AIAnalysisSession\\:\\:\\$started_at\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
+			message: "#^Parameter \\#1 \\$related of method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:hasMany\\(\\) expects class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>, string given\\.$#"
+			count: 4
+			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Class App\\\\Models\\\\AIAnalysisSession uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:aiAgent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:markAsCompleted\\(\\) has parameter \\$results with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAnalysisSession\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIInsight uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeBySeverity\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeBySeverity\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeUnread\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeUnread\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeValid\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeValid\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AILearningData uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:aiAgent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:recommendation\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AILearningData\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\AIPredictiveAlert\\:\\:\\$aiAgent\\.$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIPredictiveAlert uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:acknowledger\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:aiAgent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeUnacknowledged\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeUnacknowledged\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\AIRecommendation\\:\\:\\$status\\.$#"
-			count: 2
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AIRecommendation uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:aiAgent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:implementer\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:machine\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:mineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:route\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeByCategory\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeByCategory\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeHighPriority\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeHighPriority\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeHighPriority\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopePending\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopePending\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
+			message: "#^Unable to resolve the template type TRelatedModel in call to method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:hasMany\\(\\)$#"
+			count: 4
+			path: app/Models/AIAgent.php
 
 		-
 			message: "#^Class App\\\\Models\\\\ActivityLog has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
@@ -4109,26 +3719,6 @@ parameters:
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\ActivityLog\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ActivityLog.php
-
-		-
-			message: "#^Class App\\\\Models\\\\AiRecommendationAction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/AiRecommendationAction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AiRecommendationAction\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AiRecommendationAction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AiRecommendationAction\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AiRecommendationAction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AiRecommendationAction\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AiRecommendationAction.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Alert has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
@@ -5461,11 +5051,6 @@ parameters:
 			path: app/Models/HaulDispatch.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>fuel_capacity\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\HealthMetric\\:\\:\\$deviation\\.$#"
 			count: 1
 			path: app/Models/HealthMetric.php
@@ -5719,31 +5304,6 @@ parameters:
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Invoice\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Invoice.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$last_reading_at\\.$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Class App\\\\Models\\\\IoTSensor uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:readings\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/IoTSensor.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Machine uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -7621,6 +7181,11 @@ parameters:
 			path: app/Models/Route.php
 
 		-
+			message: "#^Class App\\\\Models\\\\IoTSensor not found\\.$#"
+			count: 1
+			path: app/Models/SensorReading.php
+
+		-
 			message: "#^Method App\\\\Models\\\\SensorReading\\:\\:sensor\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/SensorReading.php
@@ -7632,6 +7197,16 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\SensorReading\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/SensorReading.php
+
+		-
+			message: "#^Parameter \\#1 \\$related of method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:belongsTo\\(\\) expects class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>, string given\\.$#"
+			count: 1
+			path: app/Models/SensorReading.php
+
+		-
+			message: "#^Unable to resolve the template type TRelatedModel in call to method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:belongsTo\\(\\)$#"
 			count: 1
 			path: app/Models/SensorReading.php
 
@@ -8081,8 +7656,23 @@ parameters:
 			path: app/Models/Waypoint.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\AIRecommendation\\:\\:\\$team_id\\.$#"
+			message: "#^Access to property \\$team_id on an unknown class App\\\\Models\\\\AIRecommendation\\.$#"
 			count: 3
+			path: app/Policies/AIRecommendationPolicy.php
+
+		-
+			message: "#^Parameter \\$recommendation of method App\\\\Policies\\\\AIRecommendationPolicy\\:\\:delete\\(\\) has invalid type App\\\\Models\\\\AIRecommendation\\.$#"
+			count: 1
+			path: app/Policies/AIRecommendationPolicy.php
+
+		-
+			message: "#^Parameter \\$recommendation of method App\\\\Policies\\\\AIRecommendationPolicy\\:\\:update\\(\\) has invalid type App\\\\Models\\\\AIRecommendation\\.$#"
+			count: 1
+			path: app/Policies/AIRecommendationPolicy.php
+
+		-
+			message: "#^Parameter \\$recommendation of method App\\\\Policies\\\\AIRecommendationPolicy\\:\\:view\\(\\) has invalid type App\\\\Models\\\\AIRecommendation\\.$#"
+			count: 1
 			path: app/Policies/AIRecommendationPolicy.php
 
 		-
@@ -8104,6 +7694,16 @@ parameters:
 			message: "#^Parameter \\#1 \\$user of class App\\\\Mail\\\\WelcomeMail constructor expects App\\\\Models\\\\User, Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable given\\.$#"
 			count: 1
 			path: app/Providers/AppServiceProvider.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation not found\\.$#"
+			count: 1
+			path: app/Providers/AuthServiceProvider.php
+
+		-
+			message: "#^Property App\\\\Providers\\\\AuthServiceProvider\\:\\:\\$policies \\(array\\<class\\-string, class\\-string\\>\\) does not accept default value of type array\\<string, string\\>\\.$#"
+			count: 1
+			path: app/Providers/AuthServiceProvider.php
 
 		-
 			message: "#^Method App\\\\Services\\\\AI\\\\AIOptimizationService\\:\\:generateSummary\\(\\) has parameter \\$insights with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#"
@@ -8281,11 +7881,6 @@ parameters:
 			path: app/Services/AI/MaintenancePredictorAgent.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>overall_health_score\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 2
-			path: app/Services/AI/MaintenancePredictorAgent.php
-
-		-
 			message: "#^Method App\\\\Services\\\\AI\\\\ProductionOptimizerAgent\\:\\:analyze\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/AI/ProductionOptimizerAgent.php
@@ -8307,11 +7902,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Services\\\\AI\\\\ProductionOptimizerAgent\\:\\:analyzeWeekOverWeekTrend\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/AI/ProductionOptimizerAgent.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Services/AI/ProductionOptimizerAgent.php
 
@@ -8456,38 +8046,13 @@ parameters:
 			path: app/Services/AuthorizationService.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>permissions\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/AuthorizationService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\FileUploadService\\:\\:storeMinePlan\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/FileUploadService.php
 
 		-
 			message: "#^Parameter \\#1 \\$haystack of function str_starts_with expects string, string\\|false given\\.$#"
-			count: 4
-			path: app/Services/FileUploadService.php
-
-		-
-			message: "#^Parameter \\#1 \\$haystack of function strpos expects string, string\\|false given\\.$#"
-			count: 1
-			path: app/Services/FileUploadService.php
-
-		-
-			message: "#^Parameter \\#1 \\$name of method ZipArchive\\:\\:getStream\\(\\) expects string, string\\|false given\\.$#"
-			count: 1
-			path: app/Services/FileUploadService.php
-
-		-
-			message: "#^Parameter \\#1 \\$path of function pathinfo expects string, string\\|false given\\.$#"
-			count: 1
-			path: app/Services/FileUploadService.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function strtolower expects string, string\\|false given\\.$#"
-			count: 1
+			count: 2
 			path: app/Services/FileUploadService.php
 
 		-
@@ -8688,56 +8253,6 @@ parameters:
 		-
 			message: "#^Parameter \\#1 \\$startedAt of method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:writeAuditLog\\(\\) expects Carbon\\\\Carbon, Carbon\\\\CarbonInterface given\\.$#"
 			count: 2
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>EquipmentID\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>Model\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>OEMName\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>PIN\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>SerialNumber\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>UnitInstallDateTime\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>fuel_consumed\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>load_count\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>odometer\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>payload\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
 			path: app/Services/Integration/BellIso15143Service.php
 
 		-
@@ -10006,17 +9521,32 @@ parameters:
 			path: app/Services/Integration/XCMGService.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$id\\.$#"
+			message: "#^Access to property \\$id on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$sensor_type\\.$#"
+			message: "#^Access to property \\$sensor_type on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$status\\.$#"
+			message: "#^Access to property \\$status on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Services/IoTSensorService.php
+
+		-
+			message: "#^Call to method isOnline\\(\\) on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Services/IoTSensorService.php
+
+		-
+			message: "#^Call to method readings\\(\\) on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
+			count: 3
+			path: app/Services/IoTSensorService.php
+
+		-
+			message: "#^Call to method update\\(\\) on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
@@ -10041,17 +9571,22 @@ parameters:
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) should return App\\\\Models\\\\SensorReading but returns Illuminate\\\\Database\\\\Eloquent\\\\Model\\.$#"
+			message: "#^Parameter \\$sensor of method App\\\\Services\\\\IoTSensorService\\:\\:checkSensorHealth\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function max expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
+			message: "#^Parameter \\$sensor of method App\\\\Services\\\\IoTSensorService\\:\\:deactivateSensor\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function min expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
+			message: "#^Parameter \\$sensor of method App\\\\Services\\\\IoTSensorService\\:\\:getReadingStats\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Services/IoTSensorService.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
@@ -10226,22 +9761,12 @@ parameters:
 			path: app/Services/PaystackService.php
 
 		-
-			message: "#^Parameter \\#2 \\$timestamp of function date expects int\\|null, int\\|false given\\.$#"
-			count: 2
-			path: app/Services/PaystackService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\ProductionService\\:\\:getProductionByTeam\\(\\) return type with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TKey, TValue$#"
 			count: 1
 			path: app/Services/ProductionService.php
 
 		-
 			message: "#^PHPDoc tag @return with type Illuminate\\\\Pagination\\\\Paginator&iterable\\<App\\\\Models\\\\ProductionRecord\\> is not subtype of native type Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator\\.$#"
-			count: 1
-			path: app/Services/ProductionService.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>name\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Services/ProductionService.php
 
@@ -10286,24 +9811,9 @@ parameters:
 			path: app/Services/QueryCacheService.php
 
 		-
-			message: "#^Parameter \\#1 \\$string of function md5 expects string, string\\|false given\\.$#"
-			count: 1
-			path: app/Services/QueryCacheService.php
-
-		-
 			message: "#^Parameter \\#3 \\$callback of static method Illuminate\\\\Support\\\\Facades\\\\Cache\\:\\:remember\\(\\) expects Closure, callable\\(\\)\\: mixed given\\.$#"
 			count: 7
 			path: app/Services/QueryCacheService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$id\\.$#"
-			count: 4
-			path: app/Services/RealTimeAlertService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$name\\.$#"
-			count: 2
-			path: app/Services/RealTimeAlertService.php
 
 		-
 			message: "#^Access to an undefined property object\\:\\:\\$description\\.$#"
@@ -10331,6 +9841,16 @@ parameters:
 			path: app/Services/RealTimeAlertService.php
 
 		-
+			message: "#^Access to property \\$id on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
+			count: 4
+			path: app/Services/RealTimeAlertService.php
+
+		-
+			message: "#^Access to property \\$name on an unknown class App\\\\Models\\\\IoTSensor\\.$#"
+			count: 2
+			path: app/Services/RealTimeAlertService.php
+
+		-
 			message: "#^Method App\\\\Services\\\\RealTimeAlertService\\:\\:dispatchSensorAlert\\(\\) has parameter \\$reading with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/RealTimeAlertService.php
@@ -10342,6 +9862,16 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Services\\\\RealTimeAlertService\\:\\:getUnreadAlerts\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, App\\\\Models\\\\Notification\\> but returns Illuminate\\\\Support\\\\Collection\\<int, stdClass\\>\\.$#"
+			count: 1
+			path: app/Services/RealTimeAlertService.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Services\\\\RealTimeAlertService\\:\\:dispatchSensorAlert\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: app/Services/RealTimeAlertService.php
+
+		-
+			message: "#^Parameter \\$sensor of method App\\\\Services\\\\RealTimeAlertService\\:\\:dispatchSensorStatusAlert\\(\\) has invalid type App\\\\Models\\\\IoTSensor\\.$#"
 			count: 1
 			path: app/Services/RealTimeAlertService.php
 
@@ -10451,9 +9981,24 @@ parameters:
 			path: database/factories/AIAgentFactory.php
 
 		-
+			message: "#^Class App\\\\Models\\\\AIInsight not found\\.$#"
+			count: 1
+			path: database/factories/AIInsightFactory.php
+
+		-
 			message: "#^Class Database\\\\Factories\\\\AIInsightFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
 			count: 1
 			path: database/factories/AIInsightFactory.php
+
+		-
+			message: "#^Property Database\\\\Factories\\\\AIInsightFactory\\:\\:\\$model \\(class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\) does not accept default value of type string\\.$#"
+			count: 1
+			path: database/factories/AIInsightFactory.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIPredictiveAlert not found\\.$#"
+			count: 1
+			path: database/factories/AIPredictiveAlertFactory.php
 
 		-
 			message: "#^Class Database\\\\Factories\\\\AIPredictiveAlertFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
@@ -10461,7 +10006,22 @@ parameters:
 			path: database/factories/AIPredictiveAlertFactory.php
 
 		-
+			message: "#^Property Database\\\\Factories\\\\AIPredictiveAlertFactory\\:\\:\\$model \\(class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\) does not accept default value of type string\\.$#"
+			count: 1
+			path: database/factories/AIPredictiveAlertFactory.php
+
+		-
+			message: "#^Class App\\\\Models\\\\AIRecommendation not found\\.$#"
+			count: 1
+			path: database/factories/AIRecommendationFactory.php
+
+		-
 			message: "#^Class Database\\\\Factories\\\\AIRecommendationFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
+			count: 1
+			path: database/factories/AIRecommendationFactory.php
+
+		-
+			message: "#^Property Database\\\\Factories\\\\AIRecommendationFactory\\:\\:\\$model \\(class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\) does not accept default value of type string\\.$#"
 			count: 1
 			path: database/factories/AIRecommendationFactory.php
 
@@ -10469,6 +10029,26 @@ parameters:
 			message: "#^Binary operation \"\\.\" between array\\|string and ' Zone' results in an error\\.$#"
 			count: 1
 			path: database/factories/GeofenceFactory.php
+
+		-
+			message: "#^Class App\\\\Models\\\\IoTSensor not found\\.$#"
+			count: 1
+			path: database/factories/IoTSensorFactory.php
+
+		-
+			message: "#^PHPDoc tag @extends has invalid type App\\\\Models\\\\IoTSensor\\.$#"
+			count: 1
+			path: database/factories/IoTSensorFactory.php
+
+		-
+			message: "#^Property Database\\\\Factories\\\\IoTSensorFactory\\:\\:\\$model has unknown class App\\\\Models\\\\IoTSensor as its type\\.$#"
+			count: 1
+			path: database/factories/IoTSensorFactory.php
+
+		-
+			message: "#^Type App\\\\Models\\\\IoTSensor in generic type Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\<App\\\\Models\\\\IoTSensor\\> in PHPDoc tag @extends is not subtype of template type TModel of Illuminate\\\\Database\\\\Eloquent\\\\Model of class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\.$#"
+			count: 1
+			path: database/factories/IoTSensorFactory.php
 
 		-
 			message: "#^Binary operation \"\\.\" between array\\|string and ' Mine Area' results in an error\\.$#"
@@ -10567,11 +10147,6 @@ parameters:
 
 		-
 			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$users type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
 

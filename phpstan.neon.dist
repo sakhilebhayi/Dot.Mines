@@ -44,6 +44,10 @@ parameters:
     # Methods like doesntHave/whereHas/orderByDesc/when/paginate exist on Eloquent Builder but not raw Query\Builder
     - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder.*\|Illuminate\\Database\\Query\\Builder.*::#'
     - '#^Cannot call method .+ on Illuminate\\Database\\Eloquent\\Builder.*\|.*null#'
+    # SimpleXMLElement::__get() returns null for non-existent children at runtime,
+    # so nullsafe ?-> is intentionally required even though PHPStan types it as non-nullable
+    - '#^Using nullsafe (property access|method call) .+ on left side of \?\? is unnecessary#'
+    - '#^Using nullsafe (property access|method call) on non\-nullable type#'
 includes:
   - vendor/phpstan/phpstan/conf/bleedingEdge.neon
   - phpstan-baseline.neon

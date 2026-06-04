@@ -233,6 +233,10 @@ class FuelTransactionController extends Controller
         $callback = function () use ($transactions) {
             $file = fopen('php://output', 'w');
 
+            if ($file === false) {
+                return;
+            }
+
             // Headers
             fputcsv($file, [
                 'Date', 'Type', 'Tank', 'Machine', 'Fuel Type', 'Quantity (L)',

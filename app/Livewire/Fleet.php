@@ -738,7 +738,7 @@ class Fleet extends Component
         }
 
         // Compute a stable hash for the recommendation
-        $hash = md5(json_encode($rec));
+        $hash = md5((string) json_encode($rec));
 
         // Create action record
         $action = \App\Models\AiRecommendationAction::create([
@@ -798,7 +798,7 @@ class Fleet extends Component
             return;
         }
 
-        $hash = md5(json_encode($rec));
+        $hash = md5((string) json_encode($rec));
 
         \App\Models\AiRecommendationAction::create([
             'team_id' => $team->id,

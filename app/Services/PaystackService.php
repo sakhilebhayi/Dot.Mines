@@ -187,7 +187,7 @@ class PaystackService
             }
 
             $nextPaymentDate = isset($subscriptionData['next_payment_date'])
-                ? date('Y-m-d H:i:s', strtotime((string) $subscriptionData['next_payment_date']))
+                ? date('Y-m-d H:i:s', (int) strtotime((string) $subscriptionData['next_payment_date']))
                 : null;
 
             Subscription::updateOrCreate(
@@ -315,7 +315,7 @@ class PaystackService
                     'currency' => strtoupper($invoiceData['currency'] ?? 'ZAR'),
                     'status' => ($invoiceData['paid'] ?? false) ? 'paid' : 'open',
                     'issued_at' => isset($invoiceData['created_at'])
-                        ? date('Y-m-d H:i:s', strtotime((string) $invoiceData['created_at']))
+                        ? date('Y-m-d H:i:s', (int) strtotime((string) $invoiceData['created_at']))
                         : now()->toDateTimeString(),
                     'paid_at' => ($invoiceData['paid'] ?? false) ? now()->toDateTimeString() : null,
                     'pdf_url' => null,

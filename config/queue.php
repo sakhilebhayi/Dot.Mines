@@ -44,6 +44,17 @@ return [
             'after_commit' => false,
         ],
 
+        // Dedicated connection for OEM integration jobs (Bell ISO15143-3, etc.)
+        // Run a separate worker: php artisan queue:work --queue=integrations
+        'integrations' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'integrations',
+            'retry_after' => (int) env('DB_INTEGRATIONS_QUEUE_RETRY_AFTER', 180),
+            'after_commit' => true,
+        ],
+
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
