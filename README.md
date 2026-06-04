@@ -24,7 +24,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-06B6D4?logo=tailwindcss&logoColor=white)
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/Version-3.0-6875F5)
+![Version](https://img.shields.io/badge/Version-3.1-6875F5)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 
 </div>
@@ -45,6 +45,7 @@
   - [Route Planning](#route-planning)
   - [IoT Sensor Integration](#iot-sensor-integration)
   - [OEM Integrations](#oem-integrations)
+  - [Bell ISO15143-3 Fleet Integration](#bell-iso15143-3-fleet-integration)
   - [Shift & Team Management](#shift--team-management)
   - [Compliance & Reporting](#compliance--reporting)
   - [Billing & Subscriptions](#billing--subscriptions)
@@ -70,6 +71,37 @@
 **Mines** is a modern, production-ready fleet management platform built specifically for mining operations. It combines real-time GPS tracking, AI-powered optimization, structured operational communications, and deep OEM integrations into a single unified platform — replacing fragmented tools like WhatsApp groups and disconnected spreadsheets.
 
 ## 🆕 Latest Updates (June 2026)
+
+### Bell ISO15143-3 Fleet API Integration
+
+A new first-party integration with the **Bell ISO15143-3 (AEMP) telematics standard** has been added, enabling scheduled ingestion of Bell fleet XML data into the platform:
+
+- **`BellIso15143Service`** — full sync cycle: fetch XML → parse → validate → save raw JSON snapshot → upsert equipment master → merge current status → append history → calculate daily KPIs → write audit log; all wrapped in a single DB transaction with retry logic
+- **6 new database tables** created via a single migration:
+
+  | Table | Purpose |
+  |---|---|
+  | `bell_equipment` | Master equipment record per machine (one row per `EquipmentID`) |
+  | `bell_equipment_current_status` | Latest telemetry snapshot per machine (replaced on every sync) |
+  | `bell_equipment_telemetry_history` | Append-only full telemetry history per API call |
+  | `bell_fleet_snapshots` | Raw JSON payload + metadata per API call |
+  | `bell_integration_audit_logs` | Execution audit trail (success/failure, record counts, errors) |
+  | `bell_equipment_daily_kpis` | Derived daily KPIs (loads, payload, fuel, distance, utilization) |
+
+- **Data quality validation** — records failing any of these rules are skipped with a warning log:
+  - `EquipmentID` must not be null
+  - `SerialNumber` must not be null
+  - `Latitude` must be in range −90 to 90
+  - `Longitude` must be in range −180 to 180
+  - `FuelRemainingPercent` must be in range 0 to 100
+  - `EngineRunning` must be a boolean
+- **Two Power BI reporting views** created in the migration:
+  - `vw_bell_fleet_current_status` — equipment ID, model, engine status, fuel, odometer, hours, loads, payload, lat/lon
+  - `vw_bell_equipment_daily_kpis` — loads moved, payload moved, fuel used, utilization %, distance travelled
+- **`SyncBellFleetDataJob`** — queued job on the `integrations` queue; reads credentials from config and delegates to `BellIso15143Service`
+- **Scheduled every 15 minutes** (`:00`, `:15`, `:30`, `:45`) via `routes/console.php` using `everyFifteenMinutes()->withoutOverlapping()->onOneServer()`
+- **Config** — credentials driven by `.env` keys `BELL_ISO15143_API_URL`, `BELL_ISO15143_USERNAME`, `BELL_ISO15143_PASSWORD`; no secrets committed to source
+- **12 feature tests** covering happy path, repeat syncs, snapshot storage, telemetry values, KPI calculations, all 5 validation rules, HTTP errors, malformed XML, and empty fleet responses
 
 ### Static Analysis & Code Quality Overhaul
 
@@ -152,9 +184,10 @@ A comprehensive pass over the entire codebase to bring it to full Laravel 12 / P
 | ⛽ **Fuel Management** | Tank management, allocation, forecasting, and budget tracking |
 | 🔧 **Maintenance** | Preventive and corrective booking with automated status sync |
 | 🏭 **Production Tracking** | Live load comparisons, shift targets, and trend analysis |
-| 🔌 **OEM Integrations** | Native APIs for 20+ manufacturers including CAT, Komatsu, Volvo |
+| 🔌 **OEM Integrations** | Native APIs for 20+ manufacturers including CAT, Komatsu, Volvo, Bell (ISO15143-3) |
+| 🛰️ **Bell ISO15143-3** | Scheduled 15-min fleet sync with full telemetry history, daily KPIs, and Power BI views |
 | 📊 **Reporting** | Compliance, maintenance, production, and incident export to PDF/CSV |
-| 💳 **Billing** | Stripe-powered subscriptions with fleet slot enforcement |
+| 💳 **Billing** | Paystack-powered subscriptions with fleet slot enforcement |
 | 🔒 **Multi-tenant** | Team-based isolation with granular role and policy access control |
 
 ---
@@ -289,6 +322,7 @@ Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
 | Caterpillar | VisionLink |
 | Komatsu | KOMTRAX |
 | Volvo | CareTrack |
+| **Bell** | **ISO15143-3 (AEMP) — scheduled sync, full telemetry + KPI pipeline** |
 | Sandvik | — |
 | Epiroc | — |
 | Liebherr | — |
@@ -298,12 +332,43 @@ Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
 | Doosan | — |
 | JCB | — |
 | Bobcat | — |
-| Kawasaki, Kobelco, Yanmar, Kubota, XCMG, CASE, New Holland, Atlas Copco, Bell, Sany, Takeuchi, Roundebult, CTrack | — |
+| Kawasaki, Kobelco, Yanmar, Kubota, XCMG, CASE, New Holland, Atlas Copco, Sany, Takeuchi, Roundebult, CTrack | — |
 
 - Webhook-based real-time telemetry ingestion
 - Credentials stored per-team, never exposed in API responses
 - Extensible base manufacturer service for adding new integrations
 - Integration Manager in application settings
+
+### Bell ISO15143-3 Fleet Integration
+
+Bell Equipment machines are synced via the **ISO15143-3 (AEMP)** standard on a 15-minute schedule:
+
+- XML response is fetched, parsed, and converted to JSON per the spec
+- Each machine record is validated (null checks, coordinate ranges, fuel/engine value ranges) before persistence
+- **Equipment master** is upserted — new machines are inserted, existing machines are updated
+- **Current status** is replaced on every sync (delete + insert merge pattern)
+- **Telemetry history** is append-only — historical records are never modified
+- **Fleet snapshot** stores the full raw JSON payload and metadata per API call
+- **Daily KPIs** are calculated per machine per day:
+
+  | KPI | Calculation |
+  |---|---|
+  | Loads Moved | Current load count − previous load count |
+  | Payload Moved | Current cumulative payload − previous |
+  | Fuel Used | Current fuel consumed − previous |
+  | Distance Travelled | Current odometer − previous |
+  | Utilization % | Operating hours ÷ (Operating hours + Idle hours) × 100 |
+
+- **Two Power BI views** for direct reporting: `vw_bell_fleet_current_status` and `vw_bell_equipment_daily_kpis`
+- **Audit log** — every sync execution is recorded with success/failure, record counts, and any error message
+
+**Configuration** (`.env`):
+
+```env
+BELL_ISO15143_API_URL=https://your-bell-api-endpoint/fleet
+BELL_ISO15143_USERNAME=your_username
+BELL_ISO15143_PASSWORD=your_password
+```
 
 ### Shift & Team Management
 
@@ -335,7 +400,7 @@ Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
 
 ### Billing & Subscriptions
 
-- **Stripe-powered** subscription plans and invoicing
+- **Paystack-powered** subscription plans and invoicing (migrated from Stripe)
 - Fleet slot enforcement at machine addition — blocks over-limit additions
 - **Billing portal** for self-service subscription management
 - Invoice history and payment records
@@ -363,7 +428,7 @@ Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
 | **Real-time** | Laravel Reverb (WebSockets), Laravel Echo, Pusher.js |
 | **Queue** | Laravel Queue (database driver) |
 | **Auth** | Laravel Jetstream + Sanctum |
-| **Payments** | Stripe (via Laravel Cashier) |
+| **Payments** | Paystack (migrated from Stripe) |
 | **File Storage** | AWS S3 (via Flysystem) |
 | **Search** | Laravel Scout |
 | **Error Monitoring** | Sentry |
@@ -465,9 +530,14 @@ AWS_SECRET_ACCESS_KEY=
 AWS_DEFAULT_REGION=us-east-1
 AWS_BUCKET=
 
-# Stripe
-STRIPE_KEY=
-STRIPE_SECRET=
+# Paystack
+PAYSTACK_PUBLIC_KEY=
+PAYSTACK_SECRET_KEY=
+
+# Bell ISO15143-3 Fleet API
+BELL_ISO15143_API_URL=
+BELL_ISO15143_USERNAME=
+BELL_ISO15143_PASSWORD=
 
 # Sentry
 SENTRY_LARAVEL_DSN=
@@ -478,78 +548,8 @@ SENTRY_LARAVEL_DSN=
 ```bash
 php artisan key:generate
 ```
-- Fuel allocation, transactions, and consumption metrics
-- Monthly fuel budgets and alert thresholds
-- Fuel consumption forecasting via AI
 
-### OEM Integrations
-- Native API integrations for 20+ manufacturers: Caterpillar, Komatsu, Volvo, Sandvik, Epiroc, Liebherr, Hitachi, Hyundai, John Deere, Doosan, JCB, Bobcat, Kawasaki, Kobelco, Yanmar, Kubota, XCMG, CASE, New Holland, Atlas Copco, Bell, Sany, Takeuchi, Roundebult, and CTrack
-- Webhook-based real-time telemetry ingestion
-- Extensible base manufacturer service for adding new integrations
-
-### Shift & Team Management
-- Configurable shift templates per mine (A/B/C)
-- Operator fatigue tracking
-- Role-based access: operators, supervisors, safety officers, managers, admins
-
-### Billing
-- Stripe-powered subscription plans and invoicing
-- Fleet slot enforcement at machine addition
-- Billing portal for self-service subscription management
-
-```
-
-### 2. Install PHP Dependencies
-
-```bash
-composer install
-```
-
-### 3. Install Node Dependencies
-
-```bash
-npm install
-```
-
-### 4. Environment Configuration
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` file with your configuration:
-
-```env
-APP_NAME=Mines
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://localhost
-
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=mines
-DB_USERNAME=your_username
-# Do NOT store secrets in this file. Set the password via your environment or secrets manager.
-# Example: set `DB_PASSWORD` in your host/CI environment or use a secrets manager integration.
-# DB_PASSWORD will be read from the environment at runtime; do not commit real values.
-
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
-
-CACHE_DRIVER=file
-QUEUE_CONNECTION=sync
-```
-
-### 5. Generate Application Key
-
-```bash
-php artisan key:generate
-```
-
-## 💾 Database Setup
+---
 
 ### 1. Create PostgreSQL Database
 
@@ -792,14 +792,14 @@ mines/
 │   ├── Http/
 │   │   ├── Controllers/      # API and web controllers
 │   │   └── Middleware/       # HTTP middleware
-│   ├── Jobs/                 # Queued jobs
+│   ├── Jobs/                 # Queued jobs (SyncBellFleetDataJob, MachineIdleMonitoringJob, etc.)
 │   ├── Listeners/            # Event listeners
 │   ├── Livewire/             # Livewire full-page and inline components
-│   ├── Models/               # Eloquent models (60+ models)
+│   ├── Models/               # Eloquent models (65+ models, inc. BellEquipment*)
 │   ├── Policies/             # Authorization policies
 │   ├── Services/
 │   │   ├── AI/               # AI optimization agents
-│   │   └── Integration/      # OEM manufacturer API services
+│   │   └── Integration/      # OEM manufacturer API services (inc. BellIso15143Service)
 │   └── Traits/               # Shared model/controller traits
 ├── config/                   # App configuration (integrations, scanning, etc.)
 ├── database/
@@ -1045,6 +1045,6 @@ This project is proprietary software. All rights reserved.
 
 Built for Mining Operations
 
-**Version 3.0** · April 2026
+**Version 3.1** · June 2026
 
 </div>

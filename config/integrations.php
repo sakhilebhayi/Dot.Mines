@@ -451,4 +451,16 @@ return [
             'low' => ['low', 'info', 'informational'],
         ],
     ],
+
+    /**
+     * Bell ISO15143-3 (AEMP) fleet API configuration.
+     *
+     * Set BELL_ISO15143_API_URL, BELL_ISO15143_USERNAME, and
+     * BELL_ISO15143_PASSWORD in your .env file.
+     */
+    'bell_iso15143' => [
+        'api_url' => env('BELL_ISO15143_API_URL', ''),
+        'api_username' => env('BELL_ISO15143_USERNAME', ''),
+        'api_password' => env('BELL_ISO15143_PASSWORD', ''),
+    ],
 ];
