@@ -2,24 +2,26 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Services\FileUploadService;
 use Illuminate\Http\UploadedFile;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
+use Tests\TestCase;
 
+#[RequiresPhpExtension('zip')]
 class FileUploadServiceExtraTest extends TestCase
 {
     public function test_validate_zip_rejects_disallowed_entry_type()
     {
         $tmp = sys_get_temp_dir();
         $zipPath = tempnam($tmp, 'testzip');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($zipPath, \ZipArchive::OVERWRITE);
         $zip->addFromString('evil.php', "<?php echo 'pwned'; ?>");
         $zip->close();
 
         $uploaded = new UploadedFile($zipPath, 'test.zip', null, null, true);
 
-        $svc = new FileUploadService();
+        $svc = new FileUploadService;
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('disallowed file types');
@@ -31,7 +33,7 @@ class FileUploadServiceExtraTest extends TestCase
     {
         $tmp = sys_get_temp_dir();
         $zipPath = tempnam($tmp, 'testzip');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($zipPath, \ZipArchive::OVERWRITE);
         // create a file slightly larger than our small test limit
         $large = str_repeat('A', 2048);
@@ -40,7 +42,7 @@ class FileUploadServiceExtraTest extends TestCase
 
         $uploaded = new UploadedFile($zipPath, 'test.zip', null, null, true);
 
-        $svc = new FileUploadService();
+        $svc = new FileUploadService;
         $svc->setMaxUncompressedSize(1024); // 1 KB to force fail
 
         $this->expectException(\Exception::class);

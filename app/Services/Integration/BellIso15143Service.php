@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration;
 
+use App\Contracts\BellIso15143ServiceInterface;
 use App\Models\BellEquipment;
 use App\Models\BellEquipmentCurrentStatus;
 use App\Models\BellEquipmentDailyKpi;
@@ -25,7 +26,7 @@ use SimpleXMLElement;
  *   fetch XML → parse → validate → save snapshot → upsert equipment master
  *   → merge current status → insert history → calculate KPIs → write audit log
  */
-class BellIso15143Service
+class BellIso15143Service implements BellIso15143ServiceInterface
 {
     /** @var array{processed: int, inserted: int, updated: int} */
     private array $counters = ['processed' => 0, 'inserted' => 0, 'updated' => 0];

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Contracts\BellIso15143ServiceInterface;
 use App\Services\Integration\BellIso15143Service;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -41,6 +42,7 @@ class SyncBellFleetDataJob implements ShouldQueue
             return;
         }
 
+        /** @var BellIso15143ServiceInterface $service */
         $service = new BellIso15143Service($apiUrl, $apiUsername, $apiPassword);
 
         $result = $service->sync();

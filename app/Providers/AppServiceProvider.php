@@ -2,28 +2,28 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\ScanBladeUnescaped;
 use App\Events\FeedCommentCreated;
 use App\Events\FeedPostCreated;
 use App\Events\FeedPostStatusChanged;
 use App\Listeners\SendFeedApprovalNotification;
 use App\Listeners\SendFeedCommentNotification;
 use App\Listeners\SendFeedPostNotification;
+use App\Mail\WelcomeMail;
+use App\Models\AuditLog;
 use App\Models\MaintenanceRecord;
 use App\Observers\MaintenanceRecordObserver;
+use App\Services\AuditService;
 use App\Services\RealtimeEventScheduler;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Validation\Rules\Password;
-use App\Mail\WelcomeMail;
-use App\Console\Commands\ScanBladeUnescaped;
-use App\Services\AuditService;
-use App\Models\AuditLog;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,6 +40,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Detect N+1 queries in non-production environments
+        if (! $this->app->environment('production')) {
+            \Illuminate\Database\Eloquent\Model::preventLazyLoading();
+        }
+
         // Register console commands so scanning is available in CI
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -79,7 +84,7 @@ class AppServiceProvider extends ServiceProvider
         // Listen for failed queue jobs and notify monitoring
         Event::listen(\Illuminate\Queue\Events\JobFailed::class, function ($event) {
             try {
-                $listener = new \App\Listeners\NotifyOnJobFailed();
+                $listener = new \App\Listeners\NotifyOnJobFailed;
                 $listener->handle($event);
             } catch (\Throwable $e) {
                 Log::error('Failed to notify on job failure', ['error' => $e->getMessage()]);
@@ -101,7 +106,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(\Illuminate\Auth\Events\Failed::class, function ($event) {
             AuditService::log(
                 AuditLog::LOGIN_FAILED,
-                'Failed login attempt for: ' . ($event->credentials['email'] ?? 'unknown'),
+                'Failed login attempt for: '.($event->credentials['email'] ?? 'unknown'),
                 null,
                 ['email' => $event->credentials['email'] ?? 'unknown', 'guard' => $event->guard],
                 $event->user?->id,
@@ -165,7 +170,7 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function () {
                     return response()->json([
                         'message' => 'Too many requests. Please try again later.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });
@@ -173,11 +178,11 @@ class AppServiceProvider extends ServiceProvider
         // Login rate limiting - 5 attempts per minute
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)
-                ->by($request->email . '|' . $request->ip())
+                ->by($request->email.'|'.$request->ip())
                 ->response(function () {
                     return response()->json([
                         'message' => 'Too many login attempts. Please try again later.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });
@@ -189,7 +194,7 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function () {
                     return response()->json([
                         'message' => 'Webhook rate limit exceeded.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });
@@ -201,7 +206,7 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function () {
                     return response()->json([
                         'message' => 'Report generation rate limit exceeded.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });
@@ -213,7 +218,7 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function () {
                     return response()->json([
                         'message' => 'Download rate limit exceeded.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });
@@ -224,7 +229,7 @@ class AppServiceProvider extends ServiceProvider
                 ->by($request->user()?->id ?: $request->ip())
                 ->response(function () {
                     return response()->json([
-                        'message'     => 'Upload rate limit exceeded. Please wait before uploading again.',
+                        'message' => 'Upload rate limit exceeded. Please wait before uploading again.',
                         'retry_after' => 60,
                     ], 429);
                 });
@@ -236,7 +241,7 @@ class AppServiceProvider extends ServiceProvider
                 ->by($request->user()?->id ?: $request->ip())
                 ->response(function () {
                     return response()->json([
-                        'message'     => 'Post rate limit exceeded. Please slow down.',
+                        'message' => 'Post rate limit exceeded. Please slow down.',
                         'retry_after' => 60,
                     ], 429);
                 });

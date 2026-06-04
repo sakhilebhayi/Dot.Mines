@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\PrivacyPolicyController;
+use App\Http\Controllers\TermsOfServiceController;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\Report;
@@ -11,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 if (app()->environment('local') && config('app.debug')) {
     require __DIR__.'/test-session.php';
 }
+
+// Override Jetstream's terms/policy controllers to use safe markdown rendering
+Route::get('/terms-of-service', [TermsOfServiceController::class, 'show'])->name('terms.show');
+Route::get('/privacy-policy', [PrivacyPolicyController::class, 'show'])->name('policy.show');
 
 Route::get('/', function () {
     return view('welcome');

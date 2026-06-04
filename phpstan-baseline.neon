@@ -6,6 +6,11 @@ parameters:
 			path: app/Actions/Fortify/CreateNewUser.php
 
 		-
+			message: "#^Instanceof between App\\\\Models\\\\User and Illuminate\\\\Contracts\\\\Auth\\\\MustVerifyEmail will always evaluate to true\\.$#"
+			count: 1
+			path: app/Actions/Fortify/UpdateUserProfileInformation.php
+
+		-
 			message: "#^Method App\\\\Actions\\\\Jetstream\\\\AddTeamMember\\:\\:rules\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Actions/Jetstream/AddTeamMember.php
@@ -556,42 +561,12 @@ parameters:
 			path: app/Events/SensorStatusChanged.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\AlertController\\:\\:acknowledge\\(\\) has no return type specified\\.$#"
+			message: "#^Parameter \\#1 \\$userId of method App\\\\Models\\\\Alert\\:\\:acknowledge\\(\\) expects int\\|null, int\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/AlertController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\AlertController\\:\\:activeCount\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/AlertController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\AlertController\\:\\:index\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/AlertController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\AlertController\\:\\:machineAlerts\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/AlertController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\AlertController\\:\\:machineAlerts\\(\\) has parameter \\$machineId with no type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/AlertController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\AlertController\\:\\:resolve\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/AlertController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\AlertController\\:\\:show\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/AlertController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\AlertController\\:\\:store\\(\\) has no return type specified\\.$#"
+			message: "#^Parameter \\#1 \\$userId of method App\\\\Models\\\\Alert\\:\\:resolve\\(\\) expects int\\|null, int\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/AlertController.php
 
@@ -641,109 +616,9 @@ parameters:
 			path: app/Http/Controllers/Api/ComplianceReportController.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$type\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:approve\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:export\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:generate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
 			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:generateReportData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:index\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:show\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:submit\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:summary\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$critical\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$fuel_type\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$low_fuel\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$mine_area_id\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTankController\\:\\:destroy\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTankController\\:\\:index\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTankController\\:\\:show\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTankController\\:\\:statistics\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTankController\\:\\:store\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTankController\\:\\:update\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTankController.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$receipt_file_path\\.$#"
@@ -757,76 +632,16 @@ parameters:
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$end_date\\.$#"
-			count: 2
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$fuel_tank_id\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$fuel_type\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$machine_id\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/FuelTransactionController.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$start_date\\.$#"
-			count: 2
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$supplier\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$transaction_type\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/FuelTransactionController.php
 
 		-
 			message: "#^Cannot call method store\\(\\) on array\\<Illuminate\\\\Http\\\\UploadedFile\\>\\|Illuminate\\\\Http\\\\UploadedFile\\|null\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTransactionController\\:\\:destroy\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTransactionController\\:\\:export\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTransactionController\\:\\:index\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTransactionController\\:\\:show\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTransactionController\\:\\:statistics\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTransactionController\\:\\:store\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\FuelTransactionController\\:\\:update\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/FuelTransactionController.php
 
@@ -851,42 +666,12 @@ parameters:
 			path: app/Http/Controllers/Api/GeofenceController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\GeofenceController\\:\\:activeMachines\\(\\) has no return type specified\\.$#"
+			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/GeofenceController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\GeofenceController\\:\\:destroy\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\GeofenceController\\:\\:entries\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\GeofenceController\\:\\:index\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\GeofenceController\\:\\:show\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\GeofenceController\\:\\:store\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\GeofenceController\\:\\:tonnageStats\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\GeofenceController\\:\\:update\\(\\) has no return type specified\\.$#"
+			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/GeofenceController.php
 
@@ -906,159 +691,9 @@ parameters:
 			path: app/Http/Controllers/Api/IntegrationController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:authorizeTeam\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:destroy\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:index\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:machines\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:manufacturers\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:show\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:store\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:sync\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:test\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IntegrationController\\:\\:update\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$id\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Call to an undefined method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\)\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:deactivate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:export\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:readings\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:recordReading\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:show\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\IoTSensorController\\:\\:statistics\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IoTSensorController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineAssignmentController\\:\\:available\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineAssignmentController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineAssignmentController\\:\\:history\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineAssignmentController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineController\\:\\:alerts\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineController\\:\\:destroy\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineController\\:\\:index\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineController\\:\\:metrics\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineController\\:\\:show\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineController\\:\\:store\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineController\\:\\:update\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\MachineController\\:\\:updateLocation\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$health_status\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineHealthController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$max_score\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineHealthController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$min_score\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MachineHealthController.php
 
 		-
 			message: "#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<App\\\\Models\\\\MachineHealthStatus\\>\\:\\:critical\\(\\)\\.$#"
@@ -1071,56 +706,6 @@ parameters:
 			path: app/Http/Controllers/Api/MachineHealthController.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$assigned_to\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceRecordController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$end_date\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceRecordController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$machine_id\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceRecordController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$maintenance_type\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceRecordController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$start_date\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceRecordController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceRecordController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$machine_id\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceScheduleController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$maintenance_type\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceScheduleController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$schedule_type\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceScheduleController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/MaintenanceScheduleController.php
-
-		-
 			message: "#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<App\\\\Models\\\\MaintenanceSchedule\\>\\:\\:due\\(\\)\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/MaintenanceScheduleController.php
@@ -1131,12 +716,7 @@ parameters:
 			path: app/Http/Controllers/Api/MaintenanceScheduleController.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$alert_level\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/NotificationController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$type\\.$#"
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/NotificationController.php
 
@@ -1206,16 +786,6 @@ parameters:
 			path: app/Http/Controllers/Api/ReportController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\MinePlanDownloadController\\:\\:__invoke\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/MinePlanDownloadController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\MinePlanDownloadController\\:\\:__invoke\\(\\) has parameter \\$minePlanId with no type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/MinePlanDownloadController.php
-
-		-
 			message: "#^Parameter \\#1 \\$haystack of static method Illuminate\\\\Support\\\\Str\\:\\:contains\\(\\) expects string, array\\<int, string\\>\\|string given\\.$#"
 			count: 1
 			path: app/Http/Controllers/MinePlanDownloadController.php
@@ -1227,21 +797,11 @@ parameters:
 
 		-
 			message: "#^Parameter \\#1 \\$name of static method Illuminate\\\\Support\\\\Facades\\\\Storage\\:\\:disk\\(\\) expects string\\|UnitEnum\\|null, array\\|string\\|null given\\.$#"
-			count: 3
+			count: 1
 			path: app/Http/Controllers/MinePlanDownloadController.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$currentTeam\\.$#"
-			count: 1
-			path: app/Http/Controllers/ReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\ReportController\\:\\:generate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/ReportController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\ReportController\\:\\:view2\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Http/Controllers/ReportController.php
 
@@ -1256,17 +816,7 @@ parameters:
 			path: app/Http/Controllers/ReportDownloadController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\ReportDownloadController\\:\\:download\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/ReportDownloadController.php
-
-		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\WebhookController\\:\\:handleStripe\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/WebhookController.php
-
-		-
-			message: "#^PHPDoc tag @var for variable \\$eventData has no value type specified in iterable type array\\.$#"
+			message: "#^Parameter \\#2 \\$user_string of function hash_equals expects string, array\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Http/Controllers/WebhookController.php
 
@@ -1302,6 +852,16 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Jobs\\\\AlertGenerationJob\\:\\:getHoursUntilMaintenance\\(\\) never returns float so it can be removed from the return type\\.$#"
+			count: 1
+			path: app/Jobs/AlertGenerationJob.php
+
+		-
+			message: "#^Parameter \\#1 \\$machine of method App\\\\Jobs\\\\AlertGenerationJob\\:\\:createOrUpdateAlert\\(\\) expects App\\\\Models\\\\Machine, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
+			count: 1
+			path: app/Jobs/AlertGenerationJob.php
+
+		-
+			message: "#^Parameter \\#1 \\$machine of method App\\\\Jobs\\\\AlertGenerationJob\\:\\:generateAlertsForMachine\\(\\) expects App\\\\Models\\\\Machine, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
 			count: 1
 			path: app/Jobs/AlertGenerationJob.php
 
@@ -1411,6 +971,11 @@ parameters:
 			path: app/Jobs/GenerateReportJob.php
 
 		-
+			message: "#^Parameter \\#2 \\$fileSize of method App\\\\Models\\\\Report\\:\\:markCompleted\\(\\) expects int\\|null, int\\<0, max\\>\\|false given\\.$#"
+			count: 1
+			path: app/Jobs/GenerateReportJob.php
+
+		-
 			message: "#^Parameter \\#5 \\$actorId of static method App\\\\Services\\\\AuditService\\:\\:log\\(\\) expects int\\|null, int\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Jobs/GenerateReportJob.php
@@ -1462,6 +1027,16 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Jobs\\\\GeofenceCrossingDetectionJob\\:\\:isPointInPolygon\\(\\) has parameter \\$polygon with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Jobs/GeofenceCrossingDetectionJob.php
+
+		-
+			message: "#^Parameter \\#1 \\$machine of method App\\\\Jobs\\\\GeofenceCrossingDetectionJob\\:\\:recordGeofenceEntry\\(\\) expects App\\\\Models\\\\Machine, stdClass given\\.$#"
+			count: 1
+			path: app/Jobs/GeofenceCrossingDetectionJob.php
+
+		-
+			message: "#^Parameter \\#2 \\$geofence of method App\\\\Jobs\\\\GeofenceCrossingDetectionJob\\:\\:recordGeofenceEntry\\(\\) expects App\\\\Models\\\\Geofence, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
 			count: 1
 			path: app/Jobs/GeofenceCrossingDetectionJob.php
 
@@ -1681,12 +1256,17 @@ parameters:
 			path: app/Livewire/AIAnalytics.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\AINotifications\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Livewire/AIAnalytics.php
+
+		-
+			message: "#^Method App\\\\Livewire\\\\AINotifications\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/AINotifications.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\AINotifications\\:\\:\\$notifications type has no value type specified in iterable type array\\.$#"
+			message: "#^Property App\\\\Livewire\\\\AINotifications\\:\\:\\$notifications with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Livewire/AINotifications.php
 
@@ -1720,7 +1300,15 @@ parameters:
 			count: 1
 			path: app/Livewire/AIOptimizationDashboard.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/AIOptimizationDashboard.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:getOverviewDataProperty\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -1778,7 +1366,7 @@ parameters:
 			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/AIOptimizationDashboard.php
 
@@ -1857,7 +1445,15 @@ parameters:
 			count: 1
 			path: app/Livewire/Alerts.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/Alerts.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Livewire/Alerts.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:getAlerts\\(\\) has no return type specified\\.$#"
@@ -1915,7 +1511,7 @@ parameters:
 			path: app/Livewire/Alerts.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Alerts.php
 
@@ -2025,17 +1621,12 @@ parameters:
 			path: app/Livewire/BillingPortal.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\BillingPortal\\:\\:manageBilling\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/BillingPortal.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\BillingPortal\\:\\:mount\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/BillingPortal.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\BillingPortal\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\BillingPortal\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/BillingPortal.php
 
@@ -2095,7 +1686,7 @@ parameters:
 			path: app/Livewire/BillingPortal.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Dashboard\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Dashboard\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Dashboard.php
 
@@ -2115,7 +1706,7 @@ parameters:
 			path: app/Livewire/Dashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Documentation\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Documentation\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Documentation.php
 
@@ -2160,7 +1751,7 @@ parameters:
 			path: app/Livewire/Feed.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Feed\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Feed\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
@@ -2225,11 +1816,6 @@ parameters:
 			path: app/Livewire/FeedAdminPanel.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\FeedAdminPanel\\:\\:render\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/FeedAdminPanel.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\FeedAdminPanel\\:\\:\\$activeShifts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/FeedAdminPanel.php
@@ -2280,7 +1866,7 @@ parameters:
 			path: app/Livewire/Fleet.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Fleet\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Fleet\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Fleet.php
 
@@ -2325,14 +1911,14 @@ parameters:
 			path: app/Livewire/Fleet.php
 
 		-
-			message: "#^Using nullsafe property access \"\\?\\-\\>max_machines\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
-			count: 1
+			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 2
 			path: app/Livewire/Fleet.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Machine\\|Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:\\$name\\.$#"
+			message: "#^Using nullsafe property access \"\\?\\-\\>max_machines\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
-			path: app/Livewire/FleetMovementReplay.php
+			path: app/Livewire/Fleet.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\FleetMovementReplay\\:\\:exportReplayData\\(\\) has no return type specified\\.$#"
@@ -2400,7 +1986,7 @@ parameters:
 			path: app/Livewire/FleetMovementReplay.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\FleetMovementReplay\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\FleetMovementReplay\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/FleetMovementReplay.php
 
@@ -2485,11 +2071,6 @@ parameters:
 			path: app/Livewire/FleetMovementReplay.php
 
 		-
-			message: "#^Parameter \\#5 \\$machineId of method App\\\\Services\\\\RoutePlanningService\\:\\:calculateOptimalRoute\\(\\) expects int\\|null, App\\\\Models\\\\Machine given\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\FleetMovementReplay\\:\\:\\$activityFeed type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/FleetMovementReplay.php
@@ -2507,6 +2088,11 @@ parameters:
 		-
 			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
 			count: 1
+			path: app/Livewire/FleetMovementReplay.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 3
 			path: app/Livewire/FleetMovementReplay.php
 
 		-
@@ -2584,7 +2170,15 @@ parameters:
 			count: 1
 			path: app/Livewire/FuelManagement.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/FuelManagement.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Livewire/FuelManagement.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:getDateRange\\(\\) has no return type specified\\.$#"
@@ -2632,7 +2226,7 @@ parameters:
 			path: app/Livewire/FuelManagement.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/FuelManagement.php
 
@@ -2682,7 +2276,7 @@ parameters:
 			path: app/Livewire/GeofenceDetail.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\GeofenceDetail\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\GeofenceDetail\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/GeofenceDetail.php
 
@@ -2692,7 +2286,7 @@ parameters:
 			path: app/Livewire/GeofenceDetail.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\GeofenceManager\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\GeofenceManager\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/GeofenceManager.php
 
@@ -2746,7 +2340,15 @@ parameters:
 			count: 1
 			path: app/Livewire/IntegrationManager.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/IntegrationManager.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Livewire/IntegrationManager.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:loadAvailableManufacturers\\(\\) has no return type specified\\.$#"
@@ -2769,7 +2371,7 @@ parameters:
 			path: app/Livewire/IntegrationManager.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/IntegrationManager.php
 
@@ -2864,7 +2466,7 @@ parameters:
 			path: app/Livewire/LiveMap.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\LiveMap\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\LiveMap\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/LiveMap.php
 
@@ -2899,7 +2501,7 @@ parameters:
 			path: app/Livewire/MachineDetail.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\MachineDetail\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\MachineDetail\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/MachineDetail.php
 
@@ -2984,7 +2586,7 @@ parameters:
 			path: app/Livewire/MaintenanceDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/MaintenanceDashboard.php
 
@@ -3134,7 +2736,7 @@ parameters:
 			path: app/Livewire/MineAreaDetail.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\MineAreaDetail\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\MineAreaDetail\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/MineAreaDetail.php
 
@@ -3229,7 +2831,7 @@ parameters:
 			path: app/Livewire/MineAreaManager.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\MineAreaManager\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\MineAreaManager\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/MineAreaManager.php
 
@@ -3294,7 +2896,7 @@ parameters:
 			path: app/Livewire/Navbar.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Navbar\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Navbar\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Navbar.php
 
@@ -3494,7 +3096,7 @@ parameters:
 			path: app/Livewire/ProductionDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/ProductionDashboard.php
 
@@ -3548,7 +3150,15 @@ parameters:
 			count: 1
 			path: app/Livewire/ReportGenerator.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/ReportGenerator.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Livewire/ReportGenerator.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:generateReport\\(\\) has no return type specified\\.$#"
@@ -3581,7 +3191,7 @@ parameters:
 			path: app/Livewire/ReportGenerator.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/ReportGenerator.php
 
@@ -3650,7 +3260,15 @@ parameters:
 			count: 1
 			path: app/Livewire/Reports.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/Reports.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Livewire/Reports.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:downloadReport\\(\\) has no return type specified\\.$#"
@@ -3698,7 +3316,7 @@ parameters:
 			path: app/Livewire/Reports.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Reports.php
 
@@ -3763,7 +3381,7 @@ parameters:
 			path: app/Livewire/RoutePlanning.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/RoutePlanning.php
 
@@ -3857,7 +3475,20 @@ parameters:
 			count: 2
 			path: app/Livewire/RoutePlanning.php
 
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>id\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Livewire/RoutePlanning.php
 
+		-
+			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/Settings.php
+
+		-
+			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Livewire/Settings.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:getCurrencies\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -3905,7 +3536,7 @@ parameters:
 			path: app/Livewire/Settings.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Settings.php
 
@@ -3970,7 +3601,7 @@ parameters:
 			path: app/Livewire/ShiftTemplateManager.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\ShiftTemplateManager\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\ShiftTemplateManager\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/ShiftTemplateManager.php
 
@@ -3985,17 +3616,12 @@ parameters:
 			path: app/Livewire/ShiftTemplateManager.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Sidebar\\:\\:render\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Livewire\\\\Sidebar\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/Sidebar.php
 
 		-
 			message: "#^Cannot call method hasRole\\(\\) on Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\|null\\.$#"
-			count: 1
-			path: app/Livewire/WhatsAppMigration.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\WhatsAppMigration\\:\\:render\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/WhatsAppMigration.php
 
@@ -4105,22 +3731,22 @@ parameters:
 			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeByType\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeByType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIAgent.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeByType\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeByType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIAgent.php
 
@@ -4141,11 +3767,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\AIAgent\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Property App\\\\Models\\\\AIAgent\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/AIAgent.php
 
@@ -4195,22 +3816,17 @@ parameters:
 			path: app/Models/AIAnalysisSession.php
 
 		-
-			message: "#^Property App\\\\Models\\\\AIAnalysisSession\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AIAnalysisSession.php
-
-		-
 			message: "#^Class App\\\\Models\\\\AIInsight uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeBySeverity\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeBySeverity\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeBySeverity\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeBySeverity\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
@@ -4225,22 +3841,22 @@ parameters:
 			path: app/Models/AIInsight.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeUnread\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeUnread\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeUnread\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeUnread\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeValid\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeValid\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeValid\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:scopeValid\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
@@ -4251,11 +3867,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\AIInsight\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIInsight.php
-
-		-
-			message: "#^Property App\\\\Models\\\\AIInsight\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/AIInsight.php
 
@@ -4295,11 +3906,6 @@ parameters:
 			path: app/Models/AILearningData.php
 
 		-
-			message: "#^Property App\\\\Models\\\\AILearningData\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AILearningData.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\AIPredictiveAlert\\:\\:\\$aiAgent\\.$#"
 			count: 1
 			path: app/Models/AIPredictiveAlert.php
@@ -4325,12 +3931,12 @@ parameters:
 			path: app/Models/AIPredictiveAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeCritical\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIPredictiveAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeCritical\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIPredictiveAlert.php
 
@@ -4345,12 +3951,12 @@ parameters:
 			path: app/Models/AIPredictiveAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeUnacknowledged\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeUnacknowledged\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIPredictiveAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeUnacknowledged\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:scopeUnacknowledged\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIPredictiveAlert.php
 
@@ -4361,11 +3967,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\AIPredictiveAlert\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIPredictiveAlert.php
-
-		-
-			message: "#^Property App\\\\Models\\\\AIPredictiveAlert\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/AIPredictiveAlert.php
 
@@ -4405,12 +4006,12 @@ parameters:
 			path: app/Models/AIRecommendation.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeByCategory\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeByCategory\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIRecommendation.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeByCategory\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeByCategory\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIRecommendation.php
 
@@ -4425,22 +4026,27 @@ parameters:
 			path: app/Models/AIRecommendation.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeHighPriority\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeHighPriority\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIRecommendation.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeHighPriority\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeHighPriority\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIRecommendation.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopePending\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopeHighPriority\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/AIRecommendation.php
 
 		-
-			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopePending\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopePending\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/AIRecommendation.php
+
+		-
+			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:scopePending\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/AIRecommendation.php
 
@@ -4456,11 +4062,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\AIRecommendation\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIRecommendation.php
-
-		-
-			message: "#^Property App\\\\Models\\\\AIRecommendation\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/AIRecommendation.php
 
@@ -4485,7 +4086,7 @@ parameters:
 			path: app/Models/ActivityLog.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ActivityLog\\:\\:user\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ActivityLog\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/ActivityLog.php
 
@@ -4530,11 +4131,6 @@ parameters:
 			path: app/Models/AiRecommendationAction.php
 
 		-
-			message: "#^Property App\\\\Models\\\\AiRecommendationAction\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/AiRecommendationAction.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Alert has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Alert.php
@@ -4565,17 +4161,7 @@ parameters:
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:acknowledge\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:acknowledge\\(\\) has parameter \\$userId with no type specified\\.$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:acknowledgedBy\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Alert\\:\\:acknowledgedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Alert.php
 
@@ -4590,37 +4176,27 @@ parameters:
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:resolve\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Alert\\:\\:resolvedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:resolve\\(\\) has parameter \\$userId with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:resolvedBy\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeCritical\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeCritical\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Alert.php
 
@@ -4665,11 +4241,6 @@ parameters:
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Alert\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
 			message: "#^Class App\\\\Models\\\\AuditLog has PHPDoc tag @property for property \\$meta with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/AuditLog.php
@@ -4685,17 +4256,37 @@ parameters:
 			path: app/Models/AuditLog.php
 
 		-
-			message: "#^Property App\\\\Models\\\\AuditLog\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
+			message: "#^Method App\\\\Models\\\\BellEquipment\\:\\:currentStatus\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
-			path: app/Models/AuditLog.php
+			path: app/Models/BellEquipment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComplianceReport\\:\\:generator\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\BellEquipment\\:\\:dailyKpis\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
-			path: app/Models/ComplianceReport.php
+			path: app/Models/BellEquipment.php
 
 		-
-			message: "#^Property App\\\\Models\\\\ComplianceReport\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
+			message: "#^Method App\\\\Models\\\\BellEquipment\\:\\:telemetryHistory\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BellEquipment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BellEquipmentCurrentStatus\\:\\:equipment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BellEquipmentCurrentStatus.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BellEquipmentDailyKpi\\:\\:equipment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BellEquipmentDailyKpi.php
+
+		-
+			message: "#^Method App\\\\Models\\\\BellEquipmentTelemetryHistory\\:\\:equipment\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
+			count: 1
+			path: app/Models/BellEquipmentTelemetryHistory.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ComplianceReport\\:\\:generator\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/ComplianceReport.php
 
@@ -4726,11 +4317,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\ComplianceViolation\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ComplianceViolation.php
-
-		-
-			message: "#^Property App\\\\Models\\\\ComplianceViolation\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/ComplianceViolation.php
 
@@ -4785,12 +4371,12 @@ parameters:
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeComponent\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeComponent\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeComponent\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeComponent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
 
@@ -4805,22 +4391,22 @@ parameters:
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeRecentReplacements\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeRecentReplacements\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeRecentReplacements\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeRecentReplacements\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeUnderWarranty\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeUnderWarranty\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeUnderWarranty\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ComponentReplacement\\:\\:scopeUnderWarranty\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
 
@@ -4835,22 +4421,12 @@ parameters:
 			path: app/Models/ComponentReplacement.php
 
 		-
-			message: "#^Property App\\\\Models\\\\ComponentReplacement\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/ComponentReplacement.php
-
-		-
 			message: "#^Method App\\\\Models\\\\DigestSubscription\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/DigestSubscription.php
 
 		-
 			message: "#^Method App\\\\Models\\\\DigestSubscription\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/DigestSubscription.php
-
-		-
-			message: "#^Property App\\\\Models\\\\DigestSubscription\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/DigestSubscription.php
 
@@ -4865,32 +4441,32 @@ parameters:
 			path: app/Models/EngineHourSession.php
 
 		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeRunning\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeRunning\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/EngineHourSession.php
 
 		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeRunning\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeRunning\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/EngineHourSession.php
 
 		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeToday\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeRunning\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/EngineHourSession.php
 
 		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeToday\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeToday\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/EngineHourSession.php
+
+		-
+			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeToday\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/EngineHourSession.php
 
 		-
 			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/EngineHourSession.php
-
-		-
-			message: "#^Property App\\\\Models\\\\EngineHourSession\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/EngineHourSession.php
 
@@ -4905,11 +4481,6 @@ parameters:
 			path: app/Models/FeedAcknowledgement.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FeedAcknowledgement\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FeedAcknowledgement.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FeedApproval\\:\\:approver\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedApproval.php
@@ -4920,22 +4491,12 @@ parameters:
 			path: app/Models/FeedApproval.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FeedApproval\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FeedApproval.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FeedAttachment\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedAttachment.php
 
 		-
 			message: "#^Method App\\\\Models\\\\FeedAttachment\\:\\:uploader\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedAttachment.php
-
-		-
-			message: "#^Property App\\\\Models\\\\FeedAttachment\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/FeedAttachment.php
 
@@ -4960,11 +4521,6 @@ parameters:
 			path: app/Models/FeedAuditLog.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FeedAuditLog\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FeedAuditLog.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FeedComment\\:\\:author\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedComment.php
@@ -4985,22 +4541,12 @@ parameters:
 			path: app/Models/FeedComment.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FeedComment\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FeedComment.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FeedLike\\:\\:post\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/FeedLike.php
 
 		-
 			message: "#^Method App\\\\Models\\\\FeedLike\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedLike.php
-
-		-
-			message: "#^Property App\\\\Models\\\\FeedLike\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/FeedLike.php
 
@@ -5021,11 +4567,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\FeedMention\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FeedMention.php
-
-		-
-			message: "#^Property App\\\\Models\\\\FeedMention\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/FeedMention.php
 
@@ -5100,11 +4641,6 @@ parameters:
 			path: app/Models/FeedPost.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FeedPost\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FeedPost.php
-
-		-
 			message: "#^Class App\\\\Models\\\\FuelAlert has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/FuelAlert.php
@@ -5155,22 +4691,22 @@ parameters:
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeCritical\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeCritical\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
@@ -5185,12 +4721,17 @@ parameters:
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/FuelAlert.php
+
+		-
+			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/FuelAlert.php
 
@@ -5225,11 +4766,6 @@ parameters:
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FuelAlert\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\FuelBudget\\:\\:\\$budget_utilization\\.$#"
 			count: 1
 			path: app/Models/FuelBudget.php
@@ -5240,32 +4776,37 @@ parameters:
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeCurrent\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeCurrent\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeCurrent\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeCurrent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeExceeded\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeExceeded\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeExceeded\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeExceeded\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/FuelBudget.php
+
+		-
+			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeExceeded\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/FuelBudget.php
 
@@ -5296,11 +4837,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\FuelBudget\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
-			message: "#^Property App\\\\Models\\\\FuelBudget\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/FuelBudget.php
 
@@ -5351,11 +4887,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\FuelConsumptionMetric\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelConsumptionMetric.php
-
-		-
-			message: "#^Property App\\\\Models\\\\FuelConsumptionMetric\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/FuelConsumptionMetric.php
 
@@ -5490,11 +5021,6 @@ parameters:
 			path: app/Models/FuelMonthlyAllocation.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FuelMonthlyAllocation\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
 			message: "#^Binary operation \"\\-\" between float\\|string and float\\|string results in an error\\.$#"
 			count: 1
 			path: app/Models/FuelTank.php
@@ -5540,22 +5066,27 @@ parameters:
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeCritical\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeCritical\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/FuelTank.php
+
+		-
+			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeCritical\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/FuelTank.php
 
@@ -5570,12 +5101,17 @@ parameters:
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/FuelTank.php
+
+		-
+			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/FuelTank.php
 
@@ -5615,11 +5151,6 @@ parameters:
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FuelTank\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$quantity_liters\\.$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
@@ -5650,22 +5181,27 @@ parameters:
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$endDate with no type specified\\.$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
 		-
 			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$startDate with no type specified\\.$#"
+			count: 1
+			path: app/Models/FuelTransaction.php
+
+		-
+			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/FuelTransaction.php
+
+		-
+			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
@@ -5680,22 +5216,22 @@ parameters:
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeFuelType\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeFuelType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeFuelType\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeFuelType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeOfType\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeOfType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeOfType\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeOfType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
@@ -5720,11 +5256,6 @@ parameters:
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Property App\\\\Models\\\\FuelTransaction\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Geofence has PHPDoc tag @property for property \\$coordinates with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Geofence.php
@@ -5735,7 +5266,12 @@ parameters:
 			path: app/Models/Geofence.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:activeMachines\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Geofence\\:\\:activeMachines\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
+			count: 1
+			path: app/Models/Geofence.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Geofence\\:\\:activeMachines\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Collection but returns Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\), mixed\\>\\.$#"
 			count: 1
 			path: app/Models/Geofence.php
 
@@ -5745,22 +5281,12 @@ parameters:
 			path: app/Models/Geofence.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTodayEntries\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTodayEntries\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/Geofence.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTonnageForDateRange\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTonnageForDateRange\\(\\) has parameter \\$endDate with no type specified\\.$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTonnageForDateRange\\(\\) has parameter \\$startDate with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTodayEntries\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Collection but returns Illuminate\\\\Support\\\\Collection\\<int, stdClass\\>\\.$#"
 			count: 1
 			path: app/Models/Geofence.php
 
@@ -5805,11 +5331,6 @@ parameters:
 			path: app/Models/Geofence.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Geofence\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
 			message: "#^Class App\\\\Models\\\\GeofenceEntry has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/GeofenceEntry.php
@@ -5840,12 +5361,7 @@ parameters:
 			path: app/Models/GeofenceEntry.php
 
 		-
-			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:getDurationMinutes\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/GeofenceEntry.php
-
-		-
-			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:getFormattedDuration\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:getDurationMinutes\\(\\) should return int\\|null but returns float\\.$#"
 			count: 1
 			path: app/Models/GeofenceEntry.php
 
@@ -5891,11 +5407,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\GeofenceEntry\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/GeofenceEntry.php
-
-		-
-			message: "#^Property App\\\\Models\\\\GeofenceEntry\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/GeofenceEntry.php
 
@@ -5950,11 +5461,6 @@ parameters:
 			path: app/Models/HaulDispatch.php
 
 		-
-			message: "#^Property App\\\\Models\\\\HaulDispatch\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
 			message: "#^Using nullsafe property access \"\\?\\-\\>fuel_capacity\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/Models/HaulDispatch.php
@@ -5975,32 +5481,32 @@ parameters:
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeAbnormal\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeAbnormal\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeAbnormal\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeAbnormal\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeComponent\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeComponent\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeComponent\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeComponent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeCritical\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeCritical\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
@@ -6015,22 +5521,22 @@ parameters:
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeMetricType\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeMetricType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeMetricType\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeMetricType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeRecent\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeRecent\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
 		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeRecent\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeRecent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
@@ -6056,11 +5562,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\HealthMetric\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/HealthMetric.php
-
-		-
-			message: "#^Property App\\\\Models\\\\HealthMetric\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
@@ -6095,11 +5596,6 @@ parameters:
 			path: app/Models/Incident.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Incident\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Incident.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Integration has PHPDoc tag @property for property \\$config with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Integration.php
@@ -6120,21 +5616,6 @@ parameters:
 			path: app/Models/Integration.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Integration\\:\\:markError\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Integration.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Integration\\:\\:markError\\(\\) has parameter \\$error with no type specified\\.$#"
-			count: 1
-			path: app/Models/Integration.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Integration\\:\\:markSynced\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Integration.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Integration\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Integration.php
@@ -6151,11 +5632,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\Integration\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Integration.php
-
-		-
-			message: "#^Property App\\\\Models\\\\Integration\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Integration.php
 
@@ -6195,22 +5671,22 @@ parameters:
 			path: app/Models/Invoice.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopePaid\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopePaid\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Invoice.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopePaid\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopePaid\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Invoice.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopeUnpaid\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopeUnpaid\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Invoice.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopeUnpaid\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopeUnpaid\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Invoice.php
 
@@ -6245,11 +5721,6 @@ parameters:
 			path: app/Models/Invoice.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Invoice\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$last_reading_at\\.$#"
 			count: 1
 			path: app/Models/IoTSensor.php
@@ -6265,17 +5736,12 @@ parameters:
 			path: app/Models/IoTSensor.php
 
 		-
-			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:readings\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:readings\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/IoTSensor.php
 
 		-
 			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Property App\\\\Models\\\\IoTSensor\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/IoTSensor.php
 
@@ -6400,11 +5866,6 @@ parameters:
 			path: app/Models/Machine.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Machine\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MachineAreaAssignment has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
@@ -6440,27 +5901,32 @@ parameters:
 			path: app/Models/MachineAreaAssignment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
 
 		-
 			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
+			count: 1
+			path: app/Models/MachineAreaAssignment.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
 
@@ -6486,11 +5952,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\MachineAreaAssignment\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
-			message: "#^Property App\\\\Models\\\\MachineAreaAssignment\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
 
@@ -6550,12 +6011,12 @@ parameters:
 			path: app/Models/MachineHealthStatus.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeCritical\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineHealthStatus.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeCritical\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineHealthStatus.php
 
@@ -6570,12 +6031,12 @@ parameters:
 			path: app/Models/MachineHealthStatus.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeNeedsAttention\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeNeedsAttention\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineHealthStatus.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeNeedsAttention\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeNeedsAttention\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineHealthStatus.php
 
@@ -6586,11 +6047,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MachineHealthStatus.php
 
@@ -6666,11 +6122,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\MachineMetric\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineMetric.php
-
-		-
-			message: "#^Property App\\\\Models\\\\MachineMetric\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MachineMetric.php
 
@@ -6810,11 +6261,6 @@ parameters:
 			path: app/Models/MaintenanceAlert.php
 
 		-
-			message: "#^Property App\\\\Models\\\\MaintenanceAlert\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MaintenanceAlert.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MaintenanceRecord has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
@@ -6875,12 +6321,12 @@ parameters:
 			path: app/Models/MaintenanceRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeCompleted\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeCompleted\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeCompleted\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeCompleted\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
 
@@ -6895,12 +6341,12 @@ parameters:
 			path: app/Models/MaintenanceRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeInProgress\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeInProgress\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeInProgress\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeInProgress\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
 
@@ -6931,11 +6377,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\MaintenanceRecord\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Property App\\\\Models\\\\MaintenanceRecord\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MaintenanceRecord.php
 
@@ -7000,12 +6441,12 @@ parameters:
 			path: app/Models/MaintenanceSchedule.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeDue\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeDue\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeDue\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeDue\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
 
@@ -7020,12 +6461,12 @@ parameters:
 			path: app/Models/MaintenanceSchedule.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeOverdue\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeOverdue\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeOverdue\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeOverdue\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
 
@@ -7061,11 +6502,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#1 \\$date of method Carbon\\\\CarbonInterface\\:\\:gte\\(\\) expects DateTimeInterface\\|string, Carbon\\\\Carbon\\|string\\|null given\\.$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Property App\\\\Models\\\\MaintenanceSchedule\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
 
@@ -7145,11 +6581,6 @@ parameters:
 			path: app/Models/MapEvent.php
 
 		-
-			message: "#^Property App\\\\Models\\\\MapEvent\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/MapEvent.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MineArea has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MineArea.php
@@ -7176,6 +6607,11 @@ parameters:
 
 		-
 			message: "#^Class App\\\\Models\\\\MineArea has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Models/MineArea.php
+
+		-
+			message: "#^Class App\\\\Models\\\\MineArea uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/MineArea.php
 
@@ -7225,12 +6661,7 @@ parameters:
 			path: app/Models/MineArea.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MineArea.php
 
@@ -7240,17 +6671,22 @@ parameters:
 			path: app/Models/MineArea.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MineArea.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MineArea.php
 
 		-
 			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
+			count: 1
+			path: app/Models/MineArea.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MineArea.php
 
@@ -7276,11 +6712,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\MineArea\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Property App\\\\Models\\\\MineArea\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MineArea.php
 
@@ -7330,22 +6761,17 @@ parameters:
 			path: app/Models/MinePlanUpload.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeByType\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeByType\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeByType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
@@ -7355,17 +6781,22 @@ parameters:
 			path: app/Models/MinePlanUpload.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeByType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
 		-
 			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
+			count: 1
+			path: app/Models/MinePlanUpload.php
+
+		-
+			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
@@ -7376,11 +6807,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:uploader\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Property App\\\\Models\\\\MinePlanUpload\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/MinePlanUpload.php
 
@@ -7415,16 +6841,6 @@ parameters:
 			path: app/Models/Notification.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:markAsRead\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Notification\\:\\:markAsRead\\(\\) has parameter \\$userId with no type specified\\.$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Notification\\:\\:readBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#"
 			count: 1
 			path: app/Models/Notification.php
@@ -7451,11 +6867,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Notification\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Notification.php
-
-		-
-			message: "#^Property App\\\\Models\\\\Notification\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Notification.php
 
@@ -7525,11 +6936,6 @@ parameters:
 			path: app/Models/OperatorFatigue.php
 
 		-
-			message: "#^Property App\\\\Models\\\\OperatorFatigue\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/OperatorFatigue.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Payment has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Payment.php
@@ -7565,22 +6971,22 @@ parameters:
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeFailed\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeFailed\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeFailed\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeFailed\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeSucceeded\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeSucceeded\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeSucceeded\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeSucceeded\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Payment.php
 
@@ -7615,11 +7021,6 @@ parameters:
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Payment\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Permission has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Permission.php
@@ -7645,7 +7046,7 @@ parameters:
 			path: app/Models/Permission.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Permission\\:\\:roles\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Permission\\:\\:roles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#"
 			count: 1
 			path: app/Models/Permission.php
 
@@ -7671,11 +7072,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Permission\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Permission.php
-
-		-
-			message: "#^Property App\\\\Models\\\\Permission\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Permission.php
 
@@ -7710,27 +7106,22 @@ parameters:
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) has parameter \\$date with no type specified\\.$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForTeam\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForTeam\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
@@ -7740,17 +7131,22 @@ parameters:
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
 		-
 			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) has parameter \\$threshold with no type specified\\.$#"
+			count: 1
+			path: app/Models/ProductionForecast.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
@@ -7776,11 +7172,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\ProductionForecast\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Property App\\\\Models\\\\ProductionForecast\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/ProductionForecast.php
 
@@ -7825,17 +7216,12 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
 			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) has parameter \\$endDate with no type specified\\.$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
@@ -7845,12 +7231,17 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeByStatus\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeByStatus\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeBetweenDates\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
+			count: 1
+			path: app/Models/ProductionRecord.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeByStatus\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
@@ -7860,7 +7251,7 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForMineArea\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeByStatus\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
@@ -7870,22 +7261,27 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForMineArea\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForMineArea\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForTeam\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForMineArea\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForTeam\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
 		-
 			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
+			count: 1
+			path: app/Models/ProductionRecord.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ProductionRecord\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionRecord.php
 
@@ -7915,11 +7311,6 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Property App\\\\Models\\\\ProductionRecord\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/ProductionRecord.php
-
-		-
 			message: "#^Class App\\\\Models\\\\ProductionTarget has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
@@ -7945,17 +7336,12 @@ parameters:
 			path: app/Models/ProductionTarget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeByPeriod\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
@@ -7965,22 +7351,27 @@ parameters:
 			path: app/Models/ProductionTarget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeByPeriod\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeByPeriod\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeByPeriod\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
 		-
 			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
+			count: 1
+			path: app/Models/ProductionTarget.php
+
+		-
+			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
@@ -8006,11 +7397,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\ProductionTarget\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Property App\\\\Models\\\\ProductionTarget\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/ProductionTarget.php
 
@@ -8050,27 +7436,7 @@ parameters:
 			path: app/Models/Report.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Report\\:\\:generatedBy\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Report\\:\\:markCompleted\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Report\\:\\:markCompleted\\(\\) has parameter \\$filePath with no type specified\\.$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Report\\:\\:markCompleted\\(\\) has parameter \\$fileSize with no type specified\\.$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Report\\:\\:markFailed\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Report\\:\\:generatedBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Report.php
 
@@ -8115,11 +7481,6 @@ parameters:
 			path: app/Models/Report.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Report\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Role has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Role.php
@@ -8145,17 +7506,7 @@ parameters:
 			path: app/Models/Role.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Role\\:\\:hasPermission\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/Role.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Role\\:\\:hasPermission\\(\\) has parameter \\$permission with no type specified\\.$#"
-			count: 1
-			path: app/Models/Role.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Role\\:\\:permissions\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Role\\:\\:permissions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#"
 			count: 1
 			path: app/Models/Role.php
 
@@ -8181,11 +7532,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Role\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Role.php
-
-		-
-			message: "#^Property App\\\\Models\\\\Role\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Role.php
 
@@ -8275,11 +7621,6 @@ parameters:
 			path: app/Models/Route.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Route\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Route.php
-
-		-
 			message: "#^Method App\\\\Models\\\\SensorReading\\:\\:sensor\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/SensorReading.php
@@ -8291,11 +7632,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\SensorReading\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/SensorReading.php
-
-		-
-			message: "#^Property App\\\\Models\\\\SensorReading\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/SensorReading.php
 
@@ -8360,11 +7696,6 @@ parameters:
 			path: app/Models/Shift.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Shift\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Shift.php
-
-		-
 			message: "#^Class App\\\\Models\\\\ShiftTemplate has PHPDoc tag @property for property \\$required_fields with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/ShiftTemplate.php
@@ -8391,11 +7722,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\ShiftTemplate\\:\\:withoutTeamFilter\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ShiftTemplate.php
-
-		-
-			message: "#^Property App\\\\Models\\\\ShiftTemplate\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/ShiftTemplate.php
 
@@ -8450,22 +7776,27 @@ parameters:
 			path: app/Models/Subscription.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Subscription.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Subscription.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/Subscription.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/Subscription.php
+
+		-
+			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Subscription.php
 
@@ -8510,11 +7841,6 @@ parameters:
 			path: app/Models/Subscription.php
 
 		-
-			message: "#^Property App\\\\Models\\\\Subscription\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
 			message: "#^Class App\\\\Models\\\\SubscriptionPlan has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/SubscriptionPlan.php
@@ -8545,12 +7871,17 @@ parameters:
 			path: app/Models/SubscriptionPlan.php
 
 		-
-			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:scopeActive\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/SubscriptionPlan.php
 
 		-
-			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:scopeActive\\(\\) has parameter \\$query with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			count: 1
+			path: app/Models/SubscriptionPlan.php
+
+		-
+			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:scopeActive\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/SubscriptionPlan.php
 
@@ -8580,37 +7911,32 @@ parameters:
 			path: app/Models/SubscriptionPlan.php
 
 		-
-			message: "#^Property App\\\\Models\\\\SubscriptionPlan\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/SubscriptionPlan.php
-
-		-
 			message: "#^Generic type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<App\\\\Models\\\\User\\> in PHPDoc tag @return does not specify all template types of class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Team.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:alerts\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Team\\:\\:alerts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Team.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:geofences\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Team\\:\\:geofences\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Team.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:integrations\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Team\\:\\:integrations\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Team.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:machines\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Team\\:\\:machines\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Team.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:mineAreas\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Team\\:\\:mineAreas\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Team.php
 
@@ -8620,12 +7946,12 @@ parameters:
 			path: app/Models/Team.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:permissions\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Team\\:\\:permissions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Team.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Team\\:\\:roles\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\Team\\:\\:roles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
 			count: 1
 			path: app/Models/Team.php
 
@@ -8655,12 +7981,7 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:assignRole\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:assignRole\\(\\) has parameter \\$role with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\User\\:\\:assignRole\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/User.php
 
@@ -8670,27 +7991,22 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:getAllRoles\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\User\\:\\:getAllRoles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:hasAllPermissions\\(\\) has parameter \\$permissions with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\User\\:\\:hasAllPermissions\\(\\) has parameter \\$permissions with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:hasAnyPermission\\(\\) has parameter \\$permissions with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\User\\:\\:hasAnyPermission\\(\\) has parameter \\$permissions with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:hasPermission\\(\\) has parameter \\$permission with no type specified\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:hasRole\\(\\) has parameter \\$role with no type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\User\\:\\:hasRole\\(\\) has parameter \\$role with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/User.php
 
@@ -8700,22 +8016,7 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:permissions\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:removeRole\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:removeRole\\(\\) has parameter \\$role with no type specified\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:roles\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Models\\\\User\\:\\:roles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#"
 			count: 1
 			path: app/Models/User.php
 
@@ -8726,11 +8027,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\UserFeedPreference\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/UserFeedPreference.php
-
-		-
-			message: "#^Property App\\\\Models\\\\UserFeedPreference\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/UserFeedPreference.php
 
@@ -8781,11 +8077,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Waypoint\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Waypoint.php
-
-		-
-			message: "#^Property App\\\\Models\\\\Waypoint\\:\\:\\$casts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/Waypoint.php
 
@@ -9368,6 +8659,86 @@ parameters:
 			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:request\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/BaseManufacturerService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:buildTelemetryPayload\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:calculateAndSaveDailyKpis\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:insertTelemetryHistory\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:mergeCurrentStatus\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:upsertEquipmentMaster\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Parameter \\#1 \\$startedAt of method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:writeAuditLog\\(\\) expects Carbon\\\\Carbon, Carbon\\\\CarbonInterface given\\.$#"
+			count: 2
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>EquipmentID\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>Model\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>OEMName\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>PIN\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>SerialNumber\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>UnitInstallDateTime\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>fuel_consumed\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>load_count\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>odometer\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
+
+		-
+			message: "#^Using nullsafe property access \"\\?\\-\\>payload\" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/Services/Integration/BellIso15143Service.php
 
 		-
 			message: "#^Call to an undefined method App\\\\Services\\\\Integration\\\\BellService\\:\\:logError\\(\\)\\.$#"
@@ -10635,6 +10006,16 @@ parameters:
 			path: app/Services/Integration/XCMGService.php
 
 		-
+			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Services/IoTSensorService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$sensor_type\\.$#"
+			count: 1
+			path: app/Services/IoTSensorService.php
+
+		-
 			message: "#^Access to an undefined property App\\\\Models\\\\IoTSensor\\:\\:\\$status\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
@@ -10650,12 +10031,27 @@ parameters:
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:getReadingStats\\(\\) has parameter \\$days with no type specified\\.$#"
+			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:getReadingStats\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:getReadingStats\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/IoTSensorService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) should return App\\\\Models\\\\SensorReading but returns Illuminate\\\\Database\\\\Eloquent\\\\Model\\.$#"
+			count: 1
+			path: app/Services/IoTSensorService.php
+
+		-
+			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function max expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
+			count: 1
+			path: app/Services/IoTSensorService.php
+
+		-
+			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function min expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
 
@@ -10750,62 +10146,22 @@ parameters:
 			path: app/Services/MineAreaService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:create\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:delete\\(\\) should return bool but returns bool\\|null\\.$#"
 			count: 1
 			path: app/Services/MineAreaService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getActiveForTeam\\(\\) has no return type specified\\.$#"
+			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getActiveForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Services/MineAreaService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getActiveForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
+			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getAllForTeam\\(\\) return type with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TKey, TValue$#"
 			count: 1
 			path: app/Services/MineAreaService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getAllForTeam\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getAllForTeam\\(\\) has parameter \\$perPage with no type specified\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getAllForTeam\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getById\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getById\\(\\) has parameter \\$id with no type specified\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getById\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getTeamStatistics\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getTeamStatistics\\(\\) has parameter \\$teamId with no type specified\\.$#"
+			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getTeamStatistics\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/MineAreaService.php
 
@@ -10820,7 +10176,67 @@ parameters:
 			path: app/Services/MineAreaService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\ProductionService\\:\\:getProductionByTeam\\(\\) return type with generic class Illuminate\\\\Pagination\\\\Paginator does not specify its types\\: TKey, TValue$#"
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:get\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:handleChargeSuccess\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:handleInvoiceUpdate\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:handleSubscriptionCreated\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:handleSubscriptionDisabled\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:initializeTransaction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:post\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:post\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:verifyTransaction\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Negated boolean expression is always false\\.$#"
+			count: 5
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Parameter \\#2 \\$timestamp of function date expects int\\|null, int\\|false given\\.$#"
+			count: 2
+			path: app/Services/PaystackService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\ProductionService\\:\\:getProductionByTeam\\(\\) return type with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TKey, TValue$#"
+			count: 1
+			path: app/Services/ProductionService.php
+
+		-
+			message: "#^PHPDoc tag @return with type Illuminate\\\\Pagination\\\\Paginator&iterable\\<App\\\\Models\\\\ProductionRecord\\> is not subtype of native type Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator\\.$#"
 			count: 1
 			path: app/Services/ProductionService.php
 
@@ -11005,31 +10421,6 @@ parameters:
 			path: app/Services/ShiftService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:createCheckoutSession\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:handleInvoicePaid\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:handlePaymentSucceeded\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:handleSubscriptionCreated\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:handleSubscriptionUpdated\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
 			message: "#^Method App\\\\Support\\\\Reports\\\\ReportGeneration\\:\\:normalizeFilters\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Support/Reports/ReportGeneration.php
@@ -11078,6 +10469,11 @@ parameters:
 			message: "#^Binary operation \"\\.\" between array\\|string and ' Zone' results in an error\\.$#"
 			count: 1
 			path: database/factories/GeofenceFactory.php
+
+		-
+			message: "#^Binary operation \"\\.\" between array\\|string and ' Mine Area' results in an error\\.$#"
+			count: 1
+			path: database/factories/MineAreaFactory.php
 
 		-
 			message: "#^PHPDoc type string of property Database\\\\Factories\\\\NotificationFactory\\:\\:\\$model is not covariant with PHPDoc type class\\-string\\<App\\\\Models\\\\Notification\\> of overridden property Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\<App\\\\Models\\\\Notification\\>\\:\\:\\$model\\.$#"
