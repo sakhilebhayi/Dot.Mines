@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -74,3 +76,42 @@ use Illuminate\Database\Eloquent\Model;
  * @method static AIPredictiveAlert findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
+class AIPredictiveAlert extends Model
+{
+    use HasFactory, HasTeamFilters;
+
+    protected $fillable = [
+        'team_id',
+        'ai_agent_id',
+        'alert_type',
+        'severity',
+        'title',
+        'description',
+        'predictions',
+        'probability',
+        'predicted_occurrence',
+        'recommended_actions',
+        'related_machine_id',
+        'related_mine_area_id',
+        'is_acknowledged',
+        'acknowledged_by',
+        'acknowledged_at',
+        'was_accurate',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'predictions' => 'array',
+            'recommended_actions' => 'array',
+            'probability' => 'float',
+            'predicted_occurrence' => 'datetime',
+            'is_acknowledged' => 'boolean',
+            'acknowledged_at' => 'datetime',
+            'was_accurate' => 'boolean',
+        ];
+    }
+}

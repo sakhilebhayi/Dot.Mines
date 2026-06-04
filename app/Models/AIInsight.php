@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -74,3 +76,33 @@ use Illuminate\Database\Eloquent\Model;
  * @method static AIInsight findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
+class AIInsight extends Model
+{
+    use HasFactory, HasTeamFilters;
+
+    protected $fillable = [
+        'team_id',
+        'insight_type',
+        'category',
+        'severity',
+        'title',
+        'description',
+        'data',
+        'visualization_data',
+        'is_read',
+        'valid_until',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'data' => 'array',
+            'visualization_data' => 'array',
+            'is_read' => 'boolean',
+            'valid_until' => 'datetime',
+        ];
+    }
+}

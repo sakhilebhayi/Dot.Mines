@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -74,3 +76,34 @@ use Illuminate\Database\Eloquent\Model;
  * @method static AILearningData findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
+class AILearningData extends Model
+{
+    use HasFactory, HasTeamFilters;
+
+    protected $fillable = [
+        'ai_agent_id',
+        'team_id',
+        'recommendation_id',
+        'data_type',
+        'input_data',
+        'predicted_output',
+        'actual_output',
+        'accuracy',
+        'was_accurate',
+        'notes',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'input_data' => 'array',
+            'predicted_output' => 'array',
+            'actual_output' => 'array',
+            'accuracy' => 'float',
+            'was_accurate' => 'boolean',
+        ];
+    }
+}

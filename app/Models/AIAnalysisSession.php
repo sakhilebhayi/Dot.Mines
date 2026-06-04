@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -74,3 +76,58 @@ use Illuminate\Database\Eloquent\Model;
  * @method static AIAnalysisSession findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
+class AIAnalysisSession extends Model
+{
+    use HasFactory, HasTeamFilters;
+
+    protected $fillable = [
+        'team_id',
+        'ai_agent_id',
+        'user_id',
+        'analysis_type',
+        'status',
+        'input_parameters',
+        'results',
+        'recommendations_generated',
+        'processing_time_ms',
+        'started_at',
+        'completed_at',
+        'error_message',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'input_parameters' => 'array',
+            'results' => 'array',
+            'started_at' => 'datetime',
+            'completed_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $results
+     */
+    public function markAsCompleted(array $results, int $recommendationsGenerated = 0): void
+    {
+        $this->update([
+            'status' => 'completed',
+            'results' => $results,
+            'recommendations_generated' => $recommendationsGenerated,
+            'completed_at' => now(),
+            'processing_time_ms' => $this->started_at ? (int) $this->started_at->diffInMilliseconds(now()) : null,
+        ]);
+    }
+
+    public function markAsFailed(string $errorMessage): void
+    {
+        $this->update([
+            'status' => 'failed',
+            'error_message' => $errorMessage,
+            'completed_at' => now(),
+        ]);
+    }
+}
