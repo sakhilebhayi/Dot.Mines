@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -74,3 +76,55 @@ use Illuminate\Database\Eloquent\Model;
  * @method static AIRecommendation findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
+class AIRecommendation extends Model
+{
+    use HasFactory, HasTeamFilters;
+
+    protected $fillable = [
+        'team_id',
+        'ai_agent_id',
+        'user_id',
+        'category',
+        'priority',
+        'title',
+        'description',
+        'data',
+        'impact_analysis',
+        'confidence_score',
+        'estimated_savings',
+        'estimated_efficiency_gain',
+        'related_machine_id',
+        'related_mine_area_id',
+        'related_route_id',
+        'status',
+        'is_read',
+        'is_acknowledged',
+        'acknowledged_by',
+        'acknowledged_at',
+        'implemented_by',
+        'implemented_at',
+        'implementation_notes',
+        'valid_until',
+        'recommended_actions',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'data' => 'array',
+            'impact_analysis' => 'array',
+            'recommended_actions' => 'array',
+            'confidence_score' => 'float',
+            'estimated_savings' => 'float',
+            'estimated_efficiency_gain' => 'float',
+            'is_read' => 'boolean',
+            'is_acknowledged' => 'boolean',
+            'acknowledged_at' => 'datetime',
+            'implemented_at' => 'datetime',
+            'valid_until' => 'datetime',
+        ];
+    }
+}

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -26,3 +28,30 @@ use Illuminate\Database\Eloquent\Model;
  * @method static AiRecommendationAction findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
+class AiRecommendationAction extends Model
+{
+    use HasFactory, HasTeamFilters;
+
+    protected $fillable = [
+        'team_id',
+        'recommendation_hash',
+        'recommendation',
+        'status',
+        'actioned_by',
+        'actioned_at',
+        'reject_reason',
+        'performance_impact',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'recommendation' => 'array',
+            'performance_impact' => 'array',
+            'actioned_at' => 'datetime',
+        ];
+    }
+}
