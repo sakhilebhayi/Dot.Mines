@@ -332,16 +332,19 @@ class FileUploadService
 
     public function temporaryUrl(string $path, string $disk = 's3', int $minutes = 60): string
     {
-        if (! Storage::disk($disk)->exists($path)) {
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $storage */
+        $storage = Storage::disk($disk);
+
+        if (! $storage->exists($path)) {
             throw new \Exception('File not found');
         }
 
         if ($disk === 's3') {
-            return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes($minutes));
+            return $storage->temporaryUrl($path, now()->addMinutes($minutes));
         }
 
         // For local/private disk, create a signed route elsewhere; fallback to local URL
-        return Storage::disk($disk)->url($path);
+        return $storage->url($path);
     }
 
     /**
