@@ -3,47 +3,43 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Database\Factories\MachineHealthStatusFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * MachineHealthStatus Model
+ *
+ * @property int $id
+ * @property int $team_id
+ * @property int $machine_id
+ * @property int $overall_health_score
+ * @property string $health_status
+ * @property array<string, mixed>|null $component_scores
+ * @property int|null $engine_health
+ * @property int|null $transmission_health
+ * @property int|null $hydraulics_health
+ * @property int|null $electrical_health
+ * @property int|null $brakes_health
+ * @property int|null $cooling_system_health
+ * @property Carbon|null $last_diagnostic_scan
+ * @property array<string, mixed>|null $active_fault_codes
+ * @property int $fault_code_count
+ * @property string|null $recommendations
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class MachineHealthStatus extends Model
 {
+    /** @use HasFactory<MachineHealthStatusFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $table = 'machine_health_status';
 
-    /**
-     * MachineHealthStatus Model
-     *
-     * @property int $id
-     * @property int $team_id
-     * @property int $machine_id
-     * @property int $overall_health_score
-     * @property string $health_status
-     * @property array<string, mixed>|null $component_scores
-     * @property int|null $engine_health
-     * @property int|null $transmission_health
-     * @property int|null $hydraulics_health
-     * @property int|null $electrical_health
-     * @property int|null $brakes_health
-     * @property int|null $cooling_system_health
-     * @property \Carbon\Carbon|null $last_diagnostic_scan
-     * @property array<string, mixed>|null $active_fault_codes
-     * @property int $fault_code_count
-     * @property string|null $recommendations
-     * @property \Carbon\Carbon $created_at
-     * @property \Carbon\Carbon $updated_at
-     *
-     * @method static \Illuminate\Database\Eloquent\Builder|MachineHealthStatus where(string $column, mixed $operator = null, mixed $value = null)
-     * @method static \Illuminate\Database\Eloquent\Builder|MachineHealthStatus whereIn(string $column, array $values)
-     * @method static \Illuminate\Database\Eloquent\Builder|MachineHealthStatus orderBy(string $column, string $direction = 'asc')
-     * @method static MachineHealthStatus|null find(mixed $id, array $columns = ['*'])
-     * @method static MachineHealthStatus findOrFail(mixed $id, array $columns = ['*'])
-     * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
-     */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -76,19 +72,19 @@ class MachineHealthStatus extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\HealthMetric, $this> */
+    /** @return HasMany<HealthMetric, $this> */
     public function healthMetrics(): HasMany
     {
         return $this->hasMany(HealthMetric::class, 'machine_id', 'machine_id');
@@ -141,6 +137,9 @@ class MachineHealthStatus extends Model
 
     /**
      * Scope for machines needing attention
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeNeedsAttention(Builder $query): Builder
     {
@@ -152,6 +151,9 @@ class MachineHealthStatus extends Model
 
     /**
      * Scope for critical health
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCritical(Builder $query): Builder
     {

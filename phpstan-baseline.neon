@@ -271,54 +271,9 @@ parameters:
 			path: app/Events/FeedPostStatusChanged.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$geofence\\.$#"
-			count: 2
-			path: app/Events/GeofenceEntryDetected.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$latitude\\.$#"
-			count: 1
-			path: app/Events/GeofenceEntryDetected.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$longitude\\.$#"
-			count: 1
-			path: app/Events/GeofenceEntryDetected.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$machine\\.$#"
-			count: 2
-			path: app/Events/GeofenceEntryDetected.php
-
-		-
 			message: "#^Method App\\\\Events\\\\GeofenceEntryDetected\\:\\:broadcastWith\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Events/GeofenceEntryDetected.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$exited_at\\.$#"
-			count: 1
-			path: app/Events/GeofenceExitDetected.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$geofence\\.$#"
-			count: 2
-			path: app/Events/GeofenceExitDetected.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$latitude\\.$#"
-			count: 1
-			path: app/Events/GeofenceExitDetected.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$longitude\\.$#"
-			count: 1
-			path: app/Events/GeofenceExitDetected.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$machine\\.$#"
-			count: 2
-			path: app/Events/GeofenceExitDetected.php
 
 		-
 			message: "#^Method App\\\\Events\\\\GeofenceExitDetected\\:\\:broadcastWith\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -481,46 +436,6 @@ parameters:
 			path: app/Http/Controllers/Api/AlertController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\ComplianceReport\\:\\:\\$compliance_score\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\ComplianceReport\\:\\:\\$created_at\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\ComplianceReport\\:\\:\\$id\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\ComplianceReport\\:\\:\\$issues\\.$#"
-			count: 2
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\ComplianceReport\\:\\:\\$mineArea\\.$#"
-			count: 5
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\ComplianceReport\\:\\:\\$report_date\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\ComplianceReport\\:\\:\\$report_type\\.$#"
-			count: 2
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\ComplianceReport\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\MineArea\\:\\:\\$team\\.$#"
 			count: 2
 			path: app/Http/Controllers/Api/ComplianceReportController.php
@@ -529,16 +444,6 @@ parameters:
 			message: "#^Method App\\\\Http\\\\Controllers\\\\Api\\\\ComplianceReportController\\:\\:generateReportData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$receipt_file_path\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$team_id\\.$#"
-			count: 3
-			path: app/Http/Controllers/Api/FuelTransactionController.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$end_date\\.$#"
@@ -664,126 +569,6 @@ parameters:
 			message: "#^Method App\\\\Jobs\\\\AlertGenerationJob\\:\\:getHoursUntilMaintenance\\(\\) never returns float so it can be removed from the return type\\.$#"
 			count: 1
 			path: app/Jobs/AlertGenerationJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:buildReportHtml\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:generateCsv\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:generatePdf\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:generateXlsx\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryData\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryDowntime\\(\\) has parameter \\$machineIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryDowntime\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryFleetUtilization\\(\\) has parameter \\$machineIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryFleetUtilization\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryFuelConsumption\\(\\) has parameter \\$machineIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryFuelConsumption\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryMaintenance\\(\\) has parameter \\$machineIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryMaintenance\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryProduction\\(\\) has parameter \\$machineIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryProduction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryTireCondition\\(\\) has parameter \\$machineIds with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:queryTireCondition\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:xlsxRows\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\GenerateReportJob\\:\\:xlsxRows\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Parameter \\#2 \\$fileSize of method App\\\\Models\\\\Report\\:\\:markCompleted\\(\\) expects int\\|null, int\\<0, max\\>\\|false given\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Parameter \\#5 \\$actorId of static method App\\\\Services\\\\AuditService\\:\\:log\\(\\) expects int\\|null, int\\|string\\|null given\\.$#"
-			count: 1
-			path: app/Jobs/GenerateReportJob.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$exited_at\\.$#"
-			count: 2
-			path: app/Jobs/GeofenceCrossingDetectionJob.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\GeofenceEntry\\:\\:\\$machine\\.$#"
-			count: 1
-			path: app/Jobs/GeofenceCrossingDetectionJob.php
 
 		-
 			message: "#^Method App\\\\Jobs\\\\GeofenceCrossingDetectionJob\\:\\:isPointInPolygon\\(\\) has parameter \\$polygon with no value type specified in iterable type array\\.$#"
@@ -2191,26 +1976,6 @@ parameters:
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelConsumptionMetric\\:\\:\\$distance_traveled_km\\.$#"
-			count: 1
-			path: app/Models/FuelConsumptionMetric.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelConsumptionMetric\\:\\:\\$fuel_consumed_liters\\.$#"
-			count: 3
-			path: app/Models/FuelConsumptionMetric.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelConsumptionMetric\\:\\:\\$idle_fuel_consumed\\.$#"
-			count: 1
-			path: app/Models/FuelConsumptionMetric.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelConsumptionMetric\\:\\:\\$operating_hours\\.$#"
-			count: 1
-			path: app/Models/FuelConsumptionMetric.php
-
-		-
 			message: "#^Class App\\\\Models\\\\FuelConsumptionMetric uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/FuelConsumptionMetric.php
@@ -2279,16 +2044,6 @@ parameters:
 			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$quantity_liters\\.$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$total_cost\\.$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
 
 		-
 			message: "#^Class App\\\\Models\\\\FuelTransaction uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -2531,71 +2286,6 @@ parameters:
 			path: app/Models/MachineAreaAssignment.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$brakes_health\\.$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$cooling_system_health\\.$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$electrical_health\\.$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$engine_health\\.$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$fault_code_count\\.$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$hydraulics_health\\.$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$overall_health_score\\.$#"
-			count: 2
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$transmission_health\\.$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Class App\\\\Models\\\\MachineHealthStatus uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeNeedsAttention\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineHealthStatus\\:\\:scopeNeedsAttention\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineHealthStatus.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MachineMetric uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/MachineMetric.php
@@ -2744,76 +2434,6 @@ parameters:
 			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MineArea.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MinePlanUpload\\:\\:\\$effective_date\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MinePlanUpload\\:\\:\\$expiry_date\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MinePlanUpload\\:\\:\\$file_path\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MinePlanUpload\\:\\:\\$file_size\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MinePlanUpload\\:\\:\\$file_type\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MinePlanUpload\\:\\:\\$id\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MinePlanUpload\\:\\:\\$metadata\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MinePlanUpload\\:\\:\\$status\\.$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeByType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeByType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MinePlanUpload\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MinePlanUpload.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Notification uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -3361,53 +2981,13 @@ parameters:
 			path: app/Services/FileUploadService.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$from_tank_id\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$fuelTank\\.$#"
 			count: 2
 			path: app/Services/FuelManagementService.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$fuel_tank_id\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$machine\\.$#"
 			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$machine_id\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$quantity_liters\\.$#"
-			count: 7
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$team_id\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$to_tank_id\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$total_cost\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$transaction_type\\.$#"
-			count: 2
 			path: app/Services/FuelManagementService.php
 
 		-
@@ -4564,16 +4144,6 @@ parameters:
 			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function min expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$fault_code_count\\.$#"
-			count: 1
-			path: app/Services/MaintenanceHealthService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$overall_health_score\\.$#"
-			count: 1
-			path: app/Services/MaintenanceHealthService.php
 
 		-
 			message: "#^Method App\\\\Services\\\\MaintenanceHealthService\\:\\:completeMaintenanceRecord\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"

@@ -6,7 +6,28 @@ use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * FuelConsumptionMetric Model
+ *
+ * @property int $id
+ * @property int $team_id
+ * @property int $machine_id
+ * @property Carbon $date
+ * @property float $fuel_consumed_liters
+ * @property float|null $distance_traveled_km
+ * @property float|null $operating_hours
+ * @property float|null $fuel_efficiency_lph
+ * @property float|null $fuel_efficiency_lpkm
+ * @property float|null $idle_time_hours
+ * @property float|null $idle_fuel_consumed
+ * @property float|null $average_load_percentage
+ * @property string|null $shift
+ * @property array<string, mixed>|null $metadata
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class FuelConsumptionMetric extends Model
 {
     use HasFactory, HasTeamFilters;
@@ -48,13 +69,13 @@ class FuelConsumptionMetric extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);

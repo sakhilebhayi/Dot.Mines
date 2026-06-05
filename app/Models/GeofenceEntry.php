@@ -29,6 +29,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read float $latitude
+ * @property-read float $longitude
+ * @property-read Carbon|null $exited_at
+ * @property-read Machine $machine
+ * @property-read Geofence $geofence
  */
 class GeofenceEntry extends Model
 {

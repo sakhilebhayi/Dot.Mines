@@ -3,49 +3,43 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * FuelTransaction Model
+ *
+ * @property int $id
+ * @property int $team_id
+ * @property int|null $monthly_allocation_id
+ * @property int|null $fuel_tank_id
+ * @property int|null $machine_id
+ * @property int|null $user_id
+ * @property string $transaction_type
+ * @property float $quantity_liters
+ * @property float $unit_price
+ * @property float $total_cost
+ * @property string|null $fuel_type
+ * @property Carbon $transaction_date
+ * @property float|null $odometer_reading
+ * @property float|null $machine_hours
+ * @property string|null $supplier
+ * @property string|null $invoice_number
+ * @property string|null $receipt_file_path
+ * @property int|null $from_tank_id
+ * @property int|null $to_tank_id
+ * @property string|null $notes
+ * @property float|null $cost_per_liter
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class FuelTransaction extends Model
 {
     use HasFactory, HasTeamFilters;
 
-    /**
-     * FuelTransaction Model
-     *
-     * @property int $id
-     * @property int $team_id
-     * @property int|null $monthly_allocation_id
-     * @property int|null $fuel_tank_id
-     * @property int|null $machine_id
-     * @property int|null $user_id
-     * @property string $transaction_type
-     * @property string|float $quantity_liters
-     * @property string|float $unit_price
-     * @property string|float $total_cost
-     * @property string|null $fuel_type
-     * @property \Carbon\Carbon $transaction_date
-     * @property string|float|null $odometer_reading
-     * @property string|float|null $machine_hours
-     * @property string|null $supplier
-     * @property string|null $invoice_number
-     * @property string|null $receipt_file_path
-     * @property int|null $from_tank_id
-     * @property int|null $to_tank_id
-     * @property string|null $notes
-     * @property float|null $cost_per_liter
-     * @property \Carbon\Carbon $created_at
-     * @property \Carbon\Carbon $updated_at
-     *
-     * @method static \Illuminate\Database\Eloquent\Builder|FuelTransaction where(string $column, mixed $operator = null, mixed $value = null)
-     * @method static \Illuminate\Database\Eloquent\Builder|FuelTransaction whereIn(string $column, array $values)
-     * @method static \Illuminate\Database\Eloquent\Builder|FuelTransaction orderBy(string $column, string $direction = 'asc')
-     * @method static FuelTransaction|null find(mixed $id, array $columns = ['*'])
-     * @method static FuelTransaction findOrFail(mixed $id, array $columns = ['*'])
-     * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
-     */
     protected $fillable = [
         'team_id',
         'monthly_allocation_id',
@@ -85,37 +79,37 @@ class FuelTransaction extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FuelTank, $this> */
+    /** @return BelongsTo<FuelTank, $this> */
     public function fuelTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FuelTank, $this> */
+    /** @return BelongsTo<FuelTank, $this> */
     public function fromTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class, 'from_tank_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FuelTank, $this> */
+    /** @return BelongsTo<FuelTank, $this> */
     public function toTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class, 'to_tank_id');

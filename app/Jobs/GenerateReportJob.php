@@ -2,25 +2,23 @@
 
 namespace App\Jobs;
 
+use App\Models\AuditLog;
+use App\Models\FuelTransaction;
 use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\MaintenanceRecord;
-use App\Models\MaintenanceSchedule;
-use App\Models\FuelTransaction;
-use App\Models\FuelConsumptionMetric;
 use App\Models\ProductionRecord;
 use App\Models\Report;
-use App\Models\AuditLog;
 use App\Services\AuditService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 use Shuchkin\SimpleXLSXGen;
 
 class GenerateReportJob implements ShouldQueue
@@ -51,18 +49,18 @@ class GenerateReportJob implements ShouldQueue
             }
 
             $format = $this->report->format ?? 'csv';
-            $type   = $this->report->type;
+            $type = $this->report->type;
 
             $data = $this->queryData($type, $this->report->filters ?? []);
 
             $filePath = match ($format) {
-                'pdf'  => $this->generatePdf($data, $type),
+                'pdf' => $this->generatePdf($data, $type),
                 'xlsx' => $this->generateXlsx($data, $type),
                 default => $this->generateCsv($data, $type, 'csv'),
             };
 
-            $fullPath  = Storage::disk($this->reportDisk())->path($filePath);
-            $fileSize  = file_exists($fullPath) ? filesize($fullPath) : 0;
+            $fullPath = Storage::disk($this->reportDisk())->path($filePath);
+            $fileSize = file_exists($fullPath) ? (int) filesize($fullPath) : 0;
 
             $this->report->markCompleted($filePath, $fileSize);
 
@@ -71,14 +69,14 @@ class GenerateReportJob implements ShouldQueue
                 "Report generated: {$this->report->title}",
                 $this->report,
                 ['report_id' => $this->report->id, 'type' => $type, 'format' => $format],
-                $this->report->generated_by,
+                (int) $this->report->generated_by,
                 $this->report->team_id
             );
         } catch (\Throwable $e) {
             Log::error('GenerateReportJob failed', [
                 'report_id' => $this->report->id,
-                'error'     => $e->getMessage(),
-                'trace'     => $e->getTraceAsString(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $this->report->markFailed($e->getMessage());
@@ -100,37 +98,38 @@ class GenerateReportJob implements ShouldQueue
     // Data query
     // -----------------------------------------------------------------------
 
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return array<mixed>
+     */
     private function queryData(string $type, array $filters): array
     {
-        $teamId     = $this->report->team_id;
-        $startDate  = isset($filters['start_date']) ? Carbon::parse($filters['start_date']) : null;
-        $endDate    = isset($filters['end_date'])   ? Carbon::parse($filters['end_date'])   : null;
-        $machineIds = !empty($filters['machine_ids']) ? (array) $filters['machine_ids'] : null;
+        $teamId = $this->report->team_id;
+        $startDate = isset($filters['start_date']) ? Carbon::parse($filters['start_date']) : null;
+        $endDate = isset($filters['end_date']) ? Carbon::parse($filters['end_date']) : null;
+        $machineIds = ! empty($filters['machine_ids']) ? (array) $filters['machine_ids'] : null;
 
         return match ($type) {
-            'production', 'load_cycle'
-                => $this->queryProduction($teamId, $startDate, $endDate, $machineIds),
+            'production', 'load_cycle' => $this->queryProduction($teamId, $startDate, $endDate, $machineIds),
 
-            'fleet_utilization', 'truck_sensors'
-                => $this->queryFleetUtilization($teamId, $startDate, $endDate, $machineIds),
+            'fleet_utilization', 'truck_sensors' => $this->queryFleetUtilization($teamId, $startDate, $endDate, $machineIds),
 
-            'tire_condition'
-                => $this->queryTireCondition($teamId, $startDate, $endDate, $machineIds),
+            'tire_condition' => $this->queryTireCondition($teamId, $startDate, $endDate, $machineIds),
 
-            'maintenance_schedule', 'maintenance', 'engine_parts'
-                => $this->queryMaintenance($teamId, $startDate, $endDate, $machineIds, $type),
+            'maintenance_schedule', 'maintenance', 'engine_parts' => $this->queryMaintenance($teamId, $startDate, $endDate, $machineIds, $type),
 
-            'fuel_consumption', 'fuel'
-                => $this->queryFuelConsumption($teamId, $startDate, $endDate, $machineIds),
+            'fuel_consumption', 'fuel' => $this->queryFuelConsumption($teamId, $startDate, $endDate, $machineIds),
 
-            'downtime_analysis'
-                => $this->queryDowntime($teamId, $startDate, $endDate, $machineIds),
+            'downtime_analysis' => $this->queryDowntime($teamId, $startDate, $endDate, $machineIds),
 
-            default /* material_tracking, custom */
-                => $this->queryProduction($teamId, $startDate, $endDate, $machineIds),
+            default /* material_tracking, custom */ => $this->queryProduction($teamId, $startDate, $endDate, $machineIds),
         };
     }
 
+    /**
+     * @param  array<int>|null  $machineIds
+     * @return array<mixed>
+     */
     private function queryProduction(
         int $teamId,
         ?Carbon $start,
@@ -167,7 +166,7 @@ class GenerateReportJob implements ShouldQueue
             $r->quantity_produced,
             $r->target_quantity,
             $r->system_quantity,
-            $r->system_variance_percentage !== null ? round($r->system_variance_percentage, 2) . '%' : '',
+            $r->system_variance_percentage !== null ? round($r->system_variance_percentage, 2).'%' : '',
             $r->status,
             $r->notes,
         ])->toArray();
@@ -175,6 +174,10 @@ class GenerateReportJob implements ShouldQueue
         return compact('headers', 'rows');
     }
 
+    /**
+     * @param  array<int>|null  $machineIds
+     * @return array<mixed>
+     */
     private function queryFleetUtilization(
         int $teamId,
         ?Carbon $start,
@@ -226,6 +229,10 @@ class GenerateReportJob implements ShouldQueue
         return compact('headers', 'rows');
     }
 
+    /**
+     * @param  array<int>|null  $machineIds
+     * @return array<mixed>
+     */
     private function queryTireCondition(
         int $teamId,
         ?Carbon $start,
@@ -266,6 +273,10 @@ class GenerateReportJob implements ShouldQueue
         return compact('headers', 'rows');
     }
 
+    /**
+     * @param  array<int>|null  $machineIds
+     * @return array<mixed>
+     */
     private function queryMaintenance(
         int $teamId,
         ?Carbon $start,
@@ -279,8 +290,8 @@ class GenerateReportJob implements ShouldQueue
         if ($type === 'engine_parts') {
             $query->where(function ($q) {
                 $q->where('maintenance_type', 'like', '%engine%')
-                  ->orWhere('title', 'like', '%engine%')
-                  ->orWhere('description', 'like', '%engine%');
+                    ->orWhere('title', 'like', '%engine%')
+                    ->orWhere('description', 'like', '%engine%');
             });
         }
 
@@ -321,6 +332,10 @@ class GenerateReportJob implements ShouldQueue
         return compact('headers', 'rows');
     }
 
+    /**
+     * @param  array<int>|null  $machineIds
+     * @return array<mixed>
+     */
     private function queryFuelConsumption(
         int $teamId,
         ?Carbon $start,
@@ -367,6 +382,10 @@ class GenerateReportJob implements ShouldQueue
         return compact('headers', 'rows');
     }
 
+    /**
+     * @param  array<int>|null  $machineIds
+     * @return array<mixed>
+     */
     private function queryDowntime(
         int $teamId,
         ?Carbon $start,
@@ -376,8 +395,8 @@ class GenerateReportJob implements ShouldQueue
         $query = MaintenanceRecord::where('team_id', $teamId)
             ->where(function ($q) {
                 $q->where('maintenance_type', 'breakdown')
-                  ->orWhere('maintenance_type', 'corrective')
-                  ->orWhere('machine_operational', false);
+                    ->orWhere('maintenance_type', 'corrective')
+                    ->orWhere('machine_operational', false);
             })
             ->with('machine:id,name,registration_number');
 
@@ -427,6 +446,9 @@ class GenerateReportJob implements ShouldQueue
     // File generation
     // -----------------------------------------------------------------------
 
+    /**
+     * @param  array<mixed>  $data
+     */
     private function generateCsv(array $data, string $type, string $extension = 'csv'): string
     {
         $dir = "reports/{$this->report->team_id}";
@@ -446,7 +468,7 @@ class GenerateReportJob implements ShouldQueue
 
         // Title row
         fputcsv($handle, ["Report: {$this->report->title}"]);
-        fputcsv($handle, ["Generated: " . now()->toDateTimeString()]);
+        fputcsv($handle, ['Generated: '.now()->toDateTimeString()]);
         fputcsv($handle, ["Type: {$type}"]);
         fputcsv($handle, []);
 
@@ -465,6 +487,9 @@ class GenerateReportJob implements ShouldQueue
         return $filename;
     }
 
+    /**
+     * @param  array<mixed>  $data
+     */
     private function generatePdf(array $data, string $type): string
     {
         $dir = "reports/{$this->report->team_id}";
@@ -478,8 +503,8 @@ class GenerateReportJob implements ShouldQueue
             ->setPaper('a4', 'landscape')
             ->setOptions([
                 'isHtml5ParserEnabled' => true,
-                'isRemoteEnabled'      => false,
-                'defaultFont'          => 'sans-serif',
+                'isRemoteEnabled' => false,
+                'defaultFont' => 'sans-serif',
             ]);
 
         Storage::disk($this->reportDisk())->put($filename, $pdf->output());
@@ -487,6 +512,9 @@ class GenerateReportJob implements ShouldQueue
         return $filename;
     }
 
+    /**
+     * @param  array<mixed>  $data
+     */
     private function generateXlsx(array $data, string $type): string
     {
         $dir = "reports/{$this->report->team_id}";
@@ -503,11 +531,15 @@ class GenerateReportJob implements ShouldQueue
         return $filename;
     }
 
+    /**
+     * @param  array<mixed>  $data
+     * @return array<mixed>
+     */
     private function xlsxRows(array $data, string $type): array
     {
         $rows = [
             ["Report: {$this->report->title}"],
-            ['Generated: ' . now()->toDateTimeString()],
+            ['Generated: '.now()->toDateTimeString()],
             ["Type: {$type}"],
             [],
             $data['headers'],
@@ -528,22 +560,25 @@ class GenerateReportJob implements ShouldQueue
         return (string) config('reports.disk', 'local');
     }
 
+    /**
+     * @param  array<mixed>  $data
+     */
     private function buildReportHtml(array $data, string $type): string
     {
-        $title   = e($this->report->title);
+        $title = e($this->report->title);
         $genDate = now()->toDateTimeString();
-        $count   = count($data['rows']);
+        $count = count($data['rows']);
 
         $thCells = implode('', array_map(
-            fn ($h) => '<th>' . e((string) $h) . '</th>',
+            fn ($h) => '<th>'.e((string) $h).'</th>',
             $data['headers']
         ));
 
         $bodyRows = '';
         foreach ($data['rows'] as $i => $row) {
-            $bg      = ($i % 2 === 0) ? '#ffffff' : '#f1f5f9';
+            $bg = ($i % 2 === 0) ? '#ffffff' : '#f1f5f9';
             $tdCells = implode('', array_map(
-                fn ($v) => '<td>' . e((string) ($v ?? '')) . '</td>',
+                fn ($v) => '<td>'.e((string) ($v ?? '')).'</td>',
                 $row
             ));
             $bodyRows .= "<tr style=\"background:{$bg}\">{$tdCells}</tr>";
