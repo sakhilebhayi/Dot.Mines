@@ -48,7 +48,7 @@ class FleetOptimizerAgent
     /**
      * @return array<mixed>
      */
-    protected function analyzeUtilization($machines): array
+    protected function analyzeUtilization(mixed $machines): array
     {
         $recommendations = [];
         $insights = [];
@@ -124,7 +124,7 @@ class FleetOptimizerAgent
     /**
      * @return array<mixed>
      */
-    protected function analyzeIdleMachines($machines): array
+    protected function analyzeIdleMachines(mixed $machines): array
     {
         $recommendations = [];
 

@@ -216,8 +216,8 @@ class FuelTransactionController extends Controller
 
         if ($request->has('start_date') && $request->has('end_date')) {
             $query->whereBetween('transaction_date', [
-                $request->start_date,
-                $request->end_date,
+                $request->input('start_date'),
+                $request->input('end_date'),
             ]);
         }
 

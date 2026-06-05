@@ -26,11 +26,6 @@ parameters:
 			path: app/Actions/Jetstream/InviteTeamMember.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Route\\:\\:\\$waypoints\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
 			message: "#^Binary operation \"\\*\" between int\\|string and \\(float\\|int\\) results in an error\\.$#"
 			count: 1
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
@@ -86,31 +81,6 @@ parameters:
 			path: app/Contracts/ManufacturerServiceInterface.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Alert\\:\\:\\$message\\.$#"
-			count: 1
-			path: app/Events/AlertTriggered.php
-
-		-
-			message: "#^Method App\\\\Events\\\\ComplianceViolationDetected\\:\\:__construct\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Events/ComplianceViolationDetected.php
-
-		-
-			message: "#^Method App\\\\Events\\\\ComplianceViolationDetected\\:\\:__construct\\(\\) has parameter \\$violation with no type specified\\.$#"
-			count: 1
-			path: app/Events/ComplianceViolationDetected.php
-
-		-
-			message: "#^Property App\\\\Events\\\\ComplianceViolationDetected\\:\\:\\$teamId has no type specified\\.$#"
-			count: 1
-			path: app/Events/ComplianceViolationDetected.php
-
-		-
-			message: "#^Property App\\\\Events\\\\ComplianceViolationDetected\\:\\:\\$violation has no type specified\\.$#"
-			count: 1
-			path: app/Events/ComplianceViolationDetected.php
-
-		-
 			message: "#^Method App\\\\Events\\\\MachineLocationUpdated\\:\\:__construct\\(\\) has parameter \\$location with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Events/MachineLocationUpdated.php
@@ -121,22 +91,12 @@ parameters:
 			path: app/Events/MachineLocationUpdated.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Machine\\:\\:\\$last_seen_at\\.$#"
-			count: 1
-			path: app/Events/MachineOffline.php
-
-		-
 			message: "#^Method App\\\\Events\\\\MachineOffline\\:\\:__construct\\(\\) has parameter \\$lastLocation with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Events/MachineOffline.php
 
 		-
 			message: "#^Method App\\\\Events\\\\SensorReadingRecorded\\:\\:__construct\\(\\) has parameter \\$reading with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Events/SensorReadingRecorded.php
-
-		-
-			message: "#^Method App\\\\Events\\\\SensorReadingRecorded\\:\\:__construct\\(\\) has parameter \\$teamId with no type specified\\.$#"
 			count: 1
 			path: app/Events/SensorReadingRecorded.php
 
@@ -166,21 +126,6 @@ parameters:
 			path: app/Http/Controllers/Api/AlertController.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\MineArea\\:\\:\\$team\\.$#"
-			count: 2
-			path: app/Http/Controllers/Api/ComplianceReportController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$end_date\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$start_date\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/FuelTransactionController.php
-
-		-
 			message: "#^Cannot call method store\\(\\) on array\\<Illuminate\\\\Http\\\\UploadedFile\\>\\|Illuminate\\\\Http\\\\UploadedFile\\|null\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/FuelTransactionController.php
@@ -204,21 +149,6 @@ parameters:
 			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$credentials\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$name\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/IntegrationController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$provider\\.$#"
-			count: 3
-			path: app/Http/Controllers/Api/IntegrationController.php
 
 		-
 			message: "#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<App\\\\Models\\\\MachineHealthStatus\\>\\:\\:critical\\(\\)\\.$#"
@@ -259,16 +189,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$name of static method Illuminate\\\\Support\\\\Facades\\\\Storage\\:\\:disk\\(\\) expects string\\|UnitEnum\\|null, array\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Http/Controllers/MinePlanDownloadController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$currentTeam\\.$#"
-			count: 1
-			path: app/Http/Controllers/ReportController.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$current_team_id\\.$#"
-			count: 1
-			path: app/Http/Controllers/ReportDownloadController.php
 
 		-
 			message: "#^Parameter \\#2 \\$user_string of function hash_equals expects string, array\\|string\\|null given\\.$#"
@@ -341,29 +261,9 @@ parameters:
 			path: app/Jobs/MachineStatusMonitoringJob.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Route\\:\\:\\$machine\\.$#"
-			count: 1
-			path: app/Jobs/RouteSpeedMonitoringJob.php
-
-		-
-			message: "#^Method App\\\\Jobs\\\\RouteSpeedMonitoringJob\\:\\:createSpeedViolationAlert\\(\\) has parameter \\$metric with no type specified\\.$#"
-			count: 1
-			path: app/Jobs/RouteSpeedMonitoringJob.php
-
-		-
 			message: "#^Method App\\\\Jobs\\\\SendFeedNotificationJob\\:\\:__construct\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Jobs/SendFeedNotificationJob.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Machine\\:\\:\\$external_id\\.$#"
-			count: 1
-			path: app/Jobs/SyncMachineMetricsJob.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Machine\\:\\:\\$team\\.$#"
-			count: 1
-			path: app/Jobs/SyncMachineMetricsJob.php
 
 		-
 			message: "#^Call to an undefined method Illuminate\\\\Foundation\\\\Application\\:\\:hasInstance\\(\\)\\.$#"
@@ -371,19 +271,9 @@ parameters:
 			path: app/Jobs/SyncMachineMetricsJob.php
 
 		-
-			message: "#^Method App\\\\Jobs\\\\SyncMachineMetricsJob\\:\\:getServiceForIntegration\\(\\) has parameter \\$integration with no type specified\\.$#"
-			count: 1
-			path: app/Jobs/SyncMachineMetricsJob.php
-
-		-
 			message: "#^Property Illuminate\\\\Queue\\\\Events\\\\JobFailed\\:\\:\\$connectionName \\(string\\) on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: app/Listeners/NotifyOnJobFailed.php
-
-		-
-			message: "#^Method App\\\\Listeners\\\\SendFeedPostNotification\\:\\:resolveRecipients\\(\\) has parameter \\$post with no type specified\\.$#"
-			count: 1
-			path: app/Listeners/SendFeedPostNotification.php
 
 		-
 			message: "#^Property App\\\\Livewire\\\\AINotifications\\:\\:\\$notifications with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
@@ -414,21 +304,6 @@ parameters:
 			message: "#^Access to an undefined property App\\\\Livewire\\\\BillingPortal\\:\\:\\$userSelectedYearlyTotal\\.$#"
 			count: 1
 			path: app/Livewire/BillingPortal.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\BillingPortal\\:\\:downloadInvoice\\(\\) has parameter \\$invoiceId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/BillingPortal.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\BillingPortal\\:\\:selectPlan\\(\\) has parameter \\$planId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/BillingPortal.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Documentation\\:\\:setSection\\(\\) has parameter \\$section with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Documentation.php
 
 		-
 			message: "#^Cannot unset offset int on array\\<string, mixed\\>\\.$#"
@@ -531,16 +406,6 @@ parameters:
 			path: app/Livewire/FleetMovementReplay.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$current_team_id\\.$#"
-			count: 5
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$id\\.$#"
-			count: 2
-			path: app/Livewire/FuelManagement.php
-
-		-
 			message: "#^If condition is always true\\.$#"
 			count: 1
 			path: app/Livewire/FuelManagement.php
@@ -566,29 +431,9 @@ parameters:
 			path: app/Livewire/GeofenceManager.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:deleteIntegration\\(\\) has parameter \\$integrationId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:syncMachines\\(\\) has parameter \\$integrationId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:testConnection\\(\\) has parameter \\$integrationId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\IntegrationManager\\:\\:\\$listeners has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\LiveMap\\:\\:updatedSelectedMineAreaId\\(\\) has parameter \\$value with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/LiveMap.php
 
 		-
 			message: "#^Unable to resolve the template type TKey in call to function collect$#"
@@ -631,11 +476,6 @@ parameters:
 			path: app/Livewire/Navbar.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:toggleMachine\\(\\) has parameter \\$machineId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\ReportGenerator\\:\\:\\$messages has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/ReportGenerator.php
@@ -659,26 +499,6 @@ parameters:
 			message: "#^Property App\\\\Livewire\\\\ReportGenerator\\:\\:\\$selectedMachines \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/ReportGenerator.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:confirmDelete\\(\\) has parameter \\$reportId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:deleteReport\\(\\) has parameter \\$reportId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:downloadReport\\(\\) has parameter \\$reportId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:setSortBy\\(\\) has parameter \\$column with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
 
 		-
 			message: "#^Property App\\\\Livewire\\\\Reports\\:\\:\\$machinesList with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
@@ -714,21 +534,6 @@ parameters:
 			message: "#^Property App\\\\Livewire\\\\RoutePlanning\\:\\:\\$rules has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:removeUser\\(\\) has parameter \\$userId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:updateUserRole\\(\\) has parameter \\$newRole with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:updateUserRole\\(\\) has parameter \\$userId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
 
 		-
 			message: "#^Property App\\\\Livewire\\\\Settings\\:\\:\\$rules has no type specified\\.$#"
@@ -936,11 +741,6 @@ parameters:
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelBudget\\:\\:\\$budget_utilization\\.$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
 			message: "#^Class App\\\\Models\\\\FuelBudget uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/FuelBudget.php
@@ -1129,11 +929,6 @@ parameters:
 			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HaulDispatch.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\HealthMetric\\:\\:\\$deviation\\.$#"
-			count: 1
-			path: app/Models/HealthMetric.php
 
 		-
 			message: "#^Class App\\\\Models\\\\HealthMetric uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -1401,11 +1196,6 @@ parameters:
 			path: app/Models/ProductionTarget.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Report\\:\\:\\$team\\.$#"
-			count: 1
-			path: app/Models/Report.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Role uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/Role.php
@@ -1541,26 +1331,6 @@ parameters:
 			path: app/Models/Waypoint.php
 
 		-
-			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$email\\.$#"
-			count: 1
-			path: app/Providers/AppServiceProvider.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$id\\.$#"
-			count: 1
-			path: app/Providers/AppServiceProvider.php
-
-		-
-			message: "#^Access to an undefined property Illuminate\\\\Http\\\\Request\\:\\:\\$email\\.$#"
-			count: 1
-			path: app/Providers/AppServiceProvider.php
-
-		-
-			message: "#^Parameter \\#1 \\$user of class App\\\\Mail\\\\WelcomeMail constructor expects App\\\\Models\\\\User, Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable given\\.$#"
-			count: 1
-			path: app/Providers/AppServiceProvider.php
-
-		-
 			message: "#^Method App\\\\Services\\\\AI\\\\AIOptimizationService\\:\\:getRecommendationsForCategory\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
 			count: 1
 			path: app/Services/AI/AIOptimizationService.php
@@ -1586,21 +1356,6 @@ parameters:
 			path: app/Services/AI/AIOptimizationService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\AI\\\\FleetOptimizerAgent\\:\\:analyzeIdleMachines\\(\\) has parameter \\$machines with no type specified\\.$#"
-			count: 1
-			path: app/Services/AI/FleetOptimizerAgent.php
-
-		-
-			message: "#^Method App\\\\Services\\\\AI\\\\FleetOptimizerAgent\\:\\:analyzeUtilization\\(\\) has parameter \\$machines with no type specified\\.$#"
-			count: 1
-			path: app/Services/AI/FleetOptimizerAgent.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Machine\\:\\:\\$healthStatus\\.$#"
-			count: 2
-			path: app/Services/AI/MaintenancePredictorAgent.php
-
-		-
 			message: "#^Method App\\\\Services\\\\AuditService\\:\\:log\\(\\) has parameter \\$meta with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/AuditService.php
@@ -1612,11 +1367,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Services\\\\AuthorizationService\\:\\:getRolePermissions\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/AuthorizationService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\AuthorizationService\\:\\:getRoleWithPermissions\\(\\) has parameter \\$roleId with no type specified\\.$#"
 			count: 1
 			path: app/Services/AuthorizationService.php
 

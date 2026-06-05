@@ -47,7 +47,7 @@ class BillingPortal extends Component
     /** @var array<string, mixed> */
     public array $availablePlans = [];
 
-    public ?int $selectedPlanId = null;
+    public ?string $selectedPlanId = null;
 
     public string $selectedBillingCycle = 'monthly';
 
@@ -155,7 +155,7 @@ class BillingPortal extends Component
             ->toArray();
     }
 
-    public function selectPlan($planId): void
+    public function selectPlan(string $planId): void
     {
         $this->selectedPlanId = $planId;
         $this->showPlanSelector = false;
@@ -266,7 +266,7 @@ class BillingPortal extends Component
         $this->showPlanSelector = ! $this->showPlanSelector;
     }
 
-    public function downloadInvoice($invoiceId): mixed
+    public function downloadInvoice(string $invoiceId): mixed
     {
         $team = Auth::user()->currentTeam;
         $invoice = Invoice::where('team_id', $team->id)

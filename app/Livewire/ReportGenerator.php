@@ -253,7 +253,7 @@ class ReportGenerator extends Component
         $this->selectedGeofences = [];
     }
 
-    public function toggleMachine($machineId): void
+    public function toggleMachine(int $machineId): void
     {
         $machineId = (string) $machineId;
 

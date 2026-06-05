@@ -157,7 +157,7 @@ class IntegrationManager extends Component
         }
     }
 
-    public function testConnection($integrationId): void
+    public function testConnection(int $integrationId): void
     {
         if (! $this->team) {
             $this->testResult = [
@@ -202,7 +202,7 @@ class IntegrationManager extends Component
         }
     }
 
-    public function syncMachines($integrationId): void
+    public function syncMachines(int $integrationId): void
     {
         if (! $this->team) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'No team context available']);
@@ -235,7 +235,7 @@ class IntegrationManager extends Component
         }
     }
 
-    public function deleteIntegration($integrationId): void
+    public function deleteIntegration(int $integrationId): void
     {
         if (! $this->team) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'No team context available']);

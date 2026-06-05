@@ -37,6 +37,8 @@ use Illuminate\Support\Facades\Auth;
  * @property Carbon $updated_at
  * @property-read Machine|null $machine
  * @property-read MineArea|null $mineArea
+ * @property string|null $message
+ * @property-read Team|null $team
  */
 class Alert extends Model
 {

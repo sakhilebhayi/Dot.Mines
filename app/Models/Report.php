@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Mail;
  * @property Carbon|null $expires_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read Team|null $team
  */
 class Report extends Model
 {

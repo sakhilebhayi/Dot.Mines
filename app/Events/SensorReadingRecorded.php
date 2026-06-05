@@ -19,7 +19,7 @@ class SensorReadingRecorded implements ShouldBroadcast
 
     public $teamId;
 
-    public function __construct(IoTSensor $sensor, array $reading, $teamId)
+    public function __construct(IoTSensor $sensor, array $reading, int $teamId)
     {
         $this->sensor = $sensor;
         $this->reading = $reading;

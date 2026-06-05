@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MineArea;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ class ReportController extends Controller
 {
     public function view2(Request $request): View
     {
+        /** @var User|null $user */
         $user = Auth::user();
 
         // The route is inside the auth + ensure_team middleware group, so currentTeam

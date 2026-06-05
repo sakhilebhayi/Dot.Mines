@@ -172,7 +172,7 @@ class Reports extends Component
         // wire:poll keeps the generated reports table current while background jobs run.
     }
 
-    public function setSortBy($column): void
+    public function setSortBy(string $column): void
     {
         $allowed = ['title', 'created_at', 'type'];
         if (! in_array($column, $allowed, true)) {
@@ -186,14 +186,8 @@ class Reports extends Component
         }
     }
 
-    public function deleteReport($reportId): void
+    public function deleteReport(int $reportId): void
     {
-        if (! is_numeric($reportId)) {
-            $this->dispatch('notify', type: 'error', message: 'Invalid report ID');
-
-            return;
-        }
-
         $team = Auth::user()->currentTeam;
         $report = Report::where('team_id', $team->id)->find($reportId);
 
@@ -235,7 +229,7 @@ class Reports extends Component
         $this->deleteReportId = null;
     }
 
-    public function confirmDelete($reportId): void
+    public function confirmDelete(int $reportId): void
     {
         $this->deleteReportId = $reportId;
         $this->showDeleteConfirm = true;
@@ -247,14 +241,8 @@ class Reports extends Component
         $this->deleteReportId = null;
     }
 
-    public function downloadReport($reportId): mixed
+    public function downloadReport(int $reportId): mixed
     {
-        if (! is_numeric($reportId)) {
-            $this->dispatch('notify', type: 'error', message: 'Invalid report ID');
-
-            return null;
-        }
-
         $team = Auth::user()->currentTeam;
         $report = Report::where('team_id', $team->id)->find($reportId);
 

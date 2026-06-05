@@ -13,6 +13,7 @@ use App\Listeners\SendFeedPostNotification;
 use App\Mail\WelcomeMail;
 use App\Models\AuditLog;
 use App\Models\MaintenanceRecord;
+use App\Models\User;
 use App\Observers\MaintenanceRecordObserver;
 use App\Services\AuditService;
 use App\Services\RealtimeEventScheduler;
@@ -75,9 +76,13 @@ class AppServiceProvider extends ServiceProvider
         // Send welcome email when users register
         Event::listen(Registered::class, function (Registered $event) {
             try {
-                Mail::to($event->user->email)->queue(new WelcomeMail($event->user));
+                /** @var User $user */
+                $user = $event->user;
+                Mail::to($user->email)->queue(new WelcomeMail($user));
             } catch (\Exception $e) {
-                Log::error('Failed to queue welcome email', ['user_id' => $event->user->id, 'error' => $e->getMessage()]);
+                /** @var User $u */
+                $u = $event->user;
+                Log::error('Failed to queue welcome email', ['user_id' => $u->id, 'error' => $e->getMessage()]);
             }
         });
 
@@ -194,7 +199,7 @@ class AppServiceProvider extends ServiceProvider
         // Login rate limiting - 5 attempts per minute
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)
-                ->by($request->email.'|'.$request->ip())
+                ->by($request->input('email', '').'|'.$request->ip())
                 ->response(function () {
                     return response()->json([
                         'message' => 'Too many login attempts. Please try again later.',

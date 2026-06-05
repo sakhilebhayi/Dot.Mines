@@ -281,7 +281,7 @@ class MaintenancePredictorAgent
     {
         $factors = [];
 
-        if ($machine->healthStatus?->overall_health_score < 60) {
+        if ($machine->healthStatus !== null && $machine->healthStatus->overall_health_score < 60) {
             $factors[] = 'Low health score: '.$machine->healthStatus->overall_health_score;
         }
 

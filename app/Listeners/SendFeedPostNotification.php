@@ -52,7 +52,7 @@ class SendFeedPostNotification implements ShouldQueue
     /**
      * @return array<mixed>
      */
-    private function resolveRecipients($post, int $teamId): array
+    private function resolveRecipients(mixed $post, int $teamId): array
     {
         // All team users
         $allUserIds = User::whereHas('teams', fn ($q) => $q->where('teams.id', $teamId))

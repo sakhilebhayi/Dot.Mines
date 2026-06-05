@@ -8,6 +8,7 @@ use App\Models\FuelTank;
 use App\Models\FuelTransaction;
 use App\Models\Machine;
 use App\Models\MineArea;
+use App\Models\User;
 use App\Services\AI\FuelPredictorAgent;
 use App\Services\FuelManagementService;
 use App\Traits\BrowserEventBridge;
@@ -94,6 +95,7 @@ class FuelManagement extends Component
             'transactionTankId' => 'required|exists:fuel_tanks,id',
             'transactionQuantity' => 'required|numeric|min:1',
         ]);
+        /** @var User|null $user */
         $user = Auth::user();
         $teamId = $user?->current_team_id;
 
@@ -261,6 +263,7 @@ class FuelManagement extends Component
             'tankNotes' => 'nullable|string|max:1000',
         ]);
 
+        /** @var User|null $user */
         $user = Auth::user();
         if (! $user || ! $user->current_team_id) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User session invalid']);
@@ -314,6 +317,7 @@ class FuelManagement extends Component
             'refuelUnitPrice' => 'nullable|numeric|min:0',
         ]);
 
+        /** @var User|null $user */
         $user = Auth::user();
         $teamId = $user?->current_team_id;
 
@@ -406,6 +410,7 @@ class FuelManagement extends Component
      */
     public function deleteTank(int $tankId): void
     {
+        /** @var User|null $user */
         $user = Auth::user();
         $teamId = $user?->current_team_id;
 
@@ -443,6 +448,7 @@ class FuelManagement extends Component
             'allocationNotes' => 'nullable|string|max:1000',
         ]);
 
+        /** @var User|null $user */
         $user = Auth::user();
         if (! $user || ! $user->current_team_id) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User session invalid']);

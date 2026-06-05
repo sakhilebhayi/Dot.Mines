@@ -87,20 +87,20 @@ class IntegrationController extends Controller
 
         // Check if integration for this provider already exists
         if (Integration::where('team_id', Auth::user()->current_team_id)
-            ->where('provider', $request->provider)
+            ->where('provider', $request->input('provider'))
             ->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => "Integration for {$request->provider} already exists",
+                'message' => "Integration for {$request->input('provider')} already exists",
             ], Response::HTTP_CONFLICT);
         }
 
         try {
             $integration = Integration::create([
                 'team_id' => Auth::user()->current_team_id,
-                'provider' => $request->provider,
-                'name' => $request->name,
-                'credentials' => $request->credentials,
+                'provider' => $request->input('provider'),
+                'name' => $request->input('name'),
+                'credentials' => $request->input('credentials'),
                 'status' => 'disconnected',
             ]);
 

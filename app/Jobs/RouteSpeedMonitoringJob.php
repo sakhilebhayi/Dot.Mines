@@ -15,6 +15,7 @@ class RouteSpeedMonitoringJob implements ShouldQueue
     use Queueable;
 
     public int $tries = 2;
+
     public int $timeout = 120;
 
     /**
@@ -43,13 +44,14 @@ class RouteSpeedMonitoringJob implements ShouldQueue
 
             if ($routes->isEmpty()) {
                 Log::debug('No active routes with speed limits found');
+
                 return;
             }
 
             $violationsDetected = 0;
 
             foreach ($routes as $route) {
-                if (!$route->machine) {
+                if (! $route->machine) {
                     continue;
                 }
 
@@ -167,7 +169,7 @@ class RouteSpeedMonitoringJob implements ShouldQueue
     /**
      * Create speed violation alert
      */
-    private function createSpeedViolationAlert(Route $route, $metric): void
+    private function createSpeedViolationAlert(Route $route, mixed $metric): void
     {
         // Check if there's already a recent active alert for this violation
         $existingAlert = Alert::where('machine_id', $route->machine_id)
@@ -189,7 +191,7 @@ class RouteSpeedMonitoringJob implements ShouldQueue
             'title' => 'Speed Limit Exceeded',
             'description' => sprintf(
                 'Machine %s exceeded the speed limit of %d km/h on route "%s". Current speed: %d km/h.',
-                $route->machine->name,
+                $route->machine?->name ?? 'Unknown',
                 $route->speed_limit,
                 $route->name,
                 (int) $metric->speed

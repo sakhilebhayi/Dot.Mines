@@ -82,7 +82,7 @@ class AuthorizationService
     /**
      * Get role with permissions
      */
-    public static function getRoleWithPermissions($roleId): mixed
+    public static function getRoleWithPermissions(int $roleId): mixed
     {
         return Role::with('permissions')->findOrFail($roleId);
     }

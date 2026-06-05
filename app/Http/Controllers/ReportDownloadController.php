@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\User;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +19,7 @@ class ReportDownloadController
             abort(403);
         }
 
+        /** @var User|null $user */
         $user = Auth::user();
         if (! $user || $user->current_team_id !== $report->team_id) {
             abort(403);
@@ -31,7 +34,7 @@ class ReportDownloadController
             abort(404);
         }
 
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk(config('reports.disk', 'local'));
 
         if (! $disk->exists($report->file_path)) {

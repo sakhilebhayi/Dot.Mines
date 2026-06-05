@@ -212,7 +212,7 @@ class Settings extends Component
         }
     }
 
-    public function removeUser($userId): void
+    public function removeUser(int $userId): void
     {
         try {
             $team = Auth::user()->currentTeam;
@@ -233,7 +233,7 @@ class Settings extends Component
         }
     }
 
-    public function updateUserRole($userId, $newRole): void
+    public function updateUserRole(int $userId, string $newRole): void
     {
         try {
             $team = Auth::user()->currentTeam;

@@ -28,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read float|null $deviation
+ * @property-read float|null $deviation_percentage
  */
 class HealthMetric extends Model
 {
@@ -150,7 +152,7 @@ class HealthMetric extends Model
             return 0;
         }
 
-        $deviation = abs($this->deviation);
+        $deviation = abs($this->deviation ?? 0.0);
 
         return ($deviation / $normalRange) * 100;
     }

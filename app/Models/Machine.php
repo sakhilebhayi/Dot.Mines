@@ -46,6 +46,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property float|null $odometer
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property string|null $external_id
+ * @property Carbon|null $last_seen_at
+ * @property-read Team|null $team
+ * @property-read MachineHealthStatus|null $healthStatus
  */
 class Machine extends Model
 {

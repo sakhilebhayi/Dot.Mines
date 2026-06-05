@@ -9,7 +9,7 @@ class Documentation extends Component
 {
     public string $activeSection = 'getting-started';
 
-    public function setSection($section): void
+    public function setSection(string $section): void
     {
         $this->activeSection = $section;
     }

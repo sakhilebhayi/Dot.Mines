@@ -193,7 +193,7 @@ class ComplianceReportController extends Controller
                 $data['active_machines'] = $mineArea->machines()
                     ->where('status', 'online')
                     ->count();
-                $data['alerts'] = $mineArea->team->alerts()->count();
+                $data['alerts'] = $mineArea->team?->alerts()->count() ?? 0;
                 break;
 
             case 'production':
@@ -225,7 +225,7 @@ class ComplianceReportController extends Controller
         $score = 100;
 
         // Deduct for issues
-        if ($mineArea->team->alerts()->count() > 5) {
+        if (($mineArea->team?->alerts()->count() ?? 0) > 5) {
             $score -= 10;
         }
 

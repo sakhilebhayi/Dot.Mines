@@ -341,7 +341,7 @@ class LiveMap extends Component
             ->toArray();
     }
 
-    public function updatedSelectedMineAreaId($value): void
+    public function updatedSelectedMineAreaId(mixed $value): void
     {
         // When user selects a mine area, push an update to the map with filtered machines
         $this->dispatch('map-updated', [

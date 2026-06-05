@@ -12,11 +12,11 @@ class ComplianceViolationDetected implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $violation;
+    public mixed $violation;
 
-    public $teamId;
+    public int $teamId;
 
-    public function __construct($violation, $teamId)
+    public function __construct(mixed $violation, int $teamId)
     {
         $this->violation = $violation;
         $this->teamId = $teamId;

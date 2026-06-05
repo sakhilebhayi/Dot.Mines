@@ -49,7 +49,7 @@ class SyncMachineMetricsJob implements ShouldQueue
             app()->instance('current_team_id', $this->machine->team_id);
 
             // Get the integration for this machine
-            $integration = $this->machine->team->integrations()
+            $integration = $this->machine->team?->integrations()
                 ->where('provider', $this->machine->manufacturer)
                 ->first();
 
@@ -93,7 +93,7 @@ class SyncMachineMetricsJob implements ShouldQueue
     /**
      * Get service instance for integration
      */
-    private function getServiceForIntegration($integration): mixed
+    private function getServiceForIntegration(mixed $integration): mixed
     {
         $credentials = json_decode($integration->credentials, true) ?? [];
 
