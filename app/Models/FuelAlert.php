@@ -98,6 +98,9 @@ class FuelAlert extends Model
 
     /**
      * Scope for active alerts
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -108,6 +111,9 @@ class FuelAlert extends Model
 
     /**
      * Scope for critical alerts
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCritical(Builder $query): Builder
     {
@@ -118,6 +124,9 @@ class FuelAlert extends Model
 
     /**
      * Scope for unacknowledged alerts
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeUnacknowledged(Builder $query): Builder
     {

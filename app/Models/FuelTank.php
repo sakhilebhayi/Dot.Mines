@@ -141,6 +141,9 @@ class FuelTank extends Model
 
     /**
      * Scope for active tanks
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -151,6 +154,9 @@ class FuelTank extends Model
 
     /**
      * Scope for low fuel tanks
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeLowFuel(Builder $query): Builder
     {
@@ -161,6 +167,9 @@ class FuelTank extends Model
 
     /**
      * Scope for critical fuel tanks
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCritical(Builder $query): Builder
     {

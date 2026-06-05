@@ -55,6 +55,8 @@ class Role extends Model
 
     /**
      * Get all permissions for this role
+     *
+     * @return BelongsToMany<Permission, $this>
      */
     public function permissions(): BelongsToMany
     {

@@ -135,6 +135,9 @@ class FuelTransaction extends Model
 
     /**
      * Scope for specific transaction type
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeOfType(Builder $query, string $type): Builder
     {
@@ -145,6 +148,9 @@ class FuelTransaction extends Model
 
     /**
      * Scope for date range
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeDateRange(Builder $query, string $startDate, string $endDate): Builder
     {
@@ -155,6 +161,9 @@ class FuelTransaction extends Model
 
     /**
      * Scope for specific fuel type
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeFuelType(Builder $query, string $type): Builder
     {

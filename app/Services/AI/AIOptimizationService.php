@@ -44,7 +44,9 @@ class AIOptimizationService
      */
     public function runComprehensiveAnalysis(Team $team, ?User $user = null): Collection
     {
+        /** @var Collection<int, mixed> $recommendations */
         $recommendations = collect();
+        /** @var Collection<int, mixed> $insights */
         $insights = collect();
 
         foreach ($this->agents as $type => $agent) {

@@ -114,6 +114,9 @@ class Payment extends Model
 
     /**
      * Scope query to successful payments
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeSucceeded(Builder $query): Builder
     {
@@ -122,6 +125,9 @@ class Payment extends Model
 
     /**
      * Scope query to failed payments
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeFailed(Builder $query): Builder
     {

@@ -165,6 +165,9 @@ class MineArea extends Model
 
     /**
      * Scope to filter by team
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeForTeam(Builder $query, int $teamId): Builder
     {
@@ -173,6 +176,9 @@ class MineArea extends Model
 
     /**
      * Scope to filter by status
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeByStatus(Builder $query, string $status): Builder
     {

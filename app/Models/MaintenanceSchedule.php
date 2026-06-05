@@ -131,6 +131,9 @@ class MaintenanceSchedule extends Model
 
     /**
      * Scope for due schedules
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeDue(Builder $query): Builder
     {
@@ -139,6 +142,9 @@ class MaintenanceSchedule extends Model
 
     /**
      * Scope for overdue schedules
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeOverdue(Builder $query): Builder
     {

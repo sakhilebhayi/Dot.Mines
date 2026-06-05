@@ -116,11 +116,19 @@ class AIAgent extends Model
         return $this->status === 'active';
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeByType(Builder $query, string $type): Builder
     {
         return $query->where('type', $type);

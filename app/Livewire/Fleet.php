@@ -485,6 +485,9 @@ class Fleet extends Component
     /**
      * @return array<mixed>
      */
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     private function calculateMachinePerformance(int $teamId): array
     {
         $machines = Machine::where('team_id', $teamId)->get()->keyBy('id');

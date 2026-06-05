@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,15 +30,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $comment_count
  * @property int $acknowledgement_count
  * @property bool $is_pinned
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property \Carbon\Carbon|null $deleted_at
- * @property-read \App\Models\User $author
- * @property-read \App\Models\MineArea|null $mineArea
- * @property-read \App\Models\Team $team
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FeedComment> $comments
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FeedAttachment> $attachments
- * @property-read \App\Models\FeedApproval|null $approval
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read User $author
+ * @property-read MineArea|null $mineArea
+ * @property-read Team $team
+ * @property-read Collection<int, FeedComment> $comments
+ * @property-read Collection<int, FeedAttachment> $attachments
+ * @property-read FeedApproval|null $approval
  */
 class FeedPost extends Model
 {
@@ -88,25 +90,25 @@ class FeedPost extends Model
 
     // ── Relationships ──────────────────────────────────────────────────────────
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class, 'mine_area_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FeedAcknowledgement, $this> */
+    /** @return HasMany<FeedAcknowledgement, $this> */
     public function acknowledgements(): HasMany
     {
         return $this->hasMany(FeedAcknowledgement::class, 'post_id');
@@ -129,19 +131,19 @@ class FeedPost extends Model
         return $this->hasMany(FeedComment::class, 'post_id')->whereNull('parent_comment_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FeedComment, $this> */
+    /** @return HasMany<FeedComment, $this> */
     public function allComments(): HasMany
     {
         return $this->hasMany(FeedComment::class, 'post_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FeedLike, $this> */
+    /** @return HasMany<FeedLike, $this> */
     public function likes(): HasMany
     {
         return $this->hasMany(FeedLike::class, 'post_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\FeedApproval, $this> */
+    /** @return HasOne<FeedApproval, $this> */
     public function approval(): HasOne
     {
         return $this->hasOne(FeedApproval::class, 'post_id');

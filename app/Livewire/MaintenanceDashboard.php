@@ -465,8 +465,12 @@ class MaintenanceDashboard extends Component
         // Get AI-powered maintenance predictions
         $aiAgent = new MaintenancePredictorAgent;
         $aiAnalysis = $aiAgent->analyze(auth()->user()->currentTeam);
-        $aiRecommendations = collect($aiAnalysis['recommendations'] ?? [])->take(5);
-        $aiInsights = collect($aiAnalysis['insights'] ?? [])->take(3);
+        /** @var array<int, mixed> $aiRecs */
+        $aiRecs = $aiAnalysis['recommendations'] ?? [];
+        $aiRecommendations = collect($aiRecs)->take(5);
+        /** @var array<int, mixed> $aiIns */
+        $aiIns = $aiAnalysis['insights'] ?? [];
+        $aiInsights = collect($aiIns)->take(3);
 
         return view('livewire.maintenance-dashboard', [
             'healthStatuses' => $healthStatuses,

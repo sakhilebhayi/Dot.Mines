@@ -135,6 +135,9 @@ class Invoice extends Model
 
     /**
      * Scope query to paid invoices
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopePaid(Builder $query): Builder
     {
@@ -143,6 +146,9 @@ class Invoice extends Model
 
     /**
      * Scope query to unpaid invoices
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeUnpaid(Builder $query): Builder
     {

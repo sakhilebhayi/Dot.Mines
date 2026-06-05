@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,11 +33,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription active()
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription onTrial()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> active()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> onTrial()
  */
 class Subscription extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory;
 
     protected $fillable = [
@@ -207,6 +209,9 @@ class Subscription extends Model
 
     /**
      * Scope query to active subscriptions
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -217,6 +222,9 @@ class Subscription extends Model
 
     /**
      * Scope query to trial subscriptions
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeOnTrial(Builder $query): Builder
     {

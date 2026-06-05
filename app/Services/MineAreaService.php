@@ -10,6 +10,8 @@ class MineAreaService
 {
     /**
      * Get all mine areas for a team
+     *
+     * @return LengthAwarePaginator<int, MineArea>
      */
     public function getAllForTeam(int $teamId, int $perPage = 15): LengthAwarePaginator
     {
@@ -20,6 +22,8 @@ class MineAreaService
 
     /**
      * Get active mine areas for a team
+     *
+     * @return Collection<int, MineArea>
      */
     public function getActiveForTeam(int $teamId): Collection
     {

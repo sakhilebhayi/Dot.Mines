@@ -193,6 +193,9 @@ class MaintenanceRecord extends Model
 
     /**
      * Scope for completed records
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCompleted(Builder $query): Builder
     {
@@ -201,6 +204,9 @@ class MaintenanceRecord extends Model
 
     /**
      * Scope for in progress
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeInProgress(Builder $query): Builder
     {

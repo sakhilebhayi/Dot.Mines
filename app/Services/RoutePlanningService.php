@@ -144,6 +144,7 @@ class RoutePlanningService
      */
     /**
      * @param  array<mixed>  $routeCoordinates
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Geofence>  $geofences
      * @return array<mixed>
      */
     protected function sampleRouteWaypoints(array $routeCoordinates, Collection $geofences): array
@@ -215,8 +216,8 @@ class RoutePlanningService
 
     /**
      * Generate waypoints avoiding restricted geofences
-     */
-    /**
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Geofence>  $geofences
      * @return array<mixed>
      */
     protected function generateWaypoints(
@@ -230,7 +231,7 @@ class RoutePlanningService
 
         // Get restricted geofences
         $restrictedGeofences = $geofences->filter(function ($geofence) {
-            return $geofence->geofence_type === 'restricted';
+            return $geofence->type === 'restricted';
         });
 
         // Simple implementation: check if direct path intersects with restricted zones

@@ -163,6 +163,9 @@ class Alert extends Model
 
     /**
      * Scope to active alerts
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -171,6 +174,9 @@ class Alert extends Model
 
     /**
      * Scope to critical alerts
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCritical(Builder $query): Builder
     {

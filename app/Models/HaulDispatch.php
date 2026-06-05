@@ -163,6 +163,9 @@ class HaulDispatch extends Model
 
     /**
      * Only dispatches that are currently active (not yet completed).
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -173,6 +176,9 @@ class HaulDispatch extends Model
 
     /**
      * Dispatches for a specific team.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeForTeam(Builder $query, int $teamId): Builder
     {

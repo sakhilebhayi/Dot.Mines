@@ -82,6 +82,9 @@ class HealthMetric extends Model
 
     /**
      * Scopes
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeAbnormal(Builder $query): Builder
     {

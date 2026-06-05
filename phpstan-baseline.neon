@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Unable to resolve the template type TValue in call to function tap$#"
-			count: 1
-			path: app/Actions/Fortify/CreateNewUser.php
-
-		-
 			message: "#^Instanceof between App\\\\Models\\\\User and Illuminate\\\\Contracts\\\\Auth\\\\MustVerifyEmail will always evaluate to true\\.$#"
 			count: 1
 			path: app/Actions/Fortify/UpdateUserProfileInformation.php
@@ -126,11 +121,6 @@ parameters:
 			path: app/Listeners/NotifyOnJobFailed.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\AINotifications\\:\\:\\$notifications with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Livewire/AINotifications.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:\\$overviewData\\.$#"
 			count: 1
 			path: app/Livewire/AIOptimizationDashboard.php
@@ -176,39 +166,14 @@ parameters:
 			path: app/Livewire/FuelManagement.php
 
 		-
-			message: "#^Unable to resolve the template type TKey in call to function collect$#"
-			count: 2
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Unable to resolve the template type TValue in call to function collect$#"
-			count: 2
-			path: app/Livewire/FuelManagement.php
-
-		-
 			message: "#^Undefined variable\\: \\$teamId$#"
 			count: 1
 			path: app/Livewire/FuelManagement.php
 
 		-
-			message: "#^Unable to resolve the template type TKey in call to function collect$#"
-			count: 2
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Unable to resolve the template type TValue in call to function collect$#"
-			count: 2
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$currentTeam\\.$#"
 			count: 1
 			path: app/Livewire/Navbar.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Reports\\:\\:\\$machinesList with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Livewire/Reports.php
 
 		-
 			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:hasRole\\(\\)\\.$#"
@@ -219,26 +184,6 @@ parameters:
 			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:hasRole\\(\\)\\.$#"
 			count: 1
 			path: app/Livewire/WhatsAppMigration.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeByType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
-
-		-
-			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeByType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/AIAgent.php
 
 		-
 			message: "#^Class App\\\\Models\\\\AIAnalysisSession uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -256,52 +201,12 @@ parameters:
 			path: app/Models/AiRecommendationAction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Alert\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
 			message: "#^Class App\\\\Models\\\\ComponentReplacement uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/ComponentReplacement.php
 
 		-
 			message: "#^Class App\\\\Models\\\\EngineHourSession uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/EngineHourSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeRunning\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/EngineHourSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeRunning\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/EngineHourSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeToday\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/EngineHourSession.php
-
-		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeToday\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/EngineHourSession.php
 
@@ -326,67 +231,7 @@ parameters:
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
 			message: "#^Class App\\\\Models\\\\FuelBudget uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeCurrent\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeCurrent\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeExceeded\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeExceeded\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelBudget.php
 
@@ -411,97 +256,7 @@ parameters:
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeCritical\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeCritical\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeFuelType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeFuelType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeOfType\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeOfType\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
 			message: "#^Class App\\\\Models\\\\HealthMetric uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/HealthMetric.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeAbnormal\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/HealthMetric.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HealthMetric\\:\\:scopeAbnormal\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HealthMetric.php
 
@@ -516,79 +271,9 @@ parameters:
 			path: app/Models/Invoice.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopePaid\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopePaid\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopeUnpaid\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Invoice\\:\\:scopeUnpaid\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: "#^Method App\\\\Models\\\\IoTSensor\\:\\:readings\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/IoTSensor.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:activeAlerts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
 			message: "#^Class App\\\\Models\\\\MaintenanceAlert uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/MaintenanceAlert.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeCompleted\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeCompleted\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeInProgress\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceRecord\\:\\:scopeInProgress\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceRecord.php
 
 		-
 			message: "#^Cannot call method addDays\\(\\) on Carbon\\\\Carbon\\|string\\|null\\.$#"
@@ -601,46 +286,6 @@ parameters:
 			path: app/Models/MaintenanceSchedule.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeDue\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeDue\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeOverdue\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeOverdue\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeByStatus\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
-			message: "#^Method App\\\\Models\\\\MineArea\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MineArea.php
-
-		-
 			message: "#^Class App\\\\Models\\\\OperatorFatigue uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/OperatorFatigue.php
@@ -651,59 +296,9 @@ parameters:
 			path: app/Models/Payment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeFailed\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeFailed\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeSucceeded\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Payment\\:\\:scopeSucceeded\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Payment.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Permission uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/Permission.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForDate\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionForecast\\:\\:scopeHighConfidence\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionForecast.php
 
 		-
 			message: "#^Binary operation \"\\-\" between float\\|string and float\\|non\\-falsy\\-string results in an error\\.$#"
@@ -711,42 +306,7 @@ parameters:
 			path: app/Models/ProductionRecord.php
 
 		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeByPeriod\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeByPeriod\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
-			message: "#^Method App\\\\Models\\\\ProductionTarget\\:\\:scopeForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/ProductionTarget.php
-
-		-
 			message: "#^Class App\\\\Models\\\\Role uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/Role.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Role\\:\\:permissions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#"
 			count: 1
 			path: app/Models/Role.php
 
@@ -761,64 +321,9 @@ parameters:
 			path: app/Models/Route.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Subscription uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Subscription\\:\\:active\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^PHPDoc tag @method for method App\\\\Models\\\\Subscription\\:\\:onTrial\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
 			message: "#^Class App\\\\Models\\\\SubscriptionPlan uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/SubscriptionPlan.php
-
-		-
-			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/SubscriptionPlan.php
-
-		-
-			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/SubscriptionPlan.php
-
-		-
-			message: "#^Method App\\\\Models\\\\TeamInvitation\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/TeamInvitation.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:getAllRoles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Models/User.php
 
 		-
 			message: "#^Class App\\\\Models\\\\Waypoint uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
@@ -854,26 +359,6 @@ parameters:
 			message: "#^Method App\\\\Services\\\\AuditService\\:\\:log\\(\\) has parameter \\$meta with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/AuditService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\AuthorizationService\\:\\:getPermissionsByGroup\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/AuthorizationService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\AuthorizationService\\:\\:getRolePermissions\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/AuthorizationService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\AuthorizationService\\:\\:getTeamPermissions\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/AuthorizationService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\AuthorizationService\\:\\:getTeamRoles\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/AuthorizationService.php
 
 		-
 			message: "#^Parameter \\#1 \\$haystack of function str_starts_with expects string, string\\|false given\\.$#"
@@ -951,16 +436,6 @@ parameters:
 			path: app/Services/IoTSensorService.php
 
 		-
-			message: "#^Unable to resolve the template type TKey in call to function collect$#"
-			count: 2
-			path: app/Services/MaintenanceHealthService.php
-
-		-
-			message: "#^Unable to resolve the template type TValue in call to function collect$#"
-			count: 2
-			path: app/Services/MaintenanceHealthService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\MentionParser\\:\\:resolveUsers\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
 			count: 1
 			path: app/Services/MentionParser.php
@@ -969,16 +444,6 @@ parameters:
 			message: "#^Offset 1 on array\\{list\\<string\\>, list\\<non\\-empty\\-string\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#"
 			count: 1
 			path: app/Services/MentionParser.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getActiveForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getAllForTeam\\(\\) return type with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/MineAreaService.php
 
 		-
 			message: "#^Negated boolean expression is always false\\.$#"
@@ -1021,16 +486,6 @@ parameters:
 			path: app/Services/RealTimeAlertService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:generateWaypoints\\(\\) has parameter \\$geofences with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:sampleRouteWaypoints\\(\\) has parameter \\$geofences with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
 			message: "#^Call to an undefined method Illuminate\\\\Support\\\\Optional\\:\\:toDateTimeString\\(\\)\\.$#"
 			count: 1
 			path: app/Services/ShiftService.php
@@ -1039,26 +494,6 @@ parameters:
 			message: "#^Trait App\\\\Traits\\\\PhpStanEloquentStubs is used zero times and is not analysed\\.$#"
 			count: 1
 			path: app/Traits/PhpStanEloquentStubs.php
-
-		-
-			message: "#^Class Database\\\\Factories\\\\AIAgentFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
-			count: 1
-			path: database/factories/AIAgentFactory.php
-
-		-
-			message: "#^Class Database\\\\Factories\\\\AIInsightFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
-			count: 1
-			path: database/factories/AIInsightFactory.php
-
-		-
-			message: "#^Class Database\\\\Factories\\\\AIPredictiveAlertFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
-			count: 1
-			path: database/factories/AIPredictiveAlertFactory.php
-
-		-
-			message: "#^Class Database\\\\Factories\\\\AIRecommendationFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#"
-			count: 1
-			path: database/factories/AIRecommendationFactory.php
 
 		-
 			message: "#^Binary operation \"\\.\" between array\\|string and ' Zone' results in an error\\.$#"

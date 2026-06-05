@@ -65,6 +65,10 @@ class EngineHourSession extends Model
     // ── Scopes ────────────────────────────────────────────────────────────────
 
     /** Sessions that started today (from midnight). */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeToday(Builder $query): Builder
     {
         $query->where('ignition_on_at', '>=', now()->startOfDay());
@@ -73,6 +77,10 @@ class EngineHourSession extends Model
     }
 
     /** Sessions that are currently open (engine is running). */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeRunning(Builder $query): Builder
     {
         $query->whereNull('ignition_off_at');

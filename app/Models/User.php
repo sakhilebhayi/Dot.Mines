@@ -197,6 +197,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get all roles for user
+     *
+     * @return Collection<int, Role>
      */
     public function getAllRoles(): Collection
     {

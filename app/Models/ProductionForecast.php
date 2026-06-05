@@ -58,16 +58,28 @@ class ProductionForecast extends Model
         return $this->belongsTo(MineArea::class);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForDate(Builder $query, string $date): Builder
     {
         return $query->where('forecast_date', $date);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeHighConfidence(Builder $query, int $threshold = 80): Builder
     {
         return $query->where('confidence_level', '>=', $threshold);

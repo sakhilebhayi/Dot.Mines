@@ -41,6 +41,8 @@ class AuthorizationService
 
     /**
      * Get all permissions for a role
+     *
+     * @return Collection<int, mixed>
      */
     public static function getRolePermissions(Role|string $role, ?int $teamId = null): Collection
     {
@@ -55,6 +57,8 @@ class AuthorizationService
 
     /**
      * Get all roles for a team
+     *
+     * @return Collection<int, Role>
      */
     public static function getTeamRoles(int $teamId): Collection
     {
@@ -63,6 +67,8 @@ class AuthorizationService
 
     /**
      * Get all permissions for a team
+     *
+     * @return Collection<int, Permission>
      */
     public static function getTeamPermissions(int $teamId): Collection
     {
@@ -71,6 +77,8 @@ class AuthorizationService
 
     /**
      * Get permissions grouped by group
+     *
+     * @return Collection<string, Collection<int, Permission>>
      */
     public static function getPermissionsByGroup(int $teamId): Collection
     {

@@ -29,7 +29,7 @@ class MentionParser
      * Resolve @username handles to User models on the given team.
      * Matches on the `name` field (case-insensitive).
      *
-     * @return Collection<User>
+     * @return Collection<int, User>
      */
     /** @param array<string> $handles */
     public function resolveUsers(array $handles, int $teamId): Collection

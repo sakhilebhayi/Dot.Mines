@@ -72,6 +72,10 @@ class MachineAreaAssignment extends Model
         return $this->belongsTo(User::class, 'assigned_by');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive(Builder $query): Builder
     {
         $query->whereNull('unassigned_at');
@@ -79,6 +83,10 @@ class MachineAreaAssignment extends Model
         return $query;
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         $query->where('team_id', $teamId);

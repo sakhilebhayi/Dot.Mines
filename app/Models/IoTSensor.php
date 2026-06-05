@@ -78,6 +78,9 @@ class IoTSensor extends Model
         ];
     }
 
+    /**
+     * @return HasMany<SensorReading, $this>
+     */
     public function readings(): HasMany
     {
         return $this->hasMany(SensorReading::class);

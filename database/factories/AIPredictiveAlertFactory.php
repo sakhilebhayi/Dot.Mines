@@ -7,6 +7,7 @@ use App\Models\AIPredictiveAlert;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/** @extends Factory<AIPredictiveAlert> */
 class AIPredictiveAlertFactory extends Factory
 {
     protected $model = AIPredictiveAlert::class;

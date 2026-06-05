@@ -119,6 +119,9 @@ class FuelBudget extends Model
 
     /**
      * Scope for active budgets
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -129,6 +132,9 @@ class FuelBudget extends Model
 
     /**
      * Scope for exceeded budgets
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeExceeded(Builder $query): Builder
     {
@@ -139,6 +145,9 @@ class FuelBudget extends Model
 
     /**
      * Scope for current period
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCurrent(Builder $query): Builder
     {

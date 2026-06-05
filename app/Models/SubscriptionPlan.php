@@ -124,6 +124,9 @@ class SubscriptionPlan extends Model
 
     /**
      * Scope query to active plans only
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive(Builder $query): Builder
     {

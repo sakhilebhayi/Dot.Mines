@@ -265,6 +265,8 @@ class Machine extends Model
 
     /**
      * Get active alerts for this machine
+     *
+     * @return Builder<Alert>
      */
     public function activeAlerts(): Builder
     {

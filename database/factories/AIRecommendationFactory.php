@@ -8,6 +8,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/** @extends Factory<AIRecommendation> */
 class AIRecommendationFactory extends Factory
 {
     protected $model = AIRecommendation::class;

@@ -43,6 +43,7 @@ class Reports extends Component
 
     public string $selectedMachineId = '';
 
+    /** @var Collection<int, mixed>|null */
     public ?Collection $machinesList = null;
 
     public bool $showDeleteConfirm = false;

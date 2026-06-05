@@ -525,8 +525,12 @@ class FuelManagement extends Component
         // Get AI-powered fuel insights
         $aiAgent = new FuelPredictorAgent;
         $aiAnalysis = $aiAgent->analyze(auth()->user()->currentTeam);
-        $aiRecommendations = collect($aiAnalysis['recommendations'] ?? [])->take(5);
-        $aiInsights = collect($aiAnalysis['insights'] ?? [])->take(3);
+        /** @var array<int, mixed> $aiRecs */
+        $aiRecs = $aiAnalysis['recommendations'] ?? [];
+        $aiRecommendations = collect($aiRecs)->take(5);
+        /** @var array<int, mixed> $aiIns */
+        $aiIns = $aiAnalysis['insights'] ?? [];
+        $aiInsights = collect($aiIns)->take(3);
 
         $tankStats = [
             'total' => $tanks->count(),

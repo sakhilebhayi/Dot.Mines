@@ -200,8 +200,12 @@ class MaintenanceHealthService
         if (! empty($data['fault_codes_cleared'])) {
             $health = MachineHealthStatus::where('machine_id', $record->machine_id)->first();
             if ($health) {
-                $clearedCodes = collect($data['fault_codes_cleared']);
-                $activeCodes = collect($health->active_fault_codes ?? []);
+                /** @var array<int, mixed> $faultCodesCleared */
+                $faultCodesCleared = $data['fault_codes_cleared'];
+                $clearedCodes = collect($faultCodesCleared);
+                /** @var array<int, mixed> $activeFaultCodes */
+                $activeFaultCodes = $health->active_fault_codes ?? [];
+                $activeCodes = collect($activeFaultCodes);
 
                 $remainingCodes = $activeCodes->filter(function ($code) use ($clearedCodes) {
                     return ! $clearedCodes->contains($code);
