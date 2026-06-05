@@ -41,7 +41,7 @@ class Alerts extends Component
     public bool $showDismissConfirm = false;
 
     // Track when a dismissed-unresolved alert was created so UI can render specially
-    /** @var array<string, mixed> */
+    /** @var array<int|string, mixed> */
     public array $recentlyDismissedUnresolved = [];
 
     // Tab navigation
@@ -82,6 +82,7 @@ class Alerts extends Component
 
     public string $incidentResolutionNotes = '';
 
+    /** @var array<string, string> */
     protected $alertPriorities = [
         'critical' => 'Critical',
         'high' => 'High',
@@ -89,6 +90,7 @@ class Alerts extends Component
         'low' => 'Low',
     ];
 
+    /** @var array<string, string> */
     protected $alertTypes = [
         'temperature' => 'Temperature Warning',
         'fuel' => 'Fuel Level',
@@ -134,7 +136,7 @@ class Alerts extends Component
             ->paginate(15);
     }
 
-    public function setSortBy($column): void
+    public function setSortBy(string $column): void
     {
         $allowed = ['created_at', 'priority', 'status'];
         if (! in_array($column, $allowed, true)) {
@@ -148,7 +150,7 @@ class Alerts extends Component
         }
     }
 
-    public function acknowledgeAlert($alertId): void
+    public function acknowledgeAlert(int $alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -163,7 +165,7 @@ class Alerts extends Component
         }
     }
 
-    public function resolveAlert($alertId): void
+    public function resolveAlert(int $alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -190,7 +192,7 @@ class Alerts extends Component
         }
     }
 
-    public function dismissAlert($alertId): void
+    public function dismissAlert(int $alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -213,7 +215,7 @@ class Alerts extends Component
         }
     }
 
-    public function confirmDismiss($choice = 'dismiss'): void
+    public function confirmDismiss(string $choice = 'dismiss'): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($this->pendingDismissAlertId);
@@ -260,7 +262,7 @@ class Alerts extends Component
         $this->pendingDismissAlertId = null;
     }
 
-    public function showDetails($alertId): void
+    public function showDetails(int $alertId): void
     {
         $this->selectedAlertId = $alertId;
         $this->showDetailsModal = true;
@@ -302,10 +304,12 @@ class Alerts extends Component
 
     /**
      * Return an array of mine-area managers (team users with manager-like roles)
+     *
+     * @return array<int, array<string, mixed>>
      */
-    public function getMineAreaManagersForAlert($alert): array
+    public function getMineAreaManagersForAlert(?Alert $alert): array
     {
-        if (! $alert || ! $alert->mineArea) {
+        if ($alert === null || $alert->mineArea === null) {
             return [];
         }
 
@@ -493,6 +497,7 @@ class Alerts extends Component
         $this->incidentOccurredAt = '';
     }
 
+    /** @return Collection<int, Machine> */
     public function getMachinesForIncidentForm(): Collection
     {
         $team = Auth::user()->currentTeam;
@@ -502,6 +507,7 @@ class Alerts extends Component
             ->get(['id', 'name', 'machine_type']);
     }
 
+    /** @return Collection<int, MineArea> */
     public function getMineAreasForIncidentForm(): Collection
     {
         $team = Auth::user()->currentTeam;

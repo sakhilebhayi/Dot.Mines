@@ -6,7 +6,7 @@ use Exception;
 
 /**
  * Roundebult Fleet Management Integration Service
- * 
+ *
  * Contact Roundebult for API access
  * South African fleet management provider
  */
@@ -19,39 +19,39 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Test connection to Roundebult API
-     * 
-     * @return bool
      */
     public function testConnection(): bool
     {
         try {
             $response = $this->makeRequest('GET', '/api/v1/machines', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
     /**
      * Fetch machines from Roundebult API
-     * 
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/api/v1/machines');
-            
+
             $machines = [];
-            if (!empty($response['data']['machines'])) {
+            if (! empty($response['data']['machines'])) {
                 foreach ($response['data']['machines'] as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -59,6 +59,7 @@ class RoundebultService extends BaseManufacturerService
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machines', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -69,21 +70,21 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch location data for a machine
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -93,27 +94,27 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch metrics for a machine
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
         try {
             $metrics = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/metrics");
             $operations = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/operations");
-            
+
             $allMetrics = array_merge(
                 $this->parseMetrics($metrics['data'] ?? []),
                 $this->parseMetrics($operations['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $allMetrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -124,28 +125,28 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch alerts for a machine
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/alerts");
-            
+
             $alerts = [];
-            if (!empty($response['data']['alerts'])) {
+            if (! empty($response['data']['alerts'])) {
                 foreach ($response['data']['alerts'] as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch alerts', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -156,9 +157,8 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse machine data from Roundebult format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseMachineData(array $data): array
     {
@@ -181,9 +181,8 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse location data from Roundebult format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -198,9 +197,8 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse metric data from Roundebult format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -215,9 +213,8 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse alert data from Roundebult format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseAlert(array $data): array
     {
@@ -234,9 +231,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Map Roundebult status to standard status
-     * 
-     * @param string $status
-     * @return string
      */
     protected function parseStatus(string $status): string
     {
@@ -255,14 +249,14 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch machine details from Roundebult API
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -271,14 +265,12 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -287,14 +279,14 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -303,14 +295,14 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -319,9 +311,8 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -335,8 +326,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {
@@ -345,8 +334,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Get API error if any occurred
-     * 
-     * @return string|null
      */
     public function getLastError(): ?string
     {

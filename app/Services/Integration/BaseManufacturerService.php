@@ -26,6 +26,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Initialize the service with API credentials
+     *
+     * @param  array<string, string>  $credentials
      */
     public function __construct(array $credentials = [])
     {
@@ -36,6 +38,10 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Make HTTP request to manufacturer API with retry logic
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, string>  $headers
+     * @return array<string, mixed>
      */
     protected function request(
         string $method,
@@ -95,6 +101,9 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Get authentication headers for API requests
+     *
+     * @param  array<string, string>  $additionalHeaders
+     * @return array<string, string>
      */
     protected function getAuthHeaders(array $additionalHeaders = []): array
     {
@@ -107,6 +116,9 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse machine data from API response to standard format
+     *
+     * @param  array<string, mixed>  $rawData
+     * @return array<string, mixed>
      */
     protected function parseMachineData(array $rawData): array
     {
@@ -128,6 +140,9 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse location data from API response
+     *
+     * @param  array<string, mixed>  $rawData
+     * @return array<string, mixed>|null
      */
     protected function parseLocation(array $rawData): ?array
     {
@@ -147,6 +162,9 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse metrics from API response
+     *
+     * @param  array<string, mixed>  $rawData
+     * @return array<string, mixed>
      */
     protected function parseMetrics(array $rawData): array
     {
@@ -168,6 +186,9 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse alerts from API response
+     *
+     * @param  array<mixed>  $alerts
+     * @return array<int, array<string, mixed>>
      */
     protected function parseAlerts(array $alerts): array
     {

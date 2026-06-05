@@ -35,6 +35,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $cost_per_liter
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read FuelTank|null $fuelTank
+ * @property-read Machine|null $machine
+ * @property-read FuelMonthlyAllocation|null $monthlyAllocation
+ * @property-read User|null $user
  */
 class FuelTransaction extends Model
 {

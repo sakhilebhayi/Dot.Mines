@@ -6,6 +6,7 @@ use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\ProductionRecord;
+use App\Models\Team;
 use App\Services\ProductionService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,23 @@ use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * @property-read mixed $productionRecords
+ * @property-read mixed $statistics
+ * @property-read mixed $trend
+ * @property-read mixed $targets
+ * @property-read mixed $forecasts
+ * @property-read array<mixed> $summary
+ * @property-read mixed $mineAreas
+ * @property-read mixed $machines
+ * @property-read array<mixed> $dailyChart
+ * @property-read array<mixed> $materialBreakdown
+ * @property-read array<mixed> $fatigueData
+ * @property-read array<mixed> $fatigueStats
+ * @property-read array<mixed> $productionChartData
+ * @property-read array<mixed> $loadComparisonData
+ * @property-read array<mixed> $areaPerformance
+ */
 class ProductionDashboard extends Component
 {
     use WithPagination;
@@ -54,9 +72,9 @@ class ProductionDashboard extends Component
 
     public string $notes = '';
 
-    protected $productionService;
+    protected ProductionService $productionService;
 
-    protected $team;
+    protected Team $team;
 
     public int $teamId = 0;
 
@@ -75,10 +93,7 @@ class ProductionDashboard extends Component
      */
     public function hydrate(): void
     {
-        if (! $this->productionService) {
-            $this->productionService = app(ProductionService::class);
-        }
-
+        $this->productionService = app(ProductionService::class);
         $this->team = Auth::user()->currentTeam;
         $this->teamId = $this->team?->id ?? $this->teamId;
     }
@@ -342,7 +357,7 @@ class ProductionDashboard extends Component
         $this->resetForm();
     }
 
-    public function openEditModal($id): void
+    public function openEditModal(int $id): void
     {
         $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($id);
         $this->editingRecordId = $id;
@@ -394,7 +409,7 @@ class ProductionDashboard extends Component
         $this->dispatch('record-saved');
     }
 
-    public function deleteRecord($id): void
+    public function deleteRecord(int $id): void
     {
         $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($id);
         $this->productionService->deleteProductionRecord($record);
@@ -413,7 +428,7 @@ class ProductionDashboard extends Component
         $this->editingRecordId = null;
     }
 
-    public function switchView($mode): void
+    public function switchView(string $mode): void
     {
         $this->viewMode = $mode;
         $this->resetPage();

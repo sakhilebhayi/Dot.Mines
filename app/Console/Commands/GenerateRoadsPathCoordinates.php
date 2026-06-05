@@ -297,6 +297,9 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Sample exact points from OSRM route - NO interpolation
      * This guarantees all coordinates are on actual roads
+     *
+     * @param  array<mixed>  $routePoints
+     * @return array<mixed>
      */
     protected function sampleRoutePoints(array $routePoints, int $targetCount): array
     {
@@ -457,6 +460,9 @@ class GenerateRoadsPathCoordinates extends Command
      * Interpolate OSRM route geometry to get exact number of coordinates
      * Uses distance-based sampling to ensure we follow road curves precisely
      * and never cut through buildings, rivers, or non-road areas
+     *
+     * @param  array<mixed>  $routeGeometry
+     * @return array<mixed>
      */
     protected function interpolateRouteGeometry(array $routeGeometry, int $targetCount): array
     {
@@ -560,6 +566,9 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Densify route geometry by interpolating between points
      * Used when OSRM returns fewer points than we need
+     *
+     * @param  array<mixed>  $routeGeometry
+     * @return array<mixed>
      */
     protected function densifyRouteGeometry(array $routeGeometry, int $targetCount): array
     {

@@ -2,18 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Alert;
+use App\Models\FuelTransaction;
+use App\Models\Geofence;
+use App\Models\Machine;
+use App\Models\MaintenanceRecord;
+use App\Models\MineArea;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\Machine;
-use App\Models\MineArea;
-use App\Models\MaintenanceRecord;
-use App\Models\FuelTransaction;
-use App\Models\GeofenceEntry;
-use App\Models\Geofence;
-use App\Models\MachineHealthStatus;
-use App\Models\Alert;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class RealtimeScenarioSeeder extends Seeder
 {
@@ -27,34 +25,34 @@ class RealtimeScenarioSeeder extends Seeder
             'personal_team' => false,
         ]);
 
-        $this->command->info('✓ Created team: ' . $team->name);
+        $this->command->info('✓ Created team: '.$team->name);
 
         $users = $this->createUsers($team);
-        $this->command->info('✓ Created ' . count($users) . ' users');
+        $this->command->info('✓ Created '.count($users).' users');
 
         $mineAreas = $this->createMineAreas($team);
-        $this->command->info('✓ Created ' . count($mineAreas) . ' mine areas');
+        $this->command->info('✓ Created '.count($mineAreas).' mine areas');
 
         $machines = $this->createMachines($team, $mineAreas);
-        $this->command->info('✓ Created ' . count($machines) . ' machines');
+        $this->command->info('✓ Created '.count($machines).' machines');
 
         $geofences = $this->createGeofences($team);
-        $this->command->info('✓ Created ' . count($geofences) . ' geofences');
+        $this->command->info('✓ Created '.count($geofences).' geofences');
 
         $maintenanceRecords = $this->createMaintenanceRecords($team, $machines, $users);
-        $this->command->info('✓ Created ' . count($maintenanceRecords) . ' maintenance records');
+        $this->command->info('✓ Created '.count($maintenanceRecords).' maintenance records');
 
         $fuelTransactions = $this->createFuelTransactions($team, $machines, $users);
-        $this->command->info('✓ Created ' . count($fuelTransactions) . ' fuel transactions');
+        $this->command->info('✓ Created '.count($fuelTransactions).' fuel transactions');
 
         $healthStatuses = $this->createHealthStatuses($machines);
-        $this->command->info('✓ Created ' . count($healthStatuses) . ' health status records');
+        $this->command->info('✓ Created '.count($healthStatuses).' health status records');
 
         $geofenceEntries = $this->createGeofenceEntries($machines, $geofences);
-        $this->command->info('✓ Created ' . count($geofenceEntries) . ' geofence entries');
+        $this->command->info('✓ Created '.count($geofenceEntries).' geofence entries');
 
         $alerts = $this->createAlerts($team, $machines);
-        $this->command->info('✓ Created ' . count($alerts) . ' alerts');
+        $this->command->info('✓ Created '.count($alerts).' alerts');
 
         $this->command->info('');
         $this->command->info('✅ Real-Time Scenario Seed Complete!');
@@ -67,6 +65,9 @@ class RealtimeScenarioSeeder extends Seeder
         $this->command->info('  Viewer:    viewer@roundebult.local / password');
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function createUsers(Team $team): array
     {
         $userData = [
@@ -84,12 +85,18 @@ class RealtimeScenarioSeeder extends Seeder
             $user = User::create($data);
             $user->teams()->attach($team->id);
             $user->update(['current_team_id' => $team->id]);
-            if ($index === 0) $team->update(['user_id' => $user->id]);
+            if ($index === 0) {
+                $team->update(['user_id' => $user->id]);
+            }
             $users[] = $user;
         }
+
         return $users;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function createMineAreas(Team $team): array
     {
         $areas = [
@@ -136,9 +143,14 @@ class RealtimeScenarioSeeder extends Seeder
             $areaData['team_id'] = $team->id;
             $mineAreas[] = MineArea::create($areaData);
         }
+
         return $mineAreas;
     }
 
+    /**
+     * @param  array<mixed>  $mineAreas
+     * @return array<mixed>
+     */
     private function createMachines(Team $team, array $mineAreas): array
     {
         $machineData = [
@@ -166,9 +178,13 @@ class RealtimeScenarioSeeder extends Seeder
             }
             $machines[] = Machine::create($data);
         }
+
         return $machines;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function createGeofences(Team $team): array
     {
         $geofenceData = [
@@ -182,24 +198,38 @@ class RealtimeScenarioSeeder extends Seeder
             $data['team_id'] = $team->id;
             $geofences[] = Geofence::create($data);
         }
+
         return $geofences;
     }
 
+    /**
+     * @param  array<mixed>  $machines
+     * @param  array<mixed>  $users
+     * @return array<mixed>
+     */
     private function createMaintenanceRecords(Team $team, array $machines, array $users): array
     {
         $records = [];
         $records[] = MaintenanceRecord::create(['team_id' => $team->id, 'machine_id' => $machines[0]->id, 'maintenance_type' => 'routine', 'title' => '500 Hour Service', 'description' => 'Oil change, filter replacement', 'scheduled_date' => Carbon::now()->subDays(7), 'completed_at' => Carbon::now()->subDays(7), 'status' => 'completed', 'assigned_to' => $users[3]->id, 'total_cost' => 8500.00]);
         $records[] = MaintenanceRecord::create(['team_id' => $team->id, 'machine_id' => $machines[2]->id, 'maintenance_type' => 'corrective', 'title' => 'Hydraulic Pump Failure', 'description' => 'Main hydraulic pump seized', 'scheduled_date' => Carbon::now()->subDays(2), 'completed_at' => null, 'status' => 'in_progress', 'assigned_to' => $users[3]->id, 'total_cost' => 125000.00]);
         $records[] = MaintenanceRecord::create(['team_id' => $team->id, 'machine_id' => $machines[5]->id, 'maintenance_type' => 'preventive', 'title' => '1000 Hour Service', 'description' => 'Major service due', 'scheduled_date' => Carbon::now()->addDays(5), 'completed_at' => null, 'status' => 'scheduled', 'assigned_to' => null, 'total_cost' => 15000.00]);
+
         return $records;
     }
 
+    /**
+     * @param  array<mixed>  $machines
+     * @param  array<mixed>  $users
+     * @return array<mixed>
+     */
     private function createFuelTransactions(Team $team, array $machines, array $users): array
     {
         $transactions = [];
         $startDate = Carbon::now()->subDays(30);
         foreach ($machines as $machine) {
-            if ($machine->fuel_capacity == 0) continue;
+            if ($machine->fuel_capacity == 0) {
+                continue;
+            }
             $refuelCount = rand(5, 10);
             for ($i = 0; $i < $refuelCount; $i++) {
                 $date = $startDate->copy()->addDays(rand(0, 30))->addHours(rand(6, 20));
@@ -208,27 +238,42 @@ class RealtimeScenarioSeeder extends Seeder
                 $transactions[] = FuelTransaction::create(['team_id' => $team->id, 'machine_id' => $machine->id, 'user_id' => $users[rand(2, 3)]->id, 'transaction_type' => 'dispensing', 'quantity_liters' => round($quantity, 2), 'unit_price' => $pricePerLiter, 'total_cost' => round($quantity * $pricePerLiter, 2), 'fuel_type' => 'diesel', 'transaction_date' => $date, 'odometer_reading' => $machine->hours_meter + rand(-100, 50)]);
             }
         }
+
         return $transactions;
     }
 
+    /**
+     * @param  array<mixed>  $machines
+     * @return array<mixed>
+     */
     private function createHealthStatuses(array $machines): array
     {
         // Skip health statuses for now - table structure varies
         return [];
     }
 
+    /**
+     * @param  array<mixed>  $machines
+     * @param  array<mixed>  $geofences
+     * @return array<mixed>
+     */
     private function createGeofenceEntries(array $machines, array $geofences): array
     {
         // Skip geofence entries due to complex schema requirements
         return [];
     }
 
+    /**
+     * @param  array<mixed>  $machines
+     * @return array<mixed>
+     */
     private function createAlerts(Team $team, array $machines): array
     {
         $alerts = [];
         $alerts[] = Alert::create(['team_id' => $team->id, 'machine_id' => $machines[4]->id, 'type' => 'fuel', 'priority' => 'high', 'status' => 'active', 'title' => 'Low Fuel Level', 'description' => 'Fuel level at 18%', 'triggered_at' => Carbon::now()->subHours(2)]);
         $alerts[] = Alert::create(['team_id' => $team->id, 'machine_id' => $machines[5]->id, 'type' => 'maintenance', 'priority' => 'medium', 'status' => 'active', 'title' => 'Scheduled Maintenance Due', 'description' => '1000 hour service due in 5 days', 'triggered_at' => Carbon::now()->subDays(1)]);
         $alerts[] = Alert::create(['team_id' => $team->id, 'machine_id' => $machines[2]->id, 'type' => 'breakdown', 'priority' => 'critical', 'status' => 'active', 'title' => 'Machine Breakdown', 'description' => 'Hydraulic pump failure', 'triggered_at' => Carbon::now()->subDays(2)]);
+
         return $alerts;
     }
 }

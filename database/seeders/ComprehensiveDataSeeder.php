@@ -19,6 +19,7 @@ use App\Models\Route;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\Waypoint;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -27,24 +28,24 @@ class ComprehensiveDataSeeder extends Seeder
 {
     private Team $team;
 
-    private $aiAgent;
+    private mixed $aiAgent = null;
 
-    /** @var array<string, mixed> */
+    /** @var array<int|string, mixed> */
     private array $machines = [];
 
-    /** @var array<string, mixed> */
+    /** @var array<int|string, mixed> */
     private array $mineAreas = [];
 
-    /** @var array<string, mixed> */
+    /** @var array<int|string, mixed> */
     private array $excavators = [];
 
-    /** @var array<string, mixed> */
+    /** @var array<int|string, mixed> */
     private array $haulers = [];
 
-    /** @var array<string, mixed> */
+    /** @var array<int|string, mixed> */
     private array $users = [];
 
-    /** @var array<string, mixed> */
+    /** @var array<int|string, mixed> */
     private array $allTeams = [];
 
     /**
@@ -146,7 +147,7 @@ class ComprehensiveDataSeeder extends Seeder
                 continue;
             }
 
-            /** @var \Illuminate\Database\Eloquent\Collection<int, User> $users */
+            /** @var Collection<int, User> $users */
             $users = $team->users()->orderBy('users.id')->get();
             if ($users->isEmpty()) {
                 continue;
@@ -172,6 +173,7 @@ class ComprehensiveDataSeeder extends Seeder
         $this->command->info('✓ Roles assigned for seeded team users');
     }
 
+    /** @return array<int, array<string, mixed>> */
     private function getTeamConfigurations(): array
     {
         // Roles are globally unique in this schema, so we seed one rich demo team
@@ -196,6 +198,7 @@ class ComprehensiveDataSeeder extends Seeder
         ];
     }
 
+    /** @param array<string, mixed> $config */
     private function createTeamAndUsers($config): void
     {
         $this->command->info('Creating team and users...');
@@ -241,7 +244,7 @@ class ComprehensiveDataSeeder extends Seeder
         $this->command->info('✓ Created team and '.count($config['users']).' users');
     }
 
-    private function createMineAreas($areaCount): void
+    private function createMineAreas(int $areaCount): void
     {
         $this->command->info('Creating mine areas...');
 
@@ -311,6 +314,7 @@ class ComprehensiveDataSeeder extends Seeder
         $this->command->info('✓ Created '.count($this->mineAreas).' mine areas');
     }
 
+    /** @param array<string, mixed> $machineConfig */
     private function createMachines($machineConfig): void
     {
         $this->command->info('Creating fleet machines...');
@@ -1206,6 +1210,7 @@ class ComprehensiveDataSeeder extends Seeder
         return $work[array_rand($work)];
     }
 
+    /** @return array<mixed> */
     private function getRandomPartsUsed(): array
     {
         $partsSets = [
@@ -1229,6 +1234,7 @@ class ComprehensiveDataSeeder extends Seeder
         return $partsSets[array_rand($partsSets)];
     }
 
+    /** @return array<int, array<float>> */
     private function generatePolygonCoordinates(float $centerLat, float $centerLon, float $radius): array
     {
         $coordinates = [];

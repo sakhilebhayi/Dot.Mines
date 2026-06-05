@@ -8,8 +8,8 @@ use App\Models\FuelConsumptionMetric;
 use App\Models\FuelTank;
 use App\Models\FuelTransaction;
 use App\Models\Machine;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class FuelManagementService
 {
@@ -45,31 +45,39 @@ class FuelManagementService
     {
         $tank = $transaction->fuelTank;
 
+        if ($tank === null) {
+            return;
+        }
+
         switch ($transaction->transaction_type) {
             case 'refill':
             case 'delivery':
                 $tank->increment('current_level_liters', $transaction->quantity_liters);
                 break;
-            
+
             case 'dispensing':
             case 'spillage':
             case 'theft':
                 $tank->decrement('current_level_liters', $transaction->quantity_liters);
                 break;
-            
+
             case 'adjustment':
                 $tank->current_level_liters = $transaction->quantity_liters;
                 $tank->save();
                 break;
-            
+
             case 'transfer':
                 if ($transaction->from_tank_id) {
                     $fromTank = FuelTank::find($transaction->from_tank_id);
-                    $fromTank->decrement('current_level_liters', $transaction->quantity_liters);
+                    if ($fromTank !== null) {
+                        $fromTank->decrement('current_level_liters', $transaction->quantity_liters);
+                    }
                 }
                 if ($transaction->to_tank_id) {
                     $toTank = FuelTank::find($transaction->to_tank_id);
-                    $toTank->increment('current_level_liters', $transaction->quantity_liters);
+                    if ($toTank !== null) {
+                        $toTank->increment('current_level_liters', $transaction->quantity_liters);
+                    }
                 }
                 break;
         }
@@ -83,7 +91,11 @@ class FuelManagementService
         // Check tank level alerts
         if ($transaction->fuel_tank_id) {
             $tank = $transaction->fuelTank;
-            
+
+            if ($tank === null) {
+                return;
+            }
+
             if ($tank->isCritical()) {
                 $this->createFuelAlert([
                     'team_id' => $tank->team_id,
@@ -117,7 +129,11 @@ class FuelManagementService
     protected function checkMachineConsumptionPatterns(FuelTransaction $transaction): void
     {
         $machine = $transaction->machine;
-        
+
+        if ($machine === null) {
+            return;
+        }
+
         // Get average daily consumption for this machine
         $avgConsumption = FuelConsumptionMetric::where('machine_id', $machine->id)
             ->where('date', '>=', now()->subDays(30))
@@ -174,7 +190,7 @@ class FuelManagementService
             // Update status if exceeded
             if ($budget->isExceeded() && $budget->status !== 'exceeded') {
                 $budget->update(['status' => 'exceeded']);
-                
+
                 // Create budget alert
                 $this->createFuelAlert([
                     'team_id' => $budget->team_id,

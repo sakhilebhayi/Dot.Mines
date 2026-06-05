@@ -36,16 +36,6 @@ parameters:
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
 
 		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:densifyRouteGeometry\\(\\) has parameter \\$routeGeometry with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:densifyRouteGeometry\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
 			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:displayResults\\(\\) has parameter \\$machines with no type specified\\.$#"
 			count: 1
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
@@ -62,26 +52,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:interpolateAlongRoute\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:interpolateRouteGeometry\\(\\) has parameter \\$routeGeometry with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:interpolateRouteGeometry\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:sampleRoutePoints\\(\\) has parameter \\$routePoints with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:sampleRoutePoints\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
 
@@ -164,11 +134,6 @@ parameters:
 			message: "#^Method App\\\\Contracts\\\\ManufacturerServiceInterface\\:\\:fetchMachines\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Contracts/ManufacturerServiceInterface.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Alert\\:\\:\\$machine\\.$#"
-			count: 1
-			path: app/Events/AlertTriggered.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Models\\\\Alert\\:\\:\\$message\\.$#"
@@ -721,16 +686,6 @@ parameters:
 			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:implementRecommendation\\(\\) has parameter \\$recommendationId with no type specified\\.$#"
 			count: 1
 			path: app/Livewire/AIOptimizationDashboard.php
@@ -781,92 +736,7 @@ parameters:
 			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:acknowledgeAlert\\(\\) has parameter \\$alertId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:confirmDismiss\\(\\) has parameter \\$choice with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dismissAlert\\(\\) has parameter \\$alertId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:getCurrentTeam\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:getCurrentUser\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:getMachinesForIncidentForm\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:getMineAreaManagersForAlert\\(\\) has parameter \\$alert with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:getMineAreaManagersForAlert\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:getMineAreasForIncidentForm\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:resolveAlert\\(\\) has parameter \\$alertId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:setSortBy\\(\\) has parameter \\$column with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:showDetails\\(\\) has parameter \\$alertId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Alerts\\:\\:\\$alertPriorities has no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Alerts\\:\\:\\$alertTypes has no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Alerts\\:\\:\\$recentlyDismissedUnresolved \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: app/Livewire/Alerts.php
 
@@ -912,16 +782,6 @@ parameters:
 
 		-
 			message: "#^Cannot unset offset int on array\\<string, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Feed\\:\\:getCurrentTeam\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Feed\\:\\:getCurrentUser\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/Feed.php
 
@@ -1116,16 +976,6 @@ parameters:
 			path: app/Livewire/FuelManagement.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:openManageModal\\(\\) has parameter \\$tab with no type specified\\.$#"
 			count: 1
 			path: app/Livewire/FuelManagement.php
@@ -1181,16 +1031,6 @@ parameters:
 			path: app/Livewire/IntegrationManager.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/IntegrationManager.php
@@ -1209,16 +1049,6 @@ parameters:
 			message: "#^Property App\\\\Livewire\\\\IntegrationManager\\:\\:\\$listeners has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\LiveMap\\:\\:getCurrentTeam\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/LiveMap.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\LiveMap\\:\\:getCurrentUser\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/LiveMap.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\LiveMap\\:\\:getGeofencesWithType\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -1262,16 +1092,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:completeScheduledMaintenance\\(\\) has parameter \\$recordId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/MaintenanceDashboard.php
 
@@ -1356,119 +1176,9 @@ parameters:
 			path: app/Livewire/Navbar.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$areaPerformance\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$dailyChart\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$fatigueData\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$fatigueStats\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$forecasts\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$loadComparisonData\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$machines\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$materialBreakdown\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$mineAreas\\.$#"
-			count: 2
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$productionChartData\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$productionRecords\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$statistics\\.$#"
-			count: 2
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$summary\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$targets\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$trend\\.$#"
-			count: 2
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:deleteRecord\\(\\) has parameter \\$id with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:openEditModal\\(\\) has parameter \\$id with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
 			count: 1
 			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:switchView\\(\\) has parameter \\$mode with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$productionService has no type specified\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\ProductionDashboard\\:\\:\\$team has no type specified\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
@@ -1512,16 +1222,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:deleteReport\\(\\) has parameter \\$reportId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/Reports.php
 
@@ -1629,16 +1329,6 @@ parameters:
 			message: "#^Property App\\\\Livewire\\\\RoutePlanning\\:\\:\\$rules has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:getCurrencies\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -2981,16 +2671,6 @@ parameters:
 			path: app/Services/FileUploadService.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$fuelTank\\.$#"
-			count: 2
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelTransaction\\:\\:\\$machine\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\FuelManagementService\\:\\:createFuelAlert\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/FuelManagementService.php
@@ -3009,76 +2689,6 @@ parameters:
 			message: "#^Method App\\\\Services\\\\FuelManagementService\\:\\:recordTransaction\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:__construct\\(\\) has parameter \\$credentials with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:getAuthHeaders\\(\\) has parameter \\$additionalHeaders with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:getAuthHeaders\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:parseAlerts\\(\\) has parameter \\$alerts with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:parseAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:parseLocation\\(\\) has parameter \\$rawData with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:parseLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:parseMachineData\\(\\) has parameter \\$rawData with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:parseMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:parseMetrics\\(\\) has parameter \\$rawData with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:parseMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:request\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:request\\(\\) has parameter \\$headers with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BaseManufacturerService\\:\\:request\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BaseManufacturerService.php
 
 		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:buildTelemetryPayload\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
@@ -3136,22 +2746,7 @@ parameters:
 			path: app/Services/Integration/BellService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BellService\\:\\:parseLocation\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BellService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\BellService\\:\\:parseLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BellService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BellService\\:\\:parseMachineData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BellService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BellService\\:\\:parseMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/BellService.php
 
@@ -3166,87 +2761,12 @@ parameters:
 			path: app/Services/Integration/BellService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchMachineAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchMachineDetails\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchMachineLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchMachineMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchMachines\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:fetchMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:parseAlert\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/CATService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:parseAlert\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:parseLocation\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:parseLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:parseMachineData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:parseMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:parseMetric\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CATService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CATService\\:\\:parseMetric\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/CATService.php
 
@@ -3276,22 +2796,7 @@ parameters:
 			path: app/Services/Integration/CTrackService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CTrackService\\:\\:parseLocation\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CTrackService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\CTrackService\\:\\:parseLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CTrackService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CTrackService\\:\\:parseMachineData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/CTrackService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\CTrackService\\:\\:parseMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/CTrackService.php
 
@@ -3576,87 +3081,12 @@ parameters:
 			path: app/Services/Integration/JCBService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchMachineAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchMachineDetails\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchMachineLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchMachineMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchMachines\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:fetchMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:parseAlert\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/KawasakiService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:parseAlert\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:parseLocation\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:parseLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:parseMachineData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:parseMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:parseMetric\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KawasakiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KawasakiService\\:\\:parseMetric\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/KawasakiService.php
 
@@ -3731,22 +3161,7 @@ parameters:
 			path: app/Services/Integration/KomatsuService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KomatsuService\\:\\:parseLocation\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KomatsuService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\KomatsuService\\:\\:parseLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KomatsuService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KomatsuService\\:\\:parseMachineData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/KomatsuService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\KomatsuService\\:\\:parseMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/KomatsuService.php
 
@@ -3851,87 +3266,12 @@ parameters:
 			path: app/Services/Integration/LiebherrService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchMachineAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchMachineDetails\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchMachineLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchMachineMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchMachines\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:fetchMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:parseAlert\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/RoundebultService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:parseAlert\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:parseLocation\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:parseLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:parseMachineData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:parseMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:parseMetric\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/RoundebultService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\RoundebultService\\:\\:parseMetric\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/RoundebultService.php
 
@@ -3981,87 +3321,12 @@ parameters:
 			path: app/Services/Integration/SanyService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchMachineAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchMachineDetails\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchMachineLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchMachineMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchMachines\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:fetchMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:parseAlert\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/VolvoService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:parseAlert\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:parseLocation\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:parseLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:parseMachineData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:parseMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:parseMetric\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/VolvoService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\VolvoService\\:\\:parseMetric\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/Integration/VolvoService.php
 
@@ -4341,11 +3606,6 @@ parameters:
 			path: app/Services/QueryCacheService.php
 
 		-
-			message: "#^Parameter \\#3 \\$callback of static method Illuminate\\\\Support\\\\Facades\\\\Cache\\:\\:remember\\(\\) expects Closure, callable\\(\\)\\: mixed given\\.$#"
-			count: 7
-			path: app/Services/QueryCacheService.php
-
-		-
 			message: "#^Access to an undefined property object\\:\\:\\$description\\.$#"
 			count: 1
 			path: app/Services/RealTimeAlertService.php
@@ -4516,82 +3776,12 @@ parameters:
 			path: database/seeders/ComprehensiveDataSeeder.php
 
 		-
-			message: "#^Method Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:createMachines\\(\\) has parameter \\$machineConfig with no type specified\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:createMineAreas\\(\\) has parameter \\$areaCount with no type specified\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:createTeamAndUsers\\(\\) has parameter \\$config with no type specified\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:generatePolygonCoordinates\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:getRandomPartsUsed\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:getTeamConfigurations\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Offset 0 does not exist on array\\<string, mixed\\>\\.$#"
-			count: 10
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
 			message: "#^Parameter \\#1 \\$min of function rand expects int, float given\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
 
 		-
 			message: "#^Parameter \\#2 \\$max of function rand expects int, float given\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$aiAgent has no type specified\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$allTeams \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$excavators \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$haulers \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$machines \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 5
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$mineAreas \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: database/seeders/ComprehensiveDataSeeder.php
-
-		-
-			message: "#^Property Database\\\\Seeders\\\\ComprehensiveDataSeeder\\:\\:\\$users \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
 			count: 1
 			path: database/seeders/ComprehensiveDataSeeder.php
 
@@ -4669,96 +3859,6 @@ parameters:
 			message: "#^Method Database\\\\Seeders\\\\OperatorFatigueSeeder\\:\\:getShiftDetails\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: database/seeders/OperatorFatigueSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createAlerts\\(\\) has parameter \\$machines with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createFuelTransactions\\(\\) has parameter \\$machines with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createFuelTransactions\\(\\) has parameter \\$users with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createFuelTransactions\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createGeofenceEntries\\(\\) has parameter \\$geofences with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createGeofenceEntries\\(\\) has parameter \\$machines with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createGeofenceEntries\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createGeofences\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createHealthStatuses\\(\\) has parameter \\$machines with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createHealthStatuses\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createMachines\\(\\) has parameter \\$mineAreas with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createMachines\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createMaintenanceRecords\\(\\) has parameter \\$machines with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createMaintenanceRecords\\(\\) has parameter \\$users with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createMaintenanceRecords\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createMineAreas\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
-
-		-
-			message: "#^Method Database\\\\Seeders\\\\RealtimeScenarioSeeder\\:\\:createUsers\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: database/seeders/RealtimeScenarioSeeder.php
 
 		-
 			message: "#^Right side of && is always true\\.$#"

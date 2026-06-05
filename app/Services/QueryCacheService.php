@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Closure;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -20,7 +21,7 @@ class QueryCacheService
     /**
      * Cache dashboard statistics
      */
-    public static function dashboardStats(int $teamId, callable $callback): array
+    public static function dashboardStats(int $teamId, Closure $callback): array
     {
         return Cache::remember(
             "dashboard_stats_{$teamId}",
@@ -32,7 +33,7 @@ class QueryCacheService
     /**
      * Cache machine list for team
      */
-    public static function machineList(int $teamId, array $filters, callable $callback): mixed
+    public static function machineList(int $teamId, array $filters, Closure $callback): mixed
     {
         $filterKey = md5((string) json_encode($filters));
 
@@ -46,7 +47,7 @@ class QueryCacheService
     /**
      * Cache machine details
      */
-    public static function machineDetails(int $machineId, callable $callback): mixed
+    public static function machineDetails(int $machineId, Closure $callback): mixed
     {
         return Cache::remember(
             "machine_details_{$machineId}",
@@ -58,7 +59,7 @@ class QueryCacheService
     /**
      * Cache alert statistics
      */
-    public static function alertStats(int $teamId, callable $callback): array
+    public static function alertStats(int $teamId, Closure $callback): array
     {
         return Cache::remember(
             "alert_stats_{$teamId}",
@@ -70,7 +71,7 @@ class QueryCacheService
     /**
      * Cache geofence statistics
      */
-    public static function geofenceStats(int $geofenceId, callable $callback): array
+    public static function geofenceStats(int $geofenceId, Closure $callback): array
     {
         return Cache::remember(
             "geofence_stats_{$geofenceId}",
@@ -82,7 +83,7 @@ class QueryCacheService
     /**
      * Cache integration sync status
      */
-    public static function integrationStatus(int $teamId, callable $callback): array
+    public static function integrationStatus(int $teamId, Closure $callback): array
     {
         return Cache::remember(
             "integration_status_{$teamId}",
@@ -94,7 +95,7 @@ class QueryCacheService
     /**
      * Cache report templates
      */
-    public static function reportTemplates(callable $callback): array
+    public static function reportTemplates(Closure $callback): array
     {
         return Cache::remember(
             'report_templates',

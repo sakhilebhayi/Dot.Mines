@@ -34,6 +34,8 @@ use Illuminate\Support\Facades\Auth;
  * @property array<string, mixed>|null $metadata
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read Machine|null $machine
+ * @property-read MineArea|null $mineArea
  */
 class Alert extends Model
 {

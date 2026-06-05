@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * Caterpillar VisionLink / Product Link Integration Service
- * 
+ *
  * Handles integration with Caterpillar VisionLink API
  * Requires dealer authorization and subscription ID
  * Documentation: https://developer.cat.com/api-catalog/visionlink
@@ -21,38 +21,38 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Test connection to CAT VisionLink API
-     * 
-     * @return bool
      */
     public function testConnection(): bool
     {
         try {
             // Test with assets endpoint
             $response = $this->makeRequest('GET', '/assets');
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
     /**
      * Fetch machines from CAT VisionLink API
-     * 
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/assets');
-            
+
             $machines = [];
-            if (!empty($response['assets'])) {
+            if (! empty($response['assets'])) {
                 foreach ($response['assets'] as $asset) {
                     $machines[] = $this->parseMachineData($asset);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -60,6 +60,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch assets', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -70,21 +71,21 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch location data for a machine
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/machines/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -94,9 +95,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch diagnostics/metrics for a machine
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -106,18 +106,18 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             $fuelUsed = $this->makeRequest('GET', "/assets/{$machineId}/fuelUsed");
             $engineHours = $this->makeRequest('GET', "/assets/{$machineId}/engineHours");
             $productivity = $this->makeRequest('GET', "/assets/{$machineId}/productivity");
-            
+
             $metrics = [];
-            
+
             // Parse diagnostics
-            if (!empty($diagnostics['diagnostics'])) {
+            if (! empty($diagnostics['diagnostics'])) {
                 foreach ($diagnostics['diagnostics'] as $diagnostic) {
                     $metrics[] = $this->parseMetric($diagnostic);
                 }
             }
-            
+
             // Add fuel metrics
-            if (!empty($fuelUsed['fuelUsed'])) {
+            if (! empty($fuelUsed['fuelUsed'])) {
                 $metrics[] = [
                     'type' => 'fuel_used',
                     'value' => $fuelUsed['fuelUsed']['totalFuelUsed'] ?? 0,
@@ -125,9 +125,9 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
                     'timestamp' => $fuelUsed['fuelUsed']['timestamp'] ?? now(),
                 ];
             }
-            
+
             // Add engine hours
-            if (!empty($engineHours['engineHours'])) {
+            if (! empty($engineHours['engineHours'])) {
                 $metrics[] = [
                     'type' => 'engine_hours',
                     'value' => $engineHours['engineHours']['totalHours'] ?? 0,
@@ -135,22 +135,23 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
                     'timestamp' => $engineHours['engineHours']['timestamp'] ?? now(),
                 ];
             }
-            
+
             // Add productivity data
-            if (!empty($productivity['productivityData'])) {
+            if (! empty($productivity['productivityData'])) {
                 $metrics[] = [
                     'type' => 'productivity',
                     'value' => $productivity['productivityData'],
                     'timestamp' => $productivity['timestamp'] ?? now(),
                 ];
             }
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -161,28 +162,28 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch alerts for a machine
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/machines/{$machineId}/alerts");
-            
+
             $alerts = [];
-            if (!empty($response['data']['alerts'])) {
+            if (! empty($response['data']['alerts'])) {
                 foreach ($response['data']['alerts'] as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch alerts', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -193,9 +194,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Parse machine data from CAT format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseMachineData(array $data): array
     {
@@ -220,9 +220,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Parse location data from CAT format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -237,9 +236,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Parse telemetry/metric data from CAT format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -257,9 +255,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Parse alert data from CAT format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseAlert(array $data): array
     {
@@ -276,9 +273,6 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Map CAT status to standard status
-     * 
-     * @param string $status
-     * @return string
      */
     protected function parseStatus(string $status): string
     {
@@ -299,14 +293,14 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine details from CAT API
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -315,14 +309,12 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -331,14 +323,14 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -347,14 +339,14 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -363,9 +355,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -379,8 +370,6 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {
@@ -389,8 +378,6 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Get API error if any occurred
-     * 
-     * @return string|null
      */
     public function getLastError(): ?string
     {

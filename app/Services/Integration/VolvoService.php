@@ -6,7 +6,7 @@ use Exception;
 
 /**
  * Volvo CareTrack Integration Service
- * 
+ *
  * Handles integration with Volvo CareTrack API (api.volvoce.com)
  * Uses OAuth 2.0 Client Credentials for authentication
  * Documentation: https://developer.volvoce.com/caretrack-api
@@ -20,38 +20,38 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Test connection to Volvo CareTrack API
-     * 
-     * @return bool
      */
     public function testConnection(): bool
     {
         try {
             // Test with machines endpoint
             $response = $this->makeRequest('GET', '/connected-machines/v1/machines');
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
     /**
      * Fetch machines from Volvo CareTrack API
-     * 
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/connected-machines/v1/machines');
-            
+
             $machines = [];
-            if (!empty($response['data'])) {
+            if (! empty($response['data'])) {
                 foreach ($response['data'] as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -59,6 +59,7 @@ class VolvoService extends BaseManufacturerService
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machines', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -69,21 +70,21 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch location data for equipment
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/connected-machines/v1/machines/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -93,9 +94,8 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch telemetry/metrics for equipment
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -105,36 +105,36 @@ class VolvoService extends BaseManufacturerService
             $health = $this->makeRequest('GET', "/connected-machines/v1/machines/{$machineId}/health");
             $utilization = $this->makeRequest('GET', "/connected-machines/v1/machines/{$machineId}/utilization");
             $fuel = $this->makeRequest('GET', "/connected-machines/v1/machines/{$machineId}/fuel");
-            
+
             $metrics = [];
-            
+
             // Parse telemetry data
-            if (!empty($telemetry['data'])) {
+            if (! empty($telemetry['data'])) {
                 foreach ($telemetry['data'] as $metric) {
                     $metrics[] = $this->parseMetric($metric);
                 }
             }
-            
+
             // Add health metrics
-            if (!empty($health['data'])) {
+            if (! empty($health['data'])) {
                 $metrics[] = [
                     'type' => 'health_status',
                     'value' => $health['data']['status'] ?? 'unknown',
                     'timestamp' => $health['data']['timestamp'] ?? now(),
                 ];
             }
-            
+
             // Add utilization metrics
-            if (!empty($utilization['data'])) {
+            if (! empty($utilization['data'])) {
                 $metrics[] = [
                     'type' => 'utilization',
                     'value' => $utilization['data']['percentage'] ?? 0,
                     'timestamp' => $utilization['data']['timestamp'] ?? now(),
                 ];
             }
-            
+
             // Add fuel metrics
-            if (!empty($fuel['data'])) {
+            if (! empty($fuel['data'])) {
                 $metrics[] = [
                     'type' => 'fuel_level',
                     'value' => $fuel['data']['level'] ?? 0,
@@ -142,13 +142,14 @@ class VolvoService extends BaseManufacturerService
                     'timestamp' => $fuel['data']['timestamp'] ?? now(),
                 ];
             }
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -159,36 +160,36 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch alerts/faults for equipment
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
         try {
             // CareTrack includes alerts in health endpoint
             $response = $this->makeRequest('GET', "/connected-machines/v1/machines/{$machineId}/health");
-            
+
             $alerts = [];
-            if (!empty($response['data']['alerts'])) {
+            if (! empty($response['data']['alerts'])) {
                 foreach ($response['data']['alerts'] as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
-            
+
             // Also check for faults/warnings
-            if (!empty($response['data']['faults'])) {
+            if (! empty($response['data']['faults'])) {
                 foreach ($response['data']['faults'] as $fault) {
                     $alerts[] = $this->parseAlert($fault);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch alerts', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -199,9 +200,8 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Parse equipment data from Volvo format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseMachineData(array $data): array
     {
@@ -226,9 +226,8 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Parse location data from Volvo format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -243,9 +242,8 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Parse diagnostic/metric data from Volvo format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -263,9 +261,8 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Parse alert/fault data from Volvo format
-     * 
-     * @param array $data
-     * @return array
+     *
+     * @return array<mixed>
      */
     protected function parseAlert(array $data): array
     {
@@ -282,9 +279,6 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Map Volvo equipment status to standard status
-     * 
-     * @param string $status
-     * @return string
      */
     protected function parseStatus(string $status): string
     {
@@ -307,14 +301,14 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch machine details from Volvo API
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -323,14 +317,12 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -339,14 +331,14 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -355,14 +347,14 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -371,9 +363,8 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -387,8 +378,6 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {
@@ -397,8 +386,6 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Get API error if any occurred
-     * 
-     * @return string|null
      */
     public function getLastError(): ?string
     {
