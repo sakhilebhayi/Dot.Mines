@@ -73,7 +73,7 @@ class FuelManagement extends Component
     public string $selectedTankId = '';
 
     // Refuel form
-    public string $refuelTankId = '';
+    public int|string $refuelTankId = '';
 
     public string $refuelQuantity = '';
 
@@ -211,7 +211,7 @@ class FuelManagement extends Component
     }
 
     // Unified modal open/close
-    public function openManageModal($tab = 'dispense'): void
+    public function openManageModal(string $tab = 'dispense'): void
     {
         $this->showManageModal = true;
         $this->setManageTab($tab);
@@ -236,7 +236,7 @@ class FuelManagement extends Component
         $this->reset(['allocationYear', 'allocationMonth', 'allocatedLiters', 'fuelPricePerLiter', 'allocationNotes']);
     }
 
-    public function setManageTab($tab): void
+    public function setManageTab(string $tab): void
     {
         $this->manageTab = $tab;
         // Optionally reset form fields when switching tabs
@@ -369,7 +369,7 @@ class FuelManagement extends Component
         }
     }
 
-    public function openRefuelModal($tankId): void
+    public function openRefuelModal(int $tankId): void
     {
         $this->refuelTankId = $tankId;
         $this->showRefuelModal = true;
@@ -381,7 +381,7 @@ class FuelManagement extends Component
         $this->reset(['refuelTankId', 'refuelQuantity', 'refuelUnitPrice', 'refuelNotes']);
     }
 
-    public function confirmDeleteTank($tankId): void
+    public function confirmDeleteTank(int $tankId): void
     {
         $this->confirmDeleteTankId = $tankId;
         $this->showDeleteConfirm = true;
@@ -404,7 +404,7 @@ class FuelManagement extends Component
     /**
      * Permanently delete a tank. Caller should ensure confirmation on the frontend.
      */
-    public function deleteTank($tankId): void
+    public function deleteTank(int $tankId): void
     {
         $user = Auth::user();
         $teamId = $user?->current_team_id;

@@ -36,32 +36,12 @@ parameters:
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
 
 		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:displayResults\\(\\) has parameter \\$machines with no type specified\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:generatePathForMachine\\(\\) has parameter \\$routes with no type specified\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:handleKomatsuDeletion\\(\\) has parameter \\$team with no type specified\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
 			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:interpolateAlongRoute\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
 
 		-
 			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:saveCoordinatesToDatabase\\(\\) has parameter \\$coordinates with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:selectBestRoute\\(\\) has parameter \\$routes with no type specified\\.$#"
 			count: 1
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
 
@@ -151,46 +131,6 @@ parameters:
 			path: app/Events/MachineOffline.php
 
 		-
-			message: "#^Method App\\\\Events\\\\MaintenanceAlertTriggered\\:\\:__construct\\(\\) has parameter \\$machine with no type specified\\.$#"
-			count: 1
-			path: app/Events/MaintenanceAlertTriggered.php
-
-		-
-			message: "#^Method App\\\\Events\\\\MaintenanceAlertTriggered\\:\\:__construct\\(\\) has parameter \\$predictedDate with no type specified\\.$#"
-			count: 1
-			path: app/Events/MaintenanceAlertTriggered.php
-
-		-
-			message: "#^Method App\\\\Events\\\\MaintenanceAlertTriggered\\:\\:__construct\\(\\) has parameter \\$probability with no type specified\\.$#"
-			count: 1
-			path: app/Events/MaintenanceAlertTriggered.php
-
-		-
-			message: "#^Method App\\\\Events\\\\MaintenanceAlertTriggered\\:\\:__construct\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Events/MaintenanceAlertTriggered.php
-
-		-
-			message: "#^Property App\\\\Events\\\\MaintenanceAlertTriggered\\:\\:\\$machine has no type specified\\.$#"
-			count: 1
-			path: app/Events/MaintenanceAlertTriggered.php
-
-		-
-			message: "#^Property App\\\\Events\\\\MaintenanceAlertTriggered\\:\\:\\$predictedDate has no type specified\\.$#"
-			count: 1
-			path: app/Events/MaintenanceAlertTriggered.php
-
-		-
-			message: "#^Property App\\\\Events\\\\MaintenanceAlertTriggered\\:\\:\\$probability has no type specified\\.$#"
-			count: 1
-			path: app/Events/MaintenanceAlertTriggered.php
-
-		-
-			message: "#^Property App\\\\Events\\\\MaintenanceAlertTriggered\\:\\:\\$teamId has no type specified\\.$#"
-			count: 1
-			path: app/Events/MaintenanceAlertTriggered.php
-
-		-
 			message: "#^Method App\\\\Events\\\\SensorReadingRecorded\\:\\:__construct\\(\\) has parameter \\$reading with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Events/SensorReadingRecorded.php
@@ -214,46 +154,6 @@ parameters:
 			message: "#^Property App\\\\Events\\\\SensorReadingRecorded\\:\\:\\$teamId has no type specified\\.$#"
 			count: 1
 			path: app/Events/SensorReadingRecorded.php
-
-		-
-			message: "#^Method App\\\\Events\\\\SensorStatusChanged\\:\\:__construct\\(\\) has parameter \\$newStatus with no type specified\\.$#"
-			count: 1
-			path: app/Events/SensorStatusChanged.php
-
-		-
-			message: "#^Method App\\\\Events\\\\SensorStatusChanged\\:\\:__construct\\(\\) has parameter \\$oldStatus with no type specified\\.$#"
-			count: 1
-			path: app/Events/SensorStatusChanged.php
-
-		-
-			message: "#^Method App\\\\Events\\\\SensorStatusChanged\\:\\:__construct\\(\\) has parameter \\$sensor with no type specified\\.$#"
-			count: 1
-			path: app/Events/SensorStatusChanged.php
-
-		-
-			message: "#^Method App\\\\Events\\\\SensorStatusChanged\\:\\:__construct\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Events/SensorStatusChanged.php
-
-		-
-			message: "#^Property App\\\\Events\\\\SensorStatusChanged\\:\\:\\$newStatus has no type specified\\.$#"
-			count: 1
-			path: app/Events/SensorStatusChanged.php
-
-		-
-			message: "#^Property App\\\\Events\\\\SensorStatusChanged\\:\\:\\$oldStatus has no type specified\\.$#"
-			count: 1
-			path: app/Events/SensorStatusChanged.php
-
-		-
-			message: "#^Property App\\\\Events\\\\SensorStatusChanged\\:\\:\\$sensor has no type specified\\.$#"
-			count: 1
-			path: app/Events/SensorStatusChanged.php
-
-		-
-			message: "#^Property App\\\\Events\\\\SensorStatusChanged\\:\\:\\$teamId has no type specified\\.$#"
-			count: 1
-			path: app/Events/SensorStatusChanged.php
 
 		-
 			message: "#^Parameter \\#1 \\$userId of method App\\\\Models\\\\Alert\\:\\:acknowledge\\(\\) expects int\\|null, int\\|string\\|null given\\.$#"
@@ -496,46 +396,6 @@ parameters:
 			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:acknowledgeAlert\\(\\) has parameter \\$alertId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:implementRecommendation\\(\\) has parameter \\$recommendationId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:markInsightAsRead\\(\\) has parameter \\$insightId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:promptRecommendationAction\\(\\) has parameter \\$action with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:promptRecommendationAction\\(\\) has parameter \\$recommendationId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:rejectRecommendation\\(\\) has parameter \\$recommendationId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:setCategory\\(\\) has parameter \\$category with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:setPriority\\(\\) has parameter \\$priority with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:\\$aiService has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/AIOptimizationDashboard.php
@@ -666,31 +526,6 @@ parameters:
 			path: app/Livewire/Fleet.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\FleetMovementReplay\\:\\:handlePositionUpdated\\(\\) has parameter \\$data with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FleetMovementReplay\\:\\:seekTo\\(\\) has parameter \\$position with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FleetMovementReplay\\:\\:setMachine\\(\\) has parameter \\$machineId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FleetMovementReplay\\:\\:setSpeed\\(\\) has parameter \\$speed with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FleetMovementReplay\\:\\:updated\\(\\) has parameter \\$propertyName with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FleetMovementReplay.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\FleetMovementReplay\\:\\:\\$listeners has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/FleetMovementReplay.php
@@ -707,31 +542,6 @@ parameters:
 
 		-
 			message: "#^If condition is always true\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:confirmDeleteTank\\(\\) has parameter \\$tankId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:deleteTank\\(\\) has parameter \\$tankId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:openManageModal\\(\\) has parameter \\$tab with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:openRefuelModal\\(\\) has parameter \\$tankId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:setManageTab\\(\\) has parameter \\$tab with no type specified\\.$#"
 			count: 1
 			path: app/Livewire/FuelManagement.php
 
@@ -779,36 +589,6 @@ parameters:
 			message: "#^Method App\\\\Livewire\\\\LiveMap\\:\\:updatedSelectedMineAreaId\\(\\) has parameter \\$value with no type specified\\.$#"
 			count: 1
 			path: app/Livewire/LiveMap.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:calculateMachineDelay\\(\\) has parameter \\$machine with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:cancelScheduledMaintenance\\(\\) has parameter \\$recordId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:completeScheduledMaintenance\\(\\) has parameter \\$recordId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:getDelayColorCode\\(\\) has parameter \\$hours with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:getDelaySeverity\\(\\) has parameter \\$hours with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:getDelayedMachines\\(\\) has parameter \\$teamId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
 
 		-
 			message: "#^Unable to resolve the template type TKey in call to function collect$#"
@@ -909,36 +689,6 @@ parameters:
 			message: "#^Property App\\\\Livewire\\\\Reports\\:\\:\\$reportTypes has no type specified\\.$#"
 			count: 1
 			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:deleteRoute\\(\\) has parameter \\$routeId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:updateEndPoint\\(\\) has parameter \\$lat with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:updateEndPoint\\(\\) has parameter \\$lon with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:updateStartPoint\\(\\) has parameter \\$lat with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:updateStartPoint\\(\\) has parameter \\$lon with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\RoutePlanning\\:\\:viewRoute\\(\\) has parameter \\$routeId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
 
 		-
 			message: "#^Parameter \\#1 \\$startLat of method App\\\\Services\\\\RoutePlanningService\\:\\:calculateOptimalRoute\\(\\) expects float, float\\|null given\\.$#"

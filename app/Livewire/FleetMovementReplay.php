@@ -291,7 +291,7 @@ class FleetMovementReplay extends Component
         ]);
     }
 
-    public function setMachine($machineId): void
+    public function setMachine(int $machineId): void
     {
         $this->selectedMachine = $machineId;
         $this->currentPosition = 0;
@@ -325,7 +325,7 @@ class FleetMovementReplay extends Component
         $this->dispatch('replay-stop');
     }
 
-    public function updated($propertyName): void
+    public function updated(string $propertyName): void
     {
         // When currentPosition is updated via wire:model, dispatch seek event
         if ($propertyName === 'currentPosition') {
@@ -337,7 +337,7 @@ class FleetMovementReplay extends Component
         }
     }
 
-    public function setSpeed($speed): void
+    public function setSpeed(int $speed): void
     {
         $this->playbackSpeed = $speed;
         if ($this->isPlaying) {
@@ -345,7 +345,7 @@ class FleetMovementReplay extends Component
         }
     }
 
-    public function seekTo($position): void
+    public function seekTo(int $position): void
     {
         $this->currentPosition = $position;
         $this->dispatch('replay-seek', position: $position);
@@ -356,7 +356,7 @@ class FleetMovementReplay extends Component
         $this->isPlaying = false;
     }
 
-    public function handlePositionUpdated($data): void
+    public function handlePositionUpdated(mixed $data): void
     {
         $this->currentPosition = $data['position'] ?? 0;
     }

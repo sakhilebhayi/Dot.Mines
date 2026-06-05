@@ -142,14 +142,8 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function completeScheduledMaintenance($recordId): void
+    public function completeScheduledMaintenance(int $recordId): void
     {
-        if (! is_numeric($recordId)) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
-
-            return;
-        }
-
         $record = MaintenanceRecord::where('team_id', auth()->user()->current_team_id)
             ->find($recordId);
 
@@ -182,14 +176,8 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function cancelScheduledMaintenance($recordId): void
+    public function cancelScheduledMaintenance(int $recordId): void
     {
-        if (! is_numeric($recordId)) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
-
-            return;
-        }
-
         $record = MaintenanceRecord::where('team_id', auth()->user()->current_team_id)
             ->find($recordId);
 
@@ -221,7 +209,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get delayed machines with reasons and color codes
      */
-    protected function getDelayedMachines($teamId): mixed
+    protected function getDelayedMachines(int $teamId): mixed
     {
         $delayedMachines = [];
 
@@ -260,7 +248,7 @@ class MaintenanceDashboard extends Component
     /**
      * Calculate delay information for a machine
      */
-    protected function calculateMachineDelay($machine): mixed
+    protected function calculateMachineDelay(mixed $machine): mixed
     {
         $delayInfo = [
             'is_delayed' => false,
@@ -332,7 +320,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get color code based on delay duration
      */
-    protected function getDelayColorCode($hours): string
+    protected function getDelayColorCode(int|float $hours): string
     {
         if ($hours >= 48) {
             return 'red'; // Critical - 2+ days
@@ -348,7 +336,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get delay severity label
      */
-    protected function getDelaySeverity($hours): string
+    protected function getDelaySeverity(int|float $hours): string
     {
         if ($hours >= 48) {
             return 'Critical';

@@ -298,7 +298,7 @@ class RoutePlanning extends Component
             ->toArray();
     }
 
-    public function viewRoute($routeId): void
+    public function viewRoute(int $routeId): void
     {
         $team = Auth::user()->currentTeam;
         $route = Route::where('team_id', $team->id)
@@ -340,7 +340,7 @@ class RoutePlanning extends Component
         }
     }
 
-    public function deleteRoute($routeId): void
+    public function deleteRoute(int $routeId): void
     {
         $team = Auth::user()->currentTeam;
         $route = Route::where('team_id', $team->id)
@@ -401,13 +401,13 @@ class RoutePlanning extends Component
         $this->dispatch('clearMapMarkers');
     }
 
-    public function updateStartPoint($lat, $lon): void
+    public function updateStartPoint(float $lat, float $lon): void
     {
         $this->startLat = $lat;
         $this->startLon = $lon;
     }
 
-    public function updateEndPoint($lat, $lon): void
+    public function updateEndPoint(float $lat, float $lon): void
     {
         $this->endLat = $lat;
         $this->endLon = $lon;

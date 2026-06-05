@@ -132,7 +132,7 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Handle deletion of Komatsu PC800-ALPHA coordinates
      */
-    protected function handleKomatsuDeletion($team): void
+    protected function handleKomatsuDeletion(mixed $team): void
     {
         $this->warn('❌ Deleting coordinates for Komatsu PC800-ALPHA...');
 
@@ -161,7 +161,7 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Generate path coordinates for a single machine
      */
-    protected function generatePathForMachine(Machine $machine, $routes): int
+    protected function generatePathForMachine(Machine $machine, mixed $routes): int
     {
         // Delete existing metrics for this machine first
         MachineMetric::where('machine_id', $machine->id)
@@ -185,7 +185,7 @@ class GenerateRoadsPathCoordinates extends Command
      * Select the best route for a machine based on proximity
      * Returns null for machines without specific routes to force OSRM generation
      */
-    protected function selectBestRoute(Machine $machine, $routes): mixed
+    protected function selectBestRoute(Machine $machine, mixed $routes): mixed
     {
         if ($routes->isEmpty()) {
             return null;
@@ -731,7 +731,7 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Display generation results
      */
-    protected function displayResults($machines): void
+    protected function displayResults(mixed $machines): void
     {
         $this->info('📊 Summary:');
         $this->table(

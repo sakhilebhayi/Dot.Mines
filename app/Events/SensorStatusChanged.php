@@ -12,15 +12,15 @@ class SensorStatusChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $sensor;
+    public mixed $sensor;
 
-    public $oldStatus;
+    public string $oldStatus;
 
-    public $newStatus;
+    public string $newStatus;
 
-    public $teamId;
+    public int $teamId;
 
-    public function __construct($sensor, $oldStatus, $newStatus, $teamId)
+    public function __construct(mixed $sensor, string $oldStatus, string $newStatus, int $teamId)
     {
         $this->sensor = $sensor;
         $this->oldStatus = $oldStatus;

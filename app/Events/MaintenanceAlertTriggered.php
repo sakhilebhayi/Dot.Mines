@@ -12,15 +12,15 @@ class MaintenanceAlertTriggered implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $machine;
+    public mixed $machine;
 
-    public $probability;
+    public float $probability;
 
-    public $predictedDate;
+    public mixed $predictedDate;
 
-    public $teamId;
+    public int $teamId;
 
-    public function __construct($machine, $probability, $predictedDate, $teamId)
+    public function __construct(mixed $machine, float $probability, mixed $predictedDate, int $teamId)
     {
         $this->machine = $machine;
         $this->probability = $probability;

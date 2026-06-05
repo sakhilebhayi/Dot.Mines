@@ -83,19 +83,19 @@ class AIOptimizationDashboard extends Component
         $this->analysisRunning = false;
     }
 
-    public function setCategory($category): void
+    public function setCategory(string $category): void
     {
         $this->selectedCategory = $category;
         $this->resetPage();
     }
 
-    public function setPriority($priority): void
+    public function setPriority(string $priority): void
     {
         $this->selectedPriority = $priority;
         $this->resetPage();
     }
 
-    public function implementRecommendation($recommendationId): void
+    public function implementRecommendation(int $recommendationId): void
     {
         $team = Auth::user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
@@ -113,7 +113,7 @@ class AIOptimizationDashboard extends Component
         }
     }
 
-    public function rejectRecommendation($recommendationId): void
+    public function rejectRecommendation(int $recommendationId): void
     {
         $team = Auth::user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
@@ -131,7 +131,7 @@ class AIOptimizationDashboard extends Component
         }
     }
 
-    public function promptRecommendationAction($recommendationId, $action): void
+    public function promptRecommendationAction(int $recommendationId, string $action): void
     {
         $this->pendingRecommendationId = $recommendationId;
         $this->pendingRecommendationAction = $action;
@@ -171,7 +171,7 @@ class AIOptimizationDashboard extends Component
         $this->pendingRecommendationAction = null;
     }
 
-    public function acknowledgeAlert($alertId): void
+    public function acknowledgeAlert(int $alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = AIPredictiveAlert::where('team_id', $team->id)->findOrFail($alertId);
@@ -244,7 +244,7 @@ class AIOptimizationDashboard extends Component
 
     // (Possibly missing function for alert acknowledgement should be implemented here if needed)
 
-    public function markInsightAsRead($insightId): void
+    public function markInsightAsRead(int $insightId): void
     {
         $team = Auth::user()->currentTeam;
         $insight = AIInsight::where('team_id', $team->id)->findOrFail($insightId);
