@@ -6,10 +6,10 @@ use App\Models\Machine;
 use App\Models\Report;
 use App\Support\Reports\ReportGeneration;
 use App\Traits\BrowserEventBridge;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class ReportGenerator extends Component

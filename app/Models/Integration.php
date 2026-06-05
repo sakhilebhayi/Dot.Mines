@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Database\Factories\IntegrationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,16 +26,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $webhook_url
  * @property string|null $webhook_secret
  * @property string $status
- * @property \Carbon\Carbon|null $last_sync_at
+ * @property Carbon|null $last_sync_at
  * @property string|null $last_sync_status
  * @property string|null $last_error
  * @property int $machines_count
  * @property array<string, mixed>|null $config
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Integration extends Model
 {
+    /** @use HasFactory<IntegrationFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [
@@ -76,7 +79,7 @@ class Integration extends Model
     /**
      * Get the team this integration belongs to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -85,7 +88,7 @@ class Integration extends Model
     /**
      * Get all machines synced from this integration
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Machine, $this> */
+    /** @return HasMany<Machine, $this> */
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);

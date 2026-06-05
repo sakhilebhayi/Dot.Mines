@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -27,7 +28,7 @@ class Navbar extends Component
         redirect()->route('login');
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.navbar', [
             'user' => Auth::user(),

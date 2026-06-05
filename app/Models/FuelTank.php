@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\FuelTankFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -36,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class FuelTank extends Model
 {
+    /** @use HasFactory<FuelTankFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

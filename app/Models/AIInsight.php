@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\AIInsightFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -72,6 +73,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class AIInsight extends Model
 {
+    /** @use HasFactory<AIInsightFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

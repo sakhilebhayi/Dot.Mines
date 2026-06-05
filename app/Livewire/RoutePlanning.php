@@ -8,9 +8,9 @@ use App\Models\MineArea;
 use App\Models\Route;
 use App\Models\Waypoint;
 use App\Services\RoutePlanningService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class RoutePlanning extends Component

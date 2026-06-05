@@ -7,9 +7,9 @@ use App\Models\AIAnalysisSession;
 use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
 use App\Models\AIRecommendation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class AIAnalytics extends Component

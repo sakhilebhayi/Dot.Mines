@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Mail\ReportReadyMail;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,6 +34,7 @@ use Illuminate\Support\Facades\Mail;
  */
 class Report extends Model
 {
+    /** @use HasFactory<ReportFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

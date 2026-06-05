@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Geofence;
 use App\Models\MineArea;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -157,7 +158,7 @@ class GeofenceManager extends Component
         $this->dispatchBrowserEvent('notify', ['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 

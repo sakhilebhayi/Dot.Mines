@@ -5,8 +5,8 @@ namespace App\Livewire;
 use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class GeofenceDetail extends Component

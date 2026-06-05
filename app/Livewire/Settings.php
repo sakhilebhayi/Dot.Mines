@@ -7,8 +7,8 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\UserFeedPreference;
 use App\Traits\BrowserEventBridge;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 

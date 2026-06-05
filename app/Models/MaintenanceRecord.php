@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\MaintenanceRecordFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +48,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class MaintenanceRecord extends Model
 {
+    /** @use HasFactory<MaintenanceRecordFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

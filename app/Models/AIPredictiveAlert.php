@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\AIPredictiveAlertFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -72,6 +73,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class AIPredictiveAlert extends Model
 {
+    /** @use HasFactory<AIPredictiveAlertFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

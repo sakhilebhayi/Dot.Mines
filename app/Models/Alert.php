@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\AlertFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,6 +40,7 @@ use Illuminate\Support\Facades\Auth;
  */
 class Alert extends Model
 {
+    /** @use HasFactory<AlertFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

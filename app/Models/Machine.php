@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\MachineFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -48,6 +49,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Machine extends Model
 {
+    /** @use HasFactory<MachineFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

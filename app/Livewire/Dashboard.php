@@ -2,10 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\ActivityLog;
 use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Services\QueryCacheService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -97,7 +99,7 @@ class Dashboard extends Component
             ->toArray();
 
         // Activity Feed
-        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $team->id)
+        $this->activityFeed = ActivityLog::where('team_id', $team->id)
             ->with('user')
             ->latest('created_at')
             ->take(10)
@@ -131,7 +133,7 @@ class Dashboard extends Component
         $this->dispatch('alert-updated', message: 'Alert acknowledged successfully');
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.dashboard');
     }

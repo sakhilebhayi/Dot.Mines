@@ -14,8 +14,8 @@ use App\Models\ProductionRecord;
 use App\Services\AI\AIOptimizationService;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 

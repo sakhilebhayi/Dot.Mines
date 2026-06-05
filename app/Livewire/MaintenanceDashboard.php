@@ -11,8 +11,8 @@ use App\Services\AI\MaintenancePredictorAgent;
 use App\Traits\BrowserEventBridge;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class MaintenanceDashboard extends Component

@@ -11,9 +11,9 @@ use App\Models\MineArea;
 use App\Services\AI\FuelPredictorAgent;
 use App\Services\FuelManagementService;
 use App\Traits\BrowserEventBridge;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class FuelManagement extends Component

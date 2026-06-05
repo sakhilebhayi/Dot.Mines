@@ -5,9 +5,9 @@ namespace App\Livewire;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
 use App\Traits\BrowserEventBridge;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class IntegrationManager extends Component

@@ -9,10 +9,10 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Traits\BrowserEventBridge;
 use App\Traits\RealtimeUpdates;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 

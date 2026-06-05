@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Database\Factories\AIAgentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class AIAgent extends Model
 {
+    /** @use HasFactory<AIAgentFactory> */
     use HasFactory;
 
     protected $table = 'ai_agents';

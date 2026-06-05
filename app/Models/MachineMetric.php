@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\MachineMetricFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,6 +47,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class MachineMetric extends Model
 {
+    /** @use HasFactory<MachineMetricFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

@@ -9,8 +9,8 @@ use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Services\ProductionService;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 

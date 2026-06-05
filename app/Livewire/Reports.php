@@ -11,13 +11,13 @@ use App\Models\User;
 use App\Support\Reports\ReportGeneration;
 use App\Traits\BrowserEventBridge;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 

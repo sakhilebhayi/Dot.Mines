@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\IoTSensorFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -46,6 +47,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class IoTSensor extends Model
 {
+    /** @use HasFactory<IoTSensorFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\AIPredictiveAlert;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
@@ -91,7 +92,7 @@ class AINotifications extends Component
         $this->loadNotifications();
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.ai-notifications');
     }

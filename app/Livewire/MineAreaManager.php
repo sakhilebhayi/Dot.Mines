@@ -4,9 +4,9 @@ namespace App\Livewire;
 
 use App\Models\MineArea;
 use App\Services\MineAreaService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 

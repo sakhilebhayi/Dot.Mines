@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\GeofenceFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Geofence extends Model
 {
+    /** @use HasFactory<GeofenceFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

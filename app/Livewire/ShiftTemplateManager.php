@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use App\Models\FeedPost;
 use App\Models\ShiftTemplate;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class ShiftTemplateManager extends Component

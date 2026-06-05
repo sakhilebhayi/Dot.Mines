@@ -9,8 +9,8 @@ use App\Models\MapEvent;
 use App\Models\MineArea;
 use App\Models\Route;
 use App\Traits\RealtimeUpdates;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Livewire\Component;
 
 class LiveMap extends Component
