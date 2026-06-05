@@ -88,6 +88,7 @@ class Fleet extends Component
 
     public int $loadingTimeMinutes = 0;
 
+    /** @var array<string, string> */
     protected $listeners = ['machineCreated' => 'machineCreated', 'machineDeleted' => 'machineDeleted'];
 
     public function updatedSearch(): void
@@ -565,6 +566,7 @@ class Fleet extends Component
      *
      * @return array{avg_cycle: float|null, avg_queue: float|null, avg_loading: float|null, machines: array}
      */
+    /** @return array<string, mixed> */
     private function buildTimingAnalytics(int $teamId): array
     {
         $machines = Machine::where('team_id', $teamId)

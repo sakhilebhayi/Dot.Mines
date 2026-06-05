@@ -60,6 +60,7 @@ class FleetMovementReplay extends Component
     // Route panel
     public bool $showRoutesPanel = false;
 
+    /** @var array<string, string> */
     protected $listeners = [
         'playback-stopped' => 'handlePlaybackStopped',
         'position-updated' => 'handlePositionUpdated',

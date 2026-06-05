@@ -232,6 +232,7 @@ class AlertGenerationJob implements ShouldQueue
     /**
      * Create or update an alert in the database and broadcast it.
      */
+    /** @param array<string, mixed> $alertData */
     private function createOrUpdateAlert(Machine $machine, array $alertData): Alert
     {
         // Check for existing active alert of same type

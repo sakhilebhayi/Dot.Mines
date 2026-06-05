@@ -13,11 +13,12 @@ class SensorReadingRecorded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $sensor;
+    public IoTSensor $sensor;
 
-    public $reading;
+    /** @var array<string, mixed> */
+    public array $reading;
 
-    public $teamId;
+    public int $teamId;
 
     public function __construct(IoTSensor $sensor, array $reading, int $teamId)
     {

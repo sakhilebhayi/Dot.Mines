@@ -168,6 +168,11 @@ class MapEvent extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
+    /**
+     * @param  string|array<string>  $types
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeOfType(Builder $query, string|array $types): Builder
     {
         if (is_array($types)) {

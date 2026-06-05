@@ -31,6 +31,7 @@ class MentionParser
      *
      * @return Collection<User>
      */
+    /** @param array<string> $handles */
     public function resolveUsers(array $handles, int $teamId): Collection
     {
         if (empty($handles)) {

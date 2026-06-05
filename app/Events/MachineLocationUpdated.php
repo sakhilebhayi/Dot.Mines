@@ -35,6 +35,7 @@ class MachineLocationUpdated implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
+    /** @param array<string, mixed> $location */
     public function __construct(Machine $machine, array $location)
     {
         $this->machine = $machine;

@@ -17,6 +17,7 @@ class RealTimeAlertService
     /**
      * Dispatch sensor reading alert
      */
+    /** @param array<string, mixed> $reading */
     public function dispatchSensorAlert(IoTSensor $sensor, array $reading, int $teamId, bool $isAnomaly = false): void
     {
         // Create notification record

@@ -41,6 +41,7 @@ class GeofenceManager extends Component
     /** @var array<string, mixed> */
     public array $coordinates = [];
 
+    /** @var array<string, string> */
     protected $listeners = ['geofenceCreated' => 'geofenceCreated'];
 
     public function updatedSearch(): void

@@ -70,7 +70,8 @@ class Feed extends Component
     /** @var array<string, mixed> */
     public array $composeMeta = [];
 
-    public $composeAttachments = [];   // uploaded files (Livewire temp)
+    /** @var array<mixed> */
+    public array $composeAttachments = [];   // uploaded files (Livewire temp)
 
     /** @var array<string, mixed> */
     public array $categoryTemplates = [];   // templates for current category

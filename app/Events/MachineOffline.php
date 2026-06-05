@@ -33,6 +33,7 @@ class MachineOffline implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
+    /** @param array<string, mixed>|null $lastLocation */
     public function __construct(Machine $machine, ?string $reason = null, ?array $lastLocation = null)
     {
         $this->machine = $machine;

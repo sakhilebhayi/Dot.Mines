@@ -77,6 +77,7 @@ class Settings extends Component
 
     public bool $digestSubscribed = false;
 
+    /** @var array<string, string|array<mixed>> */
     protected $rules = [
         'teamName' => 'required|string|max:255',
         'teamEmail' => 'nullable|email|max:255',

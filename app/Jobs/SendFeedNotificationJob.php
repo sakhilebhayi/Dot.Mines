@@ -27,7 +27,9 @@ class SendFeedNotificationJob implements ShouldQueue
      * @param  array{team_id:int, type:string, title:string, message:string, alert_level:string, data:array, action_url:string|null}  $payload
      */
     public function __construct(
+        /** @var array<int> */
         protected array $recipientIds,
+        /** @var array<string, mixed> */
         protected array $payload,
     ) {
         $this->onQueue('notifications');

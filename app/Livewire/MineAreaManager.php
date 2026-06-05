@@ -64,6 +64,7 @@ class MineAreaManager extends Component
 
     public bool $isDrawing = false;
 
+    /** @var array<string, string|array<mixed>> */
     protected $rules = [
         'name' => 'required|string|max:255',
         'description' => 'nullable|string|max:1000',
@@ -245,6 +246,7 @@ class MineAreaManager extends Component
         $this->boundaryCoordinates = null;
     }
 
+    /** @param array<mixed> $coordinates */
     public function setBoundary(array $coordinates): void
     {
         $this->boundaryCoordinates = $coordinates;

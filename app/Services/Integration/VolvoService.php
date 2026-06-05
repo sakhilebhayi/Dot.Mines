@@ -245,6 +245,10 @@ class VolvoService extends BaseManufacturerService
      *
      * @return array<mixed>
      */
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function parseMetric(array $data): array
     {
         return [
@@ -263,6 +267,10 @@ class VolvoService extends BaseManufacturerService
      * Parse alert/fault data from Volvo format
      *
      * @return array<mixed>
+     */
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function parseAlert(array $data): array
     {

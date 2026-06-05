@@ -164,6 +164,7 @@ class MachineLocationUpdateJob implements ShouldQueue
      * Determine if location has meaningfully changed.
      * Prevents unnecessary broadcasts if machine hasn't moved significantly.
      */
+    /** @param array<string, mixed> $newLocation */
     private function hasLocationChanged(Machine $machine, array $newLocation): bool
     {
         // Always update if no previous location

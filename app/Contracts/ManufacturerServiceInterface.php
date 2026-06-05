@@ -26,6 +26,7 @@ interface ManufacturerServiceInterface
     /**
      * Fetch real-time location for a machine
      */
+    /** @return array<string, mixed>|null */
     public function fetchMachineLocation(string $machineId): ?array;
 
     /**

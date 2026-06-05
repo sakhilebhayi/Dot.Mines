@@ -157,6 +157,7 @@ class MachineStatusMonitoringJob implements ShouldQueue
     /**
      * Determine machine status based on integration data.
      */
+    /** @param array<string, mixed> $status */
     private function determineStatus(array $status, Machine $machine): string
     {
         // Check if integration reports the machine as offline/disconnected

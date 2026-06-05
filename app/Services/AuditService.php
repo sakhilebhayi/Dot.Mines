@@ -20,18 +20,19 @@ class AuditService
     /**
      * Record an audit event.
      *
-     * @param  string       $action      One of the AuditLog::* constants
-     * @param  string|null  $description Human-readable summary of the action
-     * @param  Model|null   $subject     The Eloquent model that was acted upon
-     * @param  array        $meta        Additional structured context (old/new values, IDs, etc.)
-     * @param  int|null     $actorId     Defaults to auth()->id()
-     * @param  int|null     $teamId      Defaults to auth()->user()?->current_team_id
-     * @param  string|null  $ip          Defaults to request()->ip() (null in console/queue)
+     * @param  string  $action  One of the AuditLog::* constants
+     * @param  string|null  $description  Human-readable summary of the action
+     * @param  Model|null  $subject  The Eloquent model that was acted upon
+     * @param  array  $meta  Additional structured context (old/new values, IDs, etc.)
+     * @param  int|null  $actorId  Defaults to auth()->id()
+     * @param  int|null  $teamId  Defaults to auth()->user()?->current_team_id
+     * @param  string|null  $ip  Defaults to request()->ip() (null in console/queue)
      */
     public static function log(
         string $action,
         ?string $description = null,
         ?Model $subject = null,
+        /** @param array<string, mixed> $meta */
         array $meta = [],
         ?int $actorId = null,
         ?int $teamId = null,
@@ -49,21 +50,21 @@ class AuditService
             }
 
             AuditLog::create([
-                'actor_id'     => $actorId ?? auth()->id(),
-                'team_id'      => $teamId ?? auth()->user()?->current_team_id,
-                'action'       => $action,
-                'description'  => $description,
-                'ip_address'   => $resolvedIp,
+                'actor_id' => $actorId ?? auth()->id(),
+                'team_id' => $teamId ?? auth()->user()?->current_team_id,
+                'action' => $action,
+                'description' => $description,
+                'ip_address' => $resolvedIp,
                 'subject_type' => $subject !== null ? get_class($subject) : null,
-                'subject_id'   => $subject?->getKey(),
-                'meta'         => empty($meta) ? null : $meta,
+                'subject_id' => $subject?->getKey(),
+                'meta' => empty($meta) ? null : $meta,
             ]);
         } catch (\Throwable $e) {
             Log::error('AuditService: failed to record audit event', [
-                'action'       => $action,
+                'action' => $action,
                 'subject_type' => $subject !== null ? get_class($subject) : null,
-                'subject_id'   => $subject?->getKey(),
-                'error'        => $e->getMessage(),
+                'subject_id' => $subject?->getKey(),
+                'error' => $e->getMessage(),
             ]);
         }
     }

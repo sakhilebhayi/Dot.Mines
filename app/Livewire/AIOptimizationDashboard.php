@@ -11,6 +11,7 @@ use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\MaintenanceRecord;
 use App\Models\ProductionRecord;
+use App\Models\User;
 use App\Services\AI\AIOptimizationService;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -44,7 +45,7 @@ class AIOptimizationDashboard extends Component
 
     public bool $showRecommendationConfirm = false;
 
-    protected $aiService;
+    protected ?AIOptimizationService $aiService = null;
 
     public function boot(AIOptimizationService $aiService): void
     {
@@ -69,10 +70,12 @@ class AIOptimizationDashboard extends Component
         $this->analysisRunning = true;
 
         try {
-            $this->aiService->runComprehensiveAnalysis(
-                Auth::user()->currentTeam,
-                Auth::user()
-            );
+            /** @var User|null $user */
+            $user = Auth::user();
+            $team = $user?->currentTeam;
+            if ($team) {
+                $this->aiService?->runComprehensiveAnalysis($team, $user);
+            }
 
             $this->dispatch('analysis-completed');
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'AI analysis completed successfully!']);
@@ -258,7 +261,7 @@ class AIOptimizationDashboard extends Component
         $team = Auth::user()->currentTeam;
 
         // Get dashboard data
-        $dashboardData = $this->aiService->getDashboardInsights($team);
+        $dashboardData = $this->aiService?->getDashboardInsights($team) ?? [];
 
         // Get recommendations with filters
         $recommendationsQuery = AIRecommendation::where('team_id', $team->id)

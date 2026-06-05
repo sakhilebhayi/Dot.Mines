@@ -197,6 +197,7 @@ class MachineIdleMonitoringJob implements ShouldQueue
     /**
      * Create idle machine alert
      */
+    /** @param array<string, mixed> $idleStatus */
     private function createIdleAlert(Machine $machine, array $idleStatus): void
     {
         // Check if there's already a recent active alert

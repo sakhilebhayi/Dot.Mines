@@ -58,6 +58,7 @@ class InviteTeamMember implements InvitesTeamMembers
      *
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
+    /** @return array<string, string|array<mixed>> */
     protected function rules(Team $team): array
     {
         return array_filter([

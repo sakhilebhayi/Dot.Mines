@@ -82,6 +82,7 @@ class RoutePlanning extends Component
 
     public ?int $selectedRouteId = null;
 
+    /** @var array<string, string|array<mixed>> */
     protected $rules = [
         'name' => 'required|min:3|max:255',
         'machineId' => 'nullable|exists:machines,id',

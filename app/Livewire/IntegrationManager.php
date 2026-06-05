@@ -44,6 +44,7 @@ class IntegrationManager extends Component
         ],
     ];
 
+    /** @var array<string, string> */
     protected $listeners = ['refresh' => '$refresh'];
 
     public function mount(): void

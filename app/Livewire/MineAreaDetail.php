@@ -673,6 +673,7 @@ class MineAreaDetail extends Component
      *
      * @return array{has_system_data: bool, rows: array, machines: mixed}
      */
+    /** @return array<string, mixed> */
     private function buildComparisonData(int $teamId): array
     {
         $days = (int) ($this->comparisonPeriod ?: 30);

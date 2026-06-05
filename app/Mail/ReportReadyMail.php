@@ -11,7 +11,7 @@ class ReportReadyMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $report;
+    public Report $report;
 
     public function __construct(Report $report)
     {
@@ -23,7 +23,7 @@ class ReportReadyMail extends Mailable
         // Use a signed download route so file paths are not exposed in email
         $downloadUrl = '#';
         try {
-            if ($this->report && $this->report->status === 'completed') {
+            if ($this->report->status === 'completed') {
                 $downloadUrl = \URL::temporarySignedRoute(
                     'reports.signed-download',
                     now()->addHours(24),

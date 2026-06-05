@@ -133,6 +133,7 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
      * @param  float  $lon  Point longitude
      * @param  array  $polygon  Array of coordinates [[lat, lon], [lat, lon], ...]
      */
+    /** @param array<mixed> $polygon */
     private function isPointInPolygon(float $lat, float $lon, array $polygon): bool
     {
         if (empty($polygon) || count($polygon) < 3) {

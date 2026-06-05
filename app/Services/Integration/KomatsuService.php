@@ -241,6 +241,10 @@ class KomatsuService extends BaseManufacturerService
      *
      * @return array<mixed>
      */
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function parseMetric(array $data): array
     {
         return [
@@ -259,6 +263,10 @@ class KomatsuService extends BaseManufacturerService
      * Parse alert/notification data from Komatsu format
      *
      * @return array<mixed>
+     */
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function parseAlert(array $data): array
     {

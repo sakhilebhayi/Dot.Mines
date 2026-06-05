@@ -86,6 +86,7 @@ class Reports extends Component
 
     public string $historyApproval = '';
 
+    /** @var array<string, string> */
     protected $reportTypes = [
         'production' => 'Production Summary',
         'fleet_utilization' => 'Fleet Utilization',
