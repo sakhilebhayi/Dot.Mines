@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,20 +26,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|float $minimum_level_liters
  * @property string|null $fuel_type
  * @property string $status
- * @property string|\Carbon\Carbon|null $last_inspection_date
- * @property string|\Carbon\Carbon|null $next_inspection_date
+ * @property string|Carbon|null $last_inspection_date
+ * @property string|Carbon|null $next_inspection_date
  * @property string|null $notes
  * @property float $fill_percentage
  * @property float $available_capacity
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|FuelTank where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelTank whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelTank orderBy(string $column, string $direction = 'asc')
- * @method static FuelTank|null find(mixed $id, array $columns = ['*'])
- * @method static FuelTank findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class FuelTank extends Model
 {
@@ -80,19 +74,19 @@ class FuelTank extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FuelTransaction, $this> */
+    /** @return HasMany<FuelTransaction, $this> */
     public function transactions(): HasMany
     {
         return $this->hasMany(FuelTransaction::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FuelAlert, $this> */
+    /** @return HasMany<FuelAlert, $this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(FuelAlert::class);
@@ -101,7 +95,7 @@ class FuelTank extends Model
     /**
      * Belongs to a mine area (optional)
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class, 'mine_area_id');

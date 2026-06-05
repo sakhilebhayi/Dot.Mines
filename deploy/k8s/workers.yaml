@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mines-queue
+  namespace: mines
+  labels:
+    app: mines-queue
+    component: worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mines-queue
+  template:
+    metadata:
+      labels:
+        app: mines-queue
+        component: worker
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: queue
+          image: ghcr.io/sakhileb/mines:latest
+          imagePullPolicy: Always
+          command: ["php", "artisan", "queue:work", "--queue=default,notifications,reports", "--sleep=3", "--tries=3", "--timeout=90", "--max-jobs=500"]
+          envFrom:
+            - secretRef:
+                name: mines-secrets
+            - configMapRef:
+                name: mines-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/html/storage/app
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: mines-storage-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mines-scheduler
+  namespace: mines
+  labels:
+    app: mines-scheduler
+    component: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mines-scheduler
+  template:
+    metadata:
+      labels:
+        app: mines-scheduler
+        component: scheduler
+    spec:
+      containers:
+        - name: scheduler
+          image: ghcr.io/sakhileb/mines:latest
+          imagePullPolicy: Always
+          command: ["bash", "-c", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
+          envFrom:
+            - secretRef:
+                name: mines-secrets
+            - configMapRef:
+                name: mines-config
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mines-reverb
+  namespace: mines
+  labels:
+    app: mines-reverb
+    component: websocket
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mines-reverb
+  template:
+    metadata:
+      labels:
+        app: mines-reverb
+        component: websocket
+    spec:
+      containers:
+        - name: reverb
+          image: ghcr.io/sakhileb/mines:latest
+          imagePullPolicy: Always
+          command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+          ports:
+            - containerPort: 8080
+              name: ws
+          envFrom:
+            - secretRef:
+                name: mines-secrets
+            - configMapRef:
+                name: mines-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

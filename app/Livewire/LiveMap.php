@@ -2,12 +2,15 @@
 
 namespace App\Livewire;
 
+use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MapEvent;
+use App\Models\MineArea;
 use App\Models\Route;
 use App\Traits\RealtimeUpdates;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class LiveMap extends Component
@@ -79,7 +82,7 @@ class LiveMap extends Component
         $this->subscribeToTeamLocations();
     }
 
-    public function loadActivityFeed()
+    public function loadActivityFeed(): void
     {
         $team = Auth::user()->currentTeam;
 
@@ -89,7 +92,7 @@ class LiveMap extends Component
             return;
         }
 
-        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $team->id)
+        $this->activityFeed = ActivityLog::where('team_id', $team->id)
             ->latest('created_at')
             ->take(10)
             ->get()
@@ -300,7 +303,7 @@ class LiveMap extends Component
         ]);
     }
 
-    public function getMachines()
+    public function getMachines(): mixed
     {
         $team = Auth::user()->currentTeam;
 
@@ -319,12 +322,12 @@ class LiveMap extends Component
         return $machinesQuery->get();
     }
 
-    public function getMineAreas()
+    public function getMineAreas(): mixed
     {
         $team = Auth::user()->currentTeam;
 
         // Return active mine areas with coordinates decoded for client-side use
-        return \App\Models\MineArea::forTeam($team->id)
+        return MineArea::forTeam($team->id)
             ->byStatus('active')
             ->orderBy('name')
             ->get()
@@ -350,7 +353,7 @@ class LiveMap extends Component
         ]);
     }
 
-    public function getGeofences()
+    public function getGeofences(): mixed
     {
         $team = Auth::user()->currentTeam;
 
@@ -448,7 +451,7 @@ class LiveMap extends Component
         ];
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $machines = $this->getMachines();
         $geofences = $this->getGeofences();

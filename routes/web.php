@@ -1,13 +1,38 @@
 <?php
 
+use App\Http\Controllers\FeedAttachmentController;
+use App\Http\Controllers\GdprController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\MinePlanDownloadController;
 use App\Http\Controllers\PrivacyPolicyController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportDownloadController;
 use App\Http\Controllers\TermsOfServiceController;
+use App\Http\Controllers\WebhookController;
+use App\Livewire\AIAnalytics;
+use App\Livewire\AIOptimizationDashboard;
+use App\Livewire\Alerts;
+use App\Livewire\BillingPortal;
+use App\Livewire\Documentation;
+use App\Livewire\Feed;
+use App\Livewire\FeedAdminPanel;
+use App\Livewire\FleetMovementReplay;
+use App\Livewire\FuelManagement;
+use App\Livewire\MaintenanceDashboard;
+use App\Livewire\MineAreaDetail;
+use App\Livewire\ProductionDashboard;
+use App\Livewire\RoutePlanning;
+use App\Livewire\ShiftTemplateManager;
+use App\Livewire\WhatsAppMigration;
 use App\Models\Geofence;
+use App\Models\Integration;
 use App\Models\Machine;
 use App\Models\Report;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
+use Livewire\Mechanisms\HandleRequests\HandleRequests;
 
 // Test session routes are restricted to non-production local environments only.
 if (app()->environment('local') && config('app.debug')) {
@@ -17,6 +42,9 @@ if (app()->environment('local') && config('app.debug')) {
 // Override Jetstream's terms/policy controllers to use safe markdown rendering
 Route::get('/terms-of-service', [TermsOfServiceController::class, 'show'])->name('terms.show');
 Route::get('/privacy-policy', [PrivacyPolicyController::class, 'show'])->name('policy.show');
+
+// Health check — no auth, used by load balancers and monitoring services
+Route::get('/health', HealthController::class)->name('health');
 
 Route::get('/', function () {
     return view('welcome');
@@ -62,10 +90,10 @@ Route::middleware([
     })->name('fleet');
 
     // Specific fleet routes must come before parameterized routes
-    Route::get('/fleet/replay', App\Livewire\FleetMovementReplay::class)
+    Route::get('/fleet/replay', FleetMovementReplay::class)
         ->name('fleet.replay');
 
-    Route::get('/fleet/route-planning', App\Livewire\RoutePlanning::class)
+    Route::get('/fleet/route-planning', RoutePlanning::class)
         ->name('fleet.route-planning');
 
     // Parameterized route comes last
@@ -92,7 +120,7 @@ Route::middleware([
         return view('mine-areas.index');
     })->name('mine-areas');
 
-    Route::get('/mine-areas/{mineArea}', App\Livewire\MineAreaDetail::class)
+    Route::get('/mine-areas/{mineArea}', MineAreaDetail::class)
         ->name('mine-areas.show');
 
     // Reports
@@ -106,19 +134,19 @@ Route::middleware([
     })->name('report-generator');
 
     // Signed report download route (uses signed URLs created in emails)
-    Route::get('/reports/{report}/download', [\App\Http\Controllers\ReportDownloadController::class, 'download'])
+    Route::get('/reports/{report}/download', [ReportDownloadController::class, 'download'])
         ->middleware(['auth', 'throttle:downloads'])
         ->name('reports.signed-download');
 
     // Signed mine plan download route (mirror reports signed-download)
-    Route::get('/mine-plans/{minePlan}/download', [\App\Http\Controllers\MinePlanDownloadController::class, '__invoke'])
+    Route::get('/mine-plans/{minePlan}/download', [MinePlanDownloadController::class, '__invoke'])
         ->middleware(['auth', 'throttle:downloads'])
         ->name('mineplans.signed-download');
 
     // Reports view 2 (scope selectors) — must come BEFORE the {report} param route
-    Route::get('/reports/view-2', [App\Http\Controllers\ReportController::class, 'view2'])->name('reports.view2');
+    Route::get('/reports/view-2', [ReportController::class, 'view2'])->name('reports.view2');
     // Simple generate endpoint (GET form) — must come BEFORE the {report} param route
-    Route::get('/reports/generate/simple', [App\Http\Controllers\ReportController::class, 'generate'])->name('reports.generate');
+    Route::get('/reports/generate/simple', [ReportController::class, 'generate'])->name('reports.generate');
 
     Route::get('/reports/{report}', function (Report $report) {
         // Ensure the user belongs to the same team as this report.
@@ -131,29 +159,29 @@ Route::middleware([
     })->name('reports.show');
 
     // Alerts
-    Route::get('/alerts', App\Livewire\Alerts::class)
+    Route::get('/alerts', Alerts::class)
         ->name('alerts');
 
     // Production Dashboard
-    Route::get('/production', App\Livewire\ProductionDashboard::class)
+    Route::get('/production', ProductionDashboard::class)
         ->name('production');
 
     // Fuel Management
-    Route::get('/fuel', App\Livewire\FuelManagement::class)
+    Route::get('/fuel', FuelManagement::class)
         ->name('fuel');
 
     // Maintenance & Health
-    Route::get('/maintenance', App\Livewire\MaintenanceDashboard::class)
+    Route::get('/maintenance', MaintenanceDashboard::class)
         ->name('maintenance');
 
     // AI Optimization Center
-    Route::get('/ai-optimization', App\Livewire\AIOptimizationDashboard::class)
+    Route::get('/ai-optimization', AIOptimizationDashboard::class)
         ->name('ai-optimization');
-    Route::get('/ai-analytics', App\Livewire\AIAnalytics::class)
+    Route::get('/ai-analytics', AIAnalytics::class)
         ->name('ai-analytics');
 
     // Documentation
-    Route::get('/documentation', App\Livewire\Documentation::class)
+    Route::get('/documentation', Documentation::class)
         ->name('documentation');
 
     // Integrations
@@ -161,7 +189,7 @@ Route::middleware([
         return view('integrations.index');
     })->name('integrations');
 
-    Route::get('/integrations/{integration}', function (App\Models\Integration $integration) {
+    Route::get('/integrations/{integration}', function (Integration $integration) {
         // Verify the authenticated user belongs to the same team as this integration.
         abort_unless(
             Auth::user()->current_team_id === $integration->team_id,
@@ -172,10 +200,10 @@ Route::middleware([
     })->name('integrations.show');
 
     // Billing & Subscriptions
-    Route::get('/billing', App\Livewire\BillingPortal::class)
+    Route::get('/billing', BillingPortal::class)
         ->name('billing.index');
 
-    Route::get('/billing/success', function (\Illuminate\Http\Request $request) {
+    Route::get('/billing/success', function (Request $request) {
         $reference = $request->query('reference') ?? $request->query('trxref');
         if ($reference) {
             // Paystack redirects here after payment. Subscription is processed via webhook;
@@ -189,27 +217,27 @@ Route::middleware([
     })->name('billing.success');
 
     // Feed
-    Route::get('/feed', App\Livewire\Feed::class)
+    Route::get('/feed', Feed::class)
         ->name('feed');
 
     // Feed attachment file serving — streams binary blobs stored in the DB.
     // Must come before /feed/admin to avoid route collision.
-    Route::get('/feed/attachments/{attachment}', [App\Http\Controllers\FeedAttachmentController::class, 'serve'])
+    Route::get('/feed/attachments/{attachment}', [FeedAttachmentController::class, 'serve'])
         ->middleware('throttle:downloads')
         ->name('feed.attachment.serve');
 
     // Feed admin panel — restricted to admin role.
-    Route::get('/feed/admin', App\Livewire\FeedAdminPanel::class)
+    Route::get('/feed/admin', FeedAdminPanel::class)
         ->middleware('admin')
         ->name('feed.admin');
 
     // WhatsApp migration dashboard — restricted to admin role.
-    Route::get('/feed/migration', App\Livewire\WhatsAppMigration::class)
+    Route::get('/feed/migration', WhatsAppMigration::class)
         ->middleware('admin')
         ->name('feed.migration');
 
     // Shift Templates management (admin/supervisor UI)
-    Route::get('/shift-templates', App\Livewire\ShiftTemplateManager::class)
+    Route::get('/shift-templates', ShiftTemplateManager::class)
         ->name('shift-templates');
 
     // Settings
@@ -223,7 +251,7 @@ Route::middleware([
 });
 
 // Paystack Webhooks (HMAC-SHA512 signature verified inside controller; rate limited by IP)
-Route::post('/webhooks/paystack', [App\Http\Controllers\WebhookController::class, 'handlePaystack'])
+Route::post('/webhooks/paystack', [WebhookController::class, 'handlePaystack'])
     ->middleware('throttle:webhooks')
     ->name('webhooks.paystack');
 
@@ -242,6 +270,20 @@ Route::prefix('core-features')->group(function () {
 // Ensure Livewire update route exists (helps when routes are cached or Livewire
 // couldn't register its default route). This route name ends with
 // "livewire.update" so Livewire will detect it as the update endpoint.
-Route::post('/livewire/update', [\Livewire\Mechanisms\HandleRequests\HandleRequests::class, 'handleUpdate'])
+Route::post('/livewire/update', [HandleRequests::class, 'handleUpdate'])
     ->middleware('web')
     ->name('default.livewire.update');
+
+// ── GDPR / Data Subject Rights ─────────────────────────────────────────────
+Route::middleware(['auth', 'verified'])->prefix('gdpr')->name('gdpr.')->group(function () {
+    Route::get('/', [GdprController::class, 'index'])
+        ->name('index');
+    Route::post('/export', [GdprController::class, 'requestExport'])
+        ->middleware('throttle:3,60')
+        ->name('export');
+    Route::get('/download/{token}', [GdprController::class, 'downloadExport'])
+        ->name('download');
+    Route::post('/delete', [GdprController::class, 'requestDeletion'])
+        ->middleware('throttle:2,60')
+        ->name('delete');
+});

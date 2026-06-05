@@ -7,12 +7,16 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 /**
  * Base API Controller
- * 
- * All API controllers extend this for common functionality
+ *
+ * All API controllers extend this for common functionality.
+ * Current API version: v1
  */
 class Controller extends BaseController
 {
     use AuthorizesRequests;
+
+    /** Current API version string injected into responses. */
+    protected string $apiVersion = 'v1';
 
     public function __construct()
     {

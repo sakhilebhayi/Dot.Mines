@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,15 +36,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property array<string, mixed>|null $route_geometry
  * @property float $fuel_savings
  * @property int $time_savings
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Route where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Route whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Route orderBy(string $column, string $direction = 'asc')
- * @method static Route|null find(mixed $id, array<string> $columns = ['*'])
- * @method static Route findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,Route> all(array<string> $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Route extends Model
 {
@@ -92,7 +87,7 @@ class Route extends Model
     /**
      * Get the team that owns the route.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -101,7 +96,7 @@ class Route extends Model
     /**
      * Get the machine this route is planned for.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -110,7 +105,7 @@ class Route extends Model
     /**
      * Get the mine area this route belongs to.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
@@ -184,7 +179,11 @@ class Route extends Model
     /**
      * Scope query to active routes only
      */
-    public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
@@ -192,7 +191,11 @@ class Route extends Model
     /**
      * Scope query to draft routes only
      */
-    public function scopeDraft(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeDraft(Builder $query): Builder
     {
         return $query->where('status', 'draft');
     }

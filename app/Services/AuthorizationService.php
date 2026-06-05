@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
  * AuthorizationService
- * 
+ *
  * Service for handling role and permission logic
  * Provides convenience methods for authorization checks
  */
@@ -17,15 +19,15 @@ class AuthorizationService
     /**
      * Check if user can perform an action
      */
-    public static function can($user, $permission, $teamId = null): bool
+    public static function can(?User $user, string $permission, ?int $teamId = null): bool
     {
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         $teamId = $teamId ?? $user->current_team_id;
 
-        if (!$teamId) {
+        if (! $teamId) {
             return false;
         }
 
@@ -40,11 +42,11 @@ class AuthorizationService
     /**
      * Get all permissions for a role
      */
-    public static function getRolePermissions($role, $teamId = null): Collection
+    public static function getRolePermissions(Role|string $role, ?int $teamId = null): Collection
     {
         if (is_string($role)) {
             $role = Role::where('name', $role)
-                ->when($teamId, fn($q) => $q->where('team_id', $teamId))
+                ->when($teamId, fn ($q) => $q->where('team_id', $teamId))
                 ->first();
         }
 
@@ -54,7 +56,7 @@ class AuthorizationService
     /**
      * Get all roles for a team
      */
-    public static function getTeamRoles($teamId): Collection
+    public static function getTeamRoles(int $teamId): Collection
     {
         return Role::where('team_id', $teamId)->get();
     }
@@ -62,7 +64,7 @@ class AuthorizationService
     /**
      * Get all permissions for a team
      */
-    public static function getTeamPermissions($teamId): Collection
+    public static function getTeamPermissions(int $teamId): Collection
     {
         return Permission::where('team_id', $teamId)->get();
     }
@@ -70,7 +72,7 @@ class AuthorizationService
     /**
      * Get permissions grouped by group
      */
-    public static function getPermissionsByGroup($teamId): Collection
+    public static function getPermissionsByGroup(int $teamId): Collection
     {
         return Permission::where('team_id', $teamId)
             ->get()
@@ -80,7 +82,7 @@ class AuthorizationService
     /**
      * Get role with permissions
      */
-    public static function getRoleWithPermissions($roleId)
+    public static function getRoleWithPermissions($roleId): mixed
     {
         return Role::with('permissions')->findOrFail($roleId);
     }
@@ -88,7 +90,7 @@ class AuthorizationService
     /**
      * Create default roles for a team
      */
-    public static function createDefaultRoles($team)
+    public static function createDefaultRoles(Team $team): void
     {
         $roles = [
             [
@@ -127,7 +129,7 @@ class AuthorizationService
     /**
      * Assign user to role
      */
-    public static function assignUserRole($user, $role, $teamId = null)
+    public static function assignUserRole(User $user, Role|string $role, ?int $teamId = null): bool
     {
         $teamId = $teamId ?? $user->current_team_id;
 
@@ -137,17 +139,19 @@ class AuthorizationService
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
-        return $user->roles()->attach($role->id);
+        $user->roles()->attach($role->id);
+
+        return true;
     }
 
     /**
      * Remove user from role
      */
-    public static function removeUserRole($user, $role, $teamId = null)
+    public static function removeUserRole(User $user, Role|string $role, ?int $teamId = null): bool
     {
         $teamId = $teamId ?? $user->current_team_id;
 
@@ -157,10 +161,12 @@ class AuthorizationService
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
-        return $user->roles()->detach($role->id);
+        $user->roles()->detach($role->id);
+
+        return true;
     }
 }

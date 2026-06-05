@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,20 +15,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $violation_type
  * @property string $description
  * @property string $severity
- * @property \Carbon\Carbon $detected_at
- * @property \Carbon\Carbon $remediation_deadline
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon $detected_at
+ * @property Carbon $remediation_deadline
+ * @property Carbon|null $resolved_at
  * @property int|null $resolved_by
  * @property string|null $resolution_notes
  * @property array<string, mixed>|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|ComplianceViolation where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|ComplianceViolation whereIn(string $column, array<string|int> $values)
- * @method static ComplianceViolation|null find(mixed $id, array<string> $columns = ['*'])
- * @method static ComplianceViolation findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,ComplianceViolation> all(array<string> $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class ComplianceViolation extends Model
 {
@@ -64,7 +59,7 @@ class ComplianceViolation extends Model
     /**
      * Get the team that owns the violation.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -73,7 +68,7 @@ class ComplianceViolation extends Model
     /**
      * Get the user who resolved the violation.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function resolver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

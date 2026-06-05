@@ -10,7 +10,9 @@ use App\Models\MaintenanceSchedule;
 use App\Services\AI\MaintenancePredictorAgent;
 use App\Traits\BrowserEventBridge;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class MaintenanceDashboard extends Component
@@ -47,19 +49,19 @@ class MaintenanceDashboard extends Component
 
     public string $technician_notes = '';
 
-    public function openBookingModal()
+    public function openBookingModal(): void
     {
         $this->resetForm();
         $this->showBookingModal = true;
     }
 
-    public function closeBookingModal()
+    public function closeBookingModal(): void
     {
         $this->showBookingModal = false;
         $this->resetForm();
     }
 
-    public function resetForm()
+    public function resetForm(): void
     {
         $this->editingScheduleId = null;
         $this->machine_id = '';
@@ -74,7 +76,7 @@ class MaintenanceDashboard extends Component
         $this->technician_notes = '';
     }
 
-    public function bookMaintenance()
+    public function bookMaintenance(): void
     {
         $this->validate([
             'machine_id' => 'required|exists:machines,id',
@@ -140,7 +142,7 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function completeScheduledMaintenance($recordId)
+    public function completeScheduledMaintenance($recordId): void
     {
         if (! is_numeric($recordId)) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
@@ -180,7 +182,7 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function cancelScheduledMaintenance($recordId)
+    public function cancelScheduledMaintenance($recordId): void
     {
         if (! is_numeric($recordId)) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
@@ -219,7 +221,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get delayed machines with reasons and color codes
      */
-    protected function getDelayedMachines($teamId)
+    protected function getDelayedMachines($teamId): mixed
     {
         $delayedMachines = [];
 
@@ -258,7 +260,7 @@ class MaintenanceDashboard extends Component
     /**
      * Calculate delay information for a machine
      */
-    protected function calculateMachineDelay($machine)
+    protected function calculateMachineDelay($machine): mixed
     {
         $delayInfo = [
             'is_delayed' => false,
@@ -330,7 +332,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get color code based on delay duration
      */
-    protected function getDelayColorCode($hours)
+    protected function getDelayColorCode($hours): string
     {
         if ($hours >= 48) {
             return 'red'; // Critical - 2+ days
@@ -346,7 +348,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get delay severity label
      */
-    protected function getDelaySeverity($hours)
+    protected function getDelaySeverity($hours): string
     {
         if ($hours >= 48) {
             return 'Critical';
@@ -359,7 +361,7 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $teamId = auth()->user()->current_team_id;
 
@@ -497,7 +499,8 @@ class MaintenanceDashboard extends Component
         ]);
     }
 
-    protected function getDateRange()
+    /** @return array<string, CarbonInterface> */
+    protected function getDateRange(): array
     {
         return match ($this->selectedPeriod) {
             'today' => ['start' => now()->startOfDay(), 'end' => now()->endOfDay()],

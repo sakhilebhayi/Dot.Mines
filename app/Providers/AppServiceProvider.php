@@ -6,6 +6,7 @@ use App\Console\Commands\ScanBladeUnescaped;
 use App\Events\FeedCommentCreated;
 use App\Events\FeedPostCreated;
 use App\Events\FeedPostStatusChanged;
+use App\Listeners\NotifyOnJobFailed;
 use App\Listeners\SendFeedApprovalNotification;
 use App\Listeners\SendFeedCommentNotification;
 use App\Listeners\SendFeedPostNotification;
@@ -15,10 +16,17 @@ use App\Models\MaintenanceRecord;
 use App\Observers\MaintenanceRecordObserver;
 use App\Services\AuditService;
 use App\Services\RealtimeEventScheduler;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Lockout;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
@@ -42,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Detect N+1 queries in non-production environments
         if (! $this->app->environment('production')) {
-            \Illuminate\Database\Eloquent\Model::preventLazyLoading();
+            Model::preventLazyLoading();
         }
 
         // Register console commands so scanning is available in CI
@@ -76,15 +84,23 @@ class AppServiceProvider extends ServiceProvider
         // Sync machine status when maintenance records are created/updated
         MaintenanceRecord::observe(MaintenanceRecordObserver::class);
 
+        // Pulse dashboard access (admins only in non-local)
+        Gate::define('viewPulse', function ($user) {
+            $admins = array_filter(array_map('trim', explode(',', (string) env('HORIZON_ADMINS', ''))));
+
+            return in_array($user->email, $admins, true)
+                || $user->hasTeamRole($user->currentTeam, 'admin');
+        });
+
         // Feed notification listeners
         Event::listen(FeedPostCreated::class, SendFeedPostNotification::class);
         Event::listen(FeedCommentCreated::class, SendFeedCommentNotification::class);
         Event::listen(FeedPostStatusChanged::class, SendFeedApprovalNotification::class);
 
         // Listen for failed queue jobs and notify monitoring
-        Event::listen(\Illuminate\Queue\Events\JobFailed::class, function ($event) {
+        Event::listen(JobFailed::class, function ($event) {
             try {
-                $listener = new \App\Listeners\NotifyOnJobFailed;
+                $listener = new NotifyOnJobFailed;
                 $listener->handle($event);
             } catch (\Throwable $e) {
                 Log::error('Failed to notify on job failure', ['error' => $e->getMessage()]);
@@ -92,7 +108,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // ── Auth audit events ──────────────────────────────────────────────
-        Event::listen(\Illuminate\Auth\Events\Login::class, function ($event) {
+        Event::listen(Login::class, function ($event) {
             AuditService::log(
                 AuditLog::LOGIN_SUCCESS,
                 'Successful login',
@@ -103,7 +119,7 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        Event::listen(\Illuminate\Auth\Events\Failed::class, function ($event) {
+        Event::listen(Failed::class, function ($event) {
             AuditService::log(
                 AuditLog::LOGIN_FAILED,
                 'Failed login attempt for: '.($event->credentials['email'] ?? 'unknown'),
@@ -114,7 +130,7 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        Event::listen(\Illuminate\Auth\Events\Lockout::class, function ($event) {
+        Event::listen(Lockout::class, function ($event) {
             AuditService::log(
                 AuditLog::LOGIN_LOCKOUT,
                 'Account locked out due to too many failed login attempts',
@@ -126,7 +142,7 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        Event::listen(\Illuminate\Auth\Events\Logout::class, function ($event) {
+        Event::listen(Logout::class, function ($event) {
             AuditService::log(
                 AuditLog::LOGOUT,
                 'User logged out',

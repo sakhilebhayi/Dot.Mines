@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,16 +30,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $manager_name
  * @property string|null $manager_contact
  * @property array<string, mixed>|null $metadata
- * @property \Carbon\Carbon|null $deleted_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MineArea where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MineArea whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MineArea orderBy(string $column, string $direction = 'asc')
- * @method static MineArea|null find(mixed $id, array $columns = ['*'])
- * @method static MineArea findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon|null $deleted_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class MineArea extends Model
 {
@@ -79,7 +73,7 @@ class MineArea extends Model
     /**
      * Get the team this mine area belongs to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -88,7 +82,7 @@ class MineArea extends Model
     /**
      * Get machines assigned to this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Machine, $this> */
+    /** @return HasMany<Machine, $this> */
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
@@ -97,7 +91,7 @@ class MineArea extends Model
     /**
      * Get geofences in this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Geofence, $this> */
+    /** @return HasMany<Geofence, $this> */
     public function geofences(): HasMany
     {
         return $this->hasMany(Geofence::class);
@@ -106,7 +100,7 @@ class MineArea extends Model
     /**
      * Get alerts for this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Alert, $this> */
+    /** @return HasMany<Alert, $this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
@@ -115,7 +109,7 @@ class MineArea extends Model
     /**
      * Get production records for this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ProductionRecord, $this> */
+    /** @return HasMany<ProductionRecord, $this> */
     public function productionRecords(): HasMany
     {
         return $this->hasMany(ProductionRecord::class);
@@ -124,7 +118,7 @@ class MineArea extends Model
     /**
      * Get production targets for this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ProductionTarget, $this> */
+    /** @return HasMany<ProductionTarget, $this> */
     public function productionTargets(): HasMany
     {
         return $this->hasMany(ProductionTarget::class);
@@ -133,7 +127,7 @@ class MineArea extends Model
     /**
      * Get production forecasts for this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ProductionForecast, $this> */
+    /** @return HasMany<ProductionForecast, $this> */
     public function productionForecasts(): HasMany
     {
         return $this->hasMany(ProductionForecast::class);
@@ -142,7 +136,7 @@ class MineArea extends Model
     /**
      * Get mine plan uploads for this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MinePlanUpload, $this> */
+    /** @return HasMany<MinePlanUpload, $this> */
     public function minePlanUploads(): HasMany
     {
         return $this->hasMany(MinePlanUpload::class);
@@ -151,7 +145,7 @@ class MineArea extends Model
     /**
      * Get routes in this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Route, $this> */
+    /** @return HasMany<Route, $this> */
     public function routes(): HasMany
     {
         return $this->hasMany(Route::class);
@@ -160,7 +154,7 @@ class MineArea extends Model
     /**
      * Get assignment history for this mine area
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MachineAreaAssignment, $this> */
+    /** @return HasMany<MachineAreaAssignment, $this> */
     public function machineAssignments(): HasMany
     {
         return $this->hasMany(MachineAreaAssignment::class);

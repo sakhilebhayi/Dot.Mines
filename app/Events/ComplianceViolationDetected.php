@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -14,6 +13,7 @@ class ComplianceViolationDetected implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $violation;
+
     public $teamId;
 
     public function __construct($violation, $teamId)
@@ -27,12 +27,13 @@ class ComplianceViolationDetected implements ShouldBroadcast
         return new PrivateChannel("team.{$this->teamId}.compliance");
     }
 
-    public function broadcastAs()
+    public function broadcastAs(): mixed
     {
         return 'compliance.violation';
     }
 
-    public function broadcastWith()
+    /** @return array<string, mixed> */
+    public function broadcastWith(): array
     {
         return [
             'violation_id' => $this->violation->id,

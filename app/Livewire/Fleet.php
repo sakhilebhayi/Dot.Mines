@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\ActivityLog;
+use App\Models\AiRecommendationAction;
 use App\Models\EngineHourSession;
 use App\Models\Machine;
 use App\Models\MineArea;
@@ -9,6 +11,7 @@ use App\Models\Subscription;
 use App\Services\AI\FleetOptimizerAgent;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -630,7 +633,7 @@ class Fleet extends Component
         return $map;
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $this->isLoading = true;
         $team = Auth::user()->currentTeam;
@@ -681,7 +684,7 @@ class Fleet extends Component
         $worstPerformers = collect($performanceData)->sortBy('performance_score')->take(5)->values();
 
         // Activity Feed
-        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $teamId)
+        $this->activityFeed = ActivityLog::where('team_id', $teamId)
             ->with('user')
             ->latest('created_at')
             ->take(10)
@@ -734,7 +737,7 @@ class Fleet extends Component
         ]);
     }
 
-    public function implementRecommendation(int $index)
+    public function implementRecommendation(int $index): void
     {
         $team = Auth::user()->currentTeam;
         $rec = $this->lastAiRecommendations[$index] ?? null;
@@ -748,7 +751,7 @@ class Fleet extends Component
         $hash = md5((string) json_encode($rec));
 
         // Create action record
-        $action = \App\Models\AiRecommendationAction::create([
+        $action = AiRecommendationAction::create([
             'team_id' => $team->id,
             'recommendation_hash' => $hash,
             'recommendation' => $rec,
@@ -761,7 +764,7 @@ class Fleet extends Component
         if (! empty($rec['related_machine_id'])) {
             $machine = Machine::where('team_id', $team->id)->find($rec['related_machine_id']);
             if ($machine) {
-                \App\Models\ActivityLog::create([
+                ActivityLog::create([
                     'team_id' => $team->id,
                     'user_id' => Auth::id(),
                     'action' => 'ai_recommendation_implemented',
@@ -769,7 +772,7 @@ class Fleet extends Component
                 ]);
             }
         } else {
-            \App\Models\ActivityLog::create([
+            ActivityLog::create([
                 'team_id' => $team->id,
                 'user_id' => Auth::id(),
                 'action' => 'ai_recommendation_implemented',
@@ -781,14 +784,14 @@ class Fleet extends Component
         $this->dispatch('notify', message: 'Recommendation implemented. Performance will be tracked.', type: 'success');
     }
 
-    public function openRejectRecommendation(int $index)
+    public function openRejectRecommendation(int $index): void
     {
         $this->pendingRecommendationIndex = $index;
         $this->rejectReason = '';
         $this->showRejectRecommendationModal = true;
     }
 
-    public function confirmRejectRecommendation()
+    public function confirmRejectRecommendation(): void
     {
         if (empty(trim($this->rejectReason))) {
             $this->dispatch('notify', message: 'Please provide a reason for rejection', type: 'error');
@@ -807,7 +810,7 @@ class Fleet extends Component
 
         $hash = md5((string) json_encode($rec));
 
-        \App\Models\AiRecommendationAction::create([
+        AiRecommendationAction::create([
             'team_id' => $team->id,
             'recommendation_hash' => $hash,
             'recommendation' => $rec,
@@ -817,7 +820,7 @@ class Fleet extends Component
             'reject_reason' => $this->rejectReason,
         ]);
 
-        \App\Models\ActivityLog::create([
+        ActivityLog::create([
             'team_id' => $team->id,
             'user_id' => Auth::id(),
             'action' => 'ai_recommendation_rejected',

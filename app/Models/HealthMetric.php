@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,17 +24,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $is_normal
  * @property string|null $severity
  * @property string|null $sensor_id
- * @property \Carbon\Carbon $recorded_at
+ * @property Carbon $recorded_at
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|HealthMetric where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|HealthMetric whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|HealthMetric orderBy(string $column, string $direction = 'asc')
- * @method static HealthMetric|null find(mixed $id, array<string> $columns = ['*'])
- * @method static HealthMetric findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,HealthMetric> all(array<string> $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class HealthMetric extends Model
 {
@@ -72,13 +66,13 @@ class HealthMetric extends Model
     /**
      * Relationships
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);

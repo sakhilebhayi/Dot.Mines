@@ -10,10 +10,13 @@ use App\Models\MineArea;
 use App\Models\MinePlanUpload;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
+use App\Services\FileUploadService;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -81,7 +84,7 @@ class MineAreaDetail extends Component
 
     public string $planDescription = '';
 
-    public ?\Illuminate\Http\UploadedFile $planFile = null;
+    public ?UploadedFile $planFile = null;
 
     public string $planFileType = 'pdf';
 
@@ -107,7 +110,8 @@ class MineAreaDetail extends Component
 
     public ?int $selectedGeofenceId = null;
 
-    protected function rules()
+    /** @return array<string, mixed> */
+    protected function rules(): array
     {
         return [
             'selectedMachineId' => 'required_if:showAssignModal,true|nullable|exists:machines,id',
@@ -130,7 +134,7 @@ class MineAreaDetail extends Component
         ];
     }
 
-    public function mount(MineArea $mineArea)
+    public function mount(MineArea $mineArea): void
     {
         $team = Auth::user()->currentTeam;
         if ($mineArea->team_id !== $team->id) {
@@ -143,7 +147,7 @@ class MineAreaDetail extends Component
         $this->planEffectiveDate = now()->toDateString();
     }
 
-    public function setTab(string $tab)
+    public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
         $this->resetPage();
@@ -151,21 +155,21 @@ class MineAreaDetail extends Component
 
     // === MACHINE ASSIGNMENT ===
 
-    public function openAssignModal()
+    public function openAssignModal(): void
     {
         $this->showAssignModal = true;
         $this->selectedMachineId = null;
         $this->assignmentReason = '';
     }
 
-    public function closeAssignModal()
+    public function closeAssignModal(): void
     {
         $this->showAssignModal = false;
         $this->selectedMachineId = null;
         $this->assignmentReason = '';
     }
 
-    public function assignMachine()
+    public function assignMachine(): void
     {
         $this->validate([
             'selectedMachineId' => 'required|exists:machines,id',
@@ -193,7 +197,7 @@ class MineAreaDetail extends Component
         $this->dispatchBrowserEvent('notify', ['message' => "{$machine->name} assigned to {$this->mineArea->name}", 'type' => 'success']);
     }
 
-    public function unassignMachine(int $machineId)
+    public function unassignMachine(int $machineId): void
     {
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->findOrFail($machineId);
@@ -225,7 +229,7 @@ class MineAreaDetail extends Component
 
     // === PRODUCTION TRACKING ===
 
-    public function openProductionModal()
+    public function openProductionModal(): void
     {
         $this->showProductionModal = true;
         $this->productionDate = now()->toDateString();
@@ -236,12 +240,12 @@ class MineAreaDetail extends Component
         $this->productionMachineId = null;
     }
 
-    public function closeProductionModal()
+    public function closeProductionModal(): void
     {
         $this->showProductionModal = false;
     }
 
-    public function saveProductionRecord()
+    public function saveProductionRecord(): void
     {
         $this->validate([
             'productionDate' => 'required|date',
@@ -269,19 +273,19 @@ class MineAreaDetail extends Component
         $this->dispatchBrowserEvent('notify', ['message' => 'Production record saved successfully', 'type' => 'success']);
     }
 
-    public function openTargetModal()
+    public function openTargetModal(): void
     {
         $this->showTargetModal = true;
         $this->targetValue = null;
         $this->targetDescription = '';
     }
 
-    public function closeTargetModal()
+    public function closeTargetModal(): void
     {
         $this->showTargetModal = false;
     }
 
-    public function saveProductionTarget()
+    public function saveProductionTarget(): void
     {
         $this->validate([
             'targetStartDate' => 'required|date',
@@ -309,7 +313,7 @@ class MineAreaDetail extends Component
 
     // === MINE PLAN UPLOADS ===
 
-    public function openUploadModal()
+    public function openUploadModal(): void
     {
         $this->showUploadModal = true;
         $this->planTitle = '';
@@ -320,13 +324,13 @@ class MineAreaDetail extends Component
         $this->planEffectiveDate = now()->toDateString();
     }
 
-    public function closeUploadModal()
+    public function closeUploadModal(): void
     {
         $this->showUploadModal = false;
         $this->planFile = null;
     }
 
-    public function uploadMinePlan()
+    public function uploadMinePlan(): void
     {
         $this->validate([
             'planTitle' => 'required|string|max:255',
@@ -338,7 +342,7 @@ class MineAreaDetail extends Component
         $file = $this->planFile;
 
         try {
-            $uploader = new \App\Services\FileUploadService;
+            $uploader = new FileUploadService;
             $result = $uploader->storeMinePlan($file, $team->id, $this->mineArea->id);
 
             // Map extension to type
@@ -384,7 +388,7 @@ class MineAreaDetail extends Component
         }
     }
 
-    public function deleteMinePlan(int $planId)
+    public function deleteMinePlan(int $planId): void
     {
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
@@ -395,7 +399,7 @@ class MineAreaDetail extends Component
         $this->dispatchBrowserEvent('notify', ['message' => 'Mine plan deleted', 'type' => 'success']);
     }
 
-    public function activateMinePlan(int $planId)
+    public function activateMinePlan(int $planId): void
     {
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
@@ -404,7 +408,7 @@ class MineAreaDetail extends Component
         $this->dispatchBrowserEvent('notify', ['message' => 'Mine plan activated', 'type' => 'success']);
     }
 
-    public function archiveMinePlan(int $planId)
+    public function archiveMinePlan(int $planId): void
     {
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
@@ -415,7 +419,7 @@ class MineAreaDetail extends Component
 
     // === AREA-SPECIFIC ALERTS ===
 
-    public function openAlertModal()
+    public function openAlertModal(): void
     {
         $this->showAlertModal = true;
         $this->alertTitle = '';
@@ -424,12 +428,12 @@ class MineAreaDetail extends Component
         $this->alertPriority = 'medium';
     }
 
-    public function closeAlertModal()
+    public function closeAlertModal(): void
     {
         $this->showAlertModal = false;
     }
 
-    public function createAreaAlert()
+    public function createAreaAlert(): void
     {
         $this->validate([
             'alertTitle' => 'required|string|max:255',
@@ -458,7 +462,7 @@ class MineAreaDetail extends Component
         $this->dispatchBrowserEvent('notify', ['message' => 'Area alert created', 'type' => 'success']);
     }
 
-    public function acknowledgeAlert(int $alertId)
+    public function acknowledgeAlert(int $alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
@@ -467,7 +471,7 @@ class MineAreaDetail extends Component
         $this->dispatchBrowserEvent('notify', ['message' => 'Alert acknowledged', 'type' => 'success']);
     }
 
-    public function resolveAlert(int $alertId)
+    public function resolveAlert(int $alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
@@ -478,18 +482,18 @@ class MineAreaDetail extends Component
 
     // === GEOFENCE INTEGRATION ===
 
-    public function openGeofenceModal()
+    public function openGeofenceModal(): void
     {
         $this->showGeofenceModal = true;
         $this->selectedGeofenceId = null;
     }
 
-    public function closeGeofenceModal()
+    public function closeGeofenceModal(): void
     {
         $this->showGeofenceModal = false;
     }
 
-    public function linkGeofence()
+    public function linkGeofence(): void
     {
         $this->validate([
             'selectedGeofenceId' => 'required|exists:geofences,id',
@@ -503,7 +507,7 @@ class MineAreaDetail extends Component
         $this->dispatchBrowserEvent('notify', ['message' => "{$geofence->name} linked to {$this->mineArea->name}", 'type' => 'success']);
     }
 
-    public function unlinkGeofence(int $geofenceId)
+    public function unlinkGeofence(int $geofenceId): void
     {
         $team = Auth::user()->currentTeam;
         $geofence = Geofence::where('team_id', $team->id)->findOrFail($geofenceId);
@@ -514,7 +518,7 @@ class MineAreaDetail extends Component
 
     // === RENDER ===
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 
@@ -664,7 +668,7 @@ class MineAreaDetail extends Component
      * Build comparison data: system-recorded vs operator-reported quantities.
      * Grouped by date within the selected period, optionally filtered by machine.
      *
-     * @return array{has_system_data: bool, days: array, machines: array}
+     * @return array{has_system_data: bool, rows: array, machines: mixed}
      */
     private function buildComparisonData(int $teamId): array
     {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property int $team_id
  * @property int|null $machine_id
- * @property \Carbon\Carbon $shift_date
+ * @property Carbon $shift_date
  * @property string $shift_type
  * @property string $shift_start
  * @property string $shift_end
@@ -29,15 +30,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $is_rested
  * @property string|null $notes
  * @property array<string, mixed>|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue orderBy(string $column, string $direction = 'asc')
- * @method static OperatorFatigue|null find(mixed $id, array $columns = ['*'])
- * @method static OperatorFatigue findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class OperatorFatigue extends Model
 {
@@ -88,7 +82,7 @@ class OperatorFatigue extends Model
     /**
      * Get the user (operator) this fatigue record belongs to.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -97,7 +91,7 @@ class OperatorFatigue extends Model
     /**
      * Get the team this fatigue record belongs to.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -106,7 +100,7 @@ class OperatorFatigue extends Model
     /**
      * Get the machine this fatigue record is associated with.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);

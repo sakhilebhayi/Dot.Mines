@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,16 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $sensor_type
  * @property float $value
  * @property string $unit
- * @property \Carbon\Carbon $timestamp
+ * @property Carbon $timestamp
  * @property float $quality_score
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|SensorReading where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|SensorReading whereIn(string $column, array<string|int> $values)
- * @method static SensorReading|null find(mixed $id, array<string> $columns = ['*'])
- * @method static SensorReading findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,SensorReading> all(array<string> $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class SensorReading extends Model
 {
@@ -47,7 +42,7 @@ class SensorReading extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\IoTSensor, $this> */
+    /** @return BelongsTo<IoTSensor, $this> */
     public function sensor(): BelongsTo
     {
         return $this->belongsTo(IoTSensor::class);

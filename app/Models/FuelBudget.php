@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,22 +16,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $team_id
  * @property int|null $mine_area_id
  * @property string $period_type
- * @property \Carbon\Carbon $start_date
- * @property \Carbon\Carbon $end_date
+ * @property Carbon $start_date
+ * @property Carbon $end_date
  * @property float $budgeted_amount
  * @property float $budgeted_liters
  * @property float|null $actual_spent
  * @property float|null $actual_liters
  * @property string $status
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|FuelBudget where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelBudget whereIn(string $column, array<string|int> $values)
- * @method static FuelBudget|null find(mixed $id, array<string> $columns = ['*'])
- * @method static FuelBudget findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,FuelBudget> all(array<string> $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class FuelBudget extends Model
 {
@@ -67,7 +62,7 @@ class FuelBudget extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

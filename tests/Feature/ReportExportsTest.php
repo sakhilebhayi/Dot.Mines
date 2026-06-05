@@ -9,15 +9,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ReportExportsTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @dataProvider supportedFormats
-     */
+    #[DataProvider('supportedFormats')]
     public function test_generate_report_job_completes_supported_formats(string $format, string $extension, string $signature): void
     {
         Storage::fake('local');
@@ -46,7 +45,7 @@ class ReportExportsTest extends TestCase
 
         $this->assertSame('completed', $report->status);
         $this->assertNotNull($report->generated_at);
-        $this->assertStringEndsWith('.' . $extension, $report->file_path ?? '');
+        $this->assertStringEndsWith('.'.$extension, $report->file_path ?? '');
         Storage::assertExists($report->file_path);
 
         $contents = Storage::disk('local')->get($report->file_path);

@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\StoreMachineRequest;
+use App\Http\Requests\UpdateMachineRequest;
+use App\Http\Resources\AlertResource;
+use App\Http\Resources\MachineResource;
 use App\Models\AuditLog;
 use App\Models\Machine;
 use App\Services\AuditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -84,13 +89,13 @@ class MachineController extends Controller
      *
      * GET /api/machines/{id}
      */
-    public function show(Machine $machine): JsonResponse
+    public function show(Machine $machine): MachineResource
     {
         $this->authorize('view', $machine);
 
-        return response()->json([
-            'data' => $machine->load('metrics', 'alerts', 'geofenceEntries', 'integration'),
-        ]);
+        $machine->load(['metrics' => fn ($q) => $q->latest('created_at')->limit(20), 'alerts', 'integration']);
+
+        return MachineResource::make($machine);
     }
 
     /**
@@ -98,22 +103,9 @@ class MachineController extends Controller
      *
      * POST /api/machines
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreMachineRequest $request): JsonResponse
     {
-        $this->authorize('create', Machine::class);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'machine_type' => 'required|string|in:volvo,cat,komatsu,bell,ldv',
-            'model' => 'nullable|string|max:100',
-            'registration_number' => 'required|string|unique:machines,registration_number',
-            'serial_number' => 'required|string|unique:machines,serial_number',
-            'manufacturer_id' => 'nullable|string|max:255',
-            'capacity' => 'nullable|numeric|min:0',
-            'fuel_capacity' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-        ]);
-
+        $validated = $request->validated();
         $validated['team_id'] = Auth::user()->current_team_id;
         $validated['status'] = 'active';
 
@@ -126,10 +118,9 @@ class MachineController extends Controller
             ['registration_number' => $machine->registration_number, 'machine_type' => $machine->machine_type]
         );
 
-        return response()->json([
-            'data' => $machine,
-            'message' => 'Machine created successfully',
-        ], Response::HTTP_CREATED);
+        return MachineResource::make($machine)
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
@@ -137,18 +128,9 @@ class MachineController extends Controller
      *
      * PUT /api/machines/{id}
      */
-    public function update(Request $request, Machine $machine): JsonResponse
+    public function update(UpdateMachineRequest $request, Machine $machine): MachineResource
     {
-        $this->authorize('update', $machine);
-
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'model' => 'nullable|string|max:100',
-            'status' => 'sometimes|required|string|in:active,idle,maintenance,offline',
-            'capacity' => 'nullable|numeric|min:0',
-            'fuel_capacity' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $previousValues = array_intersect_key($machine->toArray(), $validated);
         $machine->update($validated);
@@ -160,10 +142,7 @@ class MachineController extends Controller
             ['previous' => $previousValues, 'updated' => $validated]
         );
 
-        return response()->json([
-            'data' => $machine,
-            'message' => 'Machine updated successfully',
-        ]);
+        return MachineResource::make($machine->fresh());
     }
 
     /**
@@ -224,7 +203,7 @@ class MachineController extends Controller
      *
      * POST /api/machines/{id}/location
      */
-    public function updateLocation(Request $request, Machine $machine): JsonResponse
+    public function updateLocation(Request $request, Machine $machine): MachineResource
     {
         $this->authorize('update', $machine);
 
@@ -235,10 +214,7 @@ class MachineController extends Controller
 
         $machine->updateLocation($validated['latitude'], $validated['longitude']);
 
-        return response()->json([
-            'data' => $machine,
-            'message' => 'Location updated successfully',
-        ]);
+        return MachineResource::make($machine->fresh());
     }
 
     /**
@@ -246,7 +222,7 @@ class MachineController extends Controller
      *
      * GET /api/machines/{id}/alerts
      */
-    public function alerts(Machine $machine): JsonResponse
+    public function alerts(Machine $machine): AnonymousResourceCollection
     {
         $this->authorize('view', $machine);
 
@@ -254,8 +230,6 @@ class MachineController extends Controller
             ->orderBy('priority', 'desc')
             ->get();
 
-        return response()->json([
-            'data' => $alerts,
-        ]);
+        return AlertResource::collection($alerts);
     }
 }

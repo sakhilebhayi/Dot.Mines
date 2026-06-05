@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mines-app
+  namespace: mines
+  labels:
+    app: mines-app
+    component: web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mines-app
+      component: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: mines-app
+        component: web
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: app
+          image: ghcr.io/sakhileb/mines:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          envFrom:
+            - secretRef:
+                name: mines-secrets
+            - configMapRef:
+                name: mines-config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/html/storage/app
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: mines-storage-pvc

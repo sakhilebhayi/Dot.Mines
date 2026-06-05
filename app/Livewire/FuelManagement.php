@@ -13,6 +13,7 @@ use App\Services\FuelManagementService;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class FuelManagement extends Component
@@ -86,7 +87,7 @@ class FuelManagement extends Component
 
     public ?int $confirmDeleteTankId = null;
 
-    public function recordDispensingTransaction()
+    public function recordDispensingTransaction(): void
     {
         $this->transactionError = '';
         $this->validate([
@@ -203,39 +204,39 @@ class FuelManagement extends Component
         }
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->allocationYear = now()->year;
         $this->allocationMonth = now()->month;
     }
 
     // Unified modal open/close
-    public function openManageModal($tab = 'dispense')
+    public function openManageModal($tab = 'dispense'): void
     {
         $this->showManageModal = true;
         $this->setManageTab($tab);
     }
 
-    public function closeManageModal()
+    public function closeManageModal(): void
     {
         $this->showManageModal = false;
     }
 
-    public function closeTankModal()
+    public function closeTankModal(): void
     {
         $this->showManageModal = false;
         $this->manageTab = 'dispense';
         $this->reset(['tankName', 'tankNumber', 'tankCapacity', 'tankMinimumLevel', 'tankFuelType', 'tankLocationDescription', 'tankNotes', 'tankMineAreaId']);
     }
 
-    public function closeAllocationModal()
+    public function closeAllocationModal(): void
     {
         $this->showManageModal = false;
         $this->manageTab = 'dispense';
         $this->reset(['allocationYear', 'allocationMonth', 'allocatedLiters', 'fuelPricePerLiter', 'allocationNotes']);
     }
 
-    public function setManageTab($tab)
+    public function setManageTab($tab): void
     {
         $this->manageTab = $tab;
         // Optionally reset form fields when switching tabs
@@ -248,7 +249,7 @@ class FuelManagement extends Component
         }
     }
 
-    public function saveTank()
+    public function saveTank(): void
     {
         $this->validate([
             'tankName' => 'required|string|max:255',
@@ -305,7 +306,7 @@ class FuelManagement extends Component
     /**
      * Refuel (record a refill/delivery) for a tank and update its current level.
      */
-    public function refuelTank()
+    public function refuelTank(): void
     {
         $this->validate([
             'refuelTankId' => 'required|exists:fuel_tanks,id',
@@ -368,31 +369,31 @@ class FuelManagement extends Component
         }
     }
 
-    public function openRefuelModal($tankId)
+    public function openRefuelModal($tankId): void
     {
         $this->refuelTankId = $tankId;
         $this->showRefuelModal = true;
     }
 
-    public function closeRefuelModal()
+    public function closeRefuelModal(): void
     {
         $this->showRefuelModal = false;
         $this->reset(['refuelTankId', 'refuelQuantity', 'refuelUnitPrice', 'refuelNotes']);
     }
 
-    public function confirmDeleteTank($tankId)
+    public function confirmDeleteTank($tankId): void
     {
         $this->confirmDeleteTankId = $tankId;
         $this->showDeleteConfirm = true;
     }
 
-    public function closeDeleteConfirm()
+    public function closeDeleteConfirm(): void
     {
         $this->showDeleteConfirm = false;
         $this->confirmDeleteTankId = null;
     }
 
-    public function performDeleteConfirmed()
+    public function performDeleteConfirmed(): void
     {
         if ($this->confirmDeleteTankId) {
             $this->deleteTank($this->confirmDeleteTankId);
@@ -403,7 +404,7 @@ class FuelManagement extends Component
     /**
      * Permanently delete a tank. Caller should ensure confirmation on the frontend.
      */
-    public function deleteTank($tankId)
+    public function deleteTank($tankId): void
     {
         $user = Auth::user();
         $teamId = $user?->current_team_id;
@@ -431,7 +432,7 @@ class FuelManagement extends Component
         }
     }
 
-    public function saveAllocation()
+    public function saveAllocation(): void
     {
         $this->validate([
             'allocationYear' => 'required|integer|min:2020|max:2100',
@@ -487,7 +488,7 @@ class FuelManagement extends Component
         }
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $teamId = auth()->user()->current_team_id;
 
@@ -602,7 +603,7 @@ class FuelManagement extends Component
         ]);
     }
 
-    protected function getDateRange()
+    protected function getDateRange(): mixed
     {
         return match ($this->selectedPeriod) {
             'today' => ['start' => now()->startOfDay(), 'end' => now()->endOfDay()],

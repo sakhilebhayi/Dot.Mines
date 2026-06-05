@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,16 +21,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float $accuracy_score
  * @property int $predictions_made
  * @property int $successful_predictions
- * @property \Carbon\Carbon|null $last_trained_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|AIAgent where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|AIAgent whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|AIAgent orderBy(string $column, string $direction = 'asc')
- * @method static AIAgent|null find(mixed $id, array $columns = ['*'])
- * @method static AIAgent findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon|null $last_trained_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class AIAgent extends Model
 {
@@ -78,25 +72,25 @@ class AIAgent extends Model
 
     const TYPE_ANOMALY_DETECTOR = 'anomaly_detector';
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AIRecommendation, $this> */
+    /** @return HasMany<AIRecommendation, $this> */
     public function recommendations(): HasMany
     {
         return $this->hasMany(AIRecommendation::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AIAnalysisSession, $this> */
+    /** @return HasMany<AIAnalysisSession, $this> */
     public function analysisSessions(): HasMany
     {
         return $this->hasMany(AIAnalysisSession::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AILearningData, $this> */
+    /** @return HasMany<AILearningData, $this> */
     public function learningData(): HasMany
     {
         return $this->hasMany(AILearningData::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\AIPredictiveAlert, $this> */
+    /** @return HasMany<AIPredictiveAlert, $this> */
     public function predictiveAlerts(): HasMany
     {
         return $this->hasMany(AIPredictiveAlert::class);

@@ -4,13 +4,14 @@ namespace App\Livewire;
 
 use App\Models\Machine;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class MachineDetail extends Component
 {
     public Machine $machine;
 
-    public function mount(Machine $machine)
+    public function mount(Machine $machine): void
     {
         if ($machine->team_id !== Auth::user()->currentTeam->id) {
             abort(403);
@@ -18,7 +19,7 @@ class MachineDetail extends Component
         $this->machine = $machine;
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $metrics = $this->machine->metrics()
             ->latest('created_at')

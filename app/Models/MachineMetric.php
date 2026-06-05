@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,16 +40,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $tire_pressure_rear_left
  * @property float|null $tire_pressure_rear_right
  * @property array<string, mixed>|null $raw_data
- * @property \Carbon\Carbon $recorded_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MachineMetric where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MachineMetric whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MachineMetric orderBy(string $column, string $direction = 'asc')
- * @method static MachineMetric|null find(mixed $id, array $columns = ['*'])
- * @method static MachineMetric findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $recorded_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class MachineMetric extends Model
 {
@@ -121,7 +115,7 @@ class MachineMetric extends Model
     /**
      * Get the machine this metric belongs to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -130,7 +124,7 @@ class MachineMetric extends Model
     /**
      * Get the team this metric belongs to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

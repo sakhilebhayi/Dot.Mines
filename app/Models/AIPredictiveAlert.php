@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property float|null $accuracy
  * @property float $accuracy_score
- * @property \Carbon\Carbon|null $acknowledged_at
+ * @property Carbon|null $acknowledged_at
  * @property mixed|null $acknowledged_by
  * @property array<string, mixed>|null $actual_output
  * @property mixed $ai_agent_id
@@ -19,10 +20,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $analysis_type
  * @property array<string, mixed>|null $capabilities
  * @property string $category
- * @property \Carbon\Carbon|null $completed_at
+ * @property Carbon|null $completed_at
  * @property float $confidence_score
  * @property array<string, mixed>|null $configuration
- * @property \Carbon\Carbon $created_at
+ * @property Carbon $created_at
  * @property array<string, mixed>|null $data
  * @property string $data_type
  * @property string|null $description
@@ -32,17 +33,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property array<string, mixed>|null $impact_analysis
  * @property string|null $implementation_notes
- * @property \Carbon\Carbon|null $implemented_at
+ * @property Carbon|null $implemented_at
  * @property mixed|null $implemented_by
  * @property array<string, mixed>|null $input_data
  * @property array<string, mixed>|null $input_parameters
  * @property string $insight_type
  * @property bool $is_acknowledged
  * @property bool $is_read
- * @property \Carbon\Carbon|null $last_trained_at
+ * @property Carbon|null $last_trained_at
  * @property string $name
  * @property string|null $notes
- * @property \Carbon\Carbon|null $predicted_occurrence
+ * @property Carbon|null $predicted_occurrence
  * @property array<string, mixed>|null $predicted_output
  * @property array<string, mixed>|null $predictions
  * @property int $predictions_made
@@ -57,24 +58,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property mixed|null $related_route_id
  * @property array<string, mixed>|null $results
  * @property string $severity
- * @property \Carbon\Carbon|null $started_at
+ * @property Carbon|null $started_at
  * @property string $status
  * @property int $successful_predictions
  * @property mixed $team_id
  * @property string $title
  * @property mixed $type
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $updated_at
  * @property mixed|null $user_id
- * @property \Carbon\Carbon|null $valid_until
+ * @property Carbon|null $valid_until
  * @property array<string, mixed>|null $visualization_data
  * @property bool|null $was_accurate
- *
- * @method static \Illuminate\Database\Eloquent\Builder|AIPredictiveAlert where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|AIPredictiveAlert whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|AIPredictiveAlert orderBy(string $column, string $direction = 'asc')
- * @method static AIPredictiveAlert|null find(mixed $id, array $columns = ['*'])
- * @method static AIPredictiveAlert findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class AIPredictiveAlert extends Model
 {

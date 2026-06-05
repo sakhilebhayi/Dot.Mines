@@ -2,15 +2,18 @@
 
 namespace App\Livewire;
 
+use App\Models\ActivityLog;
 use App\Models\Geofence;
+use App\Models\Machine;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class GeofenceDetail extends Component
 {
     public Geofence $geofence;
 
-    public function mount(Geofence $geofence)
+    public function mount(Geofence $geofence): void
     {
         if ($geofence->team_id !== Auth::user()->currentTeam->id) {
             abort(403);
@@ -18,7 +21,7 @@ class GeofenceDetail extends Component
         $this->geofence = $geofence;
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $recentEntries = $this->geofence->entries()
             ->with('machine')
@@ -40,15 +43,15 @@ class GeofenceDetail extends Component
 
         $machineTypeCounts = [];
         if (! empty($machineIds)) {
-            $machineTypeCounts = \App\Models\Machine::whereIn('id', $machineIds)
-                ->select('machine_type', DB::raw('count(*) as cnt'))
+            $machineTypeCounts = Machine::whereIn('id', $machineIds)
+                ->select(['machine_type', DB::raw('count(*) as cnt')])
                 ->groupBy('machine_type')
                 ->pluck('cnt', 'machine_type')
                 ->toArray();
         }
 
         // Team machine counts for tracked/untracked calculation
-        $teamMachineCount = \App\Models\Machine::where('team_id', $team->id)->count();
+        $teamMachineCount = Machine::where('team_id', $team->id)->count();
         $machinesTracked = $machineCount;
         $machinesUntracked = max(0, $teamMachineCount - $machinesTracked);
 
@@ -57,7 +60,7 @@ class GeofenceDetail extends Component
             $author = null;
 
             // Attempt to find an activity log that references this machine and mentions authorization
-            $possible = \App\Models\ActivityLog::where('team_id', $team->id)
+            $possible = ActivityLog::where('team_id', $team->id)
                 ->where(function ($q) use ($entry) {
                     $q->where('description', 'like', "%{$entry->machine->name}%")
                         ->orWhere('action', 'like', '%authoriz%')

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,22 +15,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $team_id
  * @property int $mine_area_id
  * @property string $period_type
- * @property string|\Carbon\Carbon $start_date
- * @property string|\Carbon\Carbon $end_date
+ * @property string|Carbon $start_date
+ * @property string|Carbon $end_date
  * @property string|float $target_quantity
  * @property string $unit
  * @property string|null $description
  * @property bool $is_active
- * @property \Carbon\Carbon|null $deleted_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionTarget where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionTarget whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionTarget orderBy(string $column, string $direction = 'asc')
- * @method static ProductionTarget|null find(mixed $id, array $columns = ['*'])
- * @method static ProductionTarget findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon|null $deleted_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class ProductionTarget extends Model
 {
@@ -60,13 +54,13 @@ class ProductionTarget extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);

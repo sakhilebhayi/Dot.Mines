@@ -19,11 +19,15 @@ use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\ProductionRecord;
 use App\Models\ShiftTemplate;
+use App\Models\User;
+use App\Services\FeedAttachmentService;
 use App\Services\MentionParser;
 use App\Traits\RealtimeUpdates;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -110,7 +114,7 @@ class Feed extends Component
     {
         $this->initializeRealtimeUpdates();
         $this->subscribeToFeed();
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $this->composeShift = $this->detectCurrentShift();
         $this->composeMineAreaId = $user->currentTeam?->mineAreas()->first()?->id;
@@ -130,7 +134,7 @@ class Feed extends Component
 
     // ── Computed data ─────────────────────────────────────────────────────────
 
-    public function getPosts()
+    public function getPosts(): mixed
     {
         $user = Auth::user();
 
@@ -175,7 +179,7 @@ class Feed extends Component
             ->paginate(20);
     }
 
-    public function getMineAreas()
+    public function getMineAreas(): mixed
     {
         return MineArea::orderBy('name')->get(['id', 'name']);
     }
@@ -225,7 +229,7 @@ class Feed extends Component
             ]);
 
             // Handle file attachments — stored in DB, not AWS
-            $attachmentService = app(\App\Services\FeedAttachmentService::class);
+            $attachmentService = app(FeedAttachmentService::class);
             foreach ($this->composeAttachments as $file) {
                 try {
                     $attachmentService->store($file, $post, $user);
@@ -315,7 +319,7 @@ class Feed extends Component
         }
     }
 
-    public function getComments(int $postId)
+    public function getComments(int $postId): mixed
     {
         return FeedComment::with(['author:id,name', 'replies.author:id,name'])
             ->where('post_id', $postId)
@@ -540,7 +544,7 @@ class Feed extends Component
 
     public function canApprove(): bool
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         return $user->hasRole(['admin', 'supervisor', 'manager', 'safety_officer']);
@@ -548,7 +552,7 @@ class Feed extends Component
 
     public function isAdmin(): bool
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         return $user->hasRole('admin');
@@ -561,7 +565,7 @@ class Feed extends Component
         abort_if(! $this->isAdmin(), 403);
         $post = FeedPost::findOrFail($postId);
         $post->update(['is_pinned' => true]);
-        FeedAuditLog::record('pin', $post, ['body_preview' => \Illuminate\Support\Str::limit($post->body, 80)]);
+        FeedAuditLog::record('pin', $post, ['body_preview' => Str::limit($post->body, 80)]);
         $this->dispatch('notify', type: 'success', message: 'Post pinned.');
     }
 
@@ -583,7 +587,7 @@ class Feed extends Component
         FeedAuditLog::record('admin_delete', $post, [
             'category' => $post->category,
             'author_id' => $post->author_id,
-            'body_preview' => \Illuminate\Support\Str::limit($post->body, 120),
+            'body_preview' => Str::limit($post->body, 120),
         ]);
         $post->delete();
         $this->dispatch('notify', type: 'success', message: 'Post deleted.');
@@ -666,7 +670,7 @@ class Feed extends Component
 
     public function getDailyProductionStats(): array
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $teamId = (int) $user->current_team_id;
         $today = Carbon::today();
@@ -693,7 +697,7 @@ class Feed extends Component
             ->whereNotNull('machine_id')
             ->groupBy('machine_id')
             ->map(function ($machineRecords) {
-                /** @var \App\Models\ProductionRecord $first */
+                /** @var ProductionRecord $first */
                 $first = $machineRecords->first();
                 $machine = $first->machine;
 
@@ -736,7 +740,7 @@ class Feed extends Component
 
     // ── Render ────────────────────────────────────────────────────────────────
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.feed', [
             'posts' => $this->getPosts(),

@@ -9,7 +9,9 @@ use App\Models\Team;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\FeedAttachmentService;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -611,10 +613,10 @@ class FeedStorageVerificationTest extends TestCase
         $callback = RateLimiter::limiter('uploads');
         $this->assertNotNull($callback, "'uploads' rate limiter must be registered");
 
-        $mockRequest = \Illuminate\Http\Request::create('/api/test', 'POST');
+        $mockRequest = Request::create('/api/test', 'POST');
         $mockRequest->setUserResolver(fn () => $user);
 
-        /** @var \Illuminate\Cache\RateLimiting\Limit $limit */
+        /** @var Limit $limit */
         $limit = $callback($mockRequest);
 
         $this->assertSame(10, $limit->maxAttempts,
@@ -639,7 +641,7 @@ class FeedStorageVerificationTest extends TestCase
         $response = $this->actingAs($attacker, 'sanctum')
             ->withHeaders(['Accept' => 'application/json'])
             ->postJson(
-                "/api/feed/{$post->id}/attachments",
+                "/api/v1/feed/{$post->id}/attachments",
                 ['file' => $this->makeFakeFile($this->minimalJpeg(), 'test.jpg', 'image/jpeg')]
             );
 

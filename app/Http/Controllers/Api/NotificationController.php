@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +13,7 @@ class NotificationController extends Controller
     /**
      * Get all notifications for team
      */
-    public function index(Request $request)
+    public function index(Request $request): mixed
     {
         $teamId = Auth::user()->current_team_id
             ?? (Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null);
@@ -58,7 +59,7 @@ class NotificationController extends Controller
     /**
      * Get unread notifications for user
      */
-    public function unread(Request $request)
+    public function unread(Request $request): mixed
     {
         $userId = Auth::user()->id;
         $teamId = Auth::user()->current_team_id
@@ -83,7 +84,7 @@ class NotificationController extends Controller
     /**
      * Mark notification as read
      */
-    public function markAsRead(Request $request, Notification $notification)
+    public function markAsRead(Request $request, Notification $notification): mixed
     {
         $this->authorize('view', $notification);
 
@@ -95,7 +96,7 @@ class NotificationController extends Controller
     /**
      * Mark multiple as read
      */
-    public function markMultipleAsRead(Request $request)
+    public function markMultipleAsRead(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'notification_ids' => 'required|array|min:1',
@@ -115,7 +116,7 @@ class NotificationController extends Controller
     /**
      * Get alert statistics
      */
-    public function stats(Request $request)
+    public function stats(Request $request): JsonResponse
     {
         $teamId = Auth::user()->current_team_id
             ?? (Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null);
@@ -150,7 +151,7 @@ class NotificationController extends Controller
     /**
      * Clear notifications
      */
-    public function clear(Request $request)
+    public function clear(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'type' => 'nullable|string|max:100|alpha_dash',

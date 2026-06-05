@@ -2,12 +2,20 @@
 
 namespace App\Livewire;
 
+use App\Models\AIAgent;
 use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
 use App\Models\AIRecommendation;
+use App\Models\FuelTransaction;
+use App\Models\Machine;
+use App\Models\MachineMetric;
+use App\Models\MaintenanceRecord;
+use App\Models\ProductionRecord;
 use App\Services\AI\AIOptimizationService;
 use App\Traits\BrowserEventBridge;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -38,12 +46,12 @@ class AIOptimizationDashboard extends Component
 
     protected $aiService;
 
-    public function boot(AIOptimizationService $aiService)
+    public function boot(AIOptimizationService $aiService): void
     {
         $this->aiService = $aiService;
     }
 
-    public function mount()
+    public function mount(): void
     {
         // Auto-run analysis if no recent data
         $teamId = Auth::user()->currentTeam?->id;
@@ -56,7 +64,7 @@ class AIOptimizationDashboard extends Component
         }
     }
 
-    public function runAnalysis()
+    public function runAnalysis(): void
     {
         $this->analysisRunning = true;
 
@@ -75,19 +83,19 @@ class AIOptimizationDashboard extends Component
         $this->analysisRunning = false;
     }
 
-    public function setCategory($category)
+    public function setCategory($category): void
     {
         $this->selectedCategory = $category;
         $this->resetPage();
     }
 
-    public function setPriority($priority)
+    public function setPriority($priority): void
     {
         $this->selectedPriority = $priority;
         $this->resetPage();
     }
 
-    public function implementRecommendation($recommendationId)
+    public function implementRecommendation($recommendationId): void
     {
         $team = Auth::user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
@@ -98,14 +106,14 @@ class AIOptimizationDashboard extends Component
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Recommendation marked as implemented!']);
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'implemented']);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to implement this recommendation.']);
 
             return;
         }
     }
 
-    public function rejectRecommendation($recommendationId)
+    public function rejectRecommendation($recommendationId): void
     {
         $team = Auth::user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
@@ -116,21 +124,21 @@ class AIOptimizationDashboard extends Component
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Recommendation rejected.']);
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'rejected']);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to reject this recommendation.']);
 
             return;
         }
     }
 
-    public function promptRecommendationAction($recommendationId, $action)
+    public function promptRecommendationAction($recommendationId, $action): void
     {
         $this->pendingRecommendationId = $recommendationId;
         $this->pendingRecommendationAction = $action;
         $this->showRecommendationConfirm = true;
     }
 
-    public function confirmRecommendationAction()
+    public function confirmRecommendationAction(): void
     {
         if (! $this->pendingRecommendationId || ! in_array($this->pendingRecommendationAction, ['implement', 'reject'])) {
             $this->showRecommendationConfirm = false;
@@ -156,17 +164,17 @@ class AIOptimizationDashboard extends Component
         $this->resetPage();
     }
 
-    public function cancelRecommendationAction()
+    public function cancelRecommendationAction(): void
     {
         $this->showRecommendationConfirm = false;
         $this->pendingRecommendationId = null;
         $this->pendingRecommendationAction = null;
     }
 
-    public function acknowledgeAlert($alertId)
+    public function acknowledgeAlert($alertId): void
     {
         $team = Auth::user()->currentTeam;
-        $alert = \App\Models\AIPredictiveAlert::where('team_id', $team->id)->findOrFail($alertId);
+        $alert = AIPredictiveAlert::where('team_id', $team->id)->findOrFail($alertId);
 
         $alert->update([
             'is_acknowledged' => true,
@@ -181,7 +189,7 @@ class AIOptimizationDashboard extends Component
     public function getOverviewDataProperty(): array
     {
 
-        $allRecs = \App\Models\AIRecommendation::where('team_id', $team->id)->get();
+        $allRecs = AIRecommendation::where('team_id', $team->id)->get();
         $pending = $allRecs->where('status', 'pending');
         $implemented = $allRecs->where('status', 'implemented');
         $total = $allRecs->count();
@@ -209,16 +217,16 @@ class AIOptimizationDashboard extends Component
             ];
         }
 
-        $agents = \App\Models\AIAgent::all();
+        $agents = AIAgent::all();
 
         // Data transparency: record counts from real system tables
         $teamId = $team->id;
         $dataPoints = [
-            'production_records' => \App\Models\ProductionRecord::where('team_id', $teamId)->count(),
-            'machines' => \App\Models\Machine::where('team_id', $teamId)->count(),
-            'maintenance_records' => \App\Models\MaintenanceRecord::where('team_id', $teamId)->count(),
-            'fuel_transactions' => \App\Models\FuelTransaction::where('team_id', $teamId)->count(),
-            'machine_metrics' => \App\Models\MachineMetric::where('team_id', $teamId)->count(),
+            'production_records' => ProductionRecord::where('team_id', $teamId)->count(),
+            'machines' => Machine::where('team_id', $teamId)->count(),
+            'maintenance_records' => MaintenanceRecord::where('team_id', $teamId)->count(),
+            'fuel_transactions' => FuelTransaction::where('team_id', $teamId)->count(),
+            'machine_metrics' => MachineMetric::where('team_id', $teamId)->count(),
         ];
 
         return [
@@ -236,7 +244,7 @@ class AIOptimizationDashboard extends Component
 
     // (Possibly missing function for alert acknowledgement should be implemented here if needed)
 
-    public function markInsightAsRead($insightId)
+    public function markInsightAsRead($insightId): void
     {
         $team = Auth::user()->currentTeam;
         $insight = AIInsight::where('team_id', $team->id)->findOrFail($insightId);
@@ -245,7 +253,7 @@ class AIOptimizationDashboard extends Component
         $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Insight marked as read.']);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 

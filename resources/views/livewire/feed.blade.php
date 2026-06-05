@@ -496,7 +496,7 @@
                             <div class="mt-2 h-1.5 bg-slate-600 rounded-full overflow-hidden">
                                 <div class="h-1.5 rounded-full transition-all duration-700
                                     {{ ($dailyStats['achievement'] ?? 0) >= 100 ? 'bg-emerald-500' : (($dailyStats['achievement'] ?? 0) >= 75 ? 'bg-amber-500' : 'bg-red-500') }}"
-                                    style="width: <?= min(100, (int) ($dailyStats['achievement'] ?? 0)) ?>%">
+                                    style="width: {{ min(100, (int) ($dailyStats['achievement'] ?? 0)) }}%">
                                 </div>
                             </div>
                             <p class="text-xs mt-1

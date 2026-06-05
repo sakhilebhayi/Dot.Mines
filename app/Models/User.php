@@ -2,18 +2,22 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * User Model
@@ -21,7 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $id
  * @property string $name
  * @property string $email
- * @property \Carbon\Carbon|null $email_verified_at
+ * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token
  * @property int|null $current_team_id
@@ -29,17 +33,17 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $two_factor_confirmed
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Team> $ownedTeams
- * @property-read \App\Models\Team|null $currentTeam
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Collection<int, PersonalAccessToken> $tokens
+ * @property-read Collection<int, Team> $ownedTeams
+ * @property-read Team|null $currentTeam
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
 
     use HasProfilePhoto;
@@ -96,7 +100,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get roles for current team
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Role, $this> */
+    /** @return BelongsToMany<Role, $this> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user');
@@ -105,18 +109,22 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get permissions through roles for current team
      */
-    public function permissions(): \Illuminate\Database\Query\Builder
+    public function permissions(): Builder
     {
         // Return a query builder for permissions granted to this user via their roles.
         // We join through permission_role -> roles -> role_user so callers can further
         // scope by team or permission name.
-        return Permission::query()
+        /** @var Builder $query */
+        $query = Permission::query()
             ->select('permissions.*')
             ->join('permission_role', 'permissions.id', '=', 'permission_role.permission_id')
             ->join('roles', 'permission_role.role_id', '=', 'roles.id')
             ->join('role_user', 'roles.id', '=', 'role_user.role_id')
             ->where('role_user.user_id', $this->id)
-            ->where('roles.team_id', $this->current_team_id);
+            ->where('roles.team_id', $this->current_team_id)
+            ->toBase();
+
+        return $query;
     }
 
     /**
@@ -230,9 +238,9 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get the teams owned by the user.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Team>
+     * @return HasMany<Team>
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Team, $this> */
+    /** @return HasMany<Team, $this> */
     public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'user_id');
@@ -241,9 +249,9 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get the current team of the user's context.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Team>
+     * @return BelongsTo<Team>
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function currentTeam(): BelongsTo
     {
         if (is_null($this->current_team_id) && $this->id) {

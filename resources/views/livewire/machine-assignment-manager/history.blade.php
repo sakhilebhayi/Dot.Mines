@@ -36,12 +36,11 @@
                                     @if($machine->pivot->unassigned_at)
                                         @php
                                             $duration = $machine->pivot->assigned_at->diff($machine->pivot->unassigned_at);
-                                            if ($duration->d > 0) {
-                                                echo $duration->d . 'd ' . $duration->h . 'h';
-                                            } else {
-                                                echo $duration->h . 'h ' . $duration->i . 'm';
-                                            }
+                                            $durationStr = $duration->d > 0
+                                                ? $duration->d . 'd ' . $duration->h . 'h'
+                                                : $duration->h . 'h ' . $duration->i . 'm';
                                         @endphp
+                                        {{ $durationStr }}
                                     @else
                                         —
                                     @endif

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,19 +15,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $machine_id
  * @property int $mine_area_id
  * @property int|null $assigned_by
- * @property \Carbon\Carbon $assigned_at
- * @property \Carbon\Carbon|null $unassigned_at
+ * @property Carbon $assigned_at
+ * @property Carbon|null $unassigned_at
  * @property string|null $reason
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MachineAreaAssignment where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MachineAreaAssignment whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MachineAreaAssignment orderBy(string $column, string $direction = 'asc')
- * @method static MachineAreaAssignment|null find(mixed $id, array $columns = ['*'])
- * @method static MachineAreaAssignment findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class MachineAreaAssignment extends Model
 {
@@ -54,25 +48,25 @@ class MachineAreaAssignment extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function assignedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_by');

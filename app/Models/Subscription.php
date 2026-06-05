@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,21 +23,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $paystack_email_token
  * @property string $status
  * @property string $billing_cycle
- * @property \Carbon\Carbon|null $trial_ends_at
- * @property \Carbon\Carbon|null $current_period_start
- * @property \Carbon\Carbon|null $current_period_end
- * @property \Carbon\Carbon|null $canceled_at
- * @property \Carbon\Carbon|null $ends_at
+ * @property Carbon|null $trial_ends_at
+ * @property Carbon|null $current_period_start
+ * @property Carbon|null $current_period_end
+ * @property Carbon|null $canceled_at
+ * @property Carbon|null $ends_at
  * @property array<string, mixed>|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription orderBy(string $column, string $direction = 'asc')
- * @method static Subscription|null find(mixed $id, array $columns = ['*'])
- * @method static Subscription findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription active()
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription onTrial()
  */
@@ -80,7 +75,7 @@ class Subscription extends Model
     /**
      * Get the team that owns the subscription.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -89,7 +84,7 @@ class Subscription extends Model
     /**
      * Get the plan for this subscription.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\SubscriptionPlan, $this> */
+    /** @return BelongsTo<SubscriptionPlan, $this> */
     public function plan(): BelongsTo
     {
         return $this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id');
@@ -98,7 +93,7 @@ class Subscription extends Model
     /**
      * Get payments for this subscription.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Payment, $this> */
+    /** @return HasMany<Payment, $this> */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
@@ -107,7 +102,7 @@ class Subscription extends Model
     /**
      * Get invoices for this subscription.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Invoice, $this> */
+    /** @return HasMany<Invoice, $this> */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
@@ -247,6 +242,6 @@ class Subscription extends Model
             return false; // unlimited plan
         }
 
-        return \App\Models\Machine::where('team_id', $teamId)->count() >= $max;
+        return Machine::where('team_id', $teamId)->count() >= $max;
     }
 }

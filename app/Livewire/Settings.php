@@ -3,10 +3,12 @@
 namespace App\Livewire;
 
 use App\Models\DigestSubscription;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserFeedPreference;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -83,7 +85,7 @@ class Settings extends Component
         'currency' => 'required|in:USD,EUR,GBP,ZAR,AUD,CAD,JPY,CNY,INR,BRL',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $team = Auth::user()->currentTeam;
 
@@ -101,7 +103,7 @@ class Settings extends Component
         $this->loadFeedPreferences();
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.settings', [
             'roles' => $this->getRoles(),
@@ -111,14 +113,14 @@ class Settings extends Component
         ]);
     }
 
-    public function setActiveTab(string $tab)
+    public function setActiveTab(string $tab): void
     {
         $this->activeTab = $tab;
     }
 
     // ==================== GENERAL SETTINGS ====================
 
-    public function saveGeneralSettings()
+    public function saveGeneralSettings(): void
     {
         $this->validate();
 
@@ -136,7 +138,7 @@ class Settings extends Component
 
     // ==================== USERS & ROLES ====================
 
-    public function loadTeamMembers()
+    public function loadTeamMembers(): void
     {
         $team = Auth::user()->currentTeam;
         $this->teamMembers = $team->users()
@@ -154,7 +156,7 @@ class Settings extends Component
             ->toArray();
     }
 
-    public function toggleInviteForm()
+    public function toggleInviteForm(): void
     {
         $this->showInviteForm = ! $this->showInviteForm;
         if (! $this->showInviteForm) {
@@ -163,7 +165,7 @@ class Settings extends Component
         }
     }
 
-    public function inviteUser()
+    public function inviteUser(): void
     {
         $this->validate([
             'inviteEmail' => 'required|email|max:255',
@@ -195,7 +197,7 @@ class Settings extends Component
             $team->users()->attach($existingUser->id);
 
             // Assign role
-            $role = \App\Models\Role::where('name', $this->selectedRole)->first();
+            $role = Role::where('name', $this->selectedRole)->first();
             if ($role) {
                 $existingUser->roles()->attach($role->id);
             }
@@ -210,7 +212,7 @@ class Settings extends Component
         }
     }
 
-    public function removeUser($userId)
+    public function removeUser($userId): void
     {
         try {
             $team = Auth::user()->currentTeam;
@@ -231,7 +233,7 @@ class Settings extends Component
         }
     }
 
-    public function updateUserRole($userId, $newRole)
+    public function updateUserRole($userId, $newRole): void
     {
         try {
             $team = Auth::user()->currentTeam;
@@ -249,7 +251,7 @@ class Settings extends Component
             $user->roles()->detach();
 
             // Add new role
-            $role = \App\Models\Role::where('name', $newRole)->first();
+            $role = Role::where('name', $newRole)->first();
             if ($role) {
                 $user->roles()->attach($role->id);
             }
@@ -312,7 +314,7 @@ class Settings extends Component
 
     // ==================== NOTIFICATION SETTINGS ====================
 
-    public function saveNotificationSettings()
+    public function saveNotificationSettings(): void
     {
         try {
             // Store in user preferences

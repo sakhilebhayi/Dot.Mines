@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\Route;
+use App\Models\Team;
 use App\Services\RoutePlanningService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -62,7 +63,7 @@ class GenerateRoadsPathCoordinates extends Command
         $specificMachineId = $this->option('machine');
 
         // Get team
-        $team = \App\Models\Team::find($this->teamId);
+        $team = Team::find($this->teamId);
         if (! $team) {
             $this->error("❌ Team with ID {$this->teamId} not found");
 
@@ -184,7 +185,7 @@ class GenerateRoadsPathCoordinates extends Command
      * Select the best route for a machine based on proximity
      * Returns null for machines without specific routes to force OSRM generation
      */
-    protected function selectBestRoute(Machine $machine, $routes)
+    protected function selectBestRoute(Machine $machine, $routes): mixed
     {
         if ($routes->isEmpty()) {
             return null;

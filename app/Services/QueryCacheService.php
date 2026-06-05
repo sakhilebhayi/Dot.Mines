@@ -32,7 +32,7 @@ class QueryCacheService
     /**
      * Cache machine list for team
      */
-    public static function machineList(int $teamId, array $filters, callable $callback)
+    public static function machineList(int $teamId, array $filters, callable $callback): mixed
     {
         $filterKey = md5((string) json_encode($filters));
 
@@ -46,7 +46,7 @@ class QueryCacheService
     /**
      * Cache machine details
      */
-    public static function machineDetails(int $machineId, callable $callback)
+    public static function machineDetails(int $machineId, callable $callback): mixed
     {
         return Cache::remember(
             "machine_details_{$machineId}",

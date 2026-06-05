@@ -11,10 +11,13 @@ use App\Models\User;
 use App\Support\Reports\ReportGeneration;
 use App\Traits\BrowserEventBridge;
 use Carbon\Carbon;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -40,7 +43,7 @@ class Reports extends Component
 
     public string $selectedMachineId = '';
 
-    public ?\Illuminate\Support\Collection $machinesList = null;
+    public ?Collection $machinesList = null;
 
     public bool $showDeleteConfirm = false;
 
@@ -92,7 +95,7 @@ class Reports extends Component
         'downtime_analysis' => 'Downtime Analysis',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->sortBy = 'created_at';
         $this->sortDirection = 'desc';
@@ -116,7 +119,7 @@ class Reports extends Component
 
     // ── Generated Reports ──────────────────────────────────────────────────────
 
-    public function getReports()
+    public function getReports(): mixed
     {
         $team = Auth::user()->currentTeam;
 
@@ -169,7 +172,7 @@ class Reports extends Component
         // wire:poll keeps the generated reports table current while background jobs run.
     }
 
-    public function setSortBy($column)
+    public function setSortBy($column): void
     {
         $allowed = ['title', 'created_at', 'type'];
         if (! in_array($column, $allowed, true)) {
@@ -183,7 +186,7 @@ class Reports extends Component
         }
     }
 
-    public function deleteReport($reportId)
+    public function deleteReport($reportId): void
     {
         if (! is_numeric($reportId)) {
             $this->dispatch('notify', type: 'error', message: 'Invalid report ID');
@@ -202,7 +205,7 @@ class Reports extends Component
         }
 
         try {
-            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+            /** @var FilesystemAdapter $disk */
             $disk = Storage::disk(config('reports.disk', 'local'));
 
             if ($report->file_path && $disk->exists($report->file_path)) {
@@ -232,24 +235,24 @@ class Reports extends Component
         $this->deleteReportId = null;
     }
 
-    public function confirmDelete($reportId)
+    public function confirmDelete($reportId): void
     {
         $this->deleteReportId = $reportId;
         $this->showDeleteConfirm = true;
     }
 
-    public function cancelDelete()
+    public function cancelDelete(): void
     {
         $this->showDeleteConfirm = false;
         $this->deleteReportId = null;
     }
 
-    public function downloadReport($reportId)
+    public function downloadReport($reportId): mixed
     {
         if (! is_numeric($reportId)) {
             $this->dispatch('notify', type: 'error', message: 'Invalid report ID');
 
-            return;
+            return null;
         }
 
         $team = Auth::user()->currentTeam;
@@ -258,17 +261,17 @@ class Reports extends Component
         if (! $report) {
             $this->dispatch('notify', type: 'error', message: 'Report not found or access denied');
 
-            return;
+            return null;
         }
 
         if ($report->status !== 'completed') {
             $this->dispatch('notify', type: 'warning', message: 'Report is not ready for download');
 
-            return;
+            return null;
         }
 
         if ($report->file_path && ! str_contains($report->file_path, '..')) {
-            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+            /** @var FilesystemAdapter $disk */
             $disk = Storage::disk(config('reports.disk', 'local'));
 
             if ($disk->exists($report->file_path)) {
@@ -282,12 +285,14 @@ class Reports extends Component
         }
 
         $this->dispatch('notify', type: 'error', message: 'Report file not found');
+
+        return null;
     }
 
     public function retryReport(int $reportId): void
     {
         $team = Auth::user()->currentTeam;
-        /** @var \App\Models\Report|null $report */
+        /** @var Report|null $report */
         $report = Report::where('team_id', $team->id)->find($reportId);
 
         if (! $report) {
@@ -379,15 +384,15 @@ class Reports extends Component
         ];
     }
 
-    public function exportShiftReportCsv()
+    public function exportShiftReportCsv(): mixed
     {
         if (! $this->shiftReportShift || ! $this->shiftReportDate) {
-            return;
+            return null;
         }
 
         $data = $this->getShiftReportData();
         if (empty($data)) {
-            return;
+            return null;
         }
 
         $shift = $this->shiftReportShift;
@@ -397,7 +402,7 @@ class Reports extends Component
             $handle = fopen('php://output', 'w');
 
             if ($handle === false) {
-                return;
+                return null;
             }
 
             fputcsv($handle, ['Shift Report Summary']);
@@ -570,7 +575,7 @@ class Reports extends Component
 
     // ── 3.4 Historical Log ─────────────────────────────────────────────────────
 
-    public function getHistory()
+    public function getHistory(): mixed
     {
         $term = trim($this->historySearch);
 
@@ -601,7 +606,7 @@ class Reports extends Component
 
     // ── Render ─────────────────────────────────────────────────────────────────
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 

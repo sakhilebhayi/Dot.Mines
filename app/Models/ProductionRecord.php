@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,8 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $team_id
  * @property int $mine_area_id
  * @property int $machine_id
- * @property-read \App\Models\Machine|null $machine
- * @property string|\Carbon\Carbon $record_date
+ * @property-read Machine|null $machine
+ * @property string|Carbon $record_date
  * @property string $shift
  * @property string|float $quantity_produced
  * @property string|float|null $system_quantity
@@ -27,16 +28,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float $variance_percentage
  * @property bool $is_above_target
  * @property float|null $system_variance_percentage
- * @property \Carbon\Carbon|null $deleted_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionRecord where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionRecord whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionRecord orderBy(string $column, string $direction = 'asc')
- * @method static ProductionRecord|null find(mixed $id, array $columns = ['*'])
- * @method static ProductionRecord findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon|null $deleted_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class ProductionRecord extends Model
 {
@@ -88,19 +82,19 @@ class ProductionRecord extends Model
         );
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);

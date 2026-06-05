@@ -9,7 +9,10 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Traits\BrowserEventBridge;
 use App\Traits\RealtimeUpdates;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -104,12 +107,12 @@ class Alerts extends Component
         $this->subscribeToTeamAlerts();
     }
 
-    public function getAlerts()
+    public function getAlerts(): mixed
     {
         $team = Auth::user()->currentTeam;
 
         if ($team === null) {
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
+            return new LengthAwarePaginator([], 0, 15);
         }
 
         return Alert::where('team_id', $team->id)
@@ -131,7 +134,7 @@ class Alerts extends Component
             ->paginate(15);
     }
 
-    public function setSortBy($column)
+    public function setSortBy($column): void
     {
         $allowed = ['created_at', 'priority', 'status'];
         if (! in_array($column, $allowed, true)) {
@@ -145,7 +148,7 @@ class Alerts extends Component
         }
     }
 
-    public function acknowledgeAlert($alertId)
+    public function acknowledgeAlert($alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -160,7 +163,7 @@ class Alerts extends Component
         }
     }
 
-    public function resolveAlert($alertId)
+    public function resolveAlert($alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -187,7 +190,7 @@ class Alerts extends Component
         }
     }
 
-    public function dismissAlert($alertId)
+    public function dismissAlert($alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -210,7 +213,7 @@ class Alerts extends Component
         }
     }
 
-    public function confirmDismiss($choice = 'dismiss')
+    public function confirmDismiss($choice = 'dismiss'): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($this->pendingDismissAlertId);
@@ -251,25 +254,25 @@ class Alerts extends Component
         $this->pendingDismissAlertId = null;
     }
 
-    public function cancelDismiss()
+    public function cancelDismiss(): void
     {
         $this->showDismissConfirm = false;
         $this->pendingDismissAlertId = null;
     }
 
-    public function showDetails($alertId)
+    public function showDetails($alertId): void
     {
         $this->selectedAlertId = $alertId;
         $this->showDetailsModal = true;
     }
 
-    public function closeDetails()
+    public function closeDetails(): void
     {
         $this->showDetailsModal = false;
         $this->selectedAlertId = null;
     }
 
-    public function getSelectedAlert()
+    public function getSelectedAlert(): mixed
     {
         if ($this->selectedAlertId) {
             $team = Auth::user()->currentTeam;
@@ -325,7 +328,7 @@ class Alerts extends Component
         return $managers;
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $selected = $this->getSelectedAlert();
 
@@ -344,7 +347,7 @@ class Alerts extends Component
         ]);
     }
 
-    public function getIncidentReports()
+    public function getIncidentReports(): mixed
     {
         $team = Auth::user()->currentTeam;
 
@@ -490,7 +493,7 @@ class Alerts extends Component
         $this->incidentOccurredAt = '';
     }
 
-    public function getMachinesForIncidentForm(): \Illuminate\Database\Eloquent\Collection
+    public function getMachinesForIncidentForm(): Collection
     {
         $team = Auth::user()->currentTeam;
 
@@ -499,7 +502,7 @@ class Alerts extends Component
             ->get(['id', 'name', 'machine_type']);
     }
 
-    public function getMineAreasForIncidentForm(): \Illuminate\Database\Eloquent\Collection
+    public function getMineAreasForIncidentForm(): Collection
     {
         $team = Auth::user()->currentTeam;
 

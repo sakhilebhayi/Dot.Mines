@@ -41,6 +41,20 @@ class WebhookController extends Controller
             return response()->json(['error' => 'Invalid payload'], 400);
         }
 
+        // Replay protection: reject events older than 5 minutes
+        $eventTime = $event['data']['createdAt'] ?? ($event['data']['created_at'] ?? null);
+        if ($eventTime !== null) {
+            $parsedTime = strtotime((string) $eventTime);
+            if ($parsedTime !== false && (time() - $parsedTime) > 300) {
+                Log::warning('Paystack webhook replay attempt detected', [
+                    'event' => $event['event'],
+                    'event_time' => $eventTime,
+                ]);
+
+                return response()->json(['error' => 'Stale webhook event'], 400);
+            }
+        }
+
         Log::info('Paystack webhook received', ['event' => $event['event']]);
 
         $paystackService = new PaystackService;

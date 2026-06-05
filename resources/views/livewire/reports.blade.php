@@ -318,7 +318,7 @@
                         <div class="flex items-center gap-2">
                             <div class="w-24 bg-slate-700 rounded-full h-2">
                                 @php $pct = $shiftReportData['total'] > 0 ? ($count / $shiftReportData['total']) * 100 : 0; @endphp
-                                <div class="bg-blue-500 h-2 rounded-full" style="width: <?= (int) $pct ?>%"></div>
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: {{ (int) $pct }}%"></div>
                             </div>
                             <span class="text-white text-sm font-medium w-6 text-right">{{ $count }}</span>
                         </div>

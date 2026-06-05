@@ -10,6 +10,7 @@ use App\Models\Waypoint;
 use App\Services\RoutePlanningService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class RoutePlanning extends Component
@@ -96,14 +97,14 @@ class RoutePlanning extends Component
         'tmpSharedZoneSpeedLimit' => 'nullable|integer|min:1|max:80',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->isLoading = true;
         $this->loadRoutes();
         $this->isLoading = false;
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
         $teamId = $team?->id ?? 0;
@@ -170,7 +171,7 @@ class RoutePlanning extends Component
         ]);
     }
 
-    public function calculateRoute()
+    public function calculateRoute(): void
     {
         // Validate only the fields required for route calculation (name is not required here)
         $this->validate([
@@ -218,7 +219,7 @@ class RoutePlanning extends Component
         }
     }
 
-    public function saveRoute()
+    public function saveRoute(): void
     {
         if (! $this->calculatedRoute) {
             session()->flash('error', 'Please calculate a route first.');
@@ -287,7 +288,7 @@ class RoutePlanning extends Component
         }
     }
 
-    public function loadRoutes()
+    public function loadRoutes(): void
     {
         $team = Auth::user()->currentTeam;
         $this->routes = Route::where('team_id', $team->id)
@@ -297,7 +298,7 @@ class RoutePlanning extends Component
             ->toArray();
     }
 
-    public function viewRoute($routeId)
+    public function viewRoute($routeId): void
     {
         $team = Auth::user()->currentTeam;
         $route = Route::where('team_id', $team->id)
@@ -339,7 +340,7 @@ class RoutePlanning extends Component
         }
     }
 
-    public function deleteRoute($routeId)
+    public function deleteRoute($routeId): void
     {
         $team = Auth::user()->currentTeam;
         $route = Route::where('team_id', $team->id)
@@ -371,7 +372,7 @@ class RoutePlanning extends Component
         }
     }
 
-    public function switchToCreateMode()
+    public function switchToCreateMode(): void
     {
         $this->viewMode = 'create';
 
@@ -400,19 +401,19 @@ class RoutePlanning extends Component
         $this->dispatch('clearMapMarkers');
     }
 
-    public function updateStartPoint($lat, $lon)
+    public function updateStartPoint($lat, $lon): void
     {
         $this->startLat = $lat;
         $this->startLon = $lon;
     }
 
-    public function updateEndPoint($lat, $lon)
+    public function updateEndPoint($lat, $lon): void
     {
         $this->endLat = $lat;
         $this->endLon = $lon;
     }
 
-    public function clearPoints()
+    public function clearPoints(): void
     {
         $this->startLat = null;
         $this->startLon = null;

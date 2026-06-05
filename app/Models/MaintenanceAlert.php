@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,21 +21,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $message
  * @property string $severity
  * @property string $status
- * @property \Carbon\Carbon $triggered_at
- * @property \Carbon\Carbon|null $acknowledged_at
+ * @property Carbon $triggered_at
+ * @property Carbon|null $acknowledged_at
  * @property int|null $acknowledged_by
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property int|null $resolved_by
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceAlert where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceAlert whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceAlert orderBy(string $column, string $direction = 'asc')
- * @method static MaintenanceAlert|null find(mixed $id, array<string> $columns = ['*'])
- * @method static MaintenanceAlert findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,MaintenanceAlert> all(array<string> $columns = ['*'])
+ * @property-read float $age_hours
+ * @property-read bool $is_stale
+ * @property-read int $priority_score
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class MaintenanceAlert extends Model
 {
@@ -71,31 +69,31 @@ class MaintenanceAlert extends Model
     /**
      * Relationships
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MaintenanceSchedule, $this> */
+    /** @return BelongsTo<MaintenanceSchedule, $this> */
     public function maintenanceSchedule(): BelongsTo
     {
         return $this->belongsTo(MaintenanceSchedule::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function acknowledgedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function resolvedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');
@@ -104,32 +102,60 @@ class MaintenanceAlert extends Model
     /**
      * Scopes
      */
-    public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
 
-    public function scopeCritical(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeCritical(Builder $query): Builder
     {
         return $query->where('severity', 'critical');
     }
 
-    public function scopeUnacknowledged(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeUnacknowledged(Builder $query): Builder
     {
-        return $query->whereNull('acknowledged_at');
+        $query->whereNull('acknowledged_at');
+
+        return $query;
     }
 
-    public function scopeUnresolved(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeUnresolved(Builder $query): Builder
     {
-        return $query->whereNull('resolved_at');
+        $query->whereNull('resolved_at');
+
+        return $query;
     }
 
-    public function scopeAlertType(\Illuminate\Database\Eloquent\Builder $query, string $type): \Illuminate\Database\Eloquent\Builder
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeAlertType(Builder $query, string $type): Builder
     {
         return $query->where('alert_type', $type);
     }
 
-    public function scopeSeverity(\Illuminate\Database\Eloquent\Builder $query, string $severity): \Illuminate\Database\Eloquent\Builder
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeSeverity(Builder $query, string $severity): Builder
     {
         return $query->where('severity', $severity);
     }
@@ -190,7 +216,7 @@ class MaintenanceAlert extends Model
         };
 
         // Age weight (older = higher priority)
-        $score += min($this->age_hours, 48);
+        $score += (int) min($this->age_hours, 48);
 
         // Unacknowledged weight
         if (! $this->acknowledged_at) {

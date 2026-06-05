@@ -7,16 +7,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * FuelMonthlyAllocation Model
  *
- * @method static \Illuminate\Database\Eloquent\Builder|FuelMonthlyAllocation where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelMonthlyAllocation whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelMonthlyAllocation orderBy(string $column, string $direction = 'asc')
- * @method static FuelMonthlyAllocation|null find(mixed $id, array $columns = ['*'])
- * @method static FuelMonthlyAllocation findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property int $id
+ * @property int $team_id
+ * @property int|null $mine_area_id
+ * @property int $year
+ * @property int $month
+ * @property float $allocated_liters
+ * @property float $fuel_price_per_liter
+ * @property float $total_budget_zar
+ * @property float $consumed_liters
+ * @property float $remaining_liters
+ * @property float $spent_zar
+ * @property float $remaining_budget_zar
+ * @property string $status
+ * @property string|null $notes
+ * @property float $consumption_percentage
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class FuelMonthlyAllocation extends Model
 {
@@ -58,13 +70,13 @@ class FuelMonthlyAllocation extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FuelTransaction, $this> */
+    /** @return HasMany<FuelTransaction, $this> */
     public function transactions(): HasMany
     {
         return $this->hasMany(FuelTransaction::class, 'monthly_allocation_id');
@@ -81,7 +93,7 @@ class FuelMonthlyAllocation extends Model
     /**
      * Get the mine area associated with this allocation.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class, 'mine_area_id');

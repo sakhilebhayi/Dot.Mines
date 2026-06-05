@@ -1,39 +1,41 @@
 <?php
 
+use App\Http\Controllers\Api\AlertController;
+use App\Http\Controllers\Api\FeedCommentController;
+use App\Http\Controllers\Api\FeedController;
+use App\Http\Controllers\Api\FuelTankController;
+use App\Http\Controllers\Api\FuelTransactionController;
+use App\Http\Controllers\Api\GeofenceController;
+use App\Http\Controllers\Api\IntegrationController;
+use App\Http\Controllers\Api\MachineAssignmentController;
+use App\Http\Controllers\Api\MachineController;
+use App\Http\Controllers\Api\MachineHealthController;
+use App\Http\Controllers\Api\MaintenanceRecordController;
+use App\Http\Controllers\Api\MaintenanceScheduleController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\ShiftTemplateController;
+use App\Models\AuditLog;
+use App\Models\Machine;
+use App\Models\Team;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\{
-    MachineController,
-    GeofenceController,
-    AlertController,
-    IntegrationController,
-    ReportController,
-    MachineAssignmentController,
-    IoTSensorController,
-    ForecastingController,
-    ComplianceController,
-    NotificationController,
-    FuelTankController,
-    FuelTransactionController,
-    MachineHealthController,
-    MaintenanceScheduleController,
-    MaintenanceRecordController,
-    FeedController,
-    FeedCommentController,
-    ShiftTemplateController,
-};
 
 /**
  * Public endpoints (no auth required)
  */
 
 /**
- * Authenticated API endpoints
+ * API v1 — Authenticated endpoints
  * All require: auth:sanctum + ensure_team middleware
  * Rate limiting: 60 requests per minute per user
+ *
+ * Versioning: all routes are prefixed with /v1/ to allow non-breaking
+ * additions in future API versions (v2, v3, ...).
  */
-Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(function () {
-    
+Route::prefix('v1')->middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(function () {
+
     /**
      * User & Auth endpoints
      */
@@ -43,13 +45,13 @@ Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(functi
 
     Route::post('/user/team/{team_id}', function (Request $request, $team_id) {
         // Explicit team membership check (defence-in-depth on top of EnsureTeamContext)
-        $team = \App\Models\Team::findOrFail((int) $team_id);
+        $team = Team::findOrFail((int) $team_id);
         abort_unless($request->user()->belongsToTeam($team), 403, 'You do not belong to this team.');
 
         $request->user()->update(['current_team_id' => $team->id]);
 
-        \App\Services\AuditService::log(
-            \App\Models\AuditLog::TEAM_SWITCH,
+        AuditService::log(
+            AuditLog::TEAM_SWITCH,
             "Switched active team to: {$team->name}",
             $team
         );
@@ -260,9 +262,9 @@ Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(functi
      * Live Location endpoint (real-time)
      */
     Route::get('/live-locations', function (Request $request) {
-        $machines = \App\Models\Machine::select([
-            'id', 'name', 'machine_type', 'status', 
-            'last_location_latitude', 'last_location_longitude', 'last_location_update'
+        $machines = Machine::select([
+            'id', 'name', 'machine_type', 'status',
+            'last_location_latitude', 'last_location_longitude', 'last_location_update',
         ])
             ->whereNotNull('last_location_latitude')
             ->get();

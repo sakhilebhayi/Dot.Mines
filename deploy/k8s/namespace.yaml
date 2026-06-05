@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mines
+  labels:
+    app.kubernetes.io/name: mines
+    app.kubernetes.io/managed-by: kubectl

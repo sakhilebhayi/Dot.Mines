@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Services\ShiftService;
+use Illuminate\Console\Command;
 
 class PerformShiftChange extends Command
 {
@@ -11,7 +11,7 @@ class PerformShiftChange extends Command
 
     protected $description = 'Perform shift change: snapshot assignments and reset fleet for next shift.';
 
-    public function handle(ShiftService $shiftService)
+    public function handle(ShiftService $shiftService): mixed
     {
         $teamId = (int) $this->argument('team_id');
         $shiftType = $this->argument('shift_type') ?? 'day';
@@ -19,7 +19,7 @@ class PerformShiftChange extends Command
 
         $this->info("Starting shift change for team {$teamId}, shift={$shiftType}");
 
-        $shift = $shiftService->performShiftChange($teamId, $shiftType, $defaultMineArea ? (int)$defaultMineArea : null);
+        $shift = $shiftService->performShiftChange($teamId, $shiftType, $defaultMineArea ? (int) $defaultMineArea : null);
 
         $this->info("Shift record created: {$shift->id}");
 

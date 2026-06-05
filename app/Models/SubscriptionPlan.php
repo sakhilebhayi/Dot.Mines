@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,15 +32,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $has_priority_support
  * @property bool $is_active
  * @property int $sort_order
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|SubscriptionPlan where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|SubscriptionPlan whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|SubscriptionPlan orderBy(string $column, string $direction = 'asc')
- * @method static SubscriptionPlan|null find(mixed $id, array $columns = ['*'])
- * @method static SubscriptionPlan findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class SubscriptionPlan extends Model
 {
@@ -91,7 +85,7 @@ class SubscriptionPlan extends Model
     /**
      * Get subscriptions for this plan.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Subscription, $this> */
+    /** @return HasMany<Subscription, $this> */
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);

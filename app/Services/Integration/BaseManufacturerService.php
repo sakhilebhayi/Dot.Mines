@@ -9,18 +9,23 @@ use Illuminate\Support\Facades\Log;
 abstract class BaseManufacturerService implements ManufacturerServiceInterface
 {
     protected string $manufacturer;
+
     protected string $baseUrl;
+
     protected string $apiKey;
+
     protected string $apiSecret;
+
     protected ?string $lastError = null;
+
     protected int $timeout = 30;
+
     protected int $retries = 3;
+
     protected int $retryDelay = 1000; // milliseconds
 
     /**
      * Initialize the service with API credentials
-     *
-     * @param array $credentials
      */
     public function __construct(array $credentials = [])
     {
@@ -31,12 +36,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Make HTTP request to manufacturer API with retry logic
-     *
-     * @param string $method
-     * @param string $endpoint
-     * @param array $data
-     * @param array $headers
-     * @return array
      */
     protected function request(
         string $method,
@@ -44,8 +43,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
         array $data = [],
         array $headers = []
     ): array {
-        $url = rtrim($this->baseUrl, '/') . '/' . ltrim($endpoint, '/');
-        
+        $url = rtrim($this->baseUrl, '/').'/'.ltrim($endpoint, '/');
+
         $attempt = 0;
         $lastException = null;
 
@@ -72,7 +71,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
             } catch (\Exception $e) {
                 $lastException = $e;
                 $this->lastError = $e->getMessage();
-                
+
                 Log::warning("Integration API Exception: {$this->lastError}", [
                     'manufacturer' => $this->manufacturer,
                     'endpoint' => $endpoint,
@@ -96,24 +95,18 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Get authentication headers for API requests
-     *
-     * @param array $additionalHeaders
-     * @return array
      */
     protected function getAuthHeaders(array $additionalHeaders = []): array
     {
         return array_merge([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer '.$this->apiKey,
         ], $additionalHeaders);
     }
 
     /**
      * Parse machine data from API response to standard format
-     *
-     * @param array $rawData
-     * @return array
      */
     protected function parseMachineData(array $rawData): array
     {
@@ -135,9 +128,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse location data from API response
-     *
-     * @param array $rawData
-     * @return array|null
      */
     protected function parseLocation(array $rawData): ?array
     {
@@ -157,9 +147,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse metrics from API response
-     *
-     * @param array $rawData
-     * @return array
      */
     protected function parseMetrics(array $rawData): array
     {
@@ -181,9 +168,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse alerts from API response
-     *
-     * @param array $alerts
-     * @return array
      */
     protected function parseAlerts(array $alerts): array
     {
@@ -202,9 +186,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Map machine status from manufacturer format to standard
-     *
-     * @param string $status
-     * @return string
      */
     protected function parseStatus(string $status): string
     {
@@ -224,9 +205,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Map alert type from manufacturer format to standard
-     *
-     * @param string $type
-     * @return string
      */
     protected function mapAlertType(string $type): string
     {
@@ -246,9 +224,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Map alert priority from manufacturer format to standard
-     *
-     * @param string $severity
-     * @return string
      */
     protected function mapAlertPriority(string $severity): string
     {
@@ -267,8 +242,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Get manufacturer name
-     *
-     * @return string
      */
     public function getManufacturer(): string
     {
@@ -277,8 +250,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Get last error message
-     *
-     * @return string|null
      */
     public function getLastError(): ?string
     {
@@ -288,8 +259,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     /**
      * Test the connection to the manufacturer API
      * Concrete classes should override this
-     *
-     * @return bool
      */
     public function testConnection(): bool
     {
@@ -313,7 +282,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch machine details from the manufacturer API
      * Concrete classes should override this
      *
-     * @param string $machineId
      * @return array<string, mixed>
      */
     public function fetchMachineDetails(string $machineId): array
@@ -326,7 +294,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch real-time location for a machine
      * Concrete classes should override this
      *
-     * @param string $machineId
      * @return array<string, mixed>|null
      */
     public function fetchMachineLocation(string $machineId): ?array
@@ -339,8 +306,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch machine metrics/diagnostics
      * Concrete classes should override this
      *
-     * @param string $machineId
-     * @return array<string, mixed>
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -352,8 +318,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch machine alerts/faults
      * Concrete classes should override this
      *
-     * @param string $machineId
-     * @return array<string, mixed>
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -365,7 +330,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch all data for a machine (comprehensive sync)
      * Concrete classes should override this
      *
-     * @param string $machineId
      * @return array<string, mixed>
      */
     public function fetchMachineData(string $machineId): array
@@ -375,11 +339,33 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     }
 
     /**
+     * Make HTTP request to manufacturer API (alias for request())
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, string>  $headers
+     * @return array<string, mixed>
+     */
+    protected function makeRequest(string $method, string $endpoint, array $data = [], array $headers = []): array
+    {
+        return $this->request($method, $endpoint, $data, $headers);
+    }
+
+    /**
+     * Log an integration error
+     */
+    protected function logError(string $message, \Throwable $exception): void
+    {
+        $this->lastError = $exception->getMessage();
+        Log::error("Integration Error [{$this->manufacturer}]: {$message}", [
+            'manufacturer' => $this->manufacturer,
+            'exception' => $exception->getMessage(),
+        ]);
+    }
+
+    /**
      * Log integration activity
      *
-     * @param string $action
-     * @param array $details
-     * @return void
+     * @param  array<string, mixed>  $details
      */
     protected function logActivity(string $action, array $details = []): void
     {

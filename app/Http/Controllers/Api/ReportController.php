@@ -2,27 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Jobs\GenerateReportJob;
 use App\Models\Report;
 use App\Support\Reports\ReportGeneration;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Report API Controller
- * 
+ *
  * Handles report generation and management
  */
 class ReportController extends Controller
 {
     /**
      * List all reports for current team
-     * 
+     *
      * GET /api/reports
      */
-    public function index(Request $request)
+    public function index(Request $request): mixed
     {
         $validated = $request->validate([
             'page' => 'nullable|integer|min:1',
@@ -59,10 +61,10 @@ class ReportController extends Controller
 
     /**
      * Get a single report
-     * 
+     *
      * GET /api/reports/{id}
      */
-    public function show(Report $report)
+    public function show(Report $report): mixed
     {
         $this->authorize('view', $report);
 
@@ -73,16 +75,16 @@ class ReportController extends Controller
 
     /**
      * Generate a new report
-     * 
+     *
      * POST /api/reports/generate
      */
-    public function generate(Request $request)
+    public function generate(Request $request): JsonResponse
     {
         $this->authorize('generate', Report::class);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'type' => 'required|string|in:' . implode(',', ReportGeneration::supportedTypes()),
+            'type' => 'required|string|in:'.implode(',', ReportGeneration::supportedTypes()),
             'format' => 'nullable|string|in:pdf,csv,xlsx',
             'filters' => 'nullable',
         ]);
@@ -107,14 +109,14 @@ class ReportController extends Controller
 
     /**
      * Download report file
-     * 
+     *
      * GET /api/reports/{id}/download
      */
-    public function download(Report $report)
+    public function download(Report $report): JsonResponse|StreamedResponse
     {
         $this->authorize('view', $report);
 
-        if (!$report->isAvailable()) {
+        if (! $report->isAvailable()) {
             return response()->json([
                 'message' => 'Report is not available for download',
             ], Response::HTTP_NOT_FOUND);
@@ -140,8 +142,8 @@ class ReportController extends Controller
         }
 
         // Authorize was already called earlier; use Storage::download to serve safely and add security headers.
-        $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $report->title) . '.' . $report->format;
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $adapter */
+        $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $report->title).'.'.$report->format;
+        /** @var FilesystemAdapter $adapter */
         $adapter = Storage::disk($disk);
         $mime = $adapter->mimeType($relative) ?? 'application/octet-stream';
 
@@ -152,16 +154,16 @@ class ReportController extends Controller
 
         return $adapter->download($relative, $filename, array_merge($securityHeaders, [
             'Content-Type' => $mime,
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]));
     }
 
     /**
      * Delete a report
-     * 
+     *
      * DELETE /api/reports/{id}
      */
-    public function destroy(Report $report)
+    public function destroy(Report $report): JsonResponse
     {
         $this->authorize('delete', $report);
 
@@ -183,10 +185,10 @@ class ReportController extends Controller
 
     /**
      * Get available report templates
-     * 
+     *
      * GET /api/reports/templates
      */
-    public function templates()
+    public function templates(): JsonResponse
     {
         $templates = [
             [
@@ -234,10 +236,10 @@ class ReportController extends Controller
 
     /**
      * Get report statistics
-     * 
+     *
      * GET /api/reports/stats
      */
-    public function stats()
+    public function stats(): JsonResponse
     {
         $stats = [
             'total' => Report::where('team_id', Auth::user()->current_team_id)->count(),

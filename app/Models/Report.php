@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Mail\ReportReadyMail;
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,17 +26,10 @@ use Illuminate\Support\Facades\Mail;
  * @property string|null $format
  * @property array<string, mixed>|null $filters
  * @property int|string|null $generated_by
- * @property \Carbon\Carbon|null $generated_at
- * @property \Carbon\Carbon|null $expires_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Report where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Report orderBy(string $column, string $direction = 'asc')
- * @method static Report|null find(mixed $id, array $columns = ['*'])
- * @method static Report findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon|null $generated_at
+ * @property Carbon|null $expires_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Report extends Model
 {
@@ -72,7 +66,7 @@ class Report extends Model
     /**
      * Get the team this report belongs to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -81,7 +75,7 @@ class Report extends Model
     /**
      * Get the user who generated this report
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function generatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');

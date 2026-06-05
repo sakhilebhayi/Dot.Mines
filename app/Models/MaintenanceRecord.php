@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,9 +23,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $work_performed
  * @property string $status
  * @property string $priority
- * @property \Carbon\Carbon $scheduled_date
- * @property \Carbon\Carbon|null $started_at
- * @property \Carbon\Carbon|null $completed_at
+ * @property Carbon $scheduled_date
+ * @property Carbon|null $started_at
+ * @property Carbon|null $completed_at
  * @property int|null $assigned_to
  * @property int|null $completed_by
  * @property string|float $labor_hours
@@ -39,18 +40,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<string, mixed>|null $attachments
  * @property bool $machine_operational
  * @property float|null $duration
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceRecord where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceRecord whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceRecord orderBy(string $column, string $direction = 'asc')
- * @method static MaintenanceRecord|null find(mixed $id, array $columns = ['*'])
- * @method static MaintenanceRecord findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
- *
- * @property-read \App\Models\Machine $machine
- * @property-read \App\Models\MaintenanceSchedule|null $maintenanceSchedule
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Machine $machine
+ * @property-read MaintenanceSchedule|null $maintenanceSchedule
  */
 class MaintenanceRecord extends Model
 {
@@ -154,31 +147,31 @@ class MaintenanceRecord extends Model
         });
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MaintenanceSchedule, $this> */
+    /** @return BelongsTo<MaintenanceSchedule, $this> */
     public function maintenanceSchedule(): BelongsTo
     {
         return $this->belongsTo(MaintenanceSchedule::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function completedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'completed_by');

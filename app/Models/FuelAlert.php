@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,21 +21,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $message
  * @property string $severity
  * @property string $status
- * @property \Carbon\Carbon $triggered_at
- * @property \Carbon\Carbon|null $acknowledged_at
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon $triggered_at
+ * @property Carbon|null $acknowledged_at
+ * @property Carbon|null $resolved_at
  * @property int|null $acknowledged_by
  * @property int|null $resolved_by
  * @property array<string, mixed>|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|FuelAlert where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelAlert whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelAlert orderBy(string $column, string $direction = 'asc')
- * @method static FuelAlert|null find(mixed $id, array $columns = ['*'])
- * @method static FuelAlert findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class FuelAlert extends Model
 {
@@ -72,31 +66,31 @@ class FuelAlert extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FuelTank, $this> */
+    /** @return BelongsTo<FuelTank, $this> */
     public function fuelTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function acknowledgedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function resolvedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

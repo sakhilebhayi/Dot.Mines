@@ -6,6 +6,45 @@ on:
   pull_request:
 
 jobs:
+  tests:
+    name: PHPUnit test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.16'
+          extensions: pdo_sqlite, sqlite3, bcmath, gd, zip, mbstring, intl, pcntl
+
+      - name: Disable Xdebug if present
+        run: |
+          if php -m | grep -q "xdebug"; then
+            sudo phpdismod xdebug || true
+          fi
+
+      - name: Install composer deps
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Install Node dependencies & build assets
+        run: |
+          if [ -f package-lock.json ]; then npm ci --silent; fi
+          npm run build
+
+      - name: Run tests
+        run: php artisan test --compact
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          QUEUE_CONNECTION: sync
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          BROADCAST_CONNECTION: "null"
+          MAIL_MAILER: array
+          FILESYSTEM_DISK: local
+
   gitleaks:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
@@ -150,4 +189,19 @@ jobs:
       - name: Semgrep Blade XSS rules
         uses: returntocorp/semgrep-action@v1
         with:
-          config: '.semgrep/xss_rules.yml'
+          config: '.semgrep/xss_rules.yml'          config: 'p/php'
+
+  code-style:
+    name: Laravel Pint code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.16'
+          extensions: bcmath, mbstring
+      - name: Install composer deps
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Run Pint (fail on style violations)
+        run: vendor/bin/pint --test

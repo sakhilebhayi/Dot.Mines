@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,14 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $team_id
  * @property string $action
  * @property string|null $description
- * @property \Carbon\Carbon $created_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog orderBy(string $column, string $direction = 'asc')
- * @method static ActivityLog|null find(mixed $id, array $columns = ['*'])
- * @method static ActivityLog findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
  */
 class ActivityLog extends Model
 {
@@ -32,7 +26,7 @@ class ActivityLog extends Model
         'created_at',
     ];
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

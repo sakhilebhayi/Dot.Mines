@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,20 +25,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $total
  * @property string $currency
  * @property string $status
- * @property \Carbon\Carbon $issued_at
- * @property \Carbon\Carbon|null $due_at
- * @property \Carbon\Carbon|null $paid_at
+ * @property Carbon $issued_at
+ * @property Carbon|null $due_at
+ * @property Carbon|null $paid_at
  * @property string|null $pdf_url
  * @property array<string, mixed>|null $line_items
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Invoice where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Invoice whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Invoice orderBy(string $column, string $direction = 'asc')
- * @method static Invoice|null find(mixed $id, array $columns = ['*'])
- * @method static Invoice findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Invoice extends Model
 {
@@ -82,7 +76,7 @@ class Invoice extends Model
     /**
      * Get the team that owns the invoice.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -91,7 +85,7 @@ class Invoice extends Model
     /**
      * Get the subscription for this invoice.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Subscription, $this> */
+    /** @return BelongsTo<Subscription, $this> */
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
@@ -100,7 +94,7 @@ class Invoice extends Model
     /**
      * Get the payment for this invoice.
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Payment, $this> */
+    /** @return BelongsTo<Payment, $this> */
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class);

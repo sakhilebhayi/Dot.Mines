@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,24 +34,17 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $status
  * @property float|null $last_location_latitude
  * @property float|null $last_location_longitude
- * @property \Carbon\Carbon|null $last_location_update
+ * @property Carbon|null $last_location_update
  * @property int|null $integration_id
  * @property int|null $mine_area_id
  * @property int|null $excavator_id
- * @property \Carbon\Carbon|null $assigned_to_excavator_at
+ * @property Carbon|null $assigned_to_excavator_at
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Machine where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Machine whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Machine orderBy(string $column, string $direction = 'asc')
- * @method static \Illuminate\Database\Eloquent\Builder|Machine latest(string $column = 'created_at')
- * @method static \Illuminate\Database\Eloquent\Builder|Machine select(array<string> $columns = ['*'])
- * @method static Machine|null find(mixed $id, array<string> $columns = ['*'])
- * @method static Machine findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,Machine> all(array<string> $columns = ['*'])
- * @method static \Illuminate\Pagination\Paginator paginate(int $perPage = 15, array<string> $columns = ['*'], string $pageName = 'page', int $page = null)
+ * @property float|null $operating_hours
+ * @property float|null $total_distance_km
+ * @property float|null $odometer
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Machine extends Model
 {
@@ -122,7 +117,7 @@ class Machine extends Model
     /**
      * Get the team that owns this machine
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -131,7 +126,7 @@ class Machine extends Model
     /**
      * Get the integration this machine belongs to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Integration, $this> */
+    /** @return BelongsTo<Integration, $this> */
     public function integration(): BelongsTo
     {
         return $this->belongsTo(Integration::class);
@@ -140,7 +135,7 @@ class Machine extends Model
     /**
      * Get all metrics for this machine
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MachineMetric, $this> */
+    /** @return HasMany<MachineMetric, $this> */
     public function metrics(): HasMany
     {
         return $this->hasMany(MachineMetric::class);
@@ -149,7 +144,7 @@ class Machine extends Model
     /**
      * Get all alerts for this machine
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Alert, $this> */
+    /** @return HasMany<Alert, $this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
@@ -158,7 +153,7 @@ class Machine extends Model
     /**
      * Get all geofence entries for this machine
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\GeofenceEntry, $this> */
+    /** @return HasMany<GeofenceEntry, $this> */
     public function geofenceEntries(): HasMany
     {
         return $this->hasMany(GeofenceEntry::class);
@@ -167,7 +162,7 @@ class Machine extends Model
     /**
      * Get the mine area this machine is assigned to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
@@ -176,7 +171,7 @@ class Machine extends Model
     /**
      * Get assignment history for this machine
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MachineAreaAssignment, $this> */
+    /** @return HasMany<MachineAreaAssignment, $this> */
     public function areaAssignments(): HasMany
     {
         return $this->hasMany(MachineAreaAssignment::class);
@@ -185,7 +180,7 @@ class Machine extends Model
     /**
      * Get all engine hour sessions for this machine
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\EngineHourSession, $this> */
+    /** @return HasMany<EngineHourSession, $this> */
     public function engineHourSessions(): HasMany
     {
         return $this->hasMany(EngineHourSession::class);
@@ -194,7 +189,7 @@ class Machine extends Model
     /**
      * Get the currently running engine session (if any)
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\EngineHourSession, $this> */
+    /** @return HasOne<EngineHourSession, $this> */
     public function activeEngineSession(): HasOne
     {
         return $this->hasOne(EngineHourSession::class)
@@ -207,7 +202,7 @@ class Machine extends Model
     /**
      * Get the excavator this machine is assigned to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function excavator(): BelongsTo
     {
         return $this->belongsTo(Machine::class, 'excavator_id');
@@ -216,7 +211,7 @@ class Machine extends Model
     /**
      * Get all machines assigned to this excavator
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Machine, $this> */
+    /** @return HasMany<Machine, $this> */
     public function assignedMachines(): HasMany
     {
         return $this->hasMany(Machine::class, 'excavator_id');
@@ -225,7 +220,7 @@ class Machine extends Model
     /**
      * Get all maintenance records for this machine
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MaintenanceRecord, $this> */
+    /** @return HasMany<MaintenanceRecord, $this> */
     public function maintenanceRecords(): HasMany
     {
         return $this->hasMany(MaintenanceRecord::class);
@@ -234,7 +229,7 @@ class Machine extends Model
     /**
      * Get the health status for this machine
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\MachineHealthStatus, $this> */
+    /** @return HasOne<MachineHealthStatus, $this> */
     public function healthStatus(): HasOne
     {
         return $this->hasOne(MachineHealthStatus::class);
@@ -265,7 +260,7 @@ class Machine extends Model
     /**
      * Get active alerts for this machine
      */
-    public function activeAlerts(): \Illuminate\Database\Eloquent\Builder
+    public function activeAlerts(): Builder
     {
         return $this->alerts()->where('status', 'active');
     }
@@ -285,7 +280,7 @@ class Machine extends Model
     /**
      * Get latest metric
      */
-    public function getLatestMetric(): ?\Illuminate\Database\Eloquent\Model
+    public function getLatestMetric(): ?Model
     {
         return $this->metrics()->latest('created_at')->first();
     }

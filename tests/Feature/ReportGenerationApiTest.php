@@ -22,7 +22,7 @@ class ReportGenerationApiTest extends TestCase
 
         [$user, $team] = $this->createAdminUser();
 
-        $response = $this->actingAs($user, 'sanctum')->postJson('/api/reports', [
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/reports', [
             'title' => 'Daily Production',
             'type' => 'production',
             'format' => 'csv',

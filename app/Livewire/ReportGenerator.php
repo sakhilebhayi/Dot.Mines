@@ -9,6 +9,7 @@ use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class ReportGenerator extends Component
@@ -96,27 +97,27 @@ class ReportGenerator extends Component
         'endDate.after_or_equal' => 'End date must be after or equal to start date.',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->startDate = now()->subDays(30)->format('Y-m-d');
         $this->endDate = now()->format('Y-m-d');
     }
 
-    public function getMachines()
+    public function getMachines(): mixed
     {
         $team = Auth::user()->currentTeam;
 
         return Machine::where('team_id', $team->id)->get();
     }
 
-    public function getGeofences()
+    public function getGeofences(): mixed
     {
         $team = Auth::user()->currentTeam;
 
         return DB::table('geofences')->where('team_id', $team->id)->get();
     }
 
-    public function nextStep()
+    public function nextStep(): void
     {
         if ($this->step === 1) {
             $this->validate([
@@ -134,14 +135,14 @@ class ReportGenerator extends Component
         }
     }
 
-    public function previousStep()
+    public function previousStep(): void
     {
         if ($this->step > 1) {
             $this->step--;
         }
     }
 
-    public function generateReport()
+    public function generateReport(): void
     {
         $this->validate();
 
@@ -224,7 +225,7 @@ class ReportGenerator extends Component
         }
     }
 
-    public function selectAllMachines()
+    public function selectAllMachines(): void
     {
         $this->selectedMachines = $this->getMachines()
             ->pluck('id')
@@ -233,7 +234,7 @@ class ReportGenerator extends Component
             ->all();
     }
 
-    public function clearMachines()
+    public function clearMachines(): void
     {
         $this->selectedMachines = [];
     }
@@ -252,7 +253,7 @@ class ReportGenerator extends Component
         $this->selectedGeofences = [];
     }
 
-    public function toggleMachine($machineId)
+    public function toggleMachine($machineId): void
     {
         $machineId = (string) $machineId;
 
@@ -266,7 +267,7 @@ class ReportGenerator extends Component
         }
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.report-generator', [
             'reportTypes' => $this->reportTypes,

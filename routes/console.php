@@ -1,6 +1,10 @@
 <?php
 
+use App\Jobs\ArchiveOldMetricsJob;
 use App\Jobs\MachineIdleMonitoringJob;
+use App\Jobs\PurgeExpiredSoftDeletesJob;
+use App\Jobs\PurgeOldAuditLogsJob;
+use App\Jobs\PurgeOldFeedPostsJob;
 use App\Jobs\RouteSpeedMonitoringJob;
 use App\Jobs\SyncBellFleetDataJob;
 use Illuminate\Foundation\Inspiring;
@@ -26,5 +30,34 @@ Schedule::job(new MachineIdleMonitoringJob)
 // Bell ISO15143-3 fleet data sync – every 15 minutes at :00, :15, :30, :45
 Schedule::job(new SyncBellFleetDataJob)
     ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Nightly metrics archival — moves records older than METRICS_RETENTION_DAYS (default: 90)
+// from machine_metrics to machine_metrics_archive to keep the hot table lean.
+Schedule::job(new ArchiveOldMetricsJob)
+    ->dailyAt('02:00')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Weekly: purge soft-deleted records past the grace period (default 30 days)
+Schedule::job(new PurgeExpiredSoftDeletesJob)
+    ->weekly()
+    ->sundays()
+    ->at('03:00')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Weekly: purge soft-deleted feed posts/comments past retention period (default 90 days)
+Schedule::job(new PurgeOldFeedPostsJob)
+    ->weekly()
+    ->sundays()
+    ->at('03:30')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Monthly: purge old audit log entries past retention period (default 365 days)
+Schedule::job(new PurgeOldAuditLogsJob)
+    ->monthly()
     ->withoutOverlapping()
     ->onOneServer();

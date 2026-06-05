@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\AlertResource;
 use App\Models\Alert;
+use App\Models\Machine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,9 +23,9 @@ class AlertController extends Controller
      *
      * GET /api/alerts
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $validated = $request->validate([
+        $request->validate([
             'page' => 'nullable|integer|min:1',
             'per_page' => 'nullable|integer|min:1|max:100',
             'status' => 'nullable|string|in:active,acknowledged,resolved',
@@ -31,38 +34,26 @@ class AlertController extends Controller
             'machine_id' => 'nullable|integer|min:1',
         ]);
 
-        $query = Alert::query();
+        $query = Alert::with(['machine:id,name,machine_type']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
         }
-
         if ($request->filled('priority')) {
             $query->where('priority', $request->input('priority'));
         }
-
         if ($request->filled('type')) {
             $query->where('type', $request->input('type'));
         }
-
         if ($request->filled('machine_id')) {
             $query->where('machine_id', $request->input('machine_id'));
         }
 
-        $perPage = $request->input('per_page', 25);
-        $alerts = $query->with('machine')
-            ->orderBy('triggered_at', 'desc')
-            ->paginate($perPage);
+        $perPage = (int) $request->input('per_page', 25);
 
-        return response()->json([
-            'data' => $alerts->items(),
-            'pagination' => [
-                'total' => $alerts->total(),
-                'per_page' => $alerts->perPage(),
-                'current_page' => $alerts->currentPage(),
-                'last_page' => $alerts->lastPage(),
-            ],
-        ]);
+        return AlertResource::collection(
+            $query->orderBy('triggered_at', 'desc')->paginate($perPage)
+        );
     }
 
     /**
@@ -70,13 +61,11 @@ class AlertController extends Controller
      *
      * GET /api/alerts/{id}
      */
-    public function show(Alert $alert): JsonResponse
+    public function show(Alert $alert): AlertResource
     {
         $this->authorize('view', $alert);
 
-        return response()->json([
-            'data' => $alert->load('machine', 'acknowledgedBy', 'resolvedBy'),
-        ]);
+        return AlertResource::make($alert->load('machine', 'acknowledgedBy', 'resolvedBy'));
     }
 
     /**
@@ -186,7 +175,7 @@ class AlertController extends Controller
         $machineId = (int) $machineId;
 
         // Verify the machine exists within the current team (global scope enforces team isolation)
-        $machine = \App\Models\Machine::findOrFail($machineId);
+        $machine = Machine::findOrFail($machineId);
         $this->authorize('view', $machine);
 
         $query = Alert::where('machine_id', $machineId);

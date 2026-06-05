@@ -245,7 +245,7 @@
                                         default => 'bg-gray-500',
                                     };
                                 @endphp
-                                <div class="{{ $color }} h-3 rounded-full transition-all duration-1000 ease-out" style="width: <?= (int) $percentage ?>%"></div>
+                                <div class="{{ $color }} h-3 rounded-full transition-all duration-1000 ease-out" style="width: {{ (int) $percentage }}%"></div>
                             </div>
                         </div>
                     @endforeach

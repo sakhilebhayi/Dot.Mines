@@ -3,7 +3,12 @@
 namespace App\Jobs;
 
 use App\Models\Machine;
+use App\Services\Integration\BellService;
+use App\Services\Integration\CATService;
+use App\Services\Integration\CTrackService;
 use App\Services\Integration\IntegrationService;
+use App\Services\Integration\KomatsuService;
+use App\Services\Integration\VolvoService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,7 +21,9 @@ class SyncMachineMetricsJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Machine $machine;
+
     public int $tries = 2;
+
     public int $timeout = 60;
 
     /**
@@ -46,24 +53,25 @@ class SyncMachineMetricsJob implements ShouldQueue
                 ->where('provider', $this->machine->manufacturer)
                 ->first();
 
-            if (!$integration || $integration->status !== 'connected') {
+            if (! $integration || $integration->status !== 'connected') {
                 Log::warning('Integration not available or not connected', [
                     'machine_id' => $this->machine->id,
                 ]);
+
                 return;
             }
 
             // Get service and fetch metrics
             $service = $this->getServiceForIntegration($integration);
-            if (!$service) {
+            if (! $service) {
                 return;
             }
 
             $metrics = $service->fetchMachineMetrics($this->machine->external_id);
 
-            if (!empty($metrics)) {
+            if (! empty($metrics)) {
                 $this->machine->metrics()->create($metrics);
-                
+
                 Log::info('Machine metrics synced successfully', [
                     'machine_id' => $this->machine->id,
                 ]);
@@ -85,16 +93,16 @@ class SyncMachineMetricsJob implements ShouldQueue
     /**
      * Get service instance for integration
      */
-    private function getServiceForIntegration($integration)
+    private function getServiceForIntegration($integration): mixed
     {
         $credentials = json_decode($integration->credentials, true) ?? [];
-        
+
         return match ($integration->provider) {
-            'volvo' => app(\App\Services\Integration\VolvoService::class, ['credentials' => $credentials]),
-            'cat' => app(\App\Services\Integration\CATService::class, ['credentials' => $credentials]),
-            'komatsu' => app(\App\Services\Integration\KomatsuService::class, ['credentials' => $credentials]),
-            'bell' => app(\App\Services\Integration\BellService::class, ['credentials' => $credentials]),
-            'ctrack' => app(\App\Services\Integration\CTrackService::class, ['credentials' => $credentials]),
+            'volvo' => app(VolvoService::class, ['credentials' => $credentials]),
+            'cat' => app(CATService::class, ['credentials' => $credentials]),
+            'komatsu' => app(KomatsuService::class, ['credentials' => $credentials]),
+            'bell' => app(BellService::class, ['credentials' => $credentials]),
+            'ctrack' => app(CTrackService::class, ['credentials' => $credentials]),
             default => null,
         };
     }

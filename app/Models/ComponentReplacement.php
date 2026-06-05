@@ -7,7 +7,30 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $team_id
+ * @property int $machine_id
+ * @property int|null $maintenance_record_id
+ * @property string $component_name
+ * @property string|null $component_type
+ * @property string|null $part_number
+ * @property string|null $serial_number
+ * @property Carbon $replaced_at
+ * @property int|null $hours_at_replacement
+ * @property int|null $km_at_replacement
+ * @property int|null $expected_lifespan_hours
+ * @property int|null $expected_lifespan_km
+ * @property string|null $replacement_reason
+ * @property string|null $cost
+ * @property string|null $supplier
+ * @property Carbon|null $warranty_expiry
+ * @property string|null $notes
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class ComponentReplacement extends Model
 {
     use HasFactory, HasTeamFilters;
@@ -51,19 +74,19 @@ class ComponentReplacement extends Model
     /**
      * Relationships
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MaintenanceRecord, $this> */
+    /** @return BelongsTo<MaintenanceRecord, $this> */
     public function maintenanceRecord(): BelongsTo
     {
         return $this->belongsTo(MaintenanceRecord::class);
@@ -72,16 +95,28 @@ class ComponentReplacement extends Model
     /**
      * Scopes
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeComponent(Builder $query, string $component): Builder
     {
         return $query->where('component_name', $component);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeRecentReplacements(Builder $query, int $days = 30): Builder
     {
         return $query->where('replaced_at', '>=', now()->subDays($days));
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeUnderWarranty(Builder $query): Builder
     {
         return $query->where('warranty_expiry', '>=', now());

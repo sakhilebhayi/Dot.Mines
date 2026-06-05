@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,15 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $display_name
  * @property string|null $description
  * @property string|null $group
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Permission where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Permission whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Permission orderBy(string $column, string $direction = 'asc')
- * @method static Permission|null find(mixed $id, array $columns = ['*'])
- * @method static Permission findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Permission extends Model
 {
@@ -55,7 +49,7 @@ class Permission extends Model
     /**
      * Get the team that owns this permission
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -64,7 +58,7 @@ class Permission extends Model
     /**
      * Get all roles with this permission
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Role, $this> */
+    /** @return BelongsToMany<Role, $this> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);

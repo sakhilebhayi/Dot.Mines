@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,21 +26,14 @@ use Illuminate\Support\Facades\Auth;
  * @property string|null $description
  * @property string $priority
  * @property string $status
- * @property \Carbon\Carbon $triggered_at
- * @property \Carbon\Carbon|null $acknowledged_at
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon $triggered_at
+ * @property Carbon|null $acknowledged_at
+ * @property Carbon|null $resolved_at
  * @property int|null $acknowledged_by
  * @property int|null $resolved_by
  * @property array<string, mixed>|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Alert where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Alert whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Alert orderBy(string $column, string $direction = 'asc')
- * @method static Alert|null find(mixed $id, array $columns = ['*'])
- * @method static Alert findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Alert extends Model
 {
@@ -95,7 +89,7 @@ class Alert extends Model
     /**
      * Get the machine this alert is about
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -104,7 +98,7 @@ class Alert extends Model
     /**
      * Get the mine area this alert is about
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
@@ -113,7 +107,7 @@ class Alert extends Model
     /**
      * Get the team this alert belongs to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -122,7 +116,7 @@ class Alert extends Model
     /**
      * Get the user who acknowledged this alert
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function acknowledgedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
@@ -131,7 +125,7 @@ class Alert extends Model
     /**
      * Get the user who resolved this alert
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function resolvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

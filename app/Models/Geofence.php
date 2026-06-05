@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,15 +29,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float $perimeter_m
  * @property string $status
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Geofence where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Geofence whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Geofence orderBy(string $column, string $direction = 'asc')
- * @method static Geofence|null find(mixed $id, array<string> $columns = ['*'])
- * @method static Geofence findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,Geofence> all(array<string> $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Geofence extends Model
 {
@@ -75,7 +70,7 @@ class Geofence extends Model
     /**
      * Get the team that owns this geofence
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -84,7 +79,7 @@ class Geofence extends Model
     /**
      * Get the mine area this geofence belongs to
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
@@ -93,7 +88,7 @@ class Geofence extends Model
     /**
      * Get all entry/exit records for this geofence
      */
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\GeofenceEntry, $this> */
+    /** @return HasMany<GeofenceEntry, $this> */
     public function entries(): HasMany
     {
         return $this->hasMany(GeofenceEntry::class);
@@ -102,7 +97,7 @@ class Geofence extends Model
     /**
      * Get all active machines currently in this geofence
      */
-    public function activeMachines(): \Illuminate\Database\Eloquent\Collection
+    public function activeMachines(): Collection
     {
         return $this->entries()
             ->where('exit_time', null)
@@ -114,7 +109,7 @@ class Geofence extends Model
     /**
      * Get today's entry records
      */
-    public function getTodayEntries(): \Illuminate\Database\Eloquent\Collection
+    public function getTodayEntries(): Collection
     {
         return $this->entries()
             ->whereDate('entry_time', today())
@@ -124,7 +119,7 @@ class Geofence extends Model
     /**
      * Calculate total tonnage for a date range
      */
-    public function getTonnageForDateRange(\Carbon\Carbon|string $startDate, \Carbon\Carbon|string $endDate): float|int
+    public function getTonnageForDateRange(Carbon|string $startDate, Carbon|string $endDate): float|int
     {
         return $this->entries()
             ->whereBetween('created_at', [$startDate, $endDate])

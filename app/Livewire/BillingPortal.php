@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Services\PaystackService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class BillingPortal extends Component
@@ -19,22 +20,22 @@ class BillingPortal extends Component
 
     public int $selectedBigMachineCount = 0;
 
-    public function updatedSelectedAdtCount()
+    public function updatedSelectedAdtCount(): void
     {
         // Livewire will auto-update
     }
 
-    public function updatedSelectedBigMachineCount()
+    public function updatedSelectedBigMachineCount(): void
     {
         // Livewire will auto-update
     }
 
-    public function getUserSelectedMonthlyTotalProperty()
+    public function getUserSelectedMonthlyTotalProperty(): mixed
     {
         return ($this->selectedAdtCount * $this->ADT_PRICE) + ($this->selectedBigMachineCount * $this->BIG_MACHINE_PRICE);
     }
 
-    public function getUserSelectedYearlyTotalProperty()
+    public function getUserSelectedYearlyTotalProperty(): mixed
     {
         return $this->userSelectedMonthlyTotal * 12 * 0.9;
     }
@@ -79,7 +80,7 @@ class BillingPortal extends Component
     /** @var array<string, mixed> */
     public array $recentInvoices = [];
 
-    public function mount()
+    public function mount(): void
     {
         $this->calculateUsageBasedPricing();
         $this->loadSubscriptionData();
@@ -87,7 +88,7 @@ class BillingPortal extends Component
         $this->loadRecentActivity();
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.billing-portal', [
             'userSelectedMonthlyTotal' => $this->userSelectedMonthlyTotal,
@@ -95,7 +96,7 @@ class BillingPortal extends Component
         ]);
     }
 
-    public function calculateUsageBasedPricing()
+    public function calculateUsageBasedPricing(): void
     {
         $team = Auth::user()->currentTeam;
 
@@ -111,7 +112,7 @@ class BillingPortal extends Component
         $this->yearlyPrice = $this->monthlyPrice * 12 * 0.9;
     }
 
-    public function loadSubscriptionData()
+    public function loadSubscriptionData(): void
     {
         $team = Auth::user()->currentTeam;
 
@@ -127,12 +128,12 @@ class BillingPortal extends Component
         }
     }
 
-    public function loadAvailablePlans()
+    public function loadAvailablePlans(): void
     {
         $this->availablePlans = SubscriptionPlan::active()->get()->toArray();
     }
 
-    public function loadRecentActivity()
+    public function loadRecentActivity(): void
     {
         $team = Auth::user()->currentTeam;
 
@@ -154,20 +155,20 @@ class BillingPortal extends Component
             ->toArray();
     }
 
-    public function selectPlan($planId)
+    public function selectPlan($planId): void
     {
         $this->selectedPlanId = $planId;
         $this->showPlanSelector = false;
         $this->dispatch('plan-selected', $planId);
     }
 
-    public function subscribe()
+    public function subscribe(): mixed
     {
         if (! $this->selectedPlanId) {
             session()->flash('error', 'Please select a plan.');
             $this->showConfirmModal = false;
 
-            return;
+            return null;
         }
 
         $plan = SubscriptionPlan::find($this->selectedPlanId);
@@ -176,7 +177,7 @@ class BillingPortal extends Component
             session()->flash('error', 'Selected plan not found.');
             $this->showConfirmModal = false;
 
-            return;
+            return null;
         }
 
         $team = Auth::user()->currentTeam;
@@ -189,7 +190,7 @@ class BillingPortal extends Component
                 session()->flash('error', 'Unable to initiate payment. Please try again.');
                 $this->showConfirmModal = false;
 
-                return;
+                return null;
             }
 
             $this->showConfirmModal = false;
@@ -201,9 +202,11 @@ class BillingPortal extends Component
             $this->showConfirmModal = false;
             session()->flash('error', 'An error occurred. Please try again.');
         }
+
+        return null;
     }
 
-    public function cancelSubscription()
+    public function cancelSubscription(): void
     {
         if (! $this->currentSubscription) {
             session()->flash('error', 'No active subscription found.');
@@ -228,7 +231,7 @@ class BillingPortal extends Component
         }
     }
 
-    public function resumeSubscription()
+    public function resumeSubscription(): void
     {
         if (! $this->currentSubscription) {
             session()->flash('error', 'No subscription found.');
@@ -253,17 +256,17 @@ class BillingPortal extends Component
         }
     }
 
-    public function switchBillingCycle()
+    public function switchBillingCycle(): void
     {
         $this->selectedBillingCycle = $this->selectedBillingCycle === 'monthly' ? 'yearly' : 'monthly';
     }
 
-    public function togglePlanSelector()
+    public function togglePlanSelector(): void
     {
         $this->showPlanSelector = ! $this->showPlanSelector;
     }
 
-    public function downloadInvoice($invoiceId)
+    public function downloadInvoice($invoiceId): mixed
     {
         $team = Auth::user()->currentTeam;
         $invoice = Invoice::where('team_id', $team->id)
@@ -275,5 +278,7 @@ class BillingPortal extends Component
         }
 
         session()->flash('error', 'Invoice not found or PDF not available.');
+
+        return null;
     }
 }

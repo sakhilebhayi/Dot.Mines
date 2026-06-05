@@ -13,5 +13,5 @@ return [
     'dsn' => env('SENTRY_DSN', null),
     'environment' => env('SENTRY_ENVIRONMENT', env('APP_ENV', 'production')),
     'release' => env('SENTRY_RELEASE', null),
-    'traces_sample_rate' => env('SENTRY_TRACES_SAMPLE_RATE', 0.0),
+    'traces_sample_rate' => (float) env('SENTRY_TRACES_SAMPLE_RATE', 0.0),
 ];

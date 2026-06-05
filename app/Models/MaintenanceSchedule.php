@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,10 +25,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $interval_days
  * @property int|null $last_service_hours
  * @property int|null $last_service_km
- * @property string|\Carbon\Carbon|null $last_service_date
+ * @property string|Carbon|null $last_service_date
  * @property int|null $next_service_hours
  * @property int|null $next_service_km
- * @property string|\Carbon\Carbon|null $next_service_date
+ * @property string|Carbon|null $next_service_date
  * @property string $priority
  * @property string $status
  * @property string|float|null $estimated_cost
@@ -35,15 +36,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property array<string, mixed>|null $required_parts
  * @property array<string, mixed>|null $required_tools
  * @property bool $auto_generate_work_order
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceSchedule where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceSchedule whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceSchedule orderBy(string $column, string $direction = 'asc')
- * @method static MaintenanceSchedule|null find(mixed $id, array $columns = ['*'])
- * @method static MaintenanceSchedule findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class MaintenanceSchedule extends Model
 {
@@ -91,19 +85,19 @@ class MaintenanceSchedule extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MaintenanceRecord, $this> */
+    /** @return HasMany<MaintenanceRecord, $this> */
     public function maintenanceRecords(): HasMany
     {
         return $this->hasMany(MaintenanceRecord::class);
