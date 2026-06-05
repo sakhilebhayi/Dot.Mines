@@ -87,7 +87,7 @@ class FuelMonthlyAllocation extends Model
      */
     public function getPeriodNameAttribute(): string
     {
-        return date('F Y', mktime(0, 0, 0, $this->month, 1, $this->year));
+        return date('F Y', mktime(0, 0, 0, $this->month, 1, $this->year) ?: null);
     }
 
     /**

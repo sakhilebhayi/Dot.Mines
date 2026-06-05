@@ -30,7 +30,7 @@ class ReportGenerator extends Component
 
     public string $format = 'pdf';
 
-    /** @var array<string, mixed> */
+    /** @var array<array-key, mixed> */
     public array $selectedMachines = [];
 
     /** @var array<string, mixed> */

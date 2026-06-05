@@ -11,7 +11,7 @@ use Symfony\Component\Process\Process;
 
 class FileUploadService
 {
-    /** @var array<string, mixed> */
+    /** @var array<int, string> */
     protected array $allowedExtensions = [
         'pdf', 'dwg', 'dxf', 'kml', 'kmz', 'shp', 'zip', 'gz', 'tar',
         'png', 'jpg', 'jpeg', 'gif', 'tif', 'tiff',
@@ -22,7 +22,7 @@ class FileUploadService
         $name = pathinfo($originalName, PATHINFO_FILENAME);
         $ext = pathinfo($originalName, PATHINFO_EXTENSION);
         // Remove non-alphanumeric, keep dots, dashes and underscores
-        $safe = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $name);
+        $safe = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $name) ?? '';
         $safe = Str::limit($safe, 120, '');
         $hash = Str::random(8);
 
@@ -365,7 +365,7 @@ class FileUploadService
             }
             // On Windows check PATHEXT
             if (DIRECTORY_SEPARATOR !== '/') {
-                $exts = array_filter(array_map('strtolower', preg_split('/;/', getenv('PATHEXT') ?: '.EXE')));
+                $exts = array_filter(array_map('strtolower', preg_split('/;/', getenv('PATHEXT') ?: '.EXE') ?: []));
                 foreach ($exts as $ext) {
                     if (is_executable($candidate.$ext)) {
                         return true;

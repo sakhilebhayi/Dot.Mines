@@ -29,7 +29,7 @@ class WebhookController extends Controller
 
         $expected = hash_hmac('sha512', $payload, $secret);
 
-        if (! hash_equals($expected, $signature)) {
+        if (! hash_equals($expected, is_string($signature) ? $signature : '')) {
             Log::error('Paystack webhook signature verification failed');
 
             return response()->json(['error' => 'Invalid signature'], 400);

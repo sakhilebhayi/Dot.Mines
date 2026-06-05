@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Geofence;
+use App\Models\Machine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -65,7 +66,8 @@ class GeofenceController extends Controller
     {
         $this->authorize('view', $geofence);
 
-        $activeMachines = $geofence->activeMachines()->map(function ($machine) {
+        $activeMachines = $geofence->activeMachines()->filter()->map(function ($machine) {
+            /** @var Machine $machine */
             return [
                 'id' => $machine->id,
                 'name' => $machine->name,

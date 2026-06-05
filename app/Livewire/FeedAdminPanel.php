@@ -6,6 +6,7 @@ use App\Models\FeedAuditLog;
 use App\Models\MineArea;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -19,7 +20,7 @@ class FeedAdminPanel extends Component
     public string $auditAction = '';
 
     // ── Active shifts state ────────────────────────────────────────────────────
-    /** @var array<string, mixed> */
+    /** @var array<array-key, mixed> */
     public array $activeShifts = ['A', 'B', 'C'];
 
     public function mount(): void
@@ -63,7 +64,7 @@ class FeedAdminPanel extends Component
 
     // ── Render ─────────────────────────────────────────────────────────────────
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 

@@ -193,10 +193,10 @@ class RoutePlanning extends Component
             $service = new RoutePlanningService;
 
             $this->calculatedRoute = $service->calculateOptimalRoute(
-                $this->startLat,
-                $this->startLon,
-                $this->endLat,
-                $this->endLon,
+                (float) $this->startLat,
+                (float) $this->startLon,
+                (float) $this->endLat,
+                (float) $this->endLon,
                 $this->machineId,
                 $team->id
             );

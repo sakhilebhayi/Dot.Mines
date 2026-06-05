@@ -111,7 +111,7 @@ class MaintenanceSchedule extends Model
         return match ($this->schedule_type) {
             'hours' => $machine->operating_hours >= $this->next_service_hours,
             'kilometers' => $machine->odometer >= $this->next_service_km,
-            'calendar' => now()->gte($this->next_service_date),
+            'calendar' => $this->next_service_date !== null && now()->gte($this->next_service_date),
             default => false,
         };
     }

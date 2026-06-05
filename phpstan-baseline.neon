@@ -11,24 +11,9 @@ parameters:
 			path: app/Actions/Fortify/UpdateUserProfileInformation.php
 
 		-
-			message: "#^Parameter \\#1 \\$invitation of class Laravel\\\\Jetstream\\\\Mail\\\\TeamInvitation constructor expects Laravel\\\\Jetstream\\\\TeamInvitation, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#"
-			count: 1
-			path: app/Actions/Jetstream/InviteTeamMember.php
-
-		-
 			message: "#^Binary operation \"\\*\" between int\\|string and \\(float\\|int\\) results in an error\\.$#"
 			count: 1
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Parameter \\#2 \\$shiftType of method App\\\\Services\\\\ShiftService\\:\\:performShiftChange\\(\\) expects string, array\\|bool\\|float\\|int\\|string given\\.$#"
-			count: 1
-			path: app/Console/Commands/PerformShiftChange.php
-
-		-
-			message: "#^Part \\$shiftType \\(array\\|bool\\|float\\|int\\|string\\) of encapsed string cannot be cast to string\\.$#"
-			count: 1
-			path: app/Console/Commands/PerformShiftChange.php
 
 		-
 			message: "#^Call to an undefined method Illuminate\\\\Foundation\\\\Application\\:\\:hasInstance\\(\\)\\.$#"
@@ -46,34 +31,9 @@ parameters:
 			path: app/Console/Commands/SendShiftDigest.php
 
 		-
-			message: "#^Parameter \\#1 \\$name of static method Illuminate\\\\Support\\\\Facades\\\\Storage\\:\\:disk\\(\\) expects string\\|UnitEnum\\|null, array\\|bool\\|float\\|int\\|string given\\.$#"
-			count: 5
-			path: app/Console/Commands/VerifyS3Storage.php
-
-		-
-			message: "#^Part \\$disk \\(array\\|bool\\|float\\|int\\|string\\) of encapsed string cannot be cast to string\\.$#"
-			count: 3
-			path: app/Console/Commands/VerifyS3Storage.php
-
-		-
-			message: "#^Property App\\\\Events\\\\MachineLocationUpdated\\:\\:\\$timestamp \\(DateTime\\) does not accept Carbon\\\\CarbonInterface\\.$#"
-			count: 1
-			path: app/Events/MachineLocationUpdated.php
-
-		-
 			message: "#^Method App\\\\Events\\\\SensorReadingRecorded\\:\\:__construct\\(\\) has parameter \\$reading with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Events/SensorReadingRecorded.php
-
-		-
-			message: "#^Parameter \\#1 \\$userId of method App\\\\Models\\\\Alert\\:\\:acknowledge\\(\\) expects int\\|null, int\\|string\\|null given\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/AlertController.php
-
-		-
-			message: "#^Parameter \\#1 \\$userId of method App\\\\Models\\\\Alert\\:\\:resolve\\(\\) expects int\\|null, int\\|string\\|null given\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/AlertController.php
 
 		-
 			message: "#^Cannot call method store\\(\\) on array\\<Illuminate\\\\Http\\\\UploadedFile\\>\\|Illuminate\\\\Http\\\\UploadedFile\\|null\\.$#"
@@ -87,16 +47,6 @@ parameters:
 
 		-
 			message: "#^Cannot access property \\$machine_id on stdClass\\|null\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
-			count: 1
-			path: app/Http/Controllers/Api/GeofenceController.php
-
-		-
-			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/GeofenceController.php
 
@@ -124,26 +74,6 @@ parameters:
 			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: app/Http/Controllers/Api/NotificationController.php
-
-		-
-			message: "#^Parameter \\#1 \\$haystack of static method Illuminate\\\\Support\\\\Str\\:\\:contains\\(\\) expects string, array\\<int, string\\>\\|string given\\.$#"
-			count: 1
-			path: app/Http/Controllers/MinePlanDownloadController.php
-
-		-
-			message: "#^Parameter \\#1 \\$haystack of static method Illuminate\\\\Support\\\\Str\\:\\:startsWith\\(\\) expects string, array\\<int, string\\>\\|string given\\.$#"
-			count: 1
-			path: app/Http/Controllers/MinePlanDownloadController.php
-
-		-
-			message: "#^Parameter \\#1 \\$name of static method Illuminate\\\\Support\\\\Facades\\\\Storage\\:\\:disk\\(\\) expects string\\|UnitEnum\\|null, array\\|string\\|null given\\.$#"
-			count: 1
-			path: app/Http/Controllers/MinePlanDownloadController.php
-
-		-
-			message: "#^Parameter \\#2 \\$user_string of function hash_equals expects string, array\\|string\\|null given\\.$#"
-			count: 1
-			path: app/Http/Controllers/WebhookController.php
 
 		-
 			message: "#^Access to undefined constant Illuminate\\\\Http\\\\Request\\:\\:HEADER_X_FORWARDED_ALL\\.$#"
@@ -221,72 +151,12 @@ parameters:
 			path: app/Livewire/BillingPortal.php
 
 		-
-			message: "#^Cannot unset offset int on array\\<string, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Parameter \\#3 \\$uploader of method App\\\\Services\\\\FeedAttachmentService\\:\\:store\\(\\) expects App\\\\Models\\\\User, Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\|null given\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$commentBody \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$editingComment \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$expandedComments \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$expandedComments \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Feed\\:\\:\\$replyTo \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/Feed.php
-
-		-
 			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:hasRole\\(\\)\\.$#"
 			count: 1
 			path: app/Livewire/FeedAdminPanel.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\FeedAdminPanel\\:\\:\\$activeShifts \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/FeedAdminPanel.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\FeedAdminPanel\\:\\:\\$activeShifts \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/FeedAdminPanel.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\FeedAdminPanel\\:\\:\\$activeShifts \\(array\\<string, mixed\\>\\) does not accept default value of type array\\<int, string\\>\\.$#"
-			count: 1
-			path: app/Livewire/FeedAdminPanel.php
-
-		-
 			message: "#^Left side of && is always true\\.$#"
-			count: 1
-			path: app/Livewire/Fleet.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$lastAiRecommendations \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/Fleet.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\Fleet\\:\\:\\$serialNumber \\(string\\) does not accept string\\|null\\.$#"
 			count: 1
 			path: app/Livewire/Fleet.php
 
@@ -331,54 +201,14 @@ parameters:
 			path: app/Livewire/MaintenanceDashboard.php
 
 		-
-			message: "#^Cannot call method getClientOriginalExtension\\(\\) on Illuminate\\\\Http\\\\UploadedFile\\|null\\.$#"
-			count: 1
-			path: app/Livewire/MineAreaDetail.php
-
-		-
-			message: "#^Parameter \\#1 \\$file of method App\\\\Services\\\\FileUploadService\\:\\:storeMinePlan\\(\\) expects Illuminate\\\\Http\\\\UploadedFile, Illuminate\\\\Http\\\\UploadedFile\\|null given\\.$#"
-			count: 1
-			path: app/Livewire/MineAreaDetail.php
-
-		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$currentTeam\\.$#"
 			count: 1
 			path: app/Livewire/Navbar.php
 
 		-
-			message: "#^Property App\\\\Livewire\\\\ReportGenerator\\:\\:\\$selectedMachines \\(array\\<string, mixed\\>\\) does not accept array\\<int, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
-
-		-
-			message: "#^Property App\\\\Livewire\\\\ReportGenerator\\:\\:\\$selectedMachines \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
-
-		-
 			message: "#^Property App\\\\Livewire\\\\Reports\\:\\:\\$machinesList with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#"
 			count: 1
 			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Parameter \\#1 \\$startLat of method App\\\\Services\\\\RoutePlanningService\\:\\:calculateOptimalRoute\\(\\) expects float, float\\|null given\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Parameter \\#2 \\$startLon of method App\\\\Services\\\\RoutePlanningService\\:\\:calculateOptimalRoute\\(\\) expects float, float\\|null given\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Parameter \\#3 \\$endLat of method App\\\\Services\\\\RoutePlanningService\\:\\:calculateOptimalRoute\\(\\) expects float, float\\|null given\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Parameter \\#4 \\$endLon of method App\\\\Services\\\\RoutePlanningService\\:\\:calculateOptimalRoute\\(\\) expects float, float\\|null given\\.$#"
-			count: 1
-			path: app/Livewire/RoutePlanning.php
 
 		-
 			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:hasRole\\(\\)\\.$#"
@@ -389,16 +219,6 @@ parameters:
 			message: "#^Call to an undefined method Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:hasRole\\(\\)\\.$#"
 			count: 1
 			path: app/Livewire/WhatsAppMigration.php
-
-		-
-			message: "#^Parameter \\#1 \\$callback of method Monolog\\\\Logger\\:\\:pushProcessor\\(\\) expects callable\\(Monolog\\\\LogRecord\\)\\: Monolog\\\\LogRecord, Closure\\(array\\)\\: array given\\.$#"
-			count: 1
-			path: app/Logging/RedactSensitiveData.php
-
-		-
-			message: "#^Parameter \\#3 \\$subject of function preg_replace expects array\\|string, string\\|null given\\.$#"
-			count: 2
-			path: app/Logging/RedactSensitiveData.php
 
 		-
 			message: "#^Method App\\\\Models\\\\AIAgent\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
@@ -476,11 +296,6 @@ parameters:
 			path: app/Models/EngineHourSession.php
 
 		-
-			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeRunning\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/EngineHourSession.php
-
-		-
 			message: "#^Method App\\\\Models\\\\EngineHourSession\\:\\:scopeToday\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/EngineHourSession.php
@@ -541,11 +356,6 @@ parameters:
 			path: app/Models/FuelAlert.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelAlert\\:\\:scopeUnacknowledged\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/FuelAlert.php
-
-		-
 			message: "#^Class App\\\\Models\\\\FuelBudget uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/FuelBudget.php
@@ -581,22 +391,12 @@ parameters:
 			path: app/Models/FuelBudget.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelBudget\\:\\:scopeExceeded\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/FuelBudget.php
-
-		-
 			message: "#^Class App\\\\Models\\\\FuelConsumptionMetric uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/FuelConsumptionMetric.php
 
 		-
 			message: "#^Class App\\\\Models\\\\FuelMonthlyAllocation uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^Parameter \\#2 \\$timestamp of function date expects int\\|null, int\\|false given\\.$#"
 			count: 1
 			path: app/Models/FuelMonthlyAllocation.php
 
@@ -631,11 +431,6 @@ parameters:
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeCritical\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTank.php
@@ -646,22 +441,12 @@ parameters:
 			path: app/Models/FuelTank.php
 
 		-
-			message: "#^Method App\\\\Models\\\\FuelTank\\:\\:scopeLowFuel\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/FuelTank.php
-
-		-
 			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
 		-
 			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelTransaction.php
-
-		-
-			message: "#^Method App\\\\Models\\\\FuelTransaction\\:\\:scopeDateRange\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/FuelTransaction.php
 
@@ -686,42 +471,12 @@ parameters:
 			path: app/Models/FuelTransaction.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:activeMachines\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:activeMachines\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Collection but returns Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\), mixed\\>\\.$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTodayEntries\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Geofence\\:\\:getTodayEntries\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Collection but returns Illuminate\\\\Support\\\\Collection\\<int, stdClass\\>\\.$#"
-			count: 1
-			path: app/Models/Geofence.php
-
-		-
-			message: "#^Method App\\\\Models\\\\GeofenceEntry\\:\\:getDurationMinutes\\(\\) should return int\\|null but returns float\\.$#"
-			count: 1
-			path: app/Models/GeofenceEntry.php
-
-		-
 			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/HaulDispatch.php
 
 		-
 			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/HaulDispatch.php
-
-		-
-			message: "#^Method App\\\\Models\\\\HaulDispatch\\:\\:scopeActive\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
 			count: 1
 			path: app/Models/HaulDispatch.php
 
@@ -801,11 +556,6 @@ parameters:
 			path: app/Models/MachineAreaAssignment.php
 
 		-
-			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeActive\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/MachineAreaAssignment.php
-
-		-
 			message: "#^Method App\\\\Models\\\\MachineAreaAssignment\\:\\:scopeForTeam\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/MachineAreaAssignment.php
@@ -867,11 +617,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\MaintenanceSchedule\\:\\:scopeOverdue\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/MaintenanceSchedule.php
-
-		-
-			message: "#^Parameter \\#1 \\$date of method Carbon\\\\CarbonInterface\\:\\:gte\\(\\) expects DateTimeInterface\\|string, Carbon\\\\Carbon\\|string\\|null given\\.$#"
 			count: 1
 			path: app/Models/MaintenanceSchedule.php
 
@@ -1021,11 +766,6 @@ parameters:
 			path: app/Models/Subscription.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:daysRemainingInPeriod\\(\\) should return int but returns float\\|int\\.$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Subscription.php
@@ -1036,22 +776,12 @@ parameters:
 			path: app/Models/Subscription.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeActive\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/Subscription.php
 
 		-
 			message: "#^Method App\\\\Models\\\\Subscription\\:\\:scopeOnTrial\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/Subscription.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Subscription\\:\\:trialDaysRemaining\\(\\) should return int but returns float\\|int\\.$#"
 			count: 1
 			path: app/Models/Subscription.php
 
@@ -1081,22 +811,7 @@ parameters:
 			path: app/Models/SubscriptionPlan.php
 
 		-
-			message: "#^Method App\\\\Models\\\\SubscriptionPlan\\:\\:scopeActive\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Query\\\\Builder\\.$#"
-			count: 1
-			path: app/Models/SubscriptionPlan.php
-
-		-
 			message: "#^Method App\\\\Models\\\\TeamInvitation\\:\\:team\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/TeamInvitation.php
-
-		-
-			message: "#^Parameter \\#1 \\$related of method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:belongsTo\\(\\) expects class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>, string given\\.$#"
-			count: 1
-			path: app/Models/TeamInvitation.php
-
-		-
-			message: "#^Unable to resolve the template type TRelatedModel in call to method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:belongsTo\\(\\)$#"
 			count: 1
 			path: app/Models/TeamInvitation.php
 
@@ -1166,21 +881,6 @@ parameters:
 			path: app/Services/FileUploadService.php
 
 		-
-			message: "#^Parameter \\#1 \\$value of static method Illuminate\\\\Support\\\\Str\\:\\:limit\\(\\) expects string, string\\|null given\\.$#"
-			count: 1
-			path: app/Services/FileUploadService.php
-
-		-
-			message: "#^Parameter \\#2 \\$array of function array_map expects array, array\\<int, string\\>\\|false given\\.$#"
-			count: 1
-			path: app/Services/FileUploadService.php
-
-		-
-			message: "#^Property App\\\\Services\\\\FileUploadService\\:\\:\\$allowedExtensions \\(array\\<string, mixed\\>\\) does not accept default value of type array\\<int, string\\>\\.$#"
-			count: 1
-			path: app/Services/FileUploadService.php
-
-		-
 			message: "#^Parameter \\#1 \\$startedAt of method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:writeAuditLog\\(\\) expects Carbon\\\\Carbon, Carbon\\\\CarbonInterface given\\.$#"
 			count: 2
 			path: app/Services/Integration/BellIso15143Service.php
@@ -1241,11 +941,6 @@ parameters:
 			path: app/Services/Integration/XCMGService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) should return App\\\\Models\\\\SensorReading but returns Illuminate\\\\Database\\\\Eloquent\\\\Model\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
 			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function max expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
@@ -1276,22 +971,12 @@ parameters:
 			path: app/Services/MentionParser.php
 
 		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:delete\\(\\) should return bool but returns bool\\|null\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getActiveForTeam\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
 			count: 1
 			path: app/Services/MineAreaService.php
 
 		-
 			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:getAllForTeam\\(\\) return type with generic interface Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:update\\(\\) should return App\\\\Models\\\\MineArea but returns App\\\\Models\\\\MineArea\\|null\\.$#"
 			count: 1
 			path: app/Services/MineAreaService.php
 

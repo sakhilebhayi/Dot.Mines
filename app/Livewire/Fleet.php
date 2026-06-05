@@ -25,7 +25,7 @@ class Fleet extends Component
     use WithPagination;
 
     // AI recommendation interaction state
-    /** @var array<string, mixed> */
+    /** @var array<array-key, mixed> */
     public array $lastAiRecommendations = [];
 
     public ?int $pendingRecommendationIndex = null;
@@ -74,7 +74,7 @@ class Fleet extends Component
 
     public string $status = 'active';
 
-    public string $serialNumber = '';
+    public ?string $serialNumber = '';
 
     public float $capacity = 0;
 

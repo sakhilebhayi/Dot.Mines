@@ -98,8 +98,10 @@ class Geofence extends Model
 
     /**
      * Get all active machines currently in this geofence
+     *
+     * @return \Illuminate\Support\Collection<int, Machine|null>
      */
-    public function activeMachines(): Collection
+    public function activeMachines(): \Illuminate\Support\Collection
     {
         return $this->entries()
             ->where('exit_time', null)
@@ -110,12 +112,17 @@ class Geofence extends Model
 
     /**
      * Get today's entry records
+     *
+     * @return \Illuminate\Support\Collection<int, GeofenceEntry>
      */
-    public function getTodayEntries(): Collection
+    public function getTodayEntries(): \Illuminate\Support\Collection
     {
-        return $this->entries()
+        /** @var Collection<int, GeofenceEntry> $entries */
+        $entries = $this->entries()
             ->whereDate('entry_time', today())
             ->get();
+
+        return $entries;
     }
 
     /**

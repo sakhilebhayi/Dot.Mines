@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MinePlanUpload;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -23,8 +25,10 @@ class MinePlanDownloadController extends Controller
         }
 
         // Expected query params: disk and path (or the MinePlan model can be looked up)
-        $disk = $request->query('disk', config('filesystems.default'));
-        $path = $request->query('path');
+        $diskOption = $request->query('disk', config('filesystems.default'));
+        $disk = is_string($diskOption) ? $diskOption : 's3';
+        $pathOption = $request->query('path', '');
+        $path = is_string($pathOption) ? $pathOption : '';
 
         if (empty($path)) {
             abort(404);
@@ -43,12 +47,12 @@ class MinePlanDownloadController extends Controller
         }
 
         // Optional model-level authorization: if a MinePlanUpload record exists, verify ownership
-        $minePlanUpload = \App\Models\MinePlanUpload::find($minePlanId);
+        $minePlanUpload = MinePlanUpload::find($minePlanId);
         if ($minePlanUpload && $minePlanUpload->team_id !== Auth::user()->current_team_id) {
             abort(403);
         }
 
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $storageDisk */
+        /** @var FilesystemAdapter $storageDisk */
         $storageDisk = Storage::disk($disk);
 
         if (! $storageDisk->exists($normalized)) {
@@ -65,7 +69,7 @@ class MinePlanDownloadController extends Controller
         ];
 
         if ($disk === 's3') {
-            /** @var \Illuminate\Filesystem\FilesystemAdapter $s3Disk */
+            /** @var FilesystemAdapter $s3Disk */
             $s3Disk = Storage::disk('s3');
             $url = $s3Disk->temporaryUrl($normalized, now()->addMinutes(15));
 

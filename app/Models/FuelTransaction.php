@@ -138,7 +138,9 @@ class FuelTransaction extends Model
      */
     public function scopeOfType(Builder $query, string $type): Builder
     {
-        return $query->where('transaction_type', $type);
+        $query->where('transaction_type', $type);
+
+        return $query;
     }
 
     /**
@@ -146,7 +148,9 @@ class FuelTransaction extends Model
      */
     public function scopeDateRange(Builder $query, string $startDate, string $endDate): Builder
     {
-        return $query->whereBetween('transaction_date', [$startDate, $endDate]);
+        $query->whereBetween('transaction_date', [$startDate, $endDate]);
+
+        return $query;
     }
 
     /**
@@ -154,6 +158,8 @@ class FuelTransaction extends Model
      */
     public function scopeFuelType(Builder $query, string $type): Builder
     {
-        return $query->where('fuel_type', $type);
+        $query->where('fuel_type', $type);
+
+        return $query;
     }
 }

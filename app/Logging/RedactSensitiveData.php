@@ -3,6 +3,7 @@
 namespace App\Logging;
 
 use Monolog\Logger;
+use Monolog\LogRecord;
 
 /**
  * Monolog tap that adds a processor to redact sensitive keys in log records.
@@ -16,7 +17,7 @@ class RedactSensitiveData
      */
     public function __invoke(Logger $logger)
     {
-        $logger->pushProcessor(function (array $record) {
+        $logger->pushProcessor(function (LogRecord $record) use (&$defaults): LogRecord {
             $configured = config('logging_redaction.keys', []);
             $defaults = [
                 'password', 'pass', 'pwd', 'secret', 'token', 'access_token', 'refresh_token',
@@ -37,7 +38,7 @@ class RedactSensitiveData
             // normalize to lowercase for comparisons
             $sensitiveKeys = array_map('strtolower', $sensitiveKeys);
 
-            $redact = function ($value) use (&$redact, $sensitiveKeys) {
+            $redact = function (mixed $value) use (&$redact, $sensitiveKeys): mixed {
                 if (is_array($value)) {
                     foreach ($value as $k => $v) {
                         // If key looks sensitive, replace with placeholder
@@ -53,8 +54,8 @@ class RedactSensitiveData
 
                 if (is_string($value)) {
                     // redact common inline patterns
-                    $value = preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $value);
-                    $value = preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $value);
+                    $value = (string) preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $value);
+                    $value = (string) preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $value);
 
                     return $value;
                 }
@@ -62,20 +63,13 @@ class RedactSensitiveData
                 return $value;
             };
 
-            if (isset($record['context'])) {
-                $record['context'] = $redact($record['context']);
-            }
+            /** @var array<array-key, mixed> $context */
+            $context = $redact($record->context);
+            /** @var array<array-key, mixed> $extra */
+            $extra = $redact($record->extra);
+            $message = (string) $redact($record->message);
 
-            if (isset($record['extra'])) {
-                $record['extra'] = $redact($record['extra']);
-            }
-
-            // Also scrub message
-            if (! empty($record['message']) && is_string($record['message'])) {
-                $record['message'] = $redact($record['message']);
-            }
-
-            return $record;
+            return $record->with(context: $context, extra: $extra, message: $message);
         });
     }
 
@@ -110,8 +104,8 @@ class RedactSensitiveData
                 return $v;
             }
             if (is_string($v)) {
-                $v = preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $v);
-                $v = preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $v);
+                $v = (string) preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $v);
+                $v = (string) preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $v);
 
                 return $v;
             }

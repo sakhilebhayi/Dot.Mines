@@ -341,6 +341,12 @@ class MineAreaDetail extends Component
 
         $file = $this->planFile;
 
+        if ($file === null) {
+            $this->addError('planFile', 'Please select a file to upload.');
+
+            return;
+        }
+
         try {
             $uploader = new FileUploadService;
             $result = $uploader->storeMinePlan($file, $team->id, $this->mineArea->id);

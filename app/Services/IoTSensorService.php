@@ -104,7 +104,8 @@ class IoTSensorService
     /** @param array<string, mixed> $data */
     public function recordReading(IoTSensor $sensor, array $data): SensorReading
     {
-        return $sensor->readings()->create([
+        /** @var SensorReading $reading */
+        $reading = $sensor->readings()->create([
             'iot_sensor_id' => $sensor->id,
             'sensor_type' => $sensor->sensor_type,
             'value' => $data['value'],
@@ -112,6 +113,8 @@ class IoTSensorService
             'timestamp' => $data['timestamp'] ?? now(),
             'quality_score' => $data['quality_score'] ?? null,
         ]);
+
+        return $reading;
     }
 
     /**

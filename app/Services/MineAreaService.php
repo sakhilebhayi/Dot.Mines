@@ -105,7 +105,7 @@ class MineAreaService
     {
         $mineArea->update($data);
 
-        return $mineArea->fresh();
+        return $mineArea->fresh() ?? $mineArea;
     }
 
     /**
@@ -113,7 +113,7 @@ class MineAreaService
      */
     public function delete(MineArea $mineArea): bool
     {
-        return $mineArea->delete();
+        return (bool) $mineArea->delete();
     }
 
     /**

@@ -23,17 +23,18 @@ class VerifyS3Storage extends Command
 
     public function handle(): int
     {
-        $disk = $this->option('disk') ?? 's3';
+        $disk = is_string($this->option('disk')) ? $this->option('disk') : 's3';
 
         $this->info("Verifying storage disk: {$disk}");
 
         if (! config("filesystems.disks.{$disk}")) {
             $this->error("Disk '{$disk}' is not configured in filesystems.php");
+
             return self::FAILURE;
         }
 
-        $testPath = 'verify-s3/' . uniqid('verify_') . '.txt';
-        $contents = 'This is a storage verification file. ' . now()->toIsoString();
+        $testPath = 'verify-s3/'.uniqid('verify_').'.txt';
+        $contents = 'This is a storage verification file. '.now()->toIsoString();
 
         try {
             Storage::disk($disk)->put($testPath, $contents);
@@ -45,15 +46,15 @@ class VerifyS3Storage extends Command
                 try {
                     $url = Storage::disk($disk)->temporaryUrl($testPath, now()->addMinutes(10));
                 } catch (\Exception $e) {
-                    $this->warn('Could not generate temporaryUrl: ' . $e->getMessage());
+                    $this->warn('Could not generate temporaryUrl: '.$e->getMessage());
                 }
             }
 
-            if (!$url) {
+            if (! $url) {
                 try {
                     $url = Storage::disk($disk)->url($testPath);
                 } catch (\Exception $e) {
-                    $this->warn('Could not generate public URL: ' . $e->getMessage());
+                    $this->warn('Could not generate public URL: '.$e->getMessage());
                 }
             }
 
@@ -69,9 +70,11 @@ class VerifyS3Storage extends Command
             $this->info('Deleted test file from storage.');
 
             $this->info('S3 storage verification completed successfully.');
+
             return self::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('Storage verification failed: ' . $e->getMessage());
+            $this->error('Storage verification failed: '.$e->getMessage());
+
             return self::FAILURE;
         }
     }

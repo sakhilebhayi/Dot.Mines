@@ -74,11 +74,15 @@ class MachineAreaAssignment extends Model
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->whereNull('unassigned_at');
+        $query->whereNull('unassigned_at');
+
+        return $query;
     }
 
     public function scopeForTeam(Builder $query, int $teamId): Builder
     {
-        return $query->where('team_id', $teamId);
+        $query->where('team_id', $teamId);
+
+        return $query;
     }
 }

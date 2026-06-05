@@ -144,7 +144,9 @@ class FuelTank extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', 'active');
+        $query->where('status', 'active');
+
+        return $query;
     }
 
     /**
@@ -152,7 +154,9 @@ class FuelTank extends Model
      */
     public function scopeLowFuel(Builder $query): Builder
     {
-        return $query->whereRaw('current_level_liters < minimum_level_liters');
+        $query->whereRaw('current_level_liters < minimum_level_liters');
+
+        return $query;
     }
 
     /**
@@ -160,6 +164,8 @@ class FuelTank extends Model
      */
     public function scopeCritical(Builder $query): Builder
     {
-        return $query->whereRaw('(current_level_liters / capacity_liters) < 0.1');
+        $query->whereRaw('(current_level_liters / capacity_liters) < 0.1');
+
+        return $query;
     }
 }

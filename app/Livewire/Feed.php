@@ -77,16 +77,16 @@ class Feed extends Component
     public array $categoryTemplates = [];   // templates for current category
 
     // ── Comment state ─────────────────────────────────────────────────────────
-    /** @var array<string, mixed> */
+    /** @var array<array-key, mixed> */
     public array $expandedComments = [];   // post IDs with comments open
 
-    /** @var array<string, mixed> */
+    /** @var array<array-key, mixed> */
     public array $commentBody = [];   // [post_id => text]
 
-    /** @var array<string, mixed> */
+    /** @var array<array-key, mixed> */
     public array $replyTo = [];   // [post_id => comment_id]
 
-    /** @var array<string, mixed> */
+    /** @var array<array-key, mixed> */
     public array $editingComment = [];   // [comment_id => text]
 
     // ── Rejection modal ───────────────────────────────────────────────────────
@@ -211,6 +211,7 @@ class Feed extends Component
             $this->composePriority = 'critical';
         }
 
+        /** @var User $user */
         $user = Auth::user();
 
         $post = DB::transaction(function () use ($user) {

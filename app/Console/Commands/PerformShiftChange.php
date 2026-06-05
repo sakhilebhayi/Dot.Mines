@@ -14,7 +14,7 @@ class PerformShiftChange extends Command
     public function handle(ShiftService $shiftService): mixed
     {
         $teamId = (int) $this->argument('team_id');
-        $shiftType = $this->argument('shift_type') ?? 'day';
+        $shiftType = is_string($this->argument('shift_type')) ? $this->argument('shift_type') : 'day';
         $defaultMineArea = $this->option('default-mine-area');
 
         $this->info("Starting shift change for team {$teamId}, shift={$shiftType}");

@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Machine;
+use Carbon\Carbon;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -28,7 +29,7 @@ class MachineLocationUpdated implements ShouldBroadcast
     /**
      * Timestamp of the location update.
      *
-     * @var \DateTime
+     * @var Carbon
      */
     public $timestamp;
 
@@ -40,7 +41,7 @@ class MachineLocationUpdated implements ShouldBroadcast
     {
         $this->machine = $machine;
         $this->location = $location;
-        $this->timestamp = now();
+        $this->timestamp = Carbon::now();
     }
 
     /**

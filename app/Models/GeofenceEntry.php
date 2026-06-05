@@ -110,7 +110,7 @@ class GeofenceEntry extends Model
             return null;
         }
 
-        return $this->exit_time->diffInMinutes($this->entry_time);
+        return (int) $this->exit_time->diffInMinutes($this->entry_time);
     }
 
     /**

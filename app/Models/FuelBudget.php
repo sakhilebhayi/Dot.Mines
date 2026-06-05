@@ -122,7 +122,9 @@ class FuelBudget extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', 'active');
+        $query->where('status', 'active');
+
+        return $query;
     }
 
     /**
@@ -130,7 +132,9 @@ class FuelBudget extends Model
      */
     public function scopeExceeded(Builder $query): Builder
     {
-        return $query->whereRaw('actual_spent > budgeted_amount');
+        $query->whereRaw('actual_spent > budgeted_amount');
+
+        return $query;
     }
 
     /**

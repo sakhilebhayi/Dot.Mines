@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,11 +17,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $team_id
  * @property int $machine_id
- * @property \Carbon\Carbon $ignition_on_at
- * @property \Carbon\Carbon|null $ignition_off_at
+ * @property Carbon $ignition_on_at
+ * @property Carbon|null $ignition_off_at
  * @property int|null $duration_seconds
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class EngineHourSession extends Model
 {
@@ -49,13 +50,13 @@ class EngineHourSession extends Model
 
     // ── Relationships ─────────────────────────────────────────────────────────
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -66,13 +67,17 @@ class EngineHourSession extends Model
     /** Sessions that started today (from midnight). */
     public function scopeToday(Builder $query): Builder
     {
-        return $query->where('ignition_on_at', '>=', now()->startOfDay());
+        $query->where('ignition_on_at', '>=', now()->startOfDay());
+
+        return $query;
     }
 
     /** Sessions that are currently open (engine is running). */
     public function scopeRunning(Builder $query): Builder
     {
-        return $query->whereNull('ignition_off_at');
+        $query->whereNull('ignition_off_at');
+
+        return $query;
     }
 
     // ── Accessors ─────────────────────────────────────────────────────────────

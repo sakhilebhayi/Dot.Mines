@@ -106,7 +106,7 @@ class AlertController extends Controller
     {
         $this->authorize('acknowledge', $alert);
 
-        $alert->acknowledge(Auth::id());
+        $alert->acknowledge((int) Auth::id() ?: null);
 
         return response()->json([
             'data' => $alert,
@@ -123,7 +123,7 @@ class AlertController extends Controller
     {
         $this->authorize('resolve', $alert);
 
-        $alert->resolve(Auth::id());
+        $alert->resolve((int) Auth::id() ?: null);
 
         return response()->json([
             'data' => $alert,

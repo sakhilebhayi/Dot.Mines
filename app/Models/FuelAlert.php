@@ -101,7 +101,9 @@ class FuelAlert extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', 'active');
+        $query->where('status', 'active');
+
+        return $query;
     }
 
     /**
@@ -109,7 +111,9 @@ class FuelAlert extends Model
      */
     public function scopeCritical(Builder $query): Builder
     {
-        return $query->where('severity', 'critical');
+        $query->where('severity', 'critical');
+
+        return $query;
     }
 
     /**
@@ -117,6 +121,8 @@ class FuelAlert extends Model
      */
     public function scopeUnacknowledged(Builder $query): Builder
     {
-        return $query->whereNull('acknowledged_at');
+        $query->whereNull('acknowledged_at');
+
+        return $query;
     }
 }

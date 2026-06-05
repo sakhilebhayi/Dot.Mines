@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,13 +28,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $fuel_capacity_litres
  * @property float|null $total_distance_km
  * @property float|null $distance_remaining_km
- * @property \Carbon\Carbon|null $started_at
- * @property \Carbon\Carbon|null $estimated_arrival_at
- * @property \Carbon\Carbon|null $completed_at
+ * @property Carbon|null $started_at
+ * @property Carbon|null $estimated_arrival_at
+ * @property Carbon|null $completed_at
  * @property array<string, mixed>|null $path_coordinates
  * @property array<string, mixed>|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property-read Machine $machine
  * @property-read MineArea|null $mineArea
  * @property-read float $fuel_percentage
@@ -97,19 +98,19 @@ class HaulDispatch extends Model
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -165,7 +166,9 @@ class HaulDispatch extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->whereNull('completed_at');
+        $query->whereNull('completed_at');
+
+        return $query;
     }
 
     /**
@@ -173,6 +176,8 @@ class HaulDispatch extends Model
      */
     public function scopeForTeam(Builder $query, int $teamId): Builder
     {
-        return $query->where('team_id', $teamId);
+        $query->where('team_id', $teamId);
+
+        return $query;
     }
 }
