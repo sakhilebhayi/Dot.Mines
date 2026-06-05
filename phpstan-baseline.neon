@@ -31,16 +31,6 @@ parameters:
 			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
 
 		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:interpolateAlongRoute\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
-			message: "#^Method App\\\\Console\\\\Commands\\\\GenerateRoadsPathCoordinates\\:\\:saveCoordinatesToDatabase\\(\\) has parameter \\$coordinates with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Console/Commands/GenerateRoadsPathCoordinates.php
-
-		-
 			message: "#^Parameter \\#2 \\$shiftType of method App\\\\Services\\\\ShiftService\\:\\:performShiftChange\\(\\) expects string, array\\|bool\\|float\\|int\\|string given\\.$#"
 			count: 1
 			path: app/Console/Commands/PerformShiftChange.php
@@ -569,21 +559,6 @@ parameters:
 			message: "#^Property App\\\\Mail\\\\ReportReadyMail\\:\\:\\$report has no type specified\\.$#"
 			count: 1
 			path: app/Mail/ReportReadyMail.php
-
-		-
-			message: "#^Method App\\\\Mail\\\\ShiftDigestMail\\:\\:__construct\\(\\) has parameter \\$pendingApprovals with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Mail/ShiftDigestMail.php
-
-		-
-			message: "#^Method App\\\\Mail\\\\ShiftDigestMail\\:\\:__construct\\(\\) has parameter \\$stats with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Mail/ShiftDigestMail.php
-
-		-
-			message: "#^Method App\\\\Mail\\\\ShiftDigestMail\\:\\:__construct\\(\\) has parameter \\$topPosts with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Mail/ShiftDigestMail.php
 
 		-
 			message: "#^Property App\\\\Mail\\\\WelcomeMail\\:\\:\\$user has no type specified\\.$#"
@@ -1301,27 +1276,7 @@ parameters:
 			path: app/Models/TeamInvitation.php
 
 		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:assignRole\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
 			message: "#^Method App\\\\Models\\\\User\\:\\:getAllRoles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:hasAllPermissions\\(\\) has parameter \\$permissions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:hasAnyPermission\\(\\) has parameter \\$permissions with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: "#^Method App\\\\Models\\\\User\\:\\:hasRole\\(\\) has parameter \\$role with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Models/User.php
 
@@ -1401,41 +1356,6 @@ parameters:
 			path: app/Services/FileUploadService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\FuelManagementService\\:\\:createFuelAlert\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\FuelManagementService\\:\\:recordTransaction\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/FuelManagementService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:buildTelemetryPayload\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:calculateAndSaveDailyKpis\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:insertTelemetryHistory\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:mergeCurrentStatus\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:upsertEquipmentMaster\\(\\) has parameter \\$item with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/BellIso15143Service.php
-
-		-
 			message: "#^Parameter \\#1 \\$startedAt of method App\\\\Services\\\\Integration\\\\BellIso15143Service\\:\\:writeAuditLog\\(\\) expects Carbon\\\\Carbon, Carbon\\\\CarbonInterface given\\.$#"
 			count: 2
 			path: app/Services/Integration/BellIso15143Service.php
@@ -1489,21 +1409,6 @@ parameters:
 			message: "#^Call to an undefined method App\\\\Services\\\\Integration\\\\HyundaiService\\:\\:parseAlert\\(\\)\\.$#"
 			count: 1
 			path: app/Services/Integration/HyundaiService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\IntegrationService\\:\\:syncMachine\\(\\) has parameter \\$machineData with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/IntegrationService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\IntegrationService\\:\\:syncMachineAlerts\\(\\) has parameter \\$alerts with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/IntegrationService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\Integration\\\\IntegrationService\\:\\:syncMachineMetrics\\(\\) has parameter \\$metrics with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/Integration/IntegrationService.php
 
 		-
 			message: "#^Parameter \\#1 \\$json of function json_decode expects string, array\\<string, mixed\\>\\|null given\\.$#"
@@ -1581,16 +1486,6 @@ parameters:
 			path: app/Services/Integration/XCMGService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:calculateTrend\\(\\) has parameter \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/IoTSensorService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\IoTSensorService\\:\\:recordReading\\(\\) should return App\\\\Models\\\\SensorReading but returns Illuminate\\\\Database\\\\Eloquent\\\\Model\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
@@ -1604,31 +1499,6 @@ parameters:
 			message: "#^Parameter \\#1 \\.\\.\\.\\$arg1 of function min expects non\\-empty\\-array, array\\<TKey of \\(int\\|string\\), mixed\\> given\\.$#"
 			count: 1
 			path: app/Services/IoTSensorService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MaintenanceHealthService\\:\\:completeMaintenanceRecord\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/MaintenanceHealthService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MaintenanceHealthService\\:\\:createMaintenanceAlert\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/MaintenanceHealthService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MaintenanceHealthService\\:\\:createMaintenanceRecord\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/MaintenanceHealthService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MaintenanceHealthService\\:\\:recordHealthMetric\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/MaintenanceHealthService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MaintenanceHealthService\\:\\:updateHealthStatus\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/MaintenanceHealthService.php
 
 		-
 			message: "#^Unable to resolve the template type TKey in call to function collect$#"
@@ -1656,16 +1526,6 @@ parameters:
 			path: app/Services/MentionParser.php
 
 		-
-			message: "#^Call to function array_key_exists\\(\\) with 'coordinates' and non\\-empty\\-array will always evaluate to true\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:create\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:delete\\(\\) should return bool but returns bool\\|null\\.$#"
 			count: 1
 			path: app/Services/MineAreaService.php
@@ -1681,44 +1541,9 @@ parameters:
 			path: app/Services/MineAreaService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:update\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/MineAreaService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\MineAreaService\\:\\:update\\(\\) should return App\\\\Models\\\\MineArea but returns App\\\\Models\\\\MineArea\\|null\\.$#"
 			count: 1
 			path: app/Services/MineAreaService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:handleChargeSuccess\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/PaystackService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:handleInvoiceUpdate\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/PaystackService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:handleSubscriptionCreated\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/PaystackService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:handleSubscriptionDisabled\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/PaystackService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:initializeTransaction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/PaystackService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\PaystackService\\:\\:verifyTransaction\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/PaystackService.php
 
 		-
 			message: "#^Negated boolean expression is always false\\.$#"
@@ -1734,36 +1559,6 @@ parameters:
 			message: "#^PHPDoc tag @return with type Illuminate\\\\Pagination\\\\Paginator&iterable\\<App\\\\Models\\\\ProductionRecord\\> is not subtype of native type Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator\\.$#"
 			count: 1
 			path: app/Services/ProductionService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\QueryCacheService\\:\\:alertStats\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/QueryCacheService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\QueryCacheService\\:\\:dashboardStats\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/QueryCacheService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\QueryCacheService\\:\\:geofenceStats\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/QueryCacheService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\QueryCacheService\\:\\:integrationStatus\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/QueryCacheService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\QueryCacheService\\:\\:machineList\\(\\) has parameter \\$filters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/QueryCacheService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\QueryCacheService\\:\\:reportTemplates\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/QueryCacheService.php
 
 		-
 			message: "#^Access to an undefined property object\\:\\:\\$description\\.$#"
@@ -1796,37 +1591,7 @@ parameters:
 			path: app/Services/RealTimeAlertService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:calculateAvoidancePoint\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:calculateOptimalRoute\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:calculateStraightLineRoute\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:findNearbyFuelStations\\(\\) has parameter \\$waypoints with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
 			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:generateWaypoints\\(\\) has parameter \\$geofences with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:generateWaypoints\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:getOSRMRoute\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Services/RoutePlanningService.php
 
@@ -1836,24 +1601,9 @@ parameters:
 			path: app/Services/RoutePlanningService.php
 
 		-
-			message: "#^Method App\\\\Services\\\\RoutePlanningService\\:\\:sampleRouteWaypoints\\(\\) has parameter \\$routeCoordinates with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/RoutePlanningService.php
-
-		-
 			message: "#^Call to an undefined method Illuminate\\\\Support\\\\Optional\\:\\:toDateTimeString\\(\\)\\.$#"
 			count: 1
 			path: app/Services/ShiftService.php
-
-		-
-			message: "#^Method App\\\\Support\\\\Reports\\\\ReportGeneration\\:\\:normalizeFilters\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Support/Reports/ReportGeneration.php
-
-		-
-			message: "#^Method App\\\\Support\\\\Reports\\\\ReportGeneration\\:\\:supportedTypes\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Support/Reports/ReportGeneration.php
 
 		-
 			message: "#^Trait App\\\\Traits\\\\PhpStanEloquentStubs is used zero times and is not analysed\\.$#"

@@ -21,6 +21,9 @@ class QueryCacheService
     /**
      * Cache dashboard statistics
      */
+    /**
+     * @return array<string, mixed>
+     */
     public static function dashboardStats(int $teamId, Closure $callback): array
     {
         return Cache::remember(
@@ -32,6 +35,9 @@ class QueryCacheService
 
     /**
      * Cache machine list for team
+     */
+    /**
+     * @param  array<string, mixed>  $filters
      */
     public static function machineList(int $teamId, array $filters, Closure $callback): mixed
     {
@@ -59,6 +65,9 @@ class QueryCacheService
     /**
      * Cache alert statistics
      */
+    /**
+     * @return array<string, mixed>
+     */
     public static function alertStats(int $teamId, Closure $callback): array
     {
         return Cache::remember(
@@ -70,6 +79,9 @@ class QueryCacheService
 
     /**
      * Cache geofence statistics
+     */
+    /**
+     * @return array<string, mixed>
      */
     public static function geofenceStats(int $geofenceId, Closure $callback): array
     {
@@ -83,6 +95,9 @@ class QueryCacheService
     /**
      * Cache integration sync status
      */
+    /**
+     * @return array<string, mixed>
+     */
     public static function integrationStatus(int $teamId, Closure $callback): array
     {
         return Cache::remember(
@@ -94,6 +109,9 @@ class QueryCacheService
 
     /**
      * Cache report templates
+     */
+    /**
+     * @return array<string, mixed>
      */
     public static function reportTemplates(Closure $callback): array
     {

@@ -94,6 +94,8 @@ class PaystackService
     /**
      * Initialize a Paystack transaction for a subscription plan.
      * Returns ['authorization_url' => ..., 'reference' => ...].
+     *
+     * @return array<string, mixed>|null
      */
     public function initializeTransaction(
         Team $team,
@@ -153,6 +155,7 @@ class PaystackService
     /**
      * Verify a Paystack transaction by reference.
      */
+    /** @return array<mixed>|null */
     public function verifyTransaction(string $reference): ?array
     {
         $response = $this->get('/transaction/verify/'.urlencode($reference));
@@ -169,6 +172,7 @@ class PaystackService
     /**
      * Handle subscription.create webhook event.
      */
+    /** @param array<string, mixed> $data */
     public function handleSubscriptionCreated(array $data): void
     {
         try {
@@ -221,6 +225,7 @@ class PaystackService
     /**
      * Handle subscription.disable / subscription.not_renew webhook event.
      */
+    /** @param array<string, mixed> $data */
     public function handleSubscriptionDisabled(array $data): void
     {
         try {
@@ -255,6 +260,7 @@ class PaystackService
     /**
      * Handle charge.success webhook event.
      */
+    /** @param array<string, mixed> $data */
     public function handleChargeSuccess(array $data): void
     {
         try {
@@ -292,6 +298,7 @@ class PaystackService
     /**
      * Handle invoice.update webhook event (invoice paid).
      */
+    /** @param array<string, mixed> $data */
     public function handleInvoiceUpdate(array $data): void
     {
         try {

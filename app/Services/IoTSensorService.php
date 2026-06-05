@@ -74,6 +74,7 @@ class IoTSensorService
     /**
      * Calculate trend from values
      */
+    /** @param array<float|int> $values */
     private function calculateTrend(array $values): string
     {
         if (count($values) < 2) {
@@ -100,6 +101,7 @@ class IoTSensorService
     /**
      * Record a new sensor reading
      */
+    /** @param array<string, mixed> $data */
     public function recordReading(IoTSensor $sensor, array $data): SensorReading
     {
         return $sensor->readings()->create([

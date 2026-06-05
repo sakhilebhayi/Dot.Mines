@@ -10,12 +10,17 @@ class ShiftDigestMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * @param  array<string, mixed>  $stats
+     * @param  array<mixed>  $topPosts
+     * @param  array<mixed>  $pendingApprovals
+     */
     public function __construct(
         public readonly string $shift,
         public readonly string $teamName,
-        public readonly array  $stats,
-        public readonly array  $topPosts,
-        public readonly array  $pendingApprovals,
+        public readonly array $stats,
+        public readonly array $topPosts,
+        public readonly array $pendingApprovals,
     ) {}
 
     public function build(): self
@@ -30,11 +35,11 @@ class ShiftDigestMail extends Mailable
         return $this->subject("[{$this->teamName}] Shift Digest — {$shiftLabel}")
             ->view('emails.shift-digest')
             ->with([
-                'shift'            => $this->shift,
-                'shiftLabel'       => $shiftLabel,
-                'teamName'         => $this->teamName,
-                'stats'            => $this->stats,
-                'topPosts'         => $this->topPosts,
+                'shift' => $this->shift,
+                'shiftLabel' => $shiftLabel,
+                'teamName' => $this->teamName,
+                'stats' => $this->stats,
+                'topPosts' => $this->topPosts,
                 'pendingApprovals' => $this->pendingApprovals,
             ]);
     }

@@ -16,6 +16,7 @@ class MaintenanceHealthService
     /**
      * Update machine health status
      */
+    /** @param array<string, mixed> $data */
     public function updateHealthStatus(Machine $machine, array $data): MachineHealthStatus
     {
         $healthStatus = MachineHealthStatus::updateOrCreate(
@@ -72,6 +73,7 @@ class MaintenanceHealthService
     /**
      * Create maintenance alert (avoid duplicates)
      */
+    /** @param array<string, mixed> $data */
     protected function createMaintenanceAlert(Machine $machine, array $data): ?MaintenanceAlert
     {
         // Check for existing active alert
@@ -142,6 +144,7 @@ class MaintenanceHealthService
     /**
      * Create maintenance record (work order)
      */
+    /** @param array<string, mixed> $data */
     public function createMaintenanceRecord(array $data): MaintenanceRecord
     {
         DB::beginTransaction();
@@ -185,6 +188,7 @@ class MaintenanceHealthService
     /**
      * Complete maintenance record
      */
+    /** @param array<string, mixed> $data */
     public function completeMaintenanceRecord(MaintenanceRecord $record, array $data): MaintenanceRecord
     {
         $record->update(array_merge($data, [
@@ -215,6 +219,7 @@ class MaintenanceHealthService
     /**
      * Record health metric
      */
+    /** @param array<string, mixed> $data */
     public function recordHealthMetric(Machine $machine, array $data): HealthMetric
     {
         $data['team_id'] = $machine->team_id;

@@ -23,11 +23,13 @@ class ReportGeneration
         'custom',
     ];
 
+    /** @return array<string> */
     public static function supportedTypes(): array
     {
         return self::SUPPORTED_TYPES;
     }
 
+    /** @return array<string, mixed> */
     public static function normalizeFilters(mixed $filters): array
     {
         if (is_array($filters)) {

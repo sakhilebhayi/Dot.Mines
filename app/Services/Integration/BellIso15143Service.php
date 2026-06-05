@@ -312,6 +312,7 @@ class BellIso15143Service implements BellIso15143ServiceInterface
     /**
      * Insert or update the equipment master record.
      */
+    /** @param array<string, mixed> $item */
     private function upsertEquipmentMaster(array $item): BellEquipment
     {
         $existing = BellEquipment::where('equipment_id', $item['equipment_id'])->first();
@@ -349,6 +350,9 @@ class BellIso15143Service implements BellIso15143ServiceInterface
     /**
      * Replace the current-status row for this machine (merge / upsert pattern).
      */
+    /**
+     * @param  array<string, mixed>  $item
+     */
     private function mergeCurrentStatus(
         BellEquipment $equipmentModel,
         array $item,
@@ -364,6 +368,9 @@ class BellIso15143Service implements BellIso15143ServiceInterface
 
     /**
      * Append a new history record – never update existing history.
+     */
+    /**
+     * @param  array<string, mixed>  $item
      */
     private function insertTelemetryHistory(
         BellEquipment $equipmentModel,
@@ -384,6 +391,9 @@ class BellIso15143Service implements BellIso15143ServiceInterface
 
     /**
      * Calculate derived daily KPIs by comparing today's telemetry with the previous snapshot.
+     */
+    /**
+     * @param  array<string, mixed>  $item
      */
     private function calculateAndSaveDailyKpis(
         BellEquipment $equipmentModel,
@@ -442,6 +452,7 @@ class BellIso15143Service implements BellIso15143ServiceInterface
     /**
      * Build the shared telemetry column array used by both current-status and history tables.
      *
+     * @param  array<string, mixed>  $item
      * @return array<string,mixed>
      */
     private function buildTelemetryPayload(int $equipmentKey, array $item, ?Carbon $snapshotTime): array

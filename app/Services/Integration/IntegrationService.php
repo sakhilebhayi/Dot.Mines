@@ -131,6 +131,7 @@ class IntegrationService
     /**
      * Sync a single machine
      */
+    /** @param array<string, mixed> $machineData */
     public function syncMachine(Integration $integration, array $machineData): ?Machine
     {
         try {
@@ -192,6 +193,7 @@ class IntegrationService
     /**
      * Sync machine metrics
      */
+    /** @param array<mixed> $metrics */
     protected function syncMachineMetrics(Machine $machine, array $metrics): void
     {
         try {
@@ -210,6 +212,7 @@ class IntegrationService
     /**
      * Sync machine alerts
      */
+    /** @param array<mixed> $alerts */
     protected function syncMachineAlerts(Machine $machine, array $alerts): void
     {
         try {

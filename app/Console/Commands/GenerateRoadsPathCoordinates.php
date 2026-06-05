@@ -332,6 +332,7 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Interpolate points between two coordinates
      */
+    /** @return array<mixed> */
     protected function interpolateAlongRoute(
         float $startLat,
         float $startLng,
@@ -634,6 +635,7 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Save coordinates to database with calculated heading and speed
      */
+    /** @param array<mixed> $coordinates */
     protected function saveCoordinatesToDatabase(Machine $machine, array $coordinates): int
     {
         $startTime = Carbon::now()->subDays($this->days);

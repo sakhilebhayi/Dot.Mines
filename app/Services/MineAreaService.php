@@ -32,6 +32,7 @@ class MineAreaService
     /**
      * Create a new mine area
      */
+    /** @param array<string, mixed> $data */
     public function create(int $teamId, array $data): MineArea
     {
         $data['team_id'] = $teamId;
@@ -58,7 +59,7 @@ class MineAreaService
             }
 
             // If not available, try to compute from coordinates (json string or array)
-            if (($centerLat === null || $centerLng === null) && array_key_exists('coordinates', $data)) {
+            if (($centerLat === null || $centerLng === null) && isset($data['coordinates'])) {
                 $coords = $data['coordinates'];
                 if (is_string($coords)) {
                     $decoded = json_decode($coords, true);
@@ -99,6 +100,7 @@ class MineAreaService
     /**
      * Update an existing mine area
      */
+    /** @param array<string, mixed> $data */
     public function update(MineArea $mineArea, array $data): MineArea
     {
         $mineArea->update($data);

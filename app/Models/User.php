@@ -129,6 +129,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user has a specific role in current team
+     *
+     * @param  string|array<string>  $role
      */
     public function hasRole(string|array $role): bool
     {
@@ -161,6 +163,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user has any of the given permissions
+     *
+     * @param  string|array<string>  $permissions
      */
     public function hasAnyPermission(string|array $permissions): bool
     {
@@ -175,6 +179,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user has all of the given permissions
+     *
+     * @param  string|array<string>  $permissions
      */
     public function hasAllPermissions(string|array $permissions): bool
     {
@@ -201,6 +207,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Assign a role to user
+     *
+     * @return bool|array<mixed>
      */
     public function assignRole(string|Role $role): bool|array
     {

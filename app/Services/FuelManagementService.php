@@ -16,6 +16,7 @@ class FuelManagementService
     /**
      * Record a fuel transaction and update tank levels
      */
+    /** @param array<string, mixed> $data */
     public function recordTransaction(array $data): FuelTransaction
     {
         return DB::transaction(function () use ($data) {
@@ -154,6 +155,7 @@ class FuelManagementService
     /**
      * Create fuel alert (avoid duplicates)
      */
+    /** @param array<string, mixed> $data */
     protected function createFuelAlert(array $data): ?FuelAlert
     {
         // Check if similar alert exists in last 24 hours
