@@ -62,7 +62,12 @@ class ExportUserDataJob implements ShouldQueue
             // Notify user by email
             Mail::raw(
                 'Your data export is ready. Download it within 7 days from your account settings.',
-                fn ($m) => $m->to($user->email)->subject('Your Data Export is Ready – Mines')
+                fn ($m) => $m->to($user->email)
+                    ->from(
+                        (string) config('mail.addresses.privacy'),
+                        (string) config('app.name'),
+                    )
+                    ->subject('Your Data Export is Ready – Mines')
             );
         } catch (\Throwable $e) {
             Log::error('GDPR export failed', [

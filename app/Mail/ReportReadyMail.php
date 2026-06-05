@@ -36,6 +36,10 @@ class ReportReadyMail extends Mailable
         }
 
         return $this->subject('Your report is ready — '.$this->report->title)
+            ->from(
+                (string) config('mail.addresses.support'),
+                (string) config('app.name'),
+            )
             ->view('emails.report-ready')
             ->with([
                 'report' => $this->report,

@@ -7,6 +7,7 @@ use App\Jobs\PurgeOldAuditLogsJob;
 use App\Jobs\PurgeOldFeedPostsJob;
 use App\Jobs\RouteSpeedMonitoringJob;
 use App\Jobs\SyncBellFleetDataJob;
+use App\Jobs\SyncBellHistoricalDataJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -30,6 +31,13 @@ Schedule::job(new MachineIdleMonitoringJob)
 // Bell ISO15143-3 fleet data sync – every 15 minutes at :00, :15, :30, :45
 Schedule::job(new SyncBellFleetDataJob)
     ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Bell Fleetmatic REST API – historical telemetry backfill (location trail,
+// fuel usage, operating hours, idle hours, load count) – runs every hour.
+Schedule::job(new SyncBellHistoricalDataJob)
+    ->hourly()
     ->withoutOverlapping()
     ->onOneServer();
 

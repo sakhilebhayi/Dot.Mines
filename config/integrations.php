@@ -87,22 +87,30 @@ return [
         'bell' => [
             'name' => 'Bell',
             'api_system' => 'Fleetmatic',
-            'base_url' => env('BELL_API_BASE_URL', 'https://api.fleetmatic.bell.com'),
+            'base_url' => env('BELL_API_BASE_URL', 'https://b-fleet03.bellequipment.com:8080'),
             'api_version' => 'v1',
             'api_key_env' => 'BELL_API_KEY',
             'api_secret_env' => 'BELL_API_SECRET',
             'account_id_env' => 'BELL_ACCOUNT_ID',
             'webhook_url_env' => 'BELL_WEBHOOK_URL',
             'auth_type' => 'bearer_token', // Bearer Token Authentication
-            'token_endpoint' => '/auth/token',
+            'fleet_endpoint' => '/Fleet',
             'supported_endpoints' => [
-                'vehicles' => '/fleetmatic/v1/vehicles',
-                'location' => '/fleetmatic/v1/vehicles/{vehicleId}/location',
-                'telemetry' => '/fleetmatic/v1/vehicles/{vehicleId}/telemetry',
-                'fuelLevel' => '/fleetmatic/v1/vehicles/{vehicleId}/fuel',
-                'engineData' => '/fleetmatic/v1/vehicles/{vehicleId}/engine',
-                'alerts' => '/fleetmatic/v1/vehicles/{vehicleId}/alerts',
-                'trips' => '/fleetmatic/v1/vehicles/{vehicleId}/trips',
+                // Pattern: /Fleet/Equipment/{OEM ISO Identifier}/{Signal}/{startDateUTC}/{endDateUTC}
+                'fleet_snapshot'              => '/Fleet',
+                'locations'                   => '/Fleet/Equipment/{id}/Locations/{from}/{to}',
+                'operating_hours'             => '/Fleet/Equipment/{id}/CumulativeOperatingHours/{from}/{to}',
+                'fuel_used_cumulative'        => '/Fleet/Equipment/{id}/CumulativeFuelUsed/{from}/{to}',
+                'fuel_used_24h'               => '/Fleet/Equipment/{id}/FuelUsedInThePreceding24Hours/{from}/{to}',
+                'distance'                    => '/Fleet/Equipment/{id}/Distance/{from}/{to}',
+                'caution_codes'               => '/Fleet/Equipment/{id}/CautionCodes/{from}/{to}',
+                'idle_hours'                  => '/Fleet/Equipment/{id}/CumulativeIdleHours/{from}/{to}',
+                'fuel_remaining_ratio'        => '/Fleet/Equipment/{id}/FuelRemainingRatio/{from}/{to}',
+                'def_remaining'               => '/Fleet/Equipment/{id}/DEFRemaining/{from}/{to}',
+                'engine_condition'            => '/Fleet/Equipment/{id}/EngineCondition/{from}/{to}',
+                'load_count'                  => '/Fleet/Equipment/{id}/CumulativeLoadCount/{from}/{to}',
+                'payload_totals'              => '/Fleet/Equipment/{id}/CumulativePayloadTotals/{from}/{to}',
+                'active_regen_hours'          => '/Fleet/Equipment/{id}/CumulativeActiveRegenerationHours/{from}/{to}',
             ],
             'sync_interval' => 300,
             'retry_attempts' => 3,
@@ -453,14 +461,52 @@ return [
     ],
 
     /**
+     * Bell Equipment SSO — OAuth2 Password Credentials grant.
+     *
+     * Used to obtain a bearer token before calling any Bell API endpoint.
+     * Credentials are sent as a Basic Authentication header (client_id:client_secret).
+     *
+     * Token name: SSO_Token
+     * Grant type: password
+     * Scope:      ISO_Exports
+     */
+    'bell_sso' => [
+        'token_url'     => env('BELL_SSO_TOKEN_URL', 'https://sso.bellequipment.com/connect/token'),
+        'grant_type'    => env('BELL_SSO_GRANT_TYPE', 'password'),
+        'client_id'     => env('BELL_SSO_CLIENT_ID', 'ISO_Export_Service'),
+        'client_secret' => env('BELL_SSO_CLIENT_SECRET', ''),
+        'username'      => env('BELL_SSO_USERNAME', ''),
+        'password'      => env('BELL_SSO_PASSWORD', ''),
+        'scope'         => env('BELL_SSO_SCOPE', 'ISO_Exports'),
+    ],
+
+    /**
      * Bell ISO15143-3 (AEMP) fleet API configuration.
      *
      * Set BELL_ISO15143_API_URL, BELL_ISO15143_USERNAME, and
      * BELL_ISO15143_PASSWORD in your .env file.
      */
     'bell_iso15143' => [
-        'api_url' => env('BELL_ISO15143_API_URL', ''),
-        'api_username' => env('BELL_ISO15143_USERNAME', ''),
-        'api_password' => env('BELL_ISO15143_PASSWORD', ''),
+        'api_url'       => env('BELL_ISO15143_API_URL', ''),
+        'client_id'     => env('BELL_ISO15143_CLIENT_ID', 'ISO_Export_Service'),
+        'api_username'  => env('BELL_ISO15143_USERNAME', ''),
+        'api_password'  => env('BELL_ISO15143_PASSWORD', ''),
+        'client_secret' => env('BELL_ISO15143_CLIENT_SECRET', ''),
+    ],
+
+    /**
+     * Bell Fleetmatic REST API – historical telemetry endpoints.
+     *
+     * Used by SyncBellHistoricalDataJob (hourly) to backfill location trail,
+     * fuel usage, operating hours, idle hours, and load count per machine.
+     *
+     * Set BELL_HISTORICAL_BASE_URL, BELL_HISTORICAL_USERNAME, and
+     * BELL_HISTORICAL_PASSWORD in your .env file.
+     * Defaults to the same Fleetmatic base URL as the main Bell integration.
+     */
+    'bell_historical' => [
+        'base_url' => env('BELL_HISTORICAL_BASE_URL', env('BELL_API_BASE_URL', '')),
+        'api_username' => env('BELL_HISTORICAL_USERNAME', env('BELL_ISO15143_USERNAME', '')),
+        'api_password' => env('BELL_HISTORICAL_PASSWORD', env('BELL_ISO15143_PASSWORD', '')),
     ],
 ];

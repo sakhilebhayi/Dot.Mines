@@ -65,4 +65,46 @@ class BellEquipment extends Model
     {
         return $this->hasMany(BellEquipmentDailyKpi::class, 'equipment_key', 'equipment_key');
     }
+
+    /** @return HasMany<BellEquipmentLocationHistory, $this> */
+    public function locationHistory(): HasMany
+    {
+        return $this->hasMany(BellEquipmentLocationHistory::class, 'equipment_key', 'equipment_key');
+    }
+
+    /** @return HasMany<BellEquipmentFuelUsageHistory, $this> */
+    public function fuelUsageHistory(): HasMany
+    {
+        return $this->hasMany(BellEquipmentFuelUsageHistory::class, 'equipment_key', 'equipment_key');
+    }
+
+    /** @return HasMany<BellEquipmentOperatingHoursHistory, $this> */
+    public function operatingHoursHistory(): HasMany
+    {
+        return $this->hasMany(BellEquipmentOperatingHoursHistory::class, 'equipment_key', 'equipment_key');
+    }
+
+    /** @return HasMany<BellEquipmentIdleHoursHistory, $this> */
+    public function idleHoursHistory(): HasMany
+    {
+        return $this->hasMany(BellEquipmentIdleHoursHistory::class, 'equipment_key', 'equipment_key');
+    }
+
+    /** @return HasMany<BellEquipmentLoadCountHistory, $this> */
+    public function loadCountHistory(): HasMany
+    {
+        return $this->hasMany(BellEquipmentLoadCountHistory::class, 'equipment_key', 'equipment_key');
+    }
+
+    /** @return HasMany<BellEquipmentHealthHistory, $this> */
+    public function healthHistory(): HasMany
+    {
+        return $this->hasMany(BellEquipmentHealthHistory::class, 'equipment_key', 'equipment_key');
+    }
+
+    /** @return HasMany<BellEquipmentCautionCode, $this> */
+    public function cautionCodes(): HasMany
+    {
+        return $this->hasMany(BellEquipmentCautionCode::class, 'equipment_key', 'equipment_key');
+    }
 }

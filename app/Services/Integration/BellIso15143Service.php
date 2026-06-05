@@ -4,8 +4,15 @@ namespace App\Services\Integration;
 
 use App\Contracts\BellIso15143ServiceInterface;
 use App\Models\BellEquipment;
+use App\Models\BellEquipmentCautionCode;
 use App\Models\BellEquipmentCurrentStatus;
 use App\Models\BellEquipmentDailyKpi;
+use App\Models\BellEquipmentFuelUsageHistory;
+use App\Models\BellEquipmentHealthHistory;
+use App\Models\BellEquipmentIdleHoursHistory;
+use App\Models\BellEquipmentLoadCountHistory;
+use App\Models\BellEquipmentLocationHistory;
+use App\Models\BellEquipmentOperatingHoursHistory;
 use App\Models\BellEquipmentTelemetryHistory;
 use App\Models\BellFleetSnapshot;
 use App\Models\BellIntegrationAuditLog;
@@ -31,10 +38,17 @@ class BellIso15143Service implements BellIso15143ServiceInterface
     /** @var array{processed: int, inserted: int, updated: int} */
     private array $counters = ['processed' => 0, 'inserted' => 0, 'updated' => 0];
 
+    /** Cached SSO bearer token for the current sync cycle. */
+    private ?string $bearerToken = null;
+
     public function __construct(
         private readonly string $apiUrl,
         private readonly string $apiUsername,
         private readonly string $apiPassword,
+        private readonly string $ssoTokenUrl = '',
+        private readonly string $clientId = '',
+        private readonly string $clientSecret = '',
+        private readonly string $scope = 'ISO_Exports',
     ) {}
 
     /**
@@ -89,16 +103,23 @@ class BellIso15143Service implements BellIso15143ServiceInterface
 
     /**
      * Fetch the raw XML string from the Bell ISO15143-3 endpoint.
+     * Uses a bearer token (SSO) when configured, otherwise falls back to Basic Auth.
      *
      * @throws \RuntimeException when the HTTP request fails
      */
     private function fetchXml(): string
     {
-        $response = Http::withBasicAuth($this->apiUsername, $this->apiPassword)
-            ->timeout(30)
+        $request = Http::timeout(30)
             ->retry(3, 2000)
-            ->accept('application/xml')
-            ->get($this->apiUrl);
+            ->accept('application/xml');
+
+        if (! empty($this->ssoTokenUrl)) {
+            $request = $request->withToken($this->resolveBearerToken());
+        } else {
+            $request = $request->withBasicAuth($this->apiUsername, $this->apiPassword);
+        }
+
+        $response = $request->get($this->apiUrl);
 
         if (! $response->successful()) {
             throw new \RuntimeException(
@@ -107,6 +128,45 @@ class BellIso15143Service implements BellIso15143ServiceInterface
         }
 
         return $response->body();
+    }
+
+    /**
+     * Obtain (and cache for this sync cycle) a bearer token from the Bell SSO endpoint.
+     * Uses the OAuth2 Password Credentials grant with Basic Authentication header.
+     *
+     * @throws \RuntimeException when the SSO token request fails
+     */
+    private function resolveBearerToken(): string
+    {
+        if ($this->bearerToken !== null) {
+            return $this->bearerToken;
+        }
+
+        $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
+            ->timeout(15)
+            ->asForm()
+            ->post($this->ssoTokenUrl, [
+                'grant_type' => 'password',
+                'username' => $this->apiUsername,
+                'password' => $this->apiPassword,
+                'scope' => $this->scope,
+            ]);
+
+        if (! $response->successful()) {
+            throw new \RuntimeException(
+                "Bell SSO token request failed ({$response->status()}): {$response->body()}"
+            );
+        }
+
+        $token = $response->json('access_token');
+
+        if (empty($token) || ! is_string($token)) {
+            throw new \RuntimeException('Bell SSO response did not contain an access_token.');
+        }
+
+        $this->bearerToken = $token;
+
+        return $this->bearerToken;
     }
 
     // ------------------------------------------------------------------ //
@@ -199,7 +259,38 @@ class BellIso15143Service implements BellIso15143ServiceInterface
             'engine_number' => (string) ($node->EngineNumber ?? ''),
 
             'telemetry_date' => (string) ($node->TelematicDataDate ?? ''),
+
+            // OEM intelligence fields (Phase 2–3)
+            'engine_condition' => (string) ($node->EngineCondition ?? ''),
+            'active_regen_hours' => $node->CumulativeActiveRegenerationHours !== null
+                ? (float) $node->CumulativeActiveRegenerationHours
+                : null,
+            'caution_codes' => $this->parseCautionCodes($node),
         ];
+    }
+
+    /**
+     * Parse the <CautionCodes> block into a flat list of code arrays.
+     *
+     * @return list<array{code: string, description: string, severity: string}>
+     */
+    private function parseCautionCodes(SimpleXMLElement $node): array
+    {
+        $codes = [];
+
+        if (! isset($node->CautionCodes)) {
+            return $codes;
+        }
+
+        foreach ($node->CautionCodes->CautionCode ?? [] as $cc) {
+            $codes[] = [
+                'code' => (string) ($cc->Code ?? $cc->FaultCode ?? ''),
+                'description' => (string) ($cc->Description ?? $cc->FaultDescription ?? ''),
+                'severity' => (string) ($cc->Severity ?? 'Info'),
+            ];
+        }
+
+        return $codes;
     }
 
     // ------------------------------------------------------------------ //
@@ -305,6 +396,16 @@ class BellIso15143Service implements BellIso15143ServiceInterface
             $this->mergeCurrentStatus($equipmentModel, $item, $snapshotTime);
             $this->insertTelemetryHistory($equipmentModel, $item, $snapshotTime);
             $this->calculateAndSaveDailyKpis($equipmentModel, $item, $snapshotTime);
+
+            // OEM intelligence – Phase 1–3 specialized history tables
+            $this->insertLocationHistoryIfChanged($equipmentModel, $item, $snapshotTime);
+            $this->insertFuelUsageHistoryIfChanged($equipmentModel, $item, $snapshotTime);
+            $this->insertOperatingHoursHistoryIfChanged($equipmentModel, $item, $snapshotTime);
+            $this->insertIdleHoursHistoryIfChanged($equipmentModel, $item, $snapshotTime);
+            $this->insertLoadCountHistoryIfChanged($equipmentModel, $item, $snapshotTime);
+            $this->syncCautionCodes($equipmentModel, $item, $snapshotTime);
+            $this->insertHealthHistory($equipmentModel, $item, $snapshotTime);
+
             $this->counters['processed']++;
         }
     }
@@ -443,6 +544,302 @@ class BellIso15143Service implements BellIso15143ServiceInterface
                 'utilization_percent' => $utilizationPercent,
                 'created_date' => now(),
             ]);
+    }
+
+    // ------------------------------------------------------------------ //
+    // OEM Intelligence – Specialized history tables (Phase 1–3)           //
+    // ------------------------------------------------------------------ //
+
+    /** @param array<string, mixed> $item */
+    private function insertLocationHistoryIfChanged(
+        BellEquipment $equipmentModel,
+        array $item,
+        ?Carbon $snapshotTime
+    ): void {
+        $lat = $item['latitude'] ?? null;
+        $lng = $item['longitude'] ?? null;
+
+        if ($lat === null || $lng === null || $snapshotTime === null) {
+            return;
+        }
+
+        $last = BellEquipmentLocationHistory::where('equipment_key', $equipmentModel->equipment_key)
+            ->orderByDesc('recorded_at')
+            ->first();
+
+        if (
+            $last !== null
+            && round((float) $last->latitude, 6) === round((float) $lat, 6)
+            && round((float) $last->longitude, 6) === round((float) $lng, 6)
+        ) {
+            return;
+        }
+
+        BellEquipmentLocationHistory::create([
+            'equipment_key' => $equipmentModel->equipment_key,
+            'latitude' => $lat,
+            'longitude' => $lng,
+            'source' => 'snapshot',
+            'recorded_at' => $snapshotTime,
+            'created_at' => now(),
+        ]);
+    }
+
+    /** @param array<string, mixed> $item */
+    private function insertFuelUsageHistoryIfChanged(
+        BellEquipment $equipmentModel,
+        array $item,
+        ?Carbon $snapshotTime
+    ): void {
+        $fuelUsed = $item['fuel_consumed'] ?? null;
+
+        if ($fuelUsed === null || $snapshotTime === null) {
+            return;
+        }
+
+        $last = BellEquipmentFuelUsageHistory::where('equipment_key', $equipmentModel->equipment_key)
+            ->orderByDesc('recorded_at')
+            ->first();
+
+        if ($last !== null && (float) $last->fuel_used_cumulative === (float) $fuelUsed) {
+            return;
+        }
+
+        BellEquipmentFuelUsageHistory::create([
+            'equipment_key' => $equipmentModel->equipment_key,
+            'fuel_used_cumulative' => $fuelUsed,
+            'fuel_remaining_percent' => $item['fuel_remaining_percent'] ?? null,
+            'fuel_units' => $item['fuel_units'] ?? 'litre',
+            'source' => 'snapshot',
+            'recorded_at' => $snapshotTime,
+            'created_at' => now(),
+        ]);
+    }
+
+    /** @param array<string, mixed> $item */
+    private function insertOperatingHoursHistoryIfChanged(
+        BellEquipment $equipmentModel,
+        array $item,
+        ?Carbon $snapshotTime
+    ): void {
+        $hours = $item['operating_hours'] ?? null;
+
+        if ($hours === null || $snapshotTime === null) {
+            return;
+        }
+
+        $last = BellEquipmentOperatingHoursHistory::where('equipment_key', $equipmentModel->equipment_key)
+            ->orderByDesc('recorded_at')
+            ->first();
+
+        if ($last !== null && (float) $last->operating_hours === (float) $hours) {
+            return;
+        }
+
+        BellEquipmentOperatingHoursHistory::create([
+            'equipment_key' => $equipmentModel->equipment_key,
+            'operating_hours' => $hours,
+            'source' => 'snapshot',
+            'recorded_at' => $snapshotTime,
+            'created_at' => now(),
+        ]);
+    }
+
+    /** @param array<string, mixed> $item */
+    private function insertIdleHoursHistoryIfChanged(
+        BellEquipment $equipmentModel,
+        array $item,
+        ?Carbon $snapshotTime
+    ): void {
+        $idleHours = $item['idle_hours'] ?? null;
+
+        if ($idleHours === null || $snapshotTime === null) {
+            return;
+        }
+
+        $last = BellEquipmentIdleHoursHistory::where('equipment_key', $equipmentModel->equipment_key)
+            ->orderByDesc('recorded_at')
+            ->first();
+
+        if ($last !== null && (float) $last->idle_hours === (float) $idleHours) {
+            return;
+        }
+
+        BellEquipmentIdleHoursHistory::create([
+            'equipment_key' => $equipmentModel->equipment_key,
+            'idle_hours' => $idleHours,
+            'source' => 'snapshot',
+            'recorded_at' => $snapshotTime,
+            'created_at' => now(),
+        ]);
+    }
+
+    /** @param array<string, mixed> $item */
+    private function insertLoadCountHistoryIfChanged(
+        BellEquipment $equipmentModel,
+        array $item,
+        ?Carbon $snapshotTime
+    ): void {
+        $loadCount = $item['load_count'] ?? null;
+
+        if ($loadCount === null || $snapshotTime === null) {
+            return;
+        }
+
+        $last = BellEquipmentLoadCountHistory::where('equipment_key', $equipmentModel->equipment_key)
+            ->orderByDesc('recorded_at')
+            ->first();
+
+        if ($last !== null && (int) $last->load_count === (int) $loadCount) {
+            return;
+        }
+
+        BellEquipmentLoadCountHistory::create([
+            'equipment_key' => $equipmentModel->equipment_key,
+            'load_count' => $loadCount,
+            'cumulative_payload' => $item['payload'] ?? null,
+            'payload_units' => $item['payload_units'] ?? 'kilogram',
+            'source' => 'snapshot',
+            'recorded_at' => $snapshotTime,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Upsert caution codes from the current snapshot.
+     * New codes are recorded as active; codes absent from this snapshot are cleared.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function syncCautionCodes(
+        BellEquipment $equipmentModel,
+        array $item,
+        ?Carbon $snapshotTime
+    ): void {
+        /** @var list<array{code: string, description: string, severity: string}> $incoming */
+        $incoming = $item['caution_codes'] ?? [];
+        $occurredAt = $snapshotTime ?? now();
+        $incomingCodes = array_column($incoming, 'code');
+
+        // Mark previously-active codes that are no longer in this snapshot as cleared
+        $clearQuery = BellEquipmentCautionCode::where('equipment_key', $equipmentModel->equipment_key)
+            ->where('is_active', true);
+
+        if (! empty($incomingCodes)) {
+            $clearQuery->whereNotIn('fault_code', $incomingCodes);
+        }
+
+        $clearQuery->update(['is_active' => false, 'cleared_at' => $occurredAt]);
+
+        // Upsert each incoming code
+        foreach ($incoming as $cc) {
+            if (empty($cc['code'])) {
+                continue;
+            }
+
+            BellEquipmentCautionCode::firstOrCreate(
+                [
+                    'equipment_key' => $equipmentModel->equipment_key,
+                    'fault_code' => $cc['code'],
+                    'is_active' => true,
+                ],
+                [
+                    'fault_description' => $cc['description'] ?: null,
+                    'severity' => $cc['severity'] ?: 'Info',
+                    'source' => 'snapshot',
+                    'occurred_at' => $occurredAt,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Record a health snapshot for every sync cycle.
+     * Provides a full audit trail of machine health over time.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function insertHealthHistory(
+        BellEquipment $equipmentModel,
+        array $item,
+        ?Carbon $snapshotTime
+    ): void {
+        if ($snapshotTime === null) {
+            return;
+        }
+
+        /** @var list<array{code: string, description: string, severity: string}> $cautionCodes */
+        $cautionCodes = $item['caution_codes'] ?? [];
+        $cautionCodeCount = count($cautionCodes);
+        $engineCondition = ! empty($item['engine_condition']) ? $item['engine_condition'] : null;
+        $defPercent = $item['def_percent'] ?? null;
+        $activeRegenHours = $item['active_regen_hours'] ?? null;
+        $operatingHours = $item['operating_hours'] ?? null;
+
+        $healthScore = $this->computeHealthScore(
+            $engineCondition,
+            $defPercent !== null ? (float) $defPercent : null,
+            $activeRegenHours !== null ? (float) $activeRegenHours : null,
+            $operatingHours !== null ? (float) $operatingHours : null,
+            $cautionCodeCount,
+        );
+
+        BellEquipmentHealthHistory::create([
+            'equipment_key' => $equipmentModel->equipment_key,
+            'engine_condition' => $engineCondition,
+            'def_remaining_percent' => $defPercent,
+            'active_regen_hours' => $activeRegenHours,
+            'caution_code_count' => $cautionCodeCount,
+            'health_score' => $healthScore,
+            'recorded_at' => $snapshotTime,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Derive a 0–100 machine health score from OEM telemetry signals.
+     *
+     * Deductions:
+     *   Engine condition not OK             : -20
+     *   DEF < 5 %                           : -25  |  < 10 %: -20  |  < 20 %: -10
+     *   Active regen rate > 10 % of hours   : -20  |  >  5 %: -10
+     *   Per active caution code             :  -5  (capped at -30)
+     */
+    private function computeHealthScore(
+        ?string $engineCondition,
+        ?float $defPercent,
+        ?float $activeRegenHours,
+        ?float $operatingHours,
+        int $cautionCodeCount,
+    ): float {
+        $score = 100.0;
+
+        if ($engineCondition !== null && strtolower($engineCondition) !== 'ok') {
+            $score -= 20;
+        }
+
+        if ($defPercent !== null) {
+            if ($defPercent < 5) {
+                $score -= 25;
+            } elseif ($defPercent < 10) {
+                $score -= 20;
+            } elseif ($defPercent < 20) {
+                $score -= 10;
+            }
+        }
+
+        if ($activeRegenHours !== null && $operatingHours !== null && $operatingHours > 0) {
+            $regenRate = $activeRegenHours / $operatingHours;
+            if ($regenRate > 0.10) {
+                $score -= 20;
+            } elseif ($regenRate > 0.05) {
+                $score -= 10;
+            }
+        }
+
+        $score -= min(30.0, $cautionCodeCount * 5.0);
+
+        return max(0.0, round($score, 2));
     }
 
     // ------------------------------------------------------------------ //

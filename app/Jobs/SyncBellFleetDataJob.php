@@ -34,6 +34,10 @@ class SyncBellFleetDataJob implements ShouldQueue
         $apiUrl = config('integrations.bell_iso15143.api_url', '');
         $apiUsername = config('integrations.bell_iso15143.api_username', '');
         $apiPassword = config('integrations.bell_iso15143.api_password', '');
+        $ssoTokenUrl = config('integrations.bell_sso.token_url', '');
+        $clientId = config('integrations.bell_sso.client_id', '');
+        $clientSecret = config('integrations.bell_sso.client_secret', '');
+        $scope = config('integrations.bell_sso.scope', 'ISO_Exports');
 
         if (empty($apiUrl)) {
             Log::warning('SyncBellFleetDataJob: bell_iso15143.api_url is not configured – skipping.');
@@ -41,7 +45,15 @@ class SyncBellFleetDataJob implements ShouldQueue
             return;
         }
 
-        $service = new BellIso15143Service($apiUrl, $apiUsername, $apiPassword);
+        $service = new BellIso15143Service(
+            $apiUrl,
+            $apiUsername,
+            $apiPassword,
+            $ssoTokenUrl,
+            $clientId,
+            $clientSecret,
+            $scope,
+        );
 
         $result = $service->sync();
 

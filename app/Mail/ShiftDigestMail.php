@@ -33,6 +33,10 @@ class ShiftDigestMail extends Mailable
         };
 
         return $this->subject("[{$this->teamName}] Shift Digest — {$shiftLabel}")
+            ->from(
+                (string) config('mail.addresses.support'),
+                (string) config('app.name'),
+            )
             ->view('emails.shift-digest')
             ->with([
                 'shift' => $this->shift,

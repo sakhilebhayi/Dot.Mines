@@ -117,4 +117,21 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Mines Platform'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Per-Purpose From Addresses
+    |--------------------------------------------------------------------------
+    |
+    | Different parts of the application send mail from dedicated mailboxes to
+    | make routing and filtering easier for recipients.
+    |
+    */
+    'addresses' => [
+        'info' => env('MAIL_FROM_ADDRESS', 'info@mines.infodot.co.za'),
+        'support' => env('MAIL_FROM_ADDRESS_SUPPORT', 'support@mines.infodot.co.za'),
+        'billing' => env('MAIL_FROM_ADDRESS_BILLING', 'billing@mines.infodot.co.za'),
+        'privacy' => env('MAIL_FROM_ADDRESS_PRIVACY', 'privacy@mines.infodot.co.za'),
+        'legal' => env('MAIL_FROM_ADDRESS_LEGAL', 'legal@mines.infodot.co.za'),
+    ],
+
 ];

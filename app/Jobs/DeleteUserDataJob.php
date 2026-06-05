@@ -64,7 +64,12 @@ class DeleteUserDataJob implements ShouldQueue
 
             Mail::raw(
                 'Your account and personal data have been permanently deleted from Mines as requested.',
-                fn ($m) => $m->to($email)->subject('Account Deleted – Mines')
+                fn ($m) => $m->to($email)
+                    ->from(
+                        (string) config('mail.addresses.privacy'),
+                        (string) config('app.name'),
+                    )
+                    ->subject('Account Deleted – Mines')
             );
         } catch (\Throwable $e) {
             Log::error('GDPR deletion failed', [
