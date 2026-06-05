@@ -84,7 +84,7 @@ class SyncMachineMetricsJob implements ShouldQueue
 
             throw $e;
         } finally {
-            if (app()->hasInstance('current_team_id')) {
+            if (app()->bound('current_team_id')) {
                 app()->forgetInstance('current_team_id');
             }
         }

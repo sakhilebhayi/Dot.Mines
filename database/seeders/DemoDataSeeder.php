@@ -313,7 +313,7 @@ class DemoDataSeeder extends Seeder
                 'category' => $pd['category'],
                 'priority' => $pd['priority'],
                 'body' => $pd['body'],
-                'meta' => $pd['meta'] ?? [],
+                'meta' => $pd['meta'],
                 'like_count' => fake()->numberBetween(0, 12),
                 'comment_count' => count($pd['comments']),
                 'acknowledgement_count' => fake()->numberBetween(0, 8),
@@ -328,7 +328,7 @@ class DemoDataSeeder extends Seeder
                 'post_id' => $post->id,
                 'approver_id' => $approver->id,
                 'status' => $approvalStatus,
-                'reason' => $approvalStatus === 'rejected' ? 'Missing required fields.' : null,
+                'reason' => in_array($approvalStatus, ['approved', 'pending']) ? null : 'Missing required fields.',
                 'reviewed_at' => $approvalStatus !== 'pending' ? $createdAt->copy()->addMinutes(fake()->numberBetween(5, 60)) : null,
             ]);
 
@@ -381,8 +381,7 @@ class DemoDataSeeder extends Seeder
                 'loading' => 0,
                 'hauling' => fake()->randomFloat(2, 0.5, $totalDist * 0.9),
                 'dumping' => $totalDist,
-                'returning' => fake()->randomFloat(2, 0.2, $totalDist * 0.8),
-                default => fake()->randomFloat(2, 0, $totalDist),
+                default => fake()->randomFloat(2, 0.2, $totalDist * 0.8), // returning or other
             };
             $distRemaining = max(0, $totalDist - $distDone);
             $speedKmh = in_array($status, ['loading', 'dumping']) ? 0 : fake()->randomFloat(1, 15, 42);

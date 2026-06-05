@@ -68,9 +68,9 @@ class RealTimeAlertService
     /**
      * Dispatch compliance violation alert
      *
-     * @param  array<string, mixed>|\stdClass|object  $violation
+     * @param  array<string, mixed>|\stdClass  $violation
      */
-    public function dispatchComplianceAlert(array|object $violation, int $teamId): void
+    public function dispatchComplianceAlert(array|\stdClass $violation, int $teamId): void
     {
         $severityMap = [
             'critical' => 'critical',

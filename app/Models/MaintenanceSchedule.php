@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,9 +39,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $auto_generate_work_order
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static> due()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> overdue()
+ * @method \Illuminate\Database\Eloquent\Builder<static> due()
+ * @method \Illuminate\Database\Eloquent\Builder<static> overdue()
  */
 class MaintenanceSchedule extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [
@@ -124,7 +131,7 @@ class MaintenanceSchedule extends Model
         return match ($this->schedule_type) {
             'hours' => $machine->operating_hours > ($this->next_service_hours + ($this->interval_hours * 0.1)),
             'kilometers' => $machine->odometer > ($this->next_service_km + ($this->interval_km * 0.1)),
-            'calendar' => now()->gt($this->next_service_date->addDays(7)),
+            'calendar' => $this->next_service_date !== null && now()->gt(Carbon::parse($this->next_service_date)->addDays(7)),
             default => false,
         };
     }

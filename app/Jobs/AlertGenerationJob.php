@@ -287,7 +287,7 @@ class AlertGenerationJob implements ShouldQueue
     /**
      * Calculate hours until next maintenance based on machine type and hours.
      */
-    private function getHoursUntilMaintenance(Machine $machine): ?float
+    private function getHoursUntilMaintenance(Machine $machine): ?int
     {
         // Maintenance schedules based on machine type
         $maintenanceSchedule = [

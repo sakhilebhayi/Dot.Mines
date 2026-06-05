@@ -661,7 +661,7 @@ class GenerateRoadsPathCoordinates extends Command
             $speed = max(20, min(60, $baseSpeed + $speedVariation));
 
             // Calculate timestamp
-            $timestamp = $startTime->copy()->addMinutes($index * $timeInterval);
+            $timestamp = $startTime->copy()->addMinutes((int) $index * (float) $timeInterval);
 
             try {
                 MachineMetric::create([

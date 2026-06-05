@@ -20,7 +20,7 @@ class MineAreaFactory extends Factory
     {
         return [
             'team_id' => Team::factory(),
-            'name' => $this->faker->words(2, true).' Mine Area',
+            'name' => implode(' ', (array) $this->faker->words(2)).' Mine Area',
             'description' => $this->faker->sentence(),
             'status' => 'active',
             'center_latitude' => $this->faker->latitude(),

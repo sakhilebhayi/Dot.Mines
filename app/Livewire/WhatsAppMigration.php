@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class WhatsAppMigration extends Component
@@ -24,9 +25,15 @@ class WhatsAppMigration extends Component
 
     public function mount(): void
     {
-        abort_if(! Auth::user()?->hasRole('admin'), 403);
+        /** @var User $user */
+        $user = Auth::user();
+        abort_if(! $user->hasRole('admin'), 403);
 
-        $team = Auth::user()->currentTeam;
+        $team = $user->currentTeam;
+        if ($team === null) {
+            abort(403);
+        }
+
         if ($team->feed_go_live_at) {
             $this->goLiveDate = $team->feed_go_live_at->format('Y-m-d');
             $this->goLiveTime = $team->feed_go_live_at->format('H:i');
@@ -93,7 +100,7 @@ class WhatsAppMigration extends Component
         $this->dispatch('notify', type: 'success', message: $msg);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
         $users = User::whereHas('teams', fn ($q) => $q->where('teams.id', $team->id))

@@ -22,7 +22,7 @@ class SendShiftDigest extends Command
 
     protected $description = 'Send shift summary email digest to subscribed supervisors/managers';
 
-    /** @var array<string, array{start: int, end: int}> */
+    /** @var array<string, array{start: array{H: int, i: int}, end: array{H: int, i: int}}> */
     private array $shiftWindows = [
         'A' => ['start' => ['H' => 6,  'i' => 0],  'end' => ['H' => 14, 'i' => 0]],
         'B' => ['start' => ['H' => 14, 'i' => 0],  'end' => ['H' => 22, 'i' => 0]],
@@ -31,7 +31,7 @@ class SendShiftDigest extends Command
 
     public function handle(): int
     {
-        $shift = strtoupper((string) ($this->option('shift') ?? $this->detectCompletedShift()));
+        $shift = strtoupper(is_string($this->option('shift')) ? $this->option('shift') : $this->detectCompletedShift());
 
         if (! array_key_exists($shift, $this->shiftWindows)) {
             $this->error("Invalid shift '{$shift}'. Use A, B or C.");

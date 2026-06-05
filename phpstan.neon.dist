@@ -7,6 +7,7 @@ parameters:
     - database
   excludePaths:
     - tests
+    - app/Traits/PhpStanEloquentStubs.php
   inferPrivatePropertyTypeFromConstructor: true
   checkExplicitMixed: false
   treatPhpDocTypesAsCertain: false
@@ -39,7 +40,7 @@ parameters:
     # Livewire v2 dispatchBrowserEvent() — still used as a bridge in Livewire 3
     - '#^Call to an undefined method .*::dispatchBrowserEvent\(\)#'
     # Eloquent scope methods on Builder (e.g. ->active(), ->completed()) are resolved via __call
-    - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder.*::(active|completed|onTrial|forTeam)\(\)#'
+    - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder.*::(active|completed|onTrial|forTeam|critical|needsAttention|due|overdue|lowFuel|active)\(\)#'
     # PHPStan builds union Builder<Model>|Query\Builder types when Eloquent chains contain withTrashed or scopes
     # Methods like doesntHave/whereHas/orderByDesc/when/paginate exist on Eloquent Builder but not raw Query\Builder
     - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder.*\|Illuminate\\Database\\Query\\Builder.*::#'

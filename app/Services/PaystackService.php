@@ -82,7 +82,7 @@ class PaystackService
             'metadata' => ['team_id' => $team->id],
         ]);
 
-        if (empty($response['status']) || ! $response['status']) {
+        if (empty($response['status'])) {
             Log::error('Paystack customer creation failed', ['team_id' => $team->id]);
 
             return null;
@@ -137,7 +137,7 @@ class PaystackService
             ],
         ]);
 
-        if (empty($response['status']) || ! $response['status']) {
+        if (empty($response['status'])) {
             Log::error('Paystack transaction initialization failed', [
                 'team_id' => $team->id,
                 'plan_id' => $plan->id,
@@ -160,7 +160,7 @@ class PaystackService
     {
         $response = $this->get('/transaction/verify/'.urlencode($reference));
 
-        if (empty($response['status']) || ! $response['status']) {
+        if (empty($response['status'])) {
             Log::error('Paystack transaction verification failed', ['reference' => $reference]);
 
             return null;
@@ -363,7 +363,7 @@ class PaystackService
             'token' => $subscription->paystack_email_token,
         ]);
 
-        if (empty($response['status']) || ! $response['status']) {
+        if (empty($response['status'])) {
             Log::error('Paystack subscription cancellation failed', [
                 'subscription_id' => $subscription->id,
             ]);
@@ -398,7 +398,7 @@ class PaystackService
             'token' => $subscription->paystack_email_token,
         ]);
 
-        if (empty($response['status']) || ! $response['status']) {
+        if (empty($response['status'])) {
             Log::error('Paystack subscription resume failed', [
                 'subscription_id' => $subscription->id,
             ]);

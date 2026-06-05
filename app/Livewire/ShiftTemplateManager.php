@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\FeedPost;
 use App\Models\ShiftTemplate;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -42,8 +43,10 @@ class ShiftTemplateManager extends Component
 
     public function mount(): void
     {
+        /** @var User $user */
+        $user = Auth::user();
         abort_unless(
-            Auth::user()?->hasRole(['admin', 'supervisor', 'manager', 'safety_officer']),
+            $user->hasRole(['admin', 'supervisor', 'manager', 'safety_officer']),
             403
         );
     }

@@ -41,12 +41,14 @@ class AIOptimizationService
 
     /**
      * Run comprehensive analysis across all AI agents
+     *
+     * @return Collection<string, mixed>
      */
     public function runComprehensiveAnalysis(Team $team, ?User $user = null): Collection
     {
-        /** @var Collection<int, mixed> $recommendations */
+        /** @var Collection<int, AIRecommendation> $recommendations */
         $recommendations = collect();
-        /** @var Collection<int, mixed> $insights */
+        /** @var Collection<int, AIInsight> $insights */
         $insights = collect();
 
         foreach ($this->agents as $type => $agent) {
@@ -127,6 +129,8 @@ class AIOptimizationService
 
     /**
      * Get recommendations for a specific category
+     *
+     * @return Collection<int, mixed>
      */
     public function getRecommendationsForCategory(Team $team, string $category, ?User $user = null): Collection
     {
@@ -134,13 +138,18 @@ class AIOptimizationService
         $agent = $this->agents[$agentType] ?? null;
 
         if (! $agent) {
+            /** @var Collection<int, mixed> */
             return collect();
         }
 
         $agentModel = $this->getOrCreateAgent($agentType);
         $result = $agent->analyze($team);
 
-        return collect($result['recommendations'])->map(function ($rec) use ($team, $agentModel, $user) {
+        /** @var array<int, mixed> $rawRecommendations */
+        $rawRecommendations = $result['recommendations'] ?? [];
+
+        /** @var Collection<int, AIRecommendation> */
+        return collect($rawRecommendations)->map(function ($rec) use ($team, $agentModel, $user): AIRecommendation {
             return AIRecommendation::create([
                 'team_id' => $team->id,
                 'ai_agent_id' => $agentModel->id,

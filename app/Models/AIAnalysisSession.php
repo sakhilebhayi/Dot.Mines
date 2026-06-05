@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -72,6 +73,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class AIAnalysisSession extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [

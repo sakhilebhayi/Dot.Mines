@@ -6,6 +6,7 @@ use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -44,6 +45,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Route extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [
@@ -117,9 +119,13 @@ class Route extends Model
     /**
      * Get the waypoints for this route.
      */
+    /** @return HasMany<Waypoint, Route> */
     public function waypoints(): HasMany
     {
-        return $this->hasMany(Waypoint::class)->orderBy('sequence_order');
+        /** @var HasMany<Waypoint, Route> $relation */
+        $relation = $this->hasMany(Waypoint::class)->orderBy('sequence_order');
+
+        return $relation;
     }
 
     /**

@@ -45,7 +45,7 @@ class BellIso15143Service implements BellIso15143ServiceInterface
     public function sync(): array
     {
         $this->counters = ['processed' => 0, 'inserted' => 0, 'updated' => 0];
-        $startedAt = now();
+        $startedAt = Carbon::now();
 
         try {
             $xml = $this->fetchXml();

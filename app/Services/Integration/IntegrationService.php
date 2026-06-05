@@ -254,7 +254,7 @@ class IntegrationService
      */
     protected function getServiceForIntegration(Integration $integration): ?ManufacturerServiceInterface
     {
-        $credentials = json_decode($integration->credentials, true) ?? [];
+        $credentials = is_string($integration->credentials) ? (json_decode($integration->credentials, true) ?? []) : [];
 
         return match ($integration->provider) {
             'volvo' => app(VolvoService::class, ['credentials' => $credentials]),
@@ -344,5 +344,39 @@ class IntegrationService
                     ->count(),
             ];
         });
+    }
+
+    /**
+     * Get machine locations from the integration provider
+     *
+     * @param  array<mixed>  $manufacturerIds
+     * @return array<int, array<string, mixed>>
+     */
+    public function getMachineLocations(Integration $integration, array $manufacturerIds): array
+    {
+        $service = $this->getServiceForIntegration($integration);
+
+        if (! $service) {
+            return [];
+        }
+
+        return $service->fetchMachines();
+    }
+
+    /**
+     * Get machine statuses from the integration provider
+     *
+     * @param  array<mixed>  $manufacturerIds
+     * @return array<int, array<string, mixed>>
+     */
+    public function getMachineStatuses(Integration $integration, array $manufacturerIds): array
+    {
+        $service = $this->getServiceForIntegration($integration);
+
+        if (! $service) {
+            return [];
+        }
+
+        return $service->fetchMachines();
     }
 }

@@ -324,7 +324,7 @@ class Fleet extends Component
                 ->toArray();
         } else {
             // For ADTs and other machines, allow selecting a single excavator
-            if ($machine && $machine->excavator_id) {
+            if ($machine->excavator_id) {
                 $this->selectedExcavatorId = $machine->excavator_id;
             }
             $this->assignMode = 'assign_to_excavator';
@@ -714,8 +714,12 @@ class Fleet extends Component
         // AI Fleet Optimization Analysis
         $aiAgent = new FleetOptimizerAgent;
         $aiAnalysis = $aiAgent->analyze($team);
-        $aiRecommendations = collect($aiAnalysis['recommendations'])->take(5);
-        $aiInsights = collect($aiAnalysis['insights'])->take(3);
+        /** @var array<int, mixed> $rawRecommendations */
+        $rawRecommendations = $aiAnalysis['recommendations'] ?? [];
+        /** @var array<int, mixed> $rawInsights */
+        $rawInsights = $aiAnalysis['insights'] ?? [];
+        $aiRecommendations = collect($rawRecommendations)->take(5);
+        $aiInsights = collect($rawInsights)->take(3);
 
         // Keep a serializable copy to reference in action handlers (Livewire methods)
         $this->lastAiRecommendations = $aiRecommendations->values()->map(fn ($r) => (array) $r)->toArray();

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\FeedAuditLog;
 use App\Models\MineArea;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -25,9 +26,15 @@ class FeedAdminPanel extends Component
 
     public function mount(): void
     {
-        abort_if(! Auth::user()?->hasRole('admin'), 403);
+        /** @var User $user */
+        $user = Auth::user();
+        abort_if(! $user->hasRole('admin'), 403);
 
-        $team = Auth::user()->currentTeam;
+        $team = $user->currentTeam;
+        if ($team === null) {
+            abort(403);
+        }
+
         $stored = $team->active_shifts ? json_decode($team->active_shifts, true) : ['A', 'B', 'C'];
         $this->activeShifts = is_array($stored) ? $stored : ['A', 'B', 'C'];
     }

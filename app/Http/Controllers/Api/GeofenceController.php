@@ -219,9 +219,11 @@ class GeofenceController extends Controller
             ->get();
 
         $tonnageByMachine = $entries->groupBy('machine_id')->map(function ($entries) {
+            $first = $entries->first();
+
             return [
-                'machine_id' => $entries->first()->machine_id,
-                'machine_name' => $entries->first()->machine->name,
+                'machine_id' => $first?->machine_id,
+                'machine_name' => $first?->machine?->name,
                 'tonnage' => $entries->sum('tonnage_loaded'),
                 'loads' => $entries->count(),
             ];

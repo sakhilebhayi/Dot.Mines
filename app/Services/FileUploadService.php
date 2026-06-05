@@ -132,7 +132,7 @@ class FileUploadService
                             fclose($stream);
                             if ($probe !== false && strlen($probe) > 0) {
                                 $finfo = new \finfo(FILEINFO_MIME_TYPE);
-                                $mime = $finfo->buffer($probe);
+                                $mime = $finfo->buffer($probe) ?: '';
                                 // If the declared extension is an image but MIME is text or php-like, reject
                                 $imageExts = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'tiff'];
                                 if (in_array($entryExt, $imageExts, true) && str_starts_with($mime, 'text/')) {

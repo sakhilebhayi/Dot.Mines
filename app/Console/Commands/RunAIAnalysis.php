@@ -9,19 +9,20 @@ use Illuminate\Console\Command;
 class RunAIAnalysis extends Command
 {
     protected $signature = 'ai:analyze {--team=all : The team ID to analyze, or "all" for all teams}';
-    
+
     protected $description = 'Run AI analysis to generate optimization recommendations';
 
     public function handle(AIOptimizationService $aiService): int
     {
         $this->info('🤖 Starting AI Analysis...');
-        
+
         $teams = $this->option('team') === 'all'
             ? Team::all()
             : Team::where('id', $this->option('team'))->get();
 
         if ($teams->isEmpty()) {
             $this->error('No teams found to analyze.');
+
             return self::FAILURE;
         }
 
@@ -39,7 +40,7 @@ class RunAIAnalysis extends Command
 
             try {
                 $result = $aiService->runComprehensiveAnalysis($team);
-                
+
                 $recommendations = $result['recommendations']->count();
                 $insights = $result['insights']->count();
                 $savings = $result['summary']['total_estimated_savings'] ?? 0;
@@ -50,9 +51,9 @@ class RunAIAnalysis extends Command
 
                 $this->line("  ✓ Generated {$recommendations} recommendations");
                 $this->line("  ✓ Discovered {$insights} insights");
-                
+
                 if ($savings > 0) {
-                    $this->line("  ✓ Potential savings: R" . number_format($savings, 2));
+                    $this->line('  ✓ Potential savings: R'.number_format($savings, 2));
                 }
 
                 // Show top 3 critical recommendations
@@ -62,22 +63,22 @@ class RunAIAnalysis extends Command
 
                 if ($critical->count() > 0) {
                     $this->newLine();
-                    $this->warn("  ⚠️  Critical Recommendations:");
+                    $this->warn('  ⚠️  Critical Recommendations:');
                     foreach ($critical as $rec) {
                         $this->line("    • {$rec->title}");
                     }
                 }
 
                 $this->newLine();
-                
+
             } catch (\Exception $e) {
                 $this->error("  ✗ Failed: {$e->getMessage()}");
                 $this->newLine();
+
                 continue;
-            }
-            finally {
+            } finally {
                 // Remove the team instance so subsequent iterations or other code are not affected
-                if (app()->hasInstance('current_team_id')) {
+                if (app()->bound('current_team_id')) {
                     app()->forgetInstance('current_team_id');
                 }
             }
@@ -89,9 +90,9 @@ class RunAIAnalysis extends Command
         $this->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         $this->line("Total Recommendations: <fg=green>{$totalRecommendations}</>");
         $this->line("Total Insights: <fg=blue>{$totalInsights}</>");
-        
+
         if ($totalSavings > 0) {
-            $this->line("Total Potential Savings: <fg=yellow>R" . number_format($totalSavings, 2) . "</>");
+            $this->line('Total Potential Savings: <fg=yellow>R'.number_format($totalSavings, 2).'</>');
         }
 
         $this->newLine();

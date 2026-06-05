@@ -718,7 +718,7 @@ class ComprehensiveDataSeeder extends Seeder
                 $loads = $machineCount * rand(20, 40);
                 $cycles = $machineCount * rand(15, 30);
                 $tonnage = $baseTonnage + rand(-200, 200);
-                $bcm = $tonnage * rand(0.7, 0.9); // BCM typically less than tonnage
+                $bcm = $tonnage * (rand(70, 90) / 100); // BCM typically less than tonnage
 
                 $sampleMachine = array_values($pitMachines)[0] ?? null;
 
@@ -1078,7 +1078,7 @@ class ComprehensiveDataSeeder extends Seeder
 
                 $scheduledDate = now()->subDays($daysAgo);
                 $startedAt = $status !== 'scheduled' ? $scheduledDate->copy()->addHours(rand(1, 3)) : null;
-                $completedAt = $status === 'completed' ? $startedAt->copy()->addHours(rand(1, 8)) : null;
+                $completedAt = ($status === 'completed' && $startedAt !== null) ? $startedAt->copy()->addHours(rand(1, 8)) : null;
 
                 $laborHours = $completedAt ? $completedAt->diffInHours($startedAt) + (rand(0, 30) / 10) : rand(2, 8);
                 $laborCost = $laborHours * rand(350, 500); // R350-R500 per hour

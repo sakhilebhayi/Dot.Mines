@@ -32,6 +32,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $recommendations
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static> critical()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> needsAttention()
+ * @method \Illuminate\Database\Eloquent\Builder<static> critical()
+ * @method \Illuminate\Database\Eloquent\Builder<static> needsAttention()
  */
 class MachineHealthStatus extends Model
 {

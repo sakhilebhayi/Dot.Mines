@@ -173,7 +173,7 @@ class RealtimeScenarioSeeder extends Seeder
         $machines = [];
         foreach ($machineData as $data) {
             $data['team_id'] = $team->id;
-            if (isset($data['mine_area_id']) && $data['mine_area_id']) {
+            if (isset($data['mine_area_id'])) {
                 $data['mine_area_id'] = $mineAreas[$data['mine_area_id'] - 1]->id;
             }
             $machines[] = Machine::create($data);

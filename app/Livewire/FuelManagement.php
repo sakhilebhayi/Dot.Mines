@@ -192,9 +192,7 @@ class FuelManagement extends Component
             ]);
 
             // Refresh allocation consumption
-            if ($allocation) {
-                $allocation->updateConsumption();
-            }
+            $allocation->updateConsumption();
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Dispensing transaction recorded.']);
             $this->reset(['transactionTankId', 'transactionQuantity', 'transactionMineAreaId']);
@@ -585,7 +583,7 @@ class FuelManagement extends Component
             ->orderByDesc('total_consumed')
             ->limit(5)
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($teamId) {
                 $machine = Machine::where('team_id', $teamId)->find($item->machine_id);
 
                 return [

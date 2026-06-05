@@ -22,16 +22,16 @@ class MentionParser
     {
         preg_match_all('/@([\w.-]+)/', $body, $matches);
 
-        return array_unique($matches[1] ?? []);
+        return array_unique($matches[1]);
     }
 
     /**
      * Resolve @username handles to User models on the given team.
      * Matches on the `name` field (case-insensitive).
      *
+     * @param  array<string>  $handles
      * @return Collection<int, User>
      */
-    /** @param array<string> $handles */
     public function resolveUsers(array $handles, int $teamId): Collection
     {
         if (empty($handles)) {

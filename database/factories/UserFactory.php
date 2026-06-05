@@ -5,12 +5,13 @@ namespace Database\Factories;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Jetstream\Features;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -60,9 +61,9 @@ class UserFactory extends Factory
 
         return $this->has(
             Team::factory()
-                ->state(fn (array $attributes, User $user) => [
-                    'name' => $user->name.'\'s Team',
-                    'user_id' => $user->id,
+                ->state(fn (array $attributes, ?Model $owner) => [
+                    'name' => ($owner instanceof User ? $owner->name : 'User').'\'s Team',
+                    'user_id' => $owner?->id,
                     'personal_team' => true,
                 ])
                 ->when(is_callable($callback), $callback),

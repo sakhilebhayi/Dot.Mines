@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('location_longitude', 11, 8)->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
-            
+
             $table->index('team_id');
             $table->index('mine_area_id');
             $table->index('device_id');
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->timestamp('timestamp');
             $table->float('quality_score')->default(1.0);
             $table->timestamps();
-            
+
             $table->index('iot_sensor_id');
             $table->index('timestamp');
         });
@@ -53,7 +53,7 @@ return new class extends Migration
             $table->string('model_version')->default('1.0');
             $table->json('factors')->nullable();
             $table->timestamps();
-            
+
             $table->index('mine_area_id');
             $table->index('forecast_date');
             $table->unique(['mine_area_id', 'forecast_date', 'material_name']);
@@ -63,7 +63,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('mine_area_id')->constrained('mine_areas')->onDelete('cascade');
             $table->enum('report_type', ['environmental', 'safety', 'production', 'equipment', 'custom']);
-            $table->foreignId('generated_by')->constrained('users')->onDelete('set null')->nullable();
+            $table->foreignId('generated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->date('report_date');
             $table->enum('status', ['draft', 'pending_review', 'approved', 'archived'])->default('draft');
             $table->json('data')->nullable();
@@ -71,7 +71,7 @@ return new class extends Migration
             $table->float('compliance_score')->nullable();
             $table->json('issues')->nullable();
             $table->timestamps();
-            
+
             $table->index('mine_area_id');
             $table->index('report_type');
             $table->index('status');

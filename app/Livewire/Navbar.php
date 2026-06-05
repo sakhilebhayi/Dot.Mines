@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -30,9 +31,12 @@ class Navbar extends Component
 
     public function render(): View
     {
+        /** @var User|null $user */
+        $user = Auth::user();
+
         return view('livewire.navbar', [
-            'user' => Auth::user(),
-            'team' => Auth::user()?->currentTeam,
+            'user' => $user,
+            'team' => $user?->currentTeam,
         ]);
     }
 }

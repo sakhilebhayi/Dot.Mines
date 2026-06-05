@@ -6,14 +6,15 @@ use App\Models\ProductionForecast;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 class ProductionService
 {
     /**
-     * @return \Illuminate\Pagination\Paginator<ProductionRecord>
+     * @return LengthAwarePaginator<int, ProductionRecord>
      */
-    public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null): LengthAwarePaginator
     {
         $startDate = $startDate ?? Carbon::now()->subDays(30);
         $endDate = $endDate ?? Carbon::now();

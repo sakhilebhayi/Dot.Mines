@@ -120,7 +120,7 @@ class NotificationController extends Controller
     {
         $teamId = Auth::user()->current_team_id
             ?? (Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null);
-        $days = (int) $request->validate(['days' => 'nullable|integer|min:1|max:365'])['days'] ?? 7;
+        $days = (int) ($request->validate(['days' => 'nullable|integer|min:1|max:365'])['days'] ?? 7);
         $fromDate = now()->subDays($days);
 
         $alerts = Notification::where('team_id', $teamId)

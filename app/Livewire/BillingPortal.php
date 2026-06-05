@@ -11,6 +11,10 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
+/**
+ * @property-read mixed $userSelectedMonthlyTotal
+ * @property-read mixed $userSelectedYearlyTotal
+ */
 class BillingPortal extends Component
 {
     public bool $showConfirmModal = false;

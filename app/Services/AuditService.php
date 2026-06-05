@@ -23,7 +23,7 @@ class AuditService
      * @param  string  $action  One of the AuditLog::* constants
      * @param  string|null  $description  Human-readable summary of the action
      * @param  Model|null  $subject  The Eloquent model that was acted upon
-     * @param  array  $meta  Additional structured context (old/new values, IDs, etc.)
+     * @param  array<string, mixed>  $meta  Additional structured context (old/new values, IDs, etc.)
      * @param  int|null  $actorId  Defaults to auth()->id()
      * @param  int|null  $teamId  Defaults to auth()->user()?->current_team_id
      * @param  string|null  $ip  Defaults to request()->ip() (null in console/queue)
@@ -32,7 +32,6 @@ class AuditService
         string $action,
         ?string $description = null,
         ?Model $subject = null,
-        /** @param array<string, mixed> $meta */
         array $meta = [],
         ?int $actorId = null,
         ?int $teamId = null,

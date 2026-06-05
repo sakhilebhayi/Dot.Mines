@@ -154,7 +154,7 @@ class MachineLocationUpdateJob implements ShouldQueue
             throw $e;
         } finally {
             // Clear the injected team context to avoid leakage into other jobs
-            if (app()->hasInstance('current_team_id')) {
+            if (app()->bound('current_team_id')) {
                 app()->forgetInstance('current_team_id');
             }
         }
@@ -184,7 +184,7 @@ class MachineLocationUpdateJob implements ShouldQueue
         $significantDistance = $distance > 0.005; // ~5 meters
 
         // Also check if it's been more than 5 minutes since last update
-        $significantTime = $machine->last_location_update->diffInMinutes(now()) >= 5;
+        $significantTime = $machine->last_location_update !== null && $machine->last_location_update->diffInMinutes(now()) >= 5;
 
         return $significantDistance || $significantTime;
     }

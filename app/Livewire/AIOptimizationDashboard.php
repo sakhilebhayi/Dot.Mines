@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * @property-read array<string, mixed> $overviewData
+ */
 class AIOptimizationDashboard extends Component
 {
     use BrowserEventBridge, WithPagination;
@@ -191,6 +194,13 @@ class AIOptimizationDashboard extends Component
     /** @return array<string, mixed> */
     public function getOverviewDataProperty(): array
     {
+        /** @var User $user */
+        $user = Auth::user();
+        $team = $user->currentTeam;
+
+        if ($team === null) {
+            return [];
+        }
 
         $allRecs = AIRecommendation::where('team_id', $team->id)->get();
         $pending = $allRecs->where('status', 'pending');

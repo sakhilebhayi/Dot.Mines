@@ -10,6 +10,7 @@ use App\Models\Machine;
 use App\Models\Team;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -65,6 +66,7 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
             }
 
             // Get all machines with recent locations
+            /** @var Collection<int, Machine> $machines */
             $machines = $this->team->machines()
                 ->where('status', '!=', 'offline')
                 ->whereNotNull('last_location_latitude')
@@ -83,8 +85,8 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
             foreach ($machines as $machine) {
                 foreach ($geofences as $geofence) {
                     $isInside = $this->isPointInPolygon(
-                        $machine->last_location_latitude,
-                        $machine->last_location_longitude,
+                        (float) $machine->last_location_latitude,
+                        (float) $machine->last_location_longitude,
                         $geofence->coordinates
                     );
 

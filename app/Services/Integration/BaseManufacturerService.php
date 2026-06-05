@@ -206,6 +206,25 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     }
 
     /**
+     * Parse a single alert item from manufacturer format
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function parseAlert(array $data): array
+    {
+        return [
+            'external_id' => $data['id'] ?? null,
+            'type' => $this->mapAlertType($data['type'] ?? 'sensor'),
+            'priority' => $this->mapAlertPriority($data['severity'] ?? $data['priority'] ?? 'medium'),
+            'message' => $data['message'] ?? $data['description'] ?? 'Alert',
+            'timestamp' => $data['timestamp'] ?? now()->toIso8601String(),
+            'acknowledged' => $data['acknowledged'] ?? false,
+            'raw_data' => $data,
+        ];
+    }
+
+    /**
      * Map machine status from manufacturer format to standard
      */
     protected function parseStatus(string $status): string

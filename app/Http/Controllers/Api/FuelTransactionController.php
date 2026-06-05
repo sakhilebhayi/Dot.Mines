@@ -7,6 +7,7 @@ use App\Models\FuelTransaction;
 use App\Services\FuelManagementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -109,8 +110,11 @@ class FuelTransactionController extends Controller
 
         // Handle receipt file upload — store on private disk so files are not web-accessible
         if ($request->hasFile('receipt_file')) {
-            $path = $request->file('receipt_file')->store('fuel-receipts', 'local');
-            $data['receipt_file_path'] = $path;
+            $receiptFile = $request->file('receipt_file');
+            if ($receiptFile instanceof UploadedFile) {
+                $path = $receiptFile->store('fuel-receipts', 'local');
+                $data['receipt_file_path'] = $path;
+            }
         }
 
         // Use service to record transaction (handles tank updates and alerts)

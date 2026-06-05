@@ -20,6 +20,9 @@ class SensorReadingRecorded implements ShouldBroadcast
 
     public int $teamId;
 
+    /**
+     * @param  array<string, mixed>  $reading
+     */
     public function __construct(IoTSensor $sensor, array $reading, int $teamId)
     {
         $this->sensor = $sensor;
