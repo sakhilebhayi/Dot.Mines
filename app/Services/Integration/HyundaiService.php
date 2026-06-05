@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * Hyundai Hi-MATE Integration Service
- * 
+ *
  * API Documentation: https://www.hi-mate.com/api-documentation
  * Requires Hyundai dealer code
  */
@@ -19,27 +19,32 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
     {
         try {
             $response = $this->makeRequest('GET', '/api/v1/equipment', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/api/v1/equipment');
-            
+
             $machines = [];
-            if (!empty($response['data']['equipment'])) {
+            if (! empty($response['data']['equipment'])) {
                 foreach ($response['data']['equipment'] as $equipment) {
                     $machines[] = $this->parseMachineData($equipment);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -47,6 +52,7 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch equipment', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -55,17 +61,21 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v1/equipment/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -73,25 +83,29 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMetrics(string $machineId): array
     {
         try {
             $workingInfo = $this->makeRequest('GET', "/api/v1/equipment/{$machineId}/working-info");
             $engineData = $this->makeRequest('GET', "/api/v1/equipment/{$machineId}/engine-data");
             $serviceInfo = $this->makeRequest('GET', "/api/v1/equipment/{$machineId}/service-info");
-            
+
             $metrics = array_merge(
                 $this->parseMetrics($workingInfo['data'] ?? []),
                 $this->parseMetrics($engineData['data'] ?? []),
                 $this->parseMetrics($serviceInfo['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -100,24 +114,28 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v1/equipment/{$machineId}/notifications");
-            
+
             $alerts = [];
-            if (!empty($response['data']['notifications'])) {
+            if (! empty($response['data']['notifications'])) {
                 foreach ($response['data']['notifications'] as $notification) {
                     $alerts[] = $this->parseAlert($notification);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch notifications', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -133,14 +151,14 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine details from Hyundai API
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -149,14 +167,12 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -165,14 +181,14 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -181,14 +197,14 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -197,9 +213,8 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -213,8 +228,6 @@ class HyundaiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {

@@ -7,12 +7,15 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\IoTSensor>
+ * @extends Factory<IoTSensor>
  */
 class IoTSensorFactory extends Factory
 {
     protected $model = IoTSensor::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         return [

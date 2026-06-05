@@ -86,21 +86,37 @@ class HealthMetric extends Model
         return $query->where('is_normal', false);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeCritical(Builder $query): Builder
     {
         return $query->where('severity', 'critical');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeComponent(Builder $query, string $component): Builder
     {
         return $query->where('component', $component);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeMetricType(Builder $query, string $type): Builder
     {
         return $query->where('metric_type', $type);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeRecent(Builder $query, int $days = 7): Builder
     {
         return $query->where('recorded_at', '>=', now()->subDays($days));

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * Tracks each execution of the Bell fleet sync job.
  *
  * @property int $log_id
- * @property \Carbon\Carbon|null $execution_date
+ * @property Carbon|null $execution_date
  * @property bool $success
  * @property int $records_processed
  * @property int $records_inserted
@@ -34,6 +35,9 @@ class BellIntegrationAuditLog extends Model
         'error_message',
     ];
 
+    /**
+     * @return array<mixed>
+     */
     protected function casts(): array
     {
         return [

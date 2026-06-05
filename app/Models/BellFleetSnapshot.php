@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -10,11 +11,11 @@ use Illuminate\Database\Eloquent\Model;
  * Stores the raw JSON payload and metadata for each API call.
  *
  * @property int $snapshot_id
- * @property \Carbon\Carbon|null $snapshot_time
+ * @property Carbon|null $snapshot_time
  * @property string|null $fleet_version
  * @property int $equipment_count
  * @property string|null $raw_json
- * @property \Carbon\Carbon $created_date
+ * @property Carbon $created_date
  */
 class BellFleetSnapshot extends Model
 {
@@ -32,6 +33,9 @@ class BellFleetSnapshot extends Model
         'created_date',
     ];
 
+    /**
+     * @return array<mixed>
+     */
     protected function casts(): array
     {
         return [

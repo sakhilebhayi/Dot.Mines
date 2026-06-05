@@ -9,6 +9,9 @@ class AIAgentFactory extends Factory
 {
     protected $model = AIAgent::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         $types = [

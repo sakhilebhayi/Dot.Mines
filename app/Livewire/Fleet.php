@@ -157,6 +157,8 @@ class Fleet extends Component
 
     /**
      * Returns [current, max] fleet slot counts for the current team.
+     *
+     * @return array<mixed>
      */
     public function fleetUsage(): array
     {
@@ -479,6 +481,9 @@ class Fleet extends Component
         $this->closeMineAreaAssignModal();
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function calculateMachinePerformance(int $teamId): array
     {
         $machines = Machine::where('team_id', $teamId)->get()->keyBy('id');
@@ -596,6 +601,10 @@ class Fleet extends Component
         ];
     }
 
+    /**
+     * @param  array<mixed>  $machineIds
+     * @return array<mixed>
+     */
     private function buildEngineHoursMap(array $machineIds, int $teamId): array
     {
         if (empty($machineIds)) {

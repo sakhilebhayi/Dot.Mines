@@ -14,12 +14,18 @@ class CASEService extends BaseManufacturerService implements ManufacturerService
         return true;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachines(): array
     {
         // Implement CASE API fetch logic
         return [];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement CASE API fetch machine details
@@ -32,18 +38,27 @@ class CASEService extends BaseManufacturerService implements ManufacturerService
         return null;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachineMetrics(string $machineId): array
     {
         // Implement CASE API fetch machine metrics
         return [];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachineAlerts(string $machineId): array
     {
         // Implement CASE API fetch machine alerts
         return [];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachineData(string $machineId): array
     {
         // Implement CASE API fetch comprehensive machine data

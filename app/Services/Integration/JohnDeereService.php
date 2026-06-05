@@ -14,12 +14,18 @@ class JohnDeereService extends BaseManufacturerService implements ManufacturerSe
         return true;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachines(): array
     {
         // Implement John Deere API fetch logic
         return [];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement John Deere API fetch machine details
@@ -32,18 +38,27 @@ class JohnDeereService extends BaseManufacturerService implements ManufacturerSe
         return null;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachineMetrics(string $machineId): array
     {
         // Implement John Deere API fetch machine metrics
         return [];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachineAlerts(string $machineId): array
     {
         // Implement John Deere API fetch machine alerts
         return [];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachineData(string $machineId): array
     {
         // Implement John Deere API fetch comprehensive machine data

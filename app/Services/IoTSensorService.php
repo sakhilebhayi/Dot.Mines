@@ -9,6 +9,8 @@ class IoTSensorService
 {
     /**
      * Get sensor readings with statistics
+     *
+     * @return array<mixed>
      */
     public function getReadingStats(IoTSensor $sensor, int $days = 7): array
     {
@@ -47,6 +49,8 @@ class IoTSensorService
 
     /**
      * Check sensor health
+     *
+     * @return array<mixed>
      */
     public function checkSensorHealth(IoTSensor $sensor): array
     {

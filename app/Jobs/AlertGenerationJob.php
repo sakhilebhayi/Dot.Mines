@@ -77,6 +77,8 @@ class AlertGenerationJob implements ShouldQueue
 
     /**
      * Generate alerts for a specific machine based on its current state.
+     *
+     * @return array<mixed>
      */
     private function generateAlertsForMachine(Machine $machine): array
     {

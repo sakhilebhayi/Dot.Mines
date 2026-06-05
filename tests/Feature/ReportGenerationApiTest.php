@@ -51,6 +51,9 @@ class ReportGenerationApiTest extends TestCase
         });
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function createAdminUser(): array
     {
         $user = User::factory()->create();

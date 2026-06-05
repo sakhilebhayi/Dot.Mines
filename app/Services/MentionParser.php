@@ -15,10 +15,13 @@ class MentionParser
     /**
      * Extract @username handles from a body string.
      * Returns an array of raw handles (without the @ sign).
+     *
+     * @return array<mixed>
      */
     public function extractHandles(string $body): array
     {
         preg_match_all('/@([\w.-]+)/', $body, $matches);
+
         return array_unique($matches[1] ?? []);
     }
 
@@ -40,8 +43,8 @@ class MentionParser
                 foreach ($handles as $handle) {
                     // Match @first.last or @FirstName (replace dots/dashes with spaces for name lookup)
                     $q->orWhereRaw("LOWER(REPLACE(name, ' ', '.')) = ?", [strtolower($handle)])
-                      ->orWhereRaw("LOWER(REPLACE(name, ' ', '-')) = ?", [strtolower($handle)])
-                      ->orWhereRaw("LOWER(name) = ?", [strtolower(str_replace(['.', '-'], ' ', $handle))]);
+                        ->orWhereRaw("LOWER(REPLACE(name, ' ', '-')) = ?", [strtolower($handle)])
+                        ->orWhereRaw('LOWER(name) = ?', [strtolower(str_replace(['.', '-'], ' ', $handle))]);
                 }
             })
             ->get(['id', 'name', 'email']);
@@ -51,10 +54,10 @@ class MentionParser
      * Parse mentions in a body, persist FeedMention records, and create
      * in-app notifications for each mentioned user.
      *
-     * @param  Model  $mentionable   FeedPost or FeedComment instance
-     * @param  string $body          The post/comment body
-     * @param  int    $authorId      The user who authored the content
-     * @param  int    $teamId        The current team
+     * @param  Model  $mentionable  FeedPost or FeedComment instance
+     * @param  string  $body  The post/comment body
+     * @param  int  $authorId  The user who authored the content
+     * @param  int  $teamId  The current team
      */
     public function parseSave(Model $mentionable, string $body, int $authorId, int $teamId): void
     {
@@ -75,11 +78,11 @@ class MentionParser
 
                 // Persist mention record (skip duplicate)
                 FeedMention::firstOrCreate([
-                    'mentionable_type'    => get_class($mentionable),
-                    'mentionable_id'      => $mentionable->id,
-                    'mentioned_user_id'   => $user->id,
+                    'mentionable_type' => get_class($mentionable),
+                    'mentionable_id' => $mentionable->id,
+                    'mentioned_user_id' => $user->id,
                     'mentioned_by_user_id' => $authorId,
-                    'team_id'             => $teamId,
+                    'team_id' => $teamId,
                 ]);
 
                 // Check user preference for mention notifications
@@ -93,17 +96,17 @@ class MentionParser
 
                 // Create in-app notification
                 Notification::create([
-                    'team_id'     => $teamId,
-                    'type'        => 'feed_mention',
-                    'title'       => 'You were mentioned',
-                    'message'     => "Someone mentioned you in a post.",
+                    'team_id' => $teamId,
+                    'type' => 'feed_mention',
+                    'title' => 'You were mentioned',
+                    'message' => 'Someone mentioned you in a post.',
                     'alert_level' => 'medium',
-                    'data'        => [
+                    'data' => [
                         'mentionable_type' => get_class($mentionable),
-                        'mentionable_id'   => $mentionable->id,
+                        'mentionable_id' => $mentionable->id,
                     ],
-                    'action_url'  => '/feed',
-                    'is_read'     => false,
+                    'action_url' => '/feed',
+                    'is_read' => false,
                 ]);
             }
         } catch (\Exception $e) {

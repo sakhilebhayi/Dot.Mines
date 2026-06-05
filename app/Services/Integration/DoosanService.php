@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * Doosan DoosanCONNECT Integration Service
- * 
+ *
  * API Documentation: https://developer.doosan.com/connect-api
  * Requires Doosan account ID
  */
@@ -19,27 +19,32 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
     {
         try {
             $response = $this->makeRequest('GET', '/api/v2/machines', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/api/v2/machines');
-            
+
             $machines = [];
-            if (!empty($response['data']['machines'])) {
+            if (! empty($response['data']['machines'])) {
                 foreach ($response['data']['machines'] as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -47,6 +52,7 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machines', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -55,17 +61,21 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -73,25 +83,29 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMetrics(string $machineId): array
     {
         try {
             $operation = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/operation");
             $fuel = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/fuel");
             $maintenance = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/maintenance");
-            
+
             $metrics = array_merge(
                 $this->parseMetrics($operation['data'] ?? []),
                 $this->parseMetrics($fuel['data'] ?? []),
                 $this->parseMetrics($maintenance['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -100,24 +114,28 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/warnings");
-            
+
             $alerts = [];
-            if (!empty($response['data']['warnings'])) {
+            if (! empty($response['data']['warnings'])) {
                 foreach ($response['data']['warnings'] as $warning) {
                     $alerts[] = $this->parseAlert($warning);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch warnings', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -133,14 +151,14 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine details from Doosan API
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -149,14 +167,12 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -165,14 +181,14 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -181,14 +197,14 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -197,9 +213,8 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -213,8 +228,6 @@ class DoosanService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {

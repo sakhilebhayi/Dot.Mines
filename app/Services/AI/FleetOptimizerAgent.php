@@ -2,10 +2,8 @@
 
 namespace App\Services\AI;
 
-use App\Models\Team;
 use App\Models\Machine;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Models\Team;
 
 /**
  * Fleet Optimizer AI Agent
@@ -13,6 +11,9 @@ use Illuminate\Support\Facades\DB;
  */
 class FleetOptimizerAgent
 {
+    /**
+     * @return array<mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];
@@ -44,6 +45,9 @@ class FleetOptimizerAgent
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function analyzeUtilization($machines): array
     {
         $recommendations = [];
@@ -74,7 +78,7 @@ class FleetOptimizerAgent
                     ],
                     'impact_analysis' => [
                         'potential_increase' => '40% utilization increase possible',
-                        'estimated_time_saved' => round((24 - $hoursPerDay) * 0.6, 2) . ' hours/day',
+                        'estimated_time_saved' => round((24 - $hoursPerDay) * 0.6, 2).' hours/day',
                     ],
                 ];
             }
@@ -117,17 +121,20 @@ class FleetOptimizerAgent
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function analyzeIdleMachines($machines): array
     {
         $recommendations = [];
-        
+
         $idleMachines = $machines->filter(function ($machine) {
             return $machine->status === 'idle' || $machine->status === 'parked';
         });
 
         if ($idleMachines->count() > $machines->count() * 0.2) {
             $idlePercentage = ($idleMachines->count() / $machines->count()) * 100;
-            
+
             $recommendations[] = [
                 'category' => 'fleet',
                 'priority' => 'high',
@@ -142,8 +149,8 @@ class FleetOptimizerAgent
                     'machine_ids' => $idleMachines->pluck('id')->toArray(),
                 ],
                 'impact_analysis' => [
-                    'daily_cost' => 'R' . number_format($idleMachines->count() * 5000, 2),
-                    'monthly_cost' => 'R' . number_format($idleMachines->count() * 5000 * 30, 2),
+                    'daily_cost' => 'R'.number_format($idleMachines->count() * 5000, 2),
+                    'monthly_cost' => 'R'.number_format($idleMachines->count() * 5000 * 30, 2),
                     'recommended_action' => 'Reassign or consider selling/renting out',
                 ],
             ];

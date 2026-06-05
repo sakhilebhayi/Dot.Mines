@@ -33,6 +33,8 @@ class IntegrationService
 
     /**
      * Get all registered services
+     *
+     * @return array<mixed>
      */
     public function all(): array
     {
@@ -41,6 +43,8 @@ class IntegrationService
 
     /**
      * Test connection to a manufacturer API
+     *
+     * @return array<mixed>
      */
     public function testConnection(Integration $integration): array
     {
@@ -76,6 +80,8 @@ class IntegrationService
 
     /**
      * Sync all machines for an integration
+     *
+     * @return array<mixed>
      */
     public function syncMachines(Integration $integration): array
     {
@@ -248,37 +254,39 @@ class IntegrationService
         $credentials = json_decode($integration->credentials, true) ?? [];
 
         return match ($integration->provider) {
-            'volvo' => app(\App\Services\Integration\VolvoService::class, ['credentials' => $credentials]),
-            'cat' => app(\App\Services\Integration\CATService::class, ['credentials' => $credentials]),
-            'komatsu' => app(\App\Services\Integration\KomatsuService::class, ['credentials' => $credentials]),
-            'bell' => app(\App\Services\Integration\BellService::class, ['credentials' => $credentials]),
-            'hitachi' => app(\App\Services\Integration\HitachiService::class, ['credentials' => $credentials]),
-            'john-deere' => app(\App\Services\Integration\JohnDeereService::class, ['credentials' => $credentials]),
-            'liebherr' => app(\App\Services\Integration\LiebherrService::class, ['credentials' => $credentials]),
-            'hyundai' => app(\App\Services\Integration\HyundaiService::class, ['credentials' => $credentials]),
-            'doosan' => app(\App\Services\Integration\DoosanService::class, ['credentials' => $credentials]),
-            'jcb' => app(\App\Services\Integration\JCBService::class, ['credentials' => $credentials]),
-            'case' => app(\App\Services\Integration\CASEService::class, ['credentials' => $credentials]),
-            'sany' => app(\App\Services\Integration\SanyService::class, ['credentials' => $credentials]),
-            'xcmg' => app(\App\Services\Integration\XCMGService::class, ['credentials' => $credentials]),
-            'kobelco' => app(\App\Services\Integration\KobelcoService::class, ['credentials' => $credentials]),
-            'new-holland' => app(\App\Services\Integration\NewHollandService::class, ['credentials' => $credentials]),
-            'takeuchi' => app(\App\Services\Integration\TakeuchiService::class, ['credentials' => $credentials]),
-            'kubota' => app(\App\Services\Integration\KubotaService::class, ['credentials' => $credentials]),
-            'bobcat' => app(\App\Services\Integration\BobcatService::class, ['credentials' => $credentials]),
-            'yanmar' => app(\App\Services\Integration\YanmarService::class, ['credentials' => $credentials]),
-            'atlas-copco' => app(\App\Services\Integration\AtlasCopcoService::class, ['credentials' => $credentials]),
-            'sandvik' => app(\App\Services\Integration\SandvikService::class, ['credentials' => $credentials]),
-            'epiroc' => app(\App\Services\Integration\EpirocService::class, ['credentials' => $credentials]),
-            'ctrack' => app(\App\Services\Integration\CTrackService::class, ['credentials' => $credentials]),
-            'roundebult' => app(\App\Services\Integration\RoundebultService::class, ['credentials' => $credentials]),
-            'kawasaki' => app(\App\Services\Integration\KawasakiService::class, ['credentials' => $credentials]),
+            'volvo' => app(VolvoService::class, ['credentials' => $credentials]),
+            'cat' => app(CATService::class, ['credentials' => $credentials]),
+            'komatsu' => app(KomatsuService::class, ['credentials' => $credentials]),
+            'bell' => app(BellService::class, ['credentials' => $credentials]),
+            'hitachi' => app(HitachiService::class, ['credentials' => $credentials]),
+            'john-deere' => app(JohnDeereService::class, ['credentials' => $credentials]),
+            'liebherr' => app(LiebherrService::class, ['credentials' => $credentials]),
+            'hyundai' => app(HyundaiService::class, ['credentials' => $credentials]),
+            'doosan' => app(DoosanService::class, ['credentials' => $credentials]),
+            'jcb' => app(JCBService::class, ['credentials' => $credentials]),
+            'case' => app(CASEService::class, ['credentials' => $credentials]),
+            'sany' => app(SanyService::class, ['credentials' => $credentials]),
+            'xcmg' => app(XCMGService::class, ['credentials' => $credentials]),
+            'kobelco' => app(KobelcoService::class, ['credentials' => $credentials]),
+            'new-holland' => app(NewHollandService::class, ['credentials' => $credentials]),
+            'takeuchi' => app(TakeuchiService::class, ['credentials' => $credentials]),
+            'kubota' => app(KubotaService::class, ['credentials' => $credentials]),
+            'bobcat' => app(BobcatService::class, ['credentials' => $credentials]),
+            'yanmar' => app(YanmarService::class, ['credentials' => $credentials]),
+            'atlas-copco' => app(AtlasCopcoService::class, ['credentials' => $credentials]),
+            'sandvik' => app(SandvikService::class, ['credentials' => $credentials]),
+            'epiroc' => app(EpirocService::class, ['credentials' => $credentials]),
+            'ctrack' => app(CTrackService::class, ['credentials' => $credentials]),
+            'roundebult' => app(RoundebultService::class, ['credentials' => $credentials]),
+            'kawasaki' => app(KawasakiService::class, ['credentials' => $credentials]),
             default => null,
         };
     }
 
     /**
      * Get available manufacturers
+     *
+     * @return array<mixed>
      */
     public function getAvailableManufacturers(): array
     {
@@ -313,6 +321,8 @@ class IntegrationService
 
     /**
      * Get integration status
+     *
+     * @return array<mixed>
      */
     public function getStatus(Integration $integration): array
     {

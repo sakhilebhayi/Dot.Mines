@@ -7,12 +7,15 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MineArea>
+ * @extends Factory<MineArea>
  */
 class MineAreaFactory extends Factory
 {
     protected $model = MineArea::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         return [

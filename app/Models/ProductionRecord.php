@@ -100,21 +100,39 @@ class ProductionRecord extends Model
         return $this->belongsTo(Machine::class);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeByStatus(Builder $query, string $status): Builder
     {
         return $query->where('status', $status);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeBetweenDates(Builder $query, string $startDate, string $endDate): Builder
     {
-        return $query->whereBetween('record_date', [$startDate, $endDate]);
+        $query->whereBetween('record_date', [$startDate, $endDate]);
+
+        return $query;
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForMineArea(Builder $query, int $mineAreaId): Builder
     {
         return $query->where('mine_area_id', $mineAreaId);

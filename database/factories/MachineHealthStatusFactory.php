@@ -8,16 +8,19 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MachineHealthStatus>
+ * @extends Factory<MachineHealthStatus>
  */
 class MachineHealthStatusFactory extends Factory
 {
     protected $model = MachineHealthStatus::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         $healthScore = $this->faker->numberBetween(40, 100);
-        
+
         return [
             'team_id' => Team::factory(),
             'machine_id' => Machine::factory(),

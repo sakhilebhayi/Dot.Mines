@@ -7,18 +7,21 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Geofence>
+ * @extends Factory<Geofence>
  */
 class GeofenceFactory extends Factory
 {
     protected $model = Geofence::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         // Generate a simple polygon (rectangle) for testing
         $lat = $this->faker->latitude(-30, -25); // South Africa region
         $lng = $this->faker->longitude(25, 30);
-        
+
         // Create a small rectangle around the point
         $coordinates = [
             [$lng, $lat],
@@ -27,10 +30,10 @@ class GeofenceFactory extends Factory
             [$lng, $lat + 0.01],
             [$lng, $lat], // Close the polygon
         ];
-        
+
         return [
             'team_id' => Team::factory(),
-            'name' => $this->faker->words(2, true) . ' Zone',
+            'name' => $this->faker->words(2, true).' Zone',
             'description' => $this->faker->sentence(),
             'type' => $this->faker->randomElement(['pit', 'stockpile', 'dump', 'facility']),
             'coordinates' => $coordinates,

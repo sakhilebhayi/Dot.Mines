@@ -18,9 +18,10 @@ class OperatorFatigueSeeder extends Seeder
     {
         // Get the first team
         $team = Team::first();
-        
-        if (!$team) {
+
+        if (! $team) {
             $this->command->warn('No team found. Please create a team first.');
+
             return;
         }
 
@@ -36,46 +37,47 @@ class OperatorFatigueSeeder extends Seeder
 
         if ($users->isEmpty()) {
             $this->command->warn('No users found in the database. Cannot seed fatigue data.');
+
             return;
         }
 
         // Get machines
         $machines = Machine::where('team_id', $team->id)->get();
-        
+
         if ($machines->isEmpty()) {
             $this->command->warn('No machines found for the team. Fatigue records will not have associated machines.');
         }
 
         $shiftTypes = ['morning', 'afternoon', 'night'];
         $alertLevels = ['none', 'low', 'medium', 'high', 'critical'];
-        
+
         // Generate fatigue data for the last 14 days
         $startDate = Carbon::now()->subDays(14);
         $endDate = Carbon::now();
-        
+
         $this->command->info('Generating operator fatigue data...');
 
         $recordsCreated = 0;
-        
+
         // Loop through each day
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             // Create 3-8 fatigue records per day (simulating different shifts)
             $recordsPerDay = rand(3, 8);
-            
+
             for ($i = 0; $i < $recordsPerDay; $i++) {
                 $user = $users->random();
                 $machine = $machines->isNotEmpty() ? $machines->random() : null;
                 $shiftType = $shiftTypes[array_rand($shiftTypes)];
-                
+
                 // Determine shift times based on shift type
                 [$shiftStart, $shiftEnd, $hoursWorked] = $this->getShiftDetails($shiftType);
-                
+
                 // Calculate consecutive days (1-7)
                 $consecutiveDays = rand(1, 7);
-                
+
                 // Calculate break time (realistic: 30-90 minutes)
                 $breakTime = rand(30, 90);
-                
+
                 // Calculate realistic fatigue score based on various factors
                 $fatigueScore = $this->calculateRealisticFatigueScore(
                     $hoursWorked,
@@ -83,16 +85,16 @@ class OperatorFatigueSeeder extends Seeder
                     $breakTime,
                     $shiftType
                 );
-                
+
                 // Determine alert level based on fatigue score
                 $alertLevel = $this->determineAlertLevel($fatigueScore);
-                
+
                 // Determine if operator is rested
                 $isRested = $fatigueScore < 60 && $consecutiveDays < 6 && $hoursWorked < 12;
-                
+
                 // Random incidents (0-2, weighted towards 0)
                 $incidents = rand(1, 100) > 90 ? rand(1, 2) : 0;
-                
+
                 // Generate notes for high-risk cases
                 $notes = null;
                 if ($fatigueScore >= 60) {
@@ -105,7 +107,7 @@ class OperatorFatigueSeeder extends Seeder
                     ];
                     $notes = $noteOptions[array_rand($noteOptions)];
                 }
-                
+
                 OperatorFatigue::create([
                     'user_id' => $user->id,
                     'team_id' => $team->id,
@@ -128,7 +130,7 @@ class OperatorFatigueSeeder extends Seeder
                         'workload_intensity' => ['light', 'moderate', 'heavy'][array_rand(['light', 'moderate', 'heavy'])],
                     ],
                 ]);
-                
+
                 $recordsCreated++;
             }
         }
@@ -138,6 +140,8 @@ class OperatorFatigueSeeder extends Seeder
 
     /**
      * Get shift details based on shift type
+     *
+     * @return array<mixed>
      */
     private function getShiftDetails(string $shiftType): array
     {
@@ -145,13 +149,13 @@ class OperatorFatigueSeeder extends Seeder
             case 'morning':
                 return [
                     '06:00:00',
-                    rand(13, 15) . ':00:00',
+                    rand(13, 15).':00:00',
                     rand(7, 9) + (rand(0, 5) / 10), // 7-9.5 hours
                 ];
             case 'afternoon':
                 return [
                     '14:00:00',
-                    rand(21, 23) . ':00:00',
+                    rand(21, 23).':00:00',
                     rand(7, 9) + (rand(0, 5) / 10), // 7-9.5 hours
                 ];
             case 'night':

@@ -37,6 +37,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machines from Komatsu KOMTRAX API
+     *
+     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
@@ -68,6 +70,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch location data for equipment
+     *
+     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -90,6 +94,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch performance/metrics for equipment
+     *
+     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -157,6 +163,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch alerts/cautions for equipment
+     *
+     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
@@ -188,6 +196,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse equipment data from Komatsu format
+     *
+     * @return array<mixed>
      */
     protected function parseMachineData(array $data): array
     {
@@ -212,6 +222,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse location data from Komatsu format
+     *
+     * @return array<mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -226,6 +238,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse performance/metric data from Komatsu format
+     *
+     * @return array<mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -243,6 +257,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse alert/notification data from Komatsu format
+     *
+     * @return array<mixed>
      */
     protected function parseAlert(array $data): array
     {
@@ -279,6 +295,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine details from Komatsu API
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -307,6 +325,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine metrics
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -321,6 +341,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine alerts
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -335,6 +357,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch comprehensive machine data
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

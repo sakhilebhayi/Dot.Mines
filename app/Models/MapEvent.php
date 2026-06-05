@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,11 +17,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property float|null $latitude
  * @property float|null $longitude
- * @property \Carbon\Carbon $occurred_at
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon $occurred_at
+ * @property Carbon|null $resolved_at
  * @property array<string, mixed>|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property-read Machine|null  $machine
  * @property-read MineArea|null $mineArea
  * @property-read string        $icon_emoji
@@ -102,19 +103,19 @@ class MapEvent extends Model
 
     // ─── Relationships ────────────────────────────────────────────────────────
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Machine, $this> */
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\MineArea, $this> */
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -134,25 +135,47 @@ class MapEvent extends Model
 
     // ─── Scopes ───────────────────────────────────────────────────────────────
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam(Builder $query, int $teamId): Builder
     {
         return $query->where('team_id', $teamId);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeRecent(Builder $query, int $hours = 24): Builder
     {
         return $query->where('occurred_at', '>=', now()->subHours($hours));
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeWithLocation(Builder $query): Builder
     {
-        return $query->whereNotNull('latitude')->whereNotNull('longitude');
+        $query->whereNotNull('latitude')->whereNotNull('longitude');
+
+        return $query;
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeOfType(Builder $query, string|array $types): Builder
     {
-        return is_array($types)
-            ? $query->whereIn('event_type', $types)
-            : $query->where('event_type', $types);
+        if (is_array($types)) {
+            $query->whereIn('event_type', $types);
+        } else {
+            $query->where('event_type', $types);
+        }
+
+        return $query;
     }
 }

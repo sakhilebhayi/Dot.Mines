@@ -424,6 +424,9 @@ class RoutePlanning extends Component
         $this->dispatch('clearMapMarkers');
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function buildTrafficPlanSummary(int $teamId): array
     {
         $restrictedCount = Geofence::where('team_id', $teamId)

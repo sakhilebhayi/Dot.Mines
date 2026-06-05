@@ -257,6 +257,8 @@ class FuelManagementService
 
     /**
      * Get fuel analytics for team
+     *
+     * @return array<mixed>
      */
     public function getTeamAnalytics(int $teamId, Carbon $startDate, Carbon $endDate): array
     {
@@ -357,6 +359,8 @@ class FuelManagementService
 
     /**
      * Get machine fuel efficiency report
+     *
+     * @return array<mixed>
      */
     public function getMachineFuelEfficiency(Machine $machine, Carbon $startDate, Carbon $endDate): array
     {

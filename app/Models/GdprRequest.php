@@ -46,6 +46,9 @@ class GdprRequest extends Model
         'completed_at',
     ];
 
+    /**
+     * @return array<mixed>
+     */
     protected function casts(): array
     {
         return [

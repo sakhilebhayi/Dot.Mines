@@ -2,9 +2,8 @@
 
 namespace App\Services\AI;
 
-use App\Models\Team;
 use App\Models\Route;
-use App\Models\Machine;
+use App\Models\Team;
 use App\Services\RoutePlanningService;
 
 /**
@@ -17,6 +16,9 @@ class RouteAdvisorAgent
         protected RoutePlanningService $routePlanningService
     ) {}
 
+    /**
+     * @return array<mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];
@@ -30,7 +32,7 @@ class RouteAdvisorAgent
         foreach ($routes as $route) {
             // Analyze route efficiency
             $efficiency = $this->analyzeRouteEfficiency($route);
-            
+
             if ($efficiency['improvement_possible'] > 15) {
                 $recommendations[] = [
                     'category' => 'route',
@@ -52,6 +54,9 @@ class RouteAdvisorAgent
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function analyzeRouteEfficiency(Route $route): array
     {
         $directDistance = $this->routePlanningService->calculateDistance(
@@ -77,5 +82,4 @@ class RouteAdvisorAgent
             'fuel_savings' => round($fuelSavings, 2),
         ];
     }
-
 }

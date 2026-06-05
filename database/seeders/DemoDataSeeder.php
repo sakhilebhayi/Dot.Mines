@@ -58,7 +58,7 @@ class DemoDataSeeder extends Seeder
     // Fuel Tanks
     // ─────────────────────────────────────────────────────────────────────────
 
-    private function seedFuelTanks(Team $team, $areas): void
+    private function seedFuelTanks(Team $team, mixed $areas): void
     {
         if (FuelTank::where('team_id', $team->id)->exists()) {
             return;
@@ -147,7 +147,7 @@ class DemoDataSeeder extends Seeder
     // Feed Posts
     // ─────────────────────────────────────────────────────────────────────────
 
-    private function seedFeedPosts(Team $team, $users, $areas, $machines): void
+    private function seedFeedPosts(Team $team, mixed $users, mixed $areas, mixed $machines): void
     {
         if (FeedPost::where('team_id', $team->id)->exists()) {
             return;
@@ -351,7 +351,7 @@ class DemoDataSeeder extends Seeder
     // Haul Dispatches
     // ─────────────────────────────────────────────────────────────────────────
 
-    private function seedHaulDispatches(Team $team, $machines, $areas): void
+    private function seedHaulDispatches(Team $team, mixed $machines, mixed $areas): void
     {
         if (HaulDispatch::where('team_id', $team->id)->exists()) {
             return;
@@ -472,7 +472,7 @@ class DemoDataSeeder extends Seeder
     // Map Events
     // ─────────────────────────────────────────────────────────────────────────
 
-    private function seedMapEvents(Team $team, $machines, $areas): void
+    private function seedMapEvents(Team $team, mixed $machines, mixed $areas): void
     {
         if (MapEvent::where('team_id', $team->id)->exists()) {
             return;
@@ -528,7 +528,7 @@ class DemoDataSeeder extends Seeder
     // Incidents
     // ─────────────────────────────────────────────────────────────────────────
 
-    private function seedIncidents(Team $team, $machines, $areas, $users): void
+    private function seedIncidents(Team $team, mixed $machines, mixed $areas, mixed $users): void
     {
         if (Incident::where('team_id', $team->id)->exists()) {
             return;

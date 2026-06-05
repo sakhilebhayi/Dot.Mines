@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Models\GeofenceEntry;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -17,8 +16,6 @@ class GeofenceEntryDetected implements ShouldBroadcast
 
     /**
      * The geofence entry instance.
-     *
-     * @var \App\Models\GeofenceEntry
      */
     public GeofenceEntry $entry;
 
@@ -33,7 +30,7 @@ class GeofenceEntryDetected implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
@@ -42,20 +39,20 @@ class GeofenceEntryDetected implements ShouldBroadcast
 
         return [
             // Broadcast to team channel
-            new PrivateChannel('team.' . $geofence->team_id),
-            
+            new PrivateChannel('team.'.$geofence->team_id),
+
             // Broadcast to geofence channel
-            new PrivateChannel('geofence.' . $geofence->id),
-            
+            new PrivateChannel('geofence.'.$geofence->id),
+
             // Broadcast to machine channel
-            new PrivateChannel('machine.' . $machine->id),
+            new PrivateChannel('machine.'.$machine->id),
         ];
     }
 
     /**
      * Get the data to broadcast.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function broadcastWith(): array
     {
@@ -78,8 +75,6 @@ class GeofenceEntryDetected implements ShouldBroadcast
 
     /**
      * The event's broadcast name.
-     *
-     * @return string
      */
     public function broadcastAs(): string
     {

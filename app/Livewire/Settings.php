@@ -339,6 +339,9 @@ class Settings extends Component
 
     // ==================== HELPER METHODS ====================
 
+    /**
+     * @return array<mixed>
+     */
     private function getRoles(): array
     {
         return [
@@ -349,6 +352,9 @@ class Settings extends Component
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getTimezones(): array
     {
         return [
@@ -363,6 +369,9 @@ class Settings extends Component
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getLanguages(): array
     {
         return [
@@ -378,6 +387,9 @@ class Settings extends Component
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getCurrencies(): array
     {
         return [

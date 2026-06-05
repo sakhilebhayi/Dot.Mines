@@ -10,6 +10,9 @@ class AIInsightFactory extends Factory
 {
     protected $model = AIInsight::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         $types = ['trend', 'anomaly', 'prediction', 'optimization'];

@@ -2,12 +2,10 @@
 
 namespace App\Services\AI;
 
-use App\Models\Team;
-use App\Models\Machine;
-use App\Models\FuelTransaction;
-use App\Models\FuelBudget;
 use App\Models\FuelTank;
-use Carbon\Carbon;
+use App\Models\FuelTransaction;
+use App\Models\Machine;
+use App\Models\Team;
 
 /**
  * Fuel Predictor AI Agent
@@ -15,6 +13,9 @@ use Carbon\Carbon;
  */
 class FuelPredictorAgent
 {
+    /**
+     * @return array<mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];
@@ -39,6 +40,9 @@ class FuelPredictorAgent
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function analyzeFuelConsumption(Team $team): array
     {
         $recommendations = [];
@@ -59,7 +63,9 @@ class FuelPredictorAgent
 
         foreach ($byMachine as $machineId => $machineTransactions) {
             $machine = Machine::find($machineId);
-            if (!$machine) continue;
+            if (! $machine) {
+                continue;
+            }
 
             $totalLiters = $machineTransactions->sum('quantity_liters');
             $totalCost = $machineTransactions->sum('total_cost');
@@ -85,7 +91,7 @@ class FuelPredictorAgent
                         'monthly_cost_impact' => round(($avgDailyConsumption - $expectedConsumption) * 30 * 25, 2),
                     ],
                     'impact_analysis' => [
-                        'potential_savings' => 'R' . number_format(($avgDailyConsumption - $expectedConsumption) * 30 * 25, 2) . '/month',
+                        'potential_savings' => 'R'.number_format(($avgDailyConsumption - $expectedConsumption) * 30 * 25, 2).'/month',
                         'recommended_actions' => [
                             'Schedule maintenance inspection',
                             'Check for fuel leaks',
@@ -135,6 +141,9 @@ class FuelPredictorAgent
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function predictFuelNeeds(Team $team): array
     {
         $recommendations = [];
@@ -171,8 +180,8 @@ class FuelPredictorAgent
                     'recommended_order_liters' => round($predicted30Days, 2),
                 ],
                 'impact_analysis' => [
-                    'risk' => 'Operations may be affected in ' . round($daysOfSupply) . ' days',
-                    'recommended_action' => 'Order ' . number_format($predicted30Days, 0) . ' liters immediately',
+                    'risk' => 'Operations may be affected in '.round($daysOfSupply).' days',
+                    'recommended_action' => 'Order '.number_format($predicted30Days, 0).' liters immediately',
                 ],
             ];
         }
@@ -180,12 +189,12 @@ class FuelPredictorAgent
         // Optimal ordering recommendation
         if ($daysOfSupply > 7 && $daysOfSupply < 20) {
             $optimalOrderQuantity = $predicted30Days * 1.2; // 20% buffer
-            
+
             $recommendations[] = [
                 'category' => 'fuel',
                 'priority' => 'medium',
                 'title' => 'Optimal Fuel Order Timing',
-                'description' => "Good time to place a fuel order. Current inventory is adequate but planning ahead will prevent urgent orders.",
+                'description' => 'Good time to place a fuel order. Current inventory is adequate but planning ahead will prevent urgent orders.',
                 'confidence_score' => 0.85,
                 'data' => [
                     'predicted_30_day_needs' => round($predicted30Days, 2),
@@ -195,7 +204,7 @@ class FuelPredictorAgent
                 ],
                 'impact_analysis' => [
                     'benefit' => 'Avoid rushed orders and potential price premiums',
-                    'cost_estimate' => 'R' . number_format($optimalOrderQuantity * 25, 2),
+                    'cost_estimate' => 'R'.number_format($optimalOrderQuantity * 25, 2),
                 ],
             ];
         }
@@ -203,6 +212,9 @@ class FuelPredictorAgent
         return ['recommendations' => $recommendations];
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function analyzeTankLevels(Team $team): array
     {
         $recommendations = [];
@@ -253,7 +265,7 @@ class FuelPredictorAgent
     protected function getExpectedConsumption(string $machineType): float
     {
         // Expected daily fuel consumption in liters by machine type
-        return match(strtolower($machineType)) {
+        return match (strtolower($machineType)) {
             'excavator' => 200,
             'haul_truck' => 150,
             'bulldozer' => 180,

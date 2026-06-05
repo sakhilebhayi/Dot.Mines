@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * Sany SUMS (Sany Unique Management System) Integration Service
- * 
+ *
  * Contact Sany representative for API access
  * Requires Sany enterprise ID
  */
@@ -19,27 +19,32 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
     {
         try {
             $response = $this->makeRequest('GET', '/open/v1/devices', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/open/v1/devices');
-            
+
             $machines = [];
-            if (!empty($response['data']['devices'])) {
+            if (! empty($response['data']['devices'])) {
                 foreach ($response['data']['devices'] as $device) {
                     $machines[] = $this->parseMachineData($device);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -47,6 +52,7 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch devices', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -55,17 +61,21 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/open/v1/devices/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -73,25 +83,29 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMetrics(string $machineId): array
     {
         try {
             $realtimeData = $this->makeRequest('GET', "/open/v1/devices/{$machineId}/realtime");
             $workingHours = $this->makeRequest('GET', "/open/v1/devices/{$machineId}/working-hours");
             $statistics = $this->makeRequest('GET', "/open/v1/devices/{$machineId}/statistics");
-            
+
             $metrics = array_merge(
                 $this->parseMetrics($realtimeData['data'] ?? []),
                 $this->parseMetrics($workingHours['data'] ?? []),
                 $this->parseMetrics($statistics['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -100,24 +114,28 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/open/v1/devices/{$machineId}/alarms");
-            
+
             $alerts = [];
-            if (!empty($response['data']['alarms'])) {
+            if (! empty($response['data']['alarms'])) {
                 foreach ($response['data']['alarms'] as $alarm) {
                     $alerts[] = $this->parseAlert($alarm);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch alarms', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -133,14 +151,14 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine details from Sany API
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -149,14 +167,12 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -165,14 +181,14 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -181,14 +197,14 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -197,9 +213,8 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -213,8 +228,6 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {

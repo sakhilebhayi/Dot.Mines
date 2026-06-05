@@ -21,6 +21,9 @@ class PaystackService
         $this->secretKey = config('services.paystack.secret', '');
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function get(string $endpoint): array
     {
         $response = Http::withToken($this->secretKey)
@@ -39,6 +42,10 @@ class PaystackService
         return $response->json() ?? [];
     }
 
+    /**
+     * @param  array<mixed>  $data
+     * @return array<mixed>
+     */
     protected function post(string $endpoint, array $data = []): array
     {
         $response = Http::withToken($this->secretKey)

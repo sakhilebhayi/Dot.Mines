@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $kpi_id
  * @property int $equipment_key
- * @property \Carbon\Carbon $kpi_date
+ * @property Carbon $kpi_date
  * @property int $loads_moved
  * @property float $payload_moved
  * @property float $operating_hours
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $distance_travelled
  * @property float $fuel_used
  * @property float $utilization_percent
- * @property \Carbon\Carbon $created_date
+ * @property Carbon $created_date
  */
 class BellEquipmentDailyKpi extends Model
 {
@@ -43,6 +44,9 @@ class BellEquipmentDailyKpi extends Model
         'created_date',
     ];
 
+    /**
+     * @return array<mixed>
+     */
     protected function casts(): array
     {
         return [
@@ -57,7 +61,7 @@ class BellEquipmentDailyKpi extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\BellEquipment, $this> */
+    /** @return BelongsTo<BellEquipment, $this> */
     public function equipment(): BelongsTo
     {
         return $this->belongsTo(BellEquipment::class, 'equipment_key', 'equipment_key');

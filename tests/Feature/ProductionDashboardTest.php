@@ -8,6 +8,7 @@ use App\Models\ProductionRecord;
 use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -17,6 +18,9 @@ class ProductionDashboardTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @return array<mixed>
+     */
     private function makeAdminUser(): array
     {
         $user = User::factory()->create();
@@ -143,7 +147,7 @@ class ProductionDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         Livewire::test(ProductionDashboard::class)
             ->call('deleteRecord', $record->id);

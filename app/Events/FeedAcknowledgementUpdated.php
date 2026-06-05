@@ -15,17 +15,23 @@ class FeedAcknowledgementUpdated implements ShouldBroadcast
 
     public function __construct(public readonly FeedPost $post) {}
 
+    /**
+     * @return array<mixed>
+     */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('feed.team.' . $this->post->team_id),
+            new PrivateChannel('feed.team.'.$this->post->team_id),
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function broadcastWith(): array
     {
         return [
-            'post_id'               => $this->post->id,
+            'post_id' => $this->post->id,
             'acknowledgement_count' => $this->post->acknowledgement_count,
         ];
     }

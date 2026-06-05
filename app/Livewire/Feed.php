@@ -95,6 +95,9 @@ class Feed extends Component
 
     public string $rejectReason = '';
 
+    /**
+     * @return array<mixed>
+     */
     protected function rules(): array
     {
         return [
@@ -668,6 +671,9 @@ class Feed extends Component
 
     // ── Daily Production Statistics ───────────────────────────────────────────
 
+    /**
+     * @return array<mixed>
+     */
     public function getDailyProductionStats(): array
     {
         /** @var User $user */

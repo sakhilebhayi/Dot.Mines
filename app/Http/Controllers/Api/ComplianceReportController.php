@@ -165,6 +165,8 @@ class ComplianceReportController extends Controller
 
     /**
      * Generate report data
+     *
+     * @return array<mixed>
      */
     private function generateReportData(MineArea $mineArea, string $type): array
     {

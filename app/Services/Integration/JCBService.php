@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * JCB LiveLink Integration Service
- * 
+ *
  * API Documentation: https://developer.jcb.com/livelink-api
  * Requires JCB dealer ID
  */
@@ -19,27 +19,32 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
     {
         try {
             $response = $this->makeRequest('GET', '/livelink/v1/machines', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/livelink/v1/machines');
-            
+
             $machines = [];
-            if (!empty($response['data']['machines'])) {
+            if (! empty($response['data']['machines'])) {
                 foreach ($response['data']['machines'] as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -47,6 +52,7 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machines', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -55,17 +61,21 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/livelink/v1/machines/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -73,25 +83,29 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMetrics(string $machineId): array
     {
         try {
             $telemetry = $this->makeRequest('GET', "/livelink/v1/machines/{$machineId}/telemetry");
             $utilization = $this->makeRequest('GET', "/livelink/v1/machines/{$machineId}/utilization");
             $service = $this->makeRequest('GET', "/livelink/v1/machines/{$machineId}/service");
-            
+
             $metrics = array_merge(
                 $this->parseMetrics($telemetry['data'] ?? []),
                 $this->parseMetrics($utilization['data'] ?? []),
                 $this->parseMetrics($service['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -100,24 +114,28 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/livelink/v1/machines/{$machineId}/alerts");
-            
+
             $alerts = [];
-            if (!empty($response['data']['alerts'])) {
+            if (! empty($response['data']['alerts'])) {
                 foreach ($response['data']['alerts'] as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch alerts', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -133,14 +151,14 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine details from JCB API
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -149,14 +167,12 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -165,14 +181,14 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -181,14 +197,14 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -197,9 +213,8 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -213,8 +228,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {

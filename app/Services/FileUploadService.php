@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -288,6 +289,9 @@ class FileUploadService
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function storeMinePlan(UploadedFile $file, int $teamId, int $mineAreaId, ?string $disk = null): array
     {
         $this->validateFile($file);
@@ -333,7 +337,7 @@ class FileUploadService
 
     public function temporaryUrl(string $path, string $disk = 's3', int $minutes = 60): string
     {
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $storage */
+        /** @var FilesystemAdapter $storage */
         $storage = Storage::disk($disk);
 
         if (! $storage->exists($path)) {

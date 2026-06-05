@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\FeedPost;
 use App\Models\ShiftTemplate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class ShiftTemplateManager extends Component
@@ -25,6 +26,9 @@ class ShiftTemplateManager extends Component
     /** @var array<string, mixed> */
     public array $formRequired = [];
 
+    /**
+     * @return array<mixed>
+     */
     protected function rules(): array
     {
         return [
@@ -44,7 +48,7 @@ class ShiftTemplateManager extends Component
         );
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $query = ShiftTemplate::with('creator:id,name')->latest();
 

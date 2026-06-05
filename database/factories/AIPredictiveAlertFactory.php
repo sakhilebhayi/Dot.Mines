@@ -2,16 +2,18 @@
 
 namespace Database\Factories;
 
+use App\Models\AIAgent;
 use App\Models\AIPredictiveAlert;
 use App\Models\Team;
-use App\Models\AIAgent;
-use App\Models\Machine;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AIPredictiveAlertFactory extends Factory
 {
     protected $model = AIPredictiveAlert::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         $alertTypes = ['breakdown_risk', 'fuel_shortage', 'production_delay', 'cost_overrun'];

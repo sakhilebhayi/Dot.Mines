@@ -8,18 +8,21 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FuelTank>
+ * @extends Factory<FuelTank>
  */
 class FuelTankFactory extends Factory
 {
     protected $model = FuelTank::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         return [
             'team_id' => Team::factory(),
             'mine_area_id' => MineArea::factory(),
-            'name' => 'Tank ' . $this->faker->unique()->numberBetween(1, 100),
+            'name' => 'Tank '.$this->faker->unique()->numberBetween(1, 100),
             'tank_number' => $this->faker->unique()->bothify('TANK-###'),
             'location_description' => $this->faker->sentence(3),
             'location_latitude' => $this->faker->latitude(),

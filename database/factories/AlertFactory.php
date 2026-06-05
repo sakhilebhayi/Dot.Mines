@@ -9,12 +9,15 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Alert>
+ * @extends Factory<Alert>
  */
 class AlertFactory extends Factory
 {
     protected $model = Alert::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         return [

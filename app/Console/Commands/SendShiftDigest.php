@@ -172,6 +172,8 @@ class SendShiftDigest extends Command
 
     /**
      * Return [Carbon $from, Carbon $to] for the shift on today's date.
+     *
+     * @return array<mixed>
      */
     private function shiftTimeRange(string $shift): array
     {

@@ -15,6 +15,9 @@ class AuthorizationServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @return array<mixed>
+     */
     private function makeTeamWithUser(): array
     {
         $user = User::factory()->create();

@@ -158,6 +158,8 @@ class AIOptimizationService
 
     /**
      * Get AI insights dashboard
+     *
+     * @return array<mixed>
      */
     public function getDashboardInsights(Team $team): array
     {
@@ -243,6 +245,9 @@ class AIOptimizationService
         };
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function getAgentCapabilities(string $type): array
     {
         return match ($type) {
@@ -270,6 +275,11 @@ class AIOptimizationService
         };
     }
 
+    /**
+     * @param  Collection<int, mixed>  $recommendations
+     * @param  Collection<int, mixed>  $insights
+     * @return array<mixed>
+     */
     protected function generateSummary(Collection $recommendations, Collection $insights): array
     {
         return [

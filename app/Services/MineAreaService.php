@@ -124,6 +124,8 @@ class MineAreaService
 
     /**
      * Get statistics for a team's mine areas
+     *
+     * @return array<mixed>
      */
     public function getTeamStatistics(int $teamId): array
     {

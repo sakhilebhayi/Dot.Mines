@@ -83,6 +83,9 @@ class FeedStorageVerificationTest extends TestCase
 
     // ── Model/team helpers ────────────────────────────────────────────────────
 
+    /**
+     * @return array<mixed>
+     */
     private function makeTeamWithUser(): array
     {
         $team = Team::factory()->create(['personal_team' => false]);

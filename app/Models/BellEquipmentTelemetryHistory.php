@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $history_id
  * @property int $equipment_key
- * @property \Carbon\Carbon|null $snapshot_time
+ * @property Carbon|null $snapshot_time
  * @property float|null $latitude
  * @property float|null $longitude
  * @property float|null $idle_hours
@@ -29,8 +30,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $fuel_remaining_percent
  * @property bool|null $engine_running
  * @property string|null $engine_number
- * @property \Carbon\Carbon|null $telemetry_date
- * @property \Carbon\Carbon $created_date
+ * @property Carbon|null $telemetry_date
+ * @property Carbon $created_date
  */
 class BellEquipmentTelemetryHistory extends Model
 {
@@ -62,6 +63,9 @@ class BellEquipmentTelemetryHistory extends Model
         'created_date',
     ];
 
+    /**
+     * @return array<mixed>
+     */
     protected function casts(): array
     {
         return [
@@ -81,7 +85,7 @@ class BellEquipmentTelemetryHistory extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\BellEquipment, $this> */
+    /** @return BelongsTo<BellEquipment, $this> */
     public function equipment(): BelongsTo
     {
         return $this->belongsTo(BellEquipment::class, 'equipment_key', 'equipment_key');

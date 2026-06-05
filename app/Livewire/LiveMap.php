@@ -373,11 +373,17 @@ class LiveMap extends Component
             });
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getGeofencesWithType(): array
     {
         return $this->getGeofences()->toArray();
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getRoutes(): array
     {
         $team = Auth::user()->currentTeam;
@@ -409,6 +415,9 @@ class LiveMap extends Component
             ->toArray();
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getTrafficPlanData(): array
     {
         $teamId = Auth::user()->currentTeam->id;

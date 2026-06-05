@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * Epiroc Certiq Integration Service (formerly Atlas Copco)
- * 
+ *
  * API Documentation: https://certiq.com/api-documentation
  * Requires Epiroc customer ID and Certiq subscription
  */
@@ -19,27 +19,32 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
     {
         try {
             $response = $this->makeRequest('GET', '/api/v2/equipment', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/api/v2/equipment');
-            
+
             $machines = [];
-            if (!empty($response['data']['equipment'])) {
+            if (! empty($response['data']['equipment'])) {
                 foreach ($response['data']['equipment'] as $equipment) {
                     $machines[] = $this->parseMachineData($equipment);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -47,6 +52,7 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch equipment', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -55,17 +61,21 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v2/equipment/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -73,25 +83,29 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchMetrics(string $machineId): array
     {
         try {
             $performance = $this->makeRequest('GET', "/api/v2/equipment/{$machineId}/performance");
             $production = $this->makeRequest('GET', "/api/v2/equipment/{$machineId}/production");
             $maintenance = $this->makeRequest('GET', "/api/v2/equipment/{$machineId}/maintenance");
-            
+
             $metrics = array_merge(
                 $this->parseMetrics($performance['data'] ?? []),
                 $this->parseMetrics($production['data'] ?? []),
                 $this->parseMetrics($maintenance['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -100,24 +114,28 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function fetchAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v2/equipment/{$machineId}/events");
-            
+
             $alerts = [];
-            if (!empty($response['data']['events'])) {
+            if (! empty($response['data']['events'])) {
                 foreach ($response['data']['events'] as $event) {
                     $alerts[] = $this->parseAlert($event);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch events', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -133,14 +151,14 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine details from Epiroc API
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -149,14 +167,12 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -165,14 +181,14 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -181,14 +197,14 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -197,9 +213,8 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
+     *
+     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -213,8 +228,6 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {

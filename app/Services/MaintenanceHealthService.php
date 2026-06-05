@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\HealthMetric;
 use App\Models\Machine;
 use App\Models\MachineHealthStatus;
-use App\Models\MaintenanceSchedule;
-use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceAlert;
-use App\Models\HealthMetric;
+use App\Models\MaintenanceRecord;
+use App\Models\MaintenanceSchedule;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -156,7 +156,7 @@ class MaintenanceHealthService
                     $schedule->last_service_date = $record->completed_at ?? now();
                     $schedule->last_service_hours = $record->hour_meter_reading;
                     $schedule->last_service_km = $record->odometer_reading;
-                    
+
                     // Calculate next service
                     if ($schedule->schedule_type === 'hours' && $schedule->interval_hours) {
                         $schedule->next_service_hours = $record->hour_meter_reading + $schedule->interval_hours;
@@ -167,13 +167,14 @@ class MaintenanceHealthService
                     if ($schedule->schedule_type === 'calendar' && $schedule->interval_days) {
                         $schedule->next_service_date = now()->addDays($schedule->interval_days);
                     }
-                    
+
                     $schedule->status = 'active';
                     $schedule->save();
                 }
             }
 
             DB::commit();
+
             return $record;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -192,14 +193,14 @@ class MaintenanceHealthService
         ]));
 
         // Update machine health if fault codes were cleared
-        if (!empty($data['fault_codes_cleared'])) {
+        if (! empty($data['fault_codes_cleared'])) {
             $health = MachineHealthStatus::where('machine_id', $record->machine_id)->first();
             if ($health) {
                 $clearedCodes = collect($data['fault_codes_cleared']);
                 $activeCodes = collect($health->active_fault_codes ?? []);
-                
-                $remainingCodes = $activeCodes->filter(function($code) use ($clearedCodes) {
-                    return !$clearedCodes->contains($code);
+
+                $remainingCodes = $activeCodes->filter(function ($code) use ($clearedCodes) {
+                    return ! $clearedCodes->contains($code);
                 })->values()->toArray();
 
                 $health->active_fault_codes = $remainingCodes;
@@ -224,9 +225,9 @@ class MaintenanceHealthService
         if (isset($data['normal_min']) && isset($data['normal_max'])) {
             $data['is_normal'] = $data['value'] >= $data['normal_min'] && $data['value'] <= $data['normal_max'];
             $data['severity'] = $data['is_normal'] ? 'normal' : 'warning';
-            
+
             // Critical if very far from normal
-            if (!$data['is_normal']) {
+            if (! $data['is_normal']) {
                 $range = $data['normal_max'] - $data['normal_min'];
                 $deviation = abs($data['value'] - (($data['normal_min'] + $data['normal_max']) / 2));
                 if ($deviation > $range) {
@@ -252,6 +253,8 @@ class MaintenanceHealthService
 
     /**
      * Get maintenance analytics
+     *
+     * @return array<mixed>
      */
     public function getMaintenanceAnalytics(int $teamId, Carbon $startDate, Carbon $endDate): array
     {
@@ -282,6 +285,7 @@ class MaintenanceHealthService
         // By machine
         $byMachine = $completedRecords->groupBy('machine_id')->map(function ($group) {
             $machine = $group->first()->machine;
+
             return [
                 'machine_id' => $machine->id,
                 'machine_name' => $machine->name,
@@ -337,12 +341,14 @@ class MaintenanceHealthService
 
     /**
      * Get machine health report
+     *
+     * @return array<mixed>
      */
     public function getMachineHealthReport(Machine $machine): array
     {
         $health = MachineHealthStatus::where('machine_id', $machine->id)->first();
-        
-        if (!$health) {
+
+        if (! $health) {
             return [
                 'machine_id' => $machine->id,
                 'machine_name' => $machine->name,

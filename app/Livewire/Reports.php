@@ -328,6 +328,9 @@ class Reports extends Component
 
     // ── 3.1 Shift Reports ──────────────────────────────────────────────────────
 
+    /**
+     * @return array<mixed>
+     */
     public function getShiftReportData(): array
     {
         if (! $this->shiftReportShift || ! $this->shiftReportDate) {
@@ -444,6 +447,9 @@ class Reports extends Component
 
     // ── 3.2 Machine Breakdown Analytics ───────────────────────────────────────
 
+    /**
+     * @return array<mixed>
+     */
     public function getBreakdownData(): array
     {
         $posts = FeedPost::where('category', 'breakdown')
@@ -490,6 +496,9 @@ class Reports extends Component
 
     // ── 3.3 Production Analytics ───────────────────────────────────────────────
 
+    /**
+     * @return array<mixed>
+     */
     public function getProductionData(): array
     {
         $posts = FeedPost::where('category', 'shift_update')

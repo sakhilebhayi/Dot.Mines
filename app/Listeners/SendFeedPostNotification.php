@@ -15,7 +15,7 @@ class SendFeedPostNotification implements ShouldQueue
 
     public function handle(FeedPostCreated $event): void
     {
-        $post   = $event->post;
+        $post = $event->post;
         $teamId = $post->team_id;
 
         // Determine which users to notify based on category / priority
@@ -28,27 +28,30 @@ class SendFeedPostNotification implements ShouldQueue
         // Map category / priority to alert level
         $alertLevel = match ($post->priority) {
             'critical' => 'critical',
-            'high'     => 'high',
-            default    => 'medium',
+            'high' => 'high',
+            default => 'medium',
         };
 
         $categoryLabel = ucfirst(str_replace('_', ' ', $post->category));
 
         SendFeedNotificationJob::dispatch($recipientIds, [
-            'team_id'     => $teamId,
-            'type'        => 'feed_post',
-            'title'       => "[{$categoryLabel}] New post by {$post->author?->name}",
-            'message'     => mb_substr($post->body, 0, 200),
+            'team_id' => $teamId,
+            'type' => 'feed_post',
+            'title' => "[{$categoryLabel}] New post by {$post->author?->name}",
+            'message' => mb_substr($post->body, 0, 200),
             'alert_level' => $alertLevel,
-            'data'        => [
-                'post_id'  => $post->id,
+            'data' => [
+                'post_id' => $post->id,
                 'category' => $post->category,
                 'priority' => $post->priority,
             ],
-            'action_url'  => '/feed',
+            'action_url' => '/feed',
         ]);
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function resolveRecipients($post, int $teamId): array
     {
         // All team users
@@ -81,6 +84,10 @@ class SendFeedPostNotification implements ShouldQueue
         return $this->applyPreferences($targetIds, $teamId, $post->category);
     }
 
+    /**
+     * @param  array<mixed>  $userIds
+     * @return array<mixed>
+     */
     private function applyPreferences(array $userIds, int $teamId, string $category): array
     {
         if (empty($userIds)) {
@@ -97,6 +104,7 @@ class SendFeedPostNotification implements ShouldQueue
                 return true; // default: opted in
             }
             $userPrefs = $prefs[$userId] ?? [];
+
             return (bool) ($userPrefs[$category] ?? true);
         }));
     }

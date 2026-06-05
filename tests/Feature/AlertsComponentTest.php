@@ -17,6 +17,9 @@ class AlertsComponentTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @return array<mixed>
+     */
     private function makeAdminUser(): array
     {
         $user = User::factory()->create();

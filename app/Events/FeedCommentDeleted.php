@@ -18,18 +18,24 @@ class FeedCommentDeleted implements ShouldBroadcast
         public readonly FeedPost $post,
     ) {}
 
+    /**
+     * @return array<mixed>
+     */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('feed.team.' . $this->post->team_id),
+            new PrivateChannel('feed.team.'.$this->post->team_id),
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function broadcastWith(): array
     {
         return [
-            'post_id'       => $this->post->id,
-            'comment_id'    => $this->commentId,
+            'post_id' => $this->post->id,
+            'comment_id' => $this->commentId,
             'comment_count' => $this->post->comment_count,
         ];
     }

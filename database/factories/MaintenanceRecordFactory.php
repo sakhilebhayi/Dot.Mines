@@ -15,6 +15,9 @@ class MaintenanceRecordFactory extends Factory
 {
     protected $model = MaintenanceRecord::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         $scheduledDate = $this->faker->dateTimeBetween('-30 days', '+30 days');

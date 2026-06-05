@@ -2,20 +2,23 @@
 
 namespace Database\Factories;
 
-use App\Models\FuelTransaction;
 use App\Models\FuelTank;
+use App\Models\FuelTransaction;
 use App\Models\Machine;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FuelTransaction>
+ * @extends Factory<FuelTransaction>
  */
 class FuelTransactionFactory extends Factory
 {
     protected $model = FuelTransaction::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         return [

@@ -13,9 +13,9 @@ class SendFeedCommentNotification implements ShouldQueue
 
     public function handle(FeedCommentCreated $event): void
     {
-        $comment  = $event->comment;
-        $post     = $event->post;
-        $teamId   = $post->team_id;
+        $comment = $event->comment;
+        $post = $event->post;
+        $teamId = $post->team_id;
         $authorId = $comment->author_id;
 
         $notifyIds = [];
@@ -47,24 +47,28 @@ class SendFeedCommentNotification implements ShouldQueue
         }
 
         $authorName = $comment->author?->name ?? 'Someone';
-        $isReply    = $comment->parent_comment_id !== null;
+        $isReply = $comment->parent_comment_id !== null;
 
         SendFeedNotificationJob::dispatch($filteredIds, [
-            'team_id'     => $teamId,
-            'type'        => $isReply ? 'feed_reply' : 'feed_comment',
-            'title'       => $isReply
+            'team_id' => $teamId,
+            'type' => $isReply ? 'feed_reply' : 'feed_comment',
+            'title' => $isReply
                 ? "{$authorName} replied to a comment"
                 : "{$authorName} commented on a post",
-            'message'     => mb_substr($comment->body, 0, 200),
+            'message' => mb_substr($comment->body, 0, 200),
             'alert_level' => 'low',
-            'data'        => [
-                'post_id'    => $post->id,
+            'data' => [
+                'post_id' => $post->id,
                 'comment_id' => $comment->id,
             ],
-            'action_url'  => '/feed',
+            'action_url' => '/feed',
         ]);
     }
 
+    /**
+     * @param  array<mixed>  $userIds
+     * @return array<mixed>
+     */
     private function applyCommentPreferences(array $userIds, int $teamId, bool $isReply): array
     {
         $prefs = UserFeedPreference::where('team_id', $teamId)
@@ -78,6 +82,7 @@ class SendFeedCommentNotification implements ShouldQueue
             if (! $prefs->has($userId)) {
                 return true; // default: opted in
             }
+
             return (bool) $prefs[$userId]->{$field};
         }));
     }

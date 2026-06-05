@@ -19,27 +19,33 @@ class FeedCommentCreated implements ShouldBroadcast
         public readonly FeedPost $post,
     ) {}
 
+    /**
+     * @return array<mixed>
+     */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('feed.team.' . $this->post->team_id),
+            new PrivateChannel('feed.team.'.$this->post->team_id),
         ];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function broadcastWith(): array
     {
         return [
-            'post_id'           => $this->post->id,
-            'comment_count'     => $this->post->comment_count,
+            'post_id' => $this->post->id,
+            'comment_count' => $this->post->comment_count,
             'comment' => [
-                'id'                => $this->comment->id,
-                'post_id'           => $this->comment->post_id,
+                'id' => $this->comment->id,
+                'post_id' => $this->comment->post_id,
                 'parent_comment_id' => $this->comment->parent_comment_id,
-                'author_id'         => $this->comment->author_id,
-                'author_name'       => $this->comment->author->name,
-                'body'              => $this->comment->body,
-                'is_edited'         => $this->comment->is_edited,
-                'created_at'        => $this->comment->created_at->toISOString(),
+                'author_id' => $this->comment->author_id,
+                'author_name' => $this->comment->author->name,
+                'body' => $this->comment->body,
+                'is_edited' => $this->comment->is_edited,
+                'created_at' => $this->comment->created_at->toISOString(),
             ],
         ];
     }

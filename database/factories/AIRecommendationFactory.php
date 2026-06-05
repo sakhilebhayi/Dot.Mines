@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\AIAgent;
 use App\Models\AIRecommendation;
 use App\Models\Team;
-use App\Models\AIAgent;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,6 +12,9 @@ class AIRecommendationFactory extends Factory
 {
     protected $model = AIRecommendation::class;
 
+    /**
+     * @return array<mixed>
+     */
     public function definition(): array
     {
         $categories = ['fleet', 'fuel', 'maintenance', 'production', 'route', 'cost'];

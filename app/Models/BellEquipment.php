@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -18,9 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $equipment_id
  * @property string|null $serial_number
  * @property string|null $pin
- * @property \Carbon\Carbon|null $unit_install_date_time
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon|null $unit_install_date_time
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class BellEquipment extends Model
 {
@@ -37,6 +38,9 @@ class BellEquipment extends Model
         'unit_install_date_time',
     ];
 
+    /**
+     * @return array<mixed>
+     */
     protected function casts(): array
     {
         return [
@@ -44,19 +48,19 @@ class BellEquipment extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\BellEquipmentCurrentStatus, $this> */
+    /** @return HasOne<BellEquipmentCurrentStatus, $this> */
     public function currentStatus(): HasOne
     {
         return $this->hasOne(BellEquipmentCurrentStatus::class, 'equipment_key', 'equipment_key');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\BellEquipmentTelemetryHistory, $this> */
+    /** @return HasMany<BellEquipmentTelemetryHistory, $this> */
     public function telemetryHistory(): HasMany
     {
         return $this->hasMany(BellEquipmentTelemetryHistory::class, 'equipment_key', 'equipment_key');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\BellEquipmentDailyKpi, $this> */
+    /** @return HasMany<BellEquipmentDailyKpi, $this> */
     public function dailyKpis(): HasMany
     {
         return $this->hasMany(BellEquipmentDailyKpi::class, 'equipment_key', 'equipment_key');

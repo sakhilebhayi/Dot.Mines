@@ -623,6 +623,9 @@ class MineAreaDetail extends Component
         ]);
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getProductionSummary(int $teamId): array
     {
         $now = now();
