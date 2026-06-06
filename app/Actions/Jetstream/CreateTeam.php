@@ -4,6 +4,7 @@ namespace App\Actions\Jetstream;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Services\TeamRoleService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Jetstream\Contracts\CreatesTeams;
@@ -31,6 +32,8 @@ class CreateTeam implements CreatesTeams
             'name' => $input['name'],
             'personal_team' => false,
         ]));
+
+        TeamRoleService::provisionTeam($team, $user);
 
         return $team;
     }

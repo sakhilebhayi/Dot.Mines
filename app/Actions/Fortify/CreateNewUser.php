@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Services\TeamRoleService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -54,5 +55,7 @@ class CreateNewUser implements CreatesNewUsers
 
         $user->ownedTeams()->save($team);
         $user->forceFill(['current_team_id' => $team->id])->save();
+
+        TeamRoleService::provisionTeam($team, $user);
     }
 }
