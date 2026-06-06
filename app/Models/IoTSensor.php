@@ -50,6 +50,8 @@ class IoTSensor extends Model
     /** @use HasFactory<IoTSensorFactory> */
     use HasFactory, HasTeamFilters;
 
+    protected $table = 'iot_sensors';
+
     protected $fillable = [
         'team_id',
         'mine_area_id',

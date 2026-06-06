@@ -73,6 +73,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class AIInsight extends Model
 {
+    protected $table = 'ai_insights';
+
     /** @use HasFactory<AIInsightFactory> */
     use HasFactory, HasTeamFilters;
 

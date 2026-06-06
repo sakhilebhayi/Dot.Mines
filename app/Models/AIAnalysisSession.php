@@ -73,6 +73,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class AIAnalysisSession extends Model
 {
+    protected $table = 'ai_analysis_sessions';
+
     /** @use HasFactory<Factory<static>> */
     use HasFactory, HasTeamFilters;
 

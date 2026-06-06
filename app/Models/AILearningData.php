@@ -73,6 +73,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class AILearningData extends Model
 {
+    protected $table = 'ai_learning_data';
+
     /** @use HasFactory<Factory<static>> */
     use HasFactory, HasTeamFilters;
 

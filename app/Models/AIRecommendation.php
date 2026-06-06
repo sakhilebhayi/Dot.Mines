@@ -76,6 +76,8 @@ class AIRecommendation extends Model
     /** @use HasFactory<AIRecommendationFactory> */
     use HasFactory, HasTeamFilters;
 
+    protected $table = 'ai_recommendations';
+
     protected $fillable = [
         'team_id',
         'ai_agent_id',

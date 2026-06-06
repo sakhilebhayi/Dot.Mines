@@ -73,6 +73,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class AIPredictiveAlert extends Model
 {
+    protected $table = 'ai_predictive_alerts';
+
     /** @use HasFactory<AIPredictiveAlertFactory> */
     use HasFactory, HasTeamFilters;
 
