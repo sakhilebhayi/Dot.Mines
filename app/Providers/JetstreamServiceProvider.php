@@ -52,6 +52,21 @@ class JetstreamServiceProvider extends ServiceProvider
             'delete',
         ])->description('Administrator users can perform any action.');
 
+        Jetstream::role('fleet_manager', 'Fleet Manager', [
+            'read',
+            'create',
+            'update',
+        ])->description('Fleet managers can manage machines and operations.');
+
+        Jetstream::role('operator', 'Operator', [
+            'read',
+            'create',
+        ])->description('Operators have read and create access.');
+
+        Jetstream::role('viewer', 'Viewer', [
+            'read',
+        ])->description('Viewers have read-only access.');
+
         Jetstream::role('editor', 'Editor', [
             'read',
             'create',

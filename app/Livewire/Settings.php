@@ -2,12 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Actions\Jetstream\InviteTeamMember;
 use App\Models\DigestSubscription;
 use App\Models\Role;
-use App\Models\User;
 use App\Models\UserFeedPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -171,40 +172,23 @@ class Settings extends Component
         ]);
 
         try {
-            $team = Auth::user()->currentTeam;
+            $authUser = Auth::user();
+            $team = $authUser->currentTeam;
 
-            // Check if user already invited/member
-            $existingUser = User::where('email', $this->inviteEmail)->first();
-            if ($existingUser && $team->users->contains($existingUser->id)) {
-                $this->dispatch('notify', ...['type' => 'error', 'message' => 'User is already a team member']);
-
-                return;
-            }
-
-            // In production, would send actual invitation email
-            // For now, create the user if they don't exist
-            if (! $existingUser) {
-                $existingUser = User::create([
-                    'name' => explode('@', $this->inviteEmail)[0],
-                    'email' => $this->inviteEmail,
-                    'password' => bcrypt('temporary_password_change_on_login'),
-                ]);
-            }
-
-            // Add user to team
-            $team->users()->attach($existingUser->id);
-
-            // Assign role
-            $role = Role::where('name', $this->selectedRole)->first();
-            if ($role) {
-                $existingUser->roles()->attach($role->id);
-            }
+            app(InviteTeamMember::class)->invite(
+                $authUser,
+                $team,
+                $this->inviteEmail,
+                $this->selectedRole,
+            );
 
             $this->dispatch('notify', ...['type' => 'success', 'message' => "Invitation sent to {$this->inviteEmail}"]);
             $this->showInviteForm = false;
             $this->inviteEmail = '';
             $this->selectedRole = 'operator';
-            $this->loadTeamMembers();
+        } catch (ValidationException $e) {
+            $message = collect($e->errors())->flatten()->first() ?? 'Failed to invite user';
+            $this->dispatch('notify', ...['type' => 'error', 'message' => $message]);
         } catch (\Exception $e) {
             $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to invite user: '.$e->getMessage()]);
         }

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Jetstream;
 
+use App\Models\Role as RbacRole;
 use App\Models\Team;
 use App\Models\User;
 use Closure;
@@ -32,6 +33,17 @@ class AddTeamMember implements AddsTeamMembers
         $team->users()->attach(
             $newTeamMember, ['role' => $role]
         );
+
+        // Assign the custom RBAC role for this team so permissions apply immediately
+        if ($role) {
+            $rbacRole = RbacRole::where('name', $role)
+                ->where('team_id', $team->id)
+                ->first();
+
+            if ($rbacRole) {
+                $newTeamMember->roles()->syncWithoutDetaching([$rbacRole->id]);
+            }
+        }
 
         TeamMemberAdded::dispatch($team, $newTeamMember);
     }
