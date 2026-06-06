@@ -11,7 +11,6 @@ use App\Models\MineArea;
 use App\Models\User;
 use App\Services\AI\FuelPredictorAgent;
 use App\Services\FuelManagementService;
-use App\Traits\BrowserEventBridge;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -19,8 +18,6 @@ use Livewire\Component;
 
 class FuelManagement extends Component
 {
-    use BrowserEventBridge;
-
     // Unified modal state
     public bool $showManageModal = false;
 
@@ -102,7 +99,7 @@ class FuelManagement extends Component
         $tank = FuelTank::where('team_id', $teamId)->find($this->transactionTankId);
         if (! $tank) {
             $this->transactionError = 'Selected tank not found.';
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Selected tank not found.']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Selected tank not found.']);
 
             return;
         }
@@ -157,7 +154,7 @@ class FuelManagement extends Component
 
         if (! $allocation) {
             $this->transactionError = 'No monthly allocation set for this mine area.';
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'No monthly allocation set for this mine area.']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'No monthly allocation set for this mine area.']);
 
             return;
         }
@@ -165,7 +162,7 @@ class FuelManagement extends Component
         $remaining = $allocation->remaining_liters;
         if ($this->transactionQuantity > $remaining) {
             $this->transactionError = 'Dispensing this amount would exceed the monthly allocation for this mine area. Remaining: '.number_format($remaining, 2).'L.';
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => $this->transactionError]);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => $this->transactionError]);
 
             return;
         }
@@ -194,13 +191,13 @@ class FuelManagement extends Component
             // Refresh allocation consumption
             $allocation->updateConsumption();
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Dispensing transaction recorded.']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Dispensing transaction recorded.']);
             $this->reset(['transactionTankId', 'transactionQuantity', 'transactionMineAreaId']);
 
         } catch (\Exception $e) {
             Log::error('Failed to record dispensing transaction', ['error' => $e->getMessage()]);
             $this->transactionError = 'Failed to record transaction. '.$e->getMessage();
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => $this->transactionError]);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => $this->transactionError]);
         }
     }
 
@@ -264,7 +261,7 @@ class FuelManagement extends Component
         /** @var User|null $user */
         $user = Auth::user();
         if (! $user || ! $user->current_team_id) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User session invalid']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'User session invalid']);
 
             return;
         }
@@ -289,7 +286,7 @@ class FuelManagement extends Component
             $this->transactionTankId = $tank->id;
             $this->selectedTankId = $tank->id;
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Fuel tank created successfully']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Fuel tank created successfully']);
             // Notify frontend and keep selection so new tank appears in dispense dropdown
             $this->dispatch('tank-created', ['id' => $tank->id, 'name' => $tank->name]);
             $this->closeTankModal();
@@ -300,7 +297,7 @@ class FuelManagement extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to create tank']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to create tank']);
         }
     }
 
@@ -321,7 +318,7 @@ class FuelManagement extends Component
 
         $tank = FuelTank::where('team_id', $teamId)->find($this->refuelTankId);
         if (! $tank) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Selected tank not found.']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Selected tank not found.']);
 
             return;
         }
@@ -362,12 +359,12 @@ class FuelManagement extends Component
                 $message .= ' ('.number_format($overflow, 2).'L overflow was ignored)';
             }
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => $message]);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => $message]);
             $this->reset(['refuelTankId', 'refuelQuantity', 'refuelUnitPrice', 'refuelNotes']);
 
         } catch (\Exception $e) {
             Log::error('Failed to record refuel transaction', ['error' => $e->getMessage()]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to record refuel transaction.']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to record refuel transaction.']);
         }
     }
 
@@ -414,7 +411,7 @@ class FuelManagement extends Component
 
         $tank = FuelTank::where('team_id', $teamId)->find($tankId);
         if (! $tank) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Tank not found.']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Tank not found.']);
 
             return;
         }
@@ -428,10 +425,10 @@ class FuelManagement extends Component
                 $this->reset(['transactionTankId', 'selectedTankId']);
             }
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Tank deleted successfully']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Tank deleted successfully']);
         } catch (\Exception $e) {
             Log::error('Failed to delete tank', ['error' => $e->getMessage()]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to delete tank']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to delete tank']);
         }
     }
 
@@ -449,7 +446,7 @@ class FuelManagement extends Component
         /** @var User|null $user */
         $user = Auth::user();
         if (! $user || ! $user->current_team_id) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User session invalid']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'User session invalid']);
 
             return;
         }
@@ -479,7 +476,7 @@ class FuelManagement extends Component
 
             $allocation->updateConsumption();
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Monthly allocation saved successfully']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Monthly allocation saved successfully']);
             $this->closeAllocationModal();
 
         } catch (\Exception $e) {
@@ -488,7 +485,7 @@ class FuelManagement extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to save allocation']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to save allocation']);
         }
     }
 

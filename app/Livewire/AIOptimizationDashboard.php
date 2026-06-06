@@ -13,7 +13,6 @@ use App\Models\MaintenanceRecord;
 use App\Models\ProductionRecord;
 use App\Models\User;
 use App\Services\AI\AIOptimizationService;
-use App\Traits\BrowserEventBridge;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +24,7 @@ use Livewire\WithPagination;
  */
 class AIOptimizationDashboard extends Component
 {
-    use BrowserEventBridge, WithPagination;
+    use WithPagination;
 
     public string $activeTab = 'overview';
 
@@ -81,9 +80,9 @@ class AIOptimizationDashboard extends Component
             }
 
             $this->dispatch('analysis-completed');
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'AI analysis completed successfully!']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'AI analysis completed successfully!']);
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Analysis failed: '.$e->getMessage()]);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Analysis failed: '.$e->getMessage()]);
         }
 
         $this->analysisRunning = false;
@@ -110,10 +109,10 @@ class AIOptimizationDashboard extends Component
 
             $recommendation->markAsImplemented(Auth::user());
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Recommendation marked as implemented!']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Recommendation marked as implemented!']);
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'implemented']);
         } catch (AuthorizationException $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to implement this recommendation.']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'You are not authorized to implement this recommendation.']);
 
             return;
         }
@@ -128,10 +127,10 @@ class AIOptimizationDashboard extends Component
 
             $recommendation->update(['status' => 'rejected']);
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Recommendation rejected.']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Recommendation rejected.']);
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'rejected']);
         } catch (AuthorizationException $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to reject this recommendation.']);
+            $this->dispatch('notify', ...['type' => 'error', 'message' => 'You are not authorized to reject this recommendation.']);
 
             return;
         }
@@ -188,7 +187,7 @@ class AIOptimizationDashboard extends Component
             'acknowledged_at' => now(),
         ]);
 
-        $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Alert acknowledged.']);
+        $this->dispatch('notify', ...['type' => 'success', 'message' => 'Alert acknowledged.']);
     }
 
     /** @return array<string, mixed> */
@@ -263,7 +262,7 @@ class AIOptimizationDashboard extends Component
         $insight = AIInsight::where('team_id', $team->id)->findOrFail($insightId);
         $this->authorize('update', $insight);
         $insight->markAsRead();
-        $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Insight marked as read.']);
+        $this->dispatch('notify', ...['type' => 'success', 'message' => 'Insight marked as read.']);
     }
 
     public function render(): View

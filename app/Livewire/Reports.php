@@ -9,7 +9,6 @@ use App\Models\MineArea;
 use App\Models\Report;
 use App\Models\User;
 use App\Support\Reports\ReportGeneration;
-use App\Traits\BrowserEventBridge;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -23,7 +22,6 @@ use Livewire\WithPagination;
 
 class Reports extends Component
 {
-    use BrowserEventBridge;
     use WithPagination;
 
     // ── Generated Reports tab ──────────────────────────────────────────────────

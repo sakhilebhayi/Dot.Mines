@@ -165,25 +165,25 @@ class MineAreaManager extends Component
             if ($this->editingMineAreaId) {
                 $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
                 if (! $mineArea) {
-                    $this->dispatchBrowserEvent('notify', ['message' => 'Mine area not found', 'type' => 'error']);
+                    $this->dispatch('notify', ...['message' => 'Mine area not found', 'type' => 'error']);
 
                     return;
                 }
                 $this->getService()->update($mineArea, $data);
-                $this->dispatchBrowserEvent('notify', ['message' => 'Mine area updated successfully', 'type' => 'success']);
+                $this->dispatch('notify', ...['message' => 'Mine area updated successfully', 'type' => 'success']);
                 $this->showEditModal = false;
             } else {
                 // Ensure center coordinates are provided to satisfy non-null DB columns
                 $data['center_latitude'] = $this->latitude ?? null;
                 $data['center_longitude'] = $this->longitude ?? null;
                 $this->getService()->create($team->id, $data);
-                $this->dispatchBrowserEvent('notify', ['message' => 'Mine area created successfully', 'type' => 'success']);
+                $this->dispatch('notify', ...['message' => 'Mine area created successfully', 'type' => 'success']);
                 $this->showCreateModal = false;
             }
             $this->resetForm();
             $this->resetPage();
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
+            $this->dispatch('notify', ...['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
         }
     }
 
@@ -196,10 +196,10 @@ class MineAreaManager extends Component
 
         try {
             $this->getService()->delete($mineArea);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Mine area deleted successfully', 'type' => 'success']);
+            $this->dispatch('notify', ...['message' => 'Mine area deleted successfully', 'type' => 'success']);
             $this->resetPage();
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error deleting mine area: '.$e->getMessage(), 'type' => 'error']);
+            $this->dispatch('notify', ...['message' => 'Error deleting mine area: '.$e->getMessage(), 'type' => 'error']);
         }
     }
 
@@ -272,7 +272,7 @@ class MineAreaManager extends Component
         $this->validate();
 
         if (empty($this->boundaryCoordinates)) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Please draw a boundary on the map', 'type' => 'error']);
+            $this->dispatch('notify', ...['message' => 'Please draw a boundary on the map', 'type' => 'error']);
 
             return;
         }
@@ -298,13 +298,13 @@ class MineAreaManager extends Component
             $data['center_latitude'] = $this->latitude ?? null;
             $data['center_longitude'] = $this->longitude ?? null;
             $this->getService()->create($team->id, $data);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Mine area created successfully', 'type' => 'success']);
+            $this->dispatch('notify', ...['message' => 'Mine area created successfully', 'type' => 'success']);
             $this->isDrawing = false;
             $this->switchToListMode();
             $this->resetForm();
             $this->resetPage();
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
+            $this->dispatch('notify', ...['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
         }
     }
 

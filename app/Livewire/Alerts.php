@@ -7,7 +7,6 @@ use App\Models\Geofence;
 use App\Models\Incident;
 use App\Models\Machine;
 use App\Models\MineArea;
-use App\Traits\BrowserEventBridge;
 use App\Traits\RealtimeUpdates;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,7 +17,7 @@ use Livewire\WithPagination;
 
 class Alerts extends Component
 {
-    use BrowserEventBridge, RealtimeUpdates, WithPagination;
+    use RealtimeUpdates, WithPagination;
 
     public string $search = '';
 
@@ -161,7 +160,7 @@ class Alerts extends Component
                 'acknowledged_by' => Auth::id(),
                 'acknowledged_at' => now(),
             ]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Alert acknowledged']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Alert acknowledged']);
         }
     }
 
@@ -177,7 +176,7 @@ class Alerts extends Component
                 'resolved_by' => Auth::id(),
                 'resolved_at' => now(),
             ]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Alert resolved']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Alert resolved']);
 
             // If the resolved alert is currently selected in the details modal, close it
             if ($this->selectedAlertId === $alert->id) {
@@ -211,7 +210,7 @@ class Alerts extends Component
                 'dismissed_by' => Auth::id(),
                 'dismissed_at' => now(),
             ]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Alert dismissed']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Alert dismissed']);
         }
     }
 
@@ -233,7 +232,7 @@ class Alerts extends Component
                 'dismissed_by' => Auth::id(),
                 'dismissed_at' => now(),
             ]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Alert dismissed']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Alert dismissed']);
 
             $this->showDismissConfirm = false;
             $this->pendingDismissAlertId = null;
@@ -248,7 +247,7 @@ class Alerts extends Component
                 'dismissed_by' => Auth::id(),
                 'dismissed_at' => now(),
             ]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'warning', 'message' => 'Alert marked Dismissed - Unresolved']);
+            $this->dispatch('notify', ...['type' => 'warning', 'message' => 'Alert marked Dismissed - Unresolved']);
             $this->recentlyDismissedUnresolved[] = $alert->id;
         }
 
@@ -427,11 +426,11 @@ class Alerts extends Component
         if ($this->editingIncidentId) {
             $incident = Incident::where('team_id', $team->id)->findOrFail($this->editingIncidentId);
             $incident->update($payload);
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Incident updated']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Incident updated']);
         } else {
             $payload['status'] = 'open';
             Incident::create($payload);
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Incident logged']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Incident logged']);
         }
 
         $this->closeIncidentModal();
@@ -462,7 +461,7 @@ class Alerts extends Component
                 'resolved_at' => now(),
                 'resolution_notes' => $this->incidentResolutionNotes ?: null,
             ]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Incident marked resolved']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Incident marked resolved']);
         }
         $this->closeResolveModal();
     }
@@ -481,7 +480,7 @@ class Alerts extends Component
                 $update['resolved_at'] = now();
             }
             $incident->update($update);
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Status updated']);
+            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Status updated']);
         }
     }
 

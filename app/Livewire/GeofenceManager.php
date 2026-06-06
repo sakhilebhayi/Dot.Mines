@@ -136,12 +136,12 @@ class GeofenceManager extends Component
             $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->editingGeofenceId);
             $this->authorize('update', $geofence);
             $geofence->update($data);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Geofence updated successfully', 'type' => 'success']);
+            $this->dispatch('notify', ...['message' => 'Geofence updated successfully', 'type' => 'success']);
         } else {
             $data['team_id'] = $team->id;
             $this->authorize('create', Geofence::class);
             Geofence::create($data);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Geofence created successfully', 'type' => 'success']);
+            $this->dispatch('notify', ...['message' => 'Geofence created successfully', 'type' => 'success']);
         }
 
         $this->closeModal();
@@ -156,7 +156,7 @@ class GeofenceManager extends Component
         $this->authorize('delete', $geofence);
         $geofenceName = $geofence->name;
         $geofence->delete();
-        $this->dispatchBrowserEvent('notify', ['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
+        $this->dispatch('notify', ...['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
     }
 
     public function render(): View
