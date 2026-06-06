@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\VerifyEmailNotification;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -269,5 +270,13 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return $this->belongsTo(Team::class, 'current_team_id');
+    }
+
+    /**
+     * Send the email verification notification via the queue.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification);
     }
 }

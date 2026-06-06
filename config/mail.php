@@ -40,7 +40,7 @@ return [
         'smtp' => [
             'transport' => 'smtp',
             // MAIL_SCHEME controls the encryption mode.
-            // Use 'ssl' for port 465 (implicit TLS) or 'tls' for port 587 (STARTTLS).
+            // Use 'smtps' for port 465 (implicit TLS) or omit/null for port 587 (STARTTLS via stream options).
             'scheme' => env('MAIL_SCHEME', env('MAIL_ENCRYPTION')),
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
