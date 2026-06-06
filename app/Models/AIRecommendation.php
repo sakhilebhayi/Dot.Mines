@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Database\Factories\AIRecommendationFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -124,5 +125,27 @@ class AIRecommendation extends Model
             'implemented_at' => 'datetime',
             'valid_until' => 'datetime',
         ];
+    }
+
+    /**
+     * Scope to recommendations with a pending status.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', 'pending');
+    }
+
+    /**
+     * Scope to recommendations with critical or high priority.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeHighPriority(Builder $query): Builder
+    {
+        return $query->whereIn('priority', ['critical', 'high']);
     }
 }

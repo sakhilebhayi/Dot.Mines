@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Database\Factories\AIInsightFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -102,5 +103,18 @@ class AIInsight extends Model
             'is_read' => 'boolean',
             'valid_until' => 'datetime',
         ];
+    }
+
+    /**
+     * Scope to insights that have not yet expired.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeValid(Builder $query): Builder
+    {
+        return $query->where(function (Builder $q) {
+            $q->whereNull('valid_until')->orWhere('valid_until', '>', now());
+        });
     }
 }
