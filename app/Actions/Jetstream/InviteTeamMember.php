@@ -2,6 +2,7 @@
 
 namespace App\Actions\Jetstream;
 
+use App\Mail\TeamInvitationMail;
 use App\Models\Team;
 use App\Models\TeamInvitation as TeamInvitationModel;
 use App\Models\User;
@@ -14,7 +15,6 @@ use Illuminate\Validation\Rule;
 use Laravel\Jetstream\Contracts\InvitesTeamMembers;
 use Laravel\Jetstream\Events\InvitingTeamMember;
 use Laravel\Jetstream\Jetstream;
-use Laravel\Jetstream\Mail\TeamInvitation;
 use Laravel\Jetstream\Rules\Role;
 
 class InviteTeamMember implements InvitesTeamMembers
@@ -37,7 +37,7 @@ class InviteTeamMember implements InvitesTeamMembers
         ]);
 
         // Queue the invitation email so web requests aren't blocked by mail delivery
-        Mail::to($email)->queue(new TeamInvitation($invitation));
+        Mail::to($email)->queue(new TeamInvitationMail($invitation));
     }
 
     /**

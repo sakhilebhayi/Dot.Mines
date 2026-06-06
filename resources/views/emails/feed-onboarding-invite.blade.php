@@ -1,10 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>You're invited to the Operations Feed</title>
-    <style>
+@extends('emails.layout')
+
+@section('title', 'You\'re invited to the Operations Feed — ' . $team->name)
+
+@section('banner')
+    <h1 style="color:#f1f5f9;font-size:20px;font-weight:700;margin:0 0 6px;letter-spacing:-0.02em;">
+        Operations Feed — You're Invited
+    </h1>
+    <p style="color:#94a3b8;font-size:14px;margin:0;line-height:1.5;">
+        {{ $team->name }}
+    </p>
+@endsection
+
+@section('content')
+    <p style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:0 0 20px;">
+        Hi <strong style="color:#f1f5f9;">{{ $invitee->name }}</strong>,
+    </p>
+
+    @if ($personalMessage)
+        <div style="background-color:#0a0f1e;border-left:3px solid #f59e0b;border-radius:0 6px 6px 0;padding:14px 18px;margin:0 0 24px;">
+            <p style="color:#cbd5e1;font-size:14px;line-height:1.6;margin:0;">{{ $personalMessage }}</p>
+        </div>
+    @endif
+
+    <p style="color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px;">
+        What is the Operations Feed?
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin:0 0 24px;">
+        <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #1e293b;vertical-align:top;width:34px;">
+                <div style="width:28px;height:28px;background-color:rgba(245,158,11,0.15);border-radius:6px;text-align:center;line-height:28px;font-size:14px;">⚡</div>
+            </td>
+            <td style="padding:10px 0 10px 12px;border-bottom:1px solid #1e293b;">
+                <p style="color:#f1f5f9;font-size:14px;font-weight:600;margin:0 0 2px;">Real-time updates</p>
+                <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Shift summaries, breakdowns, and safety alerts — all in one place, replacing scattered WhatsApp messages.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #1e293b;vertical-align:top;width:34px;">
+                <div style="width:28px;height:28px;background-color:rgba(59,130,246,0.15);border-radius:6px;text-align:center;line-height:28px;font-size:14px;">🗂️</div>
+            </td>
+            <td style="padding:10px 0 10px 12px;border-bottom:1px solid #1e293b;">
+                <p style="color:#f1f5f9;font-size:14px;font-weight:600;margin:0 0 2px;">Structured categories</p>
+                <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Posts are organised by type — Shift Updates, Breakdowns, Safety, Production, and more.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #1e293b;vertical-align:top;width:34px;">
+                <div style="width:28px;height:28px;background-color:rgba(16,185,129,0.15);border-radius:6px;text-align:center;line-height:28px;font-size:14px;">✅</div>
+            </td>
+            <td style="padding:10px 0 10px 12px;border-bottom:1px solid #1e293b;">
+                <p style="color:#f1f5f9;font-size:14px;font-weight:600;margin:0 0 2px;">Approval workflows</p>
+                <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Important posts require supervisor sign-off before going live, keeping the feed accurate and reliable.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:10px 0;vertical-align:top;width:34px;">
+                <div style="width:28px;height:28px;background-color:rgba(239,68,68,0.15);border-radius:6px;text-align:center;line-height:28px;font-size:14px;">🔔</div>
+            </td>
+            <td style="padding:10px 0 0 12px;">
+                <p style="color:#f1f5f9;font-size:14px;font-weight:600;margin:0 0 2px;">Push notifications</p>
+                <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Enable notifications to receive instant alerts for critical events, even while off-site.</p>
+            </td>
+        </tr>
+    </table>
+
+    @if ($team->feed_go_live_at)
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"
+               style="background-color:#0a0f1e;border:1px solid #1e293b;border-radius:8px;margin:0 0 24px;">
+            <tr>
+                <td style="padding:16px 20px;text-align:center;">
+                    <p style="color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 4px;">
+                        WhatsApp channels decommission date
+                    </p>
+                    <p style="color:#fbbf24;font-size:20px;font-weight:700;margin:0;">
+                        {{ \Carbon\Carbon::parse($team->feed_go_live_at)->format('l, F j, Y — H:i') }}
+                    </p>
+                </td>
+            </tr>
+        </table>
+    @endif
+
+    <div style="text-align:center;margin:0 0 20px;">
+        <a href="{{ route('feed') }}"
+           style="display:inline-block;background-color:#f59e0b;color:#0f172a;text-decoration:none;padding:13px 36px;border-radius:8px;font-size:15px;font-weight:700;letter-spacing:0.01em;">
+            Open Operations Feed &rarr;
+        </a>
+    </div>
+
+    <p style="color:#64748b;font-size:13px;text-align:center;line-height:1.6;margin:0;">
+        Sign in with your existing <strong style="color:#94a3b8;">{{ $team->name }}</strong> credentials.<br>
+        If you don't have an account yet, contact your mine administrator.
+    </p>
+@endsection
+
+@section('footer_note')
+    This email was sent on behalf of <strong>{{ $team->name }}</strong>.
+@endsection
+
         body { margin: 0; padding: 0; background: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         .wrapper { background: #0f172a; padding: 40px 20px; }
         .card { max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 16px; border: 1px solid #334155; overflow: hidden; }
