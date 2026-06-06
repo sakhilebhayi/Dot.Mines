@@ -3,18 +3,31 @@
 namespace App\Providers;
 
 use App\Console\Commands\ScanBladeUnescaped;
+use App\Events\AlertTriggered;
 use App\Events\FeedCommentCreated;
 use App\Events\FeedPostCreated;
 use App\Events\FeedPostStatusChanged;
+use App\Events\GeofenceEntryDetected;
+use App\Events\GeofenceExitDetected;
+use App\Events\MaintenanceAlertTriggered;
 use App\Listeners\NotifyOnJobFailed;
+use App\Listeners\SendAlertNotificationEmail;
 use App\Listeners\SendFeedApprovalNotification;
 use App\Listeners\SendFeedCommentNotification;
 use App\Listeners\SendFeedPostNotification;
+use App\Listeners\SendGeofenceBreachNotification;
+use App\Listeners\SendMaintenanceAlertNotification;
 use App\Mail\WelcomeMail;
 use App\Models\AuditLog;
+use App\Models\FuelTransaction;
+use App\Models\Machine;
 use App\Models\MaintenanceRecord;
+use App\Models\MineArea;
 use App\Models\User;
+use App\Observers\FuelTransactionObserver;
+use App\Observers\MachineObserver;
 use App\Observers\MaintenanceRecordObserver;
+use App\Observers\MineAreaObserver;
 use App\Services\AuditService;
 use App\Services\RealtimeEventScheduler;
 use Illuminate\Auth\Events\Failed;
@@ -89,6 +102,11 @@ class AppServiceProvider extends ServiceProvider
         // Sync machine status when maintenance records are created/updated
         MaintenanceRecord::observe(MaintenanceRecordObserver::class);
 
+        // Notify fleet managers on machine, mine area, and fuel changes
+        Machine::observe(MachineObserver::class);
+        MineArea::observe(MineAreaObserver::class);
+        FuelTransaction::observe(FuelTransactionObserver::class);
+
         // Pulse dashboard access (admins only in non-local)
         Gate::define('viewPulse', function ($user) {
             $admins = array_filter(array_map('trim', explode(',', (string) env('HORIZON_ADMINS', ''))));
@@ -101,6 +119,12 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(FeedPostCreated::class, SendFeedPostNotification::class);
         Event::listen(FeedCommentCreated::class, SendFeedCommentNotification::class);
         Event::listen(FeedPostStatusChanged::class, SendFeedApprovalNotification::class);
+
+        // Platform event notification listeners
+        Event::listen(AlertTriggered::class, SendAlertNotificationEmail::class);
+        Event::listen(MaintenanceAlertTriggered::class, SendMaintenanceAlertNotification::class);
+        Event::listen(GeofenceEntryDetected::class, [SendGeofenceBreachNotification::class, 'handleEntry']);
+        Event::listen(GeofenceExitDetected::class, [SendGeofenceBreachNotification::class, 'handleExit']);
 
         // Listen for failed queue jobs and notify monitoring
         Event::listen(JobFailed::class, function ($event) {

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Events\MachineStatusChanged;
 use App\Models\Machine;
 use App\Models\MaintenanceRecord;
+use App\Services\NotificationService;
 use App\Services\QueryCacheService;
 use Illuminate\Support\Facades\Log;
 
@@ -30,6 +31,28 @@ class MaintenanceRecordObserver
         if (in_array($record->status, self::ACTIVE_STATUSES, true)) {
             $this->setMachineStatus($record->machine_id, 'maintenance');
         }
+
+        $machineName = $record->machine?->name ?? "Machine #{$record->machine_id}";
+
+        NotificationService::notifyRoles(
+            teamId: $record->team_id,
+            roles: ['admin', 'fleet_manager', 'operator'],
+            type: NotificationService::TYPE_MAINTENANCE,
+            title: "Maintenance Scheduled: {$machineName}",
+            message: "{$record->maintenance_type} maintenance '{$record->title}' has been scheduled for {$machineName}.",
+            alertLevel: $record->priority === 'critical' ? NotificationService::LEVEL_HIGH : NotificationService::LEVEL_INFO,
+            data: [
+                'record_id' => $record->id,
+                'machine' => $machineName,
+                'type' => $record->maintenance_type,
+                'title' => $record->title,
+                'priority' => $record->priority,
+                'status' => $record->status,
+                'scheduled_date' => $record->scheduled_date?->format('Y-m-d'),
+                'event' => 'created',
+            ],
+            actionUrl: '/maintenance',
+        );
     }
 
     /**
@@ -48,10 +71,29 @@ class MaintenanceRecordObserver
 
         if (in_array($newStatus, self::ACTIVE_STATUSES, true)) {
             $this->setMachineStatus($record->machine_id, 'maintenance');
+
             return;
         }
 
         if (in_array($newStatus, self::TERMINAL_STATUSES, true)) {
+            $machineName = $record->machine?->name ?? "Machine #{$record->machine_id}";
+
+            if ($newStatus === 'completed') {
+                NotificationService::notifyManagers(
+                    teamId: $record->team_id,
+                    type: NotificationService::TYPE_MAINTENANCE,
+                    title: "Maintenance Completed: {$machineName}",
+                    message: "Work order '{$record->title}' has been completed for {$machineName}.",
+                    alertLevel: NotificationService::LEVEL_INFO,
+                    data: [
+                        'record_id' => $record->id,
+                        'machine' => $machineName,
+                        'title' => $record->title,
+                        'event' => 'completed',
+                    ],
+                    actionUrl: '/maintenance',
+                );
+            }
             // Only restore if no other open work-orders exist for this machine
             $hasActiveRecord = MaintenanceRecord::where('machine_id', $record->machine_id)
                 ->whereIn('status', self::ACTIVE_STATUSES)
@@ -84,9 +126,9 @@ class MaintenanceRecordObserver
         });
 
         Log::info('Machine status synced from maintenance record', [
-            'machine_id'  => $machine->id,
-            'old_status'  => $oldStatus,
-            'new_status'  => $targetStatus,
+            'machine_id' => $machine->id,
+            'old_status' => $oldStatus,
+            'new_status' => $targetStatus,
         ]);
 
         // Broadcast to Fleet / Dashboard WebSocket listeners

@@ -3,7 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
@@ -48,7 +49,7 @@ class EmailVerificationTest extends TestCase
         ]);
 
         $user = User::where('email', 'testuser@example.com')->firstOrFail();
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
     }
 
     #[Test]
@@ -87,6 +88,6 @@ class EmailVerificationTest extends TestCase
     public function test_user_implements_must_verify_email(): void
     {
         $user = new User;
-        $this->assertInstanceOf(\Illuminate\Contracts\Auth\MustVerifyEmail::class, $user);
+        $this->assertInstanceOf(MustVerifyEmail::class, $user);
     }
 }
