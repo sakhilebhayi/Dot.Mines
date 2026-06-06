@@ -87,6 +87,12 @@ A new first-party integration with the **Bell ISO15143-3 (AEMP) telematics stand
   | `bell_fleet_snapshots` | Raw JSON payload + metadata per API call |
   | `bell_integration_audit_logs` | Execution audit trail (success/failure, record counts, errors) |
   | `bell_equipment_daily_kpis` | Derived daily KPIs (loads, payload, fuel, distance, utilization) |
+  | `bell_equipment_location_history` | GPS coordinates per machine per hourly sync |
+  | `bell_equipment_fuel_usage_history` | Historical fuel consumption per machine |
+  | `bell_equipment_operating_hours_history` | Historical operating hour accumulation |
+  | `bell_equipment_idle_hours_history` | Historical idle hour accumulation |
+  | `bell_equipment_load_count_history` | Historical load count per machine |
+  | `bell_equipment_health_history` | Historical engine condition and health scores |
 
 - **Data quality validation** — records failing any of these rules are skipped with a warning log:
   - `EquipmentID` must not be null
@@ -102,6 +108,55 @@ A new first-party integration with the **Bell ISO15143-3 (AEMP) telematics stand
 - **Scheduled every 15 minutes** (`:00`, `:15`, `:30`, `:45`) via `routes/console.php` using `everyFifteenMinutes()->withoutOverlapping()->onOneServer()`
 - **Config** — credentials driven by `.env` keys `BELL_ISO15143_API_URL`, `BELL_ISO15143_USERNAME`, `BELL_ISO15143_PASSWORD`; no secrets committed to source
 - **12 feature tests** covering happy path, repeat syncs, snapshot storage, telemetry values, KPI calculations, all 5 validation rules, HTTP errors, malformed XML, and empty fleet responses
+
+### Bell SSO OAuth2 Authentication
+
+Bell Equipment API endpoints are now secured via **OAuth2 Password Credentials** grant through the Bell SSO identity server. This affects both the ISO15143-3 fleet sync and the Historical Telemetry API:
+
+- A bearer token is fetched from the Bell SSO token endpoint at the start of each sync cycle using the Password Credentials grant
+- The token is cached in memory for the duration of the sync to avoid repeated round-trips
+- Client authentication uses **HTTP Basic Auth** (`client_id:client_secret`) on the Authorization header
+- Username and password are sent as form-body fields alongside the grant type and scope
+- All four SSO parameters are read exclusively from `.env` — no credentials are stored in source code
+- Both `SyncBellFleetDataJob` and `SyncBellHistoricalDataJob` pass the full set of SSO parameters when constructing the respective service classes
+
+### Bell Historical Telemetry API
+
+A second Bell integration has been added: a **Historical Telemetry API** that fetches signal time-series data per machine on an hourly schedule:
+
+- **`BellHistoricalTelemetryService`** — fetches 13 individual signal endpoints per machine and persists the results
+- Responses are accepted as **JSON or XML** — JSON is attempted first; on failure, the XML `SimpleXMLElement` parser is used
+- 13 signals fetched per machine per cycle:
+
+  | Signal | Description |
+  |---|---|
+  | `CumulativeOperatingHours` | Total engine-on hours |
+  | `CumulativeFuelUsed` | Total fuel consumed (litres) |
+  | `FuelUsed24h` | Fuel used in the last 24 hours |
+  | `CumulativeIdleHours` | Total idle hours |
+  | `FuelRemainingRatio` | Current fuel remaining (ratio 0–1) |
+  | `CumulativeLoadCount` | Total loads moved |
+  | `CumulativePayloadTotals` | Total payload moved (tonnes) |
+  | `Location` | GPS latitude/longitude with timestamp |
+  | `CautionCodes` | Active caution/fault codes |
+  | `DEFRemaining` | Diesel exhaust fluid remaining |
+  | `EngineCondition` | Engine fault state |
+  | `ActiveRegenerationHours` | DPF active regeneration hours |
+  | `Distance` | Cumulative odometer (km) |
+
+- **6 new history tables** populated by this service:
+
+  | Table | Contents |
+  |---|---|
+  | `bell_equipment_location_history` | GPS coordinates per machine per hour |
+  | `bell_equipment_fuel_usage_history` | Fuel consumption readings |
+  | `bell_equipment_operating_hours_history` | Operating hour accumulation |
+  | `bell_equipment_idle_hours_history` | Idle hour accumulation |
+  | `bell_equipment_load_count_history` | Load count accumulation |
+  | `bell_equipment_health_history` | Engine condition and health scoring |
+
+- **`SyncBellHistoricalDataJob`** — queued job on the `integrations` queue; reads all six config values (API URL, username, password, SSO token URL, client ID, client secret) and delegates to `BellHistoricalTelemetryService`
+- **Scheduled hourly** via `routes/console.php` using `hourly()->withoutOverlapping()->onOneServer()`
 
 ### Static Analysis & Code Quality Overhaul
 
@@ -186,6 +241,7 @@ A comprehensive pass over the entire codebase to bring it to full Laravel 12 / P
 | 🏭 **Production Tracking** | Live load comparisons, shift targets, and trend analysis |
 | 🔌 **OEM Integrations** | Native APIs for 20+ manufacturers including CAT, Komatsu, Volvo, Bell (ISO15143-3) |
 | 🛰️ **Bell ISO15143-3** | Scheduled 15-min fleet sync with full telemetry history, daily KPIs, and Power BI views |
+| 📈 **Bell Historical API** | Hourly 13-signal time-series ingest (location, fuel, hours, loads, health) via SSO OAuth2 |
 | 📊 **Reporting** | Compliance, maintenance, production, and incident export to PDF/CSV |
 | 💳 **Billing** | Paystack-powered subscriptions with fleet slot enforcement |
 | 🔒 **Multi-tenant** | Team-based isolation with granular role and policy access control |
@@ -322,7 +378,7 @@ Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
 | Caterpillar | VisionLink |
 | Komatsu | KOMTRAX |
 | Volvo | CareTrack |
-| **Bell** | **ISO15143-3 (AEMP) — scheduled sync, full telemetry + KPI pipeline** |
+| **Bell** | **ISO15143-3 (AEMP) + Historical Telemetry — scheduled sync, SSO OAuth2, full telemetry + KPI pipeline** |
 | Sandvik | — |
 | Epiroc | — |
 | Liebherr | — |
@@ -341,7 +397,9 @@ Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
 
 ### Bell ISO15143-3 Fleet Integration
 
-Bell Equipment machines are synced via the **ISO15143-3 (AEMP)** standard on a 15-minute schedule:
+Bell Equipment machines are synced via the **ISO15143-3 (AEMP)** standard on a 15-minute schedule. A separate **Historical Telemetry API** runs hourly to fetch 13 individual signal time-series per machine. Both integrations authenticate via **Bell SSO OAuth2** (Password Credentials grant).
+
+**15-minute Fleet Snapshot (ISO15143-3):**
 
 - XML response is fetched, parsed, and converted to JSON per the spec
 - Each machine record is validated (null checks, coordinate ranges, fuel/engine value ranges) before persistence
@@ -362,12 +420,30 @@ Bell Equipment machines are synced via the **ISO15143-3 (AEMP)** standard on a 1
 - **Two Power BI views** for direct reporting: `vw_bell_fleet_current_status` and `vw_bell_equipment_daily_kpis`
 - **Audit log** — every sync execution is recorded with success/failure, record counts, and any error message
 
+**Hourly Historical Telemetry:**
+
+- `BellHistoricalTelemetryService` fetches 13 signal endpoints per machine each hour
+- Accepts JSON or XML responses (JSON first, XML fallback via `SimpleXMLElement`)
+- Results are stored in 6 dedicated history tables (`location_history`, `fuel_usage_history`, `operating_hours_history`, `idle_hours_history`, `load_count_history`, `health_history`)
+
 **Configuration** (`.env`):
 
 ```env
-BELL_ISO15143_API_URL=https://your-bell-api-endpoint/fleet
-BELL_ISO15143_USERNAME=your_username
-BELL_ISO15143_PASSWORD=your_password
+# Bell ISO15143-3 Fleet API (15-minute sync)
+BELL_ISO15143_API_URL=
+BELL_ISO15143_USERNAME=
+BELL_ISO15143_PASSWORD=
+
+# Bell Historical Telemetry API (hourly sync)
+BELL_HISTORICAL_API_URL=
+BELL_HISTORICAL_USERNAME=
+BELL_HISTORICAL_PASSWORD=
+
+# Bell SSO OAuth2 (used by both sync jobs)
+BELL_SSO_TOKEN_URL=
+BELL_SSO_CLIENT_ID=
+BELL_SSO_CLIENT_SECRET=
+BELL_SSO_SCOPE=ISO_Exports
 ```
 
 ### Shift & Team Management
@@ -449,7 +525,7 @@ BELL_ISO15143_PASSWORD=your_password
 **Optional (for full feature set):**
 - Redis (for caching and queues in production)
 - AWS S3 bucket (for file/mine plan storage)
-- Stripe account (for billing features)
+- Paystack account (for billing and subscription features)
 - Sentry DSN (for error monitoring)
 
 ---
@@ -534,10 +610,21 @@ AWS_BUCKET=
 PAYSTACK_PUBLIC_KEY=
 PAYSTACK_SECRET_KEY=
 
-# Bell ISO15143-3 Fleet API
+# Bell ISO15143-3 Fleet API (15-minute sync)
 BELL_ISO15143_API_URL=
 BELL_ISO15143_USERNAME=
 BELL_ISO15143_PASSWORD=
+
+# Bell Historical Telemetry API (hourly sync)
+BELL_HISTORICAL_API_URL=
+BELL_HISTORICAL_USERNAME=
+BELL_HISTORICAL_PASSWORD=
+
+# Bell SSO OAuth2 (used by both Bell sync jobs)
+BELL_SSO_TOKEN_URL=
+BELL_SSO_CLIENT_ID=
+BELL_SSO_CLIENT_SECRET=
+BELL_SSO_SCOPE=ISO_Exports
 
 # Sentry
 SENTRY_LARAVEL_DSN=
@@ -792,14 +879,14 @@ mines/
 │   ├── Http/
 │   │   ├── Controllers/      # API and web controllers
 │   │   └── Middleware/       # HTTP middleware
-│   ├── Jobs/                 # Queued jobs (SyncBellFleetDataJob, MachineIdleMonitoringJob, etc.)
+│   ├── Jobs/                 # Queued jobs (SyncBellFleetDataJob, SyncBellHistoricalDataJob, MachineIdleMonitoringJob, etc.)
 │   ├── Listeners/            # Event listeners
 │   ├── Livewire/             # Livewire full-page and inline components
 │   ├── Models/               # Eloquent models (65+ models, inc. BellEquipment*)
 │   ├── Policies/             # Authorization policies
 │   ├── Services/
 │   │   ├── AI/               # AI optimization agents
-│   │   └── Integration/      # OEM manufacturer API services (inc. BellIso15143Service)
+│   │   └── Integration/      # OEM manufacturer API services (BellIso15143Service, BellHistoricalTelemetryService, etc.)
 │   └── Traits/               # Shared model/controller traits
 ├── config/                   # App configuration (integrations, scanning, etc.)
 ├── database/

@@ -1,0 +1,23 @@
+title = "Mines repo gitleaks config"
+
+# Use default gitleaks detection rules with project-specific allowlists.
+# No custom [[rules]] are defined here so that all upstream defaults remain active.
+
+[allowlist]
+description = "Known false positives: placeholder values in example files, documentation, redaction scripts, and the gitleaks report output itself"
+paths = [
+    '''.env\.example''',
+    '''secrets-to-redact\.replace\.txt''',
+    '''scripts/secrets-to-redact\.txt''',
+    '''storage/reports/gitleaks-report\.json''',
+    '''gitleaks-report\.json''',
+    '''resources/views/livewire/documentation\.blade\.php''',
+    '''\.agents/skills/''',
+    '''\.github/skills/''',
+]
+regexes = [
+    '''sk_live_abc123''',
+    '''REDACTED_TOKEN''',
+    '''REPLACE_WITH_YOUR_API_TOKEN''',
+    '''YOUR_TOKEN''',
+]
