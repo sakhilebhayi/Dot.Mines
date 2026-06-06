@@ -16,7 +16,11 @@ class TeamInvitationMail extends Mailable
 
     public function build(): self
     {
-        return $this->subject(__('Team Invitation — :team', ['team' => $this->invitation->team->name]))
+        $teamName = $this->invitation->team?->name ?? config('app.name');
+        /** @var string $subject */
+        $subject = __('Team Invitation — :team', ['team' => $teamName]);
+
+        return $this->subject($subject)
             ->view('emails.team-invitation')
             ->with([
                 'acceptUrl' => URL::signedRoute('team-invitations.accept', [

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Actions\Jetstream\InviteTeamMember;
 use App\Models\DigestSubscription;
 use App\Models\Role;
+use App\Models\User;
 use App\Models\UserFeedPreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -172,8 +173,15 @@ class Settings extends Component
         ]);
 
         try {
+            /** @var User $authUser */
             $authUser = Auth::user();
             $team = $authUser->currentTeam;
+
+            if ($team === null) {
+                $this->dispatch('notify', ...['type' => 'error', 'message' => 'No active team selected.']);
+
+                return;
+            }
 
             app(InviteTeamMember::class)->invite(
                 $authUser,

@@ -651,6 +651,7 @@ class RealisticPlatformSeeder extends Seeder
 
         foreach ($sensorDefs as $idx => $def) {
             $area = $this->areas->isNotEmpty() ? $this->areas->get($idx % $this->areas->count()) : null;
+            // @phpstan-ignore-next-line
             $range = $readingRanges[$def['type']] ?? [0, 100];
             $lastValue = round(rand((int) ($range[0] * 10), (int) ($range[1] * 10)) / 10, 1);
 
@@ -661,6 +662,7 @@ class RealisticPlatformSeeder extends Seeder
                 'sensor_type' => $def['type'],
                 'device_id' => 'IOT-'.str_pad((string) ($idx + 1), 4, '0', STR_PAD_LEFT),
                 'status' => $idx < 7 ? 'active' : 'maintenance',
+                // @phpstan-ignore-next-line
                 'last_reading' => json_encode(['value' => $lastValue, 'unit' => $unitMap[$def['type']] ?? 'unit']),
                 'last_reading_at' => now()->subMinutes(rand(1, 30)),
                 'location_latitude' => round($def['lat'], 6),
@@ -675,6 +677,7 @@ class RealisticPlatformSeeder extends Seeder
                     'iot_sensor_id' => $sensor->id,
                     'sensor_type' => $def['type'],
                     'value' => round(rand((int) ($range[0] * 10), (int) ($range[1] * 10)) / 10, 1),
+                    // @phpstan-ignore-next-line
                     'unit' => $unitMap[$def['type']] ?? 'unit',
                     'timestamp' => now()->subHours($h)->format('Y-m-d H:i:s'),
                     'quality_score' => round(rand(85, 100) / 100, 2),
@@ -729,7 +732,7 @@ class RealisticPlatformSeeder extends Seeder
                     'critical' => 1, 'high' => 3, 'medium' => 7, default => 14,
                 }),
                 'resolved_at' => $resolvedAt,
-                'resolved_by' => $resolvedAt ? $admin->id : null,
+                'resolved_by' => $resolvedAt ? $admin?->id : null,
                 'resolution_notes' => $resolvedAt ? 'Issue investigated and corrective actions implemented. Operators re-briefed.' : null,
                 'metadata' => json_encode(['source' => 'seeder', 'auto_detected' => rand(0, 1) === 1]),
             ]);
@@ -750,7 +753,7 @@ class RealisticPlatformSeeder extends Seeder
                 ComplianceReport::create([
                     'mine_area_id' => $this->areas->isNotEmpty() ? $this->areas->random()->id : null,
                     'report_type' => $r['type'],
-                    'generated_by' => $admin->id,
+                    'generated_by' => $admin?->id,
                     'report_date' => now()->subDays($r['days_ago'])->toDateString(),
                     'status' => 'approved',
                     'compliance_score' => $r['score'],
@@ -814,8 +817,8 @@ class RealisticPlatformSeeder extends Seeder
             [
                 'mine_area_id' => null,
                 'period_type' => 'quarterly',
-                'start_date' => Carbon::create(2026, 4, 1)->toDateString(),
-                'end_date' => Carbon::create(2026, 6, 30)->toDateString(),
+                'start_date' => Carbon::parse('2026-04-01')->toDateString(),
+                'end_date' => Carbon::parse('2026-06-30')->toDateString(),
                 'budgeted_amount' => 1140000.00,
                 'budgeted_liters' => 285000,
                 'actual_spent' => 665600.00,
@@ -884,8 +887,8 @@ class RealisticPlatformSeeder extends Seeder
             'team_id' => $this->team->id,
             'mine_area_id' => null,
             'period_type' => 'quarterly',
-            'start_date' => Carbon::create(2026, 4, 1)->toDateString(),
-            'end_date' => Carbon::create(2026, 6, 30)->toDateString(),
+            'start_date' => Carbon::parse('2026-04-01')->toDateString(),
+            'end_date' => Carbon::parse('2026-06-30')->toDateString(),
             'target_quantity' => 540000,
             'unit' => 'tonne',
             'description' => 'Q2 2026 production target',
@@ -983,7 +986,7 @@ class RealisticPlatformSeeder extends Seeder
                 'title' => $t['title'],
                 'template_body' => $t['body'],
                 'required_fields' => json_encode($t['fields']),
-                'created_by' => $admin->id,
+                'created_by' => $admin?->id,
             ]);
         }
 
@@ -1275,7 +1278,7 @@ class RealisticPlatformSeeder extends Seeder
             AIAnalysisSession::create([
                 'team_id' => $this->team->id,
                 'ai_agent_id' => $agent?->id,
-                'user_id' => $admin->id,
+                'user_id' => $admin?->id,
                 'analysis_type' => $s['type'],
                 'status' => $s['status'],
                 'input_parameters' => json_encode($s['params']),

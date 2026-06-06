@@ -33,6 +33,7 @@ class SendNotificationEmailJob implements ShouldQueue
         protected array $userIds,
     ) {
         $this->onQueue('notifications');
+        $this->afterCommit();
     }
 
     public function handle(): void

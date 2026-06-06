@@ -17,7 +17,10 @@ class SyncBellFleetDataJob implements ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 1;
+    public int $tries = 3;
+
+    /** @var array<int> */
+    public array $backoff = [30, 120, 300];
 
     public int $timeout = 120;
 

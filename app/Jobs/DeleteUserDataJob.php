@@ -18,6 +18,8 @@ class DeleteUserDataJob implements ShouldQueue
 
     public int $timeout = 300;
 
+    public bool $afterCommit = true;
+
     public function __construct(public readonly GdprRequest $gdprRequest) {}
 
     public function handle(): void

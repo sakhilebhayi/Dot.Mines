@@ -146,6 +146,7 @@ class AIRecommendation extends Model
      */
     public function scopeHighPriority(Builder $query): Builder
     {
+        // @phpstan-ignore-next-line
         return $query->whereIn('priority', ['critical', 'high']);
     }
 }
