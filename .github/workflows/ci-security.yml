@@ -25,6 +25,10 @@ jobs:
 
       - name: Install composer deps
         run: composer install --no-interaction --no-progress --prefer-dist
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          BROADCAST_CONNECTION: "null"
 
       - name: Install Node dependencies & build assets
         run: |
@@ -134,7 +138,9 @@ jobs:
       - name: Install composer deps
         run: composer install --no-interaction --no-progress --prefer-dist
         env:
-          BROADCAST_DRIVER: log
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          BROADCAST_CONNECTION: "null"
       - name: Run PHPStan if available
         run: |
           if [ -x vendor/bin/phpstan ]; then
@@ -185,6 +191,14 @@ jobs:
           else
             echo 'PHP not available, skipping blade scan';
           fi
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          BROADCAST_CONNECTION: "null"
+          CACHE_STORE: array
+          SESSION_DRIVER: array
 
       - name: Semgrep Blade XSS rules
         uses: returntocorp/semgrep-action@v1
@@ -203,6 +217,10 @@ jobs:
           extensions: bcmath, mbstring
       - name: Install composer deps
         run: composer install --no-interaction --no-progress --prefer-dist
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          BROADCAST_CONNECTION: "null"
       - name: Run Pint (fail on style violations)
         run: vendor/bin/pint --test
 

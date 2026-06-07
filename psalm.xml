@@ -9,6 +9,10 @@
   </projectFiles>
 
   <issueHandlers>
-    <SomeIssue severity="info" />
+    <!-- Suppress issues that are known false positives in Laravel -->
+    <MissingReturnType severity="info" />
+    <MissingParamType severity="info" />
+    <PropertyNotSetInConstructor severity="info" />
+    <UnusedVariable severity="info" />
   </issueHandlers>
 </psalm>
