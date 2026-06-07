@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,10 +17,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $template_body
  * @property array<string, mixed>|null $required_fields
  * @property int $created_by
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property-read \App\Models\Team $team
- * @property-read \App\Models\User $creator
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Team $team
+ * @property-read User $creator
  */
 class ShiftTemplate extends Model
 {
@@ -44,13 +45,13 @@ class ShiftTemplate extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Team, $this> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

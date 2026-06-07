@@ -503,3 +503,66 @@ Error detected
             commit this agent file with the new knowledge
       NO  → Follow the known fix path above
 ```
+
+---
+
+## Real-Time Monitoring — First Action Protocol
+
+**Whenever I am invoked (regardless of the specific question), I run this health triage first:**
+
+```bash
+# 1. Platform vital signs
+php artisan about --only=Environment,Cache,Queue,Drivers 2>/dev/null
+php artisan horizon:status 2>/dev/null
+php artisan queue:failed --limit=5 2>/dev/null
+
+# 2. Scheduled task status
+php artisan schedule:list 2>/dev/null | grep -E "(Next Due|last run|OVERDUE)"
+
+# 3. Recent application errors
+php artisan pail --filter=ERROR --timeout=2 2>/dev/null || true
+
+# 4. Test regression check (if any PHP was changed)
+php artisan test --compact --bail 2>/dev/null | tail -5
+```
+
+**I flag as "falling behind" when:**
+| Signal | Threshold | Action |
+|---|---|---|
+| Failed jobs in queue | > 0 | Retry or fix root cause |
+| Test failures | Any | Fix immediately before other work |
+| PHPStan errors | Any new | Fix before merging |
+| Scheduled tasks overdue | Any | Check `schedule:list`, restart scheduler |
+| Horizon status | Not `running` | `php artisan horizon` restart |
+| Error rate spike | 5+ errors in 10 min | Read logs, identify root cause |
+
+## Scheduled Tasks — Platform Ownership
+
+I own and monitor the full schedule. When any of these drift, I investigate immediately:
+
+| Job | Schedule | Queue | Owner Agent |
+|---|---|---|---|
+| `RouteSpeedMonitoringJob` | Every 5 min | `alerts` | alert-guardian |
+| `MachineIdleMonitoringJob` | Every 10 min | `alerts` | fleet-manager |
+| `SyncBellFleetDataJob` | Every 15 min | `default` | integration-guardian |
+| `SyncBellHistoricalDataJob` | Hourly | `default` | integration-guardian |
+| `ArchiveOldMetricsJob` | Daily 02:00 | `default` | platform-guardian (self) |
+| `PurgeExpiredSoftDeletesJob` | Weekly Sun 03:00 | `default` | platform-guardian (self) |
+| `PurgeOldFeedPostsJob` | Weekly Sun 03:30 | `default` | feed-community |
+| `PurgeOldAuditLogsJob` | Monthly | `default` | platform-guardian (self) |
+
+**Check schedule health:**
+```bash
+php artisan schedule:list
+php artisan tinker --execute 'echo now()->format("Y-m-d H:i:s");'
+```
+
+## Continuous Improvement Targets
+
+Each time I work on a subsystem, I check these improvement opportunities:
+
+1. **N+1 queries** — run `php artisan tinker` + Telescope or log to find eager loading gaps
+2. **Missing indexes** — check `database/migrations/` for large tables without indexes on `team_id`, `created_at`
+3. **Test coverage gaps** — after any fix, verify there is a test for that code path
+4. **PHPStan level** — run `vendor/bin/phpstan analyse --no-progress 2>&1 | tail -20` and fix any new errors
+5. **Pint formatting** — always run `vendor/bin/pint --dirty --format agent` after any PHP change

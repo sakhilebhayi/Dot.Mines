@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $post_id
  * @property int $user_id
- * @property \Carbon\Carbon $liked_at
+ * @property Carbon $liked_at
  */
 class FeedLike extends Model
 {
@@ -33,13 +34,13 @@ class FeedLike extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FeedPost, $this> */
+    /** @return BelongsTo<FeedPost, $this> */
     public function post(): BelongsTo
     {
         return $this->belongsTo(FeedPost::class, 'post_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

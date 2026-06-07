@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\NotificationCreated;
 use App\Jobs\SendNotificationEmailJob;
 use App\Models\Notification;
 use App\Models\User;
@@ -93,6 +94,9 @@ class NotificationService
                         ->onQueue('notifications');
                 }
             }
+
+            // Broadcast real-time update to the team's notification bell.
+            NotificationCreated::dispatch($notification);
 
             return $notification;
         } catch (\Exception $e) {

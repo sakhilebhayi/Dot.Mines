@@ -45,10 +45,10 @@ return new class extends Migration
             $table->timestamp('created_at')->useCurrent();
 
             // Indexes for audit dashboard queries
-            $table->index(['team_id', 'created_at'],       'idx_audit_team_time');
-            $table->index(['actor_id', 'created_at'],      'idx_audit_actor_time');
-            $table->index(['subject_type', 'subject_id'],  'idx_audit_subject');
-            $table->index('action',                        'idx_audit_action');
+            $table->index(['team_id', 'created_at'], 'idx_audit_team_time');
+            $table->index(['actor_id', 'created_at'], 'idx_audit_actor_time');
+            $table->index(['subject_type', 'subject_id'], 'idx_audit_subject');
+            $table->index('action', 'idx_audit_action');
         });
 
         // ── 2. Add ip_address to feed_audit_logs ────────────────────────────
@@ -79,10 +79,11 @@ return new class extends Migration
             // pgsql: pg_indexes
             if ($driver === 'pgsql') {
                 return count(DB::select(
-                    "SELECT indexname FROM pg_indexes WHERE tablename = ? AND indexname = ?",
+                    'SELECT indexname FROM pg_indexes WHERE tablename = ? AND indexname = ?',
                     [$tableName, $indexName]
                 )) > 0;
             }
+
             return false;
         };
 

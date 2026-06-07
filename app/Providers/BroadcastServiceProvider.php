@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Geofence;
+use App\Models\Machine;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
@@ -39,9 +41,9 @@ class BroadcastServiceProvider extends ServiceProvider
          */
         Broadcast::channel('machine.{machineId}', function (User $user, int $machineId) {
             // User must be part of the team that owns the machine
-            $machine = \App\Models\Machine::find($machineId);
-            
-            if (!$machine) {
+            $machine = Machine::find($machineId);
+
+            if (! $machine) {
                 return false;
             }
 
@@ -52,9 +54,9 @@ class BroadcastServiceProvider extends ServiceProvider
          * Geofence-specific channels
          */
         Broadcast::channel('geofence.{geofenceId}', function (User $user, int $geofenceId) {
-            $geofence = \App\Models\Geofence::find($geofenceId);
-            
-            if (!$geofence) {
+            $geofence = Geofence::find($geofenceId);
+
+            if (! $geofence) {
                 return false;
             }
 
@@ -72,7 +74,7 @@ class BroadcastServiceProvider extends ServiceProvider
          * Global team presence channel for dashboard updates
          */
         Broadcast::channel('team.presence.{teamId}', function (User $user, int $teamId) {
-            if (!$user->belongsToTeam($teamId)) {
+            if (! $user->belongsToTeam($teamId)) {
                 return false;
             }
 

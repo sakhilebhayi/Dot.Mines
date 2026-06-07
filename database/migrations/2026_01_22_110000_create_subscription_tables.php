@@ -32,7 +32,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->integer('sort_order')->default(0);
             $table->timestamps();
-            
+
             $table->index(['is_active', 'sort_order']);
         });
 
@@ -48,7 +48,7 @@ return new class extends Migration
                 'active',
                 'past_due',
                 'canceled',
-                'expired'
+                'expired',
             ])->default('trial');
             $table->enum('billing_cycle', ['monthly', 'yearly'])->default('monthly');
             $table->timestamp('trial_ends_at')->nullable();
@@ -58,7 +58,7 @@ return new class extends Migration
             $table->timestamp('ends_at')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'status']);
             $table->index(['stripe_subscription_id']);
         });
@@ -76,7 +76,7 @@ return new class extends Migration
                 'pending',
                 'succeeded',
                 'failed',
-                'refunded'
+                'refunded',
             ])->default('pending');
             $table->string('payment_method')->nullable(); // card, bank_transfer
             $table->text('description')->nullable();
@@ -84,7 +84,7 @@ return new class extends Migration
             $table->timestamp('paid_at')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'status']);
             $table->index(['stripe_payment_intent_id']);
         });
@@ -106,7 +106,7 @@ return new class extends Migration
                 'open',
                 'paid',
                 'void',
-                'uncollectible'
+                'uncollectible',
             ])->default('draft');
             $table->timestamp('issued_at')->nullable();
             $table->timestamp('due_at')->nullable();
@@ -114,7 +114,7 @@ return new class extends Migration
             $table->string('pdf_url')->nullable();
             $table->json('line_items')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'status']);
             $table->index(['invoice_number']);
         });
@@ -128,7 +128,7 @@ return new class extends Migration
             $table->date('recorded_date');
             $table->json('metadata')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'metric_type', 'recorded_date']);
         });
     }

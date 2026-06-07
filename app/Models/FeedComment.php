@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,13 +20,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $author_id
  * @property string $body
  * @property bool $is_edited
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property \Carbon\Carbon|null $deleted_at
- * @property-read \App\Models\FeedPost $post
- * @property-read \App\Models\User $author
- * @property-read \App\Models\FeedComment|null $parent
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FeedComment> $replies
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read FeedPost $post
+ * @property-read User $author
+ * @property-read FeedComment|null $parent
+ * @property-read Collection<int, FeedComment> $replies
  */
 class FeedComment extends Model
 {
@@ -53,25 +55,25 @@ class FeedComment extends Model
 
     // ── Relationships ──────────────────────────────────────────────────────────
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FeedPost, $this> */
+    /** @return BelongsTo<FeedPost, $this> */
     public function post(): BelongsTo
     {
         return $this->belongsTo(FeedPost::class, 'post_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FeedComment, $this> */
+    /** @return BelongsTo<FeedComment, $this> */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(FeedComment::class, 'parent_comment_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\FeedComment, $this> */
+    /** @return HasMany<FeedComment, $this> */
     public function replies(): HasMany
     {
         return $this->hasMany(FeedComment::class, 'parent_comment_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');

@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * SecurityHeaders Middleware
- * 
+ *
  * Adds security-related HTTP headers to all responses
  * Helps protect against common web vulnerabilities
  */
@@ -17,7 +17,7 @@ class SecurityHeaders
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -39,14 +39,14 @@ class SecurityHeaders
         $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com";
         $styleSrc = "'self' 'unsafe-inline' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://fonts.bunny.net https://unpkg.com";
 
-        $csp = "default-src 'self'; " .
-               "script-src {$scriptSrc}; " .
-               "script-src-elem {$scriptSrc}; " .
-               "style-src {$styleSrc}; " .
-               "style-src-elem {$styleSrc}; " .
-               "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net; " .
-               "img-src 'self' data: https: blob:; " .
-               "connect-src 'self' https://unpkg.com https://cdnjs.cloudflare.com https://*.pusher.com https://*.pusherapp.com ws: wss:; " .
+        $csp = "default-src 'self'; ".
+               "script-src {$scriptSrc}; ".
+               "script-src-elem {$scriptSrc}; ".
+               "style-src {$styleSrc}; ".
+               "style-src-elem {$styleSrc}; ".
+               "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net; ".
+               "img-src 'self' data: https: blob:; ".
+               "connect-src 'self' https://unpkg.com https://cdnjs.cloudflare.com https://*.pusher.com https://*.pusherapp.com ws: wss:; ".
                "frame-ancestors 'none';";
 
         // Set enforcement in production; use report-only in staging/testing to collect violations.
@@ -74,11 +74,11 @@ class SecurityHeaders
         }
 
         // Permissions Policy - Control browser features
-        $response->headers->set('Permissions-Policy', 
-            'geolocation=(self), ' .
-            'microphone=(), ' .
-            'camera=(), ' .
-            'payment=(), ' .
+        $response->headers->set('Permissions-Policy',
+            'geolocation=(self), '.
+            'microphone=(), '.
+            'camera=(), '.
+            'payment=(), '.
             'usb=()'
         );
 

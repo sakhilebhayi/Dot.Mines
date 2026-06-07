@@ -30,7 +30,7 @@ return new class extends Migration
             $table->foreignId('integration_id')->nullable()->constrained('integrations')->cascadeOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index('team_id');
             $table->index('machine_type');
             $table->index('status');

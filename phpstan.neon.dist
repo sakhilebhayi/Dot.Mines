@@ -11,7 +11,7 @@ parameters:
   inferPrivatePropertyTypeFromConstructor: true
   checkExplicitMixed: false
   treatPhpDocTypesAsCertain: false
-  
+
   # Ignore errors for Eloquent's dynamic methods
   ignoreErrors:
     - '#Call to an undefined\s+(?:method|static method)\s+Illuminate.*Model::#'

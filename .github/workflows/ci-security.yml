@@ -140,12 +140,12 @@ jobs:
           if [ -x vendor/bin/phpstan ]; then
             # Run analysis using provided config. If there are errors and no baseline exists,
             # generate a baseline for maintainers to review and fail the job so a baseline PR can be created.
-            if vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --no-progress; then
+            if vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --no-progress --memory-limit=1G; then
               echo "PHPStan passed";
             else
               if [ ! -f phpstan-baseline.neon ]; then
                 echo "PHPStan detected issues; generating baseline phpstan-baseline.neon for review.";
-                vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --generate-baseline=phpstan-baseline.neon --no-progress || true
+                vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --generate-baseline=phpstan-baseline.neon --no-progress --memory-limit=1G || true
                 echo "A baseline was generated at phpstan-baseline.neon. Please review and commit it to suppress existing errors.";
               fi
               exit 1
@@ -189,7 +189,7 @@ jobs:
       - name: Semgrep Blade XSS rules
         uses: returntocorp/semgrep-action@v1
         with:
-          config: '.semgrep/xss_rules.yml'          config: 'p/php'
+          config: 'p/php'
 
   code-style:
     name: Laravel Pint code style
@@ -205,3 +205,34 @@ jobs:
         run: composer install --no-interaction --no-progress --prefer-dist
       - name: Run Pint (fail on style violations)
         run: vendor/bin/pint --test
+
+  quality-gate:
+    name: Quality Gate (all checks must pass)
+    runs-on: ubuntu-latest
+    needs: [tests, composer-audit, npm-audit, static-php, code-style]
+    if: always()
+    steps:
+      - name: Evaluate quality gate
+        run: |
+          declare -A results
+          results[tests]="${{ needs.tests.result }}"
+          results[composer-audit]="${{ needs.composer-audit.result }}"
+          results[npm-audit]="${{ needs.npm-audit.result }}"
+          results[static-php]="${{ needs.static-php.result }}"
+          results[code-style]="${{ needs.code-style.result }}"
+          failed=0
+          for job in "${!results[@]}"; do
+            if [ "${results[$job]}" != "success" ]; then
+              echo "FAILED: $job → ${results[$job]}"
+              failed=1
+            else
+              echo "PASSED: $job"
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            echo ""
+            echo "Quality gate failed — one or more required checks did not pass."
+            exit 1
+          fi
+          echo ""
+          echo "All quality gates passed."

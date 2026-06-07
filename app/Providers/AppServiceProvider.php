@@ -4,19 +4,25 @@ namespace App\Providers;
 
 use App\Console\Commands\ScanBladeUnescaped;
 use App\Events\AlertTriggered;
+use App\Events\ComplianceViolationDetected;
 use App\Events\FeedCommentCreated;
 use App\Events\FeedPostCreated;
 use App\Events\FeedPostStatusChanged;
 use App\Events\GeofenceEntryDetected;
 use App\Events\GeofenceExitDetected;
+use App\Events\MachineOffline;
 use App\Events\MaintenanceAlertTriggered;
+use App\Events\SensorReadingRecorded;
 use App\Listeners\NotifyOnJobFailed;
 use App\Listeners\SendAlertNotificationEmail;
+use App\Listeners\SendComplianceViolationNotification;
 use App\Listeners\SendFeedApprovalNotification;
 use App\Listeners\SendFeedCommentNotification;
 use App\Listeners\SendFeedPostNotification;
 use App\Listeners\SendGeofenceBreachNotification;
+use App\Listeners\SendMachineOfflineNotification;
 use App\Listeners\SendMaintenanceAlertNotification;
+use App\Listeners\SendSensorAlertNotification;
 use App\Mail\WelcomeMail;
 use App\Models\AuditLog;
 use App\Models\FuelTransaction;
@@ -125,6 +131,9 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(MaintenanceAlertTriggered::class, SendMaintenanceAlertNotification::class);
         Event::listen(GeofenceEntryDetected::class, [SendGeofenceBreachNotification::class, 'handleEntry']);
         Event::listen(GeofenceExitDetected::class, [SendGeofenceBreachNotification::class, 'handleExit']);
+        Event::listen(SensorReadingRecorded::class, SendSensorAlertNotification::class);
+        Event::listen(MachineOffline::class, SendMachineOfflineNotification::class);
+        Event::listen(ComplianceViolationDetected::class, SendComplianceViolationNotification::class);
 
         // Listen for failed queue jobs and notify monitoring
         Event::listen(JobFailed::class, function ($event) {

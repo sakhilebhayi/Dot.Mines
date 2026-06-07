@@ -29,7 +29,7 @@ return new class extends Migration
             $table->enum('status', ['draft', 'active', 'archived'])->default('draft');
             $table->json('metadata')->nullable(); // Store additional route info
             $table->timestamps();
-            
+
             $table->index(['team_id', 'status']);
             $table->index(['machine_id']);
             $table->index(['mine_area_id']);
@@ -47,7 +47,7 @@ return new class extends Migration
             $table->integer('estimated_time_from_previous')->nullable(); // in minutes
             $table->decimal('distance_from_previous', 10, 2)->nullable(); // in kilometers
             $table->timestamps();
-            
+
             $table->index(['route_id', 'sequence_order']);
         });
     }

@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware(['web'])->group(function () {
-    
+
     // Test session functionality
     Route::get('/test-session', function (Request $request) {
         $data = [
@@ -29,15 +29,15 @@ Route::middleware(['web'])->group(function () {
             'cookies' => $request->cookies->all(),
             'session_data' => session()->all(),
         ];
-        
+
         return response()->json($data);
     })->name('test.session');
-    
+
     // Test CSRF form
     Route::get('/test-csrf-form', function () {
         return view('test-csrf-form');
     })->name('test.csrf.form');
-    
+
     // Test CSRF submission
     Route::post('/test-csrf-submit', function (Request $request) {
         return response()->json([
@@ -46,5 +46,5 @@ Route::middleware(['web'])->group(function () {
             'data' => $request->all(),
         ]);
     })->name('test.csrf.submit');
-    
+
 });

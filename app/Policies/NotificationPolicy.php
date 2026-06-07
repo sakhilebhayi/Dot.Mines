@@ -21,6 +21,7 @@ class NotificationPolicy
     public function view(User $user, Notification $notification): bool
     {
         $teamId = $user->currentTeam ? $user->currentTeam->id : $user->current_team_id;
+
         return $teamId === $notification->team_id;
     }
 
@@ -30,6 +31,7 @@ class NotificationPolicy
     public function update(User $user, Notification $notification): bool
     {
         $teamId = $user->currentTeam ? $user->currentTeam->id : $user->current_team_id;
+
         return $teamId === $notification->team_id;
     }
 
@@ -39,6 +41,7 @@ class NotificationPolicy
     public function delete(User $user, Notification $notification): bool
     {
         $teamId = $user->currentTeam ? $user->currentTeam->id : $user->current_team_id;
+
         return $teamId === $notification->team_id;
     }
 }

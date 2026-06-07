@@ -18,7 +18,7 @@ class ReflectedXssTest extends TestCase
         ];
 
         foreach ($endpoints as $ep) {
-            $resp = $this->get($ep . '?q=' . urlencode($payload));
+            $resp = $this->get($ep.'?q='.urlencode($payload));
             $content = $resp->getContent();
             $this->assertStringNotContainsString($payload, $content, "Endpoint {$ep} reflected raw script payload");
         }

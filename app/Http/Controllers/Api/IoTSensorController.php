@@ -106,7 +106,7 @@ class IoTSensorController extends Controller
     /**
      * Export sensor data
      */
-    public function export(Request $request, IoTSensor $sensor): JsonResponse|\Illuminate\Http\Response
+    public function export(Request $request, IoTSensor $sensor): JsonResponse|Response
     {
         $this->authorize('view', $sensor);
 

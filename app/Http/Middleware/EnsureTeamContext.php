@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Team;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * EnsureTeamContext Middleware
- * 
+ *
  * Ensures every request has a valid team context
  * Sets the current team for the authenticated user
  * Used to enforce multi-tenancy throughout the application
@@ -19,15 +21,15 @@ class EnsureTeamContext
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         // Get authenticated user
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return $next($request);
         }
 
@@ -35,7 +37,7 @@ class EnsureTeamContext
         $teamId = $request->route('team_id') ?? $user->current_team_id;
 
         // If no team_id, set to user's default team
-        if (!$teamId) {
+        if (! $teamId) {
             $teamId = $user->teams()->first()?->id;
             if ($teamId) {
                 $user->update(['current_team_id' => $teamId]);
@@ -46,8 +48,8 @@ class EnsureTeamContext
 
         // Verify user has access to the team
         if ($teamId) {
-            $team = \App\Models\Team::find($teamId);
-            if (!$team || !$user->belongsToTeam($team)) {
+            $team = Team::find($teamId);
+            if (! $team || ! $user->belongsToTeam($team)) {
                 abort(403, 'Unauthorized to access this team.');
             }
         }

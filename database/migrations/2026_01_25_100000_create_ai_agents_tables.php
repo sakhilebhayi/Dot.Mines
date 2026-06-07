@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('successful_predictions')->default(0);
             $table->timestamp('last_trained_at')->nullable();
             $table->timestamps();
-            
+
             $table->index('type');
             $table->index('status');
         });
@@ -50,7 +50,7 @@ return new class extends Migration
             $table->foreignId('implemented_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('implementation_notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'status']);
             $table->index(['category', 'priority']);
             $table->index('created_at');
@@ -72,7 +72,7 @@ return new class extends Migration
             $table->timestamp('completed_at')->nullable();
             $table->text('error_message')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'status']);
             $table->index('created_at');
         });
@@ -91,7 +91,7 @@ return new class extends Migration
             $table->boolean('was_accurate')->default(false);
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['ai_agent_id', 'was_accurate']);
         });
 
@@ -109,7 +109,7 @@ return new class extends Migration
             $table->boolean('is_read')->default(false);
             $table->timestamp('valid_until')->nullable(); // Insight expiry
             $table->timestamps();
-            
+
             $table->index(['team_id', 'is_read']);
             $table->index(['category', 'severity']);
         });
@@ -134,7 +134,7 @@ return new class extends Migration
             $table->timestamp('acknowledged_at')->nullable();
             $table->boolean('was_accurate')->nullable(); // Filled after event
             $table->timestamps();
-            
+
             $table->index(['team_id', 'is_acknowledged']);
             $table->index(['severity', 'predicted_occurrence']);
         });

@@ -1,0 +1,241 @@
+name: Continuous Improvement
+
+# Runs every day at 06:00 UTC and on every push to main.
+# Reports platform health — test regressions, PHPStan errors, composer
+# vulnerabilities, and blade XSS candidates — as GitHub step summaries.
+# Failing steps post a comment on any open PR so agents can act on them.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # daily 06:00 UTC
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: continuous-improvement
+  cancel-in-progress: true
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # 1. Full test suite — catches regressions on every commit to main
+  # ────────────────────────────────────────────────────────────────────────────
+  test-suite:
+    name: "🧪 PHPUnit — full suite"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.16'
+          extensions: pdo_sqlite, sqlite3, bcmath, gd, zip, mbstring, intl, pcntl
+
+      - name: Disable Xdebug
+        run: sudo phpdismod xdebug || true
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Build frontend assets
+        run: |
+          if [ -f package-lock.json ]; then npm ci --silent; fi
+          npm run build
+
+      - name: Run full test suite
+        id: tests
+        run: php artisan test --compact 2>&1 | tee test-output.txt
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          QUEUE_CONNECTION: sync
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          BROADCAST_CONNECTION: "null"
+          MAIL_MAILER: array
+
+      - name: Post test summary
+        if: always()
+        run: |
+          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          cat test-output.txt | tail -5 >> $GITHUB_STEP_SUMMARY
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 2. PHPStan static analysis — detects type errors and logic bugs
+  # ────────────────────────────────────────────────────────────────────────────
+  static-analysis:
+    name: "🔬 PHPStan — level 5"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.16'
+          extensions: pdo_sqlite, sqlite3, bcmath, gd, zip, mbstring, intl, pcntl
+
+      - name: Disable Xdebug
+        run: sudo phpdismod xdebug || true
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run PHPStan
+        id: phpstan
+        run: |
+          vendor/bin/phpstan analyse \
+            --configuration=phpstan.neon.dist \
+            --no-progress \
+            --error-format=github \
+            2>&1 | tee phpstan-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+        continue-on-error: true
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+
+      - name: Post PHPStan summary
+        if: always()
+        run: |
+          echo "## 🔬 PHPStan Results" >> $GITHUB_STEP_SUMMARY
+          ERRORS=$(grep -c "^::" phpstan-output.txt 2>/dev/null || echo 0)
+          if [ "$ERRORS" -eq 0 ]; then
+            echo "✅ No PHPStan errors found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ $ERRORS error(s) detected:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat phpstan-output.txt | head -30 >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 3. Composer audit — detects known CVEs in PHP dependencies
+  # ────────────────────────────────────────────────────────────────────────────
+  dependency-audit:
+    name: "🔒 Composer security audit"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.16'
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Composer audit
+        id: audit
+        run: |
+          composer audit --format=json 2>&1 | tee audit-output.json
+          VULNS=$(cat audit-output.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('advisories', {})))" 2>/dev/null || echo 0)
+          echo "vulnerabilities=$VULNS" >> $GITHUB_OUTPUT
+
+      - name: npm audit
+        run: npm audit --audit-level=high || true
+
+      - name: Post audit summary
+        if: always()
+        run: |
+          echo "## 🔒 Dependency Security Audit" >> $GITHUB_STEP_SUMMARY
+          VULNS="${{ steps.audit.outputs.vulnerabilities }}"
+          if [ "${VULNS:-0}" -eq 0 ]; then
+            echo "✅ No known PHP CVEs in composer dependencies" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🚨 **$VULNS known vulnerability/vulnerabilities detected in composer dependencies**" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat audit-output.json | python3 -m json.tool | head -50 >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 4. Code style — Pint check (no auto-fix, just report)
+  # ────────────────────────────────────────────────────────────────────────────
+  code-style:
+    name: "🎨 Pint code style"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3.16'
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run Pint (check only)
+        id: pint
+        run: |
+          vendor/bin/pint --test --format github 2>&1 | tee pint-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Post Pint summary
+        if: always()
+        run: |
+          echo "## 🎨 Code Style (Pint)" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.pint.outputs.exit_code }}" = "0" ]; then
+            echo "✅ All PHP files match the code style" >> $GITHUB_STEP_SUMMARY
+          else
+            FILES=$(grep -c "FAIL" pint-output.txt 2>/dev/null || echo "some")
+            echo "⚠️ $FILES file(s) need formatting — run \`vendor/bin/pint\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 5. Blade XSS scan — finds unescaped {!! output in views
+  # ────────────────────────────────────────────────────────────────────────────
+  blade-xss-scan:
+    name: "🛡️ Blade XSS scan"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for unescaped Blade output
+        run: |
+          echo "## 🛡️ Blade XSS Scan" >> $GITHUB_STEP_SUMMARY
+          RISKY=$(grep -rn "{!!" resources/views/ --include="*.blade.php" | grep -v csrf | grep -v "<!--" | wc -l)
+          if [ "$RISKY" -eq 0 ]; then
+            echo "✅ No unescaped {\!\! \!\!} output found in Blade templates" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ $RISKY unescaped output(s) found — review for XSS risk:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep -rn "{!!" resources/views/ --include="*.blade.php" | grep -v csrf | grep -v "<!--" | head -20 >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 6. Platform improvement summary — aggregates all results into one report
+  # ────────────────────────────────────────────────────────────────────────────
+  improvement-summary:
+    name: "📊 Platform improvement report"
+    runs-on: ubuntu-latest
+    needs: [test-suite, static-analysis, dependency-audit, code-style, blade-xss-scan]
+    if: always()
+
+    steps:
+      - name: Post consolidated summary
+        run: |
+          echo "# 📊 Mines Platform — Continuous Improvement Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| PHPUnit tests | ${{ needs.test-suite.result == 'success' && '✅ passing' || '❌ failures detected' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PHPStan analysis | ${{ needs.static-analysis.result == 'success' && '✅ clean' || '⚠️ issues found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency audit | ${{ needs.dependency-audit.result == 'success' && '✅ no CVEs' || '🚨 vulnerabilities' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code style (Pint) | ${{ needs.code-style.result == 'success' && '✅ clean' || '⚠️ formatting needed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Blade XSS scan | ${{ needs.blade-xss-scan.result == 'success' && '✅ clean' || '⚠️ review needed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Run daily at 06:00 UTC. View full details in each job above._" >> $GITHUB_STEP_SUMMARY

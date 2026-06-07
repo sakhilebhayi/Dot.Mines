@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,10 +25,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $file_type server-verified MIME type
  * @property string|null $file_name sanitised original filename
  * @property int|null $file_size bytes
- * @property \Carbon\Carbon $uploaded_at
+ * @property Carbon $uploaded_at
  * @property-read string $url            routable URL for serving or downloading this attachment
- * @property-read \App\Models\FeedPost $post
- * @property-read \App\Models\User|null $uploader
+ * @property-read FeedPost $post
+ * @property-read User|null $uploader
  */
 class FeedAttachment extends Model
 {
@@ -64,13 +65,13 @@ class FeedAttachment extends Model
 
     // ── Relationships ─────────────────────────────────────────────────────────
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FeedPost, $this> */
+    /** @return BelongsTo<FeedPost, $this> */
     public function post(): BelongsTo
     {
         return $this->belongsTo(FeedPost::class, 'post_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploader_id');

@@ -1,47 +1,73 @@
 #!/usr/bin/env bash
+# Pre-commit hook: runs secret scan, Pint, PHPStan, and tests before each commit.
+# Install: git config core.hooksPath .githooks
 set -euo pipefail
-# Pre-commit hook: run gitleaks and fail commit if secrets are detected in staged files.
+
 REPO_ROOT=$(git rev-parse --show-toplevel)
 cd "$REPO_ROOT"
 
-# Run gitleaks report (uses scripts/run-gitleaks.sh which supports docker fallback)
+echo "▶ Pre-commit: running quality checks..."
+
+# ── 1. Secret scan (gitleaks) ─────────────────────────────────────────────
 ./scripts/run-gitleaks.sh
 OUT=storage/reports/gitleaks-report.json
-if [ ! -f "$OUT" ]; then
-  echo "gitleaks report not found at $OUT; skipping secret check." >&2
-  exit 0
+if [ -f "$OUT" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    COUNT=$(jq 'length' "$OUT" 2>/dev/null || echo 0)
+  else
+    COUNT=$(grep -c '"RuleID"' "$OUT" 2>/dev/null || echo 0)
+  fi
+  if [ "$COUNT" -gt 0 ]; then
+    echo "✗ gitleaks: $COUNT potential secret(s) detected. Commit blocked." >&2
+    echo "  Inspect $OUT and rotate/purge secrets before committing." >&2
+    exit 1
+  fi
 fi
+echo "✓ Secret scan passed"
 
-if command -v jq >/dev/null 2>&1; then
-  COUNT=$(jq 'length' "$OUT" || echo 0)
-else
-  COUNT=$(grep -c '"RuleID"' "$OUT" || true)
-fi
-
-if [ "$COUNT" -gt 0 ]; then
-  echo "gitleaks: detected $COUNT potential secret(s). Commit blocked. Inspect $OUT and rotate/purge as needed." >&2
-  exit 1
-fi
-
-exit 0
-#!/usr/bin/env bash
-# Pre-commit hook: run gitleaks in Docker to detect secrets before commit
-set -euo pipefail
-
-# Run gitleaks container to scan the working tree (no-git)
-# Exit code 1 will block commit if leaks found
-if docker --version >/dev/null 2>&1; then
-  docker run --rm -v "$PWD":/src -w /src zricethezav/gitleaks:latest detect --no-git -f json -r /tmp/gitleaks-precommit.json || {
-    echo "gitleaks: potential secrets detected. Commit blocked. Inspect /tmp/gitleaks-precommit.json for details." >&2
+# ── 2. Composer audit ─────────────────────────────────────────────────────
+if command -v composer >/dev/null 2>&1; then
+  composer audit --no-interaction || {
+    echo "✗ Composer audit found security vulnerabilities. Commit blocked." >&2
     exit 1
   }
-else
-  echo "gitleaks pre-commit hook requires Docker. Skipping scan." >&2
+  echo "✓ Composer audit passed"
 fi
 
-# Optionally run composer audit for quick check (non-blocking)
-if command -v composer >/dev/null 2>&1; then
-  composer audit --no-interaction || echo "composer audit found issues (non-blocking)" >&2
+# ── 3. Laravel Pint (code style) ──────────────────────────────────────────
+if [ -x vendor/bin/pint ]; then
+  if ! vendor/bin/pint --test --dirty 2>&1; then
+    echo "✗ Pint: code style violations detected. Run: vendor/bin/pint --dirty" >&2
+    exit 1
+  fi
+  echo "✓ Pint passed"
 fi
 
+# ── 4. PHPStan (static analysis) ──────────────────────────────────────────
+if [ -x vendor/bin/phpstan ]; then
+  if ! vendor/bin/phpstan analyse --no-progress --memory-limit=1G 2>/dev/null; then
+    echo "✗ PHPStan: static analysis errors detected. Commit blocked." >&2
+    exit 1
+  fi
+  echo "✓ PHPStan passed"
+fi
+
+# ── 5. PHPUnit tests ──────────────────────────────────────────────────────
+if command -v php >/dev/null 2>&1 && [ -f artisan ]; then
+  # Suppress Xdebug "not connected" noise but preserve test output and exit code
+  TEST_OUTPUT=$(php artisan test --compact \
+    --env=testing \
+    -d xdebug.mode=off \
+    2>/dev/null)
+  TEST_EXIT=$?
+  echo "$TEST_OUTPUT"
+  if [ $TEST_EXIT -ne 0 ]; then
+    echo "✗ Tests failed. Commit blocked." >&2
+    exit 1
+  fi
+  echo "✓ Tests passed"
+fi
+
+echo ""
+echo "✓ All pre-commit checks passed."
 exit 0

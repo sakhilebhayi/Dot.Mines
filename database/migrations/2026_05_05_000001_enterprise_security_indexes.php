@@ -41,13 +41,14 @@ return new class extends Migration
                 }
                 if ($driver === 'pgsql') {
                     return count(DB::select(
-                        "SELECT indexname FROM pg_indexes WHERE tablename = ? AND indexname = ?",
+                        'SELECT indexname FROM pg_indexes WHERE tablename = ? AND indexname = ?',
                         [$table, $indexName]
                     )) > 0;
                 }
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // Silently skip if the check itself fails (e.g., table not yet created).
             }
+
             return false;
         };
 
@@ -136,13 +137,13 @@ return new class extends Migration
     public function down(): void
     {
         $drops = [
-            'users'               => ['idx_users_current_team', 'idx_users_email_verified'],
-            'feed_posts'          => ['idx_feed_posts_author_time', 'idx_feed_posts_deleted'],
-            'feed_approvals'      => ['idx_feed_approvals_status'],
-            'feed_attachments'    => ['idx_feed_attachments_type'],
-            'audit_logs'          => ['idx_audit_ip'],
+            'users' => ['idx_users_current_team', 'idx_users_email_verified'],
+            'feed_posts' => ['idx_feed_posts_author_time', 'idx_feed_posts_deleted'],
+            'feed_approvals' => ['idx_feed_approvals_status'],
+            'feed_attachments' => ['idx_feed_attachments_type'],
+            'audit_logs' => ['idx_audit_ip'],
             'maintenance_records' => ['idx_maintenance_machine_status'],
-            'machines'            => ['idx_machines_mine_area', 'idx_machines_team_created'],
+            'machines' => ['idx_machines_mine_area', 'idx_machines_team_created'],
         ];
 
         foreach ($drops as $table => $indexes) {
@@ -152,7 +153,7 @@ return new class extends Migration
             foreach ($indexes as $index) {
                 try {
                     Schema::table($table, fn (Blueprint $t) => $t->dropIndex($index));
-                } catch (\Throwable) {
+                } catch (Throwable) {
                     // Index may not exist in all environments.
                 }
             }

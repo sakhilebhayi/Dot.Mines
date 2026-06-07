@@ -43,7 +43,7 @@ class FeedCommentController extends Controller
         $this->authorize('view', $post);
 
         $validated = $request->validate([
-            'body'              => 'required|string|max:2000',
+            'body' => 'required|string|max:2000',
             'parent_comment_id' => [
                 'nullable',
                 'integer',
@@ -60,10 +60,10 @@ class FeedCommentController extends Controller
 
         $comment = DB::transaction(function () use ($validated, $post) {
             $comment = FeedComment::create([
-                'post_id'           => $post->id,
+                'post_id' => $post->id,
                 'parent_comment_id' => $validated['parent_comment_id'] ?? null,
-                'author_id'         => auth()->id(),
-                'body'              => $validated['body'],
+                'author_id' => auth()->id(),
+                'body' => $validated['body'],
             ]);
 
             // Only top-level comments increment the counter
@@ -98,7 +98,7 @@ class FeedCommentController extends Controller
         ]);
 
         $comment->update([
-            'body'      => $validated['body'],
+            'body' => $validated['body'],
             'is_edited' => true,
         ]);
 

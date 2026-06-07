@@ -97,20 +97,20 @@ return [
             'fleet_endpoint' => '/Fleet',
             'supported_endpoints' => [
                 // Pattern: /Fleet/Equipment/{OEM ISO Identifier}/{Signal}/{startDateUTC}/{endDateUTC}
-                'fleet_snapshot'              => '/Fleet',
-                'locations'                   => '/Fleet/Equipment/{id}/Locations/{from}/{to}',
-                'operating_hours'             => '/Fleet/Equipment/{id}/CumulativeOperatingHours/{from}/{to}',
-                'fuel_used_cumulative'        => '/Fleet/Equipment/{id}/CumulativeFuelUsed/{from}/{to}',
-                'fuel_used_24h'               => '/Fleet/Equipment/{id}/FuelUsedInThePreceding24Hours/{from}/{to}',
-                'distance'                    => '/Fleet/Equipment/{id}/Distance/{from}/{to}',
-                'caution_codes'               => '/Fleet/Equipment/{id}/CautionCodes/{from}/{to}',
-                'idle_hours'                  => '/Fleet/Equipment/{id}/CumulativeIdleHours/{from}/{to}',
-                'fuel_remaining_ratio'        => '/Fleet/Equipment/{id}/FuelRemainingRatio/{from}/{to}',
-                'def_remaining'               => '/Fleet/Equipment/{id}/DEFRemaining/{from}/{to}',
-                'engine_condition'            => '/Fleet/Equipment/{id}/EngineCondition/{from}/{to}',
-                'load_count'                  => '/Fleet/Equipment/{id}/CumulativeLoadCount/{from}/{to}',
-                'payload_totals'              => '/Fleet/Equipment/{id}/CumulativePayloadTotals/{from}/{to}',
-                'active_regen_hours'          => '/Fleet/Equipment/{id}/CumulativeActiveRegenerationHours/{from}/{to}',
+                'fleet_snapshot' => '/Fleet',
+                'locations' => '/Fleet/Equipment/{id}/Locations/{from}/{to}',
+                'operating_hours' => '/Fleet/Equipment/{id}/CumulativeOperatingHours/{from}/{to}',
+                'fuel_used_cumulative' => '/Fleet/Equipment/{id}/CumulativeFuelUsed/{from}/{to}',
+                'fuel_used_24h' => '/Fleet/Equipment/{id}/FuelUsedInThePreceding24Hours/{from}/{to}',
+                'distance' => '/Fleet/Equipment/{id}/Distance/{from}/{to}',
+                'caution_codes' => '/Fleet/Equipment/{id}/CautionCodes/{from}/{to}',
+                'idle_hours' => '/Fleet/Equipment/{id}/CumulativeIdleHours/{from}/{to}',
+                'fuel_remaining_ratio' => '/Fleet/Equipment/{id}/FuelRemainingRatio/{from}/{to}',
+                'def_remaining' => '/Fleet/Equipment/{id}/DEFRemaining/{from}/{to}',
+                'engine_condition' => '/Fleet/Equipment/{id}/EngineCondition/{from}/{to}',
+                'load_count' => '/Fleet/Equipment/{id}/CumulativeLoadCount/{from}/{to}',
+                'payload_totals' => '/Fleet/Equipment/{id}/CumulativePayloadTotals/{from}/{to}',
+                'active_regen_hours' => '/Fleet/Equipment/{id}/CumulativeActiveRegenerationHours/{from}/{to}',
             ],
             'sync_interval' => 300,
             'retry_attempts' => 3,
@@ -471,13 +471,13 @@ return [
      * Scope:      ISO_Exports
      */
     'bell_sso' => [
-        'token_url'     => env('BELL_SSO_TOKEN_URL', 'https://sso.bellequipment.com/connect/token'),
-        'grant_type'    => env('BELL_SSO_GRANT_TYPE', 'password'),
-        'client_id'     => env('BELL_SSO_CLIENT_ID', 'ISO_Export_Service'),
+        'token_url' => env('BELL_SSO_TOKEN_URL', 'https://sso.bellequipment.com/connect/token'),
+        'grant_type' => env('BELL_SSO_GRANT_TYPE', 'password'),
+        'client_id' => env('BELL_SSO_CLIENT_ID', 'ISO_Export_Service'),
         'client_secret' => env('BELL_SSO_CLIENT_SECRET', ''),
-        'username'      => env('BELL_SSO_USERNAME', ''),
-        'password'      => env('BELL_SSO_PASSWORD', ''),
-        'scope'         => env('BELL_SSO_SCOPE', 'ISO_Exports'),
+        'username' => env('BELL_SSO_USERNAME', ''),
+        'password' => env('BELL_SSO_PASSWORD', ''),
+        'scope' => env('BELL_SSO_SCOPE', 'ISO_Exports'),
     ],
 
     /**
@@ -487,10 +487,10 @@ return [
      * BELL_ISO15143_PASSWORD in your .env file.
      */
     'bell_iso15143' => [
-        'api_url'       => env('BELL_ISO15143_API_URL', ''),
-        'client_id'     => env('BELL_ISO15143_CLIENT_ID', 'ISO_Export_Service'),
-        'api_username'  => env('BELL_ISO15143_USERNAME', ''),
-        'api_password'  => env('BELL_ISO15143_PASSWORD', ''),
+        'api_url' => env('BELL_ISO15143_API_URL', ''),
+        'client_id' => env('BELL_ISO15143_CLIENT_ID', 'ISO_Export_Service'),
+        'api_username' => env('BELL_ISO15143_USERNAME', ''),
+        'api_password' => env('BELL_ISO15143_PASSWORD', ''),
         'client_secret' => env('BELL_ISO15143_CLIENT_SECRET', ''),
     ],
 

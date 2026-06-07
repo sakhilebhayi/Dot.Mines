@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\HaulDispatch;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -21,12 +22,12 @@ class HaulDispatchUpdated implements ShouldBroadcast
     /**
      * Broadcast on the team's private channel so only authorised users receive it.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('team.' . $this->haulDispatch->team_id),
+            new PrivateChannel('team.'.$this->haulDispatch->team_id),
         ];
     }
 
@@ -48,18 +49,18 @@ class HaulDispatchUpdated implements ShouldBroadcast
         $dispatch = $this->haulDispatch;
 
         return [
-            'id'              => $dispatch->id,
-            'machine_id'      => $dispatch->machine_id,
-            'machine_name'    => $dispatch->machine?->name ?? 'Unknown',
-            'event_type'      => $this->eventType,
-            'status'          => $dispatch->status,
-            'current_lat'     => $dispatch->current_latitude,
-            'current_lng'     => $dispatch->current_longitude,
+            'id' => $dispatch->id,
+            'machine_id' => $dispatch->machine_id,
+            'machine_name' => $dispatch->machine?->name ?? 'Unknown',
+            'event_type' => $this->eventType,
+            'status' => $dispatch->status,
+            'current_lat' => $dispatch->current_latitude,
+            'current_lng' => $dispatch->current_longitude,
             'current_heading' => $dispatch->current_heading,
-            'current_speed'   => $dispatch->current_speed_kmh,
+            'current_speed' => $dispatch->current_speed_kmh,
             'current_tonnage' => $dispatch->current_tonnage,
             'fuel_percentage' => $dispatch->fuel_percentage,
-            'eta'             => $dispatch->eta_formatted,
+            'eta' => $dispatch->eta_formatted,
             'distance_remaining_km' => $dispatch->distance_remaining_km,
         ];
     }

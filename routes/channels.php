@@ -55,3 +55,24 @@ Broadcast::channel('maintenance.team.{teamId}', function ($user, $teamId) {
 Broadcast::channel('ai.user.{userId}', function ($user, $userId) {
     return (int) $user->id === (int) $userId;
 });
+
+/**
+ * Team notification bell — real-time notification count updates.
+ */
+Broadcast::channel('team.{teamId}.notifications', function ($user, $teamId) {
+    return (int) $user->current_team_id === (int) $teamId;
+});
+
+/**
+ * Team sensor readings and status changes.
+ */
+Broadcast::channel('team.{teamId}.sensors', function ($user, $teamId) {
+    return (int) $user->current_team_id === (int) $teamId;
+});
+
+/**
+ * Team alert channel (machine offline, compliance violations).
+ */
+Broadcast::channel('team.{teamId}.alerts', function ($user, $teamId) {
+    return (int) $user->current_team_id === (int) $teamId;
+});

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -24,7 +25,7 @@ class PaystackWebhookTest extends TestCase
         return hash_hmac('sha512', $payload, $this->secret);
     }
 
-    private function postWebhook(array $event, ?string $signature = null): \Illuminate\Testing\TestResponse
+    private function postWebhook(array $event, ?string $signature = null): TestResponse
     {
         $payload = (string) json_encode($event);
         $sig = $signature ?? $this->makeSignature($payload);

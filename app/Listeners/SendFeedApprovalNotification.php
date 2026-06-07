@@ -13,9 +13,9 @@ class SendFeedApprovalNotification implements ShouldQueue
 
     public function handle(FeedPostStatusChanged $event): void
     {
-        $post     = $event->post;
+        $post = $event->post;
         $approval = $event->approval;
-        $teamId   = $post->team_id;
+        $teamId = $post->team_id;
 
         // Only notify on final decisions (approved / rejected)
         if (! in_array($approval->status, ['approved', 'rejected'])) {
@@ -36,23 +36,23 @@ class SendFeedApprovalNotification implements ShouldQueue
             return;
         }
 
-        $status      = $approval->status === 'approved' ? 'approved ✓' : 'rejected ✗';
-        $alertLevel  = $approval->status === 'approved' ? 'medium' : 'high';
+        $status = $approval->status === 'approved' ? 'approved ✓' : 'rejected ✗';
+        $alertLevel = $approval->status === 'approved' ? 'medium' : 'high';
 
         SendFeedNotificationJob::dispatch([$post->author_id], [
-            'team_id'     => $teamId,
-            'type'        => 'feed_approval',
-            'title'       => "Your post was {$status}",
-            'message'     => $approval->reason
+            'team_id' => $teamId,
+            'type' => 'feed_approval',
+            'title' => "Your post was {$status}",
+            'message' => $approval->reason
                 ? "Reason: {$approval->reason}"
                 : mb_substr($post->body, 0, 150),
             'alert_level' => $alertLevel,
-            'data'        => [
+            'data' => [
                 'post_id' => $post->id,
-                'status'  => $approval->status,
-                'reason'  => $approval->reason,
+                'status' => $approval->status,
+                'reason' => $approval->reason,
             ],
-            'action_url'  => '/feed',
+            'action_url' => '/feed',
         ]);
     }
 }

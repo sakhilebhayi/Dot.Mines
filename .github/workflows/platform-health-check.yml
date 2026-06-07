@@ -1,0 +1,123 @@
+name: Platform Health Check
+
+# Runs every 15 minutes to detect live production regressions early.
+# Posts failures as GitHub issues so agents can pick them up immediately.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # every 15 minutes
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to check'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: health-check-${{ github.event.inputs.environment || 'staging' }}
+  cancel-in-progress: true
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # Smoke test — hits /up endpoint on staging (and production on tag deploys)
+  # ────────────────────────────────────────────────────────────────────────────
+  smoke-test:
+    name: "❤️ Health probe"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check staging /up
+        id: staging_up
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+            --max-time 10 \
+            https://staging.mines.infodot.co.za/up 2>/dev/null || echo "000")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "Staging /up → HTTP $STATUS"
+
+      - name: Check production /up
+        id: production_up
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+            --max-time 10 \
+            https://mines.infodot.co.za/up 2>/dev/null || echo "000")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "Production /up → HTTP $STATUS"
+
+      - name: Report health status
+        if: always()
+        run: |
+          echo "## ❤️ Platform Health Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | URL | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          STAGING_STATUS="${{ steps.staging_up.outputs.status }}"
+          PROD_STATUS="${{ steps.production_up.outputs.status }}"
+          [ "$STAGING_STATUS" = "200" ] && STAGING_ICON="✅" || STAGING_ICON="🔴"
+          [ "$PROD_STATUS" = "200" ] && PROD_ICON="✅" || PROD_ICON="🔴"
+          echo "| Staging | https://staging.mines.infodot.co.za | $STAGING_ICON HTTP $STAGING_STATUS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Production | https://mines.infodot.co.za | $PROD_ICON HTTP $PROD_STATUS |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Open issue on staging failure
+        if: steps.staging_up.outputs.status != '200'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.staging_up.outputs.status }}';
+            const title = `🔴 Staging health check failed — HTTP ${status}`;
+            const body = `## Staging is DOWN\n\n**Time:** ${new Date().toISOString()}\n**URL:** https://staging.mines.infodot.co.za/up\n**HTTP Status:** ${status}\n\n### Immediate Actions\n\n1. Check \`kubectl get pods -n mines-staging\`\n2. Check recent deployments: \`kubectl rollout history deployment/mines-app -n mines-staging\`\n3. View logs: \`kubectl logs -n mines-staging -l app=mines-app --tail=50\`\n4. If broken after deploy: \`kubectl rollout undo deployment/mines-app -n mines-staging\`\n\n_Opened automatically by platform-health-check workflow._`;
+
+            // Check if a similar issue is already open
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'platform-down,staging'
+            });
+
+            if (existing.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['platform-down', 'staging', 'urgent']
+              });
+            }
+
+      - name: Open issue on production failure
+        if: steps.production_up.outputs.status != '200'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.production_up.outputs.status }}';
+            const title = `🚨 PRODUCTION health check failed — HTTP ${status}`;
+            const body = `## 🚨 PRODUCTION IS DOWN\n\n**Time:** ${new Date().toISOString()}\n**URL:** https://mines.infodot.co.za/up\n**HTTP Status:** ${status}\n\n### Immediate Actions\n\n1. Check pods: \`kubectl get pods -n mines\`\n2. Rollback: \`kubectl rollout undo deployment/mines-app -n mines\`\n3. View logs: \`kubectl logs -n mines -l app=mines-app --tail=100\`\n4. Check Sentry for errors at https://sentry.io\n\n_Opened automatically by platform-health-check workflow. **Assign immediately.**_`;
+
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'platform-down,production'
+            });
+
+            if (existing.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['platform-down', 'production', 'urgent', 'P0']
+              });
+            }
+
+      - name: Fail job if either environment is down
+        if: |
+          steps.staging_up.outputs.status != '200' ||
+          steps.production_up.outputs.status != '200'
+        run: |
+          echo "One or more environments returned a non-200 status."
+          exit 1

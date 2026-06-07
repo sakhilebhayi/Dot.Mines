@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -85,6 +85,7 @@ SQL
                 DB::statement('PRAGMA foreign_keys=on;');
                 DB::commit();
             }
+
             return;
         }
 
@@ -92,11 +93,11 @@ SQL
         $tables = ['geofences', 'mine_areas'];
 
         foreach ($tables as $tbl) {
-            if (!Schema::hasTable($tbl)) {
+            if (! Schema::hasTable($tbl)) {
                 continue;
             }
 
-            if (!Schema::hasColumn($tbl, 'center_latitude') && !Schema::hasColumn($tbl, 'center_longitude')) {
+            if (! Schema::hasColumn($tbl, 'center_latitude') && ! Schema::hasColumn($tbl, 'center_longitude')) {
                 continue;
             }
 
@@ -126,7 +127,7 @@ SQL
         $tables = ['geofences', 'mine_areas'];
 
         foreach ($tables as $tbl) {
-            if (!Schema::hasTable($tbl)) {
+            if (! Schema::hasTable($tbl)) {
                 continue;
             }
 

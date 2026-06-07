@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('resolution_notes')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'severity']);
             $table->index('detected_at');
         });

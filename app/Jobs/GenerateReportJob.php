@@ -149,7 +149,7 @@ class GenerateReportJob implements ShouldQueue
             $query->whereIn('machine_id', $machineIds);
         }
 
-        $records = $query->orderBy('record_date')->get();
+        $records = $query->lazyById(500, 'id');
 
         $headers = [
             'Date', 'Shift', 'Mine Area', 'Machine', 'Unit',
@@ -253,7 +253,7 @@ class GenerateReportJob implements ShouldQueue
             $query->whereIn('machine_id', $machineIds);
         }
 
-        $records = $query->orderBy('recorded_at', 'desc')->get();
+        $records = $query->lazyById(500, 'id');
 
         $headers = [
             'Machine', 'Registration', 'Recorded At',
@@ -305,7 +305,7 @@ class GenerateReportJob implements ShouldQueue
             $query->whereIn('machine_id', $machineIds);
         }
 
-        $records = $query->orderBy('scheduled_date')->get();
+        $records = $query->lazyById(500, 'id');
 
         $headers = [
             'Work Order', 'Machine', 'Registration', 'Type', 'Title',
@@ -355,7 +355,7 @@ class GenerateReportJob implements ShouldQueue
             $query->whereIn('machine_id', $machineIds);
         }
 
-        $records = $query->orderBy('transaction_date')->get();
+        $records = $query->lazyById(500, 'id');
 
         $headers = [
             'Date', 'Machine', 'Registration', 'Transaction Type', 'Fuel Type',
@@ -410,7 +410,7 @@ class GenerateReportJob implements ShouldQueue
             $query->whereIn('machine_id', $machineIds);
         }
 
-        $records = $query->orderBy('started_at')->get();
+        $records = $query->lazyById(500, 'id');
 
         $headers = [
             'Machine', 'Registration', 'Type', 'Title', 'Priority',

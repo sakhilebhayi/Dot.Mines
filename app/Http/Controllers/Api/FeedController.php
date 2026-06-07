@@ -12,9 +12,11 @@ use App\Models\FeedApproval;
 use App\Models\FeedLike;
 use App\Models\FeedPost;
 use App\Services\AuditService;
+use App\Services\FeedAttachmentService;
 use App\Services\MentionParser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -257,12 +259,12 @@ class FeedController extends Controller
 
         $file = $request->file('file');
 
-        if (! $file instanceof \Illuminate\Http\UploadedFile) {
+        if (! $file instanceof UploadedFile) {
             return response()->json(['message' => 'Invalid file upload.'], 422);
         }
 
         try {
-            $attachment = app(\App\Services\FeedAttachmentService::class)
+            $attachment = app(FeedAttachmentService::class)
                 ->store($file, $post, $request->user());
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], 422);

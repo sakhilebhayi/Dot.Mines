@@ -2,16 +2,25 @@
 
 namespace Tests\Feature;
 
+use App\Events\ComplianceViolationDetected;
 use App\Events\GeofenceEntryDetected;
+use App\Events\MachineOffline;
+use App\Events\NotificationCreated;
+use App\Events\SensorReadingRecorded;
 use App\Jobs\SendNotificationEmailJob;
+use App\Listeners\SendComplianceViolationNotification;
 use App\Listeners\SendGeofenceBreachNotification;
+use App\Listeners\SendMachineOfflineNotification;
+use App\Listeners\SendSensorAlertNotification;
 use App\Mail\NotificationAlertMail;
 use App\Models\Geofence;
 use App\Models\GeofenceEntry;
+use App\Models\IoTSensor;
 use App\Models\Machine;
 use App\Models\MaintenanceRecord;
 use App\Models\MineArea;
 use App\Models\Notification;
+use App\Models\NotificationPreference;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -241,5 +250,202 @@ class NotificationSystemTest extends TestCase
             'type' => NotificationService::TYPE_GEOFENCE_BREACH,
             'alert_level' => NotificationService::LEVEL_HIGH,
         ]);
+    }
+
+    // ===================== MineArea Observer::updated =====================
+
+    #[Test]
+    public function mine_area_updated_sends_notification_when_name_changes(): void
+    {
+        [$admin, $fleetManager, $team] = $this->makeTeamWithRoles();
+        $mineArea = MineArea::factory()->create(['team_id' => $team->id]);
+
+        Queue::fake();
+
+        $mineArea->update(['name' => 'Updated Area Name']);
+
+        $this->assertDatabaseHas('notifications', [
+            'team_id' => $team->id,
+            'type' => NotificationService::TYPE_MINE_AREA,
+        ]);
+    }
+
+    #[Test]
+    public function mine_area_updated_does_not_notify_on_untracked_fields(): void
+    {
+        [$admin, $fleetManager, $team] = $this->makeTeamWithRoles();
+        $mineArea = MineArea::factory()->create(['team_id' => $team->id]);
+
+        $countBefore = Notification::where('team_id', $team->id)
+            ->where('type', NotificationService::TYPE_MINE_AREA)
+            ->count();
+
+        Queue::fake();
+
+        // Update a field that is not in the watched list
+        $mineArea->update(['description' => 'Some description change']);
+
+        $countAfter = Notification::where('team_id', $team->id)
+            ->where('type', NotificationService::TYPE_MINE_AREA)
+            ->count();
+
+        $this->assertEquals($countBefore, $countAfter);
+    }
+
+    // ===================== SensorReadingRecorded Listener =====================
+
+    #[Test]
+    public function sensor_anomaly_reading_dispatches_notification(): void
+    {
+        [$admin, $fleetManager, $team] = $this->makeTeamWithRoles();
+        $sensor = IoTSensor::factory()->create(['team_id' => $team->id]);
+
+        Queue::fake();
+
+        $event = new SensorReadingRecorded(
+            $sensor,
+            ['value' => 120.5, 'unit' => 'bar', 'is_anomaly' => true],
+            $team->id,
+        );
+
+        $listener = new SendSensorAlertNotification;
+        $listener->handle($event);
+
+        $this->assertDatabaseHas('notifications', [
+            'team_id' => $team->id,
+            'type' => NotificationService::TYPE_ALERT,
+            'alert_level' => NotificationService::LEVEL_WARNING,
+        ]);
+    }
+
+    #[Test]
+    public function normal_sensor_reading_does_not_dispatch_notification(): void
+    {
+        [$admin, $fleetManager, $team] = $this->makeTeamWithRoles();
+        $sensor = IoTSensor::factory()->create(['team_id' => $team->id]);
+
+        Queue::fake();
+
+        $event = new SensorReadingRecorded(
+            $sensor,
+            ['value' => 75.0, 'unit' => 'bar', 'is_anomaly' => false],
+            $team->id,
+        );
+
+        $listener = new SendSensorAlertNotification;
+        $listener->handle($event);
+
+        $this->assertDatabaseMissing('notifications', [
+            'team_id' => $team->id,
+            'type' => NotificationService::TYPE_ALERT,
+        ]);
+    }
+
+    // ===================== MachineOffline Listener =====================
+
+    #[Test]
+    public function machine_offline_event_dispatches_high_level_notification(): void
+    {
+        [$admin, $fleetManager, $team] = $this->makeTeamWithRoles();
+        $machine = Machine::factory()->create(['team_id' => $team->id]);
+
+        Queue::fake();
+
+        $event = new MachineOffline($machine, 'GPS signal lost');
+
+        $listener = new SendMachineOfflineNotification;
+        $listener->handle($event);
+
+        $this->assertDatabaseHas('notifications', [
+            'team_id' => $team->id,
+            'type' => NotificationService::TYPE_MACHINE,
+            'alert_level' => NotificationService::LEVEL_HIGH,
+        ]);
+    }
+
+    // ===================== ComplianceViolationDetected Listener =====================
+
+    #[Test]
+    public function compliance_violation_critical_dispatches_critical_notification(): void
+    {
+        [$admin, $fleetManager, $team] = $this->makeTeamWithRoles();
+
+        Queue::fake();
+
+        $violation = (object) [
+            'id' => 99,
+            'violation_type' => 'Missing Safety Inspection',
+            'severity' => 'critical',
+            'description' => 'Annual safety inspection is overdue.',
+            'remediation_deadline' => now()->addDays(7)->toDateString(),
+        ];
+
+        $event = new ComplianceViolationDetected($violation, $team->id);
+
+        $listener = new SendComplianceViolationNotification;
+        $listener->handle($event);
+
+        $this->assertDatabaseHas('notifications', [
+            'team_id' => $team->id,
+            'type' => NotificationService::TYPE_ALERT,
+            'alert_level' => NotificationService::LEVEL_CRITICAL,
+        ]);
+    }
+
+    // ===================== NotificationCreated broadcast =====================
+
+    #[Test]
+    public function notification_service_dispatch_fires_notification_created_event(): void
+    {
+        [$admin, $fleetManager, $team] = $this->makeTeamWithRoles();
+
+        Event::fake([NotificationCreated::class]);
+        Queue::fake();
+
+        NotificationService::dispatch([
+            'team_id' => $team->id,
+            'type' => NotificationService::TYPE_CUSTOM,
+            'title' => 'Broadcast Test',
+            'message' => 'Should fire NotificationCreated.',
+            'notify_roles' => ['admin'],
+        ]);
+
+        Event::assertDispatched(NotificationCreated::class);
+    }
+
+    // ===================== NotificationPreference model =====================
+
+    #[Test]
+    public function notification_preference_can_be_created_and_retrieved(): void
+    {
+        [$admin, , $team] = $this->makeTeamWithRoles();
+
+        NotificationPreference::create([
+            'user_id' => $admin->id,
+            'team_id' => $team->id,
+            'notification_type' => NotificationService::TYPE_MACHINE,
+            'email_enabled' => false,
+            'in_app_enabled' => true,
+            'min_alert_level' => NotificationService::LEVEL_WARNING,
+        ]);
+
+        $this->assertDatabaseHas('notification_preferences', [
+            'user_id' => $admin->id,
+            'team_id' => $team->id,
+            'notification_type' => NotificationService::TYPE_MACHINE,
+            'email_enabled' => false,
+        ]);
+    }
+
+    #[Test]
+    public function notification_preference_is_above_min_level_returns_correct_result(): void
+    {
+        $pref = new NotificationPreference;
+        $pref->min_alert_level = NotificationService::LEVEL_WARNING;
+
+        $this->assertFalse($pref->isAboveMinLevel(NotificationService::LEVEL_INFO));
+        $this->assertTrue($pref->isAboveMinLevel(NotificationService::LEVEL_WARNING));
+        $this->assertTrue($pref->isAboveMinLevel(NotificationService::LEVEL_HIGH));
+        $this->assertTrue($pref->isAboveMinLevel(NotificationService::LEVEL_CRITICAL));
     }
 }

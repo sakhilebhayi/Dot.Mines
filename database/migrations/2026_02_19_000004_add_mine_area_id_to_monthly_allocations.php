@@ -9,14 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('fuel_monthly_allocations', function (Blueprint $table) {
-            if (!Schema::hasColumn('fuel_monthly_allocations', 'mine_area_id')) {
+            if (! Schema::hasColumn('fuel_monthly_allocations', 'mine_area_id')) {
                 $table->foreignId('mine_area_id')->nullable()->after('team_id')->constrained('mine_areas')->nullOnDelete();
             }
 
             // Drop existing team/year/month unique and replace with team/mine_area/year/month
             try {
                 $table->dropUnique(['team_id', 'year', 'month']);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Some drivers (sqlite) may not support dropUnique by columns; ignore if it fails
             }
 
@@ -29,7 +29,7 @@ return new class extends Migration
         Schema::table('fuel_monthly_allocations', function (Blueprint $table) {
             try {
                 $table->dropUnique(['team_id', 'mine_area_id', 'year', 'month']);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // ignore
             }
 

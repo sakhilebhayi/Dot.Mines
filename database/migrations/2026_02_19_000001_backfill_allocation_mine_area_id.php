@@ -1,11 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
-use App\Models\MineArea;
 use App\Models\FuelMonthlyAllocation;
+use App\Models\MineArea;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -25,7 +23,7 @@ return new class extends Migration
 
                 $mineArea = MineArea::where('team_id', $teamId)->first();
 
-                if (!$mineArea) {
+                if (! $mineArea) {
                     $mineArea = MineArea::create([
                         'team_id' => $teamId,
                         'name' => 'General',
@@ -54,7 +52,7 @@ return new class extends Migration
                 ->pluck('id')
                 ->toArray();
 
-            if (!empty($generalAreas)) {
+            if (! empty($generalAreas)) {
                 FuelMonthlyAllocation::whereIn('mine_area_id', $generalAreas)
                     ->update(['mine_area_id' => null]);
             }

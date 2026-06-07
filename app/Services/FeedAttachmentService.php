@@ -51,8 +51,8 @@ class FeedAttachmentService
     /**
      * Validate, sanitise, and persist a feed file attachment into the DB.
      *
-     * @throws \InvalidArgumentException  on MIME or size violations
-     * @throws \RuntimeException          on read/write failures
+     * @throws \InvalidArgumentException on MIME or size violations
+     * @throws \RuntimeException on read/write failures
      */
     public function store(UploadedFile $file, FeedPost $post, User $uploader): FeedAttachment
     {
@@ -64,7 +64,7 @@ class FeedAttachmentService
         if (! in_array($mime, self::ALLOWED_MIMES, strict: true)) {
             throw new \InvalidArgumentException(
                 "File type '{$mime}' is not permitted. Allowed types: "
-                . implode(', ', self::ALLOWED_MIMES)
+                .implode(', ', self::ALLOWED_MIMES)
             );
         }
 
@@ -100,23 +100,23 @@ class FeedAttachmentService
         // ── 5. Persist to database ───────────────────────────────────────────
         try {
             $attachment = FeedAttachment::create([
-                'post_id'      => $post->id,
-                'uploader_id'  => $uploader->id,
-                'file_name'    => $originalName,
-                'file_type'    => $mime,
-                'file_size'    => $size,
-                'uploaded_at'  => now(),
+                'post_id' => $post->id,
+                'uploader_id' => $uploader->id,
+                'file_name' => $originalName,
+                'file_type' => $mime,
+                'file_size' => $size,
+                'uploaded_at' => now(),
                 'storage_type' => 'db',
-                'file_url'     => null,       // no external URL for DB-stored files
-                'file_data'    => $content,
+                'file_url' => null,       // no external URL for DB-stored files
+                'file_data' => $content,
             ]);
         } catch (\Throwable $e) {
             Log::error('FeedAttachmentService: DB write failed', [
-                'post_id'   => $post->id,
-                'uploader'  => $uploader->id,
+                'post_id' => $post->id,
+                'uploader' => $uploader->id,
                 'file_name' => $originalName,
                 'file_size' => $size,
-                'error'     => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             throw new \RuntimeException(
@@ -131,7 +131,7 @@ class FeedAttachmentService
             "Uploaded '{$originalName}' ({$this->formatBytes($size)}) to feed post #{$post->id}",
             $attachment,
             [
-                'post_id'   => $post->id,
+                'post_id' => $post->id,
                 'file_name' => $originalName,
                 'file_size' => $size,
                 'file_type' => $mime,
@@ -179,11 +179,12 @@ class FeedAttachmentService
     private function formatBytes(int $bytes): string
     {
         $units = ['B', 'KB', 'MB', 'GB'];
-        $i     = 0;
+        $i = 0;
         while ($bytes >= 1024 && $i < count($units) - 1) {
             $bytes /= 1024;
             $i++;
         }
-        return round($bytes, 1) . ' ' . $units[$i];
+
+        return round($bytes, 1).' '.$units[$i];
     }
 }

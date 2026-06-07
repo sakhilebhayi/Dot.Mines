@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Logging\RedactSensitiveData;
+use PHPUnit\Framework\TestCase;
 
 class LogRedactionTest extends TestCase
 {
@@ -14,13 +14,13 @@ class LogRedactionTest extends TestCase
                 'email' => 'dev@example.com',
                 'password' => 'supersecret',
                 'tokens' => [
-                    'access_token' => 'abcd1234'
-                ]
+                    'access_token' => 'abcd1234',
+                ],
             ],
             'headers' => [
-                'Authorization' => 'Bearer somelongtokenvalue'
+                'Authorization' => 'Bearer somelongtokenvalue',
             ],
-            'message' => 'api_key=sk_test_12345&other=ok'
+            'message' => 'api_key=sk_test_12345&other=ok',
         ];
 
         $out = RedactSensitiveData::redactValue($input);

@@ -8,6 +8,7 @@ use App\Models\BellFleetSnapshot;
 use App\Services\Integration\BellIso15143Service;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class BellIso15143ServiceTest extends TestCase
@@ -65,7 +66,7 @@ XML;
     // Happy path                                                           //
     // ------------------------------------------------------------------ //
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_successful_sync_inserts_equipment_master_and_all_related_records(): void
     {
         Http::fake([
@@ -87,7 +88,7 @@ XML;
         $this->assertDatabaseHas('bell_integration_audit_logs', ['success' => true, 'records_processed' => 1]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_second_sync_updates_equipment_master_and_replaces_current_status(): void
     {
         Http::fake([
@@ -115,7 +116,7 @@ XML;
         $this->assertDatabaseCount('bell_integration_audit_logs', 2);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_fleet_snapshot_stores_raw_json(): void
     {
         Http::fake([
@@ -135,7 +136,7 @@ XML;
         $this->assertCount(1, $json['Equipment']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_current_status_holds_correct_telemetry_values(): void
     {
         Http::fake([
@@ -155,7 +156,7 @@ XML;
         $this->assertTrue($status->engine_running);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_daily_kpis_are_calculated_on_first_sync(): void
     {
         Http::fake([
@@ -183,7 +184,7 @@ XML;
     // Validation – invalid records are skipped                            //
     // ------------------------------------------------------------------ //
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_record_with_missing_equipment_id_is_skipped(): void
     {
         $xml = <<<'XML'
@@ -208,7 +209,7 @@ XML;
         $this->assertDatabaseCount('bell_equipment', 0);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_record_with_missing_serial_number_is_skipped(): void
     {
         $xml = <<<'XML'
@@ -232,7 +233,7 @@ XML;
         $this->assertEquals(0, $result['processed']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_record_with_out_of_range_latitude_is_skipped(): void
     {
         $xml = <<<'XML'
@@ -255,7 +256,7 @@ XML;
         $this->assertEquals(0, $result['processed']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_record_with_fuel_remaining_above100_is_skipped(): void
     {
         $xml = <<<'XML'
@@ -283,7 +284,7 @@ XML;
     // Failure path                                                         //
     // ------------------------------------------------------------------ //
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_api_http_error_is_handled_gracefully_and_logs_audit_entry(): void
     {
         Http::fake(['*' => Http::response('Server Error', 500)]);
@@ -296,7 +297,7 @@ XML;
         $this->assertDatabaseHas('bell_integration_audit_logs', ['success' => false]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_malformed_xml_is_handled_gracefully_and_logs_audit_entry(): void
     {
         Http::fake(['*' => Http::response('<<not valid xml>>', 200)]);
@@ -307,7 +308,7 @@ XML;
         $this->assertDatabaseHas('bell_integration_audit_logs', ['success' => false]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function test_empty_fleet_response_processes_zero_records(): void
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?><Fleet version="1" snapshotTime="2026-06-02T12:54:29Z"></Fleet>';

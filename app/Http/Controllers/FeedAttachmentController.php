@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FeedAttachment;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
@@ -26,7 +27,7 @@ class FeedAttachmentController extends Controller
     /**
      * Stream a feed attachment from database storage.
      */
-    public function serve(Request $request, FeedAttachment $attachment): Response|\Illuminate\Http\RedirectResponse
+    public function serve(Request $request, FeedAttachment $attachment): Response|RedirectResponse
     {
         // ── Authorization ────────────────────────────────────────────────────
         // Confirm the authenticated user belongs to the same team as the post.
@@ -46,6 +47,7 @@ class FeedAttachmentController extends Controller
         // Redirect the browser to the original URL rather than proxying the byte stream.
         if ($attachment->storage_type === 's3') {
             abort_if(empty($attachment->file_url), 404, 'Legacy attachment URL is not available.');
+
             return redirect((string) $attachment->file_url);
         }
 
@@ -65,13 +67,13 @@ class FeedAttachmentController extends Controller
         $safeFilename = addcslashes($attachment->file_name ?? 'attachment', '"\\');
 
         return response($fileData, 200, [
-            'Content-Type'              => $attachment->file_type,
-            'Content-Length'            => strlen($fileData),
-            'Content-Disposition'       => ($isInline ? 'inline' : 'attachment')
-                                           . '; filename="' . $safeFilename . '"',
-            'Cache-Control'             => 'private, max-age=3600, must-revalidate',
-            'X-Content-Type-Options'    => 'nosniff',
-            'X-Frame-Options'           => 'SAMEORIGIN',
+            'Content-Type' => $attachment->file_type,
+            'Content-Length' => strlen($fileData),
+            'Content-Disposition' => ($isInline ? 'inline' : 'attachment')
+                                           .'; filename="'.$safeFilename.'"',
+            'Cache-Control' => 'private, max-age=3600, must-revalidate',
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'SAMEORIGIN',
         ]);
     }
 }

@@ -16,8 +16,8 @@ class FeedOnboardingInvite extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public function __construct(
-        public readonly User   $invitee,
-        public readonly Team   $team,
+        public readonly User $invitee,
+        public readonly Team $team,
         public readonly string $personalMessage = '',
     ) {}
 

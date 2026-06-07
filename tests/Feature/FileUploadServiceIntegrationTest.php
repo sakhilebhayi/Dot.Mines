@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
 use App\Services\FileUploadService;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 class FileUploadServiceIntegrationTest extends TestCase
 {
@@ -16,11 +16,11 @@ class FileUploadServiceIntegrationTest extends TestCase
         $tmp = tmpfile();
         $meta = stream_get_meta_data($tmp);
         $path = $meta['uri'];
-        fwrite($tmp, "hello world");
+        fwrite($tmp, 'hello world');
 
         $uploaded = new UploadedFile($path, 'plan.pdf', null, null, true);
 
-        $svc = new FileUploadService();
+        $svc = new FileUploadService;
         $result = $svc->storeMinePlan($uploaded, 123, 456, 'local');
 
         $this->assertArrayHasKey('path', $result);

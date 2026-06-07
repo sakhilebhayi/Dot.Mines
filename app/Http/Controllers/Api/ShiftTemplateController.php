@@ -29,15 +29,15 @@ class ShiftTemplateController extends Controller
         $this->authorize('create', ShiftTemplate::class);
 
         $validated = $request->validate([
-            'category'        => 'required|in:' . implode(',', FeedPost::CATEGORIES),
-            'title'           => 'required|string|max:255',
-            'template_body'   => 'required|string|max:5000',
+            'category' => 'required|in:'.implode(',', FeedPost::CATEGORIES),
+            'title' => 'required|string|max:255',
+            'template_body' => 'required|string|max:5000',
             'required_fields' => 'nullable|array',
             'required_fields.*' => 'string|max:100',
         ]);
 
         $template = ShiftTemplate::create(array_merge($validated, [
-            'team_id'    => Auth::user()->current_team_id,
+            'team_id' => Auth::user()->current_team_id,
             'created_by' => Auth::id(),
         ]));
 
@@ -51,9 +51,9 @@ class ShiftTemplateController extends Controller
         $this->authorize('update', $shiftTemplate);
 
         $validated = $request->validate([
-            'category'        => 'sometimes|in:' . implode(',', FeedPost::CATEGORIES),
-            'title'           => 'sometimes|string|max:255',
-            'template_body'   => 'sometimes|string|max:5000',
+            'category' => 'sometimes|in:'.implode(',', FeedPost::CATEGORIES),
+            'title' => 'sometimes|string|max:255',
+            'template_body' => 'sometimes|string|max:5000',
             'required_fields' => 'nullable|array',
             'required_fields.*' => 'string|max:100',
         ]);

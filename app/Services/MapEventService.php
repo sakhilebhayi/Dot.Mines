@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Events\MapEventRecorded;
 use App\Models\Machine;
 use App\Models\MapEvent;
-use Illuminate\Support\Facades\DB;
 
 /**
  * MapEventService
@@ -31,39 +30,39 @@ class MapEventService
     /**
      * Record a map event and broadcast it immediately.
      *
-     * @param array<string, mixed>|null $metadata
+     * @param  array<string, mixed>|null  $metadata
      */
     public static function record(
-        int     $teamId,
-        string  $eventType,
-        string  $title,
-        ?int    $machineId   = null,
-        ?int    $mineAreaId  = null,
-        ?float  $latitude    = null,
-        ?float  $longitude   = null,
-        ?string $notes       = null,
-        ?array  $metadata    = null,
+        int $teamId,
+        string $eventType,
+        string $title,
+        ?int $machineId = null,
+        ?int $mineAreaId = null,
+        ?float $latitude = null,
+        ?float $longitude = null,
+        ?string $notes = null,
+        ?array $metadata = null,
     ): MapEvent {
         // If no explicit coords, try to pull from the machine's last known loc
         if (($latitude === null || $longitude === null) && $machineId !== null) {
-            $machine   = Machine::select(['last_location_latitude', 'last_location_longitude'])
+            $machine = Machine::select(['last_location_latitude', 'last_location_longitude'])
                 ->find($machineId);
 
-            $latitude  = $latitude  ?? $machine?->last_location_latitude;
+            $latitude = $latitude ?? $machine?->last_location_latitude;
             $longitude = $longitude ?? $machine?->last_location_longitude;
         }
 
         $event = MapEvent::create([
-            'team_id'      => $teamId,
-            'machine_id'   => $machineId,
+            'team_id' => $teamId,
+            'machine_id' => $machineId,
             'mine_area_id' => $mineAreaId,
-            'event_type'   => $eventType,
-            'title'        => $title,
-            'notes'        => $notes,
-            'latitude'     => $latitude,
-            'longitude'    => $longitude,
-            'occurred_at'  => now(),
-            'metadata'     => $metadata,
+            'event_type' => $eventType,
+            'title' => $title,
+            'notes' => $notes,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'occurred_at' => now(),
+            'metadata' => $metadata,
         ]);
 
         // Eager-load relationships used in broadcastWith()
@@ -80,24 +79,24 @@ class MapEventService
      */
     public static function recordStatusChange(
         Machine $machine,
-        string  $oldStatus,
-        string  $newStatus,
+        string $oldStatus,
+        string $newStatus,
     ): MapEvent {
         $labels = [
-            'active'      => 'Active',
-            'idle'        => 'Idle',
+            'active' => 'Active',
+            'idle' => 'Idle',
             'maintenance' => 'Under Maintenance',
-            'offline'     => 'Offline',
+            'offline' => 'Offline',
         ];
 
         $statusLabel = $labels[$newStatus] ?? $newStatus;
 
         return self::record(
-            teamId:    $machine->team_id,
+            teamId: $machine->team_id,
             eventType: MapEvent::TYPE_STATUS_CHANGE,
-            title:     "{$machine->name} -> {$statusLabel}",
+            title: "{$machine->name} -> {$statusLabel}",
             machineId: $machine->id,
-            metadata:  ['old_status' => $oldStatus, 'new_status' => $newStatus],
+            metadata: ['old_status' => $oldStatus, 'new_status' => $newStatus],
         );
     }
 }

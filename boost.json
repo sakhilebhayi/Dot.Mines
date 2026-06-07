@@ -8,6 +8,17 @@
         "developing-with-fortify",
         "laravel-best-practices",
         "livewire-development",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "notification-system",
+        "test-coverage-patterns",
+        "fleet-management",
+        "alert-system",
+        "rbac-patterns",
+        "queue-job-patterns",
+        "ai-agent-patterns",
+        "geofence-patterns",
+        "oem-integration-patterns",
+        "maintenance-patterns",
+        "fuel-patterns"
     ]
 }

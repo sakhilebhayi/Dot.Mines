@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $approver_id
  * @property string $status pending | approved | rejected
  * @property string|null $reason Required when rejected
- * @property \Carbon\Carbon|null $reviewed_at
+ * @property Carbon|null $reviewed_at
  */
 class FeedApproval extends Model
 {
@@ -41,13 +42,13 @@ class FeedApproval extends Model
         ];
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\FeedPost, $this> */
+    /** @return BelongsTo<FeedPost, $this> */
     public function post(): BelongsTo
     {
         return $this->belongsTo(FeedPost::class, 'post_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approver_id');
