@@ -106,4 +106,13 @@ class SyncMachineMetricsJob implements ShouldQueue
             default => null,
         };
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('SyncMachineMetricsJob permanently failed', [
+            'machine_id' => $this->machine->id,
+            'machine_name' => $this->machine->name,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

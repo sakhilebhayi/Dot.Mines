@@ -217,4 +217,11 @@ class RouteSpeedMonitoringJob implements ShouldQueue
             'current_speed' => $metric->speed,
         ]);
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('RouteSpeedMonitoringJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

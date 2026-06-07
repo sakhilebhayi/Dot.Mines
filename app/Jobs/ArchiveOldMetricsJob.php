@@ -110,4 +110,11 @@ class ArchiveOldMetricsJob implements ShouldQueue
             'total_deleted' => $totalDeleted,
         ]);
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('ArchiveOldMetricsJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

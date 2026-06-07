@@ -201,4 +201,11 @@ class CheckAIDriftJob implements ShouldQueue
             ]);
         }
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('CheckAIDriftJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

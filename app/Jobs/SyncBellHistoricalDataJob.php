@@ -69,4 +69,11 @@ class SyncBellHistoricalDataJob implements ShouldQueue
             'skipped' => $result['skipped'],
         ]);
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('SyncBellHistoricalDataJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

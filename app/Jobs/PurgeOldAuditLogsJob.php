@@ -38,4 +38,11 @@ class PurgeOldAuditLogsJob implements ShouldQueue
             'deleted_rows' => $deleted,
         ]);
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('PurgeOldAuditLogsJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

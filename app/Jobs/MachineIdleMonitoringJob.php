@@ -243,4 +243,11 @@ class MachineIdleMonitoringJob implements ShouldQueue
             'idle_duration' => $idleDuration,
         ]);
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('MachineIdleMonitoringJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

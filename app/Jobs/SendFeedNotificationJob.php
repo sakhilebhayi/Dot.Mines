@@ -67,4 +67,12 @@ class SendFeedNotificationJob implements ShouldQueue
             throw $e;
         }
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('SendFeedNotificationJob permanently failed', [
+            'recipient_count' => count($this->recipientIds),
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

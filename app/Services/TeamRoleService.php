@@ -6,6 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class TeamRoleService
 {
@@ -118,43 +119,45 @@ class TeamRoleService
      */
     public static function provisionTeam(Team $team, ?User $owner = null): void
     {
-        // 1 — Ensure all permissions exist for this team
-        foreach (static::allPermissions() as $permData) {
-            Permission::firstOrCreate(
-                ['team_id' => $team->id, 'name' => $permData['name']],
-                [
-                    'display_name' => $permData['display_name'],
-                    'group' => $permData['group'],
-                    'description' => $permData['description'],
-                ]
-            );
-        }
-
-        // 2 — Ensure all roles exist and have the correct permissions
-        foreach (static::allRoles() as $roleName => $roleData) {
-            $role = Role::firstOrCreate(
-                ['team_id' => $team->id, 'name' => $roleName],
-                [
-                    'display_name' => $roleData['display_name'],
-                    'description' => $roleData['description'],
-                ]
-            );
-
-            $permissionIds = Permission::where('team_id', $team->id)
-                ->whereIn('name', $roleData['permissions'])
-                ->pluck('id')
-                ->toArray();
-
-            $role->permissions()->sync($permissionIds);
-        }
-
-        // 3 — Assign admin role to the owner if provided
-        if ($owner) {
-            $adminRole = Role::where('team_id', $team->id)->where('name', 'admin')->first();
-
-            if ($adminRole) {
-                $owner->roles()->syncWithoutDetaching([$adminRole->id]);
+        DB::transaction(function () use ($team, $owner): void {
+            // 1 — Ensure all permissions exist for this team
+            foreach (static::allPermissions() as $permData) {
+                Permission::firstOrCreate(
+                    ['team_id' => $team->id, 'name' => $permData['name']],
+                    [
+                        'display_name' => $permData['display_name'],
+                        'group' => $permData['group'],
+                        'description' => $permData['description'],
+                    ]
+                );
             }
-        }
+
+            // 2 — Ensure all roles exist and have the correct permissions
+            foreach (static::allRoles() as $roleName => $roleData) {
+                $role = Role::firstOrCreate(
+                    ['team_id' => $team->id, 'name' => $roleName],
+                    [
+                        'display_name' => $roleData['display_name'],
+                        'description' => $roleData['description'],
+                    ]
+                );
+
+                $permissionIds = Permission::where('team_id', $team->id)
+                    ->whereIn('name', $roleData['permissions'])
+                    ->pluck('id')
+                    ->toArray();
+
+                $role->permissions()->sync($permissionIds);
+            }
+
+            // 3 — Assign admin role to the owner if provided
+            if ($owner) {
+                $adminRole = Role::where('team_id', $team->id)->where('name', 'admin')->first();
+
+                if ($adminRole) {
+                    $owner->roles()->syncWithoutDetaching([$adminRole->id]);
+                }
+            }
+        });
     }
 }

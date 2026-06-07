@@ -38,12 +38,19 @@ class FleetMineAreaAssignmentTest extends TestCase
 
         $this->actingAs($user);
 
+        // Confirm unassigned before action
+        $this->assertNull($machine->fresh()->mine_area_id);
+
         Livewire::test(Fleet::class)
             ->set('assigningMineAreaMachineId', $machine->id)
             ->set('selectedMineAreaId', $mineArea->id)
             ->call('assignToMineArea');
 
         $this->assertEquals($mineArea->id, $machine->fresh()->mine_area_id);
+        $this->assertDatabaseHas('machines', [
+            'id' => $machine->id,
+            'mine_area_id' => $mineArea->id,
+        ]);
     }
 
     public function test_assignment_is_rejected_when_no_mine_area_selected(): void
@@ -64,6 +71,10 @@ class FleetMineAreaAssignmentTest extends TestCase
             ->call('assignToMineArea');
 
         $this->assertNull($machine->fresh()->mine_area_id);
+        $this->assertDatabaseMissing('machines', [
+            'id' => $machine->id,
+            'mine_area_id' => $mineArea->id ?? -1,
+        ]);
     }
 
     public function test_assignment_is_rejected_for_machine_belonging_to_another_team(): void
@@ -83,5 +94,9 @@ class FleetMineAreaAssignmentTest extends TestCase
             ->assertStatus(403);
 
         $this->assertNull($machine->fresh()->mine_area_id);
+        $this->assertDatabaseMissing('machines', [
+            'id' => $machine->id,
+            'mine_area_id' => $mineArea->id,
+        ]);
     }
 }

@@ -85,4 +85,15 @@ class DeleteUserDataJob implements ShouldQueue
             throw $e;
         }
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('DeleteUserDataJob permanently failed', [
+            'gdpr_request_id' => $this->gdprRequest->id,
+            'user_id' => $this->gdprRequest->user_id,
+            'error' => $exception->getMessage(),
+        ]);
+
+        $this->gdprRequest->update(['status' => GdprRequest::STATUS_FAILED]);
+    }
 }

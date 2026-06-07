@@ -72,4 +72,11 @@ class SyncBellFleetDataJob implements ShouldQueue
             ]);
         }
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('SyncBellFleetDataJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

@@ -162,4 +162,11 @@ class MigrateFeedAttachmentsToS3Job implements ShouldQueue
 
         return ! empty($key) && ! empty($secret) && ! empty($bucket);
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('MigrateFeedAttachmentsToS3Job permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

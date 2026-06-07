@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Machine;
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\TeamRoleService;
@@ -28,7 +29,16 @@ class TeamRoleProvisioningTest extends TestCase
         $this->assertContains('viewer', $roles);
 
         $adminRole = Role::where('team_id', $team->id)->where('name', 'admin')->first();
+        $this->assertNotNull($adminRole);
         $this->assertNotEmpty($adminRole->permissions()->get());
+
+        // All expected roles exist
+        $this->assertCount(count(TeamRoleService::allRoles()), $roles);
+
+        // All permissions were created for this team
+        $expectedPermissionCount = count(TeamRoleService::allPermissions());
+        $actualPermissionCount = Permission::where('team_id', $team->id)->count();
+        $this->assertEquals($expectedPermissionCount, $actualPermissionCount);
     }
 
     public function test_provision_team_assigns_admin_role_to_owner(): void

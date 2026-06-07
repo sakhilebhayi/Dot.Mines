@@ -54,4 +54,11 @@ class PurgeExpiredSoftDeletesJob implements ShouldQueue
             'purged' => $totals,
         ]);
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('PurgeExpiredSoftDeletesJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

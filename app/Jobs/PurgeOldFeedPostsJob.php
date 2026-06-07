@@ -44,4 +44,11 @@ class PurgeOldFeedPostsJob implements ShouldQueue
             'deleted_comments' => $deletedComments,
         ]);
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('PurgeOldFeedPostsJob permanently failed', [
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }
