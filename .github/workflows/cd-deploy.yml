@@ -148,9 +148,9 @@ jobs:
       - name: Run smoke test
         run: |
           sleep 10
-          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://staging.mines.infodot.co.za/up || echo "000")
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://staging.mines.infodot.co.za/ready || echo "000")
           if [ "$STATUS" != "200" ]; then
-            echo "Smoke test FAILED — /up returned $STATUS"
+            echo "Smoke test FAILED — /ready returned $STATUS"
             exit 1
           fi
           echo "Smoke test passed (HTTP $STATUS)"
@@ -202,10 +202,12 @@ jobs:
       - name: Run production smoke test
         run: |
           sleep 15
-          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://mines.infodot.co.za/up || echo "000")
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://mines.infodot.co.za/ready || echo "000")
           if [ "$STATUS" != "200" ]; then
             echo "Production smoke test FAILED — rolling back"
             kubectl -n mines rollout undo deployment/mines-app
+            kubectl -n mines rollout undo deployment/mines-queue
+            kubectl -n mines rollout undo deployment/mines-reverb
             exit 1
           fi
           echo "Production smoke test passed (HTTP $STATUS)"
