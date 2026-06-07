@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Team;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -27,6 +28,9 @@ class PaystackService
     protected function get(string $endpoint): array
     {
         $response = Http::withToken($this->secretKey)
+            ->timeout(15)
+            ->connectTimeout(5)
+            ->retry(3, 500, fn (\Throwable $e) => ! ($e instanceof ConnectionException))
             ->acceptJson()
             ->get($this->baseUrl.$endpoint);
 
@@ -49,6 +53,9 @@ class PaystackService
     protected function post(string $endpoint, array $data = []): array
     {
         $response = Http::withToken($this->secretKey)
+            ->timeout(15)
+            ->connectTimeout(5)
+            ->retry(2, 500, fn (\Throwable $e) => ! ($e instanceof ConnectionException))
             ->acceptJson()
             ->post($this->baseUrl.$endpoint, $data);
 

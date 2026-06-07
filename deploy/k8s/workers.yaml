@@ -22,12 +22,18 @@ spec:
         - name: queue
           image: ghcr.io/sakhileb/mines:latest
           imagePullPolicy: Always
-          command: ["php", "artisan", "queue:work", "--queue=default,notifications,reports", "--sleep=3", "--tries=3", "--timeout=90", "--max-jobs=500"]
+          command: ["php", "artisan", "queue:work", "--queue=alerts,default,notifications,reports", "--sleep=3", "--tries=3", "--timeout=90", "--max-jobs=500"]
           envFrom:
             - secretRef:
                 name: mines-secrets
             - configMapRef:
                 name: mines-config
+          livenessProbe:
+            exec:
+              command: ["php", "artisan", "queue:monitor", "--no-interaction"]
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            failureThreshold: 3
           resources:
             requests:
               cpu: "100m"

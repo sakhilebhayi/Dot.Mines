@@ -44,7 +44,10 @@ Route::get('/terms-of-service', [TermsOfServiceController::class, 'show'])->name
 Route::get('/privacy-policy', [PrivacyPolicyController::class, 'show'])->name('policy.show');
 
 // Health check — no auth, used by load balancers and monitoring services
+// /health = liveness probe (full check: DB + cache + storage) — failure triggers pod restart
+// /ready  = readiness probe (DB only, lightweight) — failure stops traffic routing without restart
 Route::get('/health', HealthController::class)->name('health');
+Route::get('/ready', [HealthController::class, 'ready'])->name('health.ready');
 
 Route::get('/', function () {
     return view('welcome');
