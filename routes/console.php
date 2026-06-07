@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\ArchiveOldMetricsJob;
+use App\Jobs\CheckAIDriftJob;
 use App\Jobs\MachineIdleMonitoringJob;
 use App\Jobs\PurgeExpiredSoftDeletesJob;
 use App\Jobs\PurgeOldAuditLogsJob;
@@ -67,5 +68,15 @@ Schedule::job(new PurgeOldFeedPostsJob)
 // Monthly: purge old audit log entries past retention period (default 365 days)
 Schedule::job(new PurgeOldAuditLogsJob)
     ->monthly()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Weekly: AI drift detection — recalculate rolling 30-day accuracy for all AI agents
+// Triggers notifications if accuracy drops below 70% (warn) or 60% (critical).
+// Disables agents automatically if accuracy falls below 50%.
+Schedule::job(new CheckAIDriftJob)
+    ->weekly()
+    ->sundays()
+    ->at('04:00')
     ->withoutOverlapping()
     ->onOneServer();
