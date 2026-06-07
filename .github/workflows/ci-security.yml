@@ -28,7 +28,7 @@ jobs:
         env:
           APP_ENV: testing
           APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
-          BROADCAST_CONNECTION: "null"
+          BROADCAST_DRIVER: log
 
       - name: Install Node dependencies & build assets
         run: |
@@ -45,7 +45,7 @@ jobs:
           QUEUE_CONNECTION: sync
           CACHE_STORE: array
           SESSION_DRIVER: array
-          BROADCAST_CONNECTION: "null"
+          BROADCAST_DRIVER: log
           MAIL_MAILER: array
           FILESYSTEM_DISK: local
 
@@ -140,7 +140,7 @@ jobs:
         env:
           APP_ENV: testing
           APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
-          BROADCAST_CONNECTION: "null"
+          BROADCAST_DRIVER: log
       - name: Run PHPStan if available
         run: |
           if [ -x vendor/bin/phpstan ]; then
@@ -196,7 +196,7 @@ jobs:
           APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
           DB_CONNECTION: sqlite
           DB_DATABASE: ":memory:"
-          BROADCAST_CONNECTION: "null"
+          BROADCAST_DRIVER: log
           CACHE_STORE: array
           SESSION_DRIVER: array
 
@@ -220,7 +220,7 @@ jobs:
         env:
           APP_ENV: testing
           APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
-          BROADCAST_CONNECTION: "null"
+          BROADCAST_DRIVER: log
       - name: Run Pint (fail on style violations)
         run: vendor/bin/pint --test
 

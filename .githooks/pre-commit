@@ -55,8 +55,7 @@ fi
 # ── 5. PHPUnit tests ──────────────────────────────────────────────────────
 if command -v php >/dev/null 2>&1 && [ -f artisan ]; then
   # Suppress Xdebug "not connected" noise but preserve test output and exit code
-  TEST_OUTPUT=$(php artisan test --compact \
-    --env=testing \
+  TEST_OUTPUT=$(php artisan test --compact --no-coverage \
     -d xdebug.mode=off \
     2>/dev/null)
   TEST_EXIT=$?
