@@ -226,14 +226,14 @@ Route::middleware([
         ->middleware('throttle:downloads')
         ->name('feed.attachment.serve');
 
-    // Feed admin panel — restricted to admin role.
+    // Feed admin panel — restricted to admin role (2FA required).
     Route::get('/feed/admin', FeedAdminPanel::class)
-        ->middleware('admin')
+        ->middleware(['admin', 'admin.2fa'])
         ->name('feed.admin');
 
-    // WhatsApp migration dashboard — restricted to admin role.
+    // WhatsApp migration dashboard — restricted to admin role (2FA required).
     Route::get('/feed/migration', WhatsAppMigration::class)
-        ->middleware('admin')
+        ->middleware(['admin', 'admin.2fa'])
         ->name('feed.migration');
 
     // Shift Templates management (admin/supervisor UI)

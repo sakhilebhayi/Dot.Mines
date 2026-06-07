@@ -118,7 +118,20 @@ class AppServiceProvider extends ServiceProvider
             $admins = array_filter(array_map('trim', explode(',', (string) env('HORIZON_ADMINS', ''))));
 
             return in_array($user->email, $admins, true)
-                || $user->hasTeamRole($user->currentTeam, 'admin');
+                || $user->hasRole('admin');
+        });
+
+        // API documentation access — restricted to admins in non-local environments.
+        // Scramble's RestrictedDocsAccess middleware checks this gate.
+        Gate::define('viewApiDocs', function ($user) {
+            if (app()->environment('local')) {
+                return true;
+            }
+
+            $admins = array_filter(array_map('trim', explode(',', (string) env('HORIZON_ADMINS', ''))));
+
+            return in_array($user->email, $admins, true)
+                || $user->hasRole('admin');
         });
 
         // Feed notification listeners

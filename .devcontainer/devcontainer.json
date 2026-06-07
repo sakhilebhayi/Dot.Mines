@@ -1,0 +1,22 @@
+{
+  "name": "Mines Laravel",
+  "image": "mcr.microsoft.com/devcontainers/php:8.3",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  },
+  "onCreateCommand": "sudo apt-get update && sudo apt-get install -y php8.3-zip libzip-dev && sudo phpenmod zip && composer install --no-interaction && npm ci",
+  "postCreateCommand": "cp .env.example .env 2>/dev/null | true; php artisan key:generate --no-interaction 2>/dev/null | true",
+  "remoteUser": "vscode"
+}
