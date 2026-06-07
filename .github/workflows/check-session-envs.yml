@@ -18,11 +18,13 @@ jobs:
           SESSION_SECURE_COOKIE: ${{ secrets.SESSION_SECURE_COOKIE }}
           SESSION_HTTP_ONLY: ${{ secrets.SESSION_HTTP_ONLY }}
           SESSION_SAME_SITE: ${{ secrets.SESSION_SAME_SITE }}
+          SESSION_ENCRYPT: ${{ secrets.SESSION_ENCRYPT }}
         run: |
           missing=()
           if [ -z "$SESSION_SECURE_COOKIE" ]; then missing+=(SESSION_SECURE_COOKIE); fi
           if [ -z "$SESSION_HTTP_ONLY" ]; then missing+=(SESSION_HTTP_ONLY); fi
           if [ -z "$SESSION_SAME_SITE" ]; then missing+=(SESSION_SAME_SITE); fi
+          if [ -z "$SESSION_ENCRYPT" ]; then missing+=(SESSION_ENCRYPT); fi
 
           if [ ${#missing[@]} -ne 0 ]; then
             echo "The following required session secrets are missing: ${missing[*]}"
@@ -31,10 +33,72 @@ jobs:
           fi
           echo "All required session secrets are present."
 
+      - name: Validate production session security values
+        env:
+          SESSION_SECURE_COOKIE: ${{ secrets.SESSION_SECURE_COOKIE }}
+          SESSION_HTTP_ONLY: ${{ secrets.SESSION_HTTP_ONLY }}
+          SESSION_SAME_SITE: ${{ secrets.SESSION_SAME_SITE }}
+          SESSION_ENCRYPT: ${{ secrets.SESSION_ENCRYPT }}
+        run: |
+          failed=()
+
+          if [ "$SESSION_SECURE_COOKIE" != "true" ]; then
+            failed+=("SESSION_SECURE_COOKIE must be 'true' in production (HTTPS-only cookies)")
+          fi
+
+          if [ "$SESSION_HTTP_ONLY" != "true" ]; then
+            failed+=("SESSION_HTTP_ONLY must be 'true' in production (prevents JS cookie access)")
+          fi
+
+          if [ "$SESSION_SAME_SITE" != "strict" ] && [ "$SESSION_SAME_SITE" != "lax" ]; then
+            failed+=("SESSION_SAME_SITE must be 'strict' or 'lax' in production (got: $SESSION_SAME_SITE)")
+          fi
+
+          if [ "$SESSION_ENCRYPT" != "true" ]; then
+            failed+=("SESSION_ENCRYPT must be 'true' in production (session data encrypted at rest)")
+          fi
+
+          if [ ${#failed[@]} -ne 0 ]; then
+            echo "SECURITY: Production session configuration is insecure:"
+            for msg in "${failed[@]}"; do echo "  - $msg"; done
+            exit 1
+          fi
+          echo "All session security values are correctly configured for production."
+
+      - name: Verify production env template is secure
+        run: |
+          failed=()
+
+          secure=$(grep "^SESSION_SECURE_COOKIE=" .env.production.example | cut -d= -f2)
+          encrypt=$(grep "^SESSION_ENCRYPT=" .env.production.example | cut -d= -f2)
+          same_site=$(grep "^SESSION_SAME_SITE=" .env.production.example | cut -d= -f2)
+
+          if [ "$secure" != "true" ]; then
+            failed+=(".env.production.example: SESSION_SECURE_COOKIE should be 'true'")
+          fi
+          if [ "$encrypt" != "true" ]; then
+            failed+=(".env.production.example: SESSION_ENCRYPT should be 'true'")
+          fi
+          if [ "$same_site" != "strict" ]; then
+            failed+=(".env.production.example: SESSION_SAME_SITE should be 'strict' (got: $same_site)")
+          fi
+
+          if [ ${#failed[@]} -ne 0 ]; then
+            echo "SECURITY: Production env template has insecure session defaults:"
+            for msg in "${failed[@]}"; do echo "  - $msg"; done
+            exit 1
+          fi
+          echo "Production env template session security: OK"
+
       - name: Informational - CI won't alter production
-        run: echo "This check ensures deploy-time session envs are defined as secrets. It does not modify environment values."
+        run: echo "This check ensures deploy-time session envs are defined as secrets and have secure values. It does not modify environment values."
 
 # Notes:
-# - This workflow fails when any of the required session env secrets are missing.
-# - Set the secrets in GitHub: Settings → Secrets → Actions (SESSION_SECURE_COOKIE, SESSION_HTTP_ONLY, SESSION_SAME_SITE).
-# - It is recommended to let your deploy pipeline read these secrets and set runtime env variables on hosts rather than exposing them in code.
+# - This workflow fails when any required session env secret is missing OR has an insecure value.
+# - Set the secrets in GitHub: Settings → Secrets → Actions.
+# - Required values for production:
+#     SESSION_SECURE_COOKIE=true   (HTTPS-only cookie flag)
+#     SESSION_HTTP_ONLY=true       (no JS access to session cookie)
+#     SESSION_SAME_SITE=strict     (CSRF protection)
+#     SESSION_ENCRYPT=true         (session data encrypted at rest)
+
