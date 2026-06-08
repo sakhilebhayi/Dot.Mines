@@ -8,6 +8,7 @@ use Database\Factories\AIRecommendationFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * AIRecommendation Model
@@ -148,5 +149,29 @@ class AIRecommendation extends Model
     {
         // @phpstan-ignore-next-line
         return $query->whereIn('priority', ['critical', 'high']);
+    }
+
+    /** @return BelongsTo<AIAgent, $this> */
+    public function aiAgent(): BelongsTo
+    {
+        return $this->belongsTo(AIAgent::class, 'ai_agent_id');
+    }
+
+    /** @return BelongsTo<Machine, $this> */
+    public function machine(): BelongsTo
+    {
+        return $this->belongsTo(Machine::class, 'related_machine_id');
+    }
+
+    /** @return BelongsTo<MineArea, $this> */
+    public function mineArea(): BelongsTo
+    {
+        return $this->belongsTo(MineArea::class, 'related_mine_area_id');
+    }
+
+    /** @return BelongsTo<Route, $this> */
+    public function route(): BelongsTo
+    {
+        return $this->belongsTo(Route::class, 'related_route_id');
     }
 }
