@@ -24,9 +24,11 @@ use App\Services\FeedAttachmentService;
 use App\Services\MentionParser;
 use App\Traits\RealtimeUpdates;
 use Carbon\Carbon;
+use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -254,7 +256,7 @@ class Feed extends Component
         // Parse @mentions
         app(MentionParser::class)->parseSave($post, $post->body, $user->id, $post->team_id);
 
-        FeedPostCreated::dispatch($post);
+        $this->safeBroadcast(fn () => FeedPostCreated::dispatch($post));
 
         $this->closeCompose();
         $this->resetPage();
@@ -285,7 +287,7 @@ class Feed extends Component
         });
 
         $post = FeedPost::find($postId);
-        FeedAcknowledgementUpdated::dispatch($post);
+        $this->safeBroadcast(fn () => FeedAcknowledgementUpdated::dispatch($post));
     }
 
     // ── Like (toggle) ─────────────────────────────────────────────────────────
@@ -307,7 +309,7 @@ class Feed extends Component
         });
 
         $post = FeedPost::find($postId);
-        FeedPostLiked::dispatch($post);
+        $this->safeBroadcast(fn () => FeedPostLiked::dispatch($post));
     }
 
     // ── Comments ──────────────────────────────────────────────────────────────
@@ -372,7 +374,7 @@ class Feed extends Component
         // Parse @mentions in comment
         app(MentionParser::class)->parseSave($comment, $comment->body, (int) Auth::id(), (int) $post->team_id);
 
-        FeedCommentCreated::dispatch($comment, $post);
+        $this->safeBroadcast(fn () => FeedCommentCreated::dispatch($comment, $post));
 
         $this->commentBody[$postId] = '';
         $this->replyTo[$postId] = null;
@@ -404,7 +406,7 @@ class Feed extends Component
 
         $comment->update(['body' => $body, 'is_edited' => true]);
 
-        FeedCommentUpdated::dispatch($comment, $comment->post);
+        $this->safeBroadcast(fn () => FeedCommentUpdated::dispatch($comment, $comment->post));
 
         unset($this->editingComment[$commentId]);
     }
@@ -430,7 +432,7 @@ class Feed extends Component
                 $post->decrement('comment_count');
             }
 
-            FeedCommentDeleted::dispatch($commentId, $post);
+            $this->safeBroadcast(fn () => FeedCommentDeleted::dispatch($commentId, $post));
         });
     }
 
@@ -455,7 +457,7 @@ class Feed extends Component
         ]);
 
         $approval->refresh();
-        FeedPostStatusChanged::dispatch($post, $approval);
+        $this->safeBroadcast(fn () => FeedPostStatusChanged::dispatch($post, $approval));
 
         $this->dispatch('notify', type: 'success', message: 'Post approved.');
     }
@@ -488,7 +490,7 @@ class Feed extends Component
         ]);
 
         $approval->refresh();
-        FeedPostStatusChanged::dispatch($post, $approval);
+        $this->safeBroadcast(fn () => FeedPostStatusChanged::dispatch($post, $approval));
 
         $this->showRejectModal = false;
         $this->rejectPostId = null;
@@ -621,7 +623,7 @@ class Feed extends Component
 
         FeedAuditLog::record('override_approval', $post, ['new_status' => $status]);
         $approval->refresh();
-        FeedPostStatusChanged::dispatch($post, $approval);
+        $this->safeBroadcast(fn () => FeedPostStatusChanged::dispatch($post, $approval));
         $this->dispatch('notify', type: 'success', message: 'Approval overridden to '.$status.'.');
     }
 
@@ -744,6 +746,22 @@ class Feed extends Component
             'shift_loads' => $shiftLoads,
             'as_of' => now()->format('H:i'),
         ];
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Dispatch a broadcast event, swallowing BroadcastException so that
+     * feed actions still succeed when the broadcast driver is unreachable
+     * (e.g. Pusher DNS failure, Reverb not running).
+     */
+    private function safeBroadcast(callable $fn): void
+    {
+        try {
+            $fn();
+        } catch (BroadcastException $e) {
+            Log::warning('Feed broadcast failed: '.$e->getMessage());
+        }
     }
 
     // ── Render ────────────────────────────────────────────────────────────────
