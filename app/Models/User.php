@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
@@ -273,11 +274,16 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Send the email verification notification via the queue.
+     * Send the email verification notification.
+     * Falls back to synchronous delivery if the queue driver is unavailable.
      */
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new VerifyEmailNotification);
+        try {
+            $this->notify(new VerifyEmailNotification);
+        } catch (\RedisException $e) {
+            Notification::sendNow($this, new VerifyEmailNotification);
+        }
     }
 
     /** @return HasMany<NotificationPreference, $this> */
