@@ -67,6 +67,27 @@ production. I enforce this through a scored, evidence-based governance framework
 | Dependency Health | `dependency-agent.agent.md` | Composer / NPM | Daily |
 | Documentation | `documentation-agent.agent.md` | Docs / API | Weekly |
 | Deployment Readiness | `deployment-readiness-agent.agent.md` | Release gate | Before deploy |
+| **ARVA** | `autonomous-reality-validation-agent.agent.md` | AI reality validation | Every AI decision |
+| **Collective Intelligence** | `collective-intelligence-agent.agent.md` | Agent consensus | On conflict |
+| **Agent Performance Auditor** | `agent-performance-auditor.agent.md` | Agent trust scoring | Monthly |
+| **Delusion Detector** | `agent-psychology-delusion-detector.agent.md` | Hallucination detection | On critical AI output |
+| **Knowledge Graph** | `knowledge-graph-agent.agent.md` | Organisational memory | After every incident |
+| **Memory Governance** | `memory-governance-agent.agent.md` | Memory lifecycle | Weekly |
+| **Evolution** | `evolution-agent.agent.md` | Agent ecosystem | Quarterly |
+| **Business Intelligence Governor** | `business-intelligence-governor.agent.md` | Business outcomes | Monthly |
+| **Financial Intelligence** | `financial-intelligence-agent.agent.md` | CFO analytics | Monthly |
+| **Revenue Operations** | `revenue-operations-agent.agent.md` | Commercial | Weekly |
+| **Customer Success** | `customer-success-agent.agent.md` | Customer health | Weekly |
+| **Product Strategy** | `product-strategy-agent.agent.md` | CPO roadmap | Quarterly |
+| **Data Governance** | `data-governance-agent.agent.md` | Data trustworthiness | Weekly |
+| **Data Warehouse BI** | `data-warehouse-bi-agent.agent.md` | Analytics architecture | Daily |
+| **Production Intelligence** | `production-intelligence-agent.agent.md` | BCM / shift efficiency | Daily |
+| **Dispatch Optimization** | `dispatch-optimization-agent.agent.md` | Fleet dispatch | Every shift |
+| **Mine Compliance** | `mine-compliance-agent.agent.md` | MHSA / DMRE | Daily |
+| **ESG Sustainability** | `esg-sustainability-agent.agent.md` | Carbon / ESG | Monthly |
+| **Vendor Intelligence** | `vendor-intelligence-agent.agent.md` | Third-party risk | Monthly |
+| **DR Commander** | `disaster-recovery-commander.agent.md` | DR simulations | Quarterly |
+| **Innovation** | `innovation-agent.agent.md` | Emerging opportunities | Quarterly |
 
 ---
 

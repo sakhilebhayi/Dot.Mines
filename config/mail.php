@@ -14,6 +14,8 @@ return [
     |
     */
 
+    // In production, set MAIL_MAILER=failover so emails continue to send
+    // via AWS SES if the primary SMTP server is unavailable.
     'default' => env('MAIL_MAILER', 'log'),
 
     /*
@@ -41,13 +43,16 @@ return [
             'transport' => 'smtp',
             // MAIL_SCHEME controls the encryption mode.
             // Use 'smtps' for port 465 (implicit TLS) or omit/null for port 587 (STARTTLS via stream options).
-            'scheme' => env('MAIL_SCHEME', env('MAIL_ENCRYPTION')),
+            // MAIL_ENCRYPTION is a legacy Laravel <11 alias — do not use; MAIL_SCHEME is the canonical key.
+            'scheme' => env('MAIL_SCHEME'),
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            // MAIL_TIMEOUT: prevents queue workers from hanging indefinitely on SMTP failure.
+            // Production default is 30 seconds. Set to null to disable (not recommended).
+            'timeout' => env('MAIL_TIMEOUT', 30),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
@@ -83,9 +88,12 @@ return [
 
         'failover' => [
             'transport' => 'failover',
+            // Primary: custom SMTP (mines.infodot.co.za)
+            // Secondary: AWS SES — requires AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
+            // IMPORTANT: do NOT use 'log' as a secondary — that causes silent message loss.
             'mailers' => [
                 'smtp',
-                'log',
+                'ses',
             ],
             'retry_after' => 60,
         ],

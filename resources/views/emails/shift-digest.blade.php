@@ -53,7 +53,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($stats['by_category'] as $cat => $data)
+            @foreach (($stats['by_category'] ?? []) as $cat => $data)
                 <tr>
                     <td style="color:#e2e8f0;font-size:14px;padding:10px 16px;border-bottom:1px solid #334155;">
                         {{ ucfirst(str_replace('_', ' ', $cat)) }}
@@ -174,7 +174,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($stats['by_category'] as $cat => $data)
+                @foreach (($stats['by_category'] ?? []) as $cat => $data)
                     <tr>
                         <td style="color: #e2e8f0; font-size: 14px; padding: 6px 0; border-bottom: 1px solid #1e293b;">
                             {{ ucfirst(str_replace('_', ' ', $cat)) }}
@@ -262,3 +262,8 @@
         </p>
     </div>
 </div>
+@if (!empty($unsubscribeUrl))
+@section('unsubscribe_link')
+    <a href="{{ $unsubscribeUrl }}" style="color:#64748b;text-decoration:underline;">Unsubscribe from shift digests</a>
+@endsection
+@endif

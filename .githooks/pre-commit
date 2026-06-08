@@ -53,12 +53,13 @@ if [ -x vendor/bin/phpstan ]; then
 fi
 
 # ── 5. PHPUnit tests ──────────────────────────────────────────────────────
-if command -v php >/dev/null 2>&1 && [ -f artisan ]; then
-  # Suppress Xdebug "not connected" noise but preserve test output and exit code
-  TEST_OUTPUT=$(php artisan test --compact --no-coverage \
-    -d xdebug.mode=off \
-    2>/dev/null)
+if command -v php >/dev/null 2>&1 && [ -f vendor/bin/phpunit ]; then
+  # Use vendor/bin/phpunit directly so -d memory_limit is inherited by the test process.
+  # artisan test spawns a subprocess that ignores the parent memory flag.
+  set +e
+  TEST_OUTPUT=$(php -d memory_limit=512M vendor/bin/phpunit --configuration=phpunit.xml --no-coverage 2>&1)
   TEST_EXIT=$?
+  set -e
   echo "$TEST_OUTPUT"
   if [ $TEST_EXIT -ne 0 ]; then
     echo "✗ Tests failed. Commit blocked." >&2

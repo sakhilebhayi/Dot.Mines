@@ -79,5 +79,10 @@ class SendNotificationEmailJob implements ShouldQueue
             'notification_id' => $this->notificationId,
             'error' => $exception->getMessage(),
         ]);
+
+        // L3: Forward to Sentry so the on-call team is alerted immediately.
+        if (app()->bound('sentry')) {
+            \Sentry\captureException($exception);
+        }
     }
 }

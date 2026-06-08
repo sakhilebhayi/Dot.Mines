@@ -195,6 +195,9 @@
         <div class="footer">
             <p>This email was sent on behalf of <strong>{{ $team->name }}</strong></p>
             <p>You're receiving this because you're a team member. <a href="{{ route('home') }}">View platform</a></p>
+            @if (!empty($unsubscribeUrl))
+            <p style="margin-top:8px;font-size:11px;"><a href="{{ $unsubscribeUrl }}" style="color:#64748b;">Unsubscribe from onboarding emails</a></p>
+            @endif
         </div>
     </div>
 </div>

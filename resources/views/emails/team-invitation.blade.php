@@ -1,20 +1,20 @@
 @extends('emails.layout')
 
-@section('title', 'You\'ve been invited to join ' . $invitation->team->name)
+@section('title', 'You\'ve been invited to join ' . $invitation->team?->name ?? config('app.name'))
 
 @section('banner')
     <h1 style="color:#f1f5f9;font-size:20px;font-weight:700;margin:0 0 6px;letter-spacing:-0.02em;">
         You're invited to join a team
     </h1>
     <p style="color:#94a3b8;font-size:14px;margin:0;line-height:1.5;">
-        {{ $invitation->team->name }} has invited you to collaborate on {{ config('app.name') }}.
+        {{ $invitation->team?->name ?? config('app.name') }} has invited you to collaborate on {{ config('app.name') }}.
     </p>
 @endsection
 
 @section('content')
     <p style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:0 0 24px;">
         You have been invited to join the
-        <strong style="color:#f1f5f9;">{{ $invitation->team->name }}</strong>
+        <strong style="color:#f1f5f9;">{{ $invitation->team?->name ?? config('app.name') }}</strong>
         team on {{ config('app.name') }}.
     </p>
 
@@ -51,6 +51,6 @@
 @endsection
 
 @section('footer_note')
-    This invitation was sent on behalf of <strong>{{ $invitation->team->name }}</strong>.
+    This invitation was sent on behalf of <strong>{{ $invitation->team?->name ?? config('app.name') }}</strong>.
 @endsection
 

@@ -69,11 +69,16 @@
                         <td style="background-color:#070d1a;border-top:1px solid #1e293b;padding:20px 32px;text-align:center;border-radius:0 0 14px 14px;">
                             <p style="margin:0 0 5px;font-size:12px;color:#64748b;">
                                 Questions? Reach us at
-                                <a href="mailto:{{ config('mail.addresses.info', 'info@mines.infodot.co.za') }}" style="color:#94a3b8;text-decoration:none;">{{ config('mail.addresses.info', 'info@mines.infodot.co.za') }}</a>
+                                <a href="mailto:{{ config('mail.addresses.info') }}" style="color:#94a3b8;text-decoration:none;">{{ config('mail.addresses.info') }}</a>
                             </p>
                             @hasSection('footer_note')
                             <p style="margin:4px 0 5px;font-size:12px;color:#475569;">
                                 @yield('footer_note')
+                            </p>
+                            @endif
+                            @hasSection('unsubscribe_link')
+                            <p style="margin:4px 0 5px;font-size:11px;color:#475569;">
+                                @yield('unsubscribe_link')
                             </p>
                             @endif
                             <p style="margin:0;font-size:11px;color:#334155;">

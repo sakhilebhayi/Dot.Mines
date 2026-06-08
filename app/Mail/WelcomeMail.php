@@ -4,30 +4,37 @@ namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Symfony\Component\Mime\Email;
 
-class WelcomeMail extends Mailable
+class WelcomeMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public User $user;
-
-    /**
-     * Create a new message instance.
-     */
-    public function __construct(User $user)
+    public function __construct(public readonly User $user)
     {
-        $this->user = $user;
+        $this->onQueue('notifications');
     }
 
-    /**
-     * Build the message.
-     */
-    public function build(): self
+    public function envelope(): Envelope
     {
-        return $this->subject('Welcome to '.config('app.name'))
-            ->view('emails.welcome')
-            ->with(['user' => $this->user]);
+        return new Envelope(
+            subject: 'Welcome to '.config('app.name'),
+            using: [
+                fn (Email $message) => $message->getHeaders()->addTextHeader('X-Mines-Mailable', static::class),
+            ],
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.welcome',
+            text: 'emails.text.welcome',
+        );
     }
 }

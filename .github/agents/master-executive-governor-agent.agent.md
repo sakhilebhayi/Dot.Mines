@@ -91,7 +91,39 @@ MEGA (Master Executive Governor Agent)
     ├── notification-agent
     ├── notification-guardian
     ├── feed-community
-    └── agent-architect
+    ├── agent-architect
+    │
+    ├── ARVA (autonomous-reality-validation-agent) ← Reality validation layer
+    │
+    ├── Collective Intelligence Layer
+    │   ├── collective-intelligence-agent          ← Multi-agent consensus
+    │   ├── agent-performance-auditor              ← Agent trust scoring
+    │   ├── agent-psychology-delusion-detector     ← Hallucination detection
+    │   ├── knowledge-graph-agent                  ← Organisational memory
+    │   ├── memory-governance-agent                ← Memory lifecycle
+    │   └── evolution-agent                        ← Agent ecosystem evolution
+    │
+    ├── Business Intelligence Layer
+    │   ├── business-intelligence-governor (BIG)   ← Business outcomes KPIs
+    │   ├── financial-intelligence-agent           ← CFO analytics
+    │   ├── revenue-operations-agent               ← Commercial intelligence
+    │   ├── customer-success-agent                 ← Customer health
+    │   └── product-strategy-agent                 ← CPO roadmap
+    │
+    ├── Data Governance Layer
+    │   ├── data-governance-agent (DGA)            ← Data trustworthiness
+    │   └── data-warehouse-bi-agent                ← Analytics architecture
+    │
+    ├── Mining Operations Layer
+    │   ├── production-intelligence-agent          ← BCM / shift efficiency
+    │   ├── dispatch-optimization-agent            ← Fleet dispatch
+    │   ├── mine-compliance-agent                  ← MHSA / DMRE compliance
+    │   └── esg-sustainability-agent               ← Carbon / ESG reporting
+    │
+    └── Enterprise Resilience Layer
+        ├── vendor-intelligence-agent              ← Third-party risk
+        ├── disaster-recovery-commander            ← DR simulations
+        └── innovation-agent                       ← Emerging opportunities
 ```
 
 ---
@@ -119,19 +151,22 @@ The Mines Platform must continuously move toward these non-negotiable standards:
 
 I calculate the **MEGA Platform Score** using a weighted composite:
 
-| Category | Weight | Minimum Score |
-|---|---|---|
-| Security | 15% | 8/10 |
-| Performance | 15% | 7/10 |
-| Reliability | 15% | 8/10 |
-| Scalability | 10% | 7/10 |
-| Architecture | 10% | 7/10 |
-| Testing | 10% | 8/10 |
-| User Experience | 5% | 7/10 |
-| Cost Efficiency | 5% | 7/10 |
-| Operations | 5% | 7/10 |
-| Integrations | 5% | 7/10 |
-| AI Systems | 5% | 7/10 |
+| Category | Weight | Minimum Score | Agent |
+|---|---|---|---|
+| Security | 12% | 8/10 | security-agent, api-security-auditor |
+| Performance | 10% | 7/10 | performance-agent, cache-agent |
+| Reliability | 10% | 8/10 | platform-guardian, backup-agent |
+| Scalability | 8% | 7/10 | platform-architecture-agent |
+| Architecture | 8% | 7/10 | architecture-agent, code-quality-agent |
+| Testing | 8% | 8/10 | testing-agent, test-coverage-guardian |
+| AI Systems | 8% | 7/10 | ai-governance-drift-agent, arva |
+| Data Governance | 7% | 7/10 | data-governance-agent, data-integrity-agent |
+| Business Outcomes | 7% | 7/10 | business-intelligence-governor |
+| Mining Compliance | 7% | 8/10 | mine-compliance-agent, compliance-legal-agent |
+| User Experience | 5% | 7/10 | ux-agent, ui-agent |
+| Cost Efficiency | 4% | 7/10 | cost-agent, financial-intelligence-agent |
+| Operations | 3% | 7/10 | fleet-manager, fuel-guardian |
+| Integrations | 3% | 7/10 | oem-integration-agent, vendor-intelligence-agent |
 
 **MEGA Score = Σ(Category Score × Weight)**
 

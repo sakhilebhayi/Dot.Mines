@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -68,7 +69,25 @@ class WhatsAppMigration extends Component
     {
         $this->validate(['inviteMessage' => 'required|string|max:1000']);
 
-        $team = Auth::user()->currentTeam;
+        // M4: Rate-limit bulk onboarding invite sends to 3 per team per day.
+        /** @var User $actor */
+        $actor = Auth::user();
+        $team = $actor->currentTeam;
+
+        $rateLimitKey = 'feed-onboarding-invites:'.($team?->id ?? $actor->id);
+        if (RateLimiter::tooManyAttempts($rateLimitKey, maxAttempts: 3)) {
+            $this->dispatch('notify', type: 'error', message: 'Invite limit reached. You may send invites at most 3 times per day.');
+
+            return;
+        }
+
+        if ($team === null) {
+            $this->dispatch('notify', type: 'error', message: 'No active team found.');
+
+            return;
+        }
+
+        RateLimiter::hit($rateLimitKey, decaySeconds: 86400);
         $users = User::whereHas('teams', fn ($q) => $q->where('teams.id', $team->id))
             ->where('id', '!=', Auth::id())
             ->get();

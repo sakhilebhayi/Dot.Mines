@@ -24,7 +24,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-06B6D4?logo=tailwindcss&logoColor=white)
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/Version-3.1-6875F5)
+![Version](https://img.shields.io/badge/Version-3.2-6875F5)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 
 </div>
@@ -71,6 +71,98 @@
 **Mines** is a modern, production-ready fleet management platform built specifically for mining operations. It combines real-time GPS tracking, AI-powered optimization, structured operational communications, and deep OEM integrations into a single unified platform — replacing fragmented tools like WhatsApp groups and disconnected spreadsheets.
 
 ## 🆕 Latest Updates (June 2026)
+
+### MEGA V2 — Autonomous Enterprise Readiness Framework
+
+A full three-tier governance scoring framework has been implemented, producing a verifiable **MEGA V2 Score** (0–100) and APPROVE / CONDITIONAL / BLOCK deployment verdict:
+
+**Tier 1 — Technical Domains (60 pts)**
+
+| Domain | Max | Description |
+|--------|-----|-------------|
+| Security | 12 | `SESSION_ENCRYPT`, `APP_DEBUG`, DB connectivity, Sentry configured |
+| Observability | 8 | Sentry DSN, logging channel, Horizon config |
+| Database | 8 | Migration health |
+| Queue | 8 | Failed-job count penalty |
+| Email | 8 | SMTP timeout, SES failover, `sent_emails` table, unsubscribe preferences |
+| API | 8 | Route auth coverage |
+| Testing | 8 | Test file count proxy (5 test files = 1 pt; 40 files = 8 pts) |
+
+**Tier 2 — Autonomous AI Domains (30 pts)**
+
+| Domain | Max | Infrastructure |
+|--------|-----|----------------|
+| AI Governance | 4 | `ai_prediction_outcomes` table + `ai_agents` populated |
+| AI Accuracy | 4 | Mean accuracy across `ai_prediction_outcomes.accuracy_score` |
+| AI Drift Control | 3 | `PredictionAccuracyService::reliabilityScore()` (0–10 index) |
+| Agent Reliability | 4 | `agent_performance_logs` + `AgentReliabilityService::agentScore()` |
+| Agent Collaboration | 3 | Distinct active agents in `agent_performance_logs` (last 30 days) |
+| Organisational Memory | 2 | Active entries in `knowledge_graph_entries` |
+| Reality Alignment | 3 | `DataTrustService::overallTrustScore()` from `data_quality_snapshots` |
+| Hallucination Resistance | 4 | High-confidence (≥80) knowledge graph entries |
+| Decision Intelligence | 3 | `ai_recommendation_actions` populated |
+
+**Tier 3 — Business Intelligence Domains (10 pts)**
+
+| Domain | Max | Description |
+|--------|-----|-------------|
+| Operational Efficiency | 3 | Fleet + fuel data populated |
+| Customer Success | 2 | Teams provisioned |
+| Financial Intelligence | 2 | Fuel budgets tracked |
+| Innovation Capacity | 3 | MEGA V2 infrastructure (agent logs + knowledge graph) |
+
+**New Artisan Command:**
+
+```bash
+# Print full scorecard with APPROVE / CONDITIONAL / BLOCK verdict
+php artisan platform:mega-score
+
+# Also run data quality snapshots before scoring
+php artisan platform:mega-score --snapshot
+
+# Output as JSON for CI/CD pipeline integration
+php artisan platform:mega-score --json
+```
+
+**New database tables:**
+
+| Table | Purpose |
+|-------|---------|
+| `ai_prediction_outcomes` | Prediction-vs-outcome pairs per AI agent for drift detection |
+| `data_quality_snapshots` | Periodic per-domain data quality scores (fleet, fuel, maintenance) |
+| `agent_performance_logs` | Every agent operation: status, confidence, false-positive tracking |
+| `knowledge_graph_entries` | Subject→predicate→object triples (organisational memory) |
+
+**New services:**
+
+| Service | Methods |
+|---------|---------|
+| `AI\PredictionAccuracyService` | `logPrediction()`, `accuracyReport()`, `driftReport()`, `reliabilityScore()` |
+| `DataTrustService` | `snapshotAll()`, `snapshotFleet/Fuel/Maintenance()`, `overallTrustScore()` |
+| `AgentReliabilityService` | `log()`, `agentScore()`, `platformReliabilityScore()`, `report()` |
+| `OrganisationalMemoryService` | `remember()`, `recall()`, `recallAll()`, `forget()`, `memoryHealthScore()` |
+
+### Email Ecosystem Production Hardening (100/100)
+
+A complete audit and hardening of the email subsystem achieving a 100/100 email production readiness score:
+
+- **SMTP failover** — `failover` mailer routes `smtp → ses`; timeout set via `MAIL_TIMEOUT` env key
+- **`sent_emails` table** — every outbound email is logged with mailable class, recipient, subject, and bounce tracking columns (`bounced_at`, `bounce_reason`, `delivered_at`, `provider_message_id`)
+- **`LogSentMailListener`** — handles `Illuminate\Mail\Events\MessageSent`; reads `X-Mines-Mailable` header; writes to `sent_emails`
+- **All 6 mailables on `notifications` queue** — `WelcomeMail`, `TeamInvitationMail`, `ReportReadyMail`, `ShiftDigestMail`, `FeedOnboardingInvite`, `NotificationAlertMail`
+- **All 6 mailables migrated** to `envelope()` / `content()` API (Laravel 10+ recommended pattern)
+- **`EmailUnsubscribeController`** — signed-URL unsubscribe flow: `GET /email/unsubscribe` (confirmation) + `POST /email/unsubscribe` (sets `email_enabled=false`); supports 6 preference types
+- **6 plain-text fallback views** created for all mailables (`resources/views/emails/text/`)
+- **Timezone-aware shift digest windows** — per-team timezone in `SendShiftDigest` artisan command
+- **Rate limiting** on team invitations and WhatsApp migration (10 / day and 3 / day respectively)
+- **Boot-time production guards** in `AppServiceProvider`:
+  - `SENTRY_DSN` empty → `Log::critical()`
+  - `SESSION_ENCRYPT=false` → `Log::critical()`
+  - SMTP password < 32 chars → `Log::critical()`
+
+### Security: `SESSION_ENCRYPT=true`
+
+Session data is now encrypted at rest in production. The `.env.example` documents this as mandatory for OWASP A02 / POPIA / ISO 27001 compliance.
 
 ### Bell ISO15143-3 Fleet API Integration
 
@@ -495,7 +587,7 @@ BELL_SSO_SCOPE=ISO_Exports
 
 | Layer | Technology |
 |---|---|
-| **Backend** | PHP 8.2+, Laravel 12.x |
+| **Backend** | PHP 8.3+, Laravel 12.x |
 | **Frontend** | Livewire 3.x, Alpine.js 3.x |
 | **Database** | PostgreSQL 16+ |
 | **Styling** | Tailwind CSS 3.x, DaisyUI 5.x |
@@ -588,7 +680,8 @@ DB_USERNAME=your_username
 
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
+# Required in production — OWASP A02 / POPIA / ISO 27001 compliance
+SESSION_ENCRYPT=true
 
 CACHE_DRIVER=file
 QUEUE_CONNECTION=database

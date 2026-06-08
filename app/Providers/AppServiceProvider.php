@@ -13,6 +13,7 @@ use App\Events\GeofenceExitDetected;
 use App\Events\MachineOffline;
 use App\Events\MaintenanceAlertTriggered;
 use App\Events\SensorReadingRecorded;
+use App\Listeners\LogSentMailListener;
 use App\Listeners\NotifyOnJobFailed;
 use App\Listeners\SendAlertNotificationEmail;
 use App\Listeners\SendComplianceViolationNotification;
@@ -44,6 +45,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -113,6 +115,29 @@ class AppServiceProvider extends ServiceProvider
         MineArea::observe(MineAreaObserver::class);
         FuelTransaction::observe(FuelTransactionObserver::class);
 
+        // M1: Enforce minimum SMTP password strength at boot.
+        // A weak password on a production SMTP server is a security risk (brute-force, credential stuffing).
+        // Minimum 32 characters is required for production deployments.
+        if (app()->environment('production')) {
+            $smtpPassword = (string) config('mail.mailers.smtp.password', '');
+            if (strlen($smtpPassword) < 32) {
+                Log::critical('SECURITY: SMTP password is weaker than the required 32-character minimum. Rotate immediately via your mail provider dashboard and update MAIL_PASSWORD in production .env.', [
+                    'current_length' => strlen($smtpPassword),
+                    'minimum_required' => 32,
+                ]);
+            }
+
+            // NB-1: Sentry DSN is mandatory in production — without it all exceptions are silent.
+            if (empty(config('sentry.dsn'))) {
+                Log::critical('OBSERVABILITY: SENTRY_DSN is not configured. All production exceptions, failed jobs, and regressions will be completely silent. Set SENTRY_DSN immediately.');
+            }
+
+            // NB-2: Session encryption is required for OWASP A02 / POPIA / ISO 27001 compliance.
+            if (! config('session.encrypt')) {
+                Log::critical('SECURITY: SESSION_ENCRYPT is false in production. Session data is unencrypted at rest, violating OWASP A02, POPIA, and ISO 27001. Set SESSION_ENCRYPT=true immediately.');
+            }
+        }
+
         // Pulse dashboard access (admins only in non-local)
         Gate::define('viewPulse', function ($user) {
             $admins = array_filter(array_map('trim', explode(',', (string) env('HORIZON_ADMINS', ''))));
@@ -147,6 +172,9 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(SensorReadingRecorded::class, SendSensorAlertNotification::class);
         Event::listen(MachineOffline::class, SendMachineOfflineNotification::class);
         Event::listen(ComplianceViolationDetected::class, SendComplianceViolationNotification::class);
+
+        // Universal email delivery audit trail — logs every sent email to sent_emails table.
+        Event::listen(MessageSent::class, LogSentMailListener::class);
 
         // Listen for failed queue jobs and notify monitoring
         Event::listen(JobFailed::class, function ($event) {

@@ -4,23 +4,39 @@ namespace App\Mail;
 
 use App\Models\Report;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Symfony\Component\Mime\Email;
 
-class ReportReadyMail extends Mailable
+class ReportReadyMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public Report $report;
-
-    public function __construct(Report $report)
+    public function __construct(public readonly Report $report)
     {
-        $this->report = $report;
+        $this->onQueue('notifications');
     }
 
-    public function build(): self
+    public function envelope(): Envelope
     {
-        // Use a signed download route so file paths are not exposed in email
+        return new Envelope(
+            from: new Address(
+                (string) config('mail.addresses.support'),
+                (string) config('app.name'),
+            ),
+            subject: 'Your report is ready — '.$this->report->title,
+            using: [
+                fn (Email $message) => $message->getHeaders()->addTextHeader('X-Mines-Mailable', static::class),
+            ],
+        );
+    }
+
+    public function content(): Content
+    {
         $downloadUrl = '#';
         try {
             if ($this->report->status === 'completed') {
@@ -30,20 +46,17 @@ class ReportReadyMail extends Mailable
                     ['report' => $this->report->id]
                 );
             }
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // fallback to placeholder
-            $downloadUrl = '#';
         }
 
-        return $this->subject('Your report is ready — '.$this->report->title)
-            ->from(
-                (string) config('mail.addresses.support'),
-                (string) config('app.name'),
-            )
-            ->view('emails.report-ready')
-            ->with([
+        return new Content(
+            view: 'emails.report-ready',
+            text: 'emails.text.report-ready',
+            with: [
                 'report' => $this->report,
                 'downloadUrl' => $downloadUrl,
-            ]);
+            ],
+        );
     }
 }

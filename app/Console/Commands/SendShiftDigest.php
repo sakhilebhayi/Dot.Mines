@@ -47,7 +47,9 @@ class SendShiftDigest extends Command
 
         foreach ($teams as $team) {
             try {
-                $this->sendDigestForTeam($team, $shift, $from, $to);
+                // Per-team shift window uses the team's configured timezone (L2 fix).
+                [$teamFrom, $teamTo] = $this->shiftTimeRange($shift, $team->timezone ?? config('app.timezone', 'UTC'));
+                $this->sendDigestForTeam($team, $shift, $teamFrom, $teamTo);
             } catch (\Exception $e) {
                 Log::error('Shift digest failed for team', [
                     'team_id' => $team->id,
@@ -146,6 +148,7 @@ class SendShiftDigest extends Command
                 stats: $stats,
                 topPosts: $topPosts,
                 pendingApprovals: $pendingApprovals,
+                recipientUserId: $recipient->id,
             ));
         }
 
@@ -171,30 +174,32 @@ class SendShiftDigest extends Command
     }
 
     /**
-     * Return [Carbon $from, Carbon $to] for the shift on today's date.
+     * Return [Carbon $from, Carbon $to] for the shift on the current date in
+     * the given timezone. Defaults to the application timezone.
      *
      * @return array<mixed>
      */
-    private function shiftTimeRange(string $shift): array
+    private function shiftTimeRange(string $shift, string $timezone = ''): array
     {
-        $now = now();
+        $tz = $timezone ?: config('app.timezone', 'UTC');
+        $now = Carbon::now($tz);
         $today = $now->toDateString();
 
         return match ($shift) {
             'A' => [
-                Carbon::parse("{$today} 06:00:00"),
-                Carbon::parse("{$today} 14:00:00"),
+                Carbon::parse("{$today} 06:00:00", $tz),
+                Carbon::parse("{$today} 14:00:00", $tz),
             ],
             'B' => [
-                Carbon::parse("{$today} 14:00:00"),
-                Carbon::parse("{$today} 22:00:00"),
+                Carbon::parse("{$today} 14:00:00", $tz),
+                Carbon::parse("{$today} 22:00:00", $tz),
             ],
             'C' => [
                 // Shift C spans midnight: yesterday 22:00 → today 06:00
-                Carbon::parse("{$today} 22:00:00")->subDay(),
-                Carbon::parse("{$today} 06:00:00"),
+                Carbon::parse("{$today} 22:00:00", $tz)->subDay(),
+                Carbon::parse("{$today} 06:00:00", $tz),
             ],
-            default => [Carbon::parse("{$today} 06:00:00"), Carbon::parse("{$today} 14:00:00")],
+            default => [Carbon::parse("{$today} 06:00:00", $tz), Carbon::parse("{$today} 14:00:00", $tz)],
         };
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EmailUnsubscribeController;
 use App\Http\Controllers\FeedAttachmentController;
 use App\Http\Controllers\GdprController;
 use App\Http\Controllers\HealthController;
@@ -276,6 +277,15 @@ Route::prefix('core-features')->group(function () {
 Route::post('/livewire/update', [HandleRequests::class, 'handleUpdate'])
     ->middleware('web')
     ->name('default.livewire.update');
+
+// ── Email Unsubscribe (POPIA § 45(2) / CAN-SPAM compliant) ────────────────
+// These routes are intentionally public — no auth required. Signed URLs prevent abuse.
+Route::get('/email/unsubscribe', [EmailUnsubscribeController::class, 'show'])
+    ->name('email.unsubscribe');
+Route::post('/email/unsubscribe', [EmailUnsubscribeController::class, 'handle'])
+    ->name('email.unsubscribe.handle');
+Route::view('/email/unsubscribed', 'emails.unsubscribed')
+    ->name('email.unsubscribed');
 
 // ── GDPR / Data Subject Rights ─────────────────────────────────────────────
 Route::middleware(['auth', 'verified'])->prefix('gdpr')->name('gdpr.')->group(function () {

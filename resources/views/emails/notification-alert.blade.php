@@ -72,3 +72,9 @@
 @section('footer_note')
     Sent at {{ $notification->created_at->format('D, d M Y H:i T') }}
 @endsection
+
+@if (!empty($unsubscribeUrl))
+@section('unsubscribe_link')
+    <a href="{{ $unsubscribeUrl }}" style="color:#64748b;text-decoration:underline;">Unsubscribe from alert notifications</a>
+@endsection
+@endif

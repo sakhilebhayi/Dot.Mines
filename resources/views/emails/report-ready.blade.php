@@ -39,7 +39,7 @@
         <div style="background-color:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px 20px;margin:0 0 28px;">
             <p style="color:#94a3b8;font-size:14px;margin:0;line-height:1.5;">
                 The report file will be available in your
-                <a href="{{ route('reports.index') }}" style="color:#f59e0b;text-decoration:none;font-weight:600;">Reports list</a>
+                <a href="{{ route('reports') }}" style="color:#f59e0b;text-decoration:none;font-weight:600;">Reports list</a>
                 shortly.
             </p>
         </div>
@@ -70,7 +70,7 @@
 
     <p style="color:#64748b;font-size:13px;line-height:1.6;margin:24px 0 0;">
         You can also access all your reports from the
-        <a href="{{ route('reports.index') }}" style="color:#94a3b8;text-decoration:none;">Reports dashboard</a>.
+        <a href="{{ route('reports') }}" style="color:#94a3b8;text-decoration:none;">Reports dashboard</a>.
     </p>
 @endsection
 

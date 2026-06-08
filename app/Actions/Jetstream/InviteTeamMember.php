@@ -10,6 +10,7 @@ use Closure;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Jetstream\Contracts\InvitesTeamMembers;
@@ -27,6 +28,13 @@ class InviteTeamMember implements InvitesTeamMembers
         Gate::forUser($user)->authorize('addTeamMember', $team);
 
         $this->validate($team, $email, $role);
+
+        // M4: Rate-limit invitation emails to 10 per team per hour to prevent email abuse.
+        $rateLimitKey = 'team-invitations:'.$team->id;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, maxAttempts: 10)) {
+            abort(429, 'Too many invitations sent recently. Please wait before sending more.');
+        }
+        RateLimiter::hit($rateLimitKey, decaySeconds: 3600);
 
         InvitingTeamMember::dispatch($team, $email, $role);
 
