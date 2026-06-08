@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Database\Factories\AIPredictiveAlertFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -111,5 +112,11 @@ class AIPredictiveAlert extends Model
             'acknowledged_at' => 'datetime',
             'was_accurate' => 'boolean',
         ];
+    }
+
+    /** @param Builder<self> $query */
+    public function scopeUnacknowledged(Builder $query): void
+    {
+        $query->where('is_acknowledged', false);
     }
 }
