@@ -3,6 +3,7 @@
 namespace App\Services\Integration;
 
 use App\Contracts\BellIso15143ServiceInterface;
+use App\Events\MachineLocationUpdated;
 use App\Models\BellEquipment;
 use App\Models\BellEquipmentCautionCode;
 use App\Models\BellEquipmentCurrentStatus;
@@ -16,6 +17,7 @@ use App\Models\BellEquipmentOperatingHoursHistory;
 use App\Models\BellEquipmentTelemetryHistory;
 use App\Models\BellFleetSnapshot;
 use App\Models\BellIntegrationAuditLog;
+use App\Models\Machine;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -405,6 +407,9 @@ class BellIso15143Service implements BellIso15143ServiceInterface
             $this->insertLoadCountHistoryIfChanged($equipmentModel, $item, $snapshotTime);
             $this->syncCautionCodes($equipmentModel, $item, $snapshotTime);
             $this->insertHealthHistory($equipmentModel, $item, $snapshotTime);
+
+            // Push latest telemetry into the canonical machines table.
+            $this->bridgeToMachine($equipmentModel, $item, $snapshotTime);
 
             $this->counters['processed']++;
         }
@@ -889,6 +894,104 @@ class BellIso15143Service implements BellIso15143ServiceInterface
             return Carbon::parse($value);
         } catch (\Throwable) {
             return null;
+        }
+    }
+
+    /**
+     * Match a BellEquipment record to its corresponding Machine row and push
+     * the latest telemetry (GPS, engine hours, status, odometer) into the
+     * canonical machines table. Fires MachineLocationUpdated so the live map
+     * receives the updated position in real-time.
+     *
+     * Matching strategy (in order):
+     *   1. bell_equipment.machine_id already set → use directly
+     *   2. machines.serial_number  = bell_equipment.serial_number
+     *   3. machines.external_id    = bell_equipment.equipment_id
+     *   4. No match → skip (machine not yet registered in this platform)
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function bridgeToMachine(BellEquipment $bellEquipment, array $item, ?Carbon $snapshotTime): void
+    {
+        // 1. Reuse confirmed link if already set.
+        $machine = $bellEquipment->machine_id !== null
+            ? Machine::find($bellEquipment->machine_id)
+            : null;
+
+        // 2. Match by serial number.
+        if ($machine === null && ! empty($item['serial_number'])) {
+            $machine = Machine::where('serial_number', $item['serial_number'])->first();
+        }
+
+        // 3. Match by external_id / equipment_id.
+        if ($machine === null && ! empty($item['equipment_id'])) {
+            $machine = Machine::where('external_id', $item['equipment_id'])->first();
+        }
+
+        if ($machine === null) {
+            Log::debug('BellIso15143Service: no Machine match for equipment_id='.$item['equipment_id']);
+
+            return;
+        }
+
+        // Persist the confirmed link so future syncs avoid the lookup queries.
+        if ($bellEquipment->machine_id !== $machine->id) {
+            $bellEquipment->update([
+                'machine_id' => $machine->id,
+                'machine_matched_at' => now(),
+            ]);
+        }
+
+        // Determine status from engine_running flag.
+        $status = match (true) {
+            $item['engine_running'] === true => 'active',
+            $item['engine_running'] === false => 'idle',
+            default => $machine->status,
+        };
+
+        // Convert odometer to km (Bell default unit is 'kilometre').
+        $oemOdometer = isset($item['odometer']) ? (float) $item['odometer'] : null;
+        $oemUnits = strtolower($item['odometer_units'] ?? 'kilometre');
+        $totalDistanceKm = match ($oemUnits) {
+            'mile' => $oemOdometer !== null ? round($oemOdometer * 1.60934, 2) : null,
+            'kilometre', 'kilometer', 'km' => $oemOdometer,
+            default => $oemOdometer,
+        };
+
+        $operatingHours = isset($item['operating_hours']) ? (float) $item['operating_hours'] : null;
+        $lat = isset($item['latitude']) ? (float) $item['latitude'] : null;
+        $lng = isset($item['longitude']) ? (float) $item['longitude'] : null;
+
+        $updates = [
+            'external_id' => $item['equipment_id'],
+            'status' => $status,
+            'last_seen_at' => $snapshotTime ?? now(),
+        ];
+
+        if ($lat !== null && $lng !== null) {
+            $updates['last_location_latitude'] = $lat;
+            $updates['last_location_longitude'] = $lng;
+            $updates['last_location_update'] = $snapshotTime ?? now();
+        }
+
+        if ($operatingHours !== null) {
+            $updates['operating_hours'] = $operatingHours;
+            $updates['hours_meter'] = $operatingHours;
+        }
+
+        if ($oemOdometer !== null) {
+            $updates['odometer'] = $oemOdometer;
+            $updates['total_distance_km'] = $totalDistanceKm;
+        }
+
+        $machine->update($updates);
+
+        // Broadcast GPS update to the live map (only when coordinates are present).
+        if ($lat !== null && $lng !== null) {
+            MachineLocationUpdated::dispatch($machine->fresh(), [
+                'latitude' => $lat,
+                'longitude' => $lng,
+            ]);
         }
     }
 

@@ -32,14 +32,17 @@ class FileUploadServiceZipTest extends TestCase
         $tmp = tempnam(sys_get_temp_dir(), 'ziptest');
         $zip = new \ZipArchive;
         $zip->open($tmp, \ZipArchive::CREATE);
-        // Create a 60MB string to exceed default per-file 50MB limit
-        $big = str_repeat('A', 60 * 1024 * 1024);
+        // Use a 512 KB entry and lower the service limit to 256 KB to keep
+        // memory usage well within the 128 MB PHP limit while still testing
+        // the per-file size enforcement logic.
+        $big = str_repeat('A', 512 * 1024);
         $zip->addFromString('big.bin', $big);
         $zip->close();
 
         $uploaded = new UploadedFile($tmp, 'big.zip', null, null, true);
 
         $svc = new FileUploadService;
+        $svc->setMaxPerFileSize(256 * 1024); // 256 KB threshold
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('entry larger than the per-file');

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * One record per unique EquipmentID.
  *
  * @property int $equipment_key
+ * @property int|null $machine_id
+ * @property Carbon|null $machine_matched_at
  * @property string|null $oem_name
  * @property string|null $model
  * @property string $equipment_id
@@ -22,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property Carbon|null $unit_install_date_time
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read Machine|null $machine
  */
 class BellEquipment extends Model
 {
@@ -30,6 +34,8 @@ class BellEquipment extends Model
     protected $table = 'bell_equipment';
 
     protected $fillable = [
+        'machine_id',
+        'machine_matched_at',
         'oem_name',
         'model',
         'equipment_id',
@@ -45,7 +51,14 @@ class BellEquipment extends Model
     {
         return [
             'unit_install_date_time' => 'datetime',
+            'machine_matched_at' => 'datetime',
         ];
+    }
+
+    /** @return BelongsTo<Machine, $this> */
+    public function machine(): BelongsTo
+    {
+        return $this->belongsTo(Machine::class, 'machine_id');
     }
 
     /** @return HasOne<BellEquipmentCurrentStatus, $this> */

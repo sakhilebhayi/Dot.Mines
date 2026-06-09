@@ -2,11 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Events\MachineLocationUpdated;
+use App\Models\BellEquipment;
 use App\Models\BellEquipmentCurrentStatus;
 use App\Models\BellEquipmentDailyKpi;
 use App\Models\BellFleetSnapshot;
+use App\Models\Machine;
 use App\Services\Integration\BellIso15143Service;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -320,5 +324,151 @@ XML;
         $this->assertEquals(0, $result['processed']);
         $this->assertDatabaseCount('bell_fleet_snapshots', 1);
         $this->assertDatabaseCount('bell_equipment', 0);
+    }
+
+    // ------------------------------------------------------------------ //
+    // Machine bridge tests                                                 //
+    // ------------------------------------------------------------------ //
+
+    #[Test]
+    public function sync_updates_machine_gps_and_hours_when_serial_matches(): void
+    {
+        Event::fake([MachineLocationUpdated::class]);
+
+        $machine = Machine::factory()->create([
+            'serial_number' => 'AEBA850EC03509086',
+            'status' => 'idle',
+        ]);
+
+        Http::fake([
+            '*' => Http::response($this->validFleetXml(serial: 'AEBA850EC03509086'), 200, ['Content-Type' => 'application/xml']),
+        ]);
+
+        $this->makeService()->sync();
+
+        $machine->refresh();
+
+        $this->assertEquals('active', $machine->status); // EngineStatus=Running
+        $this->assertEquals(-26.0231, round($machine->last_location_latitude, 4));
+        $this->assertEquals(28.9387, round($machine->last_location_longitude, 4));
+        $this->assertEquals(8376.20, $machine->operating_hours);
+        $this->assertEquals(8376.20, $machine->hours_meter);
+        $this->assertEquals(94114.0, $machine->odometer);
+        $this->assertEquals('ASA B50E#9086', $machine->external_id);
+        $this->assertNotNull($machine->last_seen_at);
+    }
+
+    #[Test]
+    public function sync_links_bell_equipment_machine_id_after_serial_match(): void
+    {
+        Event::fake([MachineLocationUpdated::class]);
+
+        $machine = Machine::factory()->create(['serial_number' => 'AEBA850EC03509086']);
+
+        Http::fake([
+            '*' => Http::response($this->validFleetXml(serial: 'AEBA850EC03509086'), 200, ['Content-Type' => 'application/xml']),
+        ]);
+
+        $this->makeService()->sync();
+
+        $bellEquipment = BellEquipment::where('serial_number', 'AEBA850EC03509086')->firstOrFail();
+
+        $this->assertEquals($machine->id, $bellEquipment->machine_id);
+        $this->assertNotNull($bellEquipment->machine_matched_at);
+    }
+
+    #[Test]
+    public function sync_updates_machine_via_external_id_when_no_serial_match(): void
+    {
+        Event::fake([MachineLocationUpdated::class]);
+
+        // Machine has external_id but no serial set
+        $machine = Machine::factory()->create([
+            'serial_number' => null,
+            'external_id' => 'ASA B50E#9086',
+        ]);
+
+        Http::fake([
+            '*' => Http::response($this->validFleetXml(), 200, ['Content-Type' => 'application/xml']),
+        ]);
+
+        $this->makeService()->sync();
+
+        $machine->refresh();
+        $this->assertEquals('active', $machine->status);
+        $this->assertNotNull($machine->last_location_latitude);
+    }
+
+    #[Test]
+    public function sync_skips_machine_update_when_no_match_found(): void
+    {
+        Event::fake([MachineLocationUpdated::class]);
+
+        // Machine with a completely different serial — no match expected
+        Machine::factory()->create(['serial_number' => 'UNRELATED123456789']);
+
+        Http::fake([
+            '*' => Http::response($this->validFleetXml(), 200, ['Content-Type' => 'application/xml']),
+        ]);
+
+        $this->makeService()->sync();
+
+        // Bell equipment created, but no machine update occurred
+        $this->assertDatabaseHas('bell_equipment', ['equipment_id' => 'ASA B50E#9086']);
+        $this->assertDatabaseMissing('machines', ['external_id' => 'ASA B50E#9086']);
+        Event::assertNotDispatched(MachineLocationUpdated::class);
+    }
+
+    #[Test]
+    public function sync_broadcasts_machine_location_updated_event(): void
+    {
+        Event::fake([MachineLocationUpdated::class]);
+
+        Machine::factory()->create(['serial_number' => 'AEBA850EC03509086']);
+
+        Http::fake([
+            '*' => Http::response($this->validFleetXml(serial: 'AEBA850EC03509086'), 200, ['Content-Type' => 'application/xml']),
+        ]);
+
+        $this->makeService()->sync();
+
+        Event::assertDispatched(MachineLocationUpdated::class);
+    }
+
+    #[Test]
+    public function sync_does_not_broadcast_when_gps_coordinates_are_null(): void
+    {
+        Event::fake([MachineLocationUpdated::class]);
+
+        Machine::factory()->create(['serial_number' => 'AEBA850EC03509086']);
+
+        // XML with no Location block
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<Fleet version="1" snapshotTime="2026-06-02T12:54:29Z">
+  <Equipment>
+    <EquipmentHeader>
+      <OEMName>BELL</OEMName>
+      <Model>B50E</Model>
+      <EquipmentID>ASA B50E#9086</EquipmentID>
+      <SerialNumber>AEBA850EC03509086</SerialNumber>
+    </EquipmentHeader>
+    <CumulativeOperatingHours>8376.20</CumulativeOperatingHours>
+    <EngineStatus>Running</EngineStatus>
+    <TelematicDataDate>2026-06-02T11:14:14Z</TelematicDataDate>
+  </Equipment>
+</Fleet>
+XML;
+
+        Http::fake(['*' => Http::response($xml, 200, ['Content-Type' => 'application/xml'])]);
+
+        $this->makeService()->sync();
+
+        Event::assertNotDispatched(MachineLocationUpdated::class);
+
+        // But operating hours and status should still be updated
+        $machine = Machine::where('serial_number', 'AEBA850EC03509086')->firstOrFail();
+        $this->assertEquals('active', $machine->status);
+        $this->assertEquals(8376.20, $machine->operating_hours);
     }
 }

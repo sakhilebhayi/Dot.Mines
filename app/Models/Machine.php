@@ -81,6 +81,11 @@ class Machine extends Model
         'excavator_id', // Assigned excavator
         'assigned_to_excavator_at',
         'notes',
+        'external_id',         // OEM equipment ID (e.g. Bell EquipmentID)
+        'last_seen_at',        // Timestamp of last OEM telemetry sync
+        'operating_hours',     // Cumulative operating hours from OEM
+        'total_distance_km',   // Total distance km (converted from OEM odometer)
+        'odometer',            // Raw OEM odometer reading
     ];
 
     /**
@@ -98,6 +103,10 @@ class Machine extends Model
             'last_location_latitude' => 'float',
             'last_location_longitude' => 'float',
             'last_location_update' => 'datetime',
+            'last_seen_at' => 'datetime',
+            'operating_hours' => 'decimal:2',
+            'total_distance_km' => 'decimal:2',
+            'odometer' => 'decimal:2',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

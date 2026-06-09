@@ -963,15 +963,94 @@
                         </div>
 
                         <!-- Serial Number -->
-                        <div>
+                        <div
+                            x-data="{
+                                open: false,
+                                search: '',
+                                selected: @entangle('serialNumber'),
+                                options: @js($this->availableSerialNumbers),
+                                get filtered() {
+                                    if (!this.search) return this.options;
+                                    return this.options.filter(o => o.toLowerCase().includes(this.search.toLowerCase()));
+                                },
+                                select(val) {
+                                    this.selected = val;
+                                    this.search = '';
+                                    this.open = false;
+                                },
+                                clear() {
+                                    this.selected = '';
+                                    this.search = '';
+                                    this.open = false;
+                                }
+                            }"
+                            @click.outside="open = false"
+                            class="relative"
+                        >
                             <label class="block text-sm font-medium text-gray-300 mb-2">Serial Number</label>
-                            <input 
-                                type="text" 
-                                wire:model="serialNumber" 
-                                placeholder="e.g., SN123456789"
-                                class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-amber-500"
-                            />
-                            @error('serialNumber') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
+
+                            {{-- Trigger button --}}
+                            <button
+                                type="button"
+                                @click="open = !open"
+                                class="w-full flex items-center justify-between px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-left focus:outline-none focus:border-amber-500"
+                                :class="selected ? 'text-white' : 'text-gray-400'"
+                            >
+                                <span x-text="selected || 'Select or type to search...'"></span>
+                                <svg class="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {{-- Dropdown panel --}}
+                            <div
+                                x-show="open"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 -translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute z-50 mt-1 w-full bg-gray-700 border border-gray-600 rounded-lg shadow-lg"
+                            >
+                                {{-- Search input --}}
+                                <div class="p-2 border-b border-gray-600">
+                                    <input
+                                        type="text"
+                                        x-model="search"
+                                        placeholder="Search serial numbers..."
+                                        class="w-full px-3 py-1.5 bg-gray-800 border border-gray-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:border-amber-500"
+                                        @keydown.escape="open = false"
+                                        x-ref="searchInput"
+                                    />
+                                </div>
+
+                                {{-- Options list --}}
+                                <ul class="max-h-48 overflow-y-auto py-1" role="listbox">
+                                    {{-- Clear / no selection option --}}
+                                    <li
+                                        @click="clear()"
+                                        class="px-4 py-2 text-sm text-gray-400 cursor-pointer hover:bg-gray-600 hover:text-white"
+                                        :class="{ 'bg-gray-600 text-white': selected === '' }"
+                                    >
+                                        — None —
+                                    </li>
+                                    <template x-for="option in filtered" :key="option">
+                                        <li
+                                            @click="select(option)"
+                                            class="px-4 py-2 text-sm text-white cursor-pointer hover:bg-amber-600"
+                                            :class="{ 'bg-amber-600': selected === option }"
+                                            x-text="option"
+                                            role="option"
+                                        ></li>
+                                    </template>
+                                    <li
+                                        x-show="filtered.length === 0"
+                                        class="px-4 py-2 text-sm text-gray-400 italic"
+                                    >
+                                        No serial numbers found
+                                    </li>
+                                </ul>
+                            </div>
+
+                            @error('serialNumber') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <!-- Capacity -->

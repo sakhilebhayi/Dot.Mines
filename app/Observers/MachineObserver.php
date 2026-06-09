@@ -4,11 +4,14 @@ namespace App\Observers;
 
 use App\Models\Machine;
 use App\Services\NotificationService;
+use App\Services\QueryCacheService;
 
 class MachineObserver
 {
     public function created(Machine $machine): void
     {
+        QueryCacheService::invalidateSerialNumbers($machine->team_id);
+
         NotificationService::notifyManagers(
             teamId: $machine->team_id,
             type: NotificationService::TYPE_MACHINE,
@@ -30,6 +33,10 @@ class MachineObserver
 
     public function updated(Machine $machine): void
     {
+        if ($machine->wasChanged('serial_number')) {
+            QueryCacheService::invalidateSerialNumbers($machine->team_id);
+        }
+
         // Only notify on meaningful status or name changes
         $watched = ['status', 'name', 'mine_area_id'];
         $changed = array_intersect($watched, array_keys($machine->getChanges()));
@@ -68,6 +75,8 @@ class MachineObserver
 
     public function deleted(Machine $machine): void
     {
+        QueryCacheService::invalidateSerialNumbers($machine->team_id);
+
         NotificationService::notifyManagers(
             teamId: $machine->team_id,
             type: NotificationService::TYPE_MACHINE,

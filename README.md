@@ -24,7 +24,8 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-06B6D4?logo=tailwindcss&logoColor=white)
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/Version-3.2-6875F5)
+![Version](https://img.shields.io/badge/Version-3.3-6875F5)
+![Tests](https://img.shields.io/badge/Tests-377%20passing-brightgreen)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 
 </div>
@@ -71,6 +72,102 @@
 **Mines** is a modern, production-ready fleet management platform built specifically for mining operations. It combines real-time GPS tracking, AI-powered optimization, structured operational communications, and deep OEM integrations into a single unified platform — replacing fragmented tools like WhatsApp groups and disconnected spreadsheets.
 
 ## 🆕 Latest Updates (June 2026)
+
+### Bell OEM Telemetry Intelligence Framework
+
+A full telemetry intelligence layer has been added on top of the Bell integrations, creating a closed-loop pipeline from raw OEM data to fleet health scoring, ESG metrics, and real-time safety events.
+
+**`bridgeToMachine()` — Equipment → Platform Linking**
+
+The Bell ISO15143-3 sync now automatically links each Bell equipment record to the corresponding `machines` table row using three-tier matching:
+
+1. **Serial number match** — `bell_equipment.serial_number` → `machines.serial_number`
+2. **External ID match** — `bell_equipment.equipment_key` → `machines.external_id`
+3. **Name-based fallback** — normalised name comparison (emits `Log::warning()` for audit)
+
+Once linked, GPS coordinates from each sync cycle are broadcast as a `MachineLocationUpdated` event, feeding the live map in real time.
+
+**5 Dedicated Telemetry Tables**
+
+| Table | Signal | Description |
+|---|---|---|
+| `bell_distance_travelled` | `Distance` | Cumulative odometer readings (km) |
+| `bell_payload_totals` | `CumulativePayloadTotals` | Cumulative payload moved (tonnes) |
+| `bell_def_levels` | `DEFRemaining` | Diesel exhaust fluid remaining (%) |
+| `bell_fuel_levels` | `FuelRemainingRatio` | Fuel tank remaining (%) |
+| `bell_regeneration_hours` | `CumulativeActiveRegenerationHours` | DPF active regeneration hours |
+
+All five tables use `equipment_key → bell_equipment (CASCADE)` foreign keys and a unique composite index on `(equipment_key, snapshot_time)` to prevent duplicate telemetry rows.
+
+**`BellMachineIntelligenceService` — Composite Health Scoring**
+
+A new read-only analytics service that computes a health score (0–100) per machine from five weighted dimensions:
+
+| Dimension | Weight | Source |
+|---|---|---|
+| Engine Condition | 30% | `EngineCondition` signal |
+| Caution Codes | 25% | Active fault code count |
+| Idle Hours ratio | 15% | Idle ÷ Operating hours |
+| Fuel Efficiency | 15% | `FuelRemainingRatio` trend |
+| Regen Hours ratio | 15% | `bell_regeneration_hours` |
+
+Additional capabilities: `computeFleetSnapshots()`, `computeEsgMetrics()` (CO₂/BCM, diesel L/h), `detectOfflineMachines()`, `checkAndFireHealthChange()`.
+
+**7 New Bell Domain Events**
+
+| Event | Fires When |
+|---|---|
+| `BellTelemetryReceived` | Full sync cycle completes for a machine |
+| `BellLocationUpdated` | New GPS location record inserted |
+| `BellFuelLowDetected` | Fuel remaining ≤ 20% |
+| `BellEngineWarningDetected` | Engine condition is non-normal |
+| `BellMachineOfflineDetected` | No telemetry for > 2 hours |
+| `BellPayloadThresholdExceeded` | Payload exceeds configured threshold |
+| `BellMachineHealthChanged` | Composite health score changes ≥ 10 points |
+
+**5 Per-Signal Sync Jobs**
+
+| Job | Schedule | Signals |
+|---|---|---|
+| `SyncBellLocationsJob` | Every 5 min | `Location` |
+| `SyncBellEngineConditionJob` | Every 5 min | `EngineCondition`, `DEFRemaining`, `CautionCodes` |
+| `SyncBellPayloadJob` | Every 15 min | `CumulativePayloadTotals`, `CumulativeLoadCount` |
+| `SyncBellFuelJob` | Hourly | `CumulativeFuelUsed`, `FuelUsed24h`, `FuelRemainingRatio` |
+| `SyncBellOperatingHoursJob` | Hourly | `OperatingHours`, `IdleHours`, `RegenHours`, `Distance` |
+
+All 5 jobs implement `ShouldBeUnique` (prevents queue pile-up if Bell API is slow), `ShouldQueue`, `$tries = 2`, and configurable `$backoff` + `$timeout`. They run on the `integrations` queue and are scheduled with `withoutOverlapping()->onOneServer()`.
+
+**New Bell OEM Skill** — `.agents/skills/bell-oem-integration-patterns/SKILL.md` documents all 13 Bell API endpoints, health score dimensions, ESG calculations, and troubleshooting patterns.
+
+---
+
+### Fleet Management — Serial Number Searchable Dropdown
+
+The serial number field in the Fleet add/edit modal has been converted from a free-text input to a **searchable dropdown** backed by live database data:
+
+- **Source** — `machines.serial_number` filtered by current team, `DISTINCT`, ordered alphabetically
+- **Caching** — results cached at `equipment_available_serials_{teamId}` via `QueryCacheService::availableSerialNumbers()` with a 1-hour TTL
+- **Cache invalidation** — `MachineObserver` automatically invalidates the cache on machine `created`, `deleted`, and `updated` (only when `serial_number` changed)
+- **UI** — Alpine.js searchable dropdown with live client-side filtering, "— None —" clear option, and amber highlight on selected value; no external library required
+- **Livewire integration** — `#[Computed] availableSerialNumbers()` property in the `Fleet` component; bidirectional `@entangle` binding to `serialNumber`
+
+---
+
+### Enterprise Readiness Audit (MEGA Score: 82/100 — GO)
+
+A full MEGA V2 enterprise readiness assessment was conducted. All P0 blockers were identified and resolved:
+
+| Item | Finding | Resolution |
+|---|---|---|
+| `ShouldBeUnique` on Bell sync jobs | ❌ Missing — queue pile-up risk | ✅ Added to all 5 jobs |
+| Unique DB indexes on telemetry tables | ❌ Missing — duplicate row risk | ✅ Migration `2026_06_09_123207` added `(equipment_key, snapshot_time)` unique indexes to all 5 tables |
+| `$fillable` on 5 new telemetry models | ✅ Already present | ✅ Confirmed |
+| Full test suite pass | ❌ OOM crash (`FileUploadServiceZipTest`) | ✅ Fixed: uses `setMaxPerFileSize(256 KB)` + 512 KB payload |
+| Test count | 377 tests / 821 assertions | ✅ 100% passing |
+
+---
+
+## 🆕 Latest Updates (June 2026 — prior)
 
 ### MEGA V2 — Autonomous Enterprise Readiness Framework
 
@@ -334,6 +431,8 @@ A comprehensive pass over the entire codebase to bring it to full Laravel 12 / P
 | 🔌 **OEM Integrations** | Native APIs for 20+ manufacturers including CAT, Komatsu, Volvo, Bell (ISO15143-3) |
 | 🛰️ **Bell ISO15143-3** | Scheduled 15-min fleet sync with full telemetry history, daily KPIs, and Power BI views |
 | 📈 **Bell Historical API** | Hourly 13-signal time-series ingest (location, fuel, hours, loads, health) via SSO OAuth2 |
+| 🧠 **Bell Telemetry Intelligence** | Per-machine composite health scoring (5 dimensions), ESG metrics, 7 safety events, 5 per-signal sync jobs |
+| 🔍 **Serial Number Lookup** | Searchable equipment serial number dropdown backed by live DB with 1-hour team-scoped cache |
 | 📊 **Reporting** | Compliance, maintenance, production, and incident export to PDF/CSV |
 | 💳 **Billing** | Paystack-powered subscriptions with fleet slot enforcement |
 | 🔒 **Multi-tenant** | Team-based isolation with granular role and policy access control |
@@ -351,6 +450,7 @@ A comprehensive pass over the entire codebase to bring it to full Laravel 12 / P
 - Automatic status update to **Maintenance** when a machine is booked for service
 - Subscription-enforced fleet slot limits — prevents over-provisioning
 - Machine assignment tracking per mine area
+- **Serial number searchable dropdown** — select from existing fleet serials with live client-side filtering and 1-hour team-scoped cache
 
 ### Live Map & Geofencing
 
@@ -489,7 +589,15 @@ Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
 
 ### Bell ISO15143-3 Fleet Integration
 
-Bell Equipment machines are synced via the **ISO15143-3 (AEMP)** standard on a 15-minute schedule. A separate **Historical Telemetry API** runs hourly to fetch 13 individual signal time-series per machine. Both integrations authenticate via **Bell SSO OAuth2** (Password Credentials grant).
+Bell Equipment machines are synced via the **ISO15143-3 (AEMP)** standard on a 15-minute schedule. A separate **Historical Telemetry API** runs hourly to fetch 13 individual signal time-series per machine. Both integrations authenticate via **Bell SSO OAuth2** (Password Credentials grant). A **Telemetry Intelligence layer** sits on top, producing health scores, ESG metrics, and real-time safety events.
+
+**Equipment Linking — `bridgeToMachine()`**
+
+Each Bell equipment record is automatically linked to the `machines` table using three-tier matching:
+
+1. Serial number match (`bell_equipment.serial_number` → `machines.serial_number`)
+2. External ID match (`bell_equipment.equipment_key` → `machines.external_id`)
+3. Name-based fallback (logged as `Log::warning()` for operator audit)
 
 **15-minute Fleet Snapshot (ISO15143-3):**
 
@@ -516,7 +624,15 @@ Bell Equipment machines are synced via the **ISO15143-3 (AEMP)** standard on a 1
 
 - `BellHistoricalTelemetryService` fetches 13 signal endpoints per machine each hour
 - Accepts JSON or XML responses (JSON first, XML fallback via `SimpleXMLElement`)
-- Results are stored in 6 dedicated history tables (`location_history`, `fuel_usage_history`, `operating_hours_history`, `idle_hours_history`, `load_count_history`, `health_history`)
+- Results are stored in dedicated telemetry tables including the 5 new intelligence tables
+
+**Telemetry Intelligence:**
+
+- `BellMachineIntelligenceService` computes a composite health score (0–100) per machine
+- Health score weighted across Engine Condition (30%), Caution Codes (25%), Idle Hours (15%), Fuel Efficiency (15%), Regen Hours (15%)
+- ESG metric computation: CO₂ per BCM, diesel litres per hour
+- 5 per-signal sync jobs (`SyncBellLocationsJob`, `SyncBellEngineConditionJob`, `SyncBellPayloadJob`, `SyncBellFuelJob`, `SyncBellOperatingHoursJob`) — all `ShouldBeUnique` to prevent queue pile-up
+- 7 domain events fire for real-time alerts: fuel low, engine warning, machine offline, payload threshold exceeded, health score changed
 
 **Configuration** (`.env`):
 
@@ -972,14 +1088,14 @@ mines/
 │   ├── Http/
 │   │   ├── Controllers/      # API and web controllers
 │   │   └── Middleware/       # HTTP middleware
-│   ├── Jobs/                 # Queued jobs (SyncBellFleetDataJob, SyncBellHistoricalDataJob, MachineIdleMonitoringJob, etc.)
+│   ├── Jobs/                 # Queued jobs (SyncBellFleetDataJob, SyncBellHistoricalDataJob, SyncBellLocationsJob, SyncBellEngineConditionJob, SyncBellPayloadJob, SyncBellFuelJob, SyncBellOperatingHoursJob, MachineIdleMonitoringJob, etc.)
 │   ├── Listeners/            # Event listeners
 │   ├── Livewire/             # Livewire full-page and inline components
-│   ├── Models/               # Eloquent models (65+ models, inc. BellEquipment*)
+│   ├── Models/               # Eloquent models (70+ models, inc. BellEquipment*, BellDistanceTravelled, BellPayloadTotal, BellDefLevel, BellFuelLevel, BellRegenerationHour)
 │   ├── Policies/             # Authorization policies
 │   ├── Services/
 │   │   ├── AI/               # AI optimization agents
-│   │   └── Integration/      # OEM manufacturer API services (BellIso15143Service, BellHistoricalTelemetryService, etc.)
+│   │   └── Integration/      # OEM manufacturer API services (BellIso15143Service, BellHistoricalTelemetryService, BellMachineIntelligenceService, etc.)
 │   └── Traits/               # Shared model/controller traits
 ├── config/                   # App configuration (integrations, scanning, etc.)
 ├── database/
@@ -1016,19 +1132,28 @@ Run the full test suite:
 ```bash
 composer run test
 # or
-php artisan test
+php artisan test --compact
 ```
+
+The platform ships **377 tests / 821 assertions** covering:
+
+- Bell ISO15143-3 fleet sync (18 tests including all `bridgeToMachine()` matching paths)
+- Bell OEM telemetry intelligence (health scoring, ESG metrics, offline detection)
+- Fleet management and mine area assignment
+- Team data isolation and RBAC
+- Alert generation and notification pipeline
+- Paystack webhook and billing flows
+- Reflected XSS and security controls
+- Report generation (PDF, CSV, XLSX)
+- File upload security (ZIP path traversal, oversized entries, MIME mismatch)
+- Email lifecycle (queuing, rendering, subject, tracking headers)
+- AI model scopes and drift detection
+- MEGA V2 infrastructure (agent logs, knowledge graph, data trust)
 
 Run a specific test file:
 
 ```bash
-php artisan test tests/Feature/MachineTest.php
-```
-
-Run with code coverage:
-
-```bash
-php artisan test --coverage
+php artisan test tests/Feature/BellIso15143ServiceTest.php
 ```
 
 Run static analysis:
@@ -1083,9 +1208,10 @@ vendor/bin/psalm
    chown -R www-data:www-data storage bootstrap/cache
    ```
 
-7. **Start queue worker** (use `deploy/queue-worker.service` for systemd or `deploy/queue-worker.supervisord.conf` for Supervisor)
+7. **Restart queue workers** (required after deployment to load new job classes)
    ```bash
-   php artisan queue:work --tries=3 --timeout=90
+   php artisan queue:restart
+   php artisan queue:work --queue=integrations,default,notifications --tries=3 --timeout=90
    ```
 
 8. **Start WebSocket server**
@@ -1225,6 +1351,6 @@ This project is proprietary software. All rights reserved.
 
 Built for Mining Operations
 
-**Version 3.1** · June 2026
+**Version 3.3** · June 2026 · 377 tests / 821 assertions · MEGA Score 82/100
 
 </div>

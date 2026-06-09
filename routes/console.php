@@ -7,8 +7,13 @@ use App\Jobs\PurgeExpiredSoftDeletesJob;
 use App\Jobs\PurgeOldAuditLogsJob;
 use App\Jobs\PurgeOldFeedPostsJob;
 use App\Jobs\RouteSpeedMonitoringJob;
+use App\Jobs\SyncBellEngineConditionJob;
 use App\Jobs\SyncBellFleetDataJob;
+use App\Jobs\SyncBellFuelJob;
 use App\Jobs\SyncBellHistoricalDataJob;
+use App\Jobs\SyncBellLocationsJob;
+use App\Jobs\SyncBellOperatingHoursJob;
+use App\Jobs\SyncBellPayloadJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -38,6 +43,36 @@ Schedule::job(new SyncBellFleetDataJob)
 // Bell Fleetmatic REST API – historical telemetry backfill (location trail,
 // fuel usage, operating hours, idle hours, load count) – runs every hour.
 Schedule::job(new SyncBellHistoricalDataJob)
+    ->hourly()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// ── Bell per-signal granular jobs ─────────────────────────────────────────
+// Locations + Engine condition: 5-minute high-frequency polling for live map
+// and safety-critical engine fault detection.
+Schedule::job(new SyncBellLocationsJob)
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::job(new SyncBellEngineConditionJob)
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Payload + Load counts: every 15 minutes for production intelligence dashboard.
+Schedule::job(new SyncBellPayloadJob)
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Fuel + Operating hours: hourly — data changes slowly, fire events when needed.
+Schedule::job(new SyncBellFuelJob)
+    ->hourly()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::job(new SyncBellOperatingHoursJob)
     ->hourly()
     ->withoutOverlapping()
     ->onOneServer();

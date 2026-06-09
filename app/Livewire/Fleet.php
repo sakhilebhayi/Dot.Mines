@@ -9,9 +9,11 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Subscription;
 use App\Services\AI\FleetOptimizerAgent;
+use App\Services\QueryCacheService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -296,6 +298,27 @@ class Fleet extends Component
         $machineName = $machine->name;
         $machine->delete();
         $this->dispatch('notify', message: "Machine '{$machineName}' deleted successfully", type: 'success');
+    }
+
+    /**
+     * Returns all distinct serial numbers for the current team, cached for 1 hour.
+     *
+     * @return array<int, string>
+     */
+    #[Computed]
+    public function availableSerialNumbers(): array
+    {
+        $teamId = Auth::user()->currentTeam?->id ?? 0;
+
+        return QueryCacheService::availableSerialNumbers($teamId, function () use ($teamId) {
+            return Machine::where('team_id', $teamId)
+                ->whereNotNull('serial_number')
+                ->where('serial_number', '!=', '')
+                ->distinct()
+                ->orderBy('serial_number')
+                ->pluck('serial_number')
+                ->toArray();
+        });
     }
 
     public function openAssignModal(int $machineId): void

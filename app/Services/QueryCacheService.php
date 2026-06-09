@@ -473,6 +473,28 @@ class QueryCacheService
     }
 
     /**
+     * Cache available serial numbers for a team's equipment dropdown
+     *
+     * @return array<int, string>
+     */
+    public static function availableSerialNumbers(int $teamId, Closure $callback): array
+    {
+        return Cache::remember(
+            "equipment_available_serials_{$teamId}",
+            3600,
+            $callback
+        );
+    }
+
+    /**
+     * Invalidate available serial numbers cache for a team
+     */
+    public static function invalidateSerialNumbers(int $teamId): void
+    {
+        Cache::forget("equipment_available_serials_{$teamId}");
+    }
+
+    /**
      * Clear all caches for a team
      */
     public static function clearTeamCache(int $teamId): void
@@ -481,6 +503,7 @@ class QueryCacheService
             "dashboard_stats_{$teamId}",
             "alert_stats_{$teamId}",
             "integration_status_{$teamId}",
+            "equipment_available_serials_{$teamId}",
         ];
 
         foreach ($keys as $key) {

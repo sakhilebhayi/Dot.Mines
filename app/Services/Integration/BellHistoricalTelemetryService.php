@@ -2,6 +2,12 @@
 
 namespace App\Services\Integration;
 
+use App\Events\BellEngineWarningDetected;
+use App\Events\BellFuelLowDetected;
+use App\Events\BellLocationUpdated;
+use App\Events\BellTelemetryReceived;
+use App\Models\BellDefLevel;
+use App\Models\BellDistanceTravelled;
 use App\Models\BellEquipment;
 use App\Models\BellEquipmentCautionCode;
 use App\Models\BellEquipmentFuelUsageHistory;
@@ -10,6 +16,9 @@ use App\Models\BellEquipmentIdleHoursHistory;
 use App\Models\BellEquipmentLoadCountHistory;
 use App\Models\BellEquipmentLocationHistory;
 use App\Models\BellEquipmentOperatingHoursHistory;
+use App\Models\BellFuelLevel;
+use App\Models\BellPayloadTotal;
+use App\Models\BellRegenerationHour;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -67,6 +76,56 @@ class BellHistoricalTelemetryService
     // ------------------------------------------------------------------ //
 
     /**
+     * Sync a single named signal for all known Bell machines.
+     *
+     * Allows per-signal jobs to call only the endpoint they need rather than
+     * running all 13 signals. The $hours parameter sets the lookback window
+     * (e.g. 0.25 = 15-minute window for a 5-minute polling job).
+     *
+     * @return array{fetched: int, inserted: int, skipped: int}
+     */
+    public function syncSignal(string $signal, float $hours = 1.0): array
+    {
+        $this->counters = ['fetched' => 0, 'inserted' => 0, 'skipped' => 0];
+        $this->bearerToken = null;
+
+        $from = now()->subSeconds((int) ($hours * 3600))->utc()->format('Y-m-d\TH:i:s\Z');
+        $to = now()->utc()->format('Y-m-d\TH:i:s\Z');
+
+        BellEquipment::orderBy('equipment_key')->each(function (BellEquipment $machine) use ($signal, $from, $to): void {
+            $key = $machine->equipment_key;
+            $id = urlencode($machine->equipment_id);
+
+            try {
+                match ($signal) {
+                    'Locations' => $this->syncLocations($key, $id, $from, $to, $machine),
+                    'CumulativeOperatingHours' => $this->syncCumulativeOperatingHours($key, $id, $from, $to),
+                    'CumulativeFuelUsed' => $this->syncCumulativeFuelUsed($key, $id, $from, $to),
+                    'FuelUsedInThePreceding24Hours' => $this->syncFuelUsed24h($key, $id, $from, $to),
+                    'CumulativeIdleHours' => $this->syncCumulativeIdleHours($key, $id, $from, $to),
+                    'FuelRemainingRatio' => $this->syncFuelRemainingRatio($key, $id, $from, $to, $machine),
+                    'CumulativeLoadCount' => $this->syncCumulativeLoadCount($key, $id, $from, $to),
+                    'CumulativePayloadTotals' => $this->syncCumulativePayloadTotals($key, $id, $from, $to),
+                    'CautionCodes' => $this->syncCautionCodes($key, $id, $from, $to, $machine->equipment_id),
+                    'DEFRemaining' => $this->syncDefRemaining($key, $id, $from, $to),
+                    'EngineCondition' => $this->syncEngineCondition($key, $id, $from, $to, $machine),
+                    'CumulativeActiveRegenerationHours' => $this->syncActiveRegenerationHours($key, $id, $from, $to),
+                    'Distance' => $this->syncDistance($key, $id, $from, $to),
+                    default => Log::warning('BellHistoricalTelemetryService: unknown signal', ['signal' => $signal]),
+                };
+            } catch (\Throwable $e) {
+                Log::warning('BellHistoricalTelemetryService: signal sync failed', [
+                    'signal' => $signal,
+                    'equipment_id' => $machine->equipment_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        });
+
+        return $this->counters;
+    }
+
+    /**
      * Fetch and store the last $hours hours of historical data for all known Bell equipment.
      *
      * @return array{fetched: int, inserted: int, skipped: int}
@@ -110,27 +169,34 @@ class BellHistoricalTelemetryService
     {
         $key = $machine->equipment_key;
         $id = urlencode($machine->equipment_id);
+        $insertedBefore = $this->counters['inserted'];
 
-        $this->syncLocations($key, $id, $from, $to);
+        $this->syncLocations($key, $id, $from, $to, $machine);
         $this->syncCumulativeOperatingHours($key, $id, $from, $to);
         $this->syncCumulativeFuelUsed($key, $id, $from, $to);
         $this->syncFuelUsed24h($key, $id, $from, $to);
         $this->syncCumulativeIdleHours($key, $id, $from, $to);
-        $this->syncFuelRemainingRatio($key, $id, $from, $to);
+        $this->syncFuelRemainingRatio($key, $id, $from, $to, $machine);
         $this->syncCumulativeLoadCount($key, $id, $from, $to);
         $this->syncCumulativePayloadTotals($key, $id, $from, $to);
         $this->syncCautionCodes($key, $id, $from, $to, $machine->equipment_id);
         $this->syncDefRemaining($key, $id, $from, $to);
-        $this->syncEngineCondition($key, $id, $from, $to);
+        $this->syncEngineCondition($key, $id, $from, $to, $machine);
         $this->syncActiveRegenerationHours($key, $id, $from, $to);
         $this->syncDistance($key, $id, $from, $to);
+
+        if ($this->counters['inserted'] > $insertedBefore) {
+            BellTelemetryReceived::dispatch($machine, 'full_cycle', [
+                'new_records' => $this->counters['inserted'] - $insertedBefore,
+            ]);
+        }
     }
 
     // ------------------------------------------------------------------ //
     // Signal syncs                                                         //
     // ------------------------------------------------------------------ //
 
-    private function syncLocations(int $key, string $id, string $from, string $to): void
+    private function syncLocations(int $key, string $id, string $from, string $to, ?BellEquipment $equipment = null): void
     {
         $entries = $this->fetchEntries("Fleet/Equipment/{$id}/Locations/{$from}/{$to}");
 
@@ -159,16 +225,23 @@ class BellHistoricalTelemetryService
                 continue;
             }
 
+            $heading = $this->floatField($entry, ['Heading', 'heading']);
+            $speed = $this->floatField($entry, ['Speed', 'speedKmh', 'speed']);
+
             BellEquipmentLocationHistory::create([
                 'equipment_key' => $key,
                 'latitude' => $lat,
                 'longitude' => $lng,
-                'heading_degrees' => $this->floatField($entry, ['Heading', 'heading']),
-                'speed_kmh' => $this->floatField($entry, ['Speed', 'speedKmh', 'speed']),
+                'heading_degrees' => $heading,
+                'speed_kmh' => $speed,
                 'source' => 'historical_api',
                 'recorded_at' => $recordedAt,
                 'created_at' => now(),
             ]);
+
+            if ($equipment !== null && $lat !== null && $lng !== null) {
+                BellLocationUpdated::dispatch($equipment, $lat, $lng, $heading, $speed, $recordedAt);
+            }
 
             $last = null;
             $this->counters['inserted']++;
@@ -312,7 +385,7 @@ class BellHistoricalTelemetryService
         }
     }
 
-    private function syncFuelRemainingRatio(int $key, string $id, string $from, string $to): void
+    private function syncFuelRemainingRatio(int $key, string $id, string $from, string $to, ?BellEquipment $equipment = null): void
     {
         $entries = $this->fetchEntries("Fleet/Equipment/{$id}/FuelRemainingRatio/{$from}/{$to}");
 
@@ -346,6 +419,17 @@ class BellHistoricalTelemetryService
                 'recorded_at' => $recordedAt,
                 'created_at' => now(),
             ]);
+
+            BellFuelLevel::create([
+                'equipment_key' => $key,
+                'fuel_remaining_percent' => $percent,
+                'snapshot_time' => $recordedAt,
+                'created_at' => now(),
+            ]);
+
+            if ($equipment !== null && $percent <= 20.0) {
+                BellFuelLowDetected::dispatch($equipment, $percent, $recordedAt);
+            }
 
             $last = null;
             $this->counters['inserted']++;
@@ -412,12 +496,25 @@ class BellHistoricalTelemetryService
                 continue;
             }
 
+            $payloadUnits = $this->stringField($entry, ['unit', 'Unit']) ?? 'kilogram';
+
             BellEquipmentLoadCountHistory::create([
                 'equipment_key' => $key,
                 'cumulative_payload' => $payload,
-                'payload_units' => $this->stringField($entry, ['unit', 'Unit']) ?? 'kilogram',
+                'payload_units' => $payloadUnits,
                 'source' => 'historical_api',
                 'recorded_at' => $recordedAt,
+                'created_at' => now(),
+            ]);
+
+            $payloadTonnes = strtolower($payloadUnits) === 'kilogram'
+                ? round($payload / 1000, 3)
+                : round($payload, 3);
+
+            BellPayloadTotal::create([
+                'equipment_key' => $key,
+                'payload_tonnes' => $payloadTonnes,
+                'snapshot_time' => $recordedAt,
                 'created_at' => now(),
             ]);
 
@@ -481,11 +578,18 @@ class BellHistoricalTelemetryService
                 'created_at' => now(),
             ]);
 
+            BellDefLevel::create([
+                'equipment_key' => $key,
+                'def_remaining_percent' => $defPercent,
+                'snapshot_time' => $recordedAt,
+                'created_at' => now(),
+            ]);
+
             $this->counters['inserted']++;
         }
     }
 
-    private function syncEngineCondition(int $key, string $id, string $from, string $to): void
+    private function syncEngineCondition(int $key, string $id, string $from, string $to, ?BellEquipment $equipment = null): void
     {
         $entries = $this->fetchEntries("Fleet/Equipment/{$id}/EngineCondition/{$from}/{$to}");
 
@@ -506,6 +610,10 @@ class BellHistoricalTelemetryService
                 'recorded_at' => $recordedAt,
                 'created_at' => now(),
             ]);
+
+            if ($equipment !== null && ! in_array(strtolower($condition), ['normal', 'ok', ''], true)) {
+                BellEngineWarningDetected::dispatch($equipment, $condition, $recordedAt);
+            }
 
             $this->counters['inserted']++;
         }
@@ -533,27 +641,54 @@ class BellHistoricalTelemetryService
                 'created_at' => now(),
             ]);
 
+            BellRegenerationHour::create([
+                'equipment_key' => $key,
+                'regeneration_hours' => $regenHours,
+                'snapshot_time' => $recordedAt,
+                'created_at' => now(),
+            ]);
+
             $this->counters['inserted']++;
         }
     }
 
     /**
-     * Fetch Distance signal. No dedicated table exists; logs cumulative distance for reference.
-     * The odometer value is captured via the ISO15143-3 snapshot in bell_equipment_telemetry_history.
+     * Fetch Distance signal and persist to bell_distance_travelled.
+     * Also captured via ISO15143-3 snapshot in bell_equipment_telemetry_history.
      */
     private function syncDistance(int $key, string $id, string $from, string $to): void
     {
         $entries = $this->fetchEntries("Fleet/Equipment/{$id}/Distance/{$from}/{$to}");
 
-        if (! empty($entries)) {
-            $latest = end($entries);
-            $distance = $this->floatField($latest, ['Distance', 'distance', 'Odometer', 'odometer', 'value', 'Value']);
+        $last = BellDistanceTravelled::where('equipment_key', $key)
+            ->orderByDesc('snapshot_time')
+            ->first();
 
-            Log::debug('BellHistoricalTelemetryService: Distance signal', [
+        foreach ($entries as $entry) {
+            $distance = $this->floatField($entry, ['Distance', 'distance', 'Odometer', 'odometer', 'value', 'Value']);
+            $recordedAt = $this->dateField($entry);
+
+            if ($recordedAt === null || $distance === null) {
+                continue;
+            }
+
+            $this->counters['fetched']++;
+
+            if ($last !== null && (float) $last->distance_km === $distance) {
+                $this->counters['skipped']++;
+
+                continue;
+            }
+
+            BellDistanceTravelled::create([
                 'equipment_key' => $key,
-                'latest_km' => $distance,
-                'entries' => count($entries),
+                'distance_km' => $distance,
+                'snapshot_time' => $recordedAt,
+                'created_at' => now(),
             ]);
+
+            $last = null;
+            $this->counters['inserted']++;
         }
     }
 
