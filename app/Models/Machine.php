@@ -148,6 +148,15 @@ class Machine extends Model
     }
 
     /**
+     * Get the Bell equipment record linked to this machine, if present.
+     */
+    /** @return HasOne<BellEquipment, $this> */
+    public function bellEquipment(): HasOne
+    {
+        return $this->hasOne(BellEquipment::class, 'machine_id');
+    }
+
+    /**
      * Get all metrics for this machine
      */
     /** @return HasMany<MachineMetric, $this> */

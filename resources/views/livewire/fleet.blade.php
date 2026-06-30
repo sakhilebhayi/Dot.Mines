@@ -97,6 +97,39 @@
         </div>
     @endif
 
+    @if (! empty($bellOverview['totals']) && $bellOverview['totals']['machines'] > 0)
+        <div class="bg-slate-900 rounded-xl shadow-lg p-6 mb-6 border border-slate-700">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Bell fleet intelligence</h2>
+                    <p class="text-sm text-slate-400">Telemetry-backed summary for Bell machines on this team.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 text-sm">
+                    <span class="rounded-full bg-emerald-500/20 px-3 py-1 text-emerald-300">{{ $bellOverview['totals']['running'] }} running</span>
+                    <span class="rounded-full bg-amber-500/20 px-3 py-1 text-amber-300">{{ $bellOverview['totals']['issues'] }} issues</span>
+                    <span class="rounded-full bg-sky-500/20 px-3 py-1 text-sky-300">{{ number_format($bellOverview['totals']['monthly_loads']) }} loads</span>
+                </div>
+            </div>
+            <div class="grid gap-3 md:grid-cols-3">
+                @foreach ($bellOverview['machines'] as $bellMachine)
+                    <div class="rounded-lg border border-slate-700 bg-slate-800/80 p-4">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="font-semibold text-white">{{ $bellMachine['machine_name'] }}</div>
+                            <span class="rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $bellMachine['status'] === 'running' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-300' }}">
+                                {{ ucfirst($bellMachine['status']) }}
+                            </span>
+                        </div>
+                        <div class="mt-2 text-sm text-slate-400 space-y-1">
+                            <div>Fuel remaining: {{ number_format($bellMachine['fuel_remaining_percent'], 1) }}%</div>
+                            <div>Loads this month: {{ number_format($bellMachine['monthly_loads']) }}</div>
+                            <div>Open cautions: {{ count($bellMachine['open_caution_codes']) }}</div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <!-- Status Statistics with animation -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in">

@@ -8,6 +8,7 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Report;
 use App\Models\User;
+use App\Services\Integration\BellTeamInsightsService;
 use App\Support\Reports\ReportGeneration;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -70,7 +71,10 @@ class Reports extends Component
 
     public string $productionMineAreaId = '';
 
-    // ── 3.4 Historical Log ─────────────────────────────────────────────────────
+    // ── 3.4 Bell Operations ───────────────────────────────────────────────────
+    public string $bellReportMonth = '';
+
+    // ── 3.5 Historical Log ─────────────────────────────────────────────────────
     public string $historySearch = '';
 
     public string $historyCategory = '';
@@ -104,6 +108,7 @@ class Reports extends Component
         $this->breakdownDateTo = now()->format('Y-m-d');
         $this->productionDateFrom = now()->subDays(13)->format('Y-m-d');
         $this->productionDateTo = now()->format('Y-m-d');
+        $this->bellReportMonth = now()->format('Y-m');
     }
 
     // ── Pagination reset on filter change ──────────────────────────────────────
@@ -570,7 +575,24 @@ class Reports extends Component
         ];
     }
 
-    // ── 3.4 Historical Log ─────────────────────────────────────────────────────
+    // ── 3.4 Bell Operations ───────────────────────────────────────────────────
+
+    public function getBellData(): array
+    {
+        $team = Auth::user()->currentTeam;
+
+        if (! $team) {
+            return [];
+        }
+
+        $monthStart = $this->bellReportMonth
+            ? Carbon::createFromFormat('Y-m', $this->bellReportMonth)->startOfMonth()
+            : now()->startOfMonth();
+
+        return app(BellTeamInsightsService::class)->getTeamOverview($team->id, $monthStart);
+    }
+
+    // ── 3.5 Historical Log ─────────────────────────────────────────────────────
 
     public function getHistory(): mixed
     {
@@ -622,6 +644,7 @@ class Reports extends Component
             'shiftReportData' => $this->activeTab === 'shift_reports' ? $this->getShiftReportData() : [],
             'breakdownData' => $this->activeTab === 'breakdown' ? $this->getBreakdownData() : [],
             'productionData' => $this->activeTab === 'production' ? $this->getProductionData() : [],
+            'bellData' => $this->activeTab === 'bell' ? $this->getBellData() : [],
             'history' => $this->activeTab === 'history' ? $this->getHistory() : null,
             'teamUsers' => $teamUsers,
         ]);

@@ -14,6 +14,7 @@
                 ['shift_reports','Shift Reports',     'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
                 ['breakdown',    'Breakdown Analytics','M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'],
                 ['production',   'Production Analytics','M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'],
+                ['bell',         'Bell Operations',    'M5 12h14M12 5l7 7-7 7'],
                 ['history',      'Historical Log',    'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
             ] as [$tab, $label, $icon])
             <button
@@ -697,7 +698,84 @@
         @endif {{-- end production tab --}}
 
         {{-- ═══════════════════════════════════════════════════════════════════
-             TAB: Historical Log (3.4)
+             TAB: Bell Operations (3.4)
+        ═══════════════════════════════════════════════════════════════════ --}}
+        @if($activeTab === 'bell')
+
+        <div class="bg-slate-800 rounded-lg p-6 mb-6 border border-slate-700">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Month</label>
+                    <input type="month" wire:model.live="bellReportMonth"
+                        class="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none">
+                </div>
+                <div class="rounded-lg border border-blue-500/20 bg-blue-500/10 p-4 text-sm text-blue-200">
+                    Historical Bell telemetry summary for the selected month, using the same Bell tables already fed by the integration jobs.
+                </div>
+            </div>
+        </div>
+
+        @if(empty($bellData['totals']) || $bellData['totals']['machines'] === 0)
+            <div class="bg-slate-800 rounded-lg border border-slate-700 p-12 text-center">
+                <p class="text-slate-400">No Bell machine data is available for {{ $bellReportMonth ?: 'the selected month' }} yet.</p>
+            </div>
+        @else
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                    <div class="text-3xl font-bold text-white">{{ $bellData['totals']['machines'] }}</div>
+                    <div class="text-sm text-slate-400 mt-1">Bell machines</div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                    <div class="text-3xl font-bold text-emerald-400">{{ $bellData['totals']['running'] }}</div>
+                    <div class="text-sm text-slate-400 mt-1">Running</div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                    <div class="text-3xl font-bold text-amber-400">{{ $bellData['totals']['issues'] }}</div>
+                    <div class="text-sm text-slate-400 mt-1">Open issues</div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                    <div class="text-3xl font-bold text-sky-400">{{ number_format($bellData['totals']['monthly_loads']) }}</div>
+                    <div class="text-sm text-slate-400 mt-1">Month loads</div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-700">
+                    <h3 class="text-white font-semibold">Machine Summary</h3>
+                </div>
+                <table class="w-full">
+                    <thead class="bg-slate-700/50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Machine</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Status</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Fuel Remaining</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Loads</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Open Cautions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        @foreach($bellData['machines'] as $bellMachine)
+                            <tr class="hover:bg-slate-700/30 transition">
+                                <td class="px-6 py-3 text-white font-medium">{{ $bellMachine['machine_name'] }}</td>
+                                <td class="px-6 py-3">
+                                    <span class="rounded-full px-2 py-1 text-xs font-semibold {{ $bellMachine['status'] === 'running' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-300' }}">
+                                        {{ ucfirst($bellMachine['status']) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-3 text-slate-300">{{ number_format($bellMachine['fuel_remaining_percent'], 1) }}%</td>
+                                <td class="px-6 py-3 text-slate-300">{{ number_format($bellMachine['monthly_loads']) }}</td>
+                                <td class="px-6 py-3 text-slate-300">{{ count($bellMachine['open_caution_codes']) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
+        @endif {{-- end bell tab --}}
+
+        {{-- ═══════════════════════════════════════════════════════════════════
+             TAB: Historical Log (3.5)
         ═══════════════════════════════════════════════════════════════════ --}}
         @if($activeTab === 'history')
 

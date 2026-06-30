@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Services\Integration\BellTeamInsightsService;
 use App\Services\QueryCacheService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,9 @@ class Dashboard extends Component
 
     /** @var array<string, mixed> */
     public array $activityFeed = [];
+
+    /** @var array<string, mixed> */
+    public array $bellOverview = [];
 
     public bool $isLoading = true;
 
@@ -111,6 +115,8 @@ class Dashboard extends Component
                 'created_at' => $log->created_at->diffForHumans(),
             ])
             ->toArray();
+
+        $this->bellOverview = app(BellTeamInsightsService::class)->getTeamOverview($team->id);
 
         $this->isLoading = false;
     }
