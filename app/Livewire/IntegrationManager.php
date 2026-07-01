@@ -173,24 +173,23 @@ class IntegrationManager extends Component
             return;
         }
 
-        // Dispatch asynchronous connection test in its own try-catch so a
-        // sync-queue failure never masks the successful save to the user.
-        try {
-            TestIntegrationConnectionJob::dispatch($integration->id);
-        } catch (\Throwable $e) {
-            Log::warning('TestIntegrationConnectionJob dispatch failed', [
-                'integration_id' => $integration->id,
-                'error' => $e->getMessage(),
-            ]);
-            // Integration was saved — user can re-test manually
-        }
-
-        // Immediately pull machines from the API rather than waiting for the
-        // 5-minute scheduler cycle.
+        // Dispatch sync FIRST — hits the Bell API once and populates
+        // bell_equipment_current_status. The test job runs second and finds
+        // fresh data already there, so it skips the API call (avoids 405).
         try {
             SyncIntegrationJob::dispatch($integration->id);
         } catch (\Throwable $e) {
             Log::warning('SyncIntegrationJob dispatch failed on initial save', [
+                'integration_id' => $integration->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Test connection AFTER sync — reuses fresh data, no second API hit.
+        try {
+            TestIntegrationConnectionJob::dispatch($integration->id);
+        } catch (\Throwable $e) {
+            Log::warning('TestIntegrationConnectionJob dispatch failed', [
                 'integration_id' => $integration->id,
                 'error' => $e->getMessage(),
             ]);

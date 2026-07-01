@@ -21,6 +21,22 @@ class BellEquipmentAdapter implements ManufacturerAdapterInterface
      */
     public function testConnection(array $credentials): array
     {
+        // If fresh data already exists (synced within the last 10 minutes) treat the
+        // connection as valid without hitting the Bell API again. This prevents 405
+        // rate-limit errors when testConnection() and fetchFleet() run back-to-back
+        // under QUEUE_CONNECTION=sync.
+        $freshCutoff = now()->subMinutes(10);
+        $existingCount = BellEquipmentCurrentStatus::where('updated_date', '>=', $freshCutoff)->count();
+
+        if ($existingCount > 0) {
+            return [
+                'success' => true,
+                'message' => "Connected. {$existingCount} machine(s) in live snapshot.",
+                'machines_found' => $existingCount,
+            ];
+        }
+
+        // No fresh data — perform a real API sync
         try {
             $service = $this->makeService($credentials);
             $result = $service->sync();
