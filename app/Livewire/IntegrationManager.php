@@ -185,6 +185,17 @@ class IntegrationManager extends Component
             // Integration was saved — user can re-test manually
         }
 
+        // Immediately pull machines from the API rather than waiting for the
+        // 5-minute scheduler cycle.
+        try {
+            SyncIntegrationJob::dispatch($integration->id);
+        } catch (\Throwable $e) {
+            Log::warning('SyncIntegrationJob dispatch failed on initial save', [
+                'integration_id' => $integration->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         $this->dispatch('notify', type: 'success', message: 'Integration added! Testing connection...');
         $this->closeAddModal();
         $this->loadIntegrations();

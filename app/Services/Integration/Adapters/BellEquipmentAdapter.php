@@ -59,24 +59,32 @@ class BellEquipmentAdapter implements ManufacturerAdapterInterface
         $service = $this->makeService($credentials);
         $result = $service->sync();
 
-        // Pull normalised data from the stored fleet snapshot
+        // Pull normalised data from the stored fleet snapshot.
+        // Even on a partial failure we return whatever was synced.
         if (! $result['success'] && $result['processed'] === 0) {
             return [];
         }
 
-        // Re-read from the bell_equipment_current_status table to return
-        // a normalised fleet list scoped to this credential set.
+        // Re-read from the bell_equipment_current_status table and include
+        // the bell_equipment_key so SyncIntegrationJob can link machines back.
         return array_values(BellEquipmentCurrentStatus::with('equipment')
             ->get()
+            ->filter(fn ($status) => $status->equipment !== null)
             ->map(function ($status) {
                 $eq = $status->equipment;
 
+                // Build a human-readable name: "Bell B50E #9112"
+                $serial = $eq?->serial_number ?? '';
+                $suffix = $serial ? ' #'.substr($serial, -4) : '';
+                $name = 'Bell '.($eq?->model ?? 'Equipment').$suffix;
+
                 return [
                     'external_id' => $eq?->equipment_id ?? '',
-                    'name' => ($eq?->oem_name ?? '').' '.($eq?->model ?? ''),
+                    'name' => $name,
                     'model' => $eq?->model ?? '',
+                    'machine_type' => str_contains(strtolower($eq?->model ?? ''), 'g') ? 'grader' : 'truck',
                     'manufacturer' => 'Bell Equipment',
-                    'serial_number' => $eq?->serial_number ?? '',
+                    'serial_number' => $serial,
                     'latitude' => $status->latitude ? (float) $status->latitude : null,
                     'longitude' => $status->longitude ? (float) $status->longitude : null,
                     'engine_running' => (bool) $status->engine_running,
@@ -84,6 +92,8 @@ class BellEquipmentAdapter implements ManufacturerAdapterInterface
                     'operating_hours' => $status->operating_hours !== null ? (float) $status->operating_hours : null,
                     'load_count' => $status->load_count !== null ? (int) $status->load_count : null,
                     'telemetry_date' => $status->last_telemetry_date,
+                    // Pass-through so SyncIntegrationJob can wire the Bell link
+                    '_bell_equipment_key' => $eq?->equipment_key,
                 ];
             })
             ->values()

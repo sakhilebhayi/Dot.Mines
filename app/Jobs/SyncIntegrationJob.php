@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\BellEquipment;
 use App\Models\Integration;
 use App\Models\IntegrationSyncLog;
 use App\Models\Machine;
@@ -122,6 +123,10 @@ class SyncIntegrationJob implements ShouldQueue
             ->where('external_id', $externalId)
             ->first();
 
+        $telemetryDate = ! empty($data['telemetry_date'])
+            ? Carbon::parse($data['telemetry_date'])
+            : null;
+
         $attributes = [
             'team_id' => $teamId,
             'integration_id' => $integrationId,
@@ -133,16 +138,31 @@ class SyncIntegrationJob implements ShouldQueue
             'serial_number' => $data['serial_number'] ?? null,
             'last_location_latitude' => $data['latitude'] ?? null,
             'last_location_longitude' => $data['longitude'] ?? null,
-            'last_location_update' => $data['telemetry_date'] ? Carbon::parse($data['telemetry_date']) : null,
+            'last_location_update' => $telemetryDate ?? ($data['latitude'] ? now() : null),
             'operating_hours' => $data['operating_hours'] ?? null,
             'last_seen_at' => now(),
             'status' => ($data['engine_running'] ?? false) ? 'active' : 'idle',
         ];
 
         if ($machine === null) {
-            Machine::create($attributes);
+            $machine = Machine::create($attributes);
         } else {
             $machine->update($attributes);
+        }
+
+        // Link the machine to its BellEquipment row so that telemetry data
+        // (fuel %, load count, DEF level, caution codes) is accessible on the
+        // machine detail page and via BellTeamInsightsService.
+        $bellKey = $data['_bell_equipment_key'] ?? null;
+        if ($bellKey !== null) {
+            BellEquipment::where('equipment_key', $bellKey)
+                ->where(fn ($q) => $q->whereNull('machine_id')
+                    ->orWhere('machine_id', $machine->id)
+                )
+                ->update([
+                    'machine_id' => $machine->id,
+                    'machine_matched_at' => now(),
+                ]);
         }
 
         return true;
