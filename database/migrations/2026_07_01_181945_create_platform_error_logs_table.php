@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('exception_class', 250)->nullable();
             $table->text('message');
             $table->longText('stack_trace')->nullable();        // never exposed to end-users
-            $table->jsonb('context')->nullable();               // PII-stripped request params
+            $table->json('context')->nullable();               // PII-stripped request params
             $table->string('user_id')->nullable();
             $table->unsignedBigInteger('team_id')->nullable();
             $table->string('ip_address', 45)->nullable();

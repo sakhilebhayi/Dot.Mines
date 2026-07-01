@@ -156,21 +156,38 @@ class IntegrationManager extends Component
                 'team_id' => $this->team->id,
                 'provider' => $this->formData['provider'],
                 'name' => $this->formData['name'],
-                'credentials' => $this->formData['credentials'],  // encrypted by cast
+                'credentials' => $this->formData['credentials'] ?: [],
                 'status' => 'testing',
                 'config' => ['sync_frequency' => $this->formData['sync_frequency']],
             ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to create integration', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $this->addError('general', app()->isProduction()
+                ? 'Failed to save integration. Please try again.'
+                : 'Error: '.$e->getMessage()
+            );
 
-            // Kick off async connection test
-            TestIntegrationConnectionJob::dispatch($integration->id);
-
-            $this->dispatch('notify', type: 'success', message: 'Integration added! Testing connection...');
-            $this->closeAddModal();
-            $this->loadIntegrations();
-        } catch (\Exception $e) {
-            Log::error('Failed to create integration', ['error' => $e->getMessage()]);
-            $this->addError('general', 'Failed to save integration. Please try again.');
+            return;
         }
+
+        // Dispatch asynchronous connection test in its own try-catch so a
+        // sync-queue failure never masks the successful save to the user.
+        try {
+            TestIntegrationConnectionJob::dispatch($integration->id);
+        } catch (\Throwable $e) {
+            Log::warning('TestIntegrationConnectionJob dispatch failed', [
+                'integration_id' => $integration->id,
+                'error' => $e->getMessage(),
+            ]);
+            // Integration was saved — user can re-test manually
+        }
+
+        $this->dispatch('notify', type: 'success', message: 'Integration added! Testing connection...');
+        $this->closeAddModal();
+        $this->loadIntegrations();
     }
 
     public function deleteIntegration(int $integrationId): void

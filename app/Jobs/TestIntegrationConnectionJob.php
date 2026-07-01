@@ -37,9 +37,9 @@ class TestIntegrationConnectionJob implements ShouldQueue
             return;
         }
 
-        $integration->update(['status' => 'testing']);
-
         try {
+            $integration->update(['status' => 'testing']);
+
             $adapter = $registry->resolve($integration->provider);
             $result = $adapter->testConnection($integration->credentials ?? []);
 
