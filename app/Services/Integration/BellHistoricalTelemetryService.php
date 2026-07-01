@@ -94,7 +94,7 @@ class BellHistoricalTelemetryService
 
         BellEquipment::orderBy('equipment_key')->each(function (BellEquipment $machine) use ($signal, $from, $to): void {
             $key = $machine->equipment_key;
-            $id = urlencode($machine->equipment_id);
+            $id = urlencode($machine->serial_number ?: $machine->equipment_id);
 
             try {
                 match ($signal) {
@@ -130,6 +130,42 @@ class BellHistoricalTelemetryService
      *
      * @return array{fetched: int, inserted: int, skipped: int}
      */
+    /**
+     * Sync historical telemetry for all machines within an explicit UTC date range.
+     *
+     * @param  string  $from  ISO 8601 UTC, e.g. "2026-05-01T00:00:00Z"
+     * @param  string  $to  ISO 8601 UTC, e.g. "2026-07-01T00:00:00Z"
+     * @return array{fetched: int, inserted: int, skipped: int}
+     */
+    public function syncRange(string $from, string $to): array
+    {
+        $this->counters = ['fetched' => 0, 'inserted' => 0, 'skipped' => 0];
+        $this->bearerToken = null;
+
+        $equipment = BellEquipment::all();
+
+        if ($equipment->isEmpty()) {
+            Log::info('BellHistoricalTelemetryService: no equipment in database – skipping.');
+
+            return $this->counters;
+        }
+
+        foreach ($equipment as $machine) {
+            try {
+                $this->syncMachine($machine, $from, $to);
+            } catch (\Throwable $e) {
+                Log::warning('BellHistoricalTelemetryService: machine sync failed', [
+                    'equipment_key' => $machine->equipment_key,
+                    'equipment_id' => $machine->equipment_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $this->counters;
+    }
+
+    /** @return array{fetched: int, inserted: int, skipped: int} */
     public function syncHistoricalData(int $hours = 1): array
     {
         $this->counters = ['fetched' => 0, 'inserted' => 0, 'skipped' => 0];
@@ -168,7 +204,7 @@ class BellHistoricalTelemetryService
     private function syncMachine(BellEquipment $machine, string $from, string $to): void
     {
         $key = $machine->equipment_key;
-        $id = urlencode($machine->equipment_id);
+        $id = urlencode($machine->serial_number ?: $machine->equipment_id);
         $insertedBefore = $this->counters['inserted'];
 
         $this->syncLocations($key, $id, $from, $to, $machine);

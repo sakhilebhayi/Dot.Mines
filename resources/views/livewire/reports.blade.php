@@ -709,8 +709,14 @@
                     <input type="month" wire:model.live="bellReportMonth"
                         class="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none">
                 </div>
-                <div class="rounded-lg border border-blue-500/20 bg-blue-500/10 p-4 text-sm text-blue-200">
-                    Historical Bell telemetry summary for the selected month, using the same Bell tables already fed by the integration jobs.
+                <div class="flex items-end justify-end">
+                    <button wire:click="exportBellCsv"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Export CSV
+                    </button>
                 </div>
             </div>
         </div>
@@ -720,57 +726,195 @@
                 <p class="text-slate-400">No Bell machine data is available for {{ $bellReportMonth ?: 'the selected month' }} yet.</p>
             </div>
         @else
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+
+            {{-- 1. Fleet-wide Summary KPIs --}}
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
                 <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
-                    <div class="text-3xl font-bold text-white">{{ $bellData['totals']['machines'] }}</div>
-                    <div class="text-sm text-slate-400 mt-1">Bell machines</div>
+                    <div class="text-2xl font-bold text-white">{{ $bellData['totals']['machines'] }}</div>
+                    <div class="text-xs text-slate-400 mt-1">Bell machines</div>
                 </div>
                 <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
-                    <div class="text-3xl font-bold text-emerald-400">{{ $bellData['totals']['running'] }}</div>
-                    <div class="text-sm text-slate-400 mt-1">Running</div>
+                    <div class="text-2xl font-bold text-emerald-400">{{ $bellData['totals']['running'] }}</div>
+                    <div class="text-xs text-slate-400 mt-1">Running</div>
                 </div>
                 <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
-                    <div class="text-3xl font-bold text-amber-400">{{ $bellData['totals']['issues'] }}</div>
-                    <div class="text-sm text-slate-400 mt-1">Open issues</div>
+                    <div class="text-2xl font-bold text-amber-400">{{ $bellData['totals']['issues'] }}</div>
+                    <div class="text-xs text-slate-400 mt-1">Open issues</div>
                 </div>
                 <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
-                    <div class="text-3xl font-bold text-sky-400">{{ number_format($bellData['totals']['monthly_loads']) }}</div>
-                    <div class="text-sm text-slate-400 mt-1">Month loads</div>
+                    <div class="text-2xl font-bold text-sky-400">{{ number_format($bellData['totals']['monthly_loads']) }}</div>
+                    <div class="text-xs text-slate-400 mt-1">Month loads</div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-violet-400">{{ number_format($bellData['totals']['monthly_payload'] ?? 0, 0) }} t</div>
+                    <div class="text-xs text-slate-400 mt-1">Month payload</div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-orange-400">{{ number_format($bellData['totals']['monthly_fuel'] ?? 0, 0) }} L</div>
+                    <div class="text-xs text-slate-400 mt-1">Month fuel</div>
                 </div>
             </div>
 
-            <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-700">
-                    <h3 class="text-white font-semibold">Machine Summary</h3>
+            {{-- 2. Per-machine KPI Table --}}
+            <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden mb-6">
+                <div class="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+                    <h3 class="text-white font-semibold">Per-Machine KPIs</h3>
+                    <span class="text-xs text-slate-400">Selected month + full season (May → today)</span>
                 </div>
-                <table class="w-full">
-                    <thead class="bg-slate-700/50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Machine</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Status</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Fuel Remaining</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Loads</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-slate-300">Open Cautions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-700">
-                        @foreach($bellData['machines'] as $bellMachine)
-                            <tr class="hover:bg-slate-700/30 transition">
-                                <td class="px-6 py-3 text-white font-medium">{{ $bellMachine['machine_name'] }}</td>
-                                <td class="px-6 py-3">
-                                    <span class="rounded-full px-2 py-1 text-xs font-semibold {{ $bellMachine['status'] === 'running' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-300' }}">
-                                        {{ ucfirst($bellMachine['status']) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-3 text-slate-300">{{ number_format($bellMachine['fuel_remaining_percent'], 1) }}%</td>
-                                <td class="px-6 py-3 text-slate-300">{{ number_format($bellMachine['monthly_loads']) }}</td>
-                                <td class="px-6 py-3 text-slate-300">{{ count($bellMachine['open_caution_codes']) }}</td>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-slate-700/50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Machine</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Fuel Rem.</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Month Loads</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Month Payload (t)</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Month Fuel (L)</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Op. Hours</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Utilisation %</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Fuel/Load</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Open Cautions</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700">
+                            @foreach($bellData['machines'] as $bm)
+                                @php
+                                    $fuelPerLoad = ($bm['monthly_loads'] > 0 && isset($bm['monthly_fuel'])) ? round($bm['monthly_fuel'] / $bm['monthly_loads'], 1) : null;
+                                @endphp
+                                <tr class="hover:bg-slate-700/30 transition">
+                                    <td class="px-4 py-3 text-white font-medium">{{ $bm['machine_name'] }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ $bm['status'] === 'running' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-300' }}">
+                                            {{ ucfirst($bm['status']) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-slate-300">{{ number_format($bm['fuel_remaining_percent'], 1) }}%</td>
+                                    <td class="px-4 py-3 text-slate-300">{{ number_format($bm['monthly_loads']) }}</td>
+                                    <td class="px-4 py-3 text-slate-300">{{ number_format($bm['monthly_payload'] ?? 0, 1) }}</td>
+                                    <td class="px-4 py-3 text-slate-300">{{ number_format($bm['monthly_fuel'] ?? 0, 0) }}</td>
+                                    <td class="px-4 py-3 text-slate-300">{{ number_format($bm['operating_hours'] ?? 0, 1) }}</td>
+                                    <td class="px-4 py-3 text-slate-300">{{ number_format($bm['monthly_utilization'] ?? 0, 1) }}%</td>
+                                    <td class="px-4 py-3 text-slate-300">{{ $fuelPerLoad !== null ? number_format($fuelPerLoad, 1).' L' : '—' }}</td>
+                                    <td class="px-4 py-3">
+                                        @if(count($bm['open_caution_codes']) > 0)
+                                            <span class="text-amber-400 font-semibold">{{ count($bm['open_caution_codes']) }}</span>
+                                        @else
+                                            <span class="text-slate-500">0</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        @endif
+
+            {{-- 3. Monthly Comparison: May / June / July --}}
+            @if(!empty($bellData['monthly_comparison']))
+                <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden mb-6">
+                    <div class="px-5 py-4 border-b border-slate-700">
+                        <h3 class="text-white font-semibold">Monthly Comparison — May / June / July 2026</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-700/50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Metric</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-sky-300">May 2026</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-emerald-300">June 2026</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-violet-300">July 2026</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700">
+                                @php
+                                    $may = $bellData['monthly_comparison']['2026-05'] ?? [];
+                                    $jun = $bellData['monthly_comparison']['2026-06'] ?? [];
+                                    $jul = $bellData['monthly_comparison']['2026-07'] ?? [];
+                                @endphp
+                                <tr class="hover:bg-slate-700/30">
+                                    <td class="px-4 py-3 text-slate-300">Total Loads</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($may['monthly_loads'] ?? 0) }}</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($jun['monthly_loads'] ?? 0) }}</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($jul['monthly_loads'] ?? 0) }}</td>
+                                </tr>
+                                <tr class="hover:bg-slate-700/30">
+                                    <td class="px-4 py-3 text-slate-300">Total Payload (t)</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($may['monthly_payload'] ?? 0, 0) }}</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($jun['monthly_payload'] ?? 0, 0) }}</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($jul['monthly_payload'] ?? 0, 0) }}</td>
+                                </tr>
+                                <tr class="hover:bg-slate-700/30">
+                                    <td class="px-4 py-3 text-slate-300">Total Fuel (L)</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($may['monthly_fuel'] ?? 0, 0) }}</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($jun['monthly_fuel'] ?? 0, 0) }}</td>
+                                    <td class="px-4 py-3 text-white">{{ number_format($jul['monthly_fuel'] ?? 0, 0) }}</td>
+                                </tr>
+                                <tr class="hover:bg-slate-700/30">
+                                    <td class="px-4 py-3 text-slate-300">Running Machines</td>
+                                    <td class="px-4 py-3 text-white">{{ $may['running'] ?? 0 }} / {{ $may['machines'] ?? 0 }}</td>
+                                    <td class="px-4 py-3 text-white">{{ $jun['running'] ?? 0 }} / {{ $jun['machines'] ?? 0 }}</td>
+                                    <td class="px-4 py-3 text-white">{{ $jul['running'] ?? 0 }} / {{ $jul['machines'] ?? 0 }}</td>
+                                </tr>
+                                <tr class="hover:bg-slate-700/30">
+                                    <td class="px-4 py-3 text-slate-300">Open Issues</td>
+                                    <td class="px-4 py-3 {{ ($may['issues'] ?? 0) > 0 ? 'text-amber-400' : 'text-white' }}">{{ $may['issues'] ?? 0 }}</td>
+                                    <td class="px-4 py-3 {{ ($jun['issues'] ?? 0) > 0 ? 'text-amber-400' : 'text-white' }}">{{ $jun['issues'] ?? 0 }}</td>
+                                    <td class="px-4 py-3 {{ ($jul['issues'] ?? 0) > 0 ? 'text-amber-400' : 'text-white' }}">{{ $jul['issues'] ?? 0 }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
+            {{-- 4. Caution Code Frequency Report --}}
+            @if(!empty($bellData['caution_frequency']))
+                <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden mb-6">
+                    <div class="px-5 py-4 border-b border-slate-700">
+                        <h3 class="text-white font-semibold">Caution Code Frequency</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Fault codes across all Bell machines (ranked by occurrences)</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-700/50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Fault Code</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Description</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Severity</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Total</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-300">Active</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700">
+                                @foreach($bellData['caution_frequency'] as $cc)
+                                    <tr class="hover:bg-slate-700/30 transition">
+                                        <td class="px-4 py-3 font-mono text-amber-300 text-xs">{{ $cc['fault_code'] }}</td>
+                                        <td class="px-4 py-3 text-slate-300">{{ $cc['fault_description'] ?? '—' }}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-xs rounded-full px-2 py-0.5
+                                                @if(strtolower($cc['severity']) === 'critical') bg-red-500/20 text-red-300
+                                                @elseif(strtolower($cc['severity']) === 'warning') bg-amber-500/20 text-amber-300
+                                                @else bg-slate-700 text-slate-300 @endif
+                                            ">{{ ucfirst($cc['severity']) }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-white font-semibold">{{ $cc['occurrences'] }}</td>
+                                        <td class="px-4 py-3">
+                                            @if($cc['active_count'] > 0)
+                                                <span class="text-amber-400 font-semibold">{{ $cc['active_count'] }}</span>
+                                            @else
+                                                <span class="text-slate-500">0</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
+        @endif {{-- end has data --}}
 
         @endif {{-- end bell tab --}}
 

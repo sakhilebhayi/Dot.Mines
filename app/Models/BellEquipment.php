@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Machine|null $machine
+ * @property-read BellEquipmentCurrentStatus|null $currentStatus
  */
 class BellEquipment extends Model
 {

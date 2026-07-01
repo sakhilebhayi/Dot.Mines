@@ -34,22 +34,20 @@ Schedule::job(new MachineIdleMonitoringJob)
     ->withoutOverlapping()
     ->onOneServer();
 
-// Bell ISO15143-3 fleet data sync – every 15 minutes at :00, :15, :30, :45
+// Bell ISO15143-3 fleet data sync – every 5 minutes
 Schedule::job(new SyncBellFleetDataJob)
-    ->everyFifteenMinutes()
+    ->everyFiveMinutes()
     ->withoutOverlapping()
     ->onOneServer();
 
-// Bell Fleetmatic REST API – historical telemetry backfill (location trail,
-// fuel usage, operating hours, idle hours, load count) – runs every hour.
+// Bell Fleetmatic REST API – historical telemetry (all 13 signals) – every 5 minutes
 Schedule::job(new SyncBellHistoricalDataJob)
-    ->hourly()
+    ->everyFiveMinutes()
     ->withoutOverlapping()
     ->onOneServer();
 
 // ── Bell per-signal granular jobs ─────────────────────────────────────────
-// Locations + Engine condition: 5-minute high-frequency polling for live map
-// and safety-critical engine fault detection.
+// All per-signal jobs run every 5 minutes for consolidated real-time telemetry.
 Schedule::job(new SyncBellLocationsJob)
     ->everyFiveMinutes()
     ->withoutOverlapping()
@@ -60,20 +58,18 @@ Schedule::job(new SyncBellEngineConditionJob)
     ->withoutOverlapping()
     ->onOneServer();
 
-// Payload + Load counts: every 15 minutes for production intelligence dashboard.
 Schedule::job(new SyncBellPayloadJob)
-    ->everyFifteenMinutes()
+    ->everyFiveMinutes()
     ->withoutOverlapping()
     ->onOneServer();
 
-// Fuel + Operating hours: hourly — data changes slowly, fire events when needed.
 Schedule::job(new SyncBellFuelJob)
-    ->hourly()
+    ->everyFiveMinutes()
     ->withoutOverlapping()
     ->onOneServer();
 
 Schedule::job(new SyncBellOperatingHoursJob)
-    ->hourly()
+    ->everyFiveMinutes()
     ->withoutOverlapping()
     ->onOneServer();
 

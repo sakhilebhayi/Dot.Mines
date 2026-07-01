@@ -987,11 +987,20 @@ class BellIso15143Service implements BellIso15143ServiceInterface
         $machine->update($updates);
 
         // Broadcast GPS update to the live map (only when coordinates are present).
+        // Wrapped in try-catch so a broadcasting failure (e.g. Pusher/Reverb unreachable)
+        // never rolls back the outer DB transaction.
         if ($lat !== null && $lng !== null) {
-            MachineLocationUpdated::dispatch($machine->fresh(), [
-                'latitude' => $lat,
-                'longitude' => $lng,
-            ]);
+            try {
+                MachineLocationUpdated::dispatch($machine->fresh(), [
+                    'latitude' => $lat,
+                    'longitude' => $lng,
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('BellIso15143Service: failed to broadcast MachineLocationUpdated', [
+                    'machine_id' => $machine->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 

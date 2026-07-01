@@ -2,7 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Models\BellDefLevel;
+use App\Models\BellEquipment;
+use App\Models\BellEquipmentCautionCode;
+use App\Models\BellEquipmentCurrentStatus;
+use App\Models\BellEquipmentDailyKpi;
+use App\Models\BellEquipmentFuelUsageHistory;
+use App\Models\BellEquipmentLocationHistory;
+use App\Models\BellEquipmentOperatingHoursHistory;
+use App\Models\BellRegenerationHour;
 use App\Models\Machine;
+use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -31,9 +41,78 @@ class MachineDetail extends Component
             ->take(5)
             ->get();
 
+        $bellEquipment = BellEquipment::where('machine_id', $this->machine->id)->first();
+        $bellStatus = null;
+        $bellCautionCodes = collect();
+        $bellFuelHistory = collect();
+        $bellOpHoursHistory = collect();
+        $bellLoadHistory = collect();
+        $bellLocationHistory = collect();
+        $bellDefHistory = collect();
+        $bellRegenHistory = collect();
+
+        if ($bellEquipment !== null) {
+            $key = $bellEquipment->equipment_key;
+            $mayStart = Carbon::parse('2026-05-01')->startOfDay();
+
+            $bellStatus = BellEquipmentCurrentStatus::where('equipment_key', $key)->first();
+
+            $bellCautionCodes = BellEquipmentCautionCode::where('equipment_key', $key)
+                ->where('is_active', true)
+                ->orderByDesc('occurred_at')
+                ->get();
+
+            // Fuel level trend (daily aggregated from history)
+            $bellFuelHistory = BellEquipmentFuelUsageHistory::where('equipment_key', $key)
+                ->where('recorded_at', '>=', $mayStart)
+                ->whereNotNull('fuel_remaining_percent')
+                ->orderBy('recorded_at')
+                ->get(['recorded_at', 'fuel_remaining_percent']);
+
+            // Operating hours history
+            $bellOpHoursHistory = BellEquipmentOperatingHoursHistory::where('equipment_key', $key)
+                ->where('recorded_at', '>=', $mayStart)
+                ->orderBy('recorded_at')
+                ->get(['recorded_at', 'operating_hours']);
+
+            // Daily KPIs for load count + payload chart
+            $bellLoadHistory = BellEquipmentDailyKpi::where('equipment_key', $key)
+                ->where('kpi_date', '>=', $mayStart)
+                ->orderBy('kpi_date')
+                ->get(['kpi_date', 'loads_moved', 'payload_moved']);
+
+            // Location history (last 500 points)
+            $bellLocationHistory = BellEquipmentLocationHistory::where('equipment_key', $key)
+                ->where('recorded_at', '>=', $mayStart)
+                ->orderByDesc('recorded_at')
+                ->limit(500)
+                ->get(['recorded_at', 'latitude', 'longitude', 'heading_degrees', 'speed_kmh']);
+
+            // DEF level history
+            $bellDefHistory = BellDefLevel::where('equipment_key', $key)
+                ->where('snapshot_time', '>=', $mayStart)
+                ->orderBy('snapshot_time')
+                ->get(['snapshot_time as recorded_at', 'def_remaining_percent']);
+
+            // DPF regeneration hours history
+            $bellRegenHistory = BellRegenerationHour::where('equipment_key', $key)
+                ->where('snapshot_time', '>=', $mayStart)
+                ->orderBy('snapshot_time')
+                ->get(['snapshot_time as recorded_at', 'regeneration_hours']);
+        }
+
         return view('livewire.machine-detail', [
             'metrics' => $metrics,
             'recentAlerts' => $recentAlerts,
+            'bellEquipment' => $bellEquipment,
+            'bellStatus' => $bellStatus,
+            'bellCautionCodes' => $bellCautionCodes,
+            'bellFuelHistory' => $bellFuelHistory,
+            'bellOpHoursHistory' => $bellOpHoursHistory,
+            'bellLoadHistory' => $bellLoadHistory,
+            'bellLocationHistory' => $bellLocationHistory,
+            'bellDefHistory' => $bellDefHistory,
+            'bellRegenHistory' => $bellRegenHistory,
         ]);
     }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Models\BellEquipment;
+use App\Models\BellEquipmentCautionCode;
+use App\Models\BellEquipmentDailyKpi;
 use App\Models\FeedPost;
 use App\Models\Geofence;
 use App\Models\Machine;
@@ -20,6 +23,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class Reports extends Component
 {
@@ -577,6 +581,7 @@ class Reports extends Component
 
     // ── 3.4 Bell Operations ───────────────────────────────────────────────────
 
+    /** @return array<string, mixed> */
     public function getBellData(): array
     {
         $team = Auth::user()->currentTeam;
@@ -585,11 +590,95 @@ class Reports extends Component
             return [];
         }
 
-        $monthStart = $this->bellReportMonth
-            ? Carbon::createFromFormat('Y-m', $this->bellReportMonth)->startOfMonth()
-            : now()->startOfMonth();
+        $parsed = $this->bellReportMonth
+            ? Carbon::createFromFormat('Y-m', $this->bellReportMonth)
+            : null;
+        $monthStart = $parsed instanceof Carbon ? $parsed->startOfMonth() : now()->startOfMonth();
 
-        return app(BellTeamInsightsService::class)->getTeamOverview($team->id, $monthStart);
+        $insights = app(BellTeamInsightsService::class);
+        $current = $insights->getTeamOverview($team->id, Carbon::parse($monthStart));
+
+        // Monthly comparison: May, June, July 2026
+        $comparison = [];
+        foreach (['2026-05', '2026-06', '2026-07'] as $ym) {
+            $mParsed = Carbon::createFromFormat('Y-m', $ym);
+            $mStart = $mParsed instanceof Carbon ? $mParsed->startOfMonth() : now()->startOfMonth();
+            $data = $insights->getTeamOverview($team->id, Carbon::parse($mStart));
+            $comparison[$ym] = $data['totals'] ?? [];
+        }
+
+        // Fleet-wide caution code frequency (active faults across all linked machines)
+        $linkedKeys = BellEquipment::whereNotNull('machine_id')
+            ->pluck('equipment_key');
+        $cautionFrequency = BellEquipmentCautionCode::whereIn('equipment_key', $linkedKeys)
+            ->select('fault_code', 'fault_description', 'severity')
+            ->selectRaw('COUNT(*) as occurrences')
+            ->selectRaw('SUM(CASE WHEN is_active THEN 1 ELSE 0 END) as active_count')
+            ->groupBy('fault_code', 'fault_description', 'severity')
+            ->orderByDesc('occurrences')
+            ->limit(20)
+            ->get()
+            ->toArray();
+
+        // Per-machine KPI aggregates (all time from May)
+        $mayStart = Carbon::parse('2026-05-01')->startOfDay();
+        $kpiSummary = BellEquipmentDailyKpi::whereIn('equipment_key', $linkedKeys)
+            ->where('kpi_date', '>=', $mayStart)
+            ->selectRaw('equipment_key, SUM(loads_moved) as total_loads, SUM(payload_moved) as total_payload, SUM(fuel_used) as total_fuel, SUM(operating_hours) as total_hours, AVG(utilization_percent) as avg_utilization')
+            ->groupBy('equipment_key')
+            ->get()
+            ->keyBy('equipment_key')
+            ->toArray();
+
+        return array_merge($current, [
+            'monthly_comparison' => $comparison,
+            'caution_frequency' => $cautionFrequency,
+            'kpi_summary' => $kpiSummary,
+        ]);
+    }
+
+    /**
+     * Export raw Bell telemetry KPIs as CSV download.
+     */
+    public function exportBellCsv(): StreamedResponse
+    {
+        $team = Auth::user()->currentTeam;
+        $mayStart = Carbon::parse('2026-05-01')->startOfDay();
+
+        $linkedKeys = BellEquipment::whereNotNull('machine_id')->pluck('equipment_key');
+
+        $rows = BellEquipmentDailyKpi::whereIn('equipment_key', $linkedKeys)
+            ->where('kpi_date', '>=', $mayStart)
+            ->with('equipment:equipment_key,equipment_id,model,serial_number')
+            ->orderBy('kpi_date')
+            ->orderBy('equipment_key')
+            ->get();
+
+        $filename = 'bell-telemetry-'.now()->format('Y-m-d').'.csv';
+
+        return response()->streamDownload(function () use ($rows): void {
+            $out = fopen('php://output', 'w');
+            if ($out === false) {
+                return;
+            }
+            fputcsv($out, ['Date', 'Equipment ID', 'Model', 'Serial', 'Loads', 'Payload (t)', 'Fuel Used (L)', 'Operating Hours', 'Idle Hours', 'Distance (km)', 'Utilization %']);
+            foreach ($rows as $row) {
+                fputcsv($out, [
+                    $row->kpi_date instanceof Carbon ? $row->kpi_date->toDateString() : $row->kpi_date,
+                    $row->equipment->equipment_id ?? '',
+                    $row->equipment->model ?? '',
+                    $row->equipment->serial_number ?? '',
+                    $row->loads_moved,
+                    $row->payload_moved,
+                    $row->fuel_used,
+                    $row->operating_hours,
+                    $row->idle_hours,
+                    $row->distance_travelled,
+                    $row->utilization_percent,
+                ]);
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv']);
     }
 
     // ── 3.5 Historical Log ─────────────────────────────────────────────────────

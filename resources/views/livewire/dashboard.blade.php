@@ -51,54 +51,6 @@
         </div>
         
 
-    <!-- Bell Operations Summary -->
-    @if (! empty($bellOverview['totals']) && $bellOverview['totals']['machines'] > 0)
-        <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl shadow-lg p-6 mb-8 border border-slate-700">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">Bell fleet snapshot</p>
-                    <h2 class="text-2xl font-bold text-white mt-1">AfriCoal SA Operations</h2>
-                    <p class="text-sm text-slate-400 mt-2">Live Bell telemetry summary for the current team.</p>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div class="rounded-lg bg-white/10 px-3 py-2">
-                        <div class="text-xs text-slate-400">Machines</div>
-                        <div class="text-lg font-semibold text-white">{{ $bellOverview['totals']['machines'] }}</div>
-                    </div>
-                    <div class="rounded-lg bg-white/10 px-3 py-2">
-                        <div class="text-xs text-slate-400">Running</div>
-                        <div class="text-lg font-semibold text-emerald-300">{{ $bellOverview['totals']['running'] }}</div>
-                    </div>
-                    <div class="rounded-lg bg-white/10 px-3 py-2">
-                        <div class="text-xs text-slate-400">Open issues</div>
-                        <div class="text-lg font-semibold text-amber-300">{{ $bellOverview['totals']['issues'] }}</div>
-                    </div>
-                    <div class="rounded-lg bg-white/10 px-3 py-2">
-                        <div class="text-xs text-slate-400">Loads this month</div>
-                        <div class="text-lg font-semibold text-sky-300">{{ number_format($bellOverview['totals']['monthly_loads']) }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 grid gap-3 md:grid-cols-3">
-                @foreach ($bellOverview['machines'] as $bellMachine)
-                    <div class="rounded-lg border border-slate-700 bg-slate-800/80 p-3">
-                        <div class="flex items-center justify-between gap-2">
-                            <div class="font-semibold text-white">{{ $bellMachine['machine_name'] }}</div>
-                            <span class="rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $bellMachine['status'] === 'running' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-300' }}">
-                                {{ ucfirst($bellMachine['status']) }}
-                            </span>
-                        </div>
-                        <div class="mt-2 text-sm text-slate-400">
-                            <div>Loads: {{ number_format($bellMachine['monthly_loads']) }}</div>
-                            <div>Fuel remaining: {{ number_format($bellMachine['fuel_remaining_percent'], 1) }}%</div>
-                            <div>Open issues: {{ count($bellMachine['open_caution_codes']) }}</div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
     <!-- Statistics Cards -->
     <div class="flex flex-col gap-6 mb-8 md:grid md:grid-cols-2 lg:grid-cols-4 md:flex-none overflow-x-auto pb-2">
         <!-- Total Machines Card -->
