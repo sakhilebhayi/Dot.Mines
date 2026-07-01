@@ -56,33 +56,44 @@ class BellEquipmentAdapter implements ManufacturerAdapterInterface
      */
     public function fetchFleet(array $credentials): array
     {
-        $service = $this->makeService($credentials);
-        $result = $service->sync();
+        // Check if there is already fresh data in bell_equipment_current_status
+        // (within the last 10 minutes). This avoids a redundant API call when
+        // TestIntegrationConnectionJob already synced moments earlier — which
+        // would trigger Bell API rate-limiting on the second call.
+        $freshCutoff = now()->subMinutes(10);
+        $hasFreshData = BellEquipmentCurrentStatus::where('updated_date', '>=', $freshCutoff)->exists();
 
-        // Pull normalised data from the stored fleet snapshot.
-        // Even on a partial failure we return whatever was synced.
-        if (! $result['success'] && $result['processed'] === 0) {
+        if (! $hasFreshData) {
+            // Data is stale or missing — fetch from Bell API
+            $service = $this->makeService($credentials);
+            $service->sync();
+            // Continue regardless of sync outcome; return whatever is in the table
+        }
+
+        // Read from bell_equipment_current_status — always return existing data
+        // even when the API call above failed, so previous snapshots are not lost.
+        $rows = BellEquipmentCurrentStatus::with('equipment')
+            ->get()
+            ->filter(fn ($status) => $status->equipment !== null);
+
+        if ($rows->isEmpty()) {
             return [];
         }
 
-        // Re-read from the bell_equipment_current_status table and include
-        // the bell_equipment_key so SyncIntegrationJob can link machines back.
-        return array_values(BellEquipmentCurrentStatus::with('equipment')
-            ->get()
-            ->filter(fn ($status) => $status->equipment !== null)
+        return array_values($rows
             ->map(function ($status) {
                 $eq = $status->equipment;
 
-                // Build a human-readable name: "Bell B50E #9112"
+                // Human-readable name: "Bell B50E #9112" (last 4 of serial)
                 $serial = $eq?->serial_number ?? '';
                 $suffix = $serial ? ' #'.substr($serial, -4) : '';
                 $name = 'Bell '.($eq?->model ?? 'Equipment').$suffix;
 
                 return [
-                    'external_id' => $eq?->equipment_id ?? '',
+                    'external_id' => trim($eq?->equipment_id ?? ''),
                     'name' => $name,
                     'model' => $eq?->model ?? '',
-                    'machine_type' => str_contains(strtolower($eq?->model ?? ''), 'g') ? 'grader' : 'truck',
+                    'machine_type' => str_starts_with(strtolower($eq?->model ?? ''), 'g') ? 'grader' : 'articulated_hauler',
                     'manufacturer' => 'Bell Equipment',
                     'serial_number' => $serial,
                     'latitude' => $status->latitude ? (float) $status->latitude : null,
@@ -92,10 +103,11 @@ class BellEquipmentAdapter implements ManufacturerAdapterInterface
                     'operating_hours' => $status->operating_hours !== null ? (float) $status->operating_hours : null,
                     'load_count' => $status->load_count !== null ? (int) $status->load_count : null,
                     'telemetry_date' => $status->last_telemetry_date,
-                    // Pass-through so SyncIntegrationJob can wire the Bell link
+                    // Passed through so SyncIntegrationJob can link bell_equipment.machine_id
                     '_bell_equipment_key' => $eq?->equipment_key,
                 ];
             })
+            ->filter(fn ($item) => $item['external_id'] !== '')  // skip equipment with no ID
             ->values()
             ->all());
     }
