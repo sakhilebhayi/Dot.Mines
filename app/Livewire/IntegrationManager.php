@@ -2,8 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Jobs\SyncIntegrationJob;
+use App\Jobs\TestIntegrationConnectionJob;
 use App\Models\Integration;
-use App\Services\Integration\IntegrationService;
+use App\Models\IntegrationSyncLog;
+use App\Services\Integration\AdapterRegistry;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,28 +20,26 @@ class IntegrationManager extends Component
     public array $integrations = [];
 
     /** @var array<string, mixed> */
-    public array $availableManufacturers = [];
+    public array $availableProviders = [];
 
     public bool $showAddModal = false;
 
-    public bool $showTestModal = false;
+    public bool $showDetailPanel = false;
 
-    public mixed $selectedIntegration = null;
+    public ?int $detailIntegrationId = null;
 
-    public mixed $testResult = null;
+    /** @var array<string, mixed> */
+    public array $syncLogs = [];
+
+    /** @var array<string, mixed> */
+    public array $credentialFields = [];
 
     /** @var array<string, mixed> */
     public array $formData = [
         'provider' => '',
         'name' => '',
-        'endpoint' => '',
-        'connection_type' => '',
-        'sync_frequency' => 'manual',
-        'notification_email' => '',
-        'credentials' => [
-            'api_key' => '',
-            'api_secret' => '',
-        ],
+        'sync_frequency' => 'every_5_minutes',
+        'credentials' => [],
     ];
 
     /** @var array<string, string> */
@@ -52,8 +53,8 @@ class IntegrationManager extends Component
             abort(403, 'No team context available.');
         }
 
+        $this->loadAvailableProviders();
         $this->loadIntegrations();
-        $this->loadAvailableManufacturers();
     }
 
     public function loadIntegrations(): void
@@ -63,24 +64,43 @@ class IntegrationManager extends Component
         }
 
         $this->integrations = Integration::where('team_id', $this->team->id)
+            ->orderByDesc('created_at')
             ->get()
-            ->map(function ($integration) {
-                return [
-                    'id' => $integration->id,
-                    'provider' => $integration->provider,
-                    'status' => $integration->status,
-                    'created_at' => $integration->created_at->format('M d, Y'),
-                    'last_sync_at' => $integration->last_sync_at?->format('M d, Y H:i') ?? 'Never',
-                    'last_sync_status' => $integration->last_sync_status ?? 'pending',
-                ];
-            })
+            ->map(fn ($i) => [
+                'id' => $i->id,
+                'provider' => $i->provider,
+                'name' => $i->name,
+                'status' => $i->status,
+                'machines_count' => $i->machines_count,
+                'last_sync_at' => $i->last_sync_at?->diffForHumans() ?? 'Never',
+                'last_sync_status' => $i->last_sync_status ?? 'pending',
+                'last_error' => $i->last_error,
+                'created_at' => $i->created_at->format('d M Y'),
+                'sync_frequency' => $i->config['sync_frequency'] ?? 'every_5_minutes',
+            ])
             ->toArray();
     }
 
-    public function loadAvailableManufacturers(): void
+    public function loadAvailableProviders(): void
     {
-        $service = app(IntegrationService::class);
-        $this->availableManufacturers = $service->getAvailableManufacturers();
+        $this->availableProviders = app(AdapterRegistry::class)->all();
+    }
+
+    // ── Form helpers ────────────────────────────────────────────────────────────
+
+    public function updatedFormDataProvider(string $provider): void
+    {
+        if (! $provider || ! isset($this->availableProviders[$provider])) {
+            $this->credentialFields = [];
+
+            return;
+        }
+
+        $this->credentialFields = $this->availableProviders[$provider]['credential_schema'] ?? [];
+        $this->formData['name'] = $this->availableProviders[$provider]['name'] ?? $provider;
+
+        // Reset credential fields for the new provider
+        $this->formData['credentials'] = [];
     }
 
     public function openAddModal(): void
@@ -100,158 +120,151 @@ class IntegrationManager extends Component
         $this->formData = [
             'provider' => '',
             'name' => '',
-            'endpoint' => '',
-            'connection_type' => '',
-            'sync_frequency' => 'manual',
-            'notification_email' => '',
-            'credentials' => [
-                'api_key' => '',
-                'api_secret' => '',
-            ],
+            'sync_frequency' => 'every_5_minutes',
+            'credentials' => [],
         ];
+        $this->credentialFields = [];
     }
+
+    // ── CRUD ────────────────────────────────────────────────────────────────────
 
     public function createIntegration(): void
     {
         if (! $this->team) {
-            $this->addError('general', 'No team context available');
-
             return;
         }
 
         $this->validate([
             'formData.provider' => 'required|string',
-            'formData.name' => 'required|string|max:100',
-            'formData.connection_type' => 'required|string',
-            'formData.sync_frequency' => 'required|string',
-            'formData.credentials.api_key' => 'required|string',
-            'formData.credentials.api_secret' => 'required|string',
-            'formData.notification_email' => 'nullable|email',
-            'formData.endpoint' => 'nullable|string',
+            'formData.name' => 'required|string|max:120',
+            'formData.sync_frequency' => 'required|string|in:manual,every_5_minutes,every_15_minutes,hourly,every_6_hours,daily',
         ]);
+
+        // Validate required credential fields from schema
+        foreach ($this->credentialFields as $field) {
+            if (($field['required'] ?? false) && empty($this->formData['credentials'][$field['key']] ?? '')) {
+                $this->addError("credentials.{$field['key']}", "{$field['label']} is required.");
+            }
+        }
+
+        if ($this->getErrorBag()->isNotEmpty()) {
+            return;
+        }
 
         try {
             $integration = Integration::create([
                 'team_id' => $this->team->id,
                 'provider' => $this->formData['provider'],
                 'name' => $this->formData['name'],
-                'credentials' => json_encode($this->formData['credentials']),
-                'status' => 'pending',
-                'webhook_url' => $this->formData['connection_type'] === 'webhook' ? route('webhook.receive', ['provider' => $this->formData['provider']]) : null,
-                'config' => json_encode([
-                    'endpoint' => $this->formData['endpoint'],
-                    'connection_type' => $this->formData['connection_type'],
-                    'sync_frequency' => $this->formData['sync_frequency'],
-                    'notification_email' => $this->formData['notification_email'],
-                ]),
+                'credentials' => $this->formData['credentials'],  // encrypted by cast
+                'status' => 'testing',
+                'config' => ['sync_frequency' => $this->formData['sync_frequency']],
             ]);
 
-            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Integration created successfully!']);
+            // Kick off async connection test
+            TestIntegrationConnectionJob::dispatch($integration->id);
+
+            $this->dispatch('notify', type: 'success', message: 'Integration added! Testing connection...');
             $this->closeAddModal();
             $this->loadIntegrations();
         } catch (\Exception $e) {
             Log::error('Failed to create integration', ['error' => $e->getMessage()]);
-            $this->addError('general', 'Failed to create integration. Please try again.');
-        }
-    }
-
-    public function testConnection(int $integrationId): void
-    {
-        if (! $this->team) {
-            $this->testResult = [
-                'success' => false,
-                'message' => 'No team context available',
-            ];
-            $this->showTestModal = true;
-
-            return;
-        }
-
-        try {
-            $integration = Integration::where('team_id', $this->team->id)
-                ->findOrFail($integrationId);
-
-            $service = app(IntegrationService::class);
-            $result = $service->testConnection($integration);
-
-            if ($result['success']) {
-                $integration->update(['status' => 'connected']);
-                $this->testResult = [
-                    'success' => true,
-                    'message' => 'Connection successful!',
-                ];
-            } else {
-                $this->testResult = [
-                    'success' => false,
-                    'message' => $result['error'] ?? 'Connection failed',
-                ];
-            }
-
-            $this->selectedIntegration = $integrationId;
-            $this->showTestModal = true;
-            $this->loadIntegrations();
-        } catch (\Exception $e) {
-            Log::error('Test connection failed', ['error' => $e->getMessage()]);
-            $this->testResult = [
-                'success' => false,
-                'message' => 'Error testing connection',
-            ];
-            $this->showTestModal = true;
-        }
-    }
-
-    public function syncMachines(int $integrationId): void
-    {
-        if (! $this->team) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'No team context available']);
-
-            return;
-        }
-
-        try {
-            $integration = Integration::where('team_id', $this->team->id)
-                ->findOrFail($integrationId);
-
-            $service = app(IntegrationService::class);
-            $result = $service->syncMachines($integration);
-
-            if ($result['success']) {
-                $integration->update([
-                    'last_sync_at' => now(),
-                    'last_sync_status' => 'success',
-                ]);
-                $this->dispatch('notify', ...['type' => 'success', 'message' => 'Sync started successfully!']);
-            } else {
-                $integration->update(['last_sync_status' => 'failed']);
-                $this->dispatch('notify', ...['type' => 'error', 'message' => 'Sync failed: '.$result['error']]);
-            }
-
-            $this->loadIntegrations();
-        } catch (\Exception $e) {
-            Log::error('Sync machines failed', ['error' => $e->getMessage()]);
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Error starting sync']);
+            $this->addError('general', 'Failed to save integration. Please try again.');
         }
     }
 
     public function deleteIntegration(int $integrationId): void
     {
         if (! $this->team) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'No team context available']);
-
             return;
         }
 
-        try {
-            Integration::where('team_id', $this->team->id)
-                ->findOrFail($integrationId)
-                ->delete();
+        Integration::where('team_id', $this->team->id)->findOrFail($integrationId)->delete();
+        $this->dispatch('notify', type: 'success', message: 'Integration deleted.');
 
-            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Integration deleted successfully!']);
-            $this->loadIntegrations();
-        } catch (\Exception $e) {
-            Log::error('Delete integration failed', ['error' => $e->getMessage()]);
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Error deleting integration']);
+        if ($this->detailIntegrationId === $integrationId) {
+            $this->showDetailPanel = false;
+            $this->detailIntegrationId = null;
         }
+
+        $this->loadIntegrations();
+    }
+
+    // ── Sync controls ───────────────────────────────────────────────────────────
+
+    public function syncNow(int $integrationId): void
+    {
+        if (! $this->team) {
+            return;
+        }
+
+        $integration = Integration::where('team_id', $this->team->id)->findOrFail($integrationId);
+        SyncIntegrationJob::dispatch($integration->id);
+        $this->dispatch('notify', type: 'success', message: 'Sync queued — results will appear shortly.');
+        $this->loadIntegrations();
+    }
+
+    public function retestConnection(int $integrationId): void
+    {
+        if (! $this->team) {
+            return;
+        }
+
+        $integration = Integration::where('team_id', $this->team->id)->findOrFail($integrationId);
+        TestIntegrationConnectionJob::dispatch($integration->id);
+        Integration::where('id', $integrationId)->update(['status' => 'testing']);
+        $this->dispatch('notify', type: 'info', message: 'Re-testing connection...');
+        $this->loadIntegrations();
+    }
+
+    public function updateSyncFrequency(int $integrationId, string $frequency): void
+    {
+        if (! $this->team) {
+            return;
+        }
+
+        $integration = Integration::where('team_id', $this->team->id)->findOrFail($integrationId);
+        $config = $integration->config ?? [];
+        $config['sync_frequency'] = $frequency;
+        $integration->update(['config' => $config]);
+        $this->dispatch('notify', type: 'success', message: 'Sync frequency updated.');
+        $this->loadIntegrations();
+    }
+
+    // ── Detail panel ────────────────────────────────────────────────────────────
+
+    public function openDetailPanel(int $integrationId): void
+    {
+        $this->detailIntegrationId = $integrationId;
+        $this->showDetailPanel = true;
+        $this->loadSyncLogs($integrationId);
+    }
+
+    public function closeDetailPanel(): void
+    {
+        $this->showDetailPanel = false;
+        $this->detailIntegrationId = null;
+        $this->syncLogs = [];
+    }
+
+    private function loadSyncLogs(int $integrationId): void
+    {
+        $this->syncLogs = IntegrationSyncLog::where('integration_id', $integrationId)
+            ->orderByDesc('started_at')
+            ->limit(15)
+            ->get()
+            ->map(fn ($log) => [
+                'id' => $log->id,
+                'started_at' => $log->started_at->format('d M H:i'),
+                'duration' => $log->finished_at
+                    ? $log->started_at->diffInSeconds($log->finished_at).'s'
+                    : '—',
+                'status' => $log->status,
+                'machines_synced' => $log->machines_synced,
+                'records_inserted' => $log->records_inserted,
+                'error_message' => $log->error_message,
+            ])
+            ->toArray();
     }
 
     public function render(): View

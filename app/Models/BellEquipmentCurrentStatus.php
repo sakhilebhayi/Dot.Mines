@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $status_id
  * @property int $equipment_key
+ * @property-read BellEquipment|null $equipment
  * @property Carbon|null $snapshot_time
  * @property float|null $latitude
  * @property float|null $longitude

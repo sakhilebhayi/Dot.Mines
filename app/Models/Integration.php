@@ -60,6 +60,7 @@ class Integration extends Model
         'api_key',
         'api_secret',
         'webhook_secret',
+        'credentials',
     ];
 
     /**
@@ -69,8 +70,8 @@ class Integration extends Model
     {
         return [
             'last_sync_at' => 'datetime',
-            'credentials' => 'json',
-            'config' => 'json',
+            'credentials' => 'encrypted:array',
+            'config' => 'array',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
@@ -92,6 +93,15 @@ class Integration extends Model
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
+    }
+
+    /**
+     * Get sync audit logs for this integration
+     */
+    /** @return HasMany<IntegrationSyncLog, $this> */
+    public function syncLogs(): HasMany
+    {
+        return $this->hasMany(IntegrationSyncLog::class);
     }
 
     /**

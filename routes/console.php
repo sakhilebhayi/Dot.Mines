@@ -2,6 +2,7 @@
 
 use App\Jobs\ArchiveOldMetricsJob;
 use App\Jobs\CheckAIDriftJob;
+use App\Jobs\DispatchIntegrationSyncsJob;
 use App\Jobs\MachineIdleMonitoringJob;
 use App\Jobs\PurgeExpiredSoftDeletesJob;
 use App\Jobs\PurgeOldAuditLogsJob;
@@ -24,6 +25,14 @@ Artisan::command('inspire', function () {
 
 // Schedule route speed monitoring job to run every 5 minutes
 Schedule::job(new RouteSpeedMonitoringJob)
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// ── Self-service integration sync pipeline ─────────────────────────────────
+// Dispatches SyncIntegrationJob for every 'connected' integration that is
+// due for a sync, respecting each integration's configured sync_frequency.
+Schedule::job(new DispatchIntegrationSyncsJob)
     ->everyFiveMinutes()
     ->withoutOverlapping()
     ->onOneServer();
