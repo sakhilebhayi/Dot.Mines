@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureAdminHasTwoFactor;
 use App\Http\Middleware\EnsureTeamContext;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\SecurityHeaders;
+use App\Services\ErrorLoggerService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -86,21 +87,53 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // 500 — In production, hide all unhandled exception details from API responses
-        if (app()->environment('production')) {
-            $exceptions->render(function (Throwable $e, $request) {
-                if (! $e instanceof ValidationException
-                    && ! $e instanceof AuthenticationException
-                    && ! $e instanceof AuthorizationException
-                    && ! $e instanceof ThrottleRequestsException
-                    && ! $e instanceof ModelNotFoundException
-                    && ($request->expectsJson() || $request->is('api/*'))
-                ) {
-                    return response()->json(
-                        ['message' => 'An unexpected error occurred. Please try again.'],
-                        500
-                    );
+        // 500 — Log all unhandled exceptions to the platform logbook.
+        // In production: hide internals and render a branded error page.
+        // In non-production: let Laravel's default handler show the exception detail.
+        $exceptions->render(function (Throwable $e, $request) {
+            $isExpected = $e instanceof ValidationException
+                || $e instanceof AuthenticationException
+                || $e instanceof AuthorizationException
+                || $e instanceof ThrottleRequestsException
+                || $e instanceof ModelNotFoundException;
+
+            // Log unexpected errors to the platform logbook in all environments
+            $errorLog = null;
+            if (! $isExpected) {
+                try {
+                    $errorLog = ErrorLoggerService::record($e, $request);
+                } catch (Throwable) {
+                    // Logging must never crash the app
                 }
-            });
-        }
+            }
+
+            // In non-production: let Laravel default rendering handle display
+            // (shows full debug page in local/testing, no user-visible change)
+            if (! app()->isProduction()) {
+                return null;
+            }
+
+            if ($isExpected) {
+                return null;
+            }
+
+            $isApiRequest = $request->expectsJson() || $request->is('api/*');
+
+            if ($isApiRequest) {
+                $status = method_exists($e, 'getStatusCode') ? (int) $e->getStatusCode() : 500;
+
+                return response()->json(array_filter([
+                    'message' => 'An unexpected error occurred. Please try again.',
+                    'error_ref' => $errorLog?->error_id,
+                ]), $status);
+            }
+
+            // Web: render branded error page — no stack trace exposed
+            $status = method_exists($e, 'getStatusCode') ? (int) $e->getStatusCode() : 500;
+
+            return response()->view('errors.platform', [
+                'status' => $status,
+                'error_ref' => $errorLog?->error_id,
+            ], $status);
+        });
     })->create();

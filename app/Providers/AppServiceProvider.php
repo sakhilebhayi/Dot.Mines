@@ -36,6 +36,7 @@ use App\Observers\MachineObserver;
 use App\Observers\MaintenanceRecordObserver;
 use App\Observers\MineAreaObserver;
 use App\Services\AuditService;
+use App\Services\ErrorLoggerService;
 use App\Services\RealtimeEventScheduler;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
@@ -176,13 +177,27 @@ class AppServiceProvider extends ServiceProvider
         // Universal email delivery audit trail — logs every sent email to sent_emails table.
         Event::listen(MessageSent::class, LogSentMailListener::class);
 
-        // Listen for failed queue jobs and notify monitoring
+        // Listen for failed queue jobs — notify monitoring and write to error logbook
         Event::listen(JobFailed::class, function ($event) {
             try {
                 $listener = new NotifyOnJobFailed;
                 $listener->handle($event);
             } catch (\Throwable $e) {
                 Log::error('Failed to notify on job failure', ['error' => $e->getMessage()]);
+            }
+
+            // Record to platform error logbook for dashboards and forensics
+            try {
+                $jobClass = is_object($event->job)
+                    ? get_class($event->job)
+                    : (is_string($event->job) ? $event->job : 'UnknownJob');
+                ErrorLoggerService::recordQueueFailure(
+                    $jobClass,
+                    $event->exception,
+                    $event->connectionName,
+                );
+            } catch (\Throwable $e) {
+                Log::error('ErrorLoggerService::recordQueueFailure failed', ['error' => $e->getMessage()]);
             }
         });
 
