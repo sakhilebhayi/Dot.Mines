@@ -10,6 +10,7 @@ use App\Models\MineArea;
 use App\Models\Subscription;
 use App\Services\AI\FleetOptimizerAgent;
 use App\Services\Integration\BellTeamInsightsService;
+use App\Services\MachineTelemetryService;
 use App\Services\QueryCacheService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -765,6 +766,10 @@ class Fleet extends Component
             $teamId
         );
 
+        // Live Bell telemetry for every machine on the current page
+        $telemetryMap = app(MachineTelemetryService::class)
+            ->forMachines($machinesQuery->pluck('id')->toArray());
+
         // Timing analytics across all fleet machines (not just current page)
         $timingAnalytics = $this->buildTimingAnalytics($teamId);
 
@@ -782,6 +787,7 @@ class Fleet extends Component
             'isLoading' => $this->isLoading,
             'fleetUsage' => $fleetUsage,
             'engineHoursMap' => $engineHoursMap,
+            'telemetryMap' => $telemetryMap,
             'timingAnalytics' => $timingAnalytics,
         ]);
     }

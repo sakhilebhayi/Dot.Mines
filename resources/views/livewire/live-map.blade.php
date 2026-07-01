@@ -570,8 +570,30 @@
                     const statusClass = {
                         'active': 'machine-status-active',
                         'idle': 'machine-status-idle',
-                        'maintenance': 'machine-status-maintenance'
+                        'maintenance': 'machine-status-maintenance',
+                        'working': 'machine-status-active',
+                        'travelling': 'machine-status-active',
+                        'idling': 'machine-status-idle',
+                        'parked': 'machine-status-idle',
+                        'offline': 'machine-status-maintenance',
                     }[machine.status] || 'machine-status-default';
+
+                    const displayStatus = machine.telemetry_status || machine.status?.toUpperCase() || 'UNKNOWN';
+                    const fuelLine = machine.fuel_remaining_percent != null
+                        ? `<p class="text-xs text-gray-600">⛽ Fuel: <span class="font-semibold ${machine.fuel_remaining_percent < 20 ? 'text-red-600' : ''}">${Math.round(machine.fuel_remaining_percent)}%</span></p>`
+                        : '';
+                    const hoursLine = machine.telemetry_operating_hours != null
+                        ? `<p class="text-xs text-gray-600">⏱ Op. Hours: <span class="font-semibold">${Math.round(machine.telemetry_operating_hours).toLocaleString()} h</span></p>`
+                        : '';
+                    const loadsLine = machine.telemetry_load_count != null
+                        ? `<p class="text-xs text-gray-600">📦 Total Loads: <span class="font-semibold">${machine.telemetry_load_count.toLocaleString()}</span></p>`
+                        : '';
+                    const lastSeenLine = machine.last_seen_human
+                        ? `<p class="text-xs text-gray-500 mt-1">📡 ${machine.last_seen_human}</p>`
+                        : '';
+                    const engineLine = machine.engine_running != null
+                        ? `<p class="text-xs text-gray-600">🔑 Engine: <span class="font-semibold ${machine.engine_running ? 'text-emerald-600' : ''}">${machine.engine_running ? 'Running' : 'Off'}</span></p>`
+                        : '';
                     
                     const emojiImageUrl = getMachineEmojiImage(machine.machine_type);
 
@@ -587,23 +609,16 @@
 
                     const marker = L.marker([lat, lng], { icon: statusIcon })
                         .bindPopup(`
-                            <div class="p-3 min-w-max">
+                            <div class="p-3 min-w-[180px]">
                                 <p class="font-bold text-gray-900">${machine.name}</p>
-                                <p class="text-sm text-gray-700">${machine.manufacturer || 'Unknown'} ${machine.model || ''}</p>
-                                <p class="text-xs text-gray-600 mt-1">
-                                    <span class="inline-block px-2 py-1 rounded text-white ${statusClass}">
-                                        ${machine.status.toUpperCase()}
-                                    </span>
-                                </p>
-                                <p class="text-xs text-gray-600 mt-1">
-                                    Serial: ${machine.serial_number || 'N/A'}
-                                </p>
-                                <p class="text-xs text-gray-600">
-                                    Capacity: ${machine.capacity ? machine.capacity + ' tons' : 'N/A'}
-                                </p>
-                                <a href="/fleet/${machine.id}" class="text-blue-600 hover:underline text-xs mt-2 inline-block">
-                                    View Details →
-                                </a>
+                                <p class="text-sm text-gray-700 mb-1">${machine.manufacturer || 'Unknown'} ${machine.model || ''}</p>
+                                <span class="inline-block px-2 py-0.5 rounded text-white text-xs ${statusClass} mb-2">${displayStatus}</span>
+                                ${engineLine}
+                                ${fuelLine}
+                                ${hoursLine}
+                                ${loadsLine}
+                                ${lastSeenLine}
+                                <a href="/fleet/${machine.id}" class="text-blue-600 hover:underline text-xs mt-2 inline-block">View Details →</a>
                             </div>
                         `)
                         .addTo(map);

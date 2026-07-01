@@ -8,6 +8,7 @@ use App\Models\Machine;
 use App\Models\MapEvent;
 use App\Models\MineArea;
 use App\Models\Route;
+use App\Services\MachineTelemetryService;
 use App\Traits\RealtimeUpdates;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -319,7 +320,25 @@ class LiveMap extends Component
             $machinesQuery->where('mine_area_id', $this->selectedMineAreaId);
         }
 
-        return $machinesQuery->get();
+        $machines = $machinesQuery->get();
+        $machineIds = $machines->pluck('id')->all();
+
+        // Enrich with live Bell telemetry so the map popup shows fuel, hours, etc.
+        $telemetryMap = app(MachineTelemetryService::class)->forMachines($machineIds);
+
+        return $machines->map(function (Machine $machine) use ($telemetryMap) {
+            $tel = $telemetryMap[$machine->id] ?? null;
+
+            $data = $machine->toArray();
+            $data['telemetry_status'] = $tel['status_label'] ?? ucfirst($machine->status);
+            $data['engine_running'] = $tel['engine_running'] ?? false;
+            $data['fuel_remaining_percent'] = $tel['fuel_remaining_percent'] ?? null;
+            $data['telemetry_operating_hours'] = $tel['operating_hours'] ?? $machine->operating_hours;
+            $data['telemetry_load_count'] = $tel['load_count'] ?? null;
+            $data['last_seen_human'] = $tel['last_seen_human'] ?? null;
+
+            return $data;
+        });
     }
 
     public function getMineAreas(): mixed

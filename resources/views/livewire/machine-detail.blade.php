@@ -7,9 +7,140 @@
             </svg>
             Back to Fleet
         </a>
-        <h1 class="text-3xl font-bold text-white">{{ $machine->name }}</h1>
+        <div class="flex items-center gap-3 flex-wrap">
+            <h1 class="text-3xl font-bold text-white">{{ $machine->name }}</h1>
+            {{-- Live status badge --}}
+            @php
+                $liveStatus = $liveTelemetry['status'] ?? $machine->status;
+                $liveLabel  = $liveTelemetry['status_label'] ?? ucfirst($machine->status);
+                $liveBadge  = match($liveStatus) {
+                    'working'     => 'bg-emerald-500/20 text-emerald-300 border-emerald-600',
+                    'travelling'  => 'bg-cyan-500/20 text-cyan-300 border-cyan-600',
+                    'idling'      => 'bg-amber-500/20 text-amber-300 border-amber-600',
+                    'parked'      => 'bg-slate-600/40 text-slate-300 border-slate-600',
+                    'offline'     => 'bg-red-500/20 text-red-300 border-red-600',
+                    'maintenance' => 'bg-orange-500/20 text-orange-300 border-orange-600',
+                    default       => 'bg-gray-700 text-gray-300 border-gray-600',
+                };
+                $isEngineOn = $liveTelemetry['engine_running'] ?? false;
+            @endphp
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold border {{ $liveBadge }}">
+                @if($isEngineOn)
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                @endif
+                {{ $liveLabel }}
+            </span>
+        </div>
         <p class="text-gray-400 mt-2">{{ $machine->manufacturer }} {{ $machine->model }}</p>
     </div>
+
+    {{-- ── Live Telemetry Snapshot ─────────────────────────────────────────── --}}
+    @if(!empty($liveTelemetry) && $liveTelemetry['equipment_key'] !== null)
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 mb-6">
+            <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Live Telemetry Snapshot</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {{-- Engine --}}
+                <div class="bg-slate-800 rounded-lg p-3 text-center">
+                    <div class="text-xs text-slate-400 mb-1">Engine</div>
+                    @if($isEngineOn)
+                        <div class="text-emerald-400 font-bold text-sm flex items-center justify-center gap-1">
+                            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> Running
+                        </div>
+                    @else
+                        <div class="text-slate-400 font-bold text-sm">Off</div>
+                    @endif
+                </div>
+                {{-- Fuel --}}
+                @if($liveTelemetry['fuel_remaining_percent'] !== null)
+                    @php $fp = (int) $liveTelemetry['fuel_remaining_percent']; @endphp
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Fuel</div>
+                        <div class="font-bold text-sm {{ $fp < 20 ? 'text-red-400' : ($fp < 40 ? 'text-amber-400' : 'text-white') }}">{{ $fp }}%</div>
+                        <div class="w-full bg-slate-700 rounded-full h-1 mt-1.5">
+                            <div class="{{ $fp < 20 ? 'bg-red-500' : ($fp < 40 ? 'bg-amber-400' : 'bg-emerald-500') }} h-1 rounded-full" style="width:{{ $fp }}%"></div>
+                        </div>
+                    </div>
+                @endif
+                {{-- Operating hours --}}
+                @if($liveTelemetry['operating_hours'] !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Op. Hours</div>
+                        <div class="text-white font-bold text-sm">{{ number_format($liveTelemetry['operating_hours'], 0) }} h</div>
+                    </div>
+                @endif
+                {{-- Odometer --}}
+                @php $odo = $liveTelemetry['odometer'] ?? $machine->odometer; @endphp
+                @if($odo !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Odometer</div>
+                        <div class="text-white font-bold text-sm">{{ number_format($odo, 0) }} km</div>
+                    </div>
+                @endif
+                {{-- Total loads --}}
+                @if($liveTelemetry['load_count'] !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Total Loads</div>
+                        <div class="text-white font-bold text-sm">{{ number_format($liveTelemetry['load_count']) }}</div>
+                    </div>
+                @endif
+                {{-- DEF --}}
+                @if($liveTelemetry['def_percent'] !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">DEF Level</div>
+                        <div class="text-white font-bold text-sm">{{ round($liveTelemetry['def_percent']) }}%</div>
+                    </div>
+                @endif
+            </div>
+            {{-- Speed + last seen row --}}
+            <div class="flex flex-wrap gap-4 mt-3 text-xs text-slate-400">
+                @if($liveTelemetry['speed_kmh'] !== null && $liveTelemetry['speed_kmh'] > 0)
+                    <span>🏎 Speed: <span class="text-white font-semibold">{{ number_format($liveTelemetry['speed_kmh'], 1) }} km/h</span></span>
+                @endif
+                @if($liveTelemetry['latitude'] !== null)
+                    <span>📍 GPS: {{ number_format($liveTelemetry['latitude'], 5) }}, {{ number_format($liveTelemetry['longitude'], 5) }}</span>
+                @endif
+                @if($liveTelemetry['last_seen_human'])
+                    <span>📡 Last sync: {{ $liveTelemetry['last_seen_human'] }}</span>
+                @endif
+            </div>
+        </div>
+    @endif
+
+    {{-- ── Production Today (24 hr) ───────────────────────────────────────── --}}
+    @if($productionToday !== null)
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 mb-6">
+            <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
+                Production — Today ({{ \Carbon\Carbon::today()->format('d M Y') }})
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div class="bg-slate-800 rounded-lg p-3 text-center">
+                    <div class="text-xs text-slate-400 mb-1">Loads</div>
+                    <div class="text-white font-bold text-xl">{{ number_format($productionToday->loads_moved ?? 0) }}</div>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-3 text-center">
+                    <div class="text-xs text-slate-400 mb-1">Payload (t)</div>
+                    <div class="text-white font-bold text-xl">{{ number_format($productionToday->payload_moved ?? 0, 1) }}</div>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-3 text-center">
+                    <div class="text-xs text-slate-400 mb-1">Op. Hours</div>
+                    <div class="text-white font-bold text-xl">{{ number_format($productionToday->operating_hours ?? 0, 1) }}</div>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-3 text-center">
+                    <div class="text-xs text-slate-400 mb-1">Fuel Used (L)</div>
+                    <div class="text-white font-bold text-xl">{{ number_format($productionToday->fuel_used ?? 0, 0) }}</div>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-3 text-center">
+                    <div class="text-xs text-slate-400 mb-1">Utilisation</div>
+                    <div class="text-white font-bold text-xl">{{ number_format($productionToday->utilization_percent ?? 0, 1) }}%</div>
+                </div>
+            </div>
+            @if(($productionToday->loads_moved ?? 0) > 0 && ($productionToday->payload_moved ?? 0) > 0)
+                <p class="text-xs text-slate-500 mt-2">
+                    Avg payload/load: {{ number_format(($productionToday->payload_moved / $productionToday->loads_moved), 2) }} t
+                </p>
+            @endif
+        </div>
+    @endif
 
     <!-- Machine Information Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
