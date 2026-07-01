@@ -116,7 +116,9 @@ class Dashboard extends Component
             ])
             ->toArray();
 
-        $this->bellOverview = app(BellTeamInsightsService::class)->getTeamOverview($team->id);
+        if ($team->id === (int) config('integrations.bell.team_id')) {
+            $this->bellOverview = app(BellTeamInsightsService::class)->getTeamOverview($team->id);
+        }
 
         $this->isLoading = false;
     }

@@ -41,7 +41,10 @@ class MachineDetail extends Component
             ->take(5)
             ->get();
 
-        $bellEquipment = BellEquipment::where('machine_id', $this->machine->id)->first();
+        $isBellTeam = $this->machine->team_id === (int) config('integrations.bell.team_id');
+        $bellEquipment = $isBellTeam
+            ? BellEquipment::where('machine_id', $this->machine->id)->first()
+            : null;
         $bellStatus = null;
         $bellCautionCodes = collect();
         $bellFuelHistory = collect();

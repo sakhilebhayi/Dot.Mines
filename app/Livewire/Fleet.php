@@ -738,7 +738,9 @@ class Fleet extends Component
             ])
             ->toArray();
 
-        $this->bellOverview = app(BellTeamInsightsService::class)->getTeamOverview($teamId);
+        if ($teamId === (int) config('integrations.bell.team_id')) {
+            $this->bellOverview = app(BellTeamInsightsService::class)->getTeamOverview($teamId);
+        }
 
         // AI Fleet Optimization Analysis
         $aiAgent = new FleetOptimizerAgent;

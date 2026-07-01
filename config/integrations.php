@@ -87,6 +87,7 @@ return [
         'bell' => [
             'name' => 'Bell',
             'api_system' => 'Fleetmatic',
+            'team_id' => (int) env('BELL_TEAM_ID', 0),
             'base_url' => env('BELL_API_BASE_URL', 'https://b-fleet03.bellequipment.com:8080'),
             'api_version' => 'v1',
             'api_key_env' => 'BELL_API_KEY',

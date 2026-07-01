@@ -586,7 +586,7 @@ class Reports extends Component
     {
         $team = Auth::user()->currentTeam;
 
-        if (! $team) {
+        if (! $team || $team->id !== (int) config('integrations.bell.team_id')) {
             return [];
         }
 
@@ -639,10 +639,15 @@ class Reports extends Component
 
     /**
      * Export raw Bell telemetry KPIs as CSV download.
+     * Only available to the Bell-authorised team.
      */
     public function exportBellCsv(): StreamedResponse
     {
         $team = Auth::user()->currentTeam;
+
+        if (! $team || $team->id !== (int) config('integrations.bell.team_id')) {
+            abort(403);
+        }
         $mayStart = Carbon::parse('2026-05-01')->startOfDay();
 
         $linkedKeys = BellEquipment::whereNotNull('machine_id')->pluck('equipment_key');
@@ -723,6 +728,8 @@ class Reports extends Component
         $this->machinesList = $team ? Machine::where('team_id', $team->id)->select(['id', 'name'])->get() : collect();
         $teamUsers = $team ? User::whereHas('teams', fn ($q) => $q->where('teams.id', $team->id))->select(['id', 'name'])->orderBy('name')->get() : collect();
 
+        $isBellTeam = $team && $team->id === (int) config('integrations.bell.team_id');
+
         return view('livewire.reports', [
             'reports' => $this->activeTab === 'generated' ? $this->getReports() : collect(),
             'reportTypes' => $this->reportTypes,
@@ -733,7 +740,8 @@ class Reports extends Component
             'shiftReportData' => $this->activeTab === 'shift_reports' ? $this->getShiftReportData() : [],
             'breakdownData' => $this->activeTab === 'breakdown' ? $this->getBreakdownData() : [],
             'productionData' => $this->activeTab === 'production' ? $this->getProductionData() : [],
-            'bellData' => $this->activeTab === 'bell' ? $this->getBellData() : [],
+            'bellData' => ($this->activeTab === 'bell' && $isBellTeam) ? $this->getBellData() : [],
+            'isBellTeam' => $isBellTeam,
             'history' => $this->activeTab === 'history' ? $this->getHistory() : null,
             'teamUsers' => $teamUsers,
         ]);
