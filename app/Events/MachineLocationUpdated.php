@@ -72,11 +72,13 @@ class MachineLocationUpdated implements ShouldBroadcast
             'name' => $this->machine->name,
             'latitude' => $this->location['latitude'] ?? null,
             'longitude' => $this->location['longitude'] ?? null,
-            'accuracy' => $this->location['accuracy'] ?? null,
+            // Instantaneous speed/bearing from the 5-min Locations feed (null for ISO snapshot)
             'speed' => $this->location['speed'] ?? null,
             'bearing' => $this->location['bearing'] ?? null,
             'altitude' => $this->location['altitude'] ?? null,
+            'accuracy' => $this->location['accuracy'] ?? null,
             'timestamp' => $this->timestamp,
+            // Machine status so the fleet cards / map stay synchronised
             'status' => $this->machine->status,
         ];
     }

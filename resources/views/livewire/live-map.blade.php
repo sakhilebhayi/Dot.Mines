@@ -1,4 +1,4 @@
-<div>
+<div wire:poll.{{ $pollInterval }}s="refreshMachinePositions">
 <div>
     <!-- Leaflet CSS - loaded directly in component -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
@@ -485,6 +485,32 @@
                                 // Append and render the new marker immediately
                                 eventsData.unshift(payload);
                                 addSingleEventMarker(payload, true);
+                            })
+                            .listen('.machine.location.updated', (payload) => {
+                                // Move an existing machine marker in real time as GPS updates arrive.
+                                if (!payload.id || payload.latitude == null || payload.longitude == null) return;
+                                const machineId = payload.id;
+                                const newLatLng = L.latLng(parseFloat(payload.latitude), parseFloat(payload.longitude));
+
+                                if (markers[machineId] && map) {
+                                    // Animate the marker smoothly to its new position.
+                                    // Duration is 80% of the poll interval so the animation
+                                    // completes before the next update arrives.
+                                    const animDuration = Math.round(@js(config('integrations.bell_polling.location_interval_seconds', 300)) * 800);
+                                    animateMarkerTo(markers[machineId], newLatLng, animDuration);
+                                }
+
+                                // Refresh data store so the next full redraw uses the latest position.
+                                const idx = machinesData.findIndex(m => m.id === machineId);
+                                if (idx !== -1) {
+                                    machinesData[idx].last_location_latitude  = payload.latitude;
+                                    machinesData[idx].last_location_longitude = payload.longitude;
+                                    if (payload.status) machinesData[idx].status = payload.status;
+                                }
+
+                                if (payload.speed != null && payload.speed > 3) {
+                                    debugLog('Machine moving', payload.name, 'at', payload.speed, 'km/h');
+                                }
                             });
                     }
                 }
@@ -1215,10 +1241,127 @@
             }
         }
 
+        /**
+         * Smoothly animate a Leaflet marker from its current position to targetLatLng.
+         *
+         * Uses requestAnimationFrame with an ease-in-out cubic curve so movement
+         * looks natural rather than teleporting.  The animation duration should be
+         * set to roughly 80% of the polling interval so each transition completes
+         * before the next GPS update arrives.
+         *
+         * @param {L.Marker} marker      - Leaflet marker to animate.
+         * @param {L.LatLng} targetLatLng - Destination coordinates.
+         * @param {number}   durationMs  - Animation length in milliseconds (default 4000ms).
+         */
+        function animateMarkerTo(marker, targetLatLng, durationMs) {
+            durationMs = durationMs || 4000;
+            const startLatLng = marker.getLatLng();
+
+            // Skip trivial moves (< ~1 metre) to avoid jitter from GPS noise.
+            if (
+                Math.abs(startLatLng.lat - targetLatLng.lat) < 0.000009 &&
+                Math.abs(startLatLng.lng - targetLatLng.lng) < 0.000009
+            ) {
+                return;
+            }
+
+            const startTime = performance.now();
+
+            // Cancel any in-progress animation on this marker.
+            if (marker._animRaf) {
+                cancelAnimationFrame(marker._animRaf);
+                marker._animRaf = null;
+            }
+
+            function step(now) {
+                const elapsed = now - startTime;
+                const t = Math.min(elapsed / durationMs, 1);
+                // Ease-in-out cubic: smooth start and end, linear through middle.
+                const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+                marker.setLatLng([
+                    startLatLng.lat + (targetLatLng.lat - startLatLng.lat) * ease,
+                    startLatLng.lng + (targetLatLng.lng - startLatLng.lng) * ease,
+                ]);
+
+                if (t < 1) {
+                    marker._animRaf = requestAnimationFrame(step);
+                } else {
+                    marker._animRaf = null;
+                }
+            }
+
+            marker._animRaf = requestAnimationFrame(step);
+        }
+
+        /**
+         * Incrementally update machine markers from a fresh data array.
+         *
+         * Unlike clearMarkers+addMachineMarkers (which destroys and re-creates
+         * everything), this function:
+         *  - Smoothly animates existing markers to new positions.
+         *  - Adds markers for newly-appeared machines.
+         *  - Removes markers for machines that have gone offline / out of scope.
+         *
+         * This eliminates the visual flicker of a full rebuild on every wire:poll cycle.
+         *
+         * @param {Array} newMachinesArray - Array of machine objects from the server.
+         * @param {number} animDurationMs  - Animation duration in ms for position updates.
+         */
+        function updateMachinePositions(newMachinesArray, animDurationMs) {
+            animDurationMs = animDurationMs || 4000;
+            if (!map || !Array.isArray(newMachinesArray)) return;
+
+            const newIds = new Set(newMachinesArray.map(m => m.id));
+            const oldIds = new Set(Object.keys(markers).map(Number));
+
+            // 1. Animate existing markers to their new positions.
+            newMachinesArray.forEach(updatedMachine => {
+                const id = updatedMachine.id;
+                const newLat = parseFloat(updatedMachine.last_location_latitude);
+                const newLng = parseFloat(updatedMachine.last_location_longitude);
+
+                if (isNaN(newLat) || isNaN(newLng)) return;
+
+                if (markers[id]) {
+                    animateMarkerTo(markers[id], L.latLng(newLat, newLng), animDurationMs);
+                }
+            });
+
+            // 2. Add markers for machines that weren't in the previous set.
+            const addedMachines = newMachinesArray.filter(m => !oldIds.has(m.id));
+            if (addedMachines.length > 0) {
+                machinesData = [...machinesData, ...addedMachines];
+                // Temporarily swap machinesData to only the new ones, render, then restore.
+                const saved = machinesData;
+                machinesData = addedMachines;
+                addMachineMarkers();
+                machinesData = saved;
+            }
+
+            // 3. Remove markers for machines that disappeared.
+            oldIds.forEach(id => {
+                if (!newIds.has(id) && markers[id]) {
+                    try {
+                        if (map.hasLayer(markers[id])) map.removeLayer(markers[id]);
+                    } catch (_) {}
+                    delete markers[id];
+                }
+            });
+
+            // 4. Update the data store with the latest values.
+            machinesData = newMachinesArray;
+        }
+
         function clearMarkers() {
             if (!map) return;
             Object.values(markers).forEach(marker => {
                 try {
+                    // Cancel any in-progress animation before removing.
+                    if (marker._animRaf) {
+                        cancelAnimationFrame(marker._animRaf);
+                        marker._animRaf = null;
+                    }
                     if (map.hasLayer(marker)) {
                         map.removeLayer(marker);
                     }
@@ -1283,15 +1426,18 @@
                 }
             }
             
-            // Handle machines update
+            // Handle machines update — use incremental animation instead of clear+rebuild
+            // so markers glide smoothly to new positions on every wire:poll cycle.
             if (data.machines !== undefined) {
                 try {
-                    clearMarkers();
                     if (Array.isArray(data.machines) && data.machines.length > 0) {
-                        machinesData = data.machines;
                         showMachinesData = true;
-                        addMachineMarkers();
+                        // Animate over 80% of the UI poll interval so transitions
+                        // complete before the next server refresh arrives.
+                        const pollMs = @js(config('integrations.bell_polling.ui_poll_seconds', 30)) * 800;
+                        updateMachinePositions(data.machines, pollMs);
                     } else {
+                        clearMarkers();
                         machinesData = [];
                         showMachinesData = false;
                     }

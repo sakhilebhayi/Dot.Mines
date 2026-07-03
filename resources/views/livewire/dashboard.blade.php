@@ -7,7 +7,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
         </div>
-        <script>window.scrollTo(0,0);</script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
     @else
         <!-- Chart Visualization Placeholder removed -->
         <!-- Activity Feed -->
@@ -143,6 +143,71 @@
             @endif
         </div>
     </div>
+
+    {{-- ── Live Telemetry Stats (rendered when any OEM telemetry is present) ──────────── --}}
+    @if ($hasBellTelemetry)
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {{-- Running Engines --}}
+        <div class="bg-emerald-600 rounded-lg shadow p-4 text-white flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-lg flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="text-2xl font-bold leading-none">{{ $runningMachines }}</p>
+                <p class="text-xs text-emerald-100 mt-0.5">Engines Running</p>
+            </div>
+        </div>
+
+        {{-- Offline Machines --}}
+        <div class="bg-red-600 rounded-lg shadow p-4 text-white flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-lg flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 11-12.728 0"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v9"/>
+                </svg>
+            </div>
+            <div>
+                <p class="text-2xl font-bold leading-none">{{ $offlineMachines }}</p>
+                <p class="text-xs text-red-100 mt-0.5">Offline</p>
+            </div>
+        </div>
+
+        {{-- Average Fuel --}}
+        <div class="bg-amber-500 rounded-lg shadow p-4 text-white flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-lg flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h6"/>
+                </svg>
+            </div>
+            <div>
+                <p class="text-2xl font-bold leading-none">
+                    {{ $avgFuelPercent !== null ? $avgFuelPercent.'%' : '—' }}
+                </p>
+                <p class="text-xs text-amber-100 mt-0.5">Avg Fuel Level</p>
+            </div>
+        </div>
+
+        {{-- Loads Today --}}
+        <div class="bg-blue-600 rounded-lg shadow p-4 text-white flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-lg flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+            </div>
+            <div>
+                <p class="text-2xl font-bold leading-none">{{ number_format($loadsToday) }}</p>
+                <p class="text-xs text-blue-100 mt-0.5">
+                    Loads Today
+                    @if ($payloadTodayTonnes > 0)
+                        <span class="block">{{ number_format($payloadTodayTonnes, 1) }} t</span>
+                    @endif
+                </p>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

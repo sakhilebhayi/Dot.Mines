@@ -11,6 +11,7 @@ use App\Models\MineArea;
 use App\Models\User;
 use App\Services\AI\FuelPredictorAgent;
 use App\Services\FuelManagementService;
+use App\Services\MachineTelemetryService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -592,6 +593,22 @@ class FuelManagement extends Component
 
         $mineAreas = MineArea::where('team_id', $teamId)->orderBy('name')->get();
 
+        // ── Live fuel levels per machine — from all integrated OEM sources ───
+        // MachineTelemetryService resolves Bell, MachineMetric, and Machine fields
+        // in priority order, so this works for any manufacturer.
+        $allMachineIds = $machines->pluck('id')->all();
+        $telemetryMap = app(MachineTelemetryService::class)->forMachines($allMachineIds);
+
+        $machineFuelLevels = [];
+        foreach ($telemetryMap as $machineId => $tel) {
+            if ($tel['fuel_remaining_percent'] !== null) {
+                $machineFuelLevels[$machineId] = [
+                    'fuel_pct' => (float) $tel['fuel_remaining_percent'],
+                    'updated_date' => $tel['last_seen_at'],
+                ];
+            }
+        }
+
         return view('livewire.fuel-management', [
             'tanks' => $tanks,
             'machines' => $machines,
@@ -605,6 +622,7 @@ class FuelManagement extends Component
             'aiInsights' => $aiInsights,
             'mineAreas' => $mineAreas,
             'canSeeInactiveTanks' => $canSeeInactive,
+            'machineFuelLevels' => $machineFuelLevels,
         ]);
     }
 

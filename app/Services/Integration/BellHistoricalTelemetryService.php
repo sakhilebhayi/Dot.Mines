@@ -6,6 +6,7 @@ use App\Events\BellEngineWarningDetected;
 use App\Events\BellFuelLowDetected;
 use App\Events\BellLocationUpdated;
 use App\Events\BellTelemetryReceived;
+use App\Events\MachineLocationUpdated;
 use App\Models\BellDefLevel;
 use App\Models\BellDistanceTravelled;
 use App\Models\BellEquipment;
@@ -19,6 +20,7 @@ use App\Models\BellEquipmentOperatingHoursHistory;
 use App\Models\BellFuelLevel;
 use App\Models\BellPayloadTotal;
 use App\Models\BellRegenerationHour;
+use App\Models\Machine;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -277,6 +279,35 @@ class BellHistoricalTelemetryService
 
             if ($equipment !== null && $lat !== null && $lng !== null) {
                 BellLocationUpdated::dispatch($equipment, $lat, $lng, $heading, $speed, $recordedAt);
+
+                // Propagate the fresh GPS position to the canonical machines table so
+                // the live map and fleet cards always reflect the 5-minute location feed.
+                $machineId = $equipment->machine_id;
+                if ($machineId !== null) {
+                    try {
+                        $machine = Machine::find($machineId);
+                        if ($machine !== null) {
+                            $machine->update([
+                                'last_location_latitude' => $lat,
+                                'last_location_longitude' => $lng,
+                                'last_location_update' => $recordedAt,
+                                'last_seen_at' => $recordedAt,
+                            ]);
+
+                            MachineLocationUpdated::dispatch($machine->fresh(), [
+                                'latitude' => $lat,
+                                'longitude' => $lng,
+                                'speed' => $speed,
+                                'bearing' => $heading,
+                            ]);
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('BellHistoricalTelemetryService: failed to update machine location', [
+                            'machine_id' => $machineId,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
             }
 
             $last = null;

@@ -31,6 +31,9 @@ class LiveMap extends Component
 
     public string $mapStyle = 'satellite'; // 'osm' or 'satellite'
 
+    /** Wire:poll interval (seconds) — driven by BELL_UI_POLL_SECONDS config. */
+    public int $pollInterval = 30;
+
     public bool $showGeofences = true;
 
     public bool $showMachines = true;
@@ -51,6 +54,9 @@ class LiveMap extends Component
 
     public function mount(): void
     {
+        // Set the wire:poll interval from config (clamped to a safe minimum of 10s).
+        $this->pollInterval = max(10, (int) config('integrations.bell_polling.ui_poll_seconds', 30));
+
         // Try to center on first machine location if available, else default to South Africa
         $team = Auth::user()->currentTeam;
 
@@ -477,6 +483,13 @@ class LiveMap extends Component
                 'pedestrian_priority_shared_zones' => true,
             ],
         ];
+    }
+
+    public function refreshMachinePositions(): void
+    {
+        $this->dispatch('map-updated', [
+            'machines' => $this->getMachines(),
+        ]);
     }
 
     public function render(): View

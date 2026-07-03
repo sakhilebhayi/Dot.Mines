@@ -9,7 +9,7 @@
         @php($machines = $machines ?? [])
 
         {{-- Anti-FOUC: apply the correct theme class before ANY CSS or JS is parsed. --}}
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             (function () {
                 var mode = localStorage.getItem('theme-mode');
                 var isDark;

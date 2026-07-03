@@ -435,6 +435,51 @@
     </div>
     @endif
 
+    {{-- ── Active Fault Codes from integrated OEM sources ───────────────────── --}}
+    @if (isset($activeFaultCodes) && $activeFaultCodes->count() > 0)
+    <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 rounded-xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-3">
+            <svg class="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <h2 class="text-lg font-bold text-orange-800 dark:text-orange-300">
+                Active Machine Fault Codes ({{ $activeFaultCodes->count() }})
+            </h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-orange-700 dark:text-orange-400 border-b border-orange-200 dark:border-orange-700">
+                        <th class="pb-2 pr-4 font-semibold">Fault Code</th>
+                        <th class="pb-2 pr-4 font-semibold">Description</th>
+                        <th class="pb-2 pr-4 font-semibold">Severity</th>
+                        <th class="pb-2 pr-4 font-semibold">Source</th>
+                        <th class="pb-2 font-semibold">Detected</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-orange-100 dark:divide-orange-800/40">
+                    @foreach ($activeFaultCodes as $fault)
+                    <tr class="hover:bg-orange-100/50 dark:hover:bg-orange-900/30">
+                        <td class="py-2 pr-4 font-mono font-bold text-orange-900 dark:text-orange-200">{{ $fault['fault_code'] }}</td>
+                        <td class="py-2 pr-4 text-gray-700 dark:text-gray-300">{{ $fault['fault_description'] ?? '—' }}</td>
+                        <td class="py-2 pr-4">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                @if (strtolower($fault['severity']) === 'critical') bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                                @elseif (strtolower($fault['severity']) === 'warning') bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                                @else bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                                @endif
+                            ">{{ $fault['severity'] }}</span>
+                        </td>
+                        <td class="py-2 pr-4 text-gray-500 dark:text-gray-400 text-xs">{{ $fault['source'] ?? '—' }}</td>
+                        <td class="py-2 text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap">{{ $fault['occurred_at'] }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
     <!-- Due & Overdue Maintenance -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Overdue Maintenance -->

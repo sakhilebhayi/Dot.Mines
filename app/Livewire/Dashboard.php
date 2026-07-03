@@ -7,6 +7,8 @@ use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Services\Integration\BellTeamInsightsService;
+use App\Services\MachineKpiService;
+use App\Services\MachineTelemetryService;
 use App\Services\QueryCacheService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +35,23 @@ class Dashboard extends Component
 
     /** @var array<string, mixed> */
     public array $bellOverview = [];
+
+    /** Live Bell telemetry stats — available for all teams with Bell equipment. */
+    public int $runningMachines = 0;
+
+    public int $offlineMachines = 0;
+
+    /** Average fuel level across machines with Bell telemetry (null = no data). */
+    public ?float $avgFuelPercent = null;
+
+    /** Loads completed today from Bell daily KPIs. */
+    public int $loadsToday = 0;
+
+    /** Payload moved today (tonnes) from Bell daily KPIs. */
+    public float $payloadTodayTonnes = 0.0;
+
+    /** True when at least one machine has Bell telemetry. */
+    public bool $hasBellTelemetry = false;
 
     public bool $isLoading = true;
 
@@ -120,7 +139,68 @@ class Dashboard extends Component
             $this->bellOverview = app(BellTeamInsightsService::class)->getTeamOverview($team->id);
         }
 
+        // ── Bell live telemetry stats (available for every team with Bell machines) ──
+        $this->loadBellTelemetryStats($team->id);
+
         $this->isLoading = false;
+    }
+
+    /**
+     * Load live Bell telemetry aggregates (running machines, avg fuel %,
+     * today's loads/payload) for any team that has Bell equipment linked.
+     * Gracefully produces zero/null values when no Bell data exists.
+     */
+    private function loadBellTelemetryStats(int $teamId): void
+    {
+        $machineIds = Machine::where('team_id', $teamId)->pluck('id')->all();
+
+        if (empty($machineIds)) {
+            return;
+        }
+
+        // Per-machine live telemetry (two-query bulk lookup).
+        $telemetry = app(MachineTelemetryService::class)->forMachines($machineIds);
+
+        $hasTelemetry = false;
+        $running = 0;
+        $offline = 0;
+        $fuelValues = [];
+
+        foreach ($telemetry as $data) {
+            if ($data['status'] === 'offline' && $data['equipment_key'] === null) {
+                continue; // No Bell equipment linked to this machine.
+            }
+
+            $hasTelemetry = true;
+
+            if ($data['engine_running']) {
+                $running++;
+            }
+
+            if ($data['status'] === 'offline') {
+                $offline++;
+            }
+
+            if ($data['fuel_remaining_percent'] !== null) {
+                $fuelValues[] = $data['fuel_remaining_percent'];
+            }
+        }
+
+        if (! $hasTelemetry) {
+            return;
+        }
+
+        $this->hasBellTelemetry = true;
+        $this->runningMachines = $running;
+        $this->offlineMachines = $offline;
+        $this->avgFuelPercent = ! empty($fuelValues)
+            ? round(array_sum($fuelValues) / count($fuelValues), 1)
+            : null;
+
+        // Today's production KPIs — aggregated from all OEM sources.
+        $todayKpis = app(MachineKpiService::class)->getTodayKpis($machineIds);
+        $this->loadsToday = $todayKpis['total_loads'];
+        $this->payloadTodayTonnes = $todayKpis['total_payload_tonnes'];
     }
 
     public function acknowledgeAlert(int $alertId): void

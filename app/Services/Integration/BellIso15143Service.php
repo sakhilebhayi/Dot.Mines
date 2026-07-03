@@ -4,6 +4,8 @@ namespace App\Services\Integration;
 
 use App\Contracts\BellIso15143ServiceInterface;
 use App\Events\MachineLocationUpdated;
+use App\Events\MachineStatusChanged;
+use App\Models\Alert;
 use App\Models\BellEquipment;
 use App\Models\BellEquipmentCautionCode;
 use App\Models\BellEquipmentCurrentStatus;
@@ -410,6 +412,10 @@ class BellIso15143Service implements BellIso15143ServiceInterface
 
             // Push latest telemetry into the canonical machines table.
             $this->bridgeToMachine($equipmentModel, $item, $snapshotTime);
+
+            // Create (or resolve) Alert records from active Bell fault codes so
+            // operators see equipment faults on the Alerts page without manual entry.
+            $this->syncAlertsFromCautionCodes($equipmentModel, $snapshotTime);
 
             $this->counters['processed']++;
         }
@@ -942,12 +948,14 @@ class BellIso15143Service implements BellIso15143ServiceInterface
             ]);
         }
 
-        // Determine status from engine_running flag.
-        $status = match (true) {
-            $item['engine_running'] === true => 'active',
-            $item['engine_running'] === false => 'idle',
-            default => $machine->status,
-        };
+        // Derive the canonical Machine status from available telemetry.
+        // Priority: preserve manual maintenance → offline (stale telemetry)
+        //           → idle (engine off) → active (engine running).
+        $status = $this->deriveCanonicalMachineStatus(
+            engineRunning: $item['engine_running'],
+            snapshotTime: $snapshotTime,
+            existingStatus: $machine->status,
+        );
 
         // Convert odometer to km (Bell default unit is 'kilometre').
         $oemOdometer = isset($item['odometer']) ? (float) $item['odometer'] : null;
@@ -984,7 +992,20 @@ class BellIso15143Service implements BellIso15143ServiceInterface
             $updates['total_distance_km'] = $totalDistanceKm;
         }
 
+        $previousStatus = $machine->status;
         $machine->update($updates);
+
+        // Broadcast status change when the derived status differs from the previous one.
+        if ($previousStatus !== $status) {
+            try {
+                MachineStatusChanged::dispatch($machine->fresh(), $previousStatus, $status);
+            } catch (\Throwable $e) {
+                Log::warning('BellIso15143Service: failed to broadcast MachineStatusChanged', [
+                    'machine_id' => $machine->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         // Broadcast GPS update to the live map (only when coordinates are present).
         // Wrapped in try-catch so a broadcasting failure (e.g. Pusher/Reverb unreachable)
@@ -994,6 +1015,8 @@ class BellIso15143Service implements BellIso15143ServiceInterface
                 MachineLocationUpdated::dispatch($machine->fresh(), [
                     'latitude' => $lat,
                     'longitude' => $lng,
+                    'speed' => null,   // ISO15143-3 snapshot has no instantaneous speed
+                    'bearing' => null,
                 ]);
             } catch (\Throwable $e) {
                 Log::warning('BellIso15143Service: failed to broadcast MachineLocationUpdated', [
@@ -1001,6 +1024,121 @@ class BellIso15143Service implements BellIso15143ServiceInterface
                     'error' => $e->getMessage(),
                 ]);
             }
+        }
+    }
+
+    /**
+     * Map Bell ISO15143-3 telemetry signals to a canonical Machine.status value.
+     *
+     * Rules (in priority order):
+     *   1. Preserve 'maintenance' — a manually set flag, never overridden by telemetry.
+     *   2. Telemetry older than 30 minutes → 'offline'
+     *   3. engine_running = false → 'idle'
+     *   4. engine_running = true  → 'active'
+     *   5. engine_running = null  → keep existing status
+     */
+    private function deriveCanonicalMachineStatus(
+        ?bool $engineRunning,
+        ?Carbon $snapshotTime,
+        string $existingStatus,
+    ): string {
+        // Maintenance is a manual override – never touch it via telemetry.
+        if ($existingStatus === 'maintenance') {
+            return 'maintenance';
+        }
+
+        // If the snapshot is stale (>30 min old) the machine is offline.
+        if ($snapshotTime !== null && $snapshotTime->lt(now()->subMinutes(30))) {
+            return 'offline';
+        }
+
+        return match ($engineRunning) {
+            true => 'active',
+            false => 'idle',
+            null => $existingStatus,   // no signal → leave unchanged
+        };
+    }
+
+    /**
+     * Synchronise the platform Alert table with active Bell Equipment caution codes.
+     *
+     * For every active fault code that does not yet have a corresponding Alert,
+     * a new Alert is created so operators can see it on the Alerts page without
+     * manual entry.  When a code is cleared (is_active = false), its Alert is
+     * automatically resolved.
+     *
+     * Deduplication is performed via `metadata->bell_fault_code` so re-runs do
+     * not produce duplicate alerts for the same fault.
+     */
+    private function syncAlertsFromCautionCodes(BellEquipment $bellEquipment, ?Carbon $snapshotTime): void
+    {
+        $machine = $bellEquipment->machine_id !== null
+            ? Machine::find($bellEquipment->machine_id)
+            : null;
+
+        if ($machine === null) {
+            return;
+        }
+
+        // ── 1. Create alerts for newly-active fault codes ───────────────────
+        $activeCodes = BellEquipmentCautionCode::where('equipment_key', $bellEquipment->equipment_key)
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($activeCodes as $code) {
+            // Skip if an active alert already exists for this exact fault code.
+            $alreadyExists = Alert::where('machine_id', $machine->id)
+                ->where('team_id', $machine->team_id)
+                ->whereIn('status', ['active', 'acknowledged'])
+                ->where('metadata->bell_fault_code', $code->fault_code)
+                ->exists();
+
+            if ($alreadyExists) {
+                continue;
+            }
+
+            $priority = match (strtolower((string) ($code->severity ?? ''))) {
+                'critical' => 'critical',
+                'warning', 'warn' => 'high',
+                'caution' => 'medium',
+                default => 'low',
+            };
+
+            Alert::create([
+                'team_id' => $machine->team_id,
+                'machine_id' => $machine->id,
+                'type' => 'engine',
+                'title' => 'Fault Code: '.$code->fault_code,
+                'description' => $code->fault_description !== null && $code->fault_description !== ''
+                    ? 'Bell Equipment fault: '.$code->fault_description
+                    : 'Active fault code detected on '.$machine->name,
+                'priority' => $priority,
+                'status' => 'active',
+                'triggered_at' => $code->occurred_at ?? $snapshotTime ?? now(),
+                'metadata' => [
+                    'bell_fault_code' => $code->fault_code,
+                    'bell_severity' => $code->severity,
+                    'bell_equipment_key' => $bellEquipment->equipment_key,
+                    'source' => 'bell_iso15143',
+                ],
+            ]);
+        }
+
+        // ── 2. Resolve alerts whose fault codes have been cleared ────────────
+        $clearedCodes = BellEquipmentCautionCode::where('equipment_key', $bellEquipment->equipment_key)
+            ->where('is_active', false)
+            ->whereNotNull('cleared_at')
+            ->get();
+
+        foreach ($clearedCodes as $code) {
+            Alert::where('machine_id', $machine->id)
+                ->where('team_id', $machine->team_id)
+                ->where('status', 'active')
+                ->where('metadata->bell_fault_code', $code->fault_code)
+                ->update([
+                    'status' => 'resolved',
+                    'resolved_at' => $code->cleared_at,
+                ]);
         }
     }
 

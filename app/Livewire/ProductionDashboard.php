@@ -7,6 +7,7 @@ use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\ProductionRecord;
 use App\Models\Team;
+use App\Services\MachineKpiService;
 use App\Services\ProductionService;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -30,6 +31,7 @@ use Livewire\WithPagination;
  * @property-read array<mixed> $productionChartData
  * @property-read array<mixed> $loadComparisonData
  * @property-read array<mixed> $areaPerformance
+ * @property-read array{total_loads: int, total_payload_tonnes: float, avg_utilization: float, has_data: bool} $oemKpiSummary
  */
 class ProductionDashboard extends Component
 {
@@ -207,6 +209,23 @@ class ProductionDashboard extends Component
     {
         // Placeholder implementation - can be enhanced with actual material tracking
         return [];
+    }
+
+    /**
+     * OEM telemetry KPI aggregates for the selected date range.
+     * Pulled from every integrated source (Bell, IoT sensors, future OEMs) via MachineKpiService.
+     *
+     * @return array{total_loads: int, total_payload_tonnes: float, avg_utilization: float, has_data: bool}
+     */
+    public function getOemKpiSummaryProperty(): array
+    {
+        $machineIds = Machine::where('team_id', $this->teamId)->pluck('id')->all();
+
+        return app(MachineKpiService::class)->getDailyKpiSummary(
+            $machineIds,
+            $this->startDate ?? today()->toDateString(),
+            $this->endDate ?? today()->toDateString(),
+        );
     }
 
     /** @return array<empty> */
@@ -452,6 +471,7 @@ class ProductionDashboard extends Component
             'areaPerformance' => $this->areaPerformance,
             'productionChartData' => $this->productionChartData,
             'loadComparisonData' => $this->loadComparisonData,
+            'bellKpiSummary' => $this->oemKpiSummary,
         ]);
     }
 }

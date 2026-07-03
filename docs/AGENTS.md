@@ -190,3 +190,55 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
+
+---
+
+# Continuous Engineering Excellence Framework
+
+The `docs/continuous-improvement/` directory contains the platform's living engineering governance documentation.
+Every agent should consult and update these documents as appropriate during development sessions.
+
+## Document Index
+
+| Document | When to Reference |
+|---|---|
+| [continuous-improvement/INDEX.md](continuous-improvement/INDEX.md) | Starting any work session — overview of all docs |
+| [continuous-improvement/PLATFORM_SCORECARD.md](continuous-improvement/PLATFORM_SCORECARD.md) | After completing a feature; when assessing platform health |
+| [continuous-improvement/CHANGELOG.md](continuous-improvement/CHANGELOG.md) | After every significant change — append an entry |
+| [continuous-improvement/KNOWN_ISSUES.md](continuous-improvement/KNOWN_ISSUES.md) | When discovering a bug or workaround |
+| [continuous-improvement/TECHNICAL_DEBT.md](continuous-improvement/TECHNICAL_DEBT.md) | When deferring a refactor or identifying debt |
+| [continuous-improvement/SECURITY_IMPROVEMENTS.md](continuous-improvement/SECURITY_IMPROVEMENTS.md) | When fixing or finding security issues |
+| [continuous-improvement/PERFORMANCE_IMPROVEMENTS.md](continuous-improvement/PERFORMANCE_IMPROVEMENTS.md) | When optimising queries, caches, or queues |
+| [continuous-improvement/DATABASE_IMPROVEMENTS.md](continuous-improvement/DATABASE_IMPROVEMENTS.md) | When adding migrations or indexes |
+| [continuous-improvement/API_IMPROVEMENTS.md](continuous-improvement/API_IMPROVEMENTS.md) | When adding or changing API endpoints |
+| [continuous-improvement/INTEGRATION_IMPROVEMENTS.md](continuous-improvement/INTEGRATION_IMPROVEMENTS.md) | When working on OEM integrations |
+| [continuous-improvement/UI_UX_IMPROVEMENTS.md](continuous-improvement/UI_UX_IMPROVEMENTS.md) | When building or reviewing frontend |
+| [continuous-improvement/AI_IMPROVEMENTS.md](continuous-improvement/AI_IMPROVEMENTS.md) | When working on AI agents or prompts |
+| [continuous-improvement/OBSERVABILITY.md](continuous-improvement/OBSERVABILITY.md) | When adding logging, monitoring, or tracing |
+| [continuous-improvement/RELEASE_CHECKLIST.md](continuous-improvement/RELEASE_CHECKLIST.md) | Before every production deployment |
+| [continuous-improvement/TESTING_STRATEGY.md](continuous-improvement/TESTING_STRATEGY.md) | When writing or planning tests |
+| [continuous-improvement/CODE_STANDARDS.md](continuous-improvement/CODE_STANDARDS.md) | Architecture decisions, naming, conventions |
+| [continuous-improvement/ROADMAP.md](continuous-improvement/ROADMAP.md) | Strategic planning; prioritisation |
+
+## Automation Rules for Agents
+
+After completing any significant change, agents **must**:
+
+1. Append an entry to `docs/continuous-improvement/CHANGELOG.md`
+2. Update `docs/continuous-improvement/KNOWN_ISSUES.md` if a bug was found or fixed
+3. Update `docs/continuous-improvement/TECHNICAL_DEBT.md` if debt was identified or resolved
+4. Update `docs/memory.md` with a session summary
+5. Log any errors or exceptions encountered to `platform_error_logs` via `ErrorLoggerService`
+
+Before any release deployment, agents **must** verify `docs/continuous-improvement/RELEASE_CHECKLIST.md`.
+
+## Integration-Agnostic Architecture Rules
+
+All agents must enforce these rules when generating or reviewing code:
+
+- **No OEM model imports in Livewire components** — use `MachineTelemetryService`, `MachineKpiService`, `MachineFaultCodeService`
+- **Telemetry always goes through the service layer** — never query `bell_equipment_*` tables directly from UI code
+- **New OEM integrations** — implement `ManufacturerAdapterInterface`; write to `machine_metrics` for generic data
+- **Fault codes** — add new OEM fault sources to `MachineFaultCodeService::getActiveFaultCodes()` only
+- **Production KPIs** — add new OEM KPI sources to `MachineKpiService::getDailyKpiSummary()` only
+

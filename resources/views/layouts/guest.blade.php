@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         {{-- Anti-FOUC: apply correct theme class before CSS loads --}}
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             (function () {
                 var mode = localStorage.getItem('theme-mode');
                 var isDark;

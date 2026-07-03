@@ -41,7 +41,14 @@ class SyncBellLocationsJob implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $result = $service->syncSignal('Locations', hours: 0.25); // 15-min lookback for 5-min job
+        // Derive the lookback window from the configured poll interval so the job
+        // always covers the period since the last run, with a small overlap buffer.
+        $intervalSeconds = (int) config('integrations.bell_polling.location_interval_seconds', 300);
+        $multiplier = (float) config('integrations.bell_polling.lookback_multiplier', 2.0);
+        $lookbackSeconds = (int) ceil($intervalSeconds * $multiplier);
+        $lookbackHours = max(15 / 3600, $lookbackSeconds / 3600); // min 15 s
+
+        $result = $service->syncSignal('Locations', hours: $lookbackHours);
 
         Log::info('SyncBellLocationsJob completed', $result);
     }

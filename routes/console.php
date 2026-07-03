@@ -56,11 +56,39 @@ Schedule::job(new SyncBellHistoricalDataJob)
     ->onOneServer();
 
 // ── Bell per-signal granular jobs ─────────────────────────────────────────
-// All per-signal jobs run every 5 minutes for consolidated real-time telemetry.
-Schedule::job(new SyncBellLocationsJob)
-    ->everyFiveMinutes()
-    ->withoutOverlapping()
-    ->onOneServer();
+// BELL_LOCATION_POLL_SECONDS controls the location fetch frequency.
+//
+// Intervals >= 60 s are handled directly by the Laravel scheduler below.
+// Intervals <  60 s require the bell:watch-locations artisan command running
+// under Supervisor (identical to a queue worker).  A once-per-minute safety-net
+// is registered for environments without Supervisor so location data is never
+// completely stalled.
+$bellLocationInterval = (int) config('integrations.bell_polling.location_interval_seconds', 300);
+
+if ($bellLocationInterval >= 300) {
+    Schedule::job(new SyncBellLocationsJob)
+        ->everyFiveMinutes()
+        ->withoutOverlapping()
+        ->onOneServer();
+} elseif ($bellLocationInterval >= 120) {
+    Schedule::job(new SyncBellLocationsJob)
+        ->everyTwoMinutes()
+        ->withoutOverlapping()
+        ->onOneServer();
+} elseif ($bellLocationInterval >= 60) {
+    Schedule::job(new SyncBellLocationsJob)
+        ->everyMinute()
+        ->withoutOverlapping()
+        ->onOneServer();
+} else {
+    // Sub-minute: bell:watch-locations (Supervisor) is the primary mechanism.
+    // Register a per-minute safety net so the scheduler keeps data flowing
+    // even if the persistent command is not yet deployed.
+    Schedule::command('bell:watch-locations --once')
+        ->everyMinute()
+        ->withoutOverlapping()
+        ->onOneServer();
+}
 
 Schedule::job(new SyncBellEngineConditionJob)
     ->everyFiveMinutes()

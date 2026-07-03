@@ -422,6 +422,47 @@
         </div>
     </div>
 
+    {{-- ── Live Machine Fuel Levels (rendered when any OEM telemetry provides fuel data) --}}
+    @if (!empty($machineFuelLevels))
+    <div class="card bg-base-200 mb-6">
+        <div class="card-body">
+            <h2 class="card-title flex items-center gap-2">
+                <svg class="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Live Machine Fuel Levels
+            </h2>
+            <p class="text-xs text-base-content/60 mb-3">Real-time fuel levels from integrated OEM telemetry</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                @foreach ($machines as $machine)
+                    @if (isset($machineFuelLevels[$machine->id]))
+                        @php
+                            $lvl = $machineFuelLevels[$machine->id];
+                            $pct = (float) $lvl['fuel_pct'];
+                            $barColor = $pct < 20 ? 'bg-red-500' : ($pct < 40 ? 'bg-amber-400' : 'bg-emerald-500');
+                            $textColor = $pct < 20 ? 'text-red-600' : ($pct < 40 ? 'text-amber-600' : 'text-emerald-600');
+                        @endphp
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ $machine->name }}</span>
+                                <span class="font-bold text-sm {{ $textColor }}">{{ number_format($pct, 0) }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-1">
+                                <div class="{{ $barColor }} h-1.5 rounded-full" style="width:{{ $pct }}%"></div>
+                            </div>
+                            @if (!empty($lvl['updated_date']))
+                                <p class="text-xs text-gray-400 dark:text-gray-500">
+                                    {{ \Carbon\Carbon::parse($lvl['updated_date'])->diffForHumans() }}
+                                </p>
+                            @endif
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Recent Transactions -->
     <div class="card bg-base-200">
         <div class="card-body">

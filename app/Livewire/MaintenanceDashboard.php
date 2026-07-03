@@ -8,6 +8,7 @@ use App\Models\MaintenanceAlert;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use App\Services\AI\MaintenancePredictorAgent;
+use App\Services\MachineFaultCodeService;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
@@ -469,6 +470,13 @@ class MaintenanceDashboard extends Component
         $aiIns = $aiAnalysis['insights'] ?? [];
         $aiInsights = collect($aiIns)->take(3);
 
+        // ── Active fault codes — from all integrated OEM sources ─────────────
+        // MachineFaultCodeService aggregates Bell caution codes, future OEMs,
+        // and any other fault sources. UI never touches OEM-specific tables.
+        $teamMachineIds = Machine::where('team_id', $teamId)->pluck('id')->all();
+        $activeFaultCodes = app(MachineFaultCodeService::class)
+            ->getActiveFaultCodes($teamMachineIds);
+
         return view('livewire.maintenance-dashboard', [
             'healthStatuses' => $healthStatuses,
             'healthStats' => $healthStats,
@@ -485,6 +493,7 @@ class MaintenanceDashboard extends Component
             'delayStats' => $delayStats,
             'aiRecommendations' => $aiRecommendations,
             'aiInsights' => $aiInsights,
+            'activeFaultCodes' => $activeFaultCodes,
         ]);
     }
 

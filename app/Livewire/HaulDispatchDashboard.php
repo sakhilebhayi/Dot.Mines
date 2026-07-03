@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\HaulDispatch;
+use App\Services\MachineTelemetryService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -49,10 +50,22 @@ class HaulDispatchDashboard extends Component
 
         $dispatches = $query->get();
 
-        $this->activeDispatches = $dispatches->map(function (HaulDispatch $d): array {
+        // ── Enrich with live Bell telemetry ──────────────────────────────────
+        $machineIds = $dispatches->pluck('machine_id')->filter()->unique()->all();
+        $bellTelemetry = ! empty($machineIds)
+            ? app(MachineTelemetryService::class)->forMachines($machineIds)
+            : [];
+
+        $this->activeDispatches = $dispatches->map(function (HaulDispatch $d) use ($bellTelemetry): array {
             $capacity = $d->fuel_capacity_litres ?? $d->machine?->fuel_capacity ?? 0;
             $fuelLevel = $d->current_fuel_level_litres ?? 0;
             $machineCapacity = $d->machine?->capacity ?? 0;
+
+            // Prefer live Bell fuel % over the dispatch record's stale value.
+            $tel = $bellTelemetry[$d->machine_id ?? 0] ?? null;
+            $liveFuelPct = $tel !== null && $tel['fuel_remaining_percent'] !== null
+                ? (float) $tel['fuel_remaining_percent']
+                : $d->fuel_percentage;
 
             return [
                 'id' => $d->id,
@@ -65,10 +78,10 @@ class HaulDispatchDashboard extends Component
                 'current_latitude' => $d->current_latitude,
                 'current_longitude' => $d->current_longitude,
                 'current_heading' => $d->current_heading ?? 0,
-                'current_speed_kmh' => $d->current_speed_kmh ?? 0,
+                'current_speed_kmh' => $tel['speed_kmh'] ?? $d->current_speed_kmh ?? 0,
                 'current_tonnage' => $d->current_tonnage ?? 0,
                 'machine_capacity' => $machineCapacity,
-                'fuel_percentage' => $d->fuel_percentage,
+                'fuel_percentage' => $liveFuelPct,
                 'current_fuel_level_litres' => $fuelLevel,
                 'fuel_capacity_litres' => $capacity,
                 'eta_formatted' => $d->eta_formatted,
@@ -76,6 +89,10 @@ class HaulDispatchDashboard extends Component
                 'total_distance_km' => $d->total_distance_km ?? 0,
                 'distance_remaining_km' => $d->distance_remaining_km ?? 0,
                 'mine_area' => $d->mineArea?->name ?? '—',
+                // Live Bell telemetry extras
+                'bell_status' => $tel['status_label'] ?? null,
+                'bell_engine_running' => $tel['engine_running'] ?? null,
+                'bell_last_seen' => $tel['last_seen_human'] ?? null,
                 // Map-specific coords
                 'origin_lat' => $d->origin_latitude,
                 'origin_lng' => $d->origin_longitude,

@@ -510,4 +510,43 @@ return [
         'api_username' => env('BELL_HISTORICAL_USERNAME', env('BELL_ISO15143_USERNAME', '')),
         'api_password' => env('BELL_HISTORICAL_PASSWORD', env('BELL_ISO15143_PASSWORD', '')),
     ],
+
+    /**
+     * Bell real-time polling configuration.
+     *
+     * ┌──────────────────────────────────────────────────────────────────┐
+     * │  BELL_LOCATION_POLL_SECONDS   │  How it's handled                │
+     * ├──────────────────────────────────────────────────────────────────┤
+     * │  300  (5 min, default)         │  Laravel cron scheduler          │
+     * │  120  (2 min)                  │  Laravel cron scheduler          │
+     * │   60  (1 min)                  │  Laravel cron scheduler          │
+     * │   30  (30 sec)                 │  bell:watch-locations (Supervisor)│
+     * │   15  (15 sec)                 │  bell:watch-locations (Supervisor)│
+     * │   10  (10 sec)                 │  bell:watch-locations (Supervisor)│
+     * │    5  (5 sec, max frequency)   │  bell:watch-locations (Supervisor)│
+     * └──────────────────────────────────────────────────────────────────┘
+     *
+     * For intervals < 60 s, run the persistent artisan command under Supervisor:
+     *   php artisan bell:watch-locations
+     *
+     * The cron scheduler registers a once-per-minute safety-net fallback for
+     * environments that don't have Supervisor configured.
+     */
+    'bell_polling' => [
+        // Seconds between consecutive Location API requests.
+        // Valid range: 5–300.  Values < 60 require bell:watch-locations.
+        'location_interval_seconds' => max(5, (int) env('BELL_LOCATION_POLL_SECONDS', 300)),
+
+        // Seconds between full ISO15143-3 fleet snapshots.
+        // Bell's own update cadence is ~15 min; requesting more often yields duplicates.
+        'snapshot_interval_seconds' => max(60, (int) env('BELL_SNAPSHOT_POLL_SECONDS', 300)),
+
+        // Lookback window = interval × multiplier (seconds fetched per poll cycle).
+        // Must be > 1.0 to guarantee overlap between consecutive windows.
+        'lookback_multiplier' => max(1.1, (float) env('BELL_LOCATION_LOOKBACK_MULTIPLIER', 2.0)),
+
+        // Wire:poll interval (seconds) for the Live Map Livewire component.
+        // Keeps the server-side machine list in sync when WebSocket is unavailable.
+        'ui_poll_seconds' => max(10, (int) env('BELL_UI_POLL_SECONDS', 30)),
+    ],
 ];

@@ -62,8 +62,10 @@ class SecurityHeaders
         // Prevent MIME-type sniffing
         $response->headers->set('X-Content-Type-Options', 'nosniff');
 
-        // Enable browser XSS protection
-        $response->headers->set('X-XSS-Protection', '1; mode=block');
+        // X-XSS-Protection: disabled (value 0) — the legacy XSS auditor is removed from
+        // modern browsers and can introduce vulnerabilities. CSP (above) is the correct
+        // defence; keeping the header at 0 prevents the auditor from firing in old browsers.
+        $response->headers->set('X-XSS-Protection', '0');
 
         // Referrer Policy - Control how much referrer information is shared
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -73,14 +75,28 @@ class SecurityHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }
 
-        // Permissions Policy - Control browser features
+        // Permissions Policy - disable all browser features the app does not use.
+        // geolocation is () (fully blocked): machine GPS comes from server-side OEM APIs,
+        // not the browser Geolocation API.
         $response->headers->set('Permissions-Policy',
-            'geolocation=(self), '.
+            'geolocation=(), '.
             'microphone=(), '.
             'camera=(), '.
             'payment=(), '.
             'usb=()'
         );
+
+        // Cross-Origin-Opener-Policy: isolates the browsing context group so that
+        // cross-origin documents cannot access window references to this page.
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+
+        // Cross-Origin-Resource-Policy: prevents other origins from reading this
+        // response via no-cors requests (e.g. <img src="...">, fetch with no-cors).
+        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+
+        // X-DNS-Prefetch-Control: prevents browsers from speculatively resolving
+        // domains linked in the page, reducing information leakage to DNS resolvers.
+        $response->headers->set('X-DNS-Prefetch-Control', 'off');
 
         return $response;
     }

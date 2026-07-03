@@ -114,6 +114,32 @@
             </div>
         </div>
 
+        {{-- ── OEM Telemetry Production KPIs (when data exists) ──────────────────── --}}
+        @if ($bellKpiSummary['has_data'] ?? false)
+        <div class="bg-gradient-to-r from-cyan-700 to-blue-700 rounded-xl p-4 mb-6 text-white shadow-lg">
+            <div class="flex items-center gap-2 mb-3">
+                <svg class="w-5 h-5 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-sm font-semibold text-cyan-100">OEM Telemetry — Selected Period</span>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <p class="text-2xl font-bold">{{ number_format($bellKpiSummary['total_loads']) }}</p>
+                    <p class="text-xs text-cyan-200">OEM Loads Moved</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold">{{ number_format($bellKpiSummary['total_payload_tonnes'], 1) }} t</p>
+                    <p class="text-xs text-cyan-200">OEM Payload (tonnes)</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold">{{ $bellKpiSummary['avg_utilization'] }}%</p>
+                    <p class="text-xs text-cyan-200">Avg Fleet Utilization</p>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Charts Section -->
         @php
             $trendChartKey = 'prod-trend-' . md5(json_encode($productionChartData['daily'] ?? []));

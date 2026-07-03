@@ -5,6 +5,98 @@ Each entry is added after code is updated or upgraded.
 
 ---
 
+## Session: 2026-07-02 — Live Platform Audit Run
+
+### Triggered By
+User executed `run agents.md` — full platform governor audit with live measurements.
+
+### Audit Results (Live Measurements)
+| Check | Result |
+|---|---|
+| PHPStan errors | 3 → **0** (fixed) |
+| Pint violations | 11 files → **all fixed** |
+| Test files | 50 files |
+| Tests passing | 12/385 (373 failing — DB not migrated) |
+| CI workflows | **12 confirmed** (was unknown) |
+| `/health` route | ❌ Missing |
+| `SENTRY_DSN` | ❌ Blank |
+| `SESSION_SECURE_COOKIE` | ❌ false |
+| OEM coupling in Livewire | ✅ Zero violations |
+| New service test coverage | ❌ MachineKpiService, MachineFaultCodeService, MachineTelemetryService = 0 test files |
+| DB indexes on machine_metrics | ❌ 0 indexes |
+
+### Fixes Applied
+- **PHPStan**: `ProductionDashboard` null-safe guard on startDate/endDate; `MachineFaultCodeService` collection push loop
+- **Pint**: All 11 files auto-fixed (`./vendor/bin/pint --dirty`)
+
+### Documents Updated
+- `PLATFORM_SCORECARD.md` — scores revised, score history entry added
+- `KNOWN_ISSUES.md` — KI-007 (test DB critical), KI-008/KI-009 added then resolved
+- `TECHNICAL_DEBT.md` — TD-015, TD-016 added; resolved items logged
+- `CHANGELOG.md` — full audit entry prepended
+
+---
+
+## Session: 2026-07-02 — Continuous Engineering Excellence Framework
+
+### Governance Documentation (docs/continuous-improvement/)
+- Created `docs/continuous-improvement/` directory with 16 living documents
+- **INDEX.md** — navigator for all continuous improvement docs; automation trigger table
+- **PLATFORM_SCORECARD.md** — detailed scoring for 13 subsystems; overall 74/100 baseline; includes issues, risks, recommendations, effort, and business impact per finding
+- **CHANGELOG.md** — engineering history from 2026-07-01 onwards; all recent sessions documented
+- **KNOWN_ISSUES.md** — 6 open issues including SQLite risk (critical), missing Sentry DSN, uptime monitoring gap
+- **TECHNICAL_DEBT.md** — 14 debt items categorised critical/high/medium/low; includes TD-001 (SQLite → MySQL migration) as most urgent
+- **SECURITY_IMPROVEMENTS.md** — 9 open findings; MFA, secure cookies, rate limiting, SSRF, CSP headers
+- **PERFORMANCE_IMPROVEMENTS.md** — 10 items; composite indexes, telemetry caching, queue overlap prevention, load test baseline needed
+- **DATABASE_IMPROVEMENTS.md** — 9 items; 3 composite index recommendations, SQLite migration plan, archiving strategy
+- **API_IMPROVEMENTS.md** — 6 items; error response format, pagination, idempotency keys, rate limiting
+- **INTEGRATION_IMPROVEMENTS.md** — full Bell status (complete), Volvo/CAT/Komatsu planned; new OEM onboarding checklist
+- **UI_UX_IMPROVEMENTS.md** — 6 items; mobile audit, a11y audit, empty/error states; design system reference
+- **AI_IMPROVEMENTS.md** — 5 items; stale telemetry context, prompt versioning, token tracking
+- **OBSERVABILITY.md** — 8 items; health check endpoint, Sentry DSN, structured logging, Pulse config
+- **RELEASE_CHECKLIST.md** — 10-gate checklist covering code quality, tests, security, DB, API, docs, monitoring, UX, mobile; full deployment + rollback procedure
+- **TESTING_STRATEGY.md** — test pyramid with coverage targets; unit/feature/integration/load/security test examples and standards
+- **CODE_STANDARDS.md** — naming conventions, architecture layers, service design, telemetry snapshot contract, Livewire conventions, Blade/API standards
+- **ROADMAP.md** — Now/Next/Later/Backlog with 50+ items; Q3–Q4 2026 and Q1 2027 milestones
+
+### docs/AGENTS.md Updated
+- Added "Continuous Engineering Excellence Framework" section after `</laravel-boost-guidelines>`
+- Full document reference table for all 16 continuous improvement docs
+- Automation rules: agents must update CHANGELOG.md, KNOWN_ISSUES.md, TECHNICAL_DEBT.md, memory.md after significant changes
+- Integration-agnostic architecture rules codified (no OEM imports in Livewire, service layer enforcement)
+
+---
+
+## Session: 2026-07-02 — Integration Agnosticism & Platform Data Wiring
+
+### New Services (Integration-Agnostic Abstraction Layer)
+- **`MachineKpiService`** — production KPI aggregator; sources Bell daily KPIs + `machine_metrics`
+- **`MachineFaultCodeService`** — fault code aggregator; sources Bell caution codes; extensible for future OEMs
+- **`MachineTelemetryService` refactored** — now resolves in 3 priority tiers: Bell → `machine_metrics` → `Machine` model; every machine returns a meaningful snapshot; added `telemetry_source` field
+
+### Livewire Components Decoupled from Bell
+- `Dashboard`, `ProductionDashboard`, `FuelManagement`, `MaintenanceDashboard` — all direct `BellEquipment*` model imports removed; now use integration-agnostic services
+- Blade views updated: "Bell Equipment" labels replaced with OEM-neutral text; maintenance fault codes table shows Source column
+
+### Live Telemetry & Fleet UX (same day, earlier)
+- Fleet cards reverted to clean design: Engine Hours + Fuel % progress bars only
+- Machine status detection fixed: removed cumulative idle-ratio false positive; active machines no longer show as "Idling"
+- `bridgeToMachine()` upgraded: offline detection, maintenance preservation, `MachineStatusChanged` broadcast
+- 5-min location sync now updates Machine position and broadcasts `MachineLocationUpdated`
+- Live Map: `animateMarkerTo()` smooth animation, incremental `updateMachinePositions()`, configurable `wire:poll`, Echo listener for real-time marker movement
+- `bell:watch-locations` artisan command for sub-minute GPS polling
+- Dynamic scheduler routing based on `BELL_LOCATION_POLL_SECONDS`
+
+### Cross-Platform Data Wiring
+- Dashboard: OEM live stats (running machines, avg fuel %, loads/payload today) for all teams
+- Production: OEM KPI banner from daily aggregates
+- Fuel Management: Live fuel % per machine alongside physical tank data
+- Maintenance: Active fault codes table with severity and source
+- Haul Dispatch: Live fuel % and speed from telemetry service
+- Alert System: Bell caution codes auto-create and auto-resolve Alerts via `syncAlertsFromCautionCodes()`
+
+---
+
 ## Session: 2026-07-01 — Bell Integration, Self-Service Integrations & Enterprise Audit
 
 ### Bell Equipment Integration

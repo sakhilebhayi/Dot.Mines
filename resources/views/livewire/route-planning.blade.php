@@ -93,7 +93,7 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                     </svg>
                 </div>
-                <script>window.scrollTo(0,0);</script>
+                <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
             @else
             @if($viewMode === 'create')
                 <!-- Create Route Form -->

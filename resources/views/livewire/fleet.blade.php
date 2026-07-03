@@ -8,7 +8,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
         </div>
-        <script>window.scrollTo(0,0);</script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
     @else
         <!-- Chart Visualization Placeholder removed -->
     <!-- Header Section with gradient -->
@@ -480,23 +480,19 @@
 
                         // Live telemetry from BellEquipmentCurrentStatus (null for non-Bell)
                         $tel = $telemetryMap[$machine->id] ?? null;
-                        $telStatus      = $tel['status']        ?? $machine->status;
-                        $telStatusLabel = $tel['status_label']  ?? ucfirst($machine->status);
-                        $telColor       = $tel['status_color']  ?? 'gray';
 
-                        // Status badge colour map
-                        $statusBadge = match($telStatus) {
-                            'working'     => 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
-                            'travelling'  => 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800',
-                            'idling'      => 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
-                            'parked'      => 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700',
-                            'offline'     => 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
-                            'maintenance' => 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800',
-                            'active'      => 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800',
-                            'idle'        => 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800',
-                            default       => 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700',
-                        };
-                        $isRunning = $tel ? $tel['engine_running'] : in_array($telStatus, ['active','working','travelling']);
+                        // Engine hours: prefer live Bell operating_hours, fall back to session map
+                        $eng         = $engineHoursMap[$machine->id] ?? ['today_hours' => 0.0, 'is_running' => false];
+                        $engIsLive   = $tel !== null && $tel['operating_hours'] !== null;
+                        $engHours    = $engIsLive ? $tel['operating_hours'] : $eng['today_hours'];
+                        // Bell: progress against a 12 000 h lifetime cap; non-Bell: progress against 12 h shift
+                        $engPct      = $engIsLive
+                            ? min(100, $engHours > 0 ? round(($engHours / 12000) * 100) : 0)
+                            : min(100, $engHours > 0 ? round(($engHours / 12) * 100) : 0);
+                        $engColor    = $engPct >= 90 ? 'bg-red-500' : ($engPct >= 70 ? 'bg-amber-400' : 'bg-green-500');
+                        $engRunning  = $engIsLive
+                            ? ($tel['engine_running'] ?? false)
+                            : ($eng['is_running'] ?? false);
                     @endphp
                     <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
                         {{-- Header --}}
@@ -506,125 +502,86 @@
                             <div class="text-xs text-gray-400 dark:text-gray-500 mt-1 text-center">{{ $machine->manufacturer ?: 'N/A' }} &bull; {{ $machine->model }}</div>
                         </div>
 
-                        <div class="flex-1 flex flex-col p-4 gap-2">
+                        <div class="flex-1 flex flex-col justify-between p-4 gap-2">
                             {{-- Status badge --}}
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $statusBadge }}">
-                                    @if($isRunning)
-                                        <span class="w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse
-                                            {{ $telStatus === 'travelling' ? 'bg-cyan-500' : 'bg-emerald-500' }}"></span>
-                                    @endif
-                                    {{ $telStatusLabel }}
-                                </span>
-                                @if($tel && $tel['speed_kmh'] !== null && $tel['speed_kmh'] > 1)
-                                    <span class="text-xs text-slate-400">{{ number_format($tel['speed_kmh'], 0) }} km/h</span>
+                            <div class="flex items-center gap-2 mb-2">
+                                @if ($machine->status === 'active')
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">
+                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                                        Active
+                                    </span>
+                                @elseif ($machine->status === 'idle')
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                                        Idle
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
+                                        Maintenance
+                                    </span>
                                 @endif
-                                <span class="ml-auto text-xs text-gray-400 dark:text-gray-500">{{ $machine->capacity ? number_format($machine->capacity).' t' : '' }}</span>
+                                <span class="ml-auto text-xs text-gray-400 dark:text-gray-500">{{ $machine->capacity ? number_format($machine->capacity) . ' tons' : 'N/A' }}</span>
                             </div>
 
-                            {{-- Live telemetry grid (Bell machines) --}}
-                            @if($tel !== null)
-                                <div class="grid grid-cols-2 gap-1.5 mb-2">
-                                    {{-- Fuel level --}}
-                                    @if($tel['fuel_remaining_percent'] !== null)
-                                        @php $fuelPct = (int) $tel['fuel_remaining_percent']; @endphp
-                                        <div class="col-span-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
-                                            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                                <span>⛽ Fuel</span>
-                                                <span class="font-bold {{ $fuelPct < 20 ? 'text-red-500' : ($fuelPct < 40 ? 'text-amber-500' : 'text-gray-700 dark:text-gray-200') }}">{{ $fuelPct }}%</span>
-                                            </div>
-                                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                                                <div class="h-1.5 rounded-full {{ $fuelPct < 20 ? 'bg-red-500' : ($fuelPct < 40 ? 'bg-amber-400' : 'bg-emerald-500') }}"
-                                                     style="width:{{ $fuelPct }}%"></div>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    {{-- Operating hours --}}
-                                    @if($tel['operating_hours'] !== null)
-                                        <div class="p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">⏱ Op. Hours</div>
-                                            <div class="text-sm font-bold text-gray-800 dark:text-gray-100 mt-0.5">{{ number_format($tel['operating_hours'], 0) }} h</div>
-                                        </div>
-                                    @endif
-
-                                    {{-- Odometer --}}
-                                    @php $odo = $tel['odometer'] ?? $machine->odometer; @endphp
-                                    @if($odo !== null)
-                                        <div class="p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">🛣 Odometer</div>
-                                            <div class="text-sm font-bold text-gray-800 dark:text-gray-100 mt-0.5">{{ number_format($odo, 0) }} km</div>
-                                        </div>
-                                    @endif
-
-                                    {{-- Loads today (from load_count) --}}
-                                    @if($tel['load_count'] !== null)
-                                        <div class="p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">📦 Loads (total)</div>
-                                            <div class="text-sm font-bold text-gray-800 dark:text-gray-100 mt-0.5">{{ number_format($tel['load_count']) }}</div>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                {{-- Last communication --}}
-                                @if($tel['last_seen_human'])
-                                    <div class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                                        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+                            {{-- Engine Hours progress bar --}}
+                            <div class="mb-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
+                                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1.5">
+                                    <span class="flex items-center gap-1 font-medium">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
-                                        Last sync: {{ $tel['last_seen_human'] }}
-                                        @if($telStatus === 'offline')
-                                            <span class="text-red-500 font-medium">· Offline</span>
+                                        Engine Hrs{{ $engIsLive ? '' : ' (Today)' }}
+                                    </span>
+                                    <span class="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-1">
+                                        {{ number_format($engHours, $engIsLive ? 0 : 1) }}h
+                                        @if($engRunning)
+                                            <span class="inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" title="Engine running"></span>
                                         @endif
-                                    </div>
-                                @endif
-                            @else
-                                {{-- Non-Bell / no telemetry: show engine hours from session --}}
-                                @php
-                                    $eng      = $engineHoursMap[$machine->id] ?? ['today_hours' => 0.0, 'is_running' => false];
-                                    $engPct   = min(100, $eng['today_hours'] > 0 ? round(($eng['today_hours'] / 12) * 100) : 0);
-                                    $engColor = $engPct >= 90 ? 'bg-red-500' : ($engPct >= 70 ? 'bg-amber-400' : 'bg-green-500');
-                                @endphp
+                                    </span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                    <div class="{{ $engColor }} h-1.5 rounded-full transition-all duration-500" style="width: {{ $engPct }}%"></div>
+                                </div>
+                                <div class="flex items-center justify-between mt-1">
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">
+                                        @if($engRunning)
+                                            <span class="text-green-600 dark:text-green-400 font-medium">● Running</span>
+                                        @else
+                                            Off
+                                        @endif
+                                    </span>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ $engIsLive ? 'of 12 000h' : 'of 12h shift' }}</span>
+                                </div>
+                            </div>
+
+                            {{-- Fuel Percentage progress bar (Bell machines only) --}}
+                            @if($tel !== null && $tel['fuel_remaining_percent'] !== null)
+                                @php $fuelPct = (int) $tel['fuel_remaining_percent']; @endphp
                                 <div class="mb-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
-                                    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1.5">
-                                        <span class="font-medium">Engine Hrs (Today)</span>
-                                        <span class="font-bold text-gray-700 dark:text-gray-200">{{ number_format($eng['today_hours'], 1) }}h</span>
+                                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                        <span class="flex items-center gap-1 font-medium">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h6"/>
+                                            </svg>
+                                            Fuel
+                                        </span>
+                                        <span class="font-bold {{ $fuelPct < 20 ? 'text-red-500' : ($fuelPct < 40 ? 'text-amber-500' : 'text-gray-700 dark:text-gray-200') }}">{{ $fuelPct }}%</span>
                                     </div>
                                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                                        <div class="{{ $engColor }} h-1.5 rounded-full" style="width:{{ $engPct }}%"></div>
+                                        <div class="h-1.5 rounded-full {{ $fuelPct < 20 ? 'bg-red-500' : ($fuelPct < 40 ? 'bg-amber-400' : 'bg-emerald-500') }}"
+                                             style="width:{{ $fuelPct }}%"></div>
                                     </div>
                                 </div>
-                            @endif
-
-                            {{-- Cycle breakdown (if set) --}}
-                            @if ($machine->cycle_time_minutes || $machine->queue_time_minutes || $machine->loading_time_minutes)
-                            @php
-                                $ct  = $machine->cycle_time_minutes   ?? 0;
-                                $qt  = $machine->queue_time_minutes   ?? 0;
-                                $lt  = $machine->loading_time_minutes ?? 0;
-                                $tt  = $ct + $qt + $lt;
-                                $pct_c = $tt ? round(($ct / $tt) * 100) : 0;
-                                $pct_q = $tt ? round(($qt / $tt) * 100) : 0;
-                                $pct_l = $tt ? max(0, 100 - $pct_c - $pct_q) : 0;
-                            @endphp
-                            <div class="mb-1 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
-                                <div class="flex w-full h-1.5 rounded-full overflow-hidden gap-px mb-1" title="Cycle / Queue / Loading">
-                                    @if ($pct_c) <div class="bg-amber-400 h-full" style="width:{{ $pct_c }}%"></div> @endif
-                                    @if ($pct_q) <div class="bg-sky-400 h-full" style="width:{{ $pct_q }}%"></div> @endif
-                                    @if ($pct_l) <div class="bg-emerald-400 h-full" style="width:{{ $pct_l }}%"></div> @endif
-                                </div>
-                                <div class="text-xs text-gray-400 dark:text-gray-500">Cycle {{ $tt }}m total</div>
-                            </div>
                             @endif
 
                             {{-- Assignment / mine area buttons --}}
-                            <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mt-auto">
+                            <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                                 @if ($machine->excavator)
                                     <span class="font-medium">Excavator:</span> {{ $machine->excavator->name }}
                                     <button wire:click="unassignFromExcavator({{ $machine->id }})"
-                                            class="ml-auto text-red-500 hover:text-red-600 transition-colors" title="Unassign">
+                                            class="ml-auto text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                                            title="Unassign">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
                                     </button>
                                 @else
@@ -633,18 +590,24 @@
                                         $assignedAdtCount = $adts->where('excavator_id', $machine->id)->count();
                                     @endphp
                                     <button wire:click="openAssignModal({{ $machine->id }})"
-                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-700 text-xs flex items-center gap-1 font-medium transition-colors">
+                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs flex items-center gap-1 font-medium transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                         </svg>
-                                        @if($isExcavator) Manage ADTs ({{ $assignedAdtCount }}) @else Assign @endif
+                                        @if($isExcavator)
+                                            Manage ADTs ({{ $assignedAdtCount }})
+                                        @else
+                                            Assign to Excavator
+                                        @endif
                                     </button>
                                     <button wire:click="openMineAreaAssignModal({{ $machine->id }})"
-                                            class="text-amber-600 dark:text-amber-400 hover:text-amber-700 text-xs flex items-center gap-1 font-medium transition-colors">
+                                            class="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 text-xs flex items-center gap-1 font-medium transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7v6a2 2 0 01-2 2H8m8-8h-8a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V7z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7v6a2 2 0 01-2 2H8m8-8h-8a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V7z" />
                                         </svg>
-                                        @if($machine->mine_area_id) Change Mine Area @else
+                                        @if($machine->mine_area_id)
+                                            Change Mine Area
+                                        @else
                                             Assign to Mine Area
                                         @endif
                                     </button>

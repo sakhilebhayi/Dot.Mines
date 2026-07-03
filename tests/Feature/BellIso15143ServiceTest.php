@@ -25,9 +25,14 @@ class BellIso15143ServiceTest extends TestCase
 
     private function validFleetXml(string $equipmentId = 'ASA B50E#9086', string $serial = 'AEBA850EC03509086'): string
     {
+        // Use a timestamp 5 minutes in the past so the 30-minute staleness check
+        // in BellIso15143Service::deriveCanonicalMachineStatus() never fires.
+        $snapshotTime = now()->subMinutes(5)->format('Y-m-d\TH:i:s\Z');
+        $telematicsDate = now()->subMinutes(7)->format('Y-m-d\TH:i:s\Z');
+
         return <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
-<Fleet version="1" snapshotTime="2026-06-02T12:54:29Z">
+<Fleet version="1" snapshotTime="{$snapshotTime}">
   <Equipment>
     <EquipmentHeader>
       <OEMName>BELL</OEMName>
@@ -51,7 +56,7 @@ class BellIso15143ServiceTest extends TestCase
     <FuelLevel>22</FuelLevel>
     <EngineStatus>Running</EngineStatus>
     <EngineNumber>ENG-001</EngineNumber>
-    <TelematicDataDate>2026-06-02T11:14:14Z</TelematicDataDate>
+    <TelematicDataDate>{$telematicsDate}</TelematicDataDate>
   </Equipment>
 </Fleet>
 XML;
@@ -171,7 +176,7 @@ XML;
 
         $kpi = BellEquipmentDailyKpi::first();
         $this->assertNotNull($kpi);
-        $this->assertEquals('2026-06-02', $kpi->kpi_date->toDateString());
+        $this->assertEquals(now()->toDateString(), $kpi->kpi_date->toDateString());
 
         // Without a prior snapshot all delta fields equal the full cumulative value
         $this->assertEquals(13252, $kpi->loads_moved);
@@ -382,10 +387,11 @@ XML;
     {
         Event::fake([MachineLocationUpdated::class]);
 
-        // Machine has external_id but no serial set
+        // Machine has external_id but no serial set; start as 'idle' so telemetry can promote it to 'active'.
         $machine = Machine::factory()->create([
             'serial_number' => null,
             'external_id' => 'ASA B50E#9086',
+            'status' => 'idle',
         ]);
 
         Http::fake([
@@ -440,12 +446,15 @@ XML;
     {
         Event::fake([MachineLocationUpdated::class]);
 
-        Machine::factory()->create(['serial_number' => 'AEBA850EC03509086']);
+        // Start as 'idle' so telemetry can promote it to 'active'.
+        Machine::factory()->create(['serial_number' => 'AEBA850EC03509086', 'status' => 'idle']);
 
         // XML with no Location block
-        $xml = <<<'XML'
+        $snapshotTime = now()->subMinutes(5)->format('Y-m-d\TH:i:s\Z');
+        $telematicsDate = now()->subMinutes(7)->format('Y-m-d\TH:i:s\Z');
+        $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
-<Fleet version="1" snapshotTime="2026-06-02T12:54:29Z">
+<Fleet version="1" snapshotTime="{$snapshotTime}">
   <Equipment>
     <EquipmentHeader>
       <OEMName>BELL</OEMName>
@@ -455,7 +464,7 @@ XML;
     </EquipmentHeader>
     <CumulativeOperatingHours>8376.20</CumulativeOperatingHours>
     <EngineStatus>Running</EngineStatus>
-    <TelematicDataDate>2026-06-02T11:14:14Z</TelematicDataDate>
+    <TelematicDataDate>{$telematicsDate}</TelematicDataDate>
   </Equipment>
 </Fleet>
 XML;
