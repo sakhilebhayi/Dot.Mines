@@ -97,74 +97,43 @@
         </div>
     @endif
 
-    <!-- Status Statistics with animation -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in">
-            <div class="flex items-center justify-between mb-4">
-                <div class="p-3 bg-green-100 dark:bg-green-500/20 rounded-lg">
-                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
+    <!-- Live Telemetry Status Statistics -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+        @php
+            $liveStats = [
+                ['key'=>'working',    'label'=>'Working',    'icon'=>'emerald', 'desc'=>'Active & productive'],
+                ['key'=>'travelling', 'label'=>'Travelling', 'icon'=>'cyan',    'desc'=>'In transit'],
+                ['key'=>'idling',     'label'=>'Idling',     'icon'=>'amber',   'desc'=>'Engine on, stationary'],
+                ['key'=>'parked',     'label'=>'Parked',     'icon'=>'slate',   'desc'=>'Engine off'],
+                ['key'=>'maintenance','label'=>'Maintenance','icon'=>'orange',  'desc'=>'Under service'],
+                ['key'=>'offline',    'label'=>'Offline',    'icon'=>'red',     'desc'=>'No telemetry'],
+            ];
+            $iconColorMap = [
+                'emerald'=>'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400',
+                'cyan'   =>'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400',
+                'amber'  =>'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400',
+                'slate'  =>'bg-slate-100 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400',
+                'orange' =>'bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400',
+                'red'    =>'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400',
+            ];
+            $dotColorMap = [
+                'emerald'=>'bg-emerald-500','cyan'=>'bg-cyan-500','amber'=>'bg-amber-400',
+                'slate'=>'bg-slate-400','orange'=>'bg-orange-500','red'=>'bg-red-500',
+            ];
+        @endphp
+        @foreach($liveStats as $stat)
+        @php $count = $liveStatusCounts[$stat['key']] ?? 0; @endphp
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+            <div class="flex items-center justify-between mb-2">
+                <div class="p-2 rounded-lg {{ $iconColorMap[$stat['icon']] }}">
+                    <span class="w-2 h-2 rounded-full {{ $dotColorMap[$stat['icon']] }} {{ in_array($stat['key'],['working','travelling','idling']) ? 'animate-pulse' : '' }} inline-block"></span>
                 </div>
             </div>
-            <p class="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Active</p>
-            <p class="text-4xl font-bold text-gray-900 dark:text-white" x-data="{ count: 0 }" x-init="() => { let target = {{ $statusStats['active'] }}; let duration = 2000; let increment = target / (duration / 16); let timer = setInterval(() => { count += increment; if (count >= target) { count = target; clearInterval(timer); } }, 16); }">
-                <span x-text="Math.floor(count)">0</span>
-            </p>
-            <p class="text-xs text-green-600 dark:text-green-400 mt-2 font-medium flex items-center gap-1">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                Operating now
-            </p>
-            @if ($statusStats['active'] === 0)
-                <div class="text-center py-2">
-                    <span class="text-xs text-gray-400">No active machines. <button wire:click="openCreateModal" class="text-blue-600 underline">Add machine</button>.</span>
-                </div>
-            @endif
+            <p class="text-gray-500 dark:text-gray-400 text-xs font-medium mb-0.5">{{ $stat['label'] }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $count }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $stat['desc'] }}</p>
         </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in">
-            <div class="flex items-center justify-between mb-4">
-                <div class="p-3 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
-                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Idle</p>
-            <p class="text-4xl font-bold text-gray-900 dark:text-white" x-data="{ count: 0 }" x-init="() => { let target = {{ $statusStats['idle'] }}; let duration = 2000; let increment = target / (duration / 16); let timer = setInterval(() => { count += increment; if (count >= target) { count = target; clearInterval(timer); } }, 16); }">
-                <span x-text="Math.floor(count)">0</span>
-            </p>
-            <p class="text-xs text-blue-600 dark:text-blue-400 mt-2 font-medium">
-                Awaiting assignment
-            </p>
-            @if ($statusStats['idle'] === 0)
-                <div class="text-center py-2">
-                    <span class="text-xs text-gray-400">No idle machines. <button wire:click="openCreateModal" class="text-blue-600 underline">Add machine</button>.</span>
-                </div>
-            @endif
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in">
-            <div class="flex items-center justify-between mb-4">
-                <div class="p-3 bg-red-100 dark:bg-red-500/20 rounded-lg">
-                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 2.523a6 6 0 008.367 8.367z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Maintenance</p>
-            <p class="text-4xl font-bold text-gray-900 dark:text-white" x-data="{ count: 0 }" x-init="() => { let target = {{ $statusStats['maintenance'] }}; let duration = 2000; let increment = target / (duration / 16); let timer = setInterval(() => { count += increment; if (count >= target) { count = target; clearInterval(timer); } }, 16); }">
-                <span x-text="Math.floor(count)">0</span>
-            </p>
-            <p class="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">
-                Under service
-            </p>
-            @if ($statusStats['maintenance'] === 0)
-                <div class="text-center py-2">
-                    <span class="text-xs text-gray-400">No machines under maintenance. <button wire:click="openCreateModal" class="text-blue-600 underline">Add machine</button>.</span>
-                </div>
-            @endif
-        </div>
+        @endforeach
     </div>
 
     <!-- Machine Performance Section -->
@@ -503,23 +472,65 @@
                         </div>
 
                         <div class="flex-1 flex flex-col justify-between p-4 gap-2">
-                            {{-- Status badge --}}
+                            {{-- Live Telemetry Status badge --}}
+                            @php
+                                $liveStatus = $tel['status'] ?? null;
+                                $liveLabel  = $tel['status_label'] ?? null;
+                                $isStale    = $tel['is_stale'] ?? false;
+                                $ageMinutes = $tel['data_age_minutes'] ?? null;
+
+                                // Map telemetry status → badge classes
+                                $statusBadgeClass = match($liveStatus) {
+                                    'working'     => 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+                                    'travelling'  => 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800',
+                                    'loading'     => 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800',
+                                    'dumping'     => 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800',
+                                    'idling'      => 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+                                    'parked'      => 'bg-slate-100 dark:bg-slate-900/30 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-800',
+                                    'maintenance' => 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800',
+                                    'offline'     => 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
+                                    default       => 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-800',
+                                };
+                                $dotClass = match($liveStatus) {
+                                    'working', 'loading', 'dumping' => 'bg-emerald-500 animate-pulse',
+                                    'travelling'                    => 'bg-cyan-500 animate-pulse',
+                                    'idling'                        => 'bg-amber-400 animate-pulse',
+                                    'parked'                        => 'bg-slate-400',
+                                    'maintenance'                   => 'bg-orange-500',
+                                    'offline'                       => 'bg-red-500',
+                                    default                         => 'bg-gray-400',
+                                };
+                            @endphp
                             <div class="flex items-center gap-2 mb-2">
-                                @if ($machine->status === 'active')
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">
-                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
-                                        Active
+                                @if($liveLabel)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border {{ $statusBadgeClass }}">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $dotClass }}"></span>
+                                        {{ $liveLabel }}
                                     </span>
-                                @elseif ($machine->status === 'idle')
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                                        Idle
-                                    </span>
+                                    @if($isStale)
+                                        <span class="text-xs text-amber-500 dark:text-amber-400 flex items-center gap-1" title="Data may be delayed">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            {{ $ageMinutes }}m ago
+                                        </span>
+                                    @endif
                                 @else
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
-                                        Maintenance
-                                    </span>
+                                    {{-- Fallback to DB status when no telemetry --}}
+                                    @if ($machine->status === 'active')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+                                            Active
+                                        </span>
+                                    @elseif ($machine->status === 'maintenance')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
+                                            Maintenance
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                                            No Data
+                                        </span>
+                                    @endif
                                 @endif
-                                <span class="ml-auto text-xs text-gray-400 dark:text-gray-500">{{ $machine->capacity ? number_format($machine->capacity) . ' tons' : 'N/A' }}</span>
+                                <span class="ml-auto text-xs text-gray-400 dark:text-gray-500">{{ $machine->capacity ? number_format($machine->capacity) . ' t' : 'N/A' }}</span>
                             </div>
 
                             {{-- Engine Hours progress bar --}}

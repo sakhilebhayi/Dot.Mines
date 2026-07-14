@@ -720,6 +720,26 @@ class Fleet extends Component
             'maintenance' => Machine::where('team_id', $teamId)->where('status', 'maintenance')->count(),
         ];
 
+        // Live telemetry status counts from all team machines (for the header stats panel)
+        $allMachineIds = Machine::where('team_id', $teamId)->pluck('id')->toArray();
+        $allTelemetry = app(MachineTelemetryService::class)->forMachines($allMachineIds);
+        $liveStatusCounts = [
+            'working' => 0,
+            'travelling' => 0,
+            'idling' => 0,
+            'parked' => 0,
+            'offline' => 0,
+            'maintenance' => 0,
+        ];
+        foreach ($allTelemetry as $tel) {
+            $s = $tel['status'] ?? 'offline';
+            if (isset($liveStatusCounts[$s])) {
+                $liveStatusCounts[$s]++;
+            } else {
+                $liveStatusCounts['offline']++;
+            }
+        }
+
         // Calculate machine performance based on recent metrics (last 30 days)
         $performanceData = $this->calculateMachinePerformance($teamId);
         $topPerformers = collect($performanceData)->sortByDesc('performance_score')->take(5)->values();
@@ -761,14 +781,12 @@ class Fleet extends Component
         $fleetUsage = $this->fleetUsage();
 
         // Engine hours per machine for the current page (today's sessions)
-        $engineHoursMap = $this->buildEngineHoursMap(
-            $machinesQuery->pluck('id')->toArray(),
-            $teamId
-        );
+        $pageIds = $machinesQuery->pluck('id')->toArray();
+        $engineHoursMap = $this->buildEngineHoursMap($pageIds, $teamId);
 
-        // Live Bell telemetry for every machine on the current page
-        $telemetryMap = app(MachineTelemetryService::class)
-            ->forMachines($machinesQuery->pluck('id')->toArray());
+        // Re-use the $allTelemetry map already fetched for liveStatusCounts.
+        // Filter it down to current page — avoids a second MachineTelemetryService call.
+        $telemetryMap = array_intersect_key($allTelemetry, array_flip($pageIds));
 
         // Timing analytics across all fleet machines (not just current page)
         $timingAnalytics = $this->buildTimingAnalytics($teamId);
@@ -779,6 +797,7 @@ class Fleet extends Component
             'adts' => $adts,
             'mineAreas' => $mineAreas,
             'statusStats' => $statusStats,
+            'liveStatusCounts' => $liveStatusCounts,
             'topPerformers' => $topPerformers,
             'worstPerformers' => $worstPerformers,
             'aiRecommendations' => $aiRecommendations,

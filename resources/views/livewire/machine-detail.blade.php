@@ -35,10 +35,37 @@
     </div>
 
     {{-- ── Live Telemetry Snapshot ─────────────────────────────────────────── --}}
-    @if(!empty($liveTelemetry) && $liveTelemetry['equipment_key'] !== null)
+    @if(!empty($liveTelemetry) && $liveTelemetry['telemetry_source'] !== 'none')
+        @php
+            $isStaleData  = $liveTelemetry['is_stale'] ?? false;
+            $ageMinutes   = $liveTelemetry['data_age_minutes'] ?? null;
+            $workingHours = $liveTelemetry['working_hours'] ?? null;
+            $idleHours    = $liveTelemetry['idle_hours'] ?? null;
+            $opHours      = $liveTelemetry['operating_hours'] ?? null;
+            $utilizationPct = ($opHours > 0 && $workingHours !== null) ? min(100, round(($workingHours / $opHours) * 100, 1)) : null;
+            $idlePct        = ($opHours > 0 && $idleHours !== null) ? min(100, round(($idleHours / $opHours) * 100, 1)) : null;
+        @endphp
         <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 mb-6">
-            <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Live Telemetry Snapshot</p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Live Telemetry Snapshot</p>
+                <div class="flex items-center gap-2 text-xs">
+                    @if($isStaleData)
+                        <span class="text-amber-400 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Data {{ $ageMinutes }}m old
+                        </span>
+                    @elseif($ageMinutes !== null)
+                        <span class="text-emerald-400 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                            Live · {{ $ageMinutes }}m ago
+                        </span>
+                    @endif
+                    <span class="text-slate-500 uppercase">{{ $liveTelemetry['telemetry_source'] ?? '' }}</span>
+                </div>
+            </div>
+
+            {{-- Primary telemetry grid --}}
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                 {{-- Engine --}}
                 <div class="bg-slate-800 rounded-lg p-3 text-center">
                     <div class="text-xs text-slate-400 mb-1">Engine</div>
@@ -50,6 +77,7 @@
                         <div class="text-slate-400 font-bold text-sm">Off</div>
                     @endif
                 </div>
+
                 {{-- Fuel --}}
                 @if($liveTelemetry['fuel_remaining_percent'] !== null)
                     @php $fp = (int) $liveTelemetry['fuel_remaining_percent']; @endphp
@@ -61,13 +89,29 @@
                         </div>
                     </div>
                 @endif
+
                 {{-- Operating hours --}}
-                @if($liveTelemetry['operating_hours'] !== null)
+                @if($opHours !== null)
                     <div class="bg-slate-800 rounded-lg p-3 text-center">
                         <div class="text-xs text-slate-400 mb-1">Op. Hours</div>
-                        <div class="text-white font-bold text-sm">{{ number_format($liveTelemetry['operating_hours'], 0) }} h</div>
+                        <div class="text-white font-bold text-sm">{{ number_format($opHours, 0) }} h</div>
+                        @if($workingHours !== null)
+                            <div class="text-xs text-emerald-400 mt-0.5">{{ number_format($workingHours, 0) }}h working</div>
+                        @endif
                     </div>
                 @endif
+
+                {{-- Idle hours --}}
+                @if($idleHours !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Idle Hours</div>
+                        <div class="text-amber-400 font-bold text-sm">{{ number_format($idleHours, 0) }} h</div>
+                        @if($idlePct !== null)
+                            <div class="text-xs text-slate-500 mt-0.5">{{ $idlePct }}% of op.</div>
+                        @endif
+                    </div>
+                @endif
+
                 {{-- Odometer --}}
                 @php $odo = $liveTelemetry['odometer'] ?? $machine->odometer; @endphp
                 @if($odo !== null)
@@ -76,6 +120,7 @@
                         <div class="text-white font-bold text-sm">{{ number_format($odo, 0) }} km</div>
                     </div>
                 @endif
+
                 {{-- Total loads --}}
                 @if($liveTelemetry['load_count'] !== null)
                     <div class="bg-slate-800 rounded-lg p-3 text-center">
@@ -83,26 +128,135 @@
                         <div class="text-white font-bold text-sm">{{ number_format($liveTelemetry['load_count']) }}</div>
                     </div>
                 @endif
+
                 {{-- DEF --}}
                 @if($liveTelemetry['def_percent'] !== null)
                     <div class="bg-slate-800 rounded-lg p-3 text-center">
                         <div class="text-xs text-slate-400 mb-1">DEF Level</div>
-                        <div class="text-white font-bold text-sm">{{ round($liveTelemetry['def_percent']) }}%</div>
+                        @php $def = (int) $liveTelemetry['def_percent']; @endphp
+                        <div class="font-bold text-sm {{ $def < 20 ? 'text-red-400' : 'text-white' }}">{{ $def }}%</div>
+                    </div>
+                @endif
+
+                {{-- Payload --}}
+                @if($liveTelemetry['payload'] !== null && $liveTelemetry['payload'] > 0)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Payload</div>
+                        <div class="text-white font-bold text-sm">{{ number_format($liveTelemetry['payload'] / 1000, 1) }} t</div>
+                    </div>
+                @endif
+
+                {{-- Speed --}}
+                @if($liveTelemetry['speed_kmh'] !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Speed</div>
+                        <div class="text-white font-bold text-sm">{{ number_format($liveTelemetry['speed_kmh'], 1) }} km/h</div>
+                        @if($liveTelemetry['heading_degrees'] !== null)
+                            <div class="text-xs text-slate-500 mt-0.5">{{ number_format($liveTelemetry['heading_degrees'], 0) }}°</div>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- Engine RPM (MachineMetric source) --}}
+                @if($liveTelemetry['engine_rpm'] !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Engine RPM</div>
+                        <div class="text-white font-bold text-sm">{{ number_format($liveTelemetry['engine_rpm'], 0) }}</div>
+                    </div>
+                @endif
+
+                {{-- Coolant Temperature --}}
+                @if($liveTelemetry['coolant_temperature'] !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Coolant Temp</div>
+                        @php $coolant = (float) $liveTelemetry['coolant_temperature']; @endphp
+                        <div class="font-bold text-sm {{ $coolant > 105 ? 'text-red-400' : ($coolant > 95 ? 'text-amber-400' : 'text-white') }}">{{ number_format($coolant, 0) }}°C</div>
+                    </div>
+                @endif
+
+                {{-- Engine Temperature --}}
+                @if($liveTelemetry['engine_temperature'] !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Engine Temp</div>
+                        <div class="text-white font-bold text-sm">{{ number_format($liveTelemetry['engine_temperature'], 0) }}°C</div>
+                    </div>
+                @endif
+
+                {{-- Battery Voltage --}}
+                @if($liveTelemetry['battery_voltage'] !== null)
+                    <div class="bg-slate-800 rounded-lg p-3 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Battery</div>
+                        @php $bv = (float) $liveTelemetry['battery_voltage']; @endphp
+                        <div class="font-bold text-sm {{ $bv < 11.5 ? 'text-red-400' : ($bv < 12.0 ? 'text-amber-400' : 'text-white') }}">{{ number_format($bv, 1) }} V</div>
                     </div>
                 @endif
             </div>
-            {{-- Speed + last seen row --}}
+
+            {{-- GPS + last seen footer --}}
             <div class="flex flex-wrap gap-4 mt-3 text-xs text-slate-400">
-                @if($liveTelemetry['speed_kmh'] !== null && $liveTelemetry['speed_kmh'] > 0)
-                    <span>🏎 Speed: <span class="text-white font-semibold">{{ number_format($liveTelemetry['speed_kmh'], 1) }} km/h</span></span>
-                @endif
                 @if($liveTelemetry['latitude'] !== null)
-                    <span>📍 GPS: {{ number_format($liveTelemetry['latitude'], 5) }}, {{ number_format($liveTelemetry['longitude'], 5) }}</span>
+                    <span>
+                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        GPS: {{ number_format($liveTelemetry['latitude'], 5) }}, {{ number_format($liveTelemetry['longitude'], 5) }}
+                        <a href="https://maps.google.com/?q={{ $liveTelemetry['latitude'] }},{{ $liveTelemetry['longitude'] }}" target="_blank" class="text-amber-400 hover:text-amber-300 ml-1">↗ Map</a>
+                    </span>
                 @endif
                 @if($liveTelemetry['last_seen_human'])
-                    <span>📡 Last sync: {{ $liveTelemetry['last_seen_human'] }}</span>
+                    <span>
+                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
+                        Last sync: {{ $liveTelemetry['last_seen_human'] }}
+                    </span>
                 @endif
             </div>
+
+            {{-- Utilisation quick stats --}}
+            @if($utilizationPct !== null || $idlePct !== null)
+                <div class="mt-4 pt-4 border-t border-slate-700">
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-3">Lifetime Utilisation</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        @if($opHours !== null)
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-white">{{ number_format($opHours, 0) }}h</div>
+                                <div class="text-xs text-slate-400">Total Op. Hours</div>
+                            </div>
+                        @endif
+                        @if($workingHours !== null)
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-emerald-400">{{ number_format($workingHours, 0) }}h</div>
+                                <div class="text-xs text-slate-400">Working Hours</div>
+                            </div>
+                        @endif
+                        @if($idleHours !== null)
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-amber-400">{{ number_format($idleHours, 0) }}h</div>
+                                <div class="text-xs text-slate-400">Idle Hours</div>
+                            </div>
+                        @endif
+                        @if($utilizationPct !== null)
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-cyan-400">{{ $utilizationPct }}%</div>
+                                <div class="text-xs text-slate-400">Productive Utilisation</div>
+                            </div>
+                        @endif
+                    </div>
+                    @if($opHours !== null && $opHours > 0)
+                        <div class="mt-3">
+                            <div class="flex text-xs text-slate-400 justify-between mb-1">
+                                <span>Working {{ $workingHours !== null ? number_format($workingHours,0).'h' : '—' }}</span>
+                                <span>Idle {{ $idleHours !== null ? number_format($idleHours,0).'h' : '—' }}</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2 flex overflow-hidden">
+                                @if($utilizationPct !== null)
+                                    <div class="bg-emerald-500 h-2" style="width: {{ $utilizationPct }}%"></div>
+                                @endif
+                                @if($idlePct !== null)
+                                    <div class="bg-amber-400 h-2" style="width: {{ $idlePct }}%"></div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endif
         </div>
     @endif
 

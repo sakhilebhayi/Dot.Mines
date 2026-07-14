@@ -21,6 +21,7 @@ class LiveMap extends Component
     public float $centerLat = -28.4793; // South Africa center latitude
 
     /** @var array<string, mixed> */
+    /** @var array<int, array<string, mixed>> */
     public array $activityFeed = [];
 
     public bool $isLoading = true;
@@ -99,12 +100,13 @@ class LiveMap extends Component
             return;
         }
 
-        $this->activityFeed = ActivityLog::where('team_id', $team->id)
+        $this->activityFeed = ActivityLog::with('user')
+            ->where('team_id', $team->id)
             ->latest('created_at')
             ->take(10)
             ->get()
             ->map(fn ($log) => [
-                'user' => $log->user->name ?? 'System',
+                'user' => $log->user?->name ?? 'System',
                 'action' => $log->action,
                 'description' => $log->description,
                 'created_at' => $log->created_at->diffForHumans(),
@@ -329,19 +331,35 @@ class LiveMap extends Component
         $machines = $machinesQuery->get();
         $machineIds = $machines->pluck('id')->all();
 
-        // Enrich with live Bell telemetry so the map popup shows fuel, hours, etc.
+        // Enrich with live telemetry for accurate status, fuel, hours, speed, and heading.
         $telemetryMap = app(MachineTelemetryService::class)->forMachines($machineIds);
 
         return $machines->map(function (Machine $machine) use ($telemetryMap) {
             $tel = $telemetryMap[$machine->id] ?? null;
 
+            // Use live Bell telemetry coordinates when available (more recent than ISO snapshot).
+            $lat = ($tel !== null && $tel['latitude'] !== null) ? $tel['latitude'] : (float) $machine->last_location_latitude;
+            $lng = ($tel !== null && $tel['longitude'] !== null) ? $tel['longitude'] : (float) $machine->last_location_longitude;
+
             $data = $machine->toArray();
+            // Override coordinates with live telemetry values.
+            $data['last_location_latitude'] = $lat;
+            $data['last_location_longitude'] = $lng;
+
+            // Live telemetry fields for map popup and marker behaviour.
             $data['telemetry_status'] = $tel['status_label'] ?? ucfirst($machine->status);
+            $data['telemetry_status_key'] = $tel['status'] ?? 'offline';
             $data['engine_running'] = $tel['engine_running'] ?? false;
             $data['fuel_remaining_percent'] = $tel['fuel_remaining_percent'] ?? null;
             $data['telemetry_operating_hours'] = $tel['operating_hours'] ?? $machine->operating_hours;
             $data['telemetry_load_count'] = $tel['load_count'] ?? null;
+            $data['speed_kmh'] = $tel['speed_kmh'] ?? null;
+            $data['heading_degrees'] = $tel['heading_degrees'] ?? null;
             $data['last_seen_human'] = $tel['last_seen_human'] ?? null;
+            $data['last_seen_at'] = $tel['last_seen_at'] ?? null;
+            $data['is_stale'] = $tel['is_stale'] ?? false;
+            $data['data_age_minutes'] = $tel['data_age_minutes'] ?? null;
+            $data['telemetry_source'] = $tel['telemetry_source'] ?? 'none';
 
             return $data;
         });

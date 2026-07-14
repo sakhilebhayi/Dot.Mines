@@ -15,6 +15,7 @@ use App\Jobs\SyncBellHistoricalDataJob;
 use App\Jobs\SyncBellLocationsJob;
 use App\Jobs\SyncBellOperatingHoursJob;
 use App\Jobs\SyncBellPayloadJob;
+use App\Jobs\SyncBellProductionRecordsJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -114,6 +115,14 @@ Schedule::job(new SyncBellOperatingHoursJob)
 // from machine_metrics to machine_metrics_archive to keep the hot table lean.
 Schedule::job(new ArchiveOldMetricsJob)
     ->dailyAt('02:00')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Nightly: sync Bell OEM daily KPI data into ProductionRecord rows so the
+// production dashboard shows real data without manual entry.
+// Runs just after midnight to capture the full previous day's production.
+Schedule::job(new SyncBellProductionRecordsJob(lookbackDays: 7))
+    ->dailyAt('00:30')
     ->withoutOverlapping()
     ->onOneServer();
 

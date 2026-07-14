@@ -53,22 +53,70 @@ Forecast error = abs(forecast_bcm - actual_bcm) / actual_bcm * 100
 
 ---
 
+## Pattern — Auto-Sync OEM Production Data (Bell)
+
+Bell machines generate daily KPI data automatically in `bell_equipment_daily_kpis`.
+`SyncBellProductionRecordsJob` converts this into canonical `ProductionRecord` rows every night.
+
+```bash
+# Trigger manual backfill of last 30 days
+php artisan tinker --execute 'App\Jobs\SyncBellProductionRecordsJob::dispatch(30);'
+```
+
+The synced records have:
+- `shift = 'oem_auto'` — identifies OEM-sourced records
+- `metadata['source'] = 'bell_oem_kpi'` — traces back to Bell KPI table
+- `quantity_produced` = payload_moved_kg / 1000 (tonnes)
+- `metadata['loads_moved']`, `['operating_hours']`, `['utilization_percent']`, `['fuel_used_litres']`
+
+**WARNING:** Never manually edit `oem_auto` shift records — they will be overwritten on next sync.
+
+---
+
 ## Pattern — Recording a Production Entry
 
 ```php
 // Via API
 POST /api/v1/production/records
 {
-    "machine_id": 3,
-    "shift_id": 12,
     "mine_area_id": 2,
-    "bcm": 450.75,
-    "tons": 1150.20,
-    "loads": 18,
-    "operating_hours": 7.5,
-    "recorded_at": "2026-06-09T14:00:00Z"
+    "machine_id": 3,
+    "record_date": "2026-07-12",
+    "shift": "day",
+    "quantity_produced": 1150.20,
+    "unit": "tonnes",
+    "target_quantity": 1200.00,
+    "status": "completed"
 }
 ```
+
+---
+
+## OEM KPI Summary (MachineKpiService)
+
+For Bell machines, use `MachineKpiService` to get production KPIs directly from OEM data
+without waiting for manual `ProductionRecord` entry:
+
+```php
+use App\Services\MachineKpiService;
+
+$summary = app(MachineKpiService::class)->getDailyKpiSummary(
+    machineIds: $team->machines->pluck('id')->toArray(),
+    startDate: '2026-07-01',
+    endDate: '2026-07-12',
+);
+
+// Returns:
+// [
+//   'total_loads'          => 3820,
+//   'total_payload_tonnes' => 11460.5,  // already converted from kg
+//   'avg_utilization'      => 82.3,
+//   'has_data'             => true,
+// ]
+```
+
+The production dashboard exposes this as `$bellKpiSummary` and renders it even when
+there are no manual ProductionRecord entries.
 
 ---
 
@@ -77,13 +125,10 @@ POST /api/v1/production/records
 ```php
 use App\Models\ProductionRecord;
 
-// Daily production by machine
-$records = ProductionRecord::query()
-    ->whereBetween('recorded_at', [$startDate, $endDate])
-    ->where('team_id', $team->id)
-    ->with(['machine', 'shift', 'mineArea'])
-    ->selectRaw('machine_id, SUM(bcm) as total_bcm, SUM(tons) as total_tons, SUM(operating_hours) as total_hours')
-    ->groupBy('machine_id')
+$records = ProductionRecord::forTeam($teamId)
+    ->whereBetween('record_date', [$startDate, $endDate])
+    ->with(['machine', 'mineArea'])
+    ->orderByDesc('record_date')
     ->get();
 ```
 
@@ -96,61 +141,17 @@ use App\Models\ProductionTarget;
 use App\Models\ProductionRecord;
 
 $target = ProductionTarget::where('team_id', $team->id)
-    ->where('period', now()->format('Y-m'))
+    ->where('start_date', '<=', now())
+    ->where('end_date', '>=', now())
     ->first();
 
-$actual = ProductionRecord::where('team_id', $team->id)
-    ->whereBetween('recorded_at', [now()->startOfMonth(), now()])
-    ->sum('bcm');
+$actual = ProductionRecord::forTeam($team->id)
+    ->whereBetween('record_date', [now()->startOfMonth(), now()])
+    ->sum('quantity_produced');
 
-$variancePercent = $target
-    ? round((($actual - $target->target_bcm) / $target->target_bcm) * 100, 2)
+$variancePct = $target && $target->target_quantity > 0
+    ? round((($actual - $target->target_quantity) / $target->target_quantity) * 100, 1)
     : null;
-// Negative = underproduction; Positive = overproduction
-```
-
----
-
-## Pattern — Production Test Setup
-
-```php
-#[Test]
-public function production_record_calculates_bcm_per_hour(): void
-{
-    $user  = $this->adminUser();
-    $team  = $user->currentTeam;
-    $machine = Machine::factory()->create(['team_id' => $team->id]);
-    $shift   = Shift::factory()->create(['team_id' => $team->id]);
-
-    $this->actingAs($user, 'sanctum')
-        ->postJson('/api/v1/production/records', [
-            'machine_id'      => $machine->id,
-            'shift_id'        => $shift->id,
-            'bcm'             => 400.0,
-            'tons'            => 1000.0,
-            'operating_hours' => 8.0,
-            'recorded_at'     => now()->toIso8601String(),
-        ])
-        ->assertCreated();
-
-    $this->assertDatabaseHas('production_records', [
-        'machine_id' => $machine->id,
-        'bcm'        => 400.0,
-    ]);
-}
-
-#[Test]
-public function production_is_isolated_between_teams(): void
-{
-    $userA = $this->adminUser();
-    $userB = $this->createUserInSeparateTeam();
-
-    ProductionRecord::factory()->create(['team_id' => $userA->current_team_id]);
-
-    $this->actingAs($userB, 'sanctum')
-        ->getJson('/api/v1/production/records')
-        ->assertJsonCount(0, 'data');
-}
 ```
 
 ---
@@ -162,13 +163,9 @@ use App\Services\ProductionService;
 
 $service = app(ProductionService::class);
 
-// Get summary for a team and period
-$summary = $service->getPeriodSummary($team, now()->startOfMonth(), now());
-// Returns: ['bcm' => float, 'tons' => float, 'achievement_percent' => float]
-
-// Equipment productivity ranking
-$ranking = $service->getEquipmentProductivity($team, $startDate, $endDate);
-// Returns collection sorted by bcm/hour descending
+// Statistics for a period
+$stats = $service->getProductionStatistics($teamId, $startDate, $endDate);
+// Returns: ['total_produced', 'total_target', 'achievement_rate', ...]
 ```
 
 ---
@@ -179,15 +176,14 @@ $ranking = $service->getEquipmentProductivity($team, $startDate, $endDate);
 app/Livewire/ProductionDashboard.php
 
 Key public properties:
-  $period     — 'daily'|'weekly'|'monthly'
-  $mineAreaId — filter by area (null = all areas)
-  $machineId  — filter by machine (null = all machines)
+  $dateFilter    — 'day'|'week'|'month'|'year'
+  $mineAreaFilter — int|null
+  $viewMode      — 'overview'|'records'|'targets'|'analytics'
 
-Key methods:
-  mount()                — loads initial data
-  updatedPeriod()        — re-runs queries on period change
-  getProductionData()    — returns formatted chart data
-  getTargetComparison()  — returns target vs actual
+Key computed properties:
+  $statistics    — from ProductionService::getProductionStatistics()
+  $oemKpiSummary — from MachineKpiService::getDailyKpiSummary() (Bell OEM data)
+  $productionRecords — paginated ProductionRecord results
 ```
 
 ---

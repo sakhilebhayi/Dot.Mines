@@ -94,6 +94,40 @@ $replay = $service->getMovementHistory(
 
 ---
 
+## LiveMap Machine Data Payload
+
+`LiveMap::getMachines()` returns enriched machine data. Each machine has:
+
+```php
+[
+    // Core machine fields (from machines table)
+    'id', 'name', 'machine_type', 'manufacturer', 'model',
+    'last_location_latitude',  // ← may be overridden by live Bell telemetry
+    'last_location_longitude', // ← may be overridden by live Bell telemetry
+
+    // Live telemetry (from MachineTelemetryService)
+    'telemetry_status'         => 'Working',   // human-readable status label
+    'telemetry_status_key'     => 'working',   // machine-readable key
+    'engine_running'           => true,
+    'fuel_remaining_percent'   => 72.5,
+    'telemetry_operating_hours' => 4821.3,
+    'telemetry_load_count'     => 4180,
+    'speed_kmh'                => 32.4,
+    'heading_degrees'          => 185,         // for map marker rotation
+    'last_seen_human'          => '2 minutes ago',
+    'last_seen_at'             => '2026-07-12T10:23:00+02:00',
+    'is_stale'                 => false,       // true when data is 15–30 min old
+    'data_age_minutes'         => 2,
+    'telemetry_source'         => 'bell',      // 'bell'|'machine_metric'|'machine'|'none'
+]
+```
+
+**Map marker heading:** Use `heading_degrees` to rotate SVG markers for directional arrows.
+**Stale data warning:** Show a warning icon on markers when `is_stale = true`.
+**Offline markers:** Grey out markers when `telemetry_status_key = 'offline'`.
+
+---
+
 ## Real-Time Broadcasting
 
 ```
@@ -107,7 +141,7 @@ Payload:
     "lng": 28.4521,
     "speed": 42.5,
     "heading": 185,
-    "status": "moving",
+    "status": "travelling",
     "recorded_at": "2026-06-09T14:23:00Z"
 }
 ```
@@ -120,22 +154,23 @@ Payload:
 app/Livewire/LiveMap.php
 
 Key state:
-  $machines     — all team machines with last known position
-  $geofences    — team geofences (polygons for overlay)
-  $mineAreas    — area boundaries for overlay
-  $selectedId   — currently selected machine ID (for detail panel)
+  $machines            — all team machines with live telemetry enrichment
+  $geofences           — team geofences (polygons for overlay)
+  $mineAreas           — area boundaries for overlay
+  $pollInterval        — seconds between wire:poll refreshes (from BELL_UI_POLL_SECONDS)
+  $selectedStatus      — filter by telemetry status (working/idling/offline...)
+  $selectedMineAreaId  — filter by mine area
+
+Live coordinates: getMachines() prefers Bell telemetry lat/lng over Machine.last_location_*
+when Bell current status provides a more recent fix.
 
 Real-time listener:
   #[On('echo-private:team.{teamId}.map,machine.location.updated')]
   public function onLocationUpdate(array $data): void
-  {
-      // Updates the machine position in $this->machines collection
-      // Alpine.js on frontend moves marker on map canvas
-  }
 
 Alpine.js integration:
   x-data="mapComponent()" — manages Leaflet/MapLibre GL JS map instance
-  Marker positions updated via $wire.entangle('machines')
+  wire:poll.{pollInterval}s triggers getMachines() refresh
 ```
 
 ---
@@ -173,18 +208,6 @@ public function location_update_creates_map_event(): void
         'longitude'  => 28.4521,
     ]);
     $this->assertEquals(-25.7641, $machine->fresh()->latitude);
-}
-
-#[Test]
-public function location_broadcast_is_sent_on_update(): void
-{
-    Event::fake([MachineLocationUpdated::class]);
-    $machine = Machine::factory()->create();
-
-    $service = app(App\Services\MapEventService::class);
-    $service->processEvent($machine, -25.7641, 28.4521, 30.0, 270, now());
-
-    Event::assertDispatched(MachineLocationUpdated::class);
 }
 ```
 

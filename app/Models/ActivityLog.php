@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $action
  * @property string|null $description
  * @property Carbon $created_at
+ * @property-read User|null $user
  */
 class ActivityLog extends Model
 {

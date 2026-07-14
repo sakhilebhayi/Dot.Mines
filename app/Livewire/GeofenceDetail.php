@@ -6,7 +6,9 @@ use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class GeofenceDetail extends Component
@@ -55,22 +57,53 @@ class GeofenceDetail extends Component
         $machinesTracked = $machineCount;
         $machinesUntracked = max(0, $teamMachineCount - $machinesTracked);
 
-        // Loads: recent entries with tonnage and try to infer authorizer from ActivityLog
-        $loads = $this->geofence->entries()->with('machine')->latest('entry_time')->take(20)->get()->map(function ($entry) use ($team) {
-            $author = null;
+        // Loads: batch-fetch entries and activity logs in two queries (no N+1).
+        $recentLoadEntries = $this->geofence->entries()
+            ->with('machine')
+            ->latest('entry_time')
+            ->take(20)
+            ->get();
 
-            // Attempt to find an activity log that references this machine and mentions authorization
-            $possible = ActivityLog::where('team_id', $team->id)
-                ->where(function ($q) use ($entry) {
-                    $q->where('description', 'like', "%{$entry->machine->name}%")
-                        ->orWhere('action', 'like', '%authoriz%')
+        // Single query for relevant activity logs across all machines in the result set.
+        $machineNames = $recentLoadEntries
+            ->map(fn ($e) => $e->machine?->name)
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        /** @var Collection<string, ActivityLog|null> $activityLogsByMachine */
+        $activityLogsByMachine = collect();
+        if (! empty($machineNames)) {
+            $logs = ActivityLog::where('team_id', $team->id)
+                ->where(function ($q) use ($machineNames): void {
+                    foreach ($machineNames as $name) {
+                        $q->orWhere('description', 'like', '%'.$name.'%');
+                    }
+                })
+                ->where(function ($q): void {
+                    $q->where('action', 'like', '%authoriz%')
                         ->orWhere('description', 'like', '%authoriz%');
                 })
-                ->orderBy('created_at', 'desc')
-                ->first();
+                ->latest('created_at')
+                ->with('user')
+                ->get();
 
-            if ($possible && $possible->user) {
-                $author = $possible->user->name;
+            foreach ($machineNames as $name) {
+                $activityLogsByMachine[$name] = $logs->first(
+                    fn ($log) => str_contains((string) $log->description, $name)
+                );
+            }
+        }
+
+        $loads = $recentLoadEntries->map(function ($entry) use ($activityLogsByMachine) {
+            $machineName = $entry->machine?->name;
+            $author = null;
+            if ($machineName && $activityLogsByMachine->has($machineName)) {
+                $possible = $activityLogsByMachine[$machineName];
+                if ($possible?->user) {
+                    $author = $possible->user->name;
+                }
             }
 
             return [

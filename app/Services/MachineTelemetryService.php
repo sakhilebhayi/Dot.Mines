@@ -29,14 +29,22 @@ use Illuminate\Support\Collection;
  *   engine_running (bool|null)          — live engine state
  *   fuel_remaining_percent (float|null) — 0–100 %
  *   operating_hours (float|null)        — cumulative engine hours
- *   idle_hours (float|null)
+ *   idle_hours (float|null)             — cumulative idle hours
+ *   working_hours (float|null)          — operating_hours − idle_hours
  *   load_count (int|null)               — cumulative loads (Bell only)
  *   odometer (float|null)               — km
  *   def_percent (float|null)            — Bell only
  *   payload (float|null)                — kg
  *   latitude, longitude (float|null)
  *   speed_kmh (float|null)
+ *   heading_degrees (float|null)        — GPS heading 0–360
+ *   engine_rpm (float|null)             — from MachineMetric
+ *   coolant_temperature (float|null)    — °C from MachineMetric
+ *   engine_temperature (float|null)     — °C from MachineMetric
+ *   battery_voltage (float|null)        — V from MachineMetric
  *   last_seen_at, last_seen_human
+ *   data_age_minutes (int|null)         — minutes since last telemetry
+ *   is_stale (bool)                     — true when data is > STALE_MINUTES old
  *   equipment_key (int|null)            — Bell-specific identifier (null for others)
  *   telemetry_source (string)           — 'bell' | 'machine_metric' | 'machine' | 'none'
  */
@@ -49,8 +57,21 @@ class MachineTelemetryService
      */
     private const OFFLINE_MINUTES = 30;
 
+    /**
+     * Minutes after which data is considered stale but not yet offline.
+     * Show a warning badge when data is between STALE_MINUTES and OFFLINE_MINUTES old.
+     */
+    private const STALE_MINUTES = 15;
+
     /** km/h threshold above which the machine is Travelling */
     private const SPEED_THRESHOLD = 3;
+
+    /**
+     * Payload threshold (kg) above which the machine is considered under load.
+     * Bell ISO15143-3 CumulativePayload is in kg. Anything above this threshold
+     * means the machine is carrying a load and is likely Working (not Idling).
+     */
+    private const PAYLOAD_THRESHOLD_KG = 500;
 
     /**
      * Return a standardised telemetry snapshot for every requested machine ID.
@@ -85,8 +106,10 @@ class MachineTelemetryService
             $status = $eq?->currentStatus;
 
             if ($eq !== null && $status !== null) {
-                $speedKmh = $latestSpeeds[$eq->equipment_key] ?? null;
-                $result[$machineId] = $this->buildBellEntry($status, $speedKmh);
+                $locationSnap = $latestSpeeds[$eq->equipment_key] ?? [];
+                $speedKmh = $locationSnap['speed_kmh'] ?? null;
+                $headingDegrees = $locationSnap['heading_degrees'] ?? null;
+                $result[$machineId] = $this->buildBellEntry($status, $speedKmh, $headingDegrees);
 
                 continue;
             }
@@ -143,7 +166,7 @@ class MachineTelemetryService
 
     /**
      * @param  array<int>  $equipmentKeys
-     * @return array<int, float> equipment_key → speed_kmh
+     * @return array<int, array{speed_kmh: float|null, heading_degrees: float|null}> equipment_key → location snapshot
      */
     private function latestSpeedByEquipmentKey(array $equipmentKeys): array
     {
@@ -152,19 +175,21 @@ class MachineTelemetryService
         }
 
         $rows = BellEquipmentLocationHistory::whereIn('equipment_key', $equipmentKeys)
-            ->whereNotNull('speed_kmh')
-            ->select('equipment_key', 'speed_kmh', 'recorded_at')
+            ->select('equipment_key', 'speed_kmh', 'heading_degrees', 'recorded_at')
             ->orderByDesc('recorded_at')
             ->get()
             ->unique('equipment_key')
             ->keyBy('equipment_key');
 
-        $speeds = [];
+        $result = [];
         foreach ($rows as $key => $row) {
-            $speeds[(int) $key] = (float) $row->speed_kmh;
+            $result[(int) $key] = [
+                'speed_kmh' => $row->speed_kmh !== null ? (float) $row->speed_kmh : null,
+                'heading_degrees' => $row->heading_degrees !== null ? (float) $row->heading_degrees : null,
+            ];
         }
 
-        return $speeds;
+        return $result;
     }
 
     /**
@@ -198,20 +223,29 @@ class MachineTelemetryService
     // ── Entry builders ───────────────────────────────────────────────────────
 
     /** @return array<string, mixed> */
-    private function buildBellEntry(BellEquipmentCurrentStatus $status, ?float $speedKmh): array
+    private function buildBellEntry(BellEquipmentCurrentStatus $status, ?float $speedKmh, ?float $headingDegrees = null): array
     {
         $lastSeen = $status->updated_date ? Carbon::parse($status->updated_date) : null;
         $isOffline = ! $lastSeen || $lastSeen->lt(now()->subMinutes(self::OFFLINE_MINUTES));
+        $isStale = ! $isOffline && $lastSeen && $lastSeen->lt(now()->subMinutes(self::STALE_MINUTES));
+        $dataAgeMinutes = $lastSeen ? (int) $lastSeen->diffInMinutes(now()) : null;
+
+        $payloadKg = $status->payload !== null ? (float) $status->payload : null;
 
         $operationalStatus = $this->deriveStatus(
             engineRunning: (bool) $status->engine_running,
             isOffline: $isOffline,
             speedKmh: $speedKmh,
-            operatingHours: $status->operating_hours ? (float) $status->operating_hours : null,
-            idleHours: $status->idle_hours ? (float) $status->idle_hours : null,
+            payloadKg: $payloadKg,
         );
 
         [$label, $color] = $this->labelAndColor($operationalStatus);
+
+        $operatingHours = $status->operating_hours !== null ? (float) $status->operating_hours : null;
+        $idleHours = $status->idle_hours !== null ? (float) $status->idle_hours : null;
+        $workingHours = ($operatingHours !== null && $idleHours !== null)
+            ? max(0.0, round($operatingHours - $idleHours, 2))
+            : null;
 
         return [
             'status' => $operationalStatus,
@@ -219,17 +253,26 @@ class MachineTelemetryService
             'status_color' => $color,
             'engine_running' => (bool) $status->engine_running,
             'fuel_remaining_percent' => $status->fuel_remaining_percent !== null ? (float) $status->fuel_remaining_percent : null,
-            'operating_hours' => $status->operating_hours !== null ? (float) $status->operating_hours : null,
-            'idle_hours' => $status->idle_hours !== null ? (float) $status->idle_hours : null,
+            'operating_hours' => $operatingHours,
+            'idle_hours' => $idleHours,
+            'working_hours' => $workingHours,
             'load_count' => $status->load_count !== null ? (int) $status->load_count : null,
             'odometer' => $status->odometer !== null ? (float) $status->odometer : null,
             'def_percent' => $status->def_percent !== null ? (float) $status->def_percent : null,
-            'payload' => $status->payload !== null ? (float) $status->payload : null,
+            'payload' => $payloadKg,
             'latitude' => $status->latitude !== null ? (float) $status->latitude : null,
             'longitude' => $status->longitude !== null ? (float) $status->longitude : null,
             'speed_kmh' => $speedKmh,
+            'heading_degrees' => $headingDegrees,
+            // MachineMetric-only fields (null for Bell ISO15143-3 which doesn't report these)
+            'engine_rpm' => null,
+            'coolant_temperature' => null,
+            'engine_temperature' => null,
+            'battery_voltage' => null,
             'last_seen_at' => $lastSeen?->toIso8601String(),
             'last_seen_human' => $lastSeen?->diffForHumans(),
+            'data_age_minutes' => $dataAgeMinutes,
+            'is_stale' => $isStale,
             'equipment_key' => $status->equipment_key,
             'telemetry_source' => 'bell',
         ];
@@ -238,22 +281,33 @@ class MachineTelemetryService
     /** @return array<string, mixed> */
     private function buildMetricEntry(MachineMetric $metric): array
     {
-        // recorded_at is cast to datetime in MachineMetric — always a Carbon instance.
         $lastSeen = Carbon::parse($metric->recorded_at);
         $isOffline = $lastSeen->lt(now()->subMinutes(self::OFFLINE_MINUTES));
+        $isStale = ! $isOffline && $lastSeen->lt(now()->subMinutes(self::STALE_MINUTES));
+        $dataAgeMinutes = (int) $lastSeen->diffInMinutes(now());
 
-        // Infer engine running from RPM when available.
-        $engineRunning = $metric->engine_rpm !== null ? $metric->engine_rpm > 100 : null;
+        // Infer engine running from RPM when available, otherwise from total_hours change.
+        $engineRunning = null;
+        if ($metric->engine_rpm !== null) {
+            $engineRunning = $metric->engine_rpm > 100;
+        }
+
+        $payloadKg = $metric->load_weight !== null ? (float) $metric->load_weight : null;
 
         $operationalStatus = $this->deriveStatus(
             engineRunning: (bool) $engineRunning,
             isOffline: $isOffline,
             speedKmh: $metric->speed,
-            operatingHours: $metric->total_hours,
-            idleHours: $metric->idle_hours,
+            payloadKg: $payloadKg,
         );
 
         [$label, $color] = $this->labelAndColor($operationalStatus);
+
+        $operatingHours = $metric->total_hours !== null ? (float) $metric->total_hours : null;
+        $idleHours = $metric->idle_hours !== null ? (float) $metric->idle_hours : null;
+        $workingHours = ($operatingHours !== null && $idleHours !== null)
+            ? max(0.0, round($operatingHours - $idleHours, 2))
+            : null;
 
         return [
             'status' => $operationalStatus,
@@ -261,17 +315,25 @@ class MachineTelemetryService
             'status_color' => $color,
             'engine_running' => $engineRunning,
             'fuel_remaining_percent' => $metric->fuel_level !== null ? (float) $metric->fuel_level : null,
-            'operating_hours' => $metric->total_hours !== null ? (float) $metric->total_hours : null,
-            'idle_hours' => $metric->idle_hours !== null ? (float) $metric->idle_hours : null,
+            'operating_hours' => $operatingHours,
+            'idle_hours' => $idleHours,
+            'working_hours' => $workingHours,
             'load_count' => null,
             'odometer' => null,
             'def_percent' => null,
-            'payload' => $metric->load_weight !== null ? (float) $metric->load_weight : null,
+            'payload' => $payloadKg,
             'latitude' => $metric->latitude !== null ? (float) $metric->latitude : null,
             'longitude' => $metric->longitude !== null ? (float) $metric->longitude : null,
             'speed_kmh' => $metric->speed !== null ? (float) $metric->speed : null,
-            'last_seen_at' => $lastSeen?->toIso8601String(),
-            'last_seen_human' => $lastSeen?->diffForHumans(),
+            'heading_degrees' => $metric->heading !== null ? (float) $metric->heading : null,
+            'engine_rpm' => $metric->engine_rpm !== null ? (float) $metric->engine_rpm : null,
+            'coolant_temperature' => $metric->coolant_temperature !== null ? (float) $metric->coolant_temperature : null,
+            'engine_temperature' => $metric->engine_temperature !== null ? (float) $metric->engine_temperature : null,
+            'battery_voltage' => $metric->battery_voltage !== null ? (float) $metric->battery_voltage : null,
+            'last_seen_at' => $lastSeen->toIso8601String(),
+            'last_seen_human' => $lastSeen->diffForHumans(),
+            'data_age_minutes' => $dataAgeMinutes,
+            'is_stale' => $isStale,
             'equipment_key' => null,
             'telemetry_source' => 'machine_metric',
         ];
@@ -284,6 +346,8 @@ class MachineTelemetryService
             ? Carbon::parse($machine->last_seen_at)
             : null;
         $isOffline = ! $lastSeen || $lastSeen->lt(now()->subMinutes(self::OFFLINE_MINUTES));
+        $isStale = ! $isOffline && $lastSeen && $lastSeen->lt(now()->subMinutes(self::STALE_MINUTES));
+        $dataAgeMinutes = $lastSeen ? (int) $lastSeen->diffInMinutes(now()) : null;
 
         $operationalStatus = match ($machine->status) {
             'maintenance' => 'maintenance',
@@ -302,6 +366,7 @@ class MachineTelemetryService
             'fuel_remaining_percent' => null,
             'operating_hours' => $machine->operating_hours !== null ? (float) $machine->operating_hours : null,
             'idle_hours' => null,
+            'working_hours' => null,
             'load_count' => null,
             'odometer' => $machine->odometer !== null ? (float) $machine->odometer : null,
             'def_percent' => null,
@@ -309,21 +374,38 @@ class MachineTelemetryService
             'latitude' => $machine->last_location_latitude !== null ? (float) $machine->last_location_latitude : null,
             'longitude' => $machine->last_location_longitude !== null ? (float) $machine->last_location_longitude : null,
             'speed_kmh' => null,
+            'heading_degrees' => null,
+            'engine_rpm' => null,
+            'coolant_temperature' => null,
+            'engine_temperature' => null,
+            'battery_voltage' => null,
             'last_seen_at' => $lastSeen?->toIso8601String(),
             'last_seen_human' => $lastSeen?->diffForHumans(),
+            'data_age_minutes' => $dataAgeMinutes,
+            'is_stale' => $isStale,
             'equipment_key' => null,
             'telemetry_source' => 'machine',
         ];
     }
 
-    // ── Status derivation ────────────────────────────────────────────────────
+    // ── Status derivation ────────────────────────────────────────────
 
+    /**
+     * Determine the operational status of a machine from real-time telemetry.
+     *
+     * Decision tree:
+     *   1. Offline    — no telemetry for > OFFLINE_MINUTES
+     *   2. Parked     — engine not running (ignition off)
+     *   3. Travelling — engine running + speed > SPEED_THRESHOLD
+     *   4. Working    — engine running + speed ≤ threshold + payload > PAYLOAD_THRESHOLD (under load)
+     *   5. Idling     — engine running + speed ≤ threshold + no significant payload
+     *   6. Working    — engine running + no speed data (fallback: assume working)
+     */
     private function deriveStatus(
         bool $engineRunning,
         bool $isOffline,
         ?float $speedKmh,
-        ?float $operatingHours,
-        ?float $idleHours,
+        ?float $payloadKg = null,
     ): string {
         if ($isOffline) {
             return 'offline';
@@ -333,15 +415,23 @@ class MachineTelemetryService
             return 'parked';
         }
 
-        // Engine is running — determine sub-state from latest GPS speed.
-        // NOTE: We intentionally do NOT use the cumulative idle-hours ratio here.
-        // The ISO15143-3 API only provides lifetime-cumulative idle hours, which
-        // creates a false positive: a machine that has historically idled a lot
-        // will always appear as "Idling" even when actively working.
-        // Speed from the 5-minute Locations feed is a far more reliable real-time
-        // indicator of current operational state.
+        // Engine is running — use speed to distinguish Travelling vs stationary.
         if ($speedKmh !== null && $speedKmh > self::SPEED_THRESHOLD) {
             return 'travelling';
+        }
+
+        // Machine is stationary with engine running.
+        if ($speedKmh !== null) {
+            if ($payloadKg !== null && $payloadKg > self::PAYLOAD_THRESHOLD_KG) {
+                return 'working'; // carrying a load
+            }
+
+            return 'idling'; // engine on, stationary, no load
+        }
+
+        // No speed data — use payload as proxy; default to 'working' to avoid false idle alarms.
+        if ($payloadKg !== null && $payloadKg > self::PAYLOAD_THRESHOLD_KG) {
+            return 'working';
         }
 
         return 'working';
@@ -355,11 +445,13 @@ class MachineTelemetryService
         return match ($status) {
             'working' => ['Working',     'emerald'],
             'travelling' => ['Travelling',  'cyan'],
-            'idling' => ['Idling',       'amber'],
-            'parked' => ['Parked',       'slate'],
-            'offline' => ['Offline',      'red'],
-            'maintenance' => ['Maintenance',  'orange'],
-            default => ['Unknown',      'gray'],
+            'loading' => ['Loading',     'blue'],
+            'dumping' => ['Dumping',     'purple'],
+            'idling' => ['Idling',      'amber'],
+            'parked' => ['Parked',      'slate'],
+            'offline' => ['Offline',     'red'],
+            'maintenance' => ['Maintenance', 'orange'],
+            default => ['Unknown',     'gray'],
         };
     }
 
@@ -374,6 +466,7 @@ class MachineTelemetryService
             'fuel_remaining_percent' => null,
             'operating_hours' => null,
             'idle_hours' => null,
+            'working_hours' => null,
             'load_count' => null,
             'odometer' => null,
             'def_percent' => null,
@@ -381,8 +474,15 @@ class MachineTelemetryService
             'latitude' => null,
             'longitude' => null,
             'speed_kmh' => null,
+            'heading_degrees' => null,
+            'engine_rpm' => null,
+            'coolant_temperature' => null,
+            'engine_temperature' => null,
+            'battery_voltage' => null,
             'last_seen_at' => null,
             'last_seen_human' => null,
+            'data_age_minutes' => null,
+            'is_stale' => false,
             'equipment_key' => null,
             'telemetry_source' => 'none',
         ];
