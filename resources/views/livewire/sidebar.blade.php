@@ -12,13 +12,11 @@
     <!-- Logo Section -->
     <div class="p-6 border-b border-gray-700">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-2 mb-3" :class="{ 'justify-center': !sidebarOpen }">
-            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                </svg>
+            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="w-full h-full object-contain">
             </div>
             <div class="flex flex-col overflow-hidden transition-all duration-300" x-show="sidebarOpen">
-                <span class="font-bold text-white text-lg whitespace-nowrap">Mines</span>
+                <span class="font-bold text-white text-lg whitespace-nowrap">Dot.Mines</span>
                 <span class="text-xs text-gray-400 whitespace-nowrap">Fleet Manager</span>
             </div>
         </a>

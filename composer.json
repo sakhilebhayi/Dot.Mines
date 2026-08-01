@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "dot-ecosystem/mines",
     "type": "project",
-    "description": "Mines - Mining Fleet Management Platform",
+    "description": "Dot.Mines - Mining Fleet Management Platform",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
