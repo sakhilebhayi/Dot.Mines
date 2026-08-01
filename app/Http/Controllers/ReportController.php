@@ -14,16 +14,21 @@ class ReportController extends Controller
     {
         $user = Auth::user();
 
-        if ($user && isset($user->currentTeam->id)) {
-            $teamId = $user->currentTeam->id;
-            $mineAreas = MineArea::where('team_id', $teamId)->get();
-            $geofences = Geofence::whereIn('mine_area_id', $mineAreas->pluck('id'))->get();
-            $machines = Machine::where('team_id', $teamId)->get();
-        } else {
-            $mineAreas = MineArea::all();
-            $geofences = Geofence::all();
-            $machines = Machine::all();
+        // No unscoped fallback here: EnsureTeamContext only aborts when a
+        // team_id is present but invalid/unauthorized. A user who belongs to
+        // no team at all (e.g. removed from their last team) passes that
+        // middleware with no team set, so `currentTeam` can genuinely be
+        // null when this action runs. Falling through to `Model::all()` in
+        // that case would leak every team's mine areas/geofences/machines,
+        // so we abort instead of guessing a scope.
+        if (!$user || !isset($user->currentTeam->id)) {
+            abort(403, 'No active team selected.');
         }
+
+        $teamId = $user->currentTeam->id;
+        $mineAreas = MineArea::where('team_id', $teamId)->get();
+        $geofences = Geofence::whereIn('mine_area_id', $mineAreas->pluck('id'))->get();
+        $machines = Machine::where('team_id', $teamId)->get();
 
         return view('reports.view-2', compact('mineAreas','geofences','machines'));
     }
