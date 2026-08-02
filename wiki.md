@@ -1,6 +1,6 @@
 ---
 title: "Dot.Mines — Platform Wiki"
-version: 0.1.0
+version: 0.2.0
 status: draft
 owners: [Mining Platform Lead]
 platform-id: dot-mines
@@ -120,4 +120,5 @@ Dot.Brain's ecosystem registry refers to this platform as `dot-mines` and its kn
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1.0 | 2026-08-01 | Mining Platform Lead | Initial wiki: derived from the actual `mines` Laravel codebase (models, events, README), cross-referenced against Dot.Brain's platforms/dot-mines.md for ecosystem framing and gap analysis |
+| 0.2.0 | 2026-08-02 | Sakhile Bhayi | Redesigned `resources/views/welcome.blade.php`'s marketing surface: the placeholder gradient-and-SVG-icon brand mark in the nav and footer is now the real `public/images/logo.png` lockup; the hero and CTA sections' abstract gradient backgrounds are now real, licensed Unsplash photography (excavators at a mining site, and open-pit haul trucks — both hotlinked via Unsplash's CDN, photographers credited inline as HTML comments) layered under a dark gradient overlay tuned for WCAG-adequate text contrast against the photo. Verified visually via a standalone Tailwind-CDN render of the same markup before committing, not just reviewed as code. |
 | 0.1.1 | 2026-08-01 | Platform loop pass | Real Dot.Mines logo/favicons wired into the auth-card mark, sidebar brand mark, and all `<head>` favicon links; in-app "Mines" text branding aligned to "Dot.Mines" (titles, APP_NAME, composer.json); removed an unreferenced dead Jetstream default marketing view (`resources/views/components/welcome.blade.php`); added a missing `tests/TestCase.php` (existing PHPUnit tests referenced it but it did not exist in the repo) plus new Feature tests for the dashboard, the fleet list, and `MineArea` cross-team access; flagged (not fixed) that `MineArea` is the one team-owned model without the `HasTeamFilters` global scope other models use — the live `/mine-areas/{id}` route is still protected by an explicit `abort(403)` check in `MineAreaDetail::mount()`, but `ReportController::view2()` has an unscoped `MineArea::all()` fallback branch that is unreachable under normal `ensure_team` middleware flow and should be tightened defensively |

@@ -56,17 +56,10 @@
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-3 group">
                         <div class="relative">
-                            <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-amber-500/20">
-                                <svg class="w-7 h-7 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                            </div>
+                            <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="h-14 w-auto transform group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                         </div>
-                        <div>
-                            <h1 class="text-2xl font-bold bg-gradient-to-r from-white to-amber-200 bg-clip-text text-transparent">Mines</h1>
-                            <p class="text-xs text-amber-400 font-medium">Mining Intelligence</p>
-                        </div>
+                        <p class="hidden sm:block text-xs text-amber-400 font-medium border-l border-gray-700 pl-3">Mining Intelligence</p>
                     </a>
 
                     <!-- Desktop Navigation -->
@@ -134,10 +127,12 @@
 
         <!-- Hero Section -->
         <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-            <!-- Animated Background -->
-            <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 gradient-animate"></div>
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40"></div>
-            
+            <!-- Photographic Background: real excavators-at-mine photo by Dominik Vanyi (@dominik_photography), unsplash.com/photos/Mk2ls9UBO2E -->
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1523848309072-c199db53f137?q=80&w=2400&auto=format&fit=crop');"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/85 to-gray-900/60"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/40 to-transparent"></div>
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+
             <!-- Floating Elements -->
             <div class="absolute top-20 left-10 w-64 h-64 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 float-animation"></div>
             <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 float-animation" style="animation-delay: 2s;"></div>
@@ -545,9 +540,12 @@
 
         <!-- CTA Section -->
         <section class="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+            <!-- Photographic Background: real open-pit quarry photo by MiningWatch Portugal (@miningwatch_portugal), unsplash.com/photos/YG0qc-e6hgg -->
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1709489662983-3674d790b224?q=80&w=2400&auto=format&fit=crop');"></div>
+            <div class="absolute inset-0 bg-gray-900/90"></div>
             <div class="absolute inset-0 bg-gradient-to-br from-amber-600/20 via-amber-500/10 to-transparent"></div>
             <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
-            
+
             <div class="relative z-10 max-w-4xl mx-auto text-center fade-in-up">
                 <h2 class="text-4xl lg:text-5xl font-bold text-white mb-6">
                     Ready to Transform Your<br>
@@ -580,14 +578,7 @@
                 <div class="grid md:grid-cols-4 gap-8 mb-8">
                     <!-- Brand -->
                     <div class="col-span-1">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                            </div>
-                            <span class="text-xl font-bold text-white">Mines</span>
-                        </div>
+                        <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="h-12 w-auto mb-4">
                         <p class="text-gray-400 text-sm">
                             Advanced fleet management for modern mining operations.
                         </p>
