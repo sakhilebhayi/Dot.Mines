@@ -1,18 +1,8 @@
 <div align="center">
 
-<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-  <defs>
-    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FBBF24"/>
-      <stop offset="100%" style="stop-color:#D97706"/>
-    </linearGradient>
-  </defs>
-  <rect width="80" height="80" rx="18" fill="url(#amberGrad)"/>
-  <path stroke="#111827" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5" fill="none"
-        d="M46 36V22L28 44h14v14l18-22H46z"/>
-</svg>
+<img src="public/images/logo.png" alt="Dot.Mines" width="200" />
 
-# Mines
+# Dot.Mines
 
 ### Mining Intelligence Platform
 
