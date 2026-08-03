@@ -28,7 +28,7 @@
                                 </span>
                             </button>
                             <!-- Action Buttons moved here -->
-                            <a href="{{ route('fleet.route-planning') }}" class="px-4 py-2 min-w-[9rem] text-sm bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-lg transition-all font-medium flex items-center gap-2">
+                            <a href="{{ route('fleet.route-planning') }}" class="px-4 py-2 min-w-[9rem] text-sm bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors font-medium flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>

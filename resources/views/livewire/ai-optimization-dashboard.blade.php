@@ -3,15 +3,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <div class="animate-slide-in-left">
-                <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    🤖 AI Optimization Dashboard
-                </h1>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">AI Optimization Dashboard</h1>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Intelligent recommendations and insights powered by AI
                 </p>
             </div>
-            <div class="flex gap-2 animate-slide-in-right">
+            <div class="flex gap-2">
                 <a href="{{ route('ai-analytics') }}" 
                     class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition font-medium flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +18,7 @@
                     Analytics
                 </a>
                 <button wire:click="runAnalysis" wire:loading.attr="disabled" 
-                    class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2">
                     <span wire:loading.remove class="flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -53,7 +51,7 @@
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Recommendations -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all duration-200 hover:shadow-xl animate-scale-in" style="animation-delay: 0.1s">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 animate-scale-in" style="animation-delay: 0.1s">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Recommendations</h3>
                     <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -65,7 +63,7 @@
             </div>
 
             <!-- Pending Actions -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all duration-200 hover:shadow-xl animate-scale-in" style="animation-delay: 0.2s">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 animate-scale-in" style="animation-delay: 0.2s">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Actions</h3>
                     <div class="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
@@ -77,7 +75,7 @@
             </div>
 
             <!-- Implemented -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all duration-200 hover:shadow-xl animate-scale-in" style="animation-delay: 0.3s">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 animate-scale-in" style="animation-delay: 0.3s">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Implemented</h3>
                     <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -89,7 +87,7 @@
             </div>
 
             <!-- Total Savings -->
-            <div class="bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-200 hover:shadow-xl animate-scale-in" style="animation-delay: 0.4s">
+            <div class="bg-purple-600 rounded-lg shadow p-6 text-white">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-sm font-medium opacity-90">Potential Savings</h3>
                     <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">

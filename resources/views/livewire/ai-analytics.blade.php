@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">📊 AI Analytics & Insights</h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Analytics &amp; Insights</h1>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Comprehensive analytics and performance metrics for AI optimization
                 </p>
@@ -21,9 +21,9 @@
         <!-- Key Metrics Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Recommendations -->
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+            <div class="bg-blue-600 rounded-lg shadow p-6 text-white">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <div class="p-3 bg-white/10 rounded-lg">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
@@ -35,9 +35,9 @@
             </div>
 
             <!-- Total Savings -->
-            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+            <div class="bg-green-600 rounded-lg shadow p-6 text-white">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <div class="p-3 bg-white/10 rounded-lg">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -49,9 +49,9 @@
             </div>
 
             <!-- Implementation Rate -->
-            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+            <div class="bg-purple-600 rounded-lg shadow p-6 text-white">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <div class="p-3 bg-white/10 rounded-lg">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -63,9 +63,9 @@
             </div>
 
             <!-- Average Accuracy -->
-            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+            <div class="bg-orange-600 rounded-lg shadow p-6 text-white">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <div class="p-3 bg-white/10 rounded-lg">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
@@ -81,7 +81,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Category Breakdown Chart -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 Recommendations by Category</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recommendations by Category</h3>
                 <div class="space-y-3">
                     @foreach($categoryBreakdown as $item)
                     <div>
@@ -105,7 +105,7 @@
 
             <!-- Priority Distribution -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">⚡ Priority Distribution</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Priority Distribution</h3>
                 <div class="grid grid-cols-2 gap-4">
                     @foreach($priorityDistribution as $item)
                     <div class="text-center p-4 rounded-lg @if($item->priority === 'critical') bg-red-100 dark:bg-red-900/20 @elseif($item->priority === 'high') bg-orange-100 dark:bg-orange-900/20 @elseif($item->priority === 'medium') bg-yellow-100 dark:bg-yellow-900/20 @else bg-green-100 dark:bg-green-900/20 @endif">

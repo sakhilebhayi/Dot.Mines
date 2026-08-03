@@ -7,36 +7,36 @@
     class="rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-8"
 >
     {{-- ── Header ── --}}
-    <div class="px-5 py-4 flex items-center justify-between bg-gradient-to-r from-amber-500 to-yellow-600">
+    <div class="px-5 py-4 flex items-center justify-between bg-gray-800 border-b border-gray-700">
         <div class="flex items-center gap-3">
-            <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 bg-amber-500/10 rounded-lg">
+                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                 </svg>
             </div>
             <div>
                 <h2 class="text-base font-bold text-white leading-tight">Haul Dispatch Tracker</h2>
-                <p class="text-xs text-yellow-100">Real-time haul truck dispatch monitoring</p>
+                <p class="text-xs text-gray-400">Real-time haul truck dispatch monitoring</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
             {{-- Live indicator --}}
-            <span class="hidden sm:flex items-center gap-1.5 text-xs text-yellow-100 bg-white/10 px-2.5 py-1 rounded-full">
-                <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                Live · 5 s
+            <span class="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 bg-gray-700 px-2.5 py-1 rounded-md">
+                <span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+                Live &middot; 5s
             </span>
 
             {{-- Status filter tabs --}}
-            <div class="flex items-center gap-0.5 bg-black/20 rounded-lg p-0.5">
+            <div class="flex items-center gap-0.5 bg-gray-700 rounded-lg p-0.5">
                 @foreach(['all', 'loading', 'hauling', 'dumping', 'returning'] as $filterStatus)
                     <button
                         wire:click="filterByStatus('{{ $filterStatus }}')"
-                        class="px-2.5 py-1 text-xs rounded-md font-medium transition-all
+                        class="px-2.5 py-1 text-xs rounded-md font-medium transition-colors
                             {{ $statusFilter === $filterStatus
-                                ? 'bg-white text-amber-700 shadow'
-                                : 'text-white hover:bg-white/20' }}"
+                                ? 'bg-amber-500 text-gray-900 font-semibold'
+                                : 'text-gray-300 hover:bg-gray-600' }}"
                     >
                         {{ ucfirst($filterStatus) }}
                     </button>

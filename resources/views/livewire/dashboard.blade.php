@@ -54,7 +54,7 @@
     <!-- Statistics Cards -->
     <div class="flex flex-col gap-6 mb-8 md:grid md:grid-cols-2 lg:grid-cols-4 md:flex-none overflow-x-auto pb-2">
         <!-- Total Machines Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in min-w-[260px] md:min-w-0">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 animate-scale-in min-w-[260px] md:min-w-0">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-3 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
                     <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +75,7 @@
         </div>
 
         <!-- Active Machines Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in min-w-[260px] md:min-w-0" style="animation-delay: 0.2s">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 animate-scale-in min-w-[260px] md:min-w-0" style="animation-delay: 0.2s">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-3 bg-green-100 dark:bg-green-500/20 rounded-lg">
                     <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,7 +98,7 @@
         </div>
 
         <!-- Active Alerts Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in min-w-[260px] md:min-w-0" style="animation-delay: 0.3s">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 animate-scale-in min-w-[260px] md:min-w-0" style="animation-delay: 0.3s">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-3 bg-red-100 dark:bg-red-500/20 rounded-lg">
                     <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,9 +121,9 @@
         </div>
 
         <!-- Geofences Card -->
-        <div class="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg shadow-lg p-6 text-white hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in min-w-[260px] md:min-w-0" style="animation-delay: 0.4s">
+        <div class="bg-amber-500 rounded-lg shadow p-6 text-white hover:shadow-xl transition-all duration-200 min-w-[260px] md:min-w-0">
             <div class="flex items-center justify-between mb-4">
-                <div class="p-3 bg-white/20 backdrop-blur-sm rounded-lg">
+                <div class="p-3 bg-white/10 rounded-lg">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6 3m-6-3v-13m6 3l5.553-2.776A1 1 0 0121 5.618v10.764a1 1 0 01-1.447.894L15 20m0-13v13"></path>
                     </svg>
@@ -331,7 +331,7 @@
                 </h3>
                 <div class="space-y-2">
                     <a href="{{ route('fleet') }}" 
-                        class="block w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg transition-all duration-200 text-center font-medium shadow hover:shadow-lg transform hover:scale-105">
+                        class="block w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors text-center font-medium">
                         <span class="flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -340,7 +340,7 @@
                         </span>
                     </a>
                     <a href="{{ route('map') }}" 
-                        class="block w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg transition-all duration-200 text-center font-medium shadow hover:shadow-lg transform hover:scale-105">
+                        class="block w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors text-center font-medium">
                         <span class="flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6 3m-6-3v-13m6 3l5.553-2.776A1 1 0 0121 5.618v10.764a1 1 0 01-1.447.894L15 20m0-13v13"/>
@@ -349,7 +349,7 @@
                         </span>
                     </a>
                     <a href="{{ route('ai-optimization') }}" 
-                        class="block w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm rounded-lg transition-all duration-200 text-center font-medium shadow hover:shadow-lg transform hover:scale-105">
+                        class="block w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors text-center font-medium">
                         <span class="flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>

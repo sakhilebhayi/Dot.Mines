@@ -49,9 +49,9 @@
         <!-- Production Summary Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
             <!-- Total Loads -->
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow p-3 text-white">
+            <div class="bg-blue-600 rounded-lg shadow p-3 text-white">
                 <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
+                    <div class="p-1.5 bg-white/10 rounded">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                         </svg>
@@ -62,9 +62,9 @@
             </div>
 
             <!-- Total Cycles -->
-            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow p-3 text-white">
+            <div class="bg-purple-600 rounded-lg shadow p-3 text-white">
                 <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
+                    <div class="p-1.5 bg-white/10 rounded">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
@@ -75,9 +75,9 @@
             </div>
 
             <!-- Total Tonnage -->
-            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow p-3 text-white">
+            <div class="bg-green-600 rounded-lg shadow p-3 text-white">
                 <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
+                    <div class="p-1.5 bg-white/10 rounded">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
                         </svg>
@@ -88,9 +88,9 @@
             </div>
 
             <!-- Total BCM -->
-            <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow p-3 text-white">
+            <div class="bg-amber-600 rounded-lg shadow p-3 text-white">
                 <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
+                    <div class="p-1.5 bg-white/10 rounded">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                         </svg>
@@ -101,9 +101,9 @@
             </div>
 
             <!-- Active Areas -->
-            <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow p-3 text-white">
+            <div class="bg-indigo-600 rounded-lg shadow p-3 text-white">
                 <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
+                    <div class="p-1.5 bg-white/10 rounded">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6 3m-6-3v-13m6 3l5.553-2.776A1 1 0 0121 5.618v10.764a1 1 0 01-1.447.894L15 20m0-13v13"></path>
                         </svg>
@@ -116,7 +116,7 @@
 
         {{-- ── OEM Telemetry Production KPIs (when data exists) ──────────────────── --}}
         @if ($bellKpiSummary['has_data'] ?? false)
-        <div class="bg-gradient-to-r from-cyan-700 to-blue-700 rounded-xl p-4 mb-6 text-white shadow-lg">
+        <div class="bg-gray-800 rounded-xl p-4 mb-6 text-white shadow border border-gray-700">
             <div class="flex items-center gap-2 mb-3">
                 <svg class="w-5 h-5 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>

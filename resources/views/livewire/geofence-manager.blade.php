@@ -35,14 +35,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
-            <h2 class="text-2xl font-bold text-white">AI Mine Area Detection</h2>
-            <span class="badge badge-primary">AI-Powered</span>
+            <h2 class="text-2xl font-bold text-white">Mine Area Detection</h2>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- AI Area Detection Recommendations -->
             @if($aiRecommendations->count() > 0)
-            <div class="card bg-gradient-to-br from-purple-900 to-pink-900 text-white border border-purple-700">
+            <div class="card bg-gray-800 text-white border border-gray-700">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

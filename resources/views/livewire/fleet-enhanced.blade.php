@@ -1,26 +1,23 @@
 <div class="animate-fade-in">
-    <!-- Header Section with gradient -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 mb-6 animate-slide-down">
+    <!-- Page Header -->
+    <div class="mb-6 pb-5 border-b border-gray-200 dark:border-gray-700">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-white flex items-center gap-2">
-                    <span class="text-3xl">🚜</span>
-                    Fleet Management
-                </h1>
-                <p class="text-blue-100 text-sm mt-1">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Fleet Management</h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
                     Manage and monitor your mining fleet equipment
                 </p>
             </div>
             <div class="flex gap-2 flex-wrap">
                 <a href="{{ route('fleet.route-planning') }}" 
-                    class="px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium hover:scale-105 transform">
+                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
                     <span>Route Planning</span>
                 </a>
                 <a href="{{ route('fleet.replay') }}" 
-                    class="px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium hover:scale-105 transform">
+                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -28,7 +25,7 @@
                     <span>Movement Replay</span>
                 </a>
                 <button wire:click="openCreateModal" 
-                    class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium shadow-lg hover:shadow-xl hover:scale-105 transform">
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -40,7 +37,7 @@
 
     <!-- Status Statistics with animation -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in" style="animation-delay: 0.1s">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300" style="animation-delay: 0.1s">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-3 bg-green-100 dark:bg-green-500/20 rounded-lg">
                     <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -58,7 +55,7 @@
             </p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in" style="animation-delay: 0.2s">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300" style="animation-delay: 0.2s">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-3 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
                     <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -75,7 +72,7 @@
             </p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in" style="animation-delay: 0.3s">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300" style="animation-delay: 0.3s">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-3 bg-red-100 dark:bg-red-500/20 rounded-lg">
                     <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">

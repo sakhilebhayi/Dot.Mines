@@ -112,22 +112,19 @@
 
             {{-- ============== ONBOARDING ============== --}}
             @if($activeSection === 'onboarding')
-                <div class="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl p-6 mb-8 border border-primary/30">
+                <div class="rounded-xl p-6 mb-8 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <div class="flex items-start gap-4">
-                        <div class="text-5xl">🤖</div>
                         <div>
-                            <h1 class="text-2xl font-bold mb-1">Hi there! I'm your {{ config('app.name') }} Guide 👋</h1>
+                            <h1 class="text-2xl font-bold mb-1">{{ config('app.name') }} Setup Guide</h1>
                             <p class="text-base-content/70 text-base leading-relaxed">
-                                Welcome to <strong>{{ config('app.name') }}</strong> — the smart platform for managing your mining fleet!
-                                I'll walk you through everything, step by step. Don't worry — it's super easy.
-                                By the end of this guide, your platform will be fully set up and running! 🎉
+                                Welcome to <strong>{{ config('app.name') }}</strong>. This guide will walk you through the initial platform configuration, step by step.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <h2 class="text-xl font-bold mb-4">🗒️ Your Setup Checklist</h2>
-                <p class="text-base-content/60 mb-5">Tick each item as you complete it. Click "Show me" for a full step-by-step guide on each one!</p>
+                <h2 class="text-xl font-bold mb-4">Setup Checklist</h2>
+                <p class="text-base-content/60 mb-5">Complete each step to get your platform fully configured. Click "Show me" for detailed instructions.</p>
 
                 <div class="space-y-3 mb-10">
                     @php

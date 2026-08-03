@@ -11,28 +11,25 @@
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
     @else
         <!-- Chart Visualization Placeholder removed -->
-    <!-- Header Section with gradient -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 mb-6 animate-slide-down">
+    <!-- Page Header -->
+    <div class="mb-6 pb-5 border-b border-gray-200 dark:border-gray-700">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-white flex items-center gap-2">
-                    <span class="text-3xl">🚜</span>
-                    Fleet Management
-                </h1>
-                <p class="text-blue-100 text-sm mt-1">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Fleet Management</h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
                     Manage and monitor your mining fleet equipment
                 </p>
             </div>
             <div class="flex gap-2 flex-wrap">
                 <a href="{{ route('fleet.route-planning') }}" 
-                    class="px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium hover:scale-105 transform">
+                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
                     <span>Route Planning</span>
                 </a>
                 <a href="{{ route('fleet.replay') }}" 
-                    class="px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium hover:scale-105 transform">
+                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -42,7 +39,7 @@
                 @php $fleetFull = $fleetUsage['max'] && $fleetUsage['current'] >= $fleetUsage['max']; @endphp
                 <button wire:click="openCreateModal"
                     @if($fleetFull) disabled title="Fleet slot limit reached — upgrade your plan to add more machines" @endif
-                    class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium shadow-lg hover:shadow-xl hover:scale-105 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -57,20 +54,20 @@
                 $pct = min(100, round($fleetUsage['current'] / $fleetUsage['max'] * 100));
                 $barColor = $pct >= 100 ? 'bg-red-500' : ($pct >= 80 ? 'bg-amber-400' : 'bg-green-400');
             @endphp
-            <div class="mt-4 pt-4 border-t border-white/20">
-                <div class="flex items-center justify-between text-xs text-blue-100 mb-1">
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
                     <span>Fleet Slots Used</span>
                     <span class="{{ $pct >= 100 ? 'text-red-300 font-bold' : '' }}">
                         {{ $fleetUsage['current'] }} / {{ $fleetUsage['max'] }} machines
                         @if ($pct >= 100) — <span class="font-bold">Limit reached</span> @endif
                     </span>
                 </div>
-                <div class="w-full bg-white/20 rounded-full h-2">
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div class="{{ $barColor }} h-2 rounded-full transition-all duration-500" style="width: {{ $pct }}%"></div>
                 </div>
             </div>
         @endif
-    </div><!-- end header gradient -->
+    </div><!-- end header -->
 
     {{-- Upgrade prompt: shown when fleet slot limit is reached --}}
     @if ($fleetFull)
@@ -224,14 +221,13 @@
             <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
             </svg>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">AI Fleet Optimization</h2>
-            <span class="badge badge-primary">AI-Powered</span>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Fleet Optimization Recommendations</h2>
         </div>
 
         <!-- AI Fleet Recommendations - Full Width -->
         @if($aiRecommendations->count() > 0)
         <div class="mb-6">
-            <div class="bg-gradient-to-br from-blue-900 to-cyan-900 rounded-lg shadow-lg p-6 border border-blue-700">
+            <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
                 <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -323,7 +319,7 @@
 
             <!-- AI Fleet Insights - Full Width -->
             @if($aiInsights->count() > 0)
-            <div class="bg-gradient-to-br from-indigo-900 to-purple-900 rounded-lg shadow-lg p-6 border border-indigo-700">
+            <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
                 <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
