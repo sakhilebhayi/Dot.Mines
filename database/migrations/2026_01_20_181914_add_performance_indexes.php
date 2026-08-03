@@ -18,11 +18,12 @@ return new class extends Migration
             return;
         }
 
-        // Helper function to check if index exists for SQLite
+        // Helper function to check if an index exists, portable across DB drivers
+        // (this used to run a raw sqlite_master query, which only worked on SQLite
+        // and threw "relation sqlite_master does not exist" on PostgreSQL/MySQL —
+        // Schema::hasIndex() is Laravel's driver-agnostic equivalent).
         $indexExists = function($table, $indexName) {
-            $db = Schema::getConnection();
-            $result = $db->select("SELECT name FROM sqlite_master WHERE type='index' AND name=?", [$indexName]);
-            return count($result) > 0;
+            return Schema::hasIndex($table, $indexName);
         };
 
         // Helper function to check if table exists
@@ -68,7 +69,9 @@ return new class extends Migration
             }
             if (!$indexExists('alerts', 'idx_alerts_severity')) {
                 Schema::table('alerts', function (Blueprint $table) {
-                    $table->index('alert_level', 'idx_alerts_severity');
+                    // Real bug: this referenced a nonexistent 'alert_level' column.
+                    // create_alerts_table's actual severity column is 'priority'.
+                    $table->index('priority', 'idx_alerts_severity');
                 });
             }
             if (!$indexExists('alerts', 'idx_alerts_status')) {
@@ -130,7 +133,9 @@ return new class extends Migration
             }
             if (!$indexExists('geofences', 'idx_geofences_type')) {
                 Schema::table('geofences', function (Blueprint $table) {
-                    $table->index('fence_type', 'idx_geofences_type');
+                    // Real bug: this referenced a nonexistent 'fence_type' column.
+                    // create_geofences_table's actual type column is just 'type'.
+                    $table->index('type', 'idx_geofences_type');
                 });
             }
         }
@@ -158,7 +163,9 @@ return new class extends Migration
         if ($tableExists('reports')) {
             if (!$indexExists('reports', 'idx_reports_team_type')) {
                 Schema::table('reports', function (Blueprint $table) {
-                    $table->index(['team_id', 'report_type'], 'idx_reports_team_type');
+                    // Real bug: this referenced a nonexistent 'report_type' column.
+                    // create_reports_table's actual type column is just 'type'.
+                    $table->index(['team_id', 'type'], 'idx_reports_team_type');
                 });
             }
             if (!$indexExists('reports', 'idx_reports_created')) {
@@ -175,11 +182,10 @@ return new class extends Migration
                     $table->index(['team_id', 'status'], 'idx_mine_areas_team_status');
                 });
             }
-            if (!$indexExists('mine_areas', 'idx_mine_areas_type')) {
-                Schema::table('mine_areas', function (Blueprint $table) {
-                    $table->index('area_type', 'idx_mine_areas_type');
-                });
-            }
+            // Real bug: this used to index a nonexistent 'area_type' column —
+            // create_mine_areas_table has no such column (only 'status'), and no
+            // other migration ever adds one. Removed rather than inventing a
+            // column/feature that was never actually built.
         }
 
         // Mine Plans table indexes
@@ -272,7 +278,6 @@ return new class extends Migration
         });
 
         Schema::table('mine_areas', function (Blueprint $table) {
-            $table->dropIndex('idx_mine_areas_type');
             $table->dropIndex('idx_mine_areas_team_status');
         });
 

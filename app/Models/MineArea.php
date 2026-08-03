@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,7 +40,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class MineArea extends Model
 {
-    use SoftDeletes, HasTeamFilters;
+    use SoftDeletes;
 
     protected $fillable = [
         'team_id',
