@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Machine;
 use App\Models\Alert;
 use App\Models\Geofence;
+use App\Models\Team;
 use App\Services\QueryCacheService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
@@ -22,13 +23,42 @@ class Dashboard extends Component
 
     public function mount(): void
     {
+        // EnsureTeamContext (routes/web.php's `ensure_team` middleware) only
+        // sets current_team_id when the user belongs to at least one team —
+        // a user removed from their last team reaches this component with
+        // currentTeam genuinely null (see ReportController::view2() for the
+        // same, already-documented case). Send them to team creation instead
+        // of crashing on a null dereference below.
+        if (! $this->resolveCurrentTeam()) {
+            $this->redirect(route('teams.create'), navigate: true);
+
+            return;
+        }
+
         $this->loadDashboardData();
+    }
+
+    /**
+     * Auth::user()->currentTeam can be null (see mount()); centralising the
+     * check here keeps every caller in this component consistent instead of
+     * re-deriving the same null-guard in each method.
+     */
+    private function resolveCurrentTeam(): ?Team
+    {
+        return Auth::user()?->currentTeam;
     }
 
     public function loadDashboardData(): void
     {
         $this->isLoading = true;
-        $team = Auth::user()->currentTeam;
+        $team = $this->resolveCurrentTeam();
+
+        if (! $team) {
+            $this->isLoading = false;
+            $this->redirect(route('teams.create'), navigate: true);
+
+            return;
+        }
 
         // Use cache service for dashboard statistics
         $stats = QueryCacheService::dashboardStats($team->id, function () use ($team) {
@@ -100,7 +130,12 @@ class Dashboard extends Component
 
     public function acknowledgeAlert(int $alertId): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = $this->resolveCurrentTeam();
+
+        if (! $team) {
+            abort(403, 'No active team selected.');
+        }
+
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
 
         $alert->update([

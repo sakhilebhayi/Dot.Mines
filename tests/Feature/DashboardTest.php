@@ -29,4 +29,20 @@ class DashboardTest extends TestCase
         $response->assertOk();
         $response->assertSee($team->name);
     }
+
+    /**
+     * Regression test: EnsureTeamContext lets a teamless user (e.g. removed
+     * from their last team) reach /dashboard with current_team_id null, so
+     * Auth::user()->currentTeam is genuinely null here. This used to crash
+     * with "Attempt to read property 'id' on null" in loadDashboardData();
+     * it must now redirect to team creation instead.
+     */
+    public function test_authenticated_user_with_no_team_is_redirected_to_team_creation()
+    {
+        $user = User::factory()->create(['current_team_id' => null]);
+
+        $response = $this->actingAs($user)->get('/dashboard');
+
+        $response->assertRedirect(route('teams.create'));
+    }
 }
