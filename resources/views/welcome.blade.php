@@ -74,9 +74,9 @@
             :class="scrolled ? 'bg-[#211a14]/95 backdrop-blur-md border-b border-[var(--line)]' : 'border-b border-transparent'"
             class="fixed top-0 left-0 right-0 z-50 transition-colors duration-300"
         >
-            <nav class="max-w-[1400px] mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+            <nav class="max-w-[1400px] mx-auto px-5 sm:px-8 py-3 flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2.5 press">
-                    <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="h-9 w-auto">
+                    <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="h-16 sm:h-20 w-auto">
                 </a>
 
                 <div class="hidden md:flex items-center gap-8 font-mono text-[13px] tracking-wide uppercase text-[var(--sand)]">
@@ -287,7 +287,7 @@
         <footer class="py-14 px-5 sm:px-8 border-t border-[var(--line)]">
             <div class="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
                 <a href="/" class="flex items-center gap-2.5">
-                    <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="h-7 w-auto opacity-90">
+                    <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="h-11 w-auto opacity-90">
                 </a>
                 <p class="font-mono text-xs tracking-wide text-[var(--sand)]">
                     &copy; {{ date('Y') }} Dot.Mines. Fleet operations software for mining.
