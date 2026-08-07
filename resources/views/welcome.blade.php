@@ -76,7 +76,7 @@
         >
             <nav class="max-w-[1400px] mx-auto px-5 sm:px-8 py-3 flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2.5 press">
-                    <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="h-16 sm:h-20 w-auto">
+                    <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="h-16 sm:h-20 w-auto">
                 </a>
 
                 <div class="hidden md:flex items-center gap-8 font-mono text-[13px] tracking-wide uppercase text-[var(--sand)]">
@@ -287,7 +287,7 @@
         <footer class="py-14 px-5 sm:px-8 border-t border-[var(--line)]">
             <div class="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
                 <a href="/" class="flex items-center gap-2.5">
-                    <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="h-11 w-auto opacity-90">
+                    <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="h-11 w-auto opacity-90">
                 </a>
                 <p class="font-mono text-xs tracking-wide text-[var(--sand)]">
                     &copy; {{ date('Y') }} Dot.Mines. Fleet operations software for mining.

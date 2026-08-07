@@ -13,7 +13,7 @@
     <div class="p-6 border-b border-gray-700">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-2 mb-3" :class="{ 'justify-center': !sidebarOpen }">
             <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <img src="{{ asset('images/logo.png') }}" alt="Dot.Mines" class="w-full h-full object-contain">
+                <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="w-full h-full object-contain">
             </div>
             <div class="flex flex-col overflow-hidden transition-all duration-300" x-show="sidebarOpen">
                 <span class="font-bold text-white text-lg whitespace-nowrap">Dot.Mines</span>
