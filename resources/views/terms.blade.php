@@ -5,7 +5,7 @@
         </div>
 
         <div class="w-full sm:max-w-2xl mt-8 p-6 sm:p-10 bg-[var(--ink-soft)] border border-[var(--line)] shadow-2xl overflow-hidden sm:rounded-xl prose prose-invert prose-neutral max-w-none prose-headings:font-display prose-headings:text-[var(--stone)] prose-p:text-[var(--sand)] prose-li:text-[var(--sand)] prose-strong:text-[var(--stone)] prose-a:text-[var(--gold)] hover:prose-a:text-[var(--gold-soft)]">
-            {{ $terms }}
+            {!! $terms !!}
         </div>
     </div>
 </x-guest-layout>

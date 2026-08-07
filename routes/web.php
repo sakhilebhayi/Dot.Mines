@@ -1,10 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Models\Machine;
-use App\Models\Geofence;
-use App\Models\Report;
+use App\Http\Controllers\MinePlanDownloadController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportDownloadController;
+use App\Http\Controllers\WebhookController;
+use App\Livewire\AIAnalytics;
+use App\Livewire\AIOptimizationDashboard;
+use App\Livewire\Alerts;
+use App\Livewire\BillingPortal;
+use App\Livewire\Documentation;
+use App\Livewire\FleetMovementReplay;
+use App\Livewire\FuelManagement;
+use App\Livewire\MaintenanceDashboard;
+use App\Livewire\MineAreaDetail;
+use App\Livewire\ProductionDashboard;
+use App\Livewire\RoutePlanning;
+use App\Models\Geofence;
+use App\Models\Machine;
+use App\Models\Report;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use Laravel\Jetstream\Jetstream;
+use Livewire\Mechanisms\HandleRequests\HandleRequests;
 
 // Include test routes for session/CSRF debugging (remove in production)
 if (config('app.debug')) {
@@ -14,6 +31,15 @@ if (config('app.debug')) {
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Cookie Policy — Jetstream's termsAndPrivacyPolicy feature covers terms.show/policy.show
+// natively. There's no Jetstream equivalent for a Cookie Policy, so this one is wired by hand,
+// following the exact same Markdown-source convention.
+Route::get('/cookies', function () {
+    return view('cookies', [
+        'cookies' => Str::markdown(file_get_contents(Jetstream::localizedMarkdownPath('cookies.md'))),
+    ]);
+})->name('cookies');
 
 Route::middleware([
     'auth:sanctum',
@@ -32,10 +58,10 @@ Route::middleware([
     })->name('fleet');
 
     // Specific fleet routes must come before parameterized routes
-    Route::get('/fleet/replay', App\Livewire\FleetMovementReplay::class)
+    Route::get('/fleet/replay', FleetMovementReplay::class)
         ->name('fleet.replay');
 
-    Route::get('/fleet/route-planning', App\Livewire\RoutePlanning::class)
+    Route::get('/fleet/route-planning', RoutePlanning::class)
         ->name('fleet.route-planning');
 
     // Parameterized route comes last
@@ -62,7 +88,7 @@ Route::middleware([
         return view('mine-areas.index');
     })->name('mine-areas');
 
-    Route::get('/mine-areas/{mineArea}', App\Livewire\MineAreaDetail::class)
+    Route::get('/mine-areas/{mineArea}', MineAreaDetail::class)
         ->name('mine-areas.show');
 
     // Reports
@@ -75,15 +101,15 @@ Route::middleware([
         return view('reports.generate');
     })->name('report-generator');
 
-        // Signed report download route (uses signed URLs created in emails)
-        Route::get('/reports/{report}/download', [\App\Http\Controllers\ReportDownloadController::class, 'download'])
-            ->middleware(['auth', 'throttle:downloads'])
-            ->name('reports.signed-download');
+    // Signed report download route (uses signed URLs created in emails)
+    Route::get('/reports/{report}/download', [ReportDownloadController::class, 'download'])
+        ->middleware(['auth', 'throttle:downloads'])
+        ->name('reports.signed-download');
 
-        // Signed mine plan download route (mirror reports signed-download)
-        Route::get('/mine-plans/{minePlan}/download', [\App\Http\Controllers\MinePlanDownloadController::class, '__invoke'])
-            ->middleware(['auth', 'throttle:downloads'])
-            ->name('mineplans.signed-download');
+    // Signed mine plan download route (mirror reports signed-download)
+    Route::get('/mine-plans/{minePlan}/download', [MinePlanDownloadController::class, '__invoke'])
+        ->middleware(['auth', 'throttle:downloads'])
+        ->name('mineplans.signed-download');
 
     Route::get('/reports/{report}', function (Report $report) {
         return view('reports.show', ['report' => $report]);
@@ -95,29 +121,29 @@ Route::middleware([
     Route::get('/reports/generate/simple', [ReportController::class, 'generate'])->name('reports.generate');
 
     // Alerts
-    Route::get('/alerts', App\Livewire\Alerts::class)
+    Route::get('/alerts', Alerts::class)
         ->name('alerts');
 
     // Production Dashboard
-    Route::get('/production', App\Livewire\ProductionDashboard::class)
+    Route::get('/production', ProductionDashboard::class)
         ->name('production');
 
     // Fuel Management
-    Route::get('/fuel', App\Livewire\FuelManagement::class)
+    Route::get('/fuel', FuelManagement::class)
         ->name('fuel');
 
     // Maintenance & Health
-    Route::get('/maintenance', App\Livewire\MaintenanceDashboard::class)
+    Route::get('/maintenance', MaintenanceDashboard::class)
         ->name('maintenance');
 
     // AI Optimization Center
-    Route::get('/ai-optimization', App\Livewire\AIOptimizationDashboard::class)
+    Route::get('/ai-optimization', AIOptimizationDashboard::class)
         ->name('ai-optimization');
-    Route::get('/ai-analytics', App\Livewire\AIAnalytics::class)
+    Route::get('/ai-analytics', AIAnalytics::class)
         ->name('ai-analytics');
 
     // Documentation
-    Route::get('/documentation', App\Livewire\Documentation::class)
+    Route::get('/documentation', Documentation::class)
         ->name('documentation');
 
     // Integrations
@@ -130,7 +156,7 @@ Route::middleware([
     })->name('integrations.show');
 
     // Billing & Subscriptions
-    Route::get('/billing', App\Livewire\BillingPortal::class)
+    Route::get('/billing', BillingPortal::class)
         ->name('billing.index');
 
     Route::get('/billing/success', function () {
@@ -148,7 +174,7 @@ Route::middleware([
 });
 
 // Stripe Webhooks (no auth required)
-Route::post('/webhooks/stripe', [App\Http\Controllers\WebhookController::class, 'handleStripe'])
+Route::post('/webhooks/stripe', [WebhookController::class, 'handleStripe'])
     ->name('webhooks.stripe');
 
 // Public marketing/outer pages
@@ -166,7 +192,6 @@ Route::prefix('core-features')->group(function () {
 // Ensure Livewire update route exists (helps when routes are cached or Livewire
 // couldn't register its default route). This route name ends with
 // "livewire.update" so Livewire will detect it as the update endpoint.
-Route::post('/livewire/update', [\Livewire\Mechanisms\HandleRequests\HandleRequests::class, 'handleUpdate'])
+Route::post('/livewire/update', [HandleRequests::class, 'handleUpdate'])
     ->middleware('web')
     ->name('default.livewire.update');
-
