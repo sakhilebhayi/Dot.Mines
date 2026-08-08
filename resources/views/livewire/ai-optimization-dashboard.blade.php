@@ -275,7 +275,17 @@
                                 <div class="text-sm text-gray-800 dark:text-gray-200">
                                     <strong>{{ $pending?->title }}</strong>
                                     <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ $pending?->description }}</div>
+                                    @if($pending?->proposed_action)
+                                        <div class="text-gray-700 dark:text-gray-300 text-xs mt-2"><strong>Proposed action:</strong> {{ $pending->proposed_action }}</div>
+                                    @endif
                                 </div>
+
+                                @if($pendingRecommendationAction === 'reject')
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Reason for rejecting (required)</label>
+                                        <textarea wire:model="rejectReason" rows="2" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white"></textarea>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="flex gap-2 justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">

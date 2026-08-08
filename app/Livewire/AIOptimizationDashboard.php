@@ -2,30 +2,41 @@
 
 namespace App\Livewire;
 
-use App\Models\AIRecommendation;
 use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
+use App\Models\AIRecommendation;
+use App\Models\AiRecommendationAction;
 use App\Services\AI\AIOptimizationService;
+use App\Traits\BrowserEventBridge;
+use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Traits\BrowserEventBridge;
 
 class AIOptimizationDashboard extends Component
 {
-    use WithPagination, BrowserEventBridge;
+    use BrowserEventBridge, WithPagination;
 
     public string $activeTab = 'overview';
+
     public string $selectedCategory = 'all';
+
     public string $selectedPriority = 'all';
+
     public array $filters = [
         'category' => '',
         'priority' => '',
         'status' => '',
     ];
+
     public bool $analysisRunning = false;
+
     public ?int $pendingRecommendationId = null;
+
     public ?string $pendingRecommendationAction = null; // 'implement'|'reject'
+
     public bool $showRecommendationConfirm = false;
+
+    public string $rejectReason = '';
 
     protected ?AIOptimizationService $aiService = null;
 
@@ -41,7 +52,7 @@ class AIOptimizationDashboard extends Component
             ->latest()
             ->first();
 
-        if (!$lastRecommendation || $lastRecommendation->created_at->diffInHours(now()) > 24) {
+        if (! $lastRecommendation || $lastRecommendation->created_at->diffInHours(now()) > 24) {
             $this->runAnalysis();
         }
     }
@@ -49,7 +60,7 @@ class AIOptimizationDashboard extends Component
     public function runAnalysis()
     {
         $this->analysisRunning = true;
-        
+
         try {
             $aiService = $this->aiService;
             assert($aiService !== null);
@@ -61,7 +72,7 @@ class AIOptimizationDashboard extends Component
             $this->dispatch('analysis-completed');
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'AI analysis completed successfully!']);
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Analysis failed: ' . $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Analysis failed: '.$e->getMessage()]);
         }
 
         $this->analysisRunning = false;
@@ -88,27 +99,57 @@ class AIOptimizationDashboard extends Component
 
             $recommendation->markAsImplemented(auth()->user());
 
+            AiRecommendationAction::create([
+                'team_id' => $team->id,
+                'ai_recommendation_id' => $recommendation->id,
+                'recommendation_hash' => sha1($recommendation->id.$recommendation->title),
+                'recommendation' => ['title' => $recommendation->title, 'description' => $recommendation->description],
+                'status' => 'implemented',
+                'actioned_by' => auth()->id(),
+                'actioned_at' => now(),
+            ]);
+
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Recommendation marked as implemented!']);
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'implemented']);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to implement this recommendation.']);
+
             return;
         }
     }
 
-    public function rejectRecommendation($recommendationId)
+    public function rejectRecommendation($recommendationId, string $reason = '')
     {
         $team = auth()->user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
+
+        if (trim($reason) === '') {
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'A rejection reason is required.']);
+
+            return;
+        }
+
         try {
             $this->authorize('update', $recommendation);
 
             $recommendation->update(['status' => 'rejected']);
 
+            AiRecommendationAction::create([
+                'team_id' => $team->id,
+                'ai_recommendation_id' => $recommendation->id,
+                'recommendation_hash' => sha1($recommendation->id.$recommendation->title),
+                'recommendation' => ['title' => $recommendation->title, 'description' => $recommendation->description],
+                'status' => 'rejected',
+                'actioned_by' => auth()->id(),
+                'actioned_at' => now(),
+                'reject_reason' => $reason,
+            ]);
+
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Recommendation rejected.']);
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'rejected']);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to reject this recommendation.']);
+
             return;
         }
     }
@@ -126,6 +167,8 @@ class AIOptimizationDashboard extends Component
             $this->showRecommendationConfirm = false;
             $this->pendingRecommendationId = null;
             $this->pendingRecommendationAction = null;
+            $this->rejectReason = '';
+
             return;
         }
 
@@ -135,12 +178,17 @@ class AIOptimizationDashboard extends Component
         if ($action === 'implement') {
             $this->implementRecommendation($id);
         } else {
-            $this->rejectRecommendation($id);
+            $this->rejectRecommendation($id, $this->rejectReason);
+            if (trim($this->rejectReason) === '') {
+                // rejectRecommendation() already surfaced the error notification; keep the dialog open.
+                return;
+            }
         }
 
         $this->showRecommendationConfirm = false;
         $this->pendingRecommendationId = null;
         $this->pendingRecommendationAction = null;
+        $this->rejectReason = '';
         // Refresh pagination/list
         $this->resetPage();
     }
@@ -150,6 +198,7 @@ class AIOptimizationDashboard extends Component
         $this->showRecommendationConfirm = false;
         $this->pendingRecommendationId = null;
         $this->pendingRecommendationAction = null;
+        $this->rejectReason = '';
     }
 
     // (Possibly missing function for alert acknowledgement should be implemented here if needed)
@@ -176,21 +225,21 @@ class AIOptimizationDashboard extends Component
         $recommendationsQuery = AIRecommendation::where('team_id', $team->id)
             ->with(['aiAgent', 'machine', 'mineArea', 'route']);
         // Status filter: default to 'pending' when no status filter provided
-        if (!empty($this->filters['status'])) {
+        if (! empty($this->filters['status'])) {
             $recommendationsQuery->where('status', $this->filters['status']);
         } else {
             $recommendationsQuery->where('status', 'pending');
         }
 
         // Category filter (supports backward-compatible selectedCategory)
-        if (!empty($this->filters['category'])) {
+        if (! empty($this->filters['category'])) {
             $recommendationsQuery->where('category', $this->filters['category']);
         } elseif ($this->selectedCategory !== 'all') {
             $recommendationsQuery->where('category', $this->selectedCategory);
         }
 
         // Priority filter (supports backward-compatible selectedPriority)
-        if (!empty($this->filters['priority'])) {
+        if (! empty($this->filters['priority'])) {
             $recommendationsQuery->where('priority', $this->filters['priority']);
         } elseif ($this->selectedPriority !== 'all') {
             $recommendationsQuery->where('priority', $this->selectedPriority);
