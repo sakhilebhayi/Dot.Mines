@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AIRecommendation extends Model
 {
     use HasFactory, HasTeamFilters;
-    
+
     protected $table = 'ai_recommendations';
+
     protected $fillable = [
         'team_id',
         'ai_agent_id',
@@ -21,6 +22,7 @@ class AIRecommendation extends Model
         'status',
         'title',
         'description',
+        'proposed_action',
         'data',
         'impact_analysis',
         'confidence_score',

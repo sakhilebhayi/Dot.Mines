@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeamFilters;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AiRecommendationAction extends Model
 {
@@ -14,6 +15,7 @@ class AiRecommendationAction extends Model
 
     protected $fillable = [
         'team_id',
+        'ai_recommendation_id',
         'recommendation_hash',
         'recommendation',
         'status',
@@ -28,4 +30,14 @@ class AiRecommendationAction extends Model
         'performance_impact' => 'json',
         'actioned_at' => 'datetime',
     ];
+
+    public function aiRecommendation(): BelongsTo
+    {
+        return $this->belongsTo(AIRecommendation::class);
+    }
+
+    public function actionedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'actioned_by');
+    }
 }
