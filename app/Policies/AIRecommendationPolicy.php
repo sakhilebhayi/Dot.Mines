@@ -37,14 +37,12 @@ class AIRecommendationPolicy
      */
     public function update(User $user, AIRecommendation $recommendation): bool
     {
-        // Owners and admins may act across teams
-        if ($user->hasRole('owner') || $user->hasRole('admin') || $user->hasRole('administrator')) {
-            return true;
+        if ($user->current_team_id !== $recommendation->team_id) {
+            return false;
         }
 
-        // Allow any user on the same team to act (team members can manage recommendations),
-        // or users with the explicit permission. Admin/owner roles were handled above.
-        if ($user->current_team_id === $recommendation->team_id) {
+        // Owners and admins may act; anyone else needs the explicit permission.
+        if ($user->hasRole('owner') || $user->hasRole('admin') || $user->hasRole('administrator')) {
             return true;
         }
 
