@@ -1,8 +1,7 @@
 <div>
-<div>
     <!-- Leaflet CSS - loaded directly in component -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-    
+
     <div class="container mx-auto py-8">
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- Left: Map and controls -->

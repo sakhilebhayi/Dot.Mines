@@ -40,7 +40,7 @@
 
         <div class="flex items-center space-x-3">
             <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded">Generate Report</button>
-            <a href="{{ route('reports.index') }}" class="text-sm text-gray-400 hover:underline">Back to Reports</a>
+            <a href="{{ route('reports') }}" class="text-sm text-gray-400 hover:underline">Back to Reports</a>
         </div>
     </form>
 </div>
