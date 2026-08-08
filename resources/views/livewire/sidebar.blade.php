@@ -125,6 +125,17 @@
             <span class="whitespace-nowrap overflow-hidden transition-all duration-300" x-show="sidebarOpen">Alerts</span>
         </a>
 
+        <!-- Operator Fatigue -->
+        <a href="{{ route('operator-fatigue') }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('operator-fatigue*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           :class="{ 'justify-center': !sidebarOpen }"
+           :title="!sidebarOpen ? 'Operator Fatigue' : ''">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"></path>
+            </svg>
+            <span class="whitespace-nowrap overflow-hidden transition-all duration-300" x-show="sidebarOpen">Operator Fatigue</span>
+        </a>
+
         <!-- Fuel Management -->
         <a href="{{ route('fuel') }}" 
            class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('fuel*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"

@@ -4,26 +4,36 @@ namespace App\Livewire;
 
 use App\Models\Alert;
 use App\Models\Geofence;
-use App\Traits\RealtimeUpdates;
-use Livewire\Component;
 use App\Traits\BrowserEventBridge;
-use Livewire\WithPagination;
+use App\Traits\RealtimeUpdates;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class Alerts extends Component
 {
-    use WithPagination, RealtimeUpdates, BrowserEventBridge;
+    use BrowserEventBridge, RealtimeUpdates, WithPagination;
 
     public string $search = '';
+
     public string $sortBy = 'created_at';
+
     public string $sortDirection = 'desc';
+
     public string $selectedPriority = 'all';
+
     public string $selectedStatus = 'all';
+
     public string $selectedType = 'all';
+
     public bool $showDetailsModal = false;
+
     public ?int $selectedAlertId = null;
+
     public ?int $pendingDismissAlertId = null;
+
     public bool $showDismissConfirm = false;
+
     // Track when a dismissed-unresolved alert was created so UI can render specially
     public array $recentlyDismissedUnresolved = [];
 
@@ -45,6 +55,7 @@ class Alerts extends Component
         'downtime' => 'Extended Downtime',
         'speed_violation' => 'Speed Violation',
         'machine_idle' => 'Machine Idle',
+        'fatigue' => 'Operator Fatigue',
     ];
 
     public function mount(): void
@@ -138,6 +149,7 @@ class Alerts extends Component
             if ($alert->status !== 'resolved') {
                 $this->pendingDismissAlertId = $alert->id;
                 $this->showDismissConfirm = true;
+
                 return;
             }
 
@@ -158,6 +170,7 @@ class Alerts extends Component
         if (! $alert) {
             $this->showDismissConfirm = false;
             $this->pendingDismissAlertId = null;
+
             return;
         }
         // If the alert is already resolved, allow normal dismissal which will remove it from active workflows
@@ -171,6 +184,7 @@ class Alerts extends Component
 
             $this->showDismissConfirm = false;
             $this->pendingDismissAlertId = null;
+
             return;
         }
 
@@ -231,6 +245,7 @@ class Alerts extends Component
 
             return $alert;
         }
+
         return null;
     }
 
@@ -248,6 +263,7 @@ class Alerts extends Component
 
         $managers = $candidates->filter(function ($user) {
             $role = $user->roles->first()?->name ?? null;
+
             return in_array($role, ['admin', 'fleet_manager', 'manager']);
         })->map(function ($user) {
             return [

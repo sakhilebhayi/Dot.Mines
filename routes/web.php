@@ -13,6 +13,7 @@ use App\Livewire\FleetMovementReplay;
 use App\Livewire\FuelManagement;
 use App\Livewire\MaintenanceDashboard;
 use App\Livewire\MineAreaDetail;
+use App\Livewire\OperatorFatigueTracker;
 use App\Livewire\ProductionDashboard;
 use App\Livewire\RoutePlanning;
 use App\Models\Geofence;
@@ -123,6 +124,10 @@ Route::middleware([
     // Alerts
     Route::get('/alerts', Alerts::class)
         ->name('alerts');
+
+    // Operator Fatigue
+    Route::get('/operator-fatigue', OperatorFatigueTracker::class)
+        ->name('operator-fatigue');
 
     // Production Dashboard
     Route::get('/production', ProductionDashboard::class)
