@@ -24,7 +24,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-C8VmzGAZ.css",
+    "file": "assets/app-BQ9rTXT2.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -49,5 +49,11 @@
       "assets/layers-2x-Bpkbi35X.png",
       "assets/marker-icon-hN30_KVU.png"
     ]
+  },
+  "resources/js/live-map.js": {
+    "file": "assets/live-map-CF-AYwjf.js",
+    "name": "live-map",
+    "src": "resources/js/live-map.js",
+    "isEntry": true
   }
 }
