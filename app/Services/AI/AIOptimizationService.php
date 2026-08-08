@@ -3,13 +3,12 @@
 namespace App\Services\AI;
 
 use App\Models\AIAgent;
-use App\Models\AIRecommendation;
 use App\Models\AIAnalysisSession;
 use App\Models\AIInsight;
+use App\Models\AIRecommendation;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Core AI Service for mining optimization
@@ -47,8 +46,8 @@ class AIOptimizationService
 
         foreach ($this->agents as $type => $agent) {
             $agentModel = $this->getOrCreateAgent($type);
-            
-            if (!$agentModel->isActive()) {
+
+            if (! $agentModel->isActive()) {
                 continue;
             }
 
@@ -65,7 +64,7 @@ class AIOptimizationService
             try {
                 // Run agent analysis
                 $result = $agent->analyze($team);
-                
+
                 // Store recommendations
                 foreach ($result['recommendations'] as $rec) {
                     $recommendation = AIRecommendation::create([
@@ -76,6 +75,7 @@ class AIOptimizationService
                         'priority' => $rec['priority'],
                         'title' => $rec['title'],
                         'description' => $rec['description'],
+                        'proposed_action' => $rec['proposed_action'] ?? $rec['description'],
                         'data' => $rec['data'] ?? [],
                         'impact_analysis' => $rec['impact_analysis'] ?? [],
                         'confidence_score' => $rec['confidence_score'],
@@ -85,7 +85,7 @@ class AIOptimizationService
                         'related_mine_area_id' => $rec['related_mine_area_id'] ?? null,
                         'related_route_id' => $rec['related_route_id'] ?? null,
                     ]);
-                    
+
                     $recommendations->push($recommendation);
                 }
 
@@ -102,13 +102,13 @@ class AIOptimizationService
                         'visualization_data' => $ins['visualization_data'] ?? [],
                         'valid_until' => $ins['valid_until'] ?? null,
                     ]);
-                    
+
                     $insights->push($insight);
                 }
 
                 // Mark session as completed
                 $session->markAsCompleted($result, count($result['recommendations']));
-                
+
             } catch (\Exception $e) {
                 $session->markAsFailed($e->getMessage());
             }
@@ -129,7 +129,7 @@ class AIOptimizationService
         $agentType = $this->getAgentTypeForCategory($category);
         $agent = $this->agents[$agentType] ?? null;
 
-        if (!$agent) {
+        if (! $agent) {
             return collect();
         }
 
@@ -145,6 +145,7 @@ class AIOptimizationService
                 'priority' => $rec['priority'],
                 'title' => $rec['title'],
                 'description' => $rec['description'],
+                'proposed_action' => $rec['proposed_action'] ?? $rec['description'],
                 'data' => $rec['data'] ?? [],
                 'impact_analysis' => $rec['impact_analysis'] ?? [],
                 'confidence_score' => $rec['confidence_score'],
@@ -215,7 +216,7 @@ class AIOptimizationService
 
     protected function getAgentName(string $type): string
     {
-        return match($type) {
+        return match ($type) {
             AIAgent::TYPE_FLEET_OPTIMIZER => 'Fleet Optimizer',
             AIAgent::TYPE_ROUTE_ADVISOR => 'Route Advisor',
             AIAgent::TYPE_FUEL_PREDICTOR => 'Fuel Predictor',
@@ -229,7 +230,7 @@ class AIOptimizationService
 
     protected function getAgentDescription(string $type): string
     {
-        return match($type) {
+        return match ($type) {
             AIAgent::TYPE_FLEET_OPTIMIZER => 'Optimizes fleet allocation and machine utilization',
             AIAgent::TYPE_ROUTE_ADVISOR => 'Recommends optimal routes and identifies bottlenecks',
             AIAgent::TYPE_FUEL_PREDICTOR => 'Predicts fuel consumption and identifies savings opportunities',
@@ -243,7 +244,7 @@ class AIOptimizationService
 
     protected function getAgentCapabilities(string $type): array
     {
-        return match($type) {
+        return match ($type) {
             AIAgent::TYPE_FLEET_OPTIMIZER => ['machine_allocation', 'utilization_analysis', 'idle_time_reduction'],
             AIAgent::TYPE_ROUTE_ADVISOR => ['route_optimization', 'traffic_analysis', 'time_prediction'],
             AIAgent::TYPE_FUEL_PREDICTOR => ['consumption_forecasting', 'efficiency_analysis', 'cost_prediction'],
@@ -257,7 +258,7 @@ class AIOptimizationService
 
     protected function getAgentTypeForCategory(string $category): string
     {
-        return match($category) {
+        return match ($category) {
             'fleet' => AIAgent::TYPE_FLEET_OPTIMIZER,
             'route' => AIAgent::TYPE_ROUTE_ADVISOR,
             'fuel' => AIAgent::TYPE_FUEL_PREDICTOR,

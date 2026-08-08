@@ -2,9 +2,8 @@
 
 namespace App\Services\AI;
 
-use App\Models\Team;
 use App\Models\Route;
-use App\Models\Machine;
+use App\Models\Team;
 use App\Services\RoutePlanningService;
 
 /**
@@ -30,13 +29,14 @@ class RouteAdvisorAgent
         foreach ($routes as $route) {
             // Analyze route efficiency
             $efficiency = $this->analyzeRouteEfficiency($route);
-            
+
             if ($efficiency['improvement_possible'] > 15) {
                 $recommendations[] = [
                     'category' => 'route',
                     'priority' => 'high',
                     'title' => "Route Optimization Opportunity: {$route->name}",
                     'description' => "Route can be optimized to save {$efficiency['time_savings']} minutes and {$efficiency['fuel_savings']} liters of fuel.",
+                    'proposed_action' => "Reroute {$route->name} via the optimized path identified by the route advisor to capture the {$efficiency['time_savings']}-minute, {$efficiency['fuel_savings']}-liter savings above.",
                     'confidence_score' => 0.83,
                     'estimated_savings' => $efficiency['fuel_savings'] * 25,
                     'estimated_efficiency_gain' => $efficiency['improvement_possible'],
@@ -77,5 +77,4 @@ class RouteAdvisorAgent
             'fuel_savings' => round($fuelSavings, 2),
         ];
     }
-
 }
