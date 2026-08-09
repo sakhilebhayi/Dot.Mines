@@ -52,7 +52,7 @@
         <!-- Content Area -->
         <div class="flex-1 p-8 max-w-5xl">
             @if($activeSection === 'getting-started')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Welcome to Mines Fleet Manager</h1>
                     <p class="lead">Mines is a comprehensive fleet management platform designed specifically for mining operations. Track your equipment in real-time, manage fuel consumption, schedule maintenance, and optimize your fleet operations.</p>
 
@@ -100,7 +100,7 @@
             @endif
 
             @if($activeSection === 'quick-start')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Quick Start Guide</h1>
                     <p>Get up and running with Mines in 5 easy steps.</p>
 
@@ -158,7 +158,7 @@
             @endif
 
             @if($activeSection === 'fleet')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Fleet Management</h1>
                     <p>Manage your entire fleet of mining equipment from a single interface.</p>
 
@@ -240,7 +240,7 @@
             @endif
 
             @if($activeSection === 'live-map')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Live Map</h1>
                     <p>Monitor your entire fleet in real-time on an interactive map.</p>
 
@@ -288,7 +288,7 @@
             @endif
 
             @if($activeSection === 'geofences')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Geofences</h1>
                     <p>Define virtual boundaries and track machine activity within specific zones.</p>
 
@@ -343,7 +343,7 @@
             @endif
 
             @if($activeSection === 'fuel-management')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Fuel Management</h1>
                     <p>Comprehensive fuel tracking and analysis for your fleet.</p>
 
@@ -424,7 +424,7 @@
             @endif
 
             @if($activeSection === 'maintenance')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Maintenance & Health Monitoring</h1>
                     <p>Preventative maintenance scheduling and machine health tracking.</p>
 
@@ -533,7 +533,7 @@
             @endif
 
             @if($activeSection === 'integrations-overview')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Integrations Overview</h1>
                     <p>Connect Mines with your existing systems and hardware.</p>
 
@@ -610,7 +610,7 @@
             @endif
 
             @if($activeSection === 'api-access')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>API Access</h1>
                     <p>Complete REST API for programmatic access to Mines.</p>
 
@@ -830,7 +830,7 @@
             @endif
 
             @if($activeSection === 'webhooks')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Webhooks</h1>
                     <p>Receive real-time notifications when events occur in Mines.</p>
 
@@ -933,7 +933,7 @@
             @endif
 
             @if($activeSection === 'team-management')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Team Management</h1>
                     <p>Manage your team members and their access to Mines.</p>
 
@@ -991,7 +991,7 @@
             @endif
 
             @if($activeSection === 'reports')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Reports</h1>
                     <p>Generate comprehensive reports on fleet operations.</p>
 
@@ -1053,7 +1053,7 @@
             @endif
 
             @if($activeSection === 'alerts')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Alerts & Notifications</h1>
                     <p>Stay informed about critical events and conditions.</p>
 
@@ -1122,7 +1122,7 @@
             @endif
 
             @if($activeSection === 'mine-areas')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Mine Areas</h1>
                     <p>Define and manage operational areas within your mine site.</p>
 
@@ -1156,7 +1156,7 @@
             @endif
 
             @if($activeSection === 'dashboard')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Dashboard</h1>
                     <p>Your central command center for fleet operations.</p>
 
@@ -1182,7 +1182,7 @@
             @endif
 
             @if($activeSection === 'machine-tracking')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Machine Tracking</h1>
                     <p>Real-time and historical tracking of your equipment.</p>
 
@@ -1214,7 +1214,7 @@
             @endif
 
             @if($activeSection === 'user-roles')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>User Roles & Permissions</h1>
                     <p>Detailed breakdown of role capabilities.</p>
 
@@ -1311,7 +1311,7 @@
             @endif
 
             @if($activeSection === 'settings')
-                <div class="prose max-w-none">
+                <div class="prose prose-invert max-w-none">
                     <h1>Settings</h1>
                     <p>Configure your Mines platform.</p>
 

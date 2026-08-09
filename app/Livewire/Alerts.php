@@ -104,6 +104,8 @@ class Alerts extends Component
         $alert = Alert::where('team_id', $team->id)->find($alertId);
 
         if ($alert) {
+            $this->authorize('acknowledge', $alert);
+
             $alert->update([
                 'status' => 'acknowledged',
                 'acknowledged_by' => Auth::id(),
@@ -119,6 +121,8 @@ class Alerts extends Component
         $alert = Alert::where('team_id', $team->id)->find($alertId);
 
         if ($alert) {
+            $this->authorize('resolve', $alert);
+
             $alert->update([
                 'status' => 'resolved',
                 'resolved_by' => Auth::id(),
@@ -145,6 +149,8 @@ class Alerts extends Component
         $alert = Alert::where('team_id', $team->id)->find($alertId);
 
         if ($alert) {
+            $this->authorize('update', $alert);
+
             // If the alert is not resolved, ask for confirmation before dismissing
             if ($alert->status !== 'resolved') {
                 $this->pendingDismissAlertId = $alert->id;
@@ -173,6 +179,9 @@ class Alerts extends Component
 
             return;
         }
+
+        $this->authorize('update', $alert);
+
         // If the alert is already resolved, allow normal dismissal which will remove it from active workflows
         if ($alert->status === 'resolved') {
             $alert->update([

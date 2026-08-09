@@ -137,14 +137,23 @@ export default {
     daisyui: {
         themes: [
             {
+                // Matches the brand tokens in resources/css/app.css (--ink, --gold, etc.)
+                // used across the guest/marketing pages and the dashboard shell, so
+                // daisyui components (card, stat, badge, alert, btn) read as the same
+                // product instead of a generic slate-blue admin theme.
                 mines: {
-                    "primary": "#f59e0b",
-                    "secondary": "#1e293b",
-                    "accent": "#10b981",
-                    "neutral": "#0f172a",
-                    "base-100": "#0f172a",
-                    "base-200": "#1e293b",
-                    "base-300": "#334155",
+                    "primary": "#d99e2b",
+                    "primary-content": "#211a14",
+                    "secondary": "#6b4226",
+                    "secondary-content": "#f4efe4",
+                    "accent": "#f0c669",
+                    "accent-content": "#211a14",
+                    "neutral": "#211a14",
+                    "neutral-content": "#f4efe4",
+                    "base-100": "#211a14",
+                    "base-200": "#2c2319",
+                    "base-300": "#3a2f22",
+                    "base-content": "#f4efe4",
                     "info": "#3b82f6",
                     "success": "#10b981",
                     "warning": "#f59e0b",

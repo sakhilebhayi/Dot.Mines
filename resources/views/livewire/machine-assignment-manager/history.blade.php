@@ -1,53 +1,45 @@
 <!-- History Tab - Show assignment history -->
 <div class="space-y-6">
-    <h2 class="text-2xl font-semibold text-white">Assignment History</h2>
+    <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Assignment History</h2>
 
     @if($assignmentHistory->count() > 0)
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-lg overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-slate-50 border-b border-slate-200">
+                    <thead class="bg-white/5 border-b border-[var(--line)]">
                         <tr>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-300">Machine</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-300">Assigned Date</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-300">Unassigned Date</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-300">Duration</th>
-                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-300">Notes</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-[var(--sand)]">Machine</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-[var(--sand)]">Assigned Date</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-[var(--sand)]">Unassigned Date</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-[var(--sand)]">Duration</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-[var(--sand)]">Notes</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        @foreach($assignmentHistory as $machine)
-                            <tr class="hover:bg-slate-50 transition">
+                    <tbody class="divide-y divide-[var(--line)]">
+                        @foreach($assignmentHistory as $record)
+                            <tr class="hover:bg-white/5 transition">
                                 <td class="px-6 py-4">
-                                    <p class="font-medium text-white">{{ $machine->name }}</p>
-                                    <p class="text-sm text-gray-400">{{ $machine->model }}</p>
+                                    <p class="font-medium text-[var(--stone)]">{{ $record->machine->name ?? 'Deleted machine' }}</p>
+                                    <p class="text-sm text-[var(--sand)]">{{ $record->machine->model ?? '' }}</p>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-400">
-                                    {{ $machine->pivot->assigned_at->format('M d, Y H:i') }}
+                                <td class="px-6 py-4 text-sm text-[var(--sand)]">
+                                    {{ $record->assigned_at->format('M d, Y H:i') }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-400">
-                                    @if($machine->pivot->unassigned_at)
-                                        {{ $machine->pivot->unassigned_at->format('M d, Y H:i') }}
-                                    @else
-                                        —
-                                    @endif
+                                <td class="px-6 py-4 text-sm text-[var(--sand)]">
+                                    {{ $record->unassigned_at?->format('M d, Y H:i') ?? '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-400">
-                                    @if($machine->pivot->unassigned_at)
+                                <td class="px-6 py-4 text-sm text-[var(--sand)]">
+                                    @if($record->unassigned_at)
                                         @php
-                                            $duration = $machine->pivot->assigned_at->diff($machine->pivot->unassigned_at);
-                                            if ($duration->d > 0) {
-                                                echo $duration->d . 'd ' . $duration->h . 'h';
-                                            } else {
-                                                echo $duration->h . 'h ' . $duration->i . 'm';
-                                            }
+                                            $duration = $record->assigned_at->diff($record->unassigned_at);
+                                            echo $duration->d > 0 ? "{$duration->d}d {$duration->h}h" : "{$duration->h}h {$duration->i}m";
                                         @endphp
                                     @else
                                         —
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-400">
-                                    {{ $machine->pivot->notes ?: '—' }}
+                                <td class="px-6 py-4 text-sm text-[var(--sand)]">
+                                    {{ $record->notes ?: ($record->reason ?: '—') }}
                                 </td>
                             </tr>
                         @endforeach
@@ -56,15 +48,15 @@
             </div>
         </div>
     @else
-        <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-12 text-center">
-            <p class="text-gray-400">No assignment history yet</p>
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-lg p-12 text-center">
+            <p class="text-[var(--sand)]">No assignment history yet</p>
         </div>
     @endif
 
     <!-- History Info -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p class="text-sm text-blue-900">
-            <strong>Note:</strong> This view shows machines that have been unassigned from this area. Currently assigned machines can be found in the Overview tab.
+    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/20 rounded-lg p-4">
+        <p class="text-sm text-[var(--sand)]">
+            <strong class="text-[var(--stone)]">Note:</strong> This view shows machines that have been unassigned from this area. Currently assigned machines can be found in the Overview tab.
         </p>
     </div>
 </div>

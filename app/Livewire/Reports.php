@@ -2,16 +2,17 @@
 
 namespace App\Livewire;
 
-use App\Models\Report;
-use App\Models\MineArea;
 use App\Models\Geofence;
 use App\Models\Machine;
-use Livewire\Component;
+use App\Models\MineArea;
+use App\Models\Report;
 use App\Traits\BrowserEventBridge;
-use Livewire\WithPagination;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class Reports extends Component
 {
@@ -19,16 +20,26 @@ class Reports extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $sortBy = 'created_at';
+
     public string $sortDirection = 'desc';
+
     public string $selectedType = 'all';
+
     public string $selectedStatus = 'all';
+
     public string $selectedMineAreaId = '';
+
     public string $selectedGeofenceId = '';
+
     public string $selectedMachineId = '';
-    /** @var \Illuminate\Support\Collection<int, mixed>|null */
-    public ?\Illuminate\Support\Collection $machinesList = null;
+
+    /** @var Collection<int, mixed>|null */
+    public ?Collection $machinesList = null;
+
     public bool $showDeleteConfirm = false;
+
     public ?int $deleteReportId = null;
 
     /** @var array<string, string> */
@@ -53,17 +64,17 @@ class Reports extends Component
     public function getReports()
     {
         $team = Auth::user()->currentTeam;
-        
-        if (!$team) {
+
+        if (! $team) {
             return collect();
         }
 
         $searchTerm = trim($this->search);
-        
+
         return Report::where('team_id', $team->id)
             ->when($searchTerm, function ($query) use ($searchTerm) {
-                $query->where('title', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('description', 'like', '%' . $searchTerm . '%');
+                $query->where('title', 'like', '%'.$searchTerm.'%')
+                    ->orWhere('description', 'like', '%'.$searchTerm.'%');
             })
             ->when($this->selectedMineAreaId, function ($query) {
                 $query->where('filters->mine_area_id', $this->selectedMineAreaId);
@@ -97,34 +108,38 @@ class Reports extends Component
     public function deleteReport($reportId)
     {
         // Validate report ID
-        if (!is_numeric($reportId)) {
+        if (! is_numeric($reportId)) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Invalid report ID']);
+
             return;
         }
-        
+
         $team = Auth::user()->currentTeam;
         $report = Report::where('team_id', $team->id)->find($reportId);
 
-        if (!$report) {
+        if (! $report) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
             $this->showDeleteConfirm = false;
+
             return;
         }
-        
+
         try {
+            $this->authorize('delete', $report);
+
             // Delete associated files if they exist
             if ($report->file_path && Storage::exists($report->file_path)) {
                 Storage::delete($report->file_path);
             }
-            
+
             $report->delete();
-            
+
             Log::info('User deleted report', [
                 'user_id' => Auth::id(),
                 'report_id' => $reportId,
                 'report_type' => $report->type,
             ]);
-            
+
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Report deleted successfully']);
         } catch (\Exception $e) {
             Log::error('Failed to delete report', [
@@ -132,7 +147,7 @@ class Reports extends Component
                 'report_id' => $reportId,
                 'error' => $e->getMessage(),
             ]);
-            
+
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to delete report']);
         }
 
@@ -155,36 +170,41 @@ class Reports extends Component
     public function downloadReport($reportId)
     {
         // Validate report ID
-        if (!is_numeric($reportId)) {
+        if (! is_numeric($reportId)) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Invalid report ID']);
+
             return;
         }
-        
+
         $team = Auth::user()->currentTeam;
         $report = Report::where('team_id', $team->id)->find($reportId);
 
-        if (!$report) {
+        if (! $report) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
+
             return;
         }
-        
+
+        $this->authorize('download', $report);
+
         if ($report->status !== 'completed') {
             $this->dispatchBrowserEvent('notify', ['type' => 'warning', 'message' => 'Report is not ready for download']);
+
             return;
         }
-        
+
         // Prevent path traversal attacks
-        if ($report->file_path && !str_contains($report->file_path, '..')) {
+        if ($report->file_path && ! str_contains($report->file_path, '..')) {
             if (Storage::exists($report->file_path)) {
                 Log::info('User downloaded report', [
                     'user_id' => Auth::id(),
                     'report_id' => $reportId,
                 ]);
-                
-                return Storage::download($report->file_path, $report->title . '.' . $report->format);
+
+                return Storage::download($report->file_path, $report->title.'.'.$report->format);
             }
         }
-        
+
         $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Report file not found']);
     }
 
@@ -194,7 +214,7 @@ class Reports extends Component
 
         $mineAreas = $team ? MineArea::where('team_id', $team->id)->get() : collect();
         $geofences = $team ? Geofence::where('team_id', $team->id)->get() : collect();
-        $this->machinesList = $team ? Machine::where('team_id', $team->id)->select('id','name')->get() : collect();
+        $this->machinesList = $team ? Machine::where('team_id', $team->id)->select('id', 'name')->get() : collect();
 
         return view('livewire.reports', [
             'reports' => $this->getReports(),

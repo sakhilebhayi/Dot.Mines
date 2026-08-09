@@ -4,43 +4,63 @@ namespace App\Livewire;
 
 use App\Models\MineArea;
 use App\Services\MineAreaService;
+use App\Traits\BrowserEventBridge;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
 
 class MineAreaManager extends Component
 {
+    use BrowserEventBridge;
     use WithPagination;
 
     protected ?MineAreaService $service = null;
 
     // List properties
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $sortBy = 'created_at';
+
     public string $sortDirection = 'desc';
+
     public string $viewMode = 'list'; // list or map
 
     // Form properties
     public bool $showCreateModal = false;
+
     public bool $showEditModal = false;
+
     public ?int $editingMineAreaId = null;
 
     public string $name = '';
+
     public string $description = '';
+
     public string $location = '';
+
     public ?float $latitude = null;
+
     public ?float $longitude = null;
+
     public ?float $area_size_hectares = null;
+
     public string $status = 'active';
+
     public string $manager_name = '';
+
     public string $manager_contact = '';
 
     // Map properties
     public ?array $boundaryCoordinates = null;
+
     public float $centerLat = -26.2041;
+
     public float $centerLng = 28.0473;
+
     public int $zoomLevel = 10;
+
     public bool $isDrawing = false;
 
     /** @var array<string, string> */
@@ -67,6 +87,7 @@ class MineAreaManager extends Component
         if ($this->service === null) {
             $this->service = app(MineAreaService::class);
         }
+
         return $this->service;
     }
 
@@ -138,8 +159,9 @@ class MineAreaManager extends Component
         try {
             if ($this->editingMineAreaId) {
                 $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
-                if (!$mineArea) {
+                if (! $mineArea) {
                     $this->dispatchBrowserEvent('notify', ['message' => 'Mine area not found', 'type' => 'error']);
+
                     return;
                 }
                 $this->getService()->update($mineArea, $data);
@@ -156,7 +178,7 @@ class MineAreaManager extends Component
             $this->resetForm();
             $this->resetPage();
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: ' . $e->getMessage(), 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
         }
     }
 
@@ -172,7 +194,7 @@ class MineAreaManager extends Component
             $this->dispatchBrowserEvent('notify', ['message' => 'Mine area deleted successfully', 'type' => 'success']);
             $this->resetPage();
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error deleting mine area: ' . $e->getMessage(), 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Error deleting mine area: '.$e->getMessage(), 'type' => 'error']);
         }
     }
 
@@ -223,10 +245,10 @@ class MineAreaManager extends Component
     {
         $this->boundaryCoordinates = $coordinates;
         // Calculate center and approximate area from polygon
-        if (!empty($coordinates)) {
-            $latitudes = array_map(fn($coord) => $coord['lat'], $coordinates);
-            $longitudes = array_map(fn($coord) => $coord['lng'], $coordinates);
-            
+        if (! empty($coordinates)) {
+            $latitudes = array_map(fn ($coord) => $coord['lat'], $coordinates);
+            $longitudes = array_map(fn ($coord) => $coord['lng'], $coordinates);
+
             $this->latitude = array_sum($latitudes) / count($latitudes);
             $this->longitude = array_sum($longitudes) / count($longitudes);
         }
@@ -245,6 +267,7 @@ class MineAreaManager extends Component
 
         if (empty($this->boundaryCoordinates)) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Please draw a boundary on the map', 'type' => 'error']);
+
             return;
         }
 
@@ -275,7 +298,7 @@ class MineAreaManager extends Component
             $this->resetForm();
             $this->resetPage();
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: ' . $e->getMessage(), 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
         }
     }
 

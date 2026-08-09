@@ -3,13 +3,17 @@
 namespace App\Livewire;
 
 use App\Models\AIPredictiveAlert;
-use Livewire\Component;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class AINotifications extends Component
 {
-    public array $notifications = [];
+    /** @var Collection<int, AIPredictiveAlert> */
+    public Collection $notifications;
+
     public int $unreadCount = 0;
+
     public bool $showPanel = false;
 
     public function mount(): void
@@ -21,20 +25,20 @@ class AINotifications extends Component
     public function loadNotifications(): void
     {
         $team = auth()->user()->currentTeam;
-        
+
         $this->notifications = AIPredictiveAlert::where('team_id', $team->id)
             ->where('is_acknowledged', false)
             ->orderByDesc('created_at')
             ->limit(10)
             ->with('aiAgent')
             ->get();
-        
+
         $this->unreadCount = $this->notifications->count();
     }
 
     public function togglePanel(): void
     {
-        $this->showPanel = !$this->showPanel;
+        $this->showPanel = ! $this->showPanel;
     }
 
     public function acknowledge(int $alertId): void
@@ -48,9 +52,9 @@ class AINotifications extends Component
                 'acknowledged_at' => now(),
                 'acknowledged_by' => auth()->id(),
             ]);
-            
+
             $this->loadNotifications();
-            
+
             $this->dispatch('alert-acknowledged', alertId: $alertId);
         }
     }
@@ -58,7 +62,7 @@ class AINotifications extends Component
     public function acknowledgeAll(): void
     {
         $team = auth()->user()->currentTeam;
-        
+
         AIPredictiveAlert::where('team_id', $team->id)
             ->where('is_acknowledged', false)
             ->update([
@@ -66,7 +70,7 @@ class AINotifications extends Component
                 'acknowledged_at' => now(),
                 'acknowledged_by' => auth()->id(),
             ]);
-        
+
         $this->loadNotifications();
     }
 

@@ -131,6 +131,8 @@ class IntegrationManager extends Component
         ]);
 
         try {
+            $this->authorize('create', Integration::class);
+
             $integration = Integration::create([
                 'team_id' => $this->team->id,
                 'provider' => $this->formData['provider'],
@@ -176,6 +178,7 @@ class IntegrationManager extends Component
         try {
             $integration = Integration::where('team_id', $this->team->id)
                 ->findOrFail($integrationId);
+            $this->authorize('test', $integration);
 
             $service = app(IntegrationService::class);
             $result = $service->testConnection($integration);
@@ -217,6 +220,7 @@ class IntegrationManager extends Component
         try {
             $integration = Integration::where('team_id', $this->team->id)
                 ->findOrFail($integrationId);
+            $this->authorize('sync', $integration);
 
             $service = app(IntegrationService::class);
             $result = $service->syncMachines($integration);
@@ -248,9 +252,10 @@ class IntegrationManager extends Component
         }
 
         try {
-            Integration::where('team_id', $this->team->id)
-                ->findOrFail($integrationId)
-                ->delete();
+            $integration = Integration::where('team_id', $this->team->id)
+                ->findOrFail($integrationId);
+            $this->authorize('delete', $integration);
+            $integration->delete();
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Integration deleted successfully!']);
             $this->loadIntegrations();

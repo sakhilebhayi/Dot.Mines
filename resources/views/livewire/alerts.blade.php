@@ -1,9 +1,9 @@
-<div class="min-h-screen bg-slate-900 p-6">
+<div class="min-h-screen bg-[var(--ink)] p-6">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-4xl font-bold text-white mb-2">Alerts</h1>
-            <p class="text-slate-400">Monitor and manage machine alerts and notifications</p>
+            <h1 class="text-4xl font-display font-semibold text-[var(--stone)] mb-2">Alerts</h1>
+            <p class="text-[var(--sand)]">Monitor and manage machine alerts and notifications</p>
         </div>
 
         <!-- Stats Cards -->
@@ -30,32 +30,32 @@
                 <div class="text-3xl font-bold text-blue-300 mt-2">{{ $openCount }}</div>
             </div>
             
-            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
-                <div class="text-slate-400 text-sm font-medium">Total Alerts</div>
-                <div class="text-3xl font-bold text-slate-300 mt-2">{{ $allAlerts->total() ?? 0 }}</div>
+            <div class="bg-white/5 border border-[var(--line)] rounded-lg p-4">
+                <div class="text-[var(--sand)] text-sm font-medium">Total Alerts</div>
+                <div class="text-3xl font-bold text-[var(--sand)] mt-2">{{ $allAlerts->total() ?? 0 }}</div>
             </div>
         </div>
 
         <!-- Filters Bar -->
-        <div class="bg-slate-800 rounded-lg p-6 mb-6 border border-slate-700">
+        <div class="bg-[var(--ink-soft)] rounded-lg p-6 mb-6 border border-[var(--line)]">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <!-- Search -->
                 <div>
-                    <label class="block text-sm text-slate-400 mb-2">Search Alerts</label>
+                    <label class="block text-sm text-[var(--sand)] mb-2">Search Alerts</label>
                     <input 
                         type="text" 
                         wire:model.live="search" 
                         placeholder="Search by title or description..."
-                        class="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                        class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
                 </div>
 
                 <!-- Priority Filter -->
                 <div>
-                    <label class="block text-sm text-slate-400 mb-2">Priority</label>
+                    <label class="block text-sm text-[var(--sand)] mb-2">Priority</label>
                     <select 
                         wire:model.live="selectedPriority"
-                        class="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                        class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
 
                         <option value="all">All Priorities</option>
@@ -67,10 +67,10 @@
 
                 <!-- Status Filter -->
                 <div>
-                    <label class="block text-sm text-slate-400 mb-2">Status</label>
+                    <label class="block text-sm text-[var(--sand)] mb-2">Status</label>
                     <select 
                         wire:model.live="selectedStatus"
-                        class="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                        class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
                         <option value="all">All Statuses</option>
                         <option value="new">New</option>
@@ -82,10 +82,10 @@
 
                 <!-- Type Filter -->
                 <div>
-                    <label class="block text-sm text-slate-400 mb-2">Type</label>
+                    <label class="block text-sm text-[var(--sand)] mb-2">Type</label>
                     <select 
                         wire:model.live="selectedType"
-                        class="w-full bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                        class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
                         <option value="all">All Types</option>
                         @foreach ($alertTypes as $key => $label)
@@ -97,22 +97,22 @@
 
             <!-- Sort Controls -->
             <div class="flex items-center gap-2">
-                <span class="text-sm text-slate-400">Sort by:</span>
+                <span class="text-sm text-[var(--sand)]">Sort by:</span>
                 <button 
                     wire:click="setSortBy('created_at')"
-                    class="px-3 py-1 rounded-lg text-sm {{ $sortBy === 'created_at' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600' }}"
+                    class="px-3 py-1 rounded-lg text-sm {{ $sortBy === 'created_at' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}"
                 >
                     Date
                 </button>
                 <button 
                     wire:click="setSortBy('priority')"
-                    class="px-3 py-1 rounded-lg text-sm {{ $sortBy === 'priority' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600' }}"
+                    class="px-3 py-1 rounded-lg text-sm {{ $sortBy === 'priority' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}"
                 >
                     Priority
                 </button>
                 <button 
                     wire:click="setSortBy('status')"
-                    class="px-3 py-1 rounded-lg text-sm {{ $sortBy === 'status' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600' }}"
+                    class="px-3 py-1 rounded-lg text-sm {{ $sortBy === 'status' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}"
                 >
                     Status
                 </button>
@@ -124,11 +124,11 @@
             <div class="space-y-3">
                 @foreach ($alerts as $alert)
                     @php
-                        $priorityClasses = $alert->priority === 'critical' ? 'border-red-700 bg-red-900/10' : ($alert->priority === 'high' ? 'border-orange-700 bg-orange-900/10' : ($alert->priority === 'medium' ? 'border-yellow-700 bg-yellow-900/10' : 'border-slate-700'));
+                        $priorityClasses = $alert->priority === 'critical' ? 'border-red-700 bg-red-900/10' : ($alert->priority === 'high' ? 'border-orange-700 bg-orange-900/10' : ($alert->priority === 'medium' ? 'border-yellow-700 bg-yellow-900/10' : 'border-[var(--line)]'));
                         $attentionClass = $alert->status === 'attention' ? 'border-red-700 bg-red-900/10' : '';
                     @endphp
 
-                    <div class="bg-slate-800 rounded-lg border {{ $priorityClasses }} {{ $attentionClass }} p-4 hover:border-blue-600 transition">
+                    <div class="bg-[var(--ink-soft)] rounded-lg border {{ $priorityClasses }} {{ $attentionClass }} p-4 hover:border-[var(--gold)]/50 transition">
                         <div class="flex items-start justify-between gap-4">
                             <!-- Alert Info -->
                             <div class="flex-1">
@@ -157,33 +157,33 @@
                                                         $statusClass = match($alert->status) {
                                                             'new' => 'bg-green-900 text-green-300',
                                                             'acknowledged' => 'bg-blue-900 text-blue-300',
-                                                            'resolved' => 'bg-slate-700 text-slate-300',
+                                                            'resolved' => 'bg-white/5 text-[var(--sand)]',
                                                             'attention' => 'bg-red-900 text-red-300',
                                                             'dismissed_unresolved' => 'bg-red-900 text-red-300',
-                                                            'dismissed' => 'bg-slate-600 text-slate-400',
-                                                            default => 'bg-slate-600 text-slate-400',
+                                                            'dismissed' => 'bg-white/10 text-[var(--sand)]',
+                                                            default => 'bg-white/10 text-[var(--sand)]',
                                                         };
                                                     @endphp
                                                     <span class="px-2 py-1 text-xs font-semibold rounded {{ $statusClass }}">{{ $statusLabel }}</span>
 
                                     <!-- Type Badge -->
-                                    <span class="px-2 py-1 text-xs font-medium rounded bg-slate-700 text-slate-300">
+                                    <span class="px-2 py-1 text-xs font-medium rounded bg-white/5 text-[var(--sand)]">
                                         {{ $alertTypes[$alert->type] ?? $alert->type }}
                                     </span>
                                 </div>
 
-                                <h3 class="text-lg font-semibold text-white mb-1">{{ $alert->title }}</h3>
-                                <p class="text-slate-400 text-sm">{{ $alert->description }}</p>
+                                <h3 class="text-lg font-semibold text-[var(--stone)] mb-1">{{ $alert->title }}</h3>
+                                <p class="text-[var(--sand)] text-sm">{{ $alert->description }}</p>
 
                                 @if($alert->machine)
-                                    <div class="mt-2 text-sm text-slate-500">
-                                        <a href="{{ route('fleet.show', $alert->machine->id) }}" class="text-blue-400 hover:text-blue-300">
+                                    <div class="mt-2 text-sm text-[var(--sand)]/70">
+                                        <a href="{{ route('fleet.show', $alert->machine->id) }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">
                                             Machine: {{ $alert->machine->name }}
                                         </a>
                                     </div>
                                 @endif
 
-                                <div class="mt-2 text-xs text-slate-500">
+                                <div class="mt-2 text-xs text-[var(--sand)]/70">
                                     {{ $alert->created_at->diffForHumans() }}
                                 </div>
                             </div>
@@ -192,7 +192,7 @@
                             <div class="flex items-center gap-2">
                                 <button 
                                     wire:click="showDetails({{ $alert->id }})"
-                                    class="px-3 py-1 text-sm bg-slate-700 text-slate-300 hover:bg-slate-600 rounded transition"
+                                    class="px-3 py-1 text-sm bg-white/5 text-[var(--sand)] hover:bg-white/10 rounded transition"
                                 >
                                     Details
                                 </button>
@@ -200,7 +200,7 @@
                                 @if($alert->status === 'new')
                                     <button 
                                         wire:click="acknowledgeAlert({{ $alert->id }})"
-                                        class="px-3 py-1 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded transition flex items-center gap-1"
+                                        class="px-3 py-1 text-sm bg-[var(--gold)] text-[var(--ink)] hover:bg-[var(--gold-soft)] rounded transition flex items-center gap-1 font-medium"
                                         wire:loading.attr="disabled"
                                         wire:target="acknowledgeAlert({{ $alert->id }})"
                                     >
@@ -214,7 +214,7 @@
                                 @if($alert->status !== 'resolved')
                                     <button 
                                         wire:click="resolveAlert({{ $alert->id }})"
-                                        class="px-3 py-1 text-sm bg-green-600 text-white hover:bg-green-700 rounded transition flex items-center gap-1"
+                                        class="px-3 py-1 text-sm bg-green-600 text-[var(--stone)] hover:bg-green-700 rounded transition flex items-center gap-1"
                                         wire:loading.attr="disabled"
                                         wire:target="resolveAlert({{ $alert->id }})"
                                     >
@@ -228,7 +228,7 @@
                                 @if($alert->status !== 'dismissed')
                                     <button 
                                         wire:click="dismissAlert({{ $alert->id }})"
-                                        class="px-3 py-1 text-sm bg-slate-600 text-white hover:bg-slate-500 rounded transition"
+                                        class="px-3 py-1 text-sm bg-white/10 text-[var(--stone)] hover:bg-white/15 rounded transition"
                                     >
                                         Dismiss
                                     </button>
@@ -245,14 +245,14 @@
             </div>
         @else
             <!-- Empty State -->
-            <div class="bg-slate-800 rounded-lg border border-slate-700 p-12 text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-700 mb-4">
-                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-12 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
+                    <svg class="w-8 h-8 text-[var(--sand)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                     </svg>
                 </div>
-                <h3 class="text-xl font-semibold text-white mb-2">No Alerts Found</h3>
-                <p class="text-slate-400">No alerts match your criteria. Great job!</p>
+                <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Alerts Found</h3>
+                <p class="text-[var(--sand)]">No alerts match your criteria. Great job!</p>
             </div>
         @endif
     </div>
@@ -264,12 +264,12 @@
             $modalSizeClass = $isSpeedAlert ? 'w-full max-w-3xl max-h-[80vh]' : 'w-96 max-h-96';
         @endphp
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-slate-800 rounded-lg border border-slate-700 p-6 {{ $modalSizeClass }} overflow-y-auto">
+            <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 {{ $modalSizeClass }} overflow-y-auto">
                 <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-lg font-semibold text-white">{{ $selectedAlert->title }}</h3>
+                    <h3 class="text-lg font-semibold text-[var(--stone)]">{{ $selectedAlert->title }}</h3>
                     <button 
                         wire:click="closeDetails"
-                        class="text-slate-400 hover:text-slate-300"
+                        class="text-[var(--sand)] hover:text-[var(--sand)]"
                     >
                         ✕
                     </button>
@@ -277,43 +277,43 @@
 
                 <div class="space-y-4">
                     <div>
-                        <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Description</div>
-                        <div class="text-slate-300">{{ $selectedAlert->description }}</div>
+                        <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Description</div>
+                        <div class="text-[var(--sand)]">{{ $selectedAlert->description }}</div>
                     </div>
 
                     @if($selectedAlert->details)
                         <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Details</div>
-                            <div class="text-slate-300 text-sm">{{ $selectedAlert->details }}</div>
+                            <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Details</div>
+                            <div class="text-[var(--sand)] text-sm">{{ $selectedAlert->details }}</div>
                         </div>
                     @endif
 
                     <div>
-                        <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Priority</div>
-                        <div class="text-slate-300">{{ ucfirst($selectedAlert->priority) }}</div>
+                        <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Priority</div>
+                        <div class="text-[var(--sand)]">{{ ucfirst($selectedAlert->priority) }}</div>
                     </div>
 
                     <div>
-                        <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Status</div>
-                        <div class="text-slate-300">{{ ucfirst($selectedAlert->status) }}</div>
+                        <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Status</div>
+                        <div class="text-[var(--sand)]">{{ ucfirst($selectedAlert->status) }}</div>
                     </div>
 
                     <div>
-                        <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Created</div>
-                        <div class="text-slate-300">{{ $selectedAlert->created_at->format('M d, Y H:i') }}</div>
+                        <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Created</div>
+                        <div class="text-[var(--sand)]">{{ $selectedAlert->created_at->format('M d, Y H:i') }}</div>
                     </div>
 
                     @if($selectedAlert->acknowledged_at)
                         <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Acknowledged</div>
-                            <div class="text-slate-300">{{ $selectedAlert->acknowledged_at->format('M d, Y H:i') }}</div>
+                            <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Acknowledged</div>
+                            <div class="text-[var(--sand)]">{{ $selectedAlert->acknowledged_at->format('M d, Y H:i') }}</div>
                         </div>
                     @endif
 
                     @if($selectedAlert->resolved_at)
                         <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Resolved</div>
-                            <div class="text-slate-300">{{ $selectedAlert->resolved_at->format('M d, Y H:i') }}</div>
+                            <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Resolved</div>
+                            <div class="text-[var(--sand)]">{{ $selectedAlert->resolved_at->format('M d, Y H:i') }}</div>
                         </div>
                     @endif
 
@@ -322,63 +322,63 @@
                         <!-- Expanded speed alert context -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <div class="text-xs font-semibold text-slate-400 uppercase mb-1">GPS Coordinates</div>
-                                <div class="text-slate-300 text-sm">
+                                <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">GPS Coordinates</div>
+                                <div class="text-[var(--sand)] text-sm">
                                     @if(is_array($selectedAlert->metadata ?? []) && isset($selectedAlert->metadata['latitude']) && isset($selectedAlert->metadata['longitude']))
                                         {{ $selectedAlert->metadata['latitude'] }}, {{ $selectedAlert->metadata['longitude'] }}
-                                        <a href="https://maps.google.com/?q={{ $selectedAlert->metadata['latitude'] }},{{ $selectedAlert->metadata['longitude'] }}" target="_blank" class="text-amber-400 hover:text-amber-300 ml-2 text-xs">View on map →</a>
+                                        <a href="https://maps.google.com/?q={{ $selectedAlert->metadata['latitude'] }},{{ $selectedAlert->metadata['longitude'] }}" target="_blank" class="text-[var(--gold)] hover:text-[var(--gold-soft)] ml-2 text-xs">View on map →</a>
                                     @elseif($selectedAlert->machine && $selectedAlert->machine->last_location_latitude)
                                         {{ $selectedAlert->machine->last_location_latitude }}, {{ $selectedAlert->machine->last_location_longitude }}
-                                        <a href="https://maps.google.com/?q={{ $selectedAlert->machine->last_location_latitude }},{{ $selectedAlert->machine->last_location_longitude }}" target="_blank" class="text-amber-400 hover:text-amber-300 ml-2 text-xs">View on map →</a>
+                                        <a href="https://maps.google.com/?q={{ $selectedAlert->machine->last_location_latitude }},{{ $selectedAlert->machine->last_location_longitude }}" target="_blank" class="text-[var(--gold)] hover:text-[var(--gold-soft)] ml-2 text-xs">View on map →</a>
                                     @else
-                                        <span class="text-slate-500">No coordinates available</span>
+                                        <span class="text-[var(--sand)]/70">No coordinates available</span>
                                     @endif
                                 </div>
                             </div>
 
                             <div>
-                                <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Associated Geofence</div>
-                                <div class="text-slate-300">
+                                <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Associated Geofence</div>
+                                <div class="text-[var(--sand)]">
                                     @if(isset($selectedAlert->geofence) && $selectedAlert->geofence)
                                         {{ $selectedAlert->geofence->name }}
                                     @elseif(is_array($selectedAlert->metadata ?? []) && isset($selectedAlert->metadata['geofence_name']))
                                         {{ $selectedAlert->metadata['geofence_name'] }}
                                     @else
-                                        <span class="text-slate-500">N/A</span>
+                                        <span class="text-[var(--sand)]/70">N/A</span>
                                     @endif
                                 </div>
                             </div>
 
                             <div>
-                                <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Mining Area</div>
-                                <div class="text-slate-300">
+                                <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Mining Area</div>
+                                <div class="text-[var(--sand)]">
                                     @if($selectedAlert->mineArea)
-                                        <a href="{{ route('mine-areas.show', $selectedAlert->mineArea->id) }}" class="text-amber-400 hover:text-amber-300">{{ $selectedAlert->mineArea->name }}</a>
+                                        <a href="{{ route('mine-areas.show', $selectedAlert->mineArea->id) }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">{{ $selectedAlert->mineArea->name }}</a>
                                     @else
-                                        <span class="text-slate-500">N/A</span>
+                                        <span class="text-[var(--sand)]/70">N/A</span>
                                     @endif
                                 </div>
                             </div>
 
                             <div>
-                                <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Asset</div>
-                                <div class="text-slate-300">
+                                <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Asset</div>
+                                <div class="text-[var(--sand)]">
                                     @if($selectedAlert->machine)
-                                        <a href="{{ route('fleet.show', $selectedAlert->machine->id) }}" class="text-amber-400 hover:text-amber-300">{{ $selectedAlert->machine->name }}</a>
+                                        <a href="{{ route('fleet.show', $selectedAlert->machine->id) }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">{{ $selectedAlert->machine->name }}</a>
                                     @else
-                                        <span class="text-slate-500">Unlinked asset</span>
+                                        <span class="text-[var(--sand)]/70">Unlinked asset</span>
                                     @endif
                                 </div>
                             </div>
 
                             <div>
-                                <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Timestamp</div>
-                                <div class="text-slate-300">{{ $selectedAlert->created_at->format('M d, Y H:i:s') }}</div>
+                                <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Timestamp</div>
+                                <div class="text-[var(--sand)]">{{ $selectedAlert->created_at->format('M d, Y H:i:s') }}</div>
                             </div>
 
                             <div>
-                                <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Management Chain</div>
-                                <div class="text-slate-300 text-sm">
+                                <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Management Chain</div>
+                                <div class="text-[var(--sand)] text-sm">
                                     @php
                                         // Try to resolve management chain from alert data, else fall back to mineAreaManagers
                                         $chain = $selectedAlert->management_chain ?? null;
@@ -416,25 +416,25 @@
                                         <li>
                                             <strong>Mine Supervisor:</strong>
                                             @if($supervisor)
-                                                {{ $supervisor['name'] }} <span class="text-slate-500">({{ $supervisor['role'] }})</span> — <a href="mailto:{{ $supervisor['email'] }}" class="text-amber-400">{{ $supervisor['email'] }}</a>
+                                                {{ $supervisor['name'] }} <span class="text-[var(--sand)]/70">({{ $supervisor['role'] }})</span> — <a href="mailto:{{ $supervisor['email'] }}" class="text-[var(--gold)]">{{ $supervisor['email'] }}</a>
                                             @else
-                                                <span class="text-slate-500">Unassigned</span>
+                                                <span class="text-[var(--sand)]/70">Unassigned</span>
                                             @endif
                                         </li>
                                         <li>
                                             <strong>Operations Manager:</strong>
                                             @if($opsManager)
-                                                {{ $opsManager['name'] }} <span class="text-slate-500">({{ $opsManager['role'] }})</span> — <a href="mailto:{{ $opsManager['email'] }}" class="text-amber-400">{{ $opsManager['email'] }}</a>
+                                                {{ $opsManager['name'] }} <span class="text-[var(--sand)]/70">({{ $opsManager['role'] }})</span> — <a href="mailto:{{ $opsManager['email'] }}" class="text-[var(--gold)]">{{ $opsManager['email'] }}</a>
                                             @else
-                                                <span class="text-slate-500">Unassigned</span>
+                                                <span class="text-[var(--sand)]/70">Unassigned</span>
                                             @endif
                                         </li>
                                         <li>
                                             <strong>Safety Officer:</strong>
                                             @if($safetyOfficer)
-                                                {{ $safetyOfficer['name'] }} <span class="text-slate-500">({{ $safetyOfficer['role'] }})</span> — <a href="mailto:{{ $safetyOfficer['email'] }}" class="text-amber-400">{{ $safetyOfficer['email'] }}</a>
+                                                {{ $safetyOfficer['name'] }} <span class="text-[var(--sand)]/70">({{ $safetyOfficer['role'] }})</span> — <a href="mailto:{{ $safetyOfficer['email'] }}" class="text-[var(--gold)]">{{ $safetyOfficer['email'] }}</a>
                                             @else
-                                                <span class="text-slate-500">Unassigned</span>
+                                                <span class="text-[var(--sand)]/70">Unassigned</span>
                                             @endif
                                         </li>
                                     </ul>
@@ -443,55 +443,55 @@
                         </div>
                     @else
                         <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Location</div>
-                            <div class="text-slate-300 text-sm">
+                            <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Location</div>
+                            <div class="text-[var(--sand)] text-sm">
                                 @if(is_array($selectedAlert->metadata ?? []) && isset($selectedAlert->metadata['latitude']) && isset($selectedAlert->metadata['longitude']))
                                     {{ $selectedAlert->metadata['latitude'] }}, {{ $selectedAlert->metadata['longitude'] }}
-                                    <a href="https://maps.google.com/?q={{ $selectedAlert->metadata['latitude'] }},{{ $selectedAlert->metadata['longitude'] }}" target="_blank" class="text-amber-400 hover:text-amber-300 ml-2 text-xs">View on map →</a>
+                                    <a href="https://maps.google.com/?q={{ $selectedAlert->metadata['latitude'] }},{{ $selectedAlert->metadata['longitude'] }}" target="_blank" class="text-[var(--gold)] hover:text-[var(--gold-soft)] ml-2 text-xs">View on map →</a>
                                 @elseif($selectedAlert->machine && $selectedAlert->machine->last_location_latitude)
                                     {{ $selectedAlert->machine->last_location_latitude }}, {{ $selectedAlert->machine->last_location_longitude }}
-                                    <a href="https://maps.google.com/?q={{ $selectedAlert->machine->last_location_latitude }},{{ $selectedAlert->machine->last_location_longitude }}" target="_blank" class="text-amber-400 hover:text-amber-300 ml-2 text-xs">View on map →</a>
+                                    <a href="https://maps.google.com/?q={{ $selectedAlert->machine->last_location_latitude }},{{ $selectedAlert->machine->last_location_longitude }}" target="_blank" class="text-[var(--gold)] hover:text-[var(--gold-soft)] ml-2 text-xs">View on map →</a>
                                 @else
-                                    <span class="text-slate-500">No coordinates available</span>
+                                    <span class="text-[var(--sand)]/70">No coordinates available</span>
                                 @endif
                             </div>
                         </div>
 
                         <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Geofence</div>
-                            <div class="text-slate-300">
+                            <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Geofence</div>
+                            <div class="text-[var(--sand)]">
                                 @if(isset($selectedAlert->geofence) && $selectedAlert->geofence)
                                     {{ $selectedAlert->geofence->name }}
                                 @elseif(is_array($selectedAlert->metadata ?? []) && isset($selectedAlert->metadata['geofence_name']))
                                     {{ $selectedAlert->metadata['geofence_name'] }}
                                 @else
-                                    <span class="text-slate-500">N/A</span>
+                                    <span class="text-[var(--sand)]/70">N/A</span>
                                 @endif
                             </div>
                         </div>
 
                         <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Mine Area</div>
-                            <div class="text-slate-300">
+                            <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Mine Area</div>
+                            <div class="text-[var(--sand)]">
                                 @if($selectedAlert->mineArea)
-                                    <a href="{{ route('mine-areas.show', $selectedAlert->mineArea->id) }}" class="text-amber-400 hover:text-amber-300">{{ $selectedAlert->mineArea->name }}</a>
+                                    <a href="{{ route('mine-areas.show', $selectedAlert->mineArea->id) }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">{{ $selectedAlert->mineArea->name }}</a>
                                 @else
-                                    <span class="text-slate-500">N/A</span>
+                                    <span class="text-[var(--sand)]/70">N/A</span>
                                 @endif
                             </div>
                         </div>
 
                     <div>
-                        <div class="text-xs font-semibold text-slate-400 uppercase mb-1">Mine Area Managers</div>
-                        <div class="text-slate-300 text-sm">
+                        <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Mine Area Managers</div>
+                        <div class="text-[var(--sand)] text-sm">
                             @if(!empty($mineAreaManagers) && count($mineAreaManagers) > 0)
                                 <ul class="list-disc pl-5">
                                     @foreach($mineAreaManagers as $mgr)
-                                        <li class="text-slate-300">{{ $mgr['name'] }} <span class="text-slate-500">({{ $mgr['role'] }})</span> — <a href="mailto:{{ $mgr['email'] }}" class="text-amber-400">{{ $mgr['email'] }}</a></li>
+                                        <li class="text-[var(--sand)]">{{ $mgr['name'] }} <span class="text-[var(--sand)]/70">({{ $mgr['role'] }})</span> — <a href="mailto:{{ $mgr['email'] }}" class="text-[var(--gold)]">{{ $mgr['email'] }}</a></li>
                                     @endforeach
                                 </ul>
                             @else
-                                <span class="text-slate-500">No managers assigned</span>
+                                <span class="text-[var(--sand)]/70">No managers assigned</span>
                             @endif
                         </div>
                     </div>
@@ -499,10 +499,10 @@
 
                     @endif
 
-                <div class="flex gap-2 justify-end mt-6 pt-4 border-t border-slate-700">
+                <div class="flex gap-2 justify-end mt-6 pt-4 border-t border-[var(--line)]">
                     <button 
                         wire:click="closeDetails"
-                        class="px-4 py-2 bg-slate-700 text-white rounded hover:bg-slate-600 transition"
+                        class="px-4 py-2 bg-white/5 text-[var(--stone)] rounded hover:bg-white/10 transition"
                     >
                         Close
                     </button>
@@ -515,22 +515,22 @@
     @if($showDismissConfirm && isset($pendingDismissAlertId))
         @php $pendingAlert = \App\Models\Alert::find($pendingDismissAlertId); @endphp
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-slate-800 rounded-lg border border-slate-700 p-6 w-96 max-h-80 overflow-y-auto">
+            <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 w-96 max-h-80 overflow-y-auto">
                 <div class="mb-4">
-                    <h3 class="text-lg font-semibold text-white">Confirm Dismissal</h3>
-                    <p class="text-sm text-slate-400 mt-2">This issue remains unresolved. Dismissing may affect operational safety. Continue?</p>
+                    <h3 class="text-lg font-semibold text-[var(--stone)]">Confirm Dismissal</h3>
+                    <p class="text-sm text-[var(--sand)] mt-2">This issue remains unresolved. Dismissing may affect operational safety. Continue?</p>
                 </div>
 
                 <div class="space-y-3">
-                    <div class="text-sm text-slate-300">
+                    <div class="text-sm text-[var(--sand)]">
                         <strong>{{ $pendingAlert?->title }}</strong>
-                        <div class="text-slate-400 text-xs mt-1">{{ $pendingAlert?->description }}</div>
+                        <div class="text-[var(--sand)] text-xs mt-1">{{ $pendingAlert?->description }}</div>
                     </div>
                 </div>
 
-                <div class="flex gap-2 justify-end mt-6 pt-4 border-t border-slate-700">
-                    <button wire:click="cancelDismiss" class="px-4 py-2 bg-slate-700 text-white rounded hover:bg-slate-600">Cancel</button>
-                    <button wire:click="confirmDismiss('confirm')" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500">Confirm Dismiss</button>
+                <div class="flex gap-2 justify-end mt-6 pt-4 border-t border-[var(--line)]">
+                    <button wire:click="cancelDismiss" class="px-4 py-2 bg-white/5 text-[var(--stone)] rounded hover:bg-white/10">Cancel</button>
+                    <button wire:click="confirmDismiss('confirm')" class="px-4 py-2 bg-red-600 text-[var(--stone)] rounded hover:bg-red-500">Confirm Dismiss</button>
                 </div>
             </div>
         </div>

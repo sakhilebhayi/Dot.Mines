@@ -11,6 +11,7 @@ use App\Livewire\BillingPortal;
 use App\Livewire\Documentation;
 use App\Livewire\FleetMovementReplay;
 use App\Livewire\FuelManagement;
+use App\Livewire\MachineAssignmentManager;
 use App\Livewire\MaintenanceDashboard;
 use App\Livewire\MineAreaDetail;
 use App\Livewire\OperatorFatigueTracker;
@@ -91,6 +92,9 @@ Route::middleware([
 
     Route::get('/mine-areas/{mineArea}', MineAreaDetail::class)
         ->name('mine-areas.show');
+
+    Route::get('/mine-areas/{mineArea}/assignments', MachineAssignmentManager::class)
+        ->name('mine-areas.assignments');
 
     // Reports
     Route::get('/reports', function () {

@@ -3,30 +3,42 @@
 namespace App\Livewire;
 
 use App\Models\Geofence;
-use App\Models\GeofenceEntry;
 use App\Models\MineArea;
+use App\Traits\BrowserEventBridge;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
 
 class GeofenceManager extends Component
 {
+    use BrowserEventBridge;
     use WithPagination;
 
     public string $search = '';
+
     public string $sortBy = 'name';
+
     public string $sortDirection = 'asc';
+
     public bool $showCreateModal = false;
 
     // Form properties
     public ?int $editingGeofenceId = null;
+
     public ?int $teamId = null;
+
     public ?int $mineAreaId = null;
+
     public string $name = '';
+
     public string $description = '';
+
     public string $type = 'pit';
+
     public float $centerLatitude = 0;
+
     public float $centerLongitude = 0;
+
     public array $coordinates = [];
 
     /** @var array<string, string> */
@@ -118,9 +130,11 @@ class GeofenceManager extends Component
 
         if ($this->editingGeofenceId) {
             $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->editingGeofenceId);
+            $this->authorize('update', $geofence);
             $geofence->update($data);
             $this->dispatchBrowserEvent('notify', ['message' => 'Geofence updated successfully', 'type' => 'success']);
         } else {
+            $this->authorize('create', Geofence::class);
             $data['team_id'] = $team->id;
             Geofence::create($data);
             $this->dispatchBrowserEvent('notify', ['message' => 'Geofence created successfully', 'type' => 'success']);
@@ -131,9 +145,7 @@ class GeofenceManager extends Component
 
     public function deleteGeofence(Geofence $geofence): void
     {
-        if ($geofence->team_id !== Auth::user()->currentTeam->id) {
-            abort(403);
-        }
+        $this->authorize('delete', $geofence);
 
         $geofenceName = $geofence->name;
         $geofence->delete();

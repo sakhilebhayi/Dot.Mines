@@ -3,15 +3,15 @@
 namespace App\Livewire;
 
 use App\Models\User;
-use Livewire\Component;
+use App\Services\TeamRoleProvisioner;
 use App\Traits\BrowserEventBridge;
 use Livewire\Attributes\Validate;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class Settings extends Component
 {
     use BrowserEventBridge;
+
     public string $activeTab = 'general';
 
     // General Settings
@@ -32,16 +32,24 @@ class Settings extends Component
 
     // Users & Roles
     public array $teamMembers = [];
+
     public string $inviteEmail = '';
+
     public string $selectedRole = 'operator';
+
     public bool $showInviteForm = false;
 
     // Notification Settings
     public bool $emailAlerts = true;
+
     public bool $emailReports = true;
+
     public bool $inAppAlerts = true;
+
     public string $quietHoursStart = '22:00';
+
     public string $quietHoursEnd = '08:00';
+
     public bool $quietHoursEnabled = false;
 
     /** @var array<string, string> */
@@ -86,6 +94,8 @@ class Settings extends Component
         $this->validate();
 
         $team = auth()->user()->currentTeam;
+        $this->authorize('update', $team);
+
         $team->update([
             'name' => $this->teamName,
             'email' => $this->teamEmail,
@@ -119,8 +129,8 @@ class Settings extends Component
 
     public function toggleInviteForm()
     {
-        $this->showInviteForm = !$this->showInviteForm;
-        if (!$this->showInviteForm) {
+        $this->showInviteForm = ! $this->showInviteForm;
+        if (! $this->showInviteForm) {
             $this->inviteEmail = '';
             $this->selectedRole = 'operator';
         }
@@ -135,17 +145,19 @@ class Settings extends Component
 
         try {
             $team = auth()->user()->currentTeam;
-            
+            $this->authorize('addTeamMember', $team);
+
             // Check if user already invited/member
             $existingUser = User::where('email', $this->inviteEmail)->first();
             if ($existingUser && $team->users->contains($existingUser->id)) {
                 $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User is already a team member']);
+
                 return;
             }
 
             // In production, would send actual invitation email
             // For now, create the user if they don't exist
-            if (!$existingUser) {
+            if (! $existingUser) {
                 $existingUser = User::create([
                     'name' => explode('@', $this->inviteEmail)[0],
                     'email' => $this->inviteEmail,
@@ -156,11 +168,8 @@ class Settings extends Component
             // Add user to team
             $team->users()->attach($existingUser->id);
 
-            // Assign role
-            $role = \App\Models\Role::where('name', $this->selectedRole)->first();
-            if ($role) {
-                $existingUser->roles()->attach($role->id);
-            }
+            // Assign role (provisions this team's roles/permissions first if they don't exist yet)
+            TeamRoleProvisioner::assignRole($existingUser, $team, $this->selectedRole);
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => "Invitation sent to {$this->inviteEmail}"]);
             $this->showInviteForm = false;
@@ -168,7 +177,7 @@ class Settings extends Component
             $this->selectedRole = 'operator';
             $this->loadTeamMembers();
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to invite user: ' . $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to invite user: '.$e->getMessage()]);
         }
     }
 
@@ -176,11 +185,13 @@ class Settings extends Component
     {
         try {
             $team = auth()->user()->currentTeam;
+            $this->authorize('removeTeamMember', $team);
             $currentUser = auth()->user();
 
             // Prevent removing self
-            if ($userId === $currentUser->id) {
+            if ((int) $userId === (int) $currentUser->id) {
                 $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Cannot remove yourself from the team']);
+
                 return;
             }
 
@@ -196,23 +207,19 @@ class Settings extends Component
     {
         try {
             $team = auth()->user()->currentTeam;
+            $this->authorize('updateTeamMember', $team);
 
             // Ensure the user is a member of this team
             if (! $team->users()->where('id', $userId)->exists()) {
                 $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User is not a member of this team']);
+
                 return;
             }
 
             $team = auth()->user()->currentTeam;
             $user = $team->users()->findOrFail($userId);
-            // Remove old roles
-            $user->roles()->detach();
-            
-            // Add new role
-            $role = \App\Models\Role::where('name', $newRole)->first();
-            if ($role) {
-                $user->roles()->attach($role->id);
-            }
+
+            TeamRoleProvisioner::assignRole($user, $team, $newRole);
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'User role updated']);
             $this->loadTeamMembers();
@@ -239,7 +246,7 @@ class Settings extends Component
 
             // Store preferences (would use a proper preferences table in production)
             // For now, just dispatch success
-            
+
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Notification settings saved']);
         } catch (\Exception $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to save settings']);

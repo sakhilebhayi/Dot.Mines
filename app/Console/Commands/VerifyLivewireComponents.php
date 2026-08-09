@@ -43,7 +43,6 @@ class VerifyLivewireComponents extends Command
             'machine-assignment-manager',
             'machine-detail',
             'maintenance-dashboard',
-            'mine-plan-uploader',
             'navbar',
             'report-generator',
             'reports',
@@ -72,8 +71,8 @@ class VerifyLivewireComponents extends Command
         $this->info('App Components:');
         foreach ($appComponents as $component) {
             // Convert kebab-case to PascalCase class name
-            $className = 'App\\Livewire\\' . str_replace(' ', '', ucwords(str_replace('-', ' ', $component)));
-            
+            $className = 'App\\Livewire\\'.str_replace(' ', '', ucwords(str_replace('-', ' ', $component)));
+
             if (class_exists($className)) {
                 $this->line("  <fg=green>✓</> {$component} ({$className})");
             } else {
@@ -89,14 +88,14 @@ class VerifyLivewireComponents extends Command
             $componentParts = explode('.', $component);
             if (count($componentParts) > 1) {
                 // profile.update-profile-information-form -> UpdateProfileInformationForm
-                $className = 'Laravel\\Jetstream\\Http\\Livewire\\' . 
+                $className = 'Laravel\\Jetstream\\Http\\Livewire\\'.
                     str_replace(' ', '', ucwords(str_replace('-', ' ', $componentParts[1])));
             } else {
                 // navigation-menu -> NavigationMenu
-                $className = 'Laravel\\Jetstream\\Http\\Livewire\\' . 
+                $className = 'Laravel\\Jetstream\\Http\\Livewire\\'.
                     str_replace(' ', '', ucwords(str_replace('-', ' ', $component)));
             }
-            
+
             if (class_exists($className)) {
                 $this->line("  <fg=green>✓</> {$component} ({$className})");
             } else {
@@ -107,11 +106,13 @@ class VerifyLivewireComponents extends Command
 
         $this->newLine();
         if (count($errors) > 0) {
-            $this->error('Found ' . count($errors) . ' component(s) with errors!');
+            $this->error('Found '.count($errors).' component(s) with errors!');
+
             return self::FAILURE;
         }
 
         $this->info('✓ All components are properly registered!');
+
         return self::SUCCESS;
     }
 }

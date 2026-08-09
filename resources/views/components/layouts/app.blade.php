@@ -16,9 +16,10 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <!-- Fonts — matches the guest/marketing pages (welcome.blade.php, layouts/guest.blade.php) -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -26,7 +27,7 @@
         <!-- Styles -->
         @livewireStyles
     </head>
-    <body class="font-sans antialiased bg-gray-900 text-gray-100">
+    <body class="antialiased bg-[var(--ink)] text-[var(--stone)]" style="font-family: var(--font-body);">
         <div class="min-h-screen flex">
             <!-- Sidebar Navigation -->
             @livewire('sidebar')
@@ -37,7 +38,7 @@
                 @livewire('navbar')
 
                 <!-- Page Content -->
-                <main class="flex-1 overflow-auto bg-gray-900">
+                <main class="flex-1 overflow-auto bg-[var(--ink)]">
                     <div class="p-6">
                         {{ $slot }}
                     </div>

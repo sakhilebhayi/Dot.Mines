@@ -6,11 +6,11 @@
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- Left: Map and controls -->
             <div class="w-full space-y-6">
-                <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+                <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 mb-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h1 class="text-2xl font-bold text-white">Live Fleet Tracking</h1>
+                        <h1 class="text-2xl font-bold text-[var(--stone)]">Live Fleet Tracking</h1>
                         <div class="flex flex-wrap gap-2 items-center">
-                            <button wire:click="toggleMachines" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showMachines ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-700 hover:bg-gray-600' }} text-white text-sm">
+                            <button wire:click="toggleMachines" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showMachines ? 'bg-green-600 hover:bg-green-700' : 'bg-white/5 hover:bg-white/10 border border-[var(--line)]' }} text-[var(--stone)] text-sm">
                                 <span class="flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -18,7 +18,7 @@
                                     Machines {{ $showMachines ? '(On)' : '(Off)' }}
                                 </span>
                             </button>
-                            <button wire:click="toggleGeofences" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showGeofences ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600' }} text-white text-sm">
+                            <button wire:click="toggleGeofences" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showGeofences ? 'bg-blue-600 hover:bg-blue-700' : 'bg-white/5 hover:bg-white/10 border border-[var(--line)]' }} text-[var(--stone)] text-sm">
                                 <span class="flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6 3m-6-3v-13m6 3l5.553-2.776A1 1 0 0121 5.618v10.764a1 1 0 01-1.447.894L15 20m0-13v13"></path>
@@ -27,7 +27,7 @@
                                 </span>
                             </button>
                             <!-- Action Buttons moved here -->
-                            <a href="{{ route('fleet.route-planning') }}" class="px-4 py-2 min-w-[9rem] text-sm bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-lg transition-all font-medium flex items-center gap-2">
+                            <a href="{{ route('fleet.route-planning') }}" class="px-4 py-2 min-w-[9rem] text-sm bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg transition-all font-display font-semibold flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
@@ -37,19 +37,19 @@
                     </div>
                     <div class="flex flex-col md:flex-row gap-4 mb-4">
                         <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Map Style</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Map Style</label>
                             <div class="flex gap-2">
-                                <button wire:click="changeMapStyle('osm')" class="flex-1 px-3 py-2 rounded-lg {{ $mapStyle === 'osm' ? 'bg-amber-600' : 'bg-gray-700 hover:bg-gray-600' }} text-white text-sm transition-colors">
+                                <button wire:click="changeMapStyle('osm')" class="flex-1 px-3 py-2 rounded-lg {{ $mapStyle === 'osm' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)]' }} text-sm transition-colors">
                                     Standard
                                 </button>
-                                <button wire:click="changeMapStyle('satellite')" class="flex-1 px-3 py-2 rounded-lg {{ $mapStyle === 'satellite' ? 'bg-amber-600' : 'bg-gray-700 hover:bg-gray-600' }} text-white text-sm transition-colors">
+                                <button wire:click="changeMapStyle('satellite')" class="flex-1 px-3 py-2 rounded-lg {{ $mapStyle === 'satellite' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)]' }} text-sm transition-colors">
                                     Satellite
                                 </button>
                             </div>
                         </div>
                         <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Filter by Status</label>
-                            <select wire:model.live="selectedStatus" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500">
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Filter by Status</label>
+                            <select wire:model.live="selectedStatus" class="w-full px-3 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm focus:outline-none focus:border-[var(--gold)]">
                                 <option value="">All Machines</option>
                                 <option value="active">Active Only</option>
                                 <option value="idle">Idle Only</option>
@@ -58,8 +58,8 @@
                         </div>
 
                         <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Select Mine Area</label>
-                            <select id="mineAreaSelect" wire:model.live="selectedMineAreaId" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500">
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Select Mine Area</label>
+                            <select id="mineAreaSelect" wire:model.live="selectedMineAreaId" class="w-full px-3 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm focus:outline-none focus:border-[var(--gold)]">
                                 <option value="">All Areas</option>
                                 @foreach($mineAreas ?? [] as $area)
                                     <option value="{{ data_get($area, 'id') }}">{{ data_get($area, 'name') }} @if(data_get($area, 'type')) ({{ ucfirst(data_get($area, 'type')) }})@endif</option>
@@ -68,15 +68,15 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-2 mb-4">
-                        <div class="bg-green-600 bg-opacity-20 rounded-lg p-2 border border-green-600">
+                        <div class="bg-green-600/20 rounded-lg p-2 border border-green-600">
                             <p class="text-green-400 text-xs font-semibold">ACTIVE</p>
                             <p class="text-green-300 text-lg font-bold">{{ $machineStatuses['active'] ?? 0 }}</p>
                         </div>
-                        <div class="bg-blue-600 bg-opacity-20 rounded-lg p-2 border border-blue-600">
+                        <div class="bg-blue-600/20 rounded-lg p-2 border border-blue-600">
                             <p class="text-blue-400 text-xs font-semibold">IDLE</p>
                             <p class="text-blue-300 text-lg font-bold">{{ $machineStatuses['idle'] ?? 0 }}</p>
                         </div>
-                        <div class="bg-red-600 bg-opacity-20 rounded-lg p-2 border border-red-600">
+                        <div class="bg-red-600/20 rounded-lg p-2 border border-red-600">
                             <p class="text-red-400 text-xs font-semibold">MAINT</p>
                             <p class="text-red-300 text-lg font-bold">{{ $machineStatuses['maintenance'] ?? 0 }}</p>
                         </div>
@@ -84,7 +84,7 @@
                     <div
                         wire:ignore
                         id="map"
-                        class="w-full h-[36rem] rounded-lg shadow-lg bg-gray-900"
+                        class="w-full h-[36rem] rounded-lg shadow-lg bg-[var(--ink)]"
                         style="height:36rem;"
                         data-machines="{{ json_encode($machines) }}"
                         data-geofences="{{ json_encode($geofences) }}"
@@ -97,15 +97,15 @@
                         data-zoom-level="{{ $zoomLevel }}"
                     ></div>
                     <div id="map-toast" class="hidden fixed top-4 right-4 z-50 pointer-events-none">
-                        <div class="bg-amber-600 text-white px-4 py-2 rounded shadow-lg text-sm message"></div>
+                        <div class="bg-[var(--gold)] text-[var(--ink)] px-4 py-2 rounded shadow-lg text-sm message"></div>
                     </div>
-                    <div id="map-loading" class="absolute inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50" style="display:none;">
+                    <div id="map-loading" class="absolute inset-0 bg-[var(--ink)]/90 flex items-center justify-center z-50" style="display:none;">
                         <div class="text-center">
                             <div class="text-6xl mb-4">🗺️</div>
-                            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
-                            <h3 class="text-xl font-semibold text-white mt-4 mb-2">Loading map...</h3>
-                            <p class="text-gray-400 mb-2">Fetching live fleet and geofence data.</p>
-                            <ul class="text-sm text-gray-500 mb-4 space-y-1">
+                            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--gold)]"></div>
+                            <h3 class="text-xl font-semibold text-[var(--stone)] mt-4 mb-2">Loading map...</h3>
+                            <p class="text-[var(--sand)] mb-2">Fetching live fleet and geofence data.</p>
+                            <ul class="text-sm text-[var(--sand)] mb-4 space-y-1">
                                 <li>• If loading takes too long, check your connection</li>
                                 <li>• Refresh the page if the map does not appear</li>
                                 <li>• Data will update in real time once loaded</li>

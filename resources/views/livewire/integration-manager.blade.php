@@ -2,40 +2,41 @@
     <!-- Header -->
     <div class="mb-8">
         <div class="flex items-center justify-between">
-                    <div class="mb-4 p-4 bg-blue-900/30 rounded-lg text-blue-200 text-sm">
-                        <strong>Integration Setup Guide:</strong><br>
-                        1. Select your equipment manufacturer.<br>
-                        2. Enter your API credentials (get these from your provider dashboard).<br>
-                        3. Optionally set a custom API endpoint, sync frequency, and connection type.<br>
-                        4. Test the connection before saving.<br>
-                        5. For webhook integrations, copy the provided URL and set it in your provider dashboard.<br>
-                        6. You will receive alerts at your notification email if sync fails.
-                    </div>
             <div>
-                <h2 class="text-3xl font-bold text-white">Integrations</h2>
-                <p class="text-gray-400 mt-2">Manage your equipment manufacturer connections</p>
+                <h2 class="text-3xl font-display font-semibold text-[var(--stone)]">Integrations</h2>
+                <p class="text-[var(--sand)] mt-2">Manage your equipment manufacturer connections</p>
             </div>
-            <button 
+            <button
                 wire:click="openAddModal"
-                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                class="px-6 py-3 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-display font-semibold transition"
             >
                 + Add Integration
             </button>
+        </div>
+
+        <div class="mt-4 p-4 bg-[var(--gold)]/10 border border-[var(--gold)]/20 rounded-lg text-[var(--sand)] text-sm">
+            <strong class="text-[var(--stone)]">Integration Setup Guide:</strong><br>
+            1. Select your equipment manufacturer.<br>
+            2. Enter your API credentials (get these from your provider dashboard).<br>
+            3. Optionally set a custom API endpoint, sync frequency, and connection type.<br>
+            4. Test the connection before saving.<br>
+            5. For webhook integrations, copy the provided URL and set it in your provider dashboard.<br>
+            6. You will receive alerts at your notification email if sync fails.
         </div>
     </div>
 
     <!-- Available Manufacturers Info -->
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 mb-8">
         @foreach($availableManufacturers as $key => $mfr)
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 text-center">
+            <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-4 text-center">
                 <div class="text-3xl mb-2">{{ $mfr['icon'] }}</div>
-                <h3 class="text-white font-semibold">{{ $mfr['name'] }}</h3>
-                <p class="text-gray-400 text-xs mt-1">{{ $mfr['description'] }}</p>
+                <h3 class="text-[var(--stone)] font-semibold">{{ $mfr['name'] }}</h3>
+                <p class="text-[var(--sand)] text-xs mt-1">{{ $mfr['description'] }}</p>
                 <div class="mt-3">
                     @if(in_array($key, array_map(fn($i) => $i['provider'], $integrations)))
                         <span class="inline-block px-2 py-1 bg-green-900 text-green-200 text-xs rounded">Connected</span>
                     @else
-                        <span class="inline-block px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded">Available</span>
+                        <span class="inline-block px-2 py-1 bg-white/10 text-[var(--sand)] text-xs rounded">Available</span>
                     @endif
                 </div>
             </div>
@@ -44,31 +45,31 @@
 
     <!-- Integrations List -->
     @if(count($integrations) > 0)
-        <div class="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-900 border-b border-gray-700">
+                    <thead class="bg-[var(--ink)] border-b border-[var(--line)]">
                         <tr>
-                            <th class="px-6 py-4 text-left text-white font-semibold">Manufacturer</th>
-                            <th class="px-6 py-4 text-left text-white font-semibold">Status</th>
-                            <th class="px-6 py-4 text-left text-white font-semibold">Last Sync</th>
-                            <th class="px-6 py-4 text-left text-white font-semibold">Created</th>
-                            <th class="px-6 py-4 text-right text-white font-semibold">Actions</th>
+                            <th class="px-6 py-4 text-left text-[var(--stone)] font-semibold">Manufacturer</th>
+                            <th class="px-6 py-4 text-left text-[var(--stone)] font-semibold">Status</th>
+                            <th class="px-6 py-4 text-left text-[var(--stone)] font-semibold">Last Sync</th>
+                            <th class="px-6 py-4 text-left text-[var(--stone)] font-semibold">Created</th>
+                            <th class="px-6 py-4 text-right text-[var(--stone)] font-semibold">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($integrations as $integration)
-                            <tr class="border-t border-gray-700 hover:bg-gray-750 transition">
+                            <tr class="border-t border-[var(--line)] hover:bg-white/5 transition">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
                                         <span class="text-2xl mr-3">
                                             {{ $availableManufacturers[$integration['provider']]['icon'] ?? '📦' }}
                                         </span>
                                         <div>
-                                            <p class="text-white font-medium">
+                                            <p class="text-[var(--stone)] font-medium">
                                                 {{ $availableManufacturers[$integration['provider']]['name'] ?? ucfirst($integration['provider']) }}
                                             </p>
-                                            <p class="text-gray-400 text-sm">{{ $integration['provider'] }}</p>
+                                            <p class="text-[var(--sand)] text-sm">{{ $integration['provider'] }}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -92,26 +93,26 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div>
-                                        <p class="text-white text-sm">{{ $integration['last_sync_at'] }}</p>
-                                        <p class="text-gray-400 text-xs">
+                                        <p class="text-[var(--stone)] text-sm">{{ $integration['last_sync_at'] }}</p>
+                                        <p class="text-[var(--sand)] text-xs">
                                             @if($integration['last_sync_status'] === 'success')
                                                 <span class="text-green-400">Success</span>
                                             @elseif($integration['last_sync_status'] === 'failed')
                                                 <span class="text-red-400">Failed</span>
                                             @else
-                                                <span class="text-gray-400">Not synced</span>
+                                                <span class="text-[var(--sand)]">Not synced</span>
                                             @endif
                                         </p>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-gray-400 text-sm">
+                                <td class="px-6 py-4 text-[var(--sand)] text-sm">
                                     {{ $integration['created_at'] }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         <button 
                                             wire:click="testConnection({{ $integration['id'] }})"
-                                            class="px-3 py-2 bg-blue-900 hover:bg-blue-800 text-blue-200 rounded text-sm transition flex items-center gap-1"
+                                            class="px-3 py-2 bg-white/10 hover:bg-white/20 text-[var(--stone)] rounded text-sm transition flex items-center gap-1"
                                             title="Test connection"
                                             wire:loading.attr="disabled"
                                             wire:target="testConnection({{ $integration['id'] }})"
@@ -124,7 +125,7 @@
                                         </button>
                                         <button 
                                             wire:click="syncMachines({{ $integration['id'] }})"
-                                            class="px-3 py-2 bg-green-900 hover:bg-green-800 text-green-200 rounded text-sm transition flex items-center gap-1"
+                                            class="px-3 py-2 bg-green-900/60 hover:bg-green-800 text-green-200 rounded text-sm transition flex items-center gap-1"
                                             title="Sync machines"
                                             wire:loading.attr="disabled"
                                             wire:target="syncMachines({{ $integration['id'] }})"
@@ -138,7 +139,7 @@
                                         <button 
                                             wire:click="deleteIntegration({{ $integration['id'] }})"
                                             wire:confirm="Are you sure you want to delete this integration?"
-                                            class="px-3 py-2 bg-red-900 hover:bg-red-800 text-red-200 rounded text-sm transition"
+                                            class="px-3 py-2 bg-red-900/60 hover:bg-red-800 text-red-200 rounded text-sm transition"
                                             title="Delete integration"
                                         >
                                             🗑️ Delete
@@ -152,13 +153,13 @@
             </div>
         </div>
     @else
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-12 text-center">
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-12 text-center">
             <div class="text-4xl mb-4">📦</div>
-            <h3 class="text-xl font-semibold text-white mb-2">No Integrations Yet</h3>
-            <p class="text-gray-400 mb-6">Get started by adding your first equipment manufacturer integration</p>
+            <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Integrations Yet</h3>
+            <p class="text-[var(--sand)] mb-6">Get started by adding your first equipment manufacturer integration</p>
             <button 
                 wire:click="openAddModal"
-                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                class="px-6 py-3 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-display font-semibold transition"
             >
                 + Add Your First Integration
             </button>
@@ -167,10 +168,10 @@
 
     <!-- Add Integration Modal -->
     @if($showAddModal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
-            <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-w-md w-full mx-4">
-                <div class="p-6 border-b border-gray-700">
-                    <h3 class="text-xl font-bold text-white">Add New Integration</h3>
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
+            <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="p-6 border-b border-[var(--line)]">
+                    <h3 class="text-xl font-bold text-[var(--stone)]">Add New Integration</h3>
                 </div>
 
                 <div class="p-6 space-y-4">
@@ -182,10 +183,10 @@
 
                     <!-- Provider Selection -->
                     <div>
-                        <label class="block text-white font-medium mb-2">Manufacturer *</label>
+                        <label class="block text-[var(--stone)] font-medium mb-2">Manufacturer *</label>
                         <select 
                             wire:model="formData.provider"
-                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                            class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
                         >
                             <option value="">Select a manufacturer...</option>
                             @foreach($availableManufacturers as $key => $mfr)
@@ -198,7 +199,7 @@
                             <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
                         @enderror
                         @if($formData['provider'])
-                            <div class="mt-3 text-xs text-blue-200 bg-blue-900/30 rounded p-2">
+                            <div class="mt-3 text-xs text-[var(--sand)] bg-[var(--gold)]/10 rounded p-2">
                                 <strong>Integration requirements for {{ $availableManufacturers[$formData['provider']]['name'] ?? $formData['provider'] }}:</strong>
                                 @switch($formData['provider'])
                                     @case('volvo')
@@ -243,47 +244,47 @@
                     <!-- API Key -->
                     <div>
                         @if($formData['provider'] === 'ctrack')
-                            <label class="block text-white font-medium mb-2 mt-4">API Key *</label>
-                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
-                            <label class="block text-white font-medium mb-2 mt-4">API Secret *</label>
-                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
-                            <label class="block text-white font-medium mb-2 mt-4">Endpoint URL *</label>
-                            <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.ctrack.com/..." class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
+                            <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.ctrack.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @elseif($formData['provider'] === 'john-deere')
-                            <label class="block text-white font-medium mb-2 mt-4">OAuth Client ID *</label>
-                            <input type="text" wire:model="formData.credentials.client_id" placeholder="Enter Client ID" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
-                            <label class="block text-white font-medium mb-2 mt-4">OAuth Client Secret *</label>
-                            <input type="password" wire:model="formData.credentials.client_secret" placeholder="Enter Client Secret" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
-                            <label class="block text-white font-medium mb-2 mt-4">Endpoint URL *</label>
-                            <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.deere.com/..." class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">OAuth Client ID *</label>
+                            <input type="text" wire:model="formData.credentials.client_id" placeholder="Enter Client ID" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">OAuth Client Secret *</label>
+                            <input type="password" wire:model="formData.credentials.client_secret" placeholder="Enter Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
+                            <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.deere.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @elseif(in_array($formData['provider'], ['atlas-copco','sandvik','epiroc']))
-                            <label class="block text-white font-medium mb-2 mt-4">API Key *</label>
-                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
-                            <label class="block text-white font-medium mb-2 mt-4">API Secret *</label>
-                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
-                            <label class="block text-white font-medium mb-2 mt-4">Site Code *</label>
-                            <input type="text" wire:model="formData.credentials.site_code" placeholder="Enter site code" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Site Code *</label>
+                            <input type="text" wire:model="formData.credentials.site_code" placeholder="Enter site code" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @else
-                            <label class="block text-white font-medium mb-2 mt-4">API Key *</label>
-                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
-                            <label class="block text-white font-medium mb-2 mt-4">API Secret *</label>
-                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @endif
-                        <p class="text-gray-400 text-sm mt-2">
+                        <p class="text-[var(--sand)] text-sm mt-2">
                             💡 Tip: Your credentials are encrypted and stored securely. You can test the connection before saving.
                         </p>
                 </div>
 
-                <div class="p-6 border-t border-gray-700 flex gap-3">
+                <div class="p-6 border-t border-[var(--line)] flex gap-3">
                     <button 
                         wire:click="closeAddModal"
-                        class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded font-medium transition"
+                        class="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded font-medium transition"
                     >
                         Cancel
                     </button>
                     <button 
                         wire:click="createIntegration"
-                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"
+                        class="flex-1 px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded font-display font-semibold transition"
                     >
                         Create Integration
                     </button>
@@ -294,23 +295,23 @@
 
     <!-- Test Connection Modal -->
     @if($showTestModal && $testResult)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
-            <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
+            <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-xl max-w-md w-full mx-4">
                 <div class="p-6 text-center">
                     @if($testResult['success'])
                         <div class="text-5xl mb-4">✅</div>
                         <h3 class="text-xl font-bold text-green-400 mb-2">Connection Successful</h3>
-                        <p class="text-gray-400">{{ $testResult['message'] }}</p>
+                        <p class="text-[var(--sand)]">{{ $testResult['message'] }}</p>
                     @else
                         <div class="text-5xl mb-4">❌</div>
                         <h3 class="text-xl font-bold text-red-400 mb-2">Connection Failed</h3>
-                        <p class="text-gray-400">{{ $testResult['message'] }}</p>
+                        <p class="text-[var(--sand)]">{{ $testResult['message'] }}</p>
                     @endif
                 </div>
-                <div class="p-6 border-t border-gray-700">
+                <div class="p-6 border-t border-[var(--line)]">
                     <button 
                         wire:click="$set('showTestModal', false)"
-                        class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"
+                        class="w-full px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded font-display font-semibold transition"
                     >
                         Close
                     </button>

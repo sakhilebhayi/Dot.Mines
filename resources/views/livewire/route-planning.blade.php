@@ -1,4 +1,4 @@
-<div class="h-screen flex flex-col bg-slate-900 animate-fade-in">
+<div class="h-screen flex flex-col bg-[var(--ink)] animate-fade-in">
     <!-- Leaflet CSS - loaded directly in component -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     
@@ -7,56 +7,59 @@
         #route-planning-map {
             background: #1f2937;
         }
-        
-        <script>
-            // Fallback: ensure the calculate form calls the Livewire method if submit interception fails
-            (function(){
-                try {
-                    const componentId = @json($this->id ?? null);
-                    if (!componentId) return;
-                    const livewireComponent = Livewire.find(componentId);
-                    const calcForm = document.querySelector('form[wire\\:submit\\.prevent="calculateRoute"]');
-                    if (calcForm && livewireComponent) {
-                        calcForm.addEventListener('submit', function(e){
-                            e.preventDefault();
-                            livewireComponent.call('calculateRoute');
-                        });
-                    }
-                } catch (e) {
-                    console.warn('RoutePlanning fallback binding failed', e);
-                }
-            })();
-        </script>
+
         #route-planning-map.clickable-mode {
             cursor: crosshair !important;
         }
-        
+
         #route-planning-map .leaflet-container {
             background: #1f2937;
         }
-        
+
         /* Custom marker styles */
         .route-marker {
             border-radius: 50%;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
     </style>
-    
+
+    <script>
+        // Fallback: ensure the calculate form calls the Livewire method if submit interception fails.
+        // This was previously nested inside the <style> tag above, where browsers parse it as inert
+        // CSS text and never execute it -- moved out so it actually runs.
+        (function(){
+            try {
+                const componentId = @json($this->id ?? null);
+                if (!componentId) return;
+                const livewireComponent = Livewire.find(componentId);
+                const calcForm = document.querySelector('form[wire\\:submit\\.prevent="calculateRoute"]');
+                if (calcForm && livewireComponent) {
+                    calcForm.addEventListener('submit', function(e){
+                        e.preventDefault();
+                        livewireComponent.call('calculateRoute');
+                    });
+                }
+            } catch (e) {
+                console.warn('RoutePlanning fallback binding failed', e);
+            }
+        })();
+    </script>
+
     <!-- Header & Controls -->
-    <div class="bg-gray-800 border-b border-gray-700 p-6">
+    <div class="bg-[var(--ink-soft)] border-b border-[var(--line)] p-6">
         <div class="max-w-7xl mx-auto space-y-4">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-white">Optimal Route Planning</h1>
-                    <p class="text-gray-400 mt-1">Plan efficient routes with fuel and time optimization</p>
+                    <h1 class="text-3xl font-bold text-[var(--stone)]">Optimal Route Planning</h1>
+                    <p class="text-[var(--sand)] mt-1">Plan efficient routes with fuel and time optimization</p>
                 </div>
                 <div class="flex gap-2">
                     @if($viewMode === 'view')
-                        <button wire:click="switchToCreateMode" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors">
+                        <button wire:click="switchToCreateMode" class="px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg transition-colors font-display font-semibold">
                             Create New Route
                         </button>
                     @endif
-                    <a href="{{ route('fleet') }}" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    <a href="{{ route('fleet') }}" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded-lg transition-colors">
                         Back to Fleet
                     </a>
                 </div>
@@ -65,23 +68,23 @@
             <!-- Mode Toggle -->
             <div class="flex gap-2">
                 <button wire:click="$set('viewMode', 'create')" 
-                    class="px-4 py-2 rounded-lg transition-colors {{ $viewMode === 'create' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }}">
+                    class="px-4 py-2 rounded-lg transition-colors {{ $viewMode === 'create' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}">
                     Create Route
                 </button>
                 <button wire:click="$set('viewMode', 'list')" 
-                    class="px-4 py-2 rounded-lg transition-colors {{ $viewMode === 'list' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }}">
+                    class="px-4 py-2 rounded-lg transition-colors {{ $viewMode === 'list' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}">
                     Saved Routes ({{ count($routes) }})
                 </button>
             </div>
 
             <!-- Flash Messages -->
             @if (session()->has('success'))
-                <div class="bg-green-600 text-white px-4 py-3 rounded-lg">
+                <div class="bg-green-600 text-[var(--stone)] px-4 py-3 rounded-lg">
                     {{ session('success') }}
                 </div>
             @endif
             @if (session()->has('error'))
-                <div class="bg-red-600 text-white px-4 py-3 rounded-lg">
+                <div class="bg-red-600 text-[var(--stone)] px-4 py-3 rounded-lg">
                     {{ session('error') }}
                 </div>
             @endif
@@ -90,11 +93,11 @@
 
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
         <!-- Left Sidebar - Route Form / List -->
-        <div class="w-full md:w-96 bg-gray-800 border-b md:border-b-0 md:border-r border-gray-700 overflow-y-auto p-4 md:p-6">
+        <div class="w-full md:w-96 bg-[var(--ink-soft)] border-b md:border-b-0 md:border-r border-[var(--line)] overflow-y-auto p-4 md:p-6">
             <!-- Loading Spinner -->
             @if ($isLoading)
                 <div class="flex justify-center items-center h-96">
-                    <svg class="animate-spin h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-12 w-12 text-[var(--gold)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                     </svg>
@@ -104,31 +107,31 @@
             @if($viewMode === 'create')
                 <!-- Create Route Form -->
                 <div wire:key="create-form-{{ $viewMode }}">
-                <h2 class="text-xl font-bold text-white mb-4">Route Details</h2>
+                <h2 class="text-xl font-bold text-[var(--stone)] mb-4">Route Details</h2>
                 
                 <form wire:submit.prevent="calculateRoute" class="space-y-4">
                     <!-- Route Name -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Route Name *</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Route Name *</label>
                         <input type="text" wire:model="name" 
-                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500"
+                            class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]"
                             placeholder="e.g., Loading Zone to Dump Site A">
                         @error('name') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Description</label>
                         <textarea wire:model="description" rows="3"
-                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500"
+                            class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]"
                             placeholder="Optional route description"></textarea>
                     </div>
 
                     <!-- Machine Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Assign to Machine (Optional)</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Assign to Machine (Optional)</label>
                         <select wire:model="machineId" 
-                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500">
+                            class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
                             <option value="">-- Select Machine --</option>
                             @foreach($machines as $machine)
                                 <option value="{{ $machine->id }}">{{ $machine->name }}</option>
@@ -138,9 +141,9 @@
 
                     <!-- Mine Area Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Mine Area (Optional)</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Mine Area (Optional)</label>
                         <select wire:model="mineAreaId" 
-                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500">
+                            class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
                             <option value="">-- Select Mine Area --</option>
                             @foreach($mineAreas as $area)
                                 <option value="{{ $area->id }}">{{ $area->name }}</option>
@@ -150,9 +153,9 @@
 
                     <!-- Route Type -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Route Type</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Route Type</label>
                         <select wire:model="routeType" 
-                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500">
+                            class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
                             <option value="optimal">Optimal (Balanced)</option>
                             <option value="shortest">Shortest Distance</option>
                             <option value="safest">Safest (Avoid Hazards)</option>
@@ -161,49 +164,49 @@
 
                     <!-- Speed Limit -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Speed Limit (km/h)</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Speed Limit (km/h)</label>
                         <input type="number" wire:model="speedLimit" min="1" max="200" step="1"
-                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500"
+                            class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]"
                             placeholder="e.g., 40">
-                        <p class="text-xs text-gray-400 mt-1">Set a speed limit for this route. Alerts will trigger when machines exceed this limit.</p>
+                        <p class="text-xs text-[var(--sand)] mt-1">Set a speed limit for this route. Alerts will trigger when machines exceed this limit.</p>
                         @error('speedLimit') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="border-t border-gray-700 pt-4">
-                        <h3 class="text-lg font-semibold text-white mb-3">Start & End Points</h3>
-                        <p class="text-sm text-gray-400 mb-3">Click on the map to set start and end points</p>
+                    <div class="border-t border-[var(--line)] pt-4">
+                        <h3 class="text-lg font-semibold text-[var(--stone)] mb-3">Start & End Points</h3>
+                        <p class="text-sm text-[var(--sand)] mb-3">Click on the map to set start and end points</p>
 
                         <!-- Start Point -->
-                        <div class="bg-gray-700/50 rounded-lg p-3 mb-3">
+                        <div class="bg-white/5 rounded-lg p-3 mb-3">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-white flex items-center gap-2">
+                                <span class="text-sm font-medium text-[var(--stone)] flex items-center gap-2">
                                     <span class="w-3 h-3 bg-green-500 rounded-full"></span>
                                     Start Point
                                 </span>
                             </div>
                             @if($startLat && $startLon)
-                                <div class="text-xs text-gray-400">
+                                <div class="text-xs text-[var(--sand)]">
                                     {{ number_format($startLat, 6) }}, {{ number_format($startLon, 6) }}
                                 </div>
                             @else
-                                <div class="text-xs text-gray-500">Not set</div>
+                                <div class="text-xs text-[var(--sand)]">Not set</div>
                             @endif
                         </div>
 
                         <!-- End Point -->
-                        <div class="bg-gray-700/50 rounded-lg p-3">
+                        <div class="bg-white/5 rounded-lg p-3">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-white flex items-center gap-2">
+                                <span class="text-sm font-medium text-[var(--stone)] flex items-center gap-2">
                                     <span class="w-3 h-3 bg-red-500 rounded-full"></span>
                                     End Point
                                 </span>
                             </div>
                             @if($endLat && $endLon)
-                                <div class="text-xs text-gray-400">
+                                <div class="text-xs text-[var(--sand)]">
                                     {{ number_format($endLat, 6) }}, {{ number_format($endLon, 6) }}
                                 </div>
                             @else
-                                <div class="text-xs text-gray-500">Not set</div>
+                                <div class="text-xs text-[var(--sand)]">Not set</div>
                             @endif
                         </div>
                     </div>
@@ -211,7 +214,7 @@
                     <!-- Calculate Button -->
                     <button type="submit" 
                         @if($isCalculating) disabled @endif
-                        class="w-full px-4 py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium">
+                        class="w-full px-4 py-3 bg-[var(--gold)] hover:bg-[var(--gold-soft)] disabled:bg-white/10 disabled:cursor-not-allowed text-[var(--ink)] rounded-lg transition-colors font-display font-semibold">
                         @if($isCalculating)
                             <span class="flex items-center justify-center gap-2">
                                 <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -227,7 +230,7 @@
                     
                     @if($startLat || $endLat)
                         <button type="button" wire:click="clearPoints"
-                            class="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium">
+                            class="w-full px-4 py-2 bg-white/10 hover:bg-white/15 border border-[var(--line)] text-[var(--stone)] rounded-lg transition-colors font-medium">
                             Clear Points
                         </button>
                     @endif
@@ -235,20 +238,20 @@
 
                 <!-- Calculated Route Results -->
                 @if($showCalculatedRoute && $calculatedRoute)
-                    <div class="mt-6 border-t border-gray-700 pt-6">
-                        <h3 class="text-lg font-semibold text-white mb-4">Route Summary</h3>
+                    <div class="mt-6 border-t border-[var(--line)] pt-6">
+                        <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Route Summary</h3>
                         
                         <div class="space-y-3">
                             <!-- Distance -->
                             <div class="bg-blue-600/20 border border-blue-600/50 rounded-lg p-3">
                                 <div class="text-sm text-blue-300 mb-1">Total Distance</div>
-                                <div class="text-2xl font-bold text-white">{{ number_format($calculatedRoute['total_distance'], 2) }} km</div>
+                                <div class="text-2xl font-bold text-[var(--stone)]">{{ number_format($calculatedRoute['total_distance'], 2) }} km</div>
                             </div>
 
                             <!-- Time -->
                             <div class="bg-green-600/20 border border-green-600/50 rounded-lg p-3">
                                 <div class="text-sm text-green-300 mb-1">Estimated Time</div>
-                                <div class="text-2xl font-bold text-white">
+                                <div class="text-2xl font-bold text-[var(--stone)]">
                                     {{ floor($calculatedRoute['estimated_time'] / 60) }}h {{ $calculatedRoute['estimated_time'] % 60 }}m
                                 </div>
                             </div>
@@ -256,14 +259,14 @@
                             <!-- Fuel -->
                             <div class="bg-yellow-600/20 border border-yellow-600/50 rounded-lg p-3">
                                 <div class="text-sm text-yellow-300 mb-1">Estimated Fuel</div>
-                                <div class="text-2xl font-bold text-white">{{ number_format($calculatedRoute['estimated_fuel'], 2) }} L</div>
+                                <div class="text-2xl font-bold text-[var(--stone)]">{{ number_format($calculatedRoute['estimated_fuel'], 2) }} L</div>
                             </div>
 
                             <!-- Waypoints -->
                             @if(count($calculatedRoute['waypoints']) > 0)
-                                <div class="bg-gray-700/50 rounded-lg p-3">
-                                    <div class="text-sm text-gray-300 mb-2">{{ count($calculatedRoute['waypoints']) }} Waypoints</div>
-                                    <div class="text-xs text-gray-400">Route optimized to avoid restricted zones</div>
+                                <div class="bg-white/5 rounded-lg p-3">
+                                    <div class="text-sm text-[var(--sand)] mb-2">{{ count($calculatedRoute['waypoints']) }} Waypoints</div>
+                                    <div class="text-xs text-[var(--sand)]">Route optimized to avoid restricted zones</div>
                                 </div>
                             @endif
                         </div>
@@ -271,11 +274,11 @@
                         <!-- Save Button -->
                         @if(!$routeSaved)
                             <button wire:click="saveRoute" 
-                                class="w-full mt-4 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">
+                                class="w-full mt-4 px-4 py-3 bg-green-600 hover:bg-green-700 text-[var(--stone)] rounded-lg transition-colors font-medium">
                                 Save This Route
                             </button>
                         @else
-                            <div class="mt-4 bg-green-600 text-white px-4 py-3 rounded-lg text-center font-medium">
+                            <div class="mt-4 bg-green-600 text-[var(--stone)] px-4 py-3 rounded-lg text-center font-medium">
                                 ✓ Route Saved Successfully
                             </div>
                         @endif
@@ -286,19 +289,19 @@
             @elseif($viewMode === 'list')
                 <!-- Saved Routes List -->
                 <div wire:key="routes-list-{{ count($routes) }}">
-                <h2 class="text-xl font-bold text-white mb-4">Saved Routes</h2>
+                <h2 class="text-xl font-bold text-[var(--stone)] mb-4">Saved Routes</h2>
                 
                 @if(count($routes) === 0)
                     <div class="text-center py-12">
                         <div class="text-6xl mb-4">🗺️</div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No routes saved yet</h3>
-                        <p class="text-gray-400 mb-2">Start planning your first optimal route to improve efficiency and save fuel.</p>
-                        <ul class="text-sm text-gray-500 mb-4 space-y-1">
-                            <li>• Click <span class="font-bold text-amber-600">Plan New Route</span> to begin</li>
+                        <h3 class="text-lg font-semibold text-[var(--stone)] mb-2">No routes saved yet</h3>
+                        <p class="text-[var(--sand)] mb-2">Start planning your first optimal route to improve efficiency and save fuel.</p>
+                        <ul class="text-sm text-[var(--sand)] mb-4 space-y-1">
+                            <li>• Click <span class="font-bold text-[var(--gold)]">Plan New Route</span> to begin</li>
                             <li>• Set start and end points on the map</li>
                             <li>• Save and view your planned routes here</li>
                         </ul>
-                        <button wire:click="switchToCreateMode" class="mt-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-lg transition-all font-medium">
+                        <button wire:click="switchToCreateMode" class="mt-4 px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg transition-all font-display font-semibold">
                             <span class="flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -311,41 +314,41 @@
                     <div class="space-y-3">
                         @foreach($routes as $route)
                             @php $isSelected = isset($selectedRouteId) && $selectedRouteId == $route['id']; @endphp
-                            <div wire:key="route-{{ $route['id'] }}" class="rounded-lg p-4 transition-colors {{ $isSelected ? 'bg-gray-700 ring-2 ring-amber-400' : 'bg-gray-700 hover:bg-gray-700/80' }}">
+                            <div wire:key="route-{{ $route['id'] }}" class="rounded-lg p-4 transition-colors {{ $isSelected ? 'bg-white/10 ring-2 ring-[var(--gold)]' : 'bg-white/5 hover:bg-white/10' }}">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-semibold text-white">{{ $route['name'] }}</h3>
-                                    <span class="px-2 py-1 text-xs rounded {{ $route['status'] === 'active' ? 'bg-green-600' : 'bg-gray-600' }} text-white">
+                                    <h3 class="font-semibold text-[var(--stone)]">{{ $route['name'] }}</h3>
+                                    <span class="px-2 py-1 text-xs rounded {{ $route['status'] === 'active' ? 'bg-green-600' : 'bg-white/10' }} text-[var(--stone)]">
                                         {{ ucfirst($route['status']) }}
                                     </span>
                                 </div>
                                 
                                 @if($route['description'])
-                                    <p class="text-sm text-gray-400 mb-3">{{ $route['description'] }}</p>
+                                    <p class="text-sm text-[var(--sand)] mb-3">{{ $route['description'] }}</p>
                                 @endif
 
-                                <div class="grid grid-cols-3 gap-2 text-xs text-gray-400 mb-3">
+                                <div class="grid grid-cols-3 gap-2 text-xs text-[var(--sand)] mb-3">
                                     <div>
-                                        <span class="block text-gray-500">Distance</span>
-                                        <span class="text-white font-medium">{{ number_format($route['total_distance'], 1) }} km</span>
+                                        <span class="block text-[var(--sand)]">Distance</span>
+                                        <span class="text-[var(--stone)] font-medium">{{ number_format($route['total_distance'], 1) }} km</span>
                                     </div>
                                     <div>
-                                        <span class="block text-gray-500">Time</span>
-                                        <span class="text-white font-medium">{{ floor($route['estimated_time'] / 60) }}h {{ $route['estimated_time'] % 60 }}m</span>
+                                        <span class="block text-[var(--sand)]">Time</span>
+                                        <span class="text-[var(--stone)] font-medium">{{ floor($route['estimated_time'] / 60) }}h {{ $route['estimated_time'] % 60 }}m</span>
                                     </div>
                                     <div>
-                                        <span class="block text-gray-500">Fuel</span>
-                                        <span class="text-white font-medium">{{ number_format($route['estimated_fuel'], 1) }} L</span>
+                                        <span class="block text-[var(--sand)]">Fuel</span>
+                                        <span class="text-[var(--stone)] font-medium">{{ number_format($route['estimated_fuel'], 1) }} L</span>
                                     </div>
                                 </div>
 
                                 <div class="flex gap-2">
                                     <button wire:click="viewRoute({{ $route['id'] }})" 
-                                        class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors">
+                                        class="flex-1 px-3 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] text-sm rounded transition-colors font-medium">
                                         View on Map
                                     </button>
                                     <button wire:click="deleteRoute({{ $route['id'] }})" 
                                         wire:confirm="Are you sure you want to delete this route?"
-                                        class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors">
+                                        class="px-3 py-2 bg-red-600 hover:bg-red-700 text-[var(--stone)] text-sm rounded transition-colors">
                                         Delete
                                     </button>
                                 </div>
@@ -359,15 +362,15 @@
         </div>
 
         <!-- Map Container -->
-        <div class="flex-1 relative min-h-[300px] md:min-h-0 bg-gray-800" wire:ignore>
+        <div class="flex-1 relative min-h-[300px] md:min-h-0 bg-[var(--ink-soft)]" wire:ignore>
             <!-- Loading indicator -->
-            <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-gray-800 z-[999]" wire:ignore>
+            <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-[var(--ink-soft)] z-[999]" wire:ignore>
                 <div class="text-center">
-                    <svg class="animate-spin h-12 w-12 text-amber-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-12 w-12 text-[var(--gold)] mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p class="text-gray-300 text-sm">Loading map...</p>
+                    <p class="text-[var(--sand)] text-sm">Loading map...</p>
                 </div>
             </div>
             
@@ -377,15 +380,15 @@
             
             <!-- Map Instructions Overlay -->
             @if($viewMode === 'create' && !$startLat)
-                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-gray-800/95 border border-gray-700 rounded-lg px-6 py-3 shadow-lg z-[1000]">
-                    <p class="text-white text-sm">
+                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-[var(--ink-soft)]/95 border border-[var(--line)] rounded-lg px-6 py-3 shadow-lg z-[1000]">
+                    <p class="text-[var(--stone)] text-sm">
                         <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
                         Click on the map to set <strong>Start Point</strong>
                     </p>
                 </div>
             @elseif($viewMode === 'create' && $startLat && !$endLat)
-                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-gray-800/95 border border-gray-700 rounded-lg px-6 py-3 shadow-lg z-[1000]">
-                    <p class="text-white text-sm">
+                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-[var(--ink-soft)]/95 border border-[var(--line)] rounded-lg px-6 py-3 shadow-lg z-[1000]">
+                    <p class="text-[var(--stone)] text-sm">
                         <span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span>
                         Click on the map to set <strong>End Point</strong>
                     </p>
@@ -437,7 +440,7 @@
                     console.error('Leaflet script tags found:', document.querySelectorAll('script[src*="leaflet"]'));
                     const loadingEl = document.getElementById('map-loading');
                     if (loadingEl) {
-                        loadingEl.innerHTML = '<div class="text-center"><p class="text-red-400 mb-2">Map library failed to load</p><p class="text-gray-400 text-sm">Leaflet library could not be loaded from CDN</p><button onclick="location.reload()" class="mt-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded">Retry</button></div>';
+                        loadingEl.innerHTML = '<div class="text-center"><p class="text-red-400 mb-2">Map library failed to load</p><p class="text-[var(--sand)] text-sm">Leaflet library could not be loaded from CDN</p><button onclick="location.reload()" class="mt-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-[var(--stone)] rounded">Retry</button></div>';
                     }
                     return;
                 }
@@ -505,7 +508,7 @@
                 console.error('Error initializing map:', error);
                 const loadingEl = document.getElementById('map-loading');
                 if (loadingEl) {
-                    loadingEl.innerHTML = '<div class="text-center"><p class="text-red-400 mb-2">Failed to load map</p><p class="text-gray-400 text-sm">Please refresh the page</p></div>';
+                    loadingEl.innerHTML = '<div class="text-center"><p class="text-red-400 mb-2">Failed to load map</p><p class="text-[var(--sand)] text-sm">Please refresh the page</p></div>';
                 }
             }
 

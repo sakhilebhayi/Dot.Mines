@@ -2,50 +2,81 @@
 
 namespace App\Livewire;
 
+use App\Models\ActivityLog;
+use App\Models\AiRecommendationAction;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Services\AI\FleetOptimizerAgent;
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class Fleet extends Component
 {
-public array $activityFeed = [];
-public bool $isLoading = true;
-use WithPagination;
+    use BrowserEventBridge;
+
+    public array $activityFeed = [];
+
+    public bool $isLoading = true;
+
+    use WithPagination;
 
     // AI recommendation interaction state
     public array $lastAiRecommendations = [];
+
     public ?int $pendingRecommendationIndex = null;
+
     public bool $showRejectRecommendationModal = false;
+
     public string $rejectReason = '';
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $sortBy = 'name';
+
     public string $sortDirection = 'asc';
+
     public bool $showCreateModal = false;
+
     public bool $showAssignModal = false;
+
     public ?int $assigningMachineId = null;
+
     public ?int $selectedExcavatorId = null;
+
     public array $selectedAdtIds = [];
+
     public string $assignMode = 'assign_to_excavator';
+
     public bool $showMineAreaAssignModal = false;
+
     public ?int $assigningMineAreaMachineId = null;
+
     public ?int $selectedMineAreaId = null;
 
     // Create/Edit form properties
     public ?int $editingMachineId = null;
+
     public string $name = '';
+
     public string $model = '';
+
     public string $manufacturer = '';
+
     public string $machineType = '';
+
     public string $status = 'active';
+
     public string $serialNumber = '';
+
     public float $capacity = 0;
+
     public float $latitude = 0;
+
     public float $longitude = 0;
 
     /** @var array<string, string> */
@@ -130,6 +161,8 @@ use WithPagination;
 
         if ($this->editingMachineId) {
             $machine = Machine::where('team_id', $team->id)->findOrFail($this->editingMachineId);
+            $this->authorize('update', $machine);
+
             $machine->update([
                 'name' => $this->name,
                 'model' => $this->model,
@@ -143,6 +176,8 @@ use WithPagination;
             ]);
             $this->dispatchBrowserEvent('notify', ['message' => 'Machine updated successfully', 'type' => 'success']);
         } else {
+            $this->authorize('create', Machine::class);
+
             Machine::create([
                 'team_id' => $team->id,
                 'name' => $this->name,
@@ -163,9 +198,7 @@ use WithPagination;
 
     public function deleteMachine(Machine $machine): void
     {
-        if ($machine->team_id !== Auth::user()->currentTeam->id) {
-            abort(403);
-        }
+        $this->authorize('delete', $machine);
 
         $machineName = $machine->name;
         $machine->delete();
@@ -180,8 +213,9 @@ use WithPagination;
         $this->assignMode = 'assign_to_excavator';
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($machineId);
-        if (!$machine) {
+        if (! $machine) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Machine not found', 'type' => 'error']);
+
             return;
         }
 
@@ -193,7 +227,7 @@ use WithPagination;
                 ->where('excavator_id', $machine->id)
                 ->where('machine_type', 'adt')
                 ->pluck('id')
-                ->map(fn($id) => (int) $id)
+                ->map(fn ($id) => (int) $id)
                 ->toArray();
         } else {
             // For ADTs and other machines, allow selecting a single excavator
@@ -220,29 +254,31 @@ use WithPagination;
         // If in ADT assignment mode, route to assignAdtsToExcavator
         if ($this->assignMode === 'assign_adts_to_excavator') {
             $this->assignAdtsToExcavator();
+
             return;
         }
 
-        if (!$this->assigningMachineId || !$this->selectedExcavatorId) {
+        if (! $this->assigningMachineId || ! $this->selectedExcavatorId) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Please select an excavator', 'type' => 'error']);
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($this->assigningMachineId);
         $excavator = Machine::where('team_id', $team->id)->find($this->selectedExcavatorId);
-        
-        if (!$machine || $machine->team_id !== Auth::user()->currentTeam->id) {
+
+        if (! $machine || ! $excavator) {
             abort(403);
         }
 
-        if (!$excavator || $excavator->team_id !== Auth::user()->currentTeam->id) {
-            abort(403);
-        }
+        $this->authorize('update', $machine);
+        $this->authorize('update', $excavator);
 
         // Prevent assigning a machine to itself
         if ($machine->id === $excavator->id) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Cannot assign a machine to itself', 'type' => 'error']);
+
             return;
         }
 
@@ -250,6 +286,7 @@ use WithPagination;
         $bigTypes = ['excavator', 'dozer', 'loader', 'grader', 'bulldozer'];
         if (in_array($machine->machine_type, $bigTypes) && in_array($excavator->machine_type, $bigTypes)) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Cannot assign an excavator or big machine to another big machine', 'type' => 'error']);
+
             return;
         }
 
@@ -261,16 +298,18 @@ use WithPagination;
 
     public function assignAdtsToExcavator(): void
     {
-        if (!$this->assigningMachineId) {
+        if (! $this->assigningMachineId) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Excavator not specified', 'type' => 'error']);
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $excavator = Machine::where('team_id', $team->id)->find($this->assigningMachineId);
-        if (!$excavator) {
+        if (! $excavator) {
             abort(403);
         }
+        $this->authorize('update', $excavator);
 
         // Ensure selected ADTs belong to team and are ADTs
         $validAdts = Machine::where('team_id', $excavator->team_id)
@@ -297,14 +336,15 @@ use WithPagination;
     {
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($machineId);
-        
-        if (!$machine) {
+
+        if (! $machine) {
             abort(403);
         }
+        $this->authorize('update', $machine);
 
         $machineName = $machine->name;
         $machine->unassignFromExcavator();
-        
+
         $this->dispatchBrowserEvent('notify', ['message' => "Machine '{$machineName}' unassigned from excavator", 'type' => 'success']);
     }
 
@@ -324,28 +364,30 @@ use WithPagination;
 
     public function assignToMineArea(): void
     {
-        if (!$this->assigningMineAreaMachineId || !$this->selectedMineAreaId) {
+        if (! $this->assigningMineAreaMachineId || ! $this->selectedMineAreaId) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Please select a mine area', 'type' => 'error']);
+
             return;
         }
 
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($this->assigningMineAreaMachineId);
-        
-        if (!$machine) {
+
+        if (! $machine) {
             abort(403);
         }
+        $this->authorize('update', $machine);
 
         $mineArea = MineArea::where('team_id', $team->id)->find($this->selectedMineAreaId);
-        if (!$mineArea) {
+        if (! $mineArea) {
             abort(403);
         }
 
         // Update machine's mine_area_id field
         $machine->update(['mine_area_id' => $this->selectedMineAreaId]);
-        
+
         $this->dispatchBrowserEvent('notify', ['message' => "Machine '{$machine->name}' assigned to '{$mineArea->name}'", 'type' => 'success']);
-        
+
         $this->closeMineAreaAssignModal();
     }
 
@@ -372,8 +414,8 @@ use WithPagination;
             $avgSpeed = $metrics->avg('speed') ?? 0;
 
             // Calculate utilization rate (0-100)
-            $utilizationRate = $avgTotalHours > 0 
-                ? (($avgTotalHours - $avgIdleHours) / $avgTotalHours) * 100 
+            $utilizationRate = $avgTotalHours > 0
+                ? (($avgTotalHours - $avgIdleHours) / $avgTotalHours) * 100
                 : 0;
 
             // Calculate efficiency score (lower fuel consumption per hour is better)
@@ -386,8 +428,8 @@ use WithPagination;
 
             // Overall performance score (weighted average)
             $performanceScore = (
-                ($utilizationRate * 0.4) + 
-                ($fuelEfficiency * 0.3) + 
+                ($utilizationRate * 0.4) +
+                ($fuelEfficiency * 0.3) +
                 ($productivityScore * 0.3)
             );
 
@@ -458,7 +500,7 @@ use WithPagination;
         $worstPerformers = collect($performanceData)->sortBy('performance_score')->take(5)->values();
 
         // Activity Feed
-        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $team->id)
+        $this->activityFeed = ActivityLog::where('team_id', $team->id)
             ->with('user')
             ->latest('created_at')
             ->take(10)
@@ -472,13 +514,13 @@ use WithPagination;
             ->toArray();
 
         // AI Fleet Optimization Analysis
-        $aiAgent = new FleetOptimizerAgent();
+        $aiAgent = new FleetOptimizerAgent;
         $aiAnalysis = $aiAgent->analyze($team);
         $aiRecommendations = collect($aiAnalysis['recommendations'])->take(5);
         $aiInsights = collect($aiAnalysis['insights'])->take(3);
 
         // Keep a serializable copy to reference in action handlers (Livewire methods)
-        $this->lastAiRecommendations = $aiRecommendations->values()->map(fn($r) => (array) $r)->toArray();
+        $this->lastAiRecommendations = $aiRecommendations->values()->map(fn ($r) => (array) $r)->toArray();
 
         $this->isLoading = false;
 
@@ -503,6 +545,7 @@ use WithPagination;
         $rec = $this->lastAiRecommendations[$index] ?? null;
         if (! $rec) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
+
             return;
         }
 
@@ -510,7 +553,7 @@ use WithPagination;
         $hash = md5(json_encode($rec));
 
         // Create action record
-        $action = \App\Models\AiRecommendationAction::create([
+        $action = AiRecommendationAction::create([
             'team_id' => $team->id,
             'recommendation_hash' => $hash,
             'recommendation' => $rec,
@@ -520,10 +563,10 @@ use WithPagination;
         ]);
 
         // Apply operational adjustment (best-effort): if recommendation references a machine, create an activity log and tag machine
-        if (!empty($rec['related_machine_id'])) {
+        if (! empty($rec['related_machine_id'])) {
             $machine = Machine::where('team_id', $team->id)->find($rec['related_machine_id']);
             if ($machine) {
-                \App\Models\ActivityLog::create([
+                ActivityLog::create([
                     'team_id' => $team->id,
                     'user_id' => Auth::id(),
                     'action' => 'ai_recommendation_implemented',
@@ -531,7 +574,7 @@ use WithPagination;
                 ]);
             }
         } else {
-            \App\Models\ActivityLog::create([
+            ActivityLog::create([
                 'team_id' => $team->id,
                 'user_id' => Auth::id(),
                 'action' => 'ai_recommendation_implemented',
@@ -554,6 +597,7 @@ use WithPagination;
     {
         if (empty(trim($this->rejectReason))) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Please provide a reason for rejection', 'type' => 'error']);
+
             return;
         }
 
@@ -562,12 +606,13 @@ use WithPagination;
         if (! $rec) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
             $this->showRejectRecommendationModal = false;
+
             return;
         }
 
         $hash = md5(json_encode($rec));
 
-        \App\Models\AiRecommendationAction::create([
+        AiRecommendationAction::create([
             'team_id' => $team->id,
             'recommendation_hash' => $hash,
             'recommendation' => $rec,
@@ -577,7 +622,7 @@ use WithPagination;
             'reject_reason' => $this->rejectReason,
         ]);
 
-        \App\Models\ActivityLog::create([
+        ActivityLog::create([
             'team_id' => $team->id,
             'user_id' => Auth::id(),
             'action' => 'ai_recommendation_rejected',

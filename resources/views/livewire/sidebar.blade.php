@@ -1,4 +1,4 @@
-<nav class="bg-gray-800 border-r border-gray-700 overflow-y-auto transition-all duration-300" 
+<nav class="bg-[var(--ink-soft)] border-r border-[var(--line)] overflow-y-auto transition-all duration-300"
      :class="{ 'w-64': sidebarOpen, 'w-20': !sidebarOpen }"
      x-data="{ 
          sidebarOpen: localStorage.getItem('sidebarOpen') === 'false' ? false : true,
@@ -10,25 +10,25 @@
          }
      }">
     <!-- Logo Section -->
-    <div class="p-6 border-b border-gray-700">
+    <div class="p-6 border-b border-[var(--line)]">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-2 mb-3" :class="{ 'justify-center': !sidebarOpen }">
-            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="w-full h-full object-contain">
+            <div class="w-10 h-10 bg-[var(--stone)] rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img src="{{ asset('images/mark.png') }}" alt="Dot.Mines" class="w-full h-full object-contain">
             </div>
             <div class="flex flex-col overflow-hidden transition-all duration-300" x-show="sidebarOpen">
-                <span class="font-bold text-white text-lg whitespace-nowrap">Dot.Mines</span>
-                <span class="text-xs text-gray-400 whitespace-nowrap">Fleet Manager</span>
+                <span class="font-display font-semibold text-[var(--stone)] text-lg whitespace-nowrap">Dot.Mines</span>
+                <span class="text-xs text-[var(--sand)] whitespace-nowrap">Fleet Manager</span>
             </div>
         </a>
-        
+
         <!-- Toggle Button Row -->
         <div class="flex" :class="{ 'justify-center': !sidebarOpen }">
-            <button 
+            <button
                 @click="sidebarOpen = !sidebarOpen"
-                class="w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 rounded-lg flex items-center justify-center transition-colors"
+                class="w-full py-2 bg-[var(--gold)]/10 hover:bg-[var(--gold)]/20 rounded-lg flex items-center justify-center transition-colors"
                 title="Toggle Sidebar"
             >
-                <svg class="w-4 h-4 text-amber-500 transition-transform duration-300" :class="{ 'rotate-180': !sidebarOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-[var(--gold)] transition-transform duration-300" :class="{ 'rotate-180': !sidebarOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
@@ -39,7 +39,7 @@
     <div class="p-4 space-y-2">
         <!-- Dashboard -->
         <a href="{{ route('dashboard') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('dashboard') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('dashboard') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Dashboard' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +50,7 @@
 
         <!-- Fleet Management -->
         <a href="{{ route('fleet') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('fleet*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('fleet*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Fleet' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@
 
         <!-- Live Map -->
         <a href="{{ route('map') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('map*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('map*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Live Map' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@
 
         <!-- Geofences -->
         <a href="{{ route('geofences') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('geofences*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('geofences*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Geofences' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@
 
         <!-- Mine Areas -->
         <a href="{{ route('mine-areas') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('mine-areas*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('mine-areas*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Mine Areas' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +94,7 @@
 
         <!-- Reports -->
         <a href="{{ route('reports') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('reports*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('reports*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Reports' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@
 
         <!-- Production Dashboard -->
         <a href="{{ route('production') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('production*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('production*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Production' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +116,7 @@
 
         <!-- Alerts -->
         <a href="{{ route('alerts') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('alerts*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('alerts*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Alerts' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,7 +127,7 @@
 
         <!-- Operator Fatigue -->
         <a href="{{ route('operator-fatigue') }}"
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('operator-fatigue*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('operator-fatigue*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Operator Fatigue' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,7 +138,7 @@
 
         <!-- Fuel Management -->
         <a href="{{ route('fuel') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('fuel*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('fuel*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Fuel Management' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@
 
         <!-- Maintenance -->
         <a href="{{ route('maintenance') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('maintenance*') ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('maintenance*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'Maintenance' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +161,7 @@
 
         <!-- AI Optimization (NEW!) -->
         <a href="{{ route('ai-optimization') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('ai-optimization*') ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'text-gray-300 hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:text-white' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('ai-optimization*') ? 'bg-gradient-to-r from-[var(--gold)] to-[var(--umber)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-gradient-to-r hover:from-[var(--gold)] hover:to-[var(--umber)] hover:text-[var(--ink)]' }}"
            :class="{ 'justify-center': !sidebarOpen }"
            :title="!sidebarOpen ? 'AI Optimization' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
