@@ -20,15 +20,11 @@ use App\Livewire\RoutePlanning;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\Report;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Laravel\Jetstream\Jetstream;
 use Livewire\Mechanisms\HandleRequests\HandleRequests;
-
-// Include test routes for session/CSRF debugging (remove in production)
-if (config('app.debug')) {
-    require __DIR__.'/test-session.php';
-}
 
 Route::get('/', function () {
     return view('welcome');
@@ -177,8 +173,12 @@ Route::middleware([
         return view('settings.index');
     })->name('settings');
 
+    // /team/settings used to render a "Coming soon" stub. Team management
+    // (name, members, roles, deletion) is fully built already at
+    // teams.show -- redirect here instead of maintaining a second,
+    // half-built copy of the same page.
     Route::get('/team/settings', function () {
-        return view('team.settings');
+        return redirect()->route('teams.show', Auth::user()->currentTeam);
     })->name('team.settings');
 });
 

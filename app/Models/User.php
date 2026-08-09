@@ -3,13 +3,19 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\Carbon;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * User Model
@@ -17,7 +23,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $id
  * @property string $name
  * @property string $email
- * @property \Carbon\Carbon|null $email_verified_at
+ * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token
  * @property int|null $current_team_id
@@ -25,17 +31,18 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $two_factor_confirmed
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Team> $ownedTeams
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Collection<int, PersonalAccessToken> $tokens
+ * @property-read Collection<int, Team> $ownedTeams
  */
 class User extends Authenticatable
 {
     use HasApiTokens;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use HasProfilePhoto;
     use HasTeams;
     use Notifiable;
@@ -51,6 +58,7 @@ class User extends Authenticatable
         'email',
         'password',
         'current_team_id',
+        'notification_preferences',
     ];
 
     /**
@@ -84,6 +92,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_preferences' => 'array',
         ];
     }
 
@@ -195,7 +204,7 @@ class User extends Authenticatable
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
@@ -213,19 +222,19 @@ class User extends Authenticatable
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
         return $this->roles()->detach($role->id);
     }
 
-    public function ownedTeams(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'user_id');
     }
 
-    public function currentTeam(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function currentTeam(): BelongsTo
     {
         return $this->belongsTo(Team::class, 'current_team_id');
     }

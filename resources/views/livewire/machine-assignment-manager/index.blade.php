@@ -42,7 +42,7 @@
                             'bg-[var(--gold)]/10 text-[var(--gold)] border-b-2 border-[var(--gold)]' => $view === 'overview',
                             'text-[var(--sand)] hover:bg-white/5' => $view !== 'overview'])
                 >
-                    📊 Overview
+                    Overview
                 </button>
                 <button
                     wire:click="switchToManage"
@@ -50,7 +50,7 @@
                             'bg-[var(--gold)]/10 text-[var(--gold)] border-b-2 border-[var(--gold)]' => $view === 'manage',
                             'text-[var(--sand)] hover:bg-white/5' => $view !== 'manage'])
                 >
-                    🔧 Manage
+                    Manage
                 </button>
                 <button
                     wire:click="switchToAssign"
@@ -58,7 +58,7 @@
                             'bg-[var(--gold)]/10 text-[var(--gold)] border-b-2 border-[var(--gold)]' => $view === 'assign',
                             'text-[var(--sand)] hover:bg-white/5' => $view !== 'assign'])
                 >
-                    ➕ Assign
+                    Assign
                 </button>
                 <button
                     wire:click="switchToHistory"
@@ -66,7 +66,7 @@
                             'bg-[var(--gold)]/10 text-[var(--gold)] border-b-2 border-[var(--gold)]' => $view === 'history',
                             'text-[var(--sand)] hover:bg-white/5' => $view !== 'history'])
                 >
-                    📜 History
+                    History
                 </button>
             </div>
         </div>

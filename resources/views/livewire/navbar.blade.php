@@ -26,7 +26,8 @@
                     'integrations' => 'Integrations',
                     'billing.index' => 'Billing',
                     'settings' => 'Settings',
-                    'team.settings' => 'Team Settings',
+                    'teams.show' => 'Team Settings',
+                    'api-tokens.index' => 'API Tokens',
                 ];
 
                 $pageTitle = null;
@@ -98,6 +99,12 @@
                             </a>
                             <a href="{{ route('integrations') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 Integrations
+                            </a>
+                            <a href="{{ route('api-tokens.index') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
+                                API Tokens
+                            </a>
+                            <a href="{{ route('teams.show', auth()->user()->currentTeam) }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
+                                Team
                             </a>
                             <a href="{{ route('billing.index') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 Billing

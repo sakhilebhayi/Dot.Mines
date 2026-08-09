@@ -156,14 +156,20 @@ class MineAreaManager extends Component
             'manager_contact' => $this->manager_contact,
         ];
 
+        if ($this->editingMineAreaId) {
+            $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
+            if (! $mineArea) {
+                $this->dispatchBrowserEvent('notify', ['message' => 'Mine area not found', 'type' => 'error']);
+
+                return;
+            }
+            $this->authorize('update', $mineArea);
+        } else {
+            $this->authorize('create', MineArea::class);
+        }
+
         try {
             if ($this->editingMineAreaId) {
-                $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
-                if (! $mineArea) {
-                    $this->dispatchBrowserEvent('notify', ['message' => 'Mine area not found', 'type' => 'error']);
-
-                    return;
-                }
                 $this->getService()->update($mineArea, $data);
                 $this->dispatchBrowserEvent('notify', ['message' => 'Mine area updated successfully', 'type' => 'success']);
                 $this->showEditModal = false;
@@ -188,6 +194,7 @@ class MineAreaManager extends Component
         if ($mineArea->team_id !== $team->id) {
             abort(403);
         }
+        $this->authorize('delete', $mineArea);
 
         try {
             $this->getService()->delete($mineArea);
@@ -263,6 +270,8 @@ class MineAreaManager extends Component
 
     public function saveMineAreaWithBoundary()
     {
+        $this->authorize('create', MineArea::class);
+
         $this->validate();
 
         if (empty($this->boundaryCoordinates)) {

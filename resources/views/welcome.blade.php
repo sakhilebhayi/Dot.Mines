@@ -82,6 +82,7 @@
                 <div class="hidden md:flex items-center gap-8 font-mono text-[13px] tracking-wide uppercase text-[var(--sand)]">
                     <a href="#capabilities" class="link-underline hover:text-[var(--stone)] pb-0.5">Product</a>
                     <a href="#features" class="link-underline hover:text-[var(--stone)] pb-0.5">Features</a>
+                    <a href="{{ route('pricing') }}" class="link-underline hover:text-[var(--stone)] pb-0.5">Pricing</a>
                 </div>
 
                 @if (Route::has('login'))
@@ -123,6 +124,7 @@
                 <div class="flex flex-col px-5 py-4 gap-1 font-mono text-sm uppercase tracking-wide">
                     <a href="#capabilities" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Product</a>
                     <a href="#features" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Features</a>
+                    <a href="{{ route('pricing') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Pricing</a>
                     @guest
                         <a href="{{ route('login') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Sign in</a>
                     @endguest
@@ -290,6 +292,7 @@
                     <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="h-11 w-auto opacity-90">
                 </a>
                 <div class="flex items-center gap-6 font-mono text-xs tracking-wide uppercase text-[var(--sand)]">
+                    <a href="{{ route('pricing') }}" class="hover:text-[var(--stone)] transition-colors">Pricing</a>
                     <a href="{{ route('policy.show') }}" class="hover:text-[var(--stone)] transition-colors">Privacy</a>
                     <a href="{{ route('cookies') }}" class="hover:text-[var(--stone)] transition-colors">Cookies</a>
                     <a href="{{ route('terms.show') }}" class="hover:text-[var(--stone)] transition-colors">Terms</a>

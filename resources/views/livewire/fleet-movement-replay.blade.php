@@ -337,7 +337,6 @@
         </div>
     </div>
 
-
     <!-- Leaflet JS - loaded directly in component -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.13.0/leaflet-providers.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -476,23 +475,15 @@
                     });
 
                     if (window.routes && window.routes.length > 0) {
-                        console.log('Raw routes payload:', rawRoutes.slice(0,5));
-                        console.log('Normalized routes:', window.routes.slice(0,5));
                     }
                     
                     // Clear the snapped coordinate cache when new data is loaded
                     window.snappedCoordinateCache = {};
                     
-                    console.log('Initial data loaded from attributes:', {
-                        pathCoords: window.pathCoordinates?.length || 0,
-                        geofences: window.geofences?.length || 0,
-                        routes: window.routes?.length || 0
-                    });
                     
                     // Log route details for debugging
                     if (window.routes?.length > 0) {
                         window.routes.forEach((route, idx) => {
-                            console.log(`Route ${idx}: ${route.name} with ${route.waypoints?.length || 0} waypoints`);
                         });
                     }
                 } catch (err) {
@@ -523,8 +514,6 @@
 
         function initReplayMap() {
             // Debug: Check what's available
-            console.log('Checking for Leaflet... window.L:', typeof window.L, 'L:', typeof L);
-            console.log('Path coordinates:', window.pathCoordinates?.length);
             
             // Check if Leaflet is loaded (check both window.L and global L)
             if (typeof window.L === 'undefined' && typeof L === 'undefined') {
@@ -533,7 +522,6 @@
                     console.error('Leaflet failed to load after maximum retries');
                     return;
                 }
-                console.log('Leaflet not loaded yet, retry', window.initRetryCount);
                 setTimeout(initReplayMap, 200);
                 return;
             }
@@ -541,18 +529,15 @@
             // Check if map container exists
             const mapContainer = document.getElementById('replay-map');
             if (!mapContainer) {
-                console.log('Map container not found, retrying...');
                 setTimeout(initReplayMap, 100);
                 return;
             }
             
             // Check if map is already initialized
             if (window.replayMap) {
-                console.log('Map already initialized');
                 return;
             }
             
-            console.log('Initializing replay map...');
             
             try {
                 // Initialize map
@@ -577,7 +562,6 @@
                     'Satellite': satelliteLayer
                 }).addTo(window.replayMap);
                 
-                console.log('Map initialized successfully');
                 
                 // Invalidate size after short delay
                 setTimeout(() => {
@@ -594,7 +578,6 @@
         function renderPathOnMap() {
             try {
                 if (!window.replayMap || !Array.isArray(window.pathCoordinates) || window.pathCoordinates.length === 0) {
-                    console.log('Cannot render path - map or coordinates missing');
                     return;
                 }
                 
@@ -620,8 +603,6 @@
                     }
                     pathLatLngs.push([Number(snapped.lat), Number(snapped.lng)]);
                 }
-                if (skipped > 0) console.log(`Skipped ${skipped} invalid path points when rendering`);
-                
                 // Filter to ensure only finite numeric lat/lng pairs are passed to Leaflet
                 const validPathLatLngs = pathLatLngs.filter(pt => Array.isArray(pt) && pt.length >= 2 && isFinite(Number(pt[0])) && isFinite(Number(pt[1]))).map(pt => [Number(pt[0]), Number(pt[1])]);
                 if (validPathLatLngs.length < 2) {
@@ -703,12 +684,9 @@
                     }
                 }
                 
-                console.log('Path rendered with', pathLatLngs.length, 'points (snapped to routes)');
                 
                 // Log first and last points to verify snapping
                 if (pathLatLngs.length > 0) {
-                    console.log('Path start:', pathLatLngs[0]);
-                    console.log('Path end:', pathLatLngs[pathLatLngs.length - 1]);
                 }
             } catch (err) {
                 console.error('Error rendering path on map:', err);
@@ -718,7 +696,6 @@
         function renderGeofencesOnMap() {
             try {
                 if (!window.replayMap || !Array.isArray(window.geofences) || window.geofences.length === 0) {
-                    console.log('No geofences to render');
                     return;
                 }
                 
@@ -758,7 +735,6 @@
                     }
                 });
                 
-                console.log('Rendered', window.geofencePolygons.length, 'geofences');
             } catch (err) {
                 console.error('Error rendering geofences on map:', err);
             }
@@ -767,7 +743,6 @@
         function renderRoutesOnMap() {
             try {
                 if (!window.replayMap || !Array.isArray(window.routes) || window.routes.length === 0) {
-                    console.log('No routes to render');
                     return;
                 }
                 
@@ -851,7 +826,6 @@
                     }
                 });
                 
-                console.log('Rendered', window.routePolylines.length, 'routes on map');
             } catch (err) {
                 console.error('Error rendering routes on map:', err);
             }
@@ -1087,7 +1061,6 @@
                         setTimeout(() => {
                             try {
                                 window.replayMap.fitBounds(effectiveBounds, { padding: [50, 50] });
-                                console.log('Map zoomed to route area');
                             } catch (fbErr) {
                                 console.error('Error applying fitBounds (deferred):', fbErr);
                             }
@@ -1272,15 +1245,9 @@
             if (now - (window._replayLastRenderAt || 0) < 180) {
                 // Prevent spamming Leaflet with rapid updates which can trigger
                 // renderer exceptions during animations.
-                console.log('Skipping render: throttled');
                 return;
             }
             window._replayLastRenderAt = now;
-
-            console.log('=== Rendering map elements ===');
-            console.log('Path coordinates:', window.pathCoordinates?.length || 0);
-            console.log('Routes available:', window.routes?.length || 0);
-            console.log('Geofences:', window.geofences?.length || 0);
 
             renderPathOnMap();
             renderGeofencesOnMap();
@@ -1291,18 +1258,15 @@
                 updateMachineMarker(0);
             }
 
-            console.log('=== Map rendering complete ===');
         }
         
         // Listen for Livewire component updates
         function initializeLivewireListeners() {
             document.addEventListener('livewire:updated', (e) => {
-                console.log('Livewire updated, refreshing data from DOM...');
                 try {
                     // Re-run the attribute parsing/normalization so we always have
                     // consistent `{lat, lng}` objects regardless of raw JSON shape
                     loadDataFromAttributes();
-                    console.log('Machine selected event');
 
                     // Wait a moment for Livewire to re-render, then load new data
                     setTimeout(() => {
@@ -1331,25 +1295,16 @@
                 let playbackInterval = null;
 
                 Livewire.on('replay-loaded', () => {
-                    console.log('Replay loaded event');
                     setTimeout(() => {
                         try {
                             loadDataFromAttributes();
-                            console.log('After loading attributes:', {
-                                pathCoords: window.pathCoordinates?.length || 0,
-                                geofences: window.geofences?.length || 0,
-                                routes: window.routes?.length || 0
-                            });
 
                             if (Array.isArray(window.pathCoordinates) && window.pathCoordinates.length > 0) {
-                                console.log('Rendering map elements with path data...');
                                 renderMapElements();
                                 centerOnSelectedMachine();
                                 hideMapOverlay();
                                 updateTimerDisplay();
-                                console.log('Map rendering completed');
                             } else {
-                                console.log('No path coordinates available yet');
                                 showMapOverlay();
                             }
                         } catch (err) {
@@ -1359,7 +1314,6 @@
                 });
 
                 Livewire.on('show-routes', () => {
-                    console.log('Show routes event received');
                     setTimeout(() => {
                         try {
                             loadDataFromAttributes();
@@ -1368,7 +1322,6 @@
                                 zoomToRouteArea();
                                 hideMapOverlay();
                             } else {
-                                console.log('No routes available to show');
                             }
                         } catch (err) {
                             console.error('Error showing routes:', err);
@@ -1380,7 +1333,6 @@
                     try {
                         const position = typeof data?.position === 'number' ? data.position : 0;
                         if (position >= 0 && Array.isArray(window.pathCoordinates) && position < window.pathCoordinates.length) {
-                            console.log('Seeking to position', position);
                             updateMachineMarker(position);
                             updateTimerDisplay();
                         }
@@ -1390,7 +1342,6 @@
                 });
 
                 Livewire.on('replay-play', (payload) => {
-                    console.log('Replay playing');
                     if (playbackInterval) clearInterval(playbackInterval);
 
                     // Playback driven by client but authoritative state stored server-side.
@@ -1436,7 +1387,6 @@
                 });
 
                 Livewire.on('replay-pause', () => {
-                    console.log('Replay paused');
                     try {
                         if (playbackInterval) {
                             clearInterval(playbackInterval);
@@ -1446,7 +1396,6 @@
                 });
 
                 Livewire.on('replay-stop', () => {
-                    console.log('Replay stopped');
                     try {
                         if (playbackInterval) {
                             clearInterval(playbackInterval);

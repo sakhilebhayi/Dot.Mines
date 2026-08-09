@@ -541,6 +541,8 @@ class Fleet extends Component
 
     public function implementRecommendation(int $index)
     {
+        $this->authorizeRecommendationAction();
+
         $team = Auth::user()->currentTeam;
         $rec = $this->lastAiRecommendations[$index] ?? null;
         if (! $rec) {
@@ -595,6 +597,8 @@ class Fleet extends Component
 
     public function confirmRejectRecommendation()
     {
+        $this->authorizeRecommendationAction();
+
         if (empty(trim($this->rejectReason))) {
             $this->dispatchBrowserEvent('notify', ['message' => 'Please provide a reason for rejection', 'type' => 'error']);
 
@@ -634,5 +638,22 @@ class Fleet extends Component
         $this->rejectReason = '';
 
         $this->dispatchBrowserEvent('notify', ['message' => 'Recommendation rejected and logged', 'type' => 'success']);
+    }
+
+    /**
+     * These AI recommendations are computed fresh on every page load by
+     * FleetOptimizerAgent (plain arrays, never persisted with an id), unlike
+     * AIOptimizationDashboard's recommendations which are real AIRecommendation
+     * rows -- there's no model instance to authorize against here via
+     * AIRecommendationPolicy, so this checks the same underlying permission
+     * directly instead.
+     */
+    private function authorizeRecommendationAction(): void
+    {
+        $user = Auth::user();
+
+        if (! $user->hasPermission('update_recommendations') && ! $user->ownsTeam($user->currentTeam)) {
+            abort(403, 'You are not authorized to act on AI recommendations.');
+        }
     }
 }

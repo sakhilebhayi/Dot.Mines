@@ -152,7 +152,7 @@
 
                     <div class="alert alert-info mt-6">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span>Need help? Contact our support team at <a href="mailto:support@mines.com">support@mines.com</a></span>
+                        <span>Need help? Reach out to your team's administrator or owner -- they can be found on the <a href="#" wire:click="setSection('team-management')">Team Management</a> page.</span>
                     </div>
                 </div>
             @endif
@@ -173,13 +173,15 @@
 
                     <h3>Machine Types</h3>
                     <ul>
-                        <li><strong>Haul Truck:</strong> Large dump trucks for material transport</li>
+                        <li><strong>ADT:</strong> Articulated dump truck</li>
                         <li><strong>Excavator:</strong> Digging and loading equipment</li>
                         <li><strong>Dozer:</strong> Bulldozers for pushing material</li>
                         <li><strong>Loader:</strong> Front-end loaders</li>
                         <li><strong>Grader:</strong> Motor graders for surface preparation</li>
                         <li><strong>Drill:</strong> Drilling equipment</li>
-                        <li><strong>Support Vehicle:</strong> Service trucks, water trucks, etc.</li>
+                        <li><strong>Truck:</strong> General haul trucks</li>
+                        <li><strong>LDV:</strong> Light delivery vehicle</li>
+                        <li><strong>Other</strong></li>
                     </ul>
 
                     <h2>Machine Status</h2>
@@ -280,10 +282,6 @@
                         <li>Display custom date ranges</li>
                     </ul>
 
-                    <div class="alert alert-info">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span><strong>Pro Tip:</strong> Use keyboard shortcuts: Press 'F' to toggle fullscreen, 'M' to toggle map layers.</span>
-                    </div>
                 </div>
             @endif
 
@@ -303,12 +301,10 @@
 
                     <h2>Geofence Types</h2>
                     <ul>
-                        <li><strong>Loading Zone:</strong> Areas where material is loaded</li>
-                        <li><strong>Dumping Zone:</strong> Waste or stockpile areas</li>
-                        <li><strong>Restricted:</strong> No-access areas</li>
-                        <li><strong>Parking:</strong> Equipment parking areas</li>
-                        <li><strong>Maintenance:</strong> Workshop and service areas</li>
-                        <li><strong>Safety:</strong> Special safety zones</li>
+                        <li><strong>Pit:</strong> Open pit mining areas</li>
+                        <li><strong>Stockpile:</strong> Material storage areas</li>
+                        <li><strong>Dump:</strong> Waste dump areas</li>
+                        <li><strong>Facility:</strong> Administrative and support buildings</li>
                     </ul>
 
                     <h2>Entry/Exit Tracking</h2>
@@ -538,46 +534,20 @@
                     <p>Connect Mines with your existing systems and hardware.</p>
 
                     <h2>Available Integrations</h2>
-                    
-                    <h3>GPS Tracking Devices</h3>
-                    <p>Mines supports major GPS tracking providers:</p>
+                    <p>Mines connects directly to major heavy equipment manufacturers' telematics systems, so machine data flows in automatically instead of being entered by hand:</p>
                     <ul>
-                        <li><strong>Trimble:</strong> Fleet management hardware</li>
-                        <li><strong>Geotab:</strong> Telematics devices</li>
-                        <li><strong>CalAmp:</strong> GPS trackers</li>
-                        <li><strong>Topcon:</strong> 3D machine control</li>
-                        <li><strong>Generic NMEA:</strong> Standard GPS protocols</li>
+                        <li><strong>Volvo, Caterpillar, Komatsu, Bell, Hitachi:</strong> Heavy equipment telematics</li>
+                        <li><strong>John Deere, Liebherr, Hyundai, Doosan, JCB, CASE:</strong> Construction equipment</li>
+                        <li><strong>Sany, XCMG, Kobelco, New Holland, Takeuchi, Kubota, Bobcat, Yanmar:</strong> Additional manufacturer integrations</li>
+                        <li><strong>Atlas Copco, Sandvik, Epiroc:</strong> Drilling equipment</li>
+                        <li><strong>C-Track:</strong> GPS tracking</li>
                     </ul>
-
-                    <h3>ERP Systems</h3>
-                    <p>Integrate with enterprise resource planning systems:</p>
-                    <ul>
-                        <li><strong>SAP:</strong> Bi-directional sync for work orders and inventory</li>
-                        <li><strong>Oracle NetSuite:</strong> Financial and operational data</li>
-                        <li><strong>Microsoft Dynamics:</strong> Equipment and maintenance records</li>
-                    </ul>
-
-                    <h3>Fuel Management Systems</h3>
-                    <ul>
-                        <li><strong>FuelMaster:</strong> Automated fuel dispensing</li>
-                        <li><strong>OPW:</strong> Tank monitoring systems</li>
-                        <li><strong>Banlaw:</strong> Fluid management</li>
-                    </ul>
-
-                    <h3>Maintenance Systems</h3>
-                    <ul>
-                        <li><strong>Maximo:</strong> IBM asset management</li>
-                        <li><strong>Infor EAM:</strong> Enterprise asset management</li>
-                        <li><strong>Maintenance Connection:</strong> CMMS integration</li>
-                    </ul>
+                    <p>See the <a href="{{ route('integrations') }}">Integrations</a> page in your account for the full, current list and each provider's connection status.</p>
 
                     <h2>Integration Methods</h2>
-                    
+
                     <h3>REST API</h3>
                     <p>Full REST API for all platform features. See <a href="#" wire:click="setSection('api-access')">API Access</a> for details.</p>
-
-                    <h3>Webhooks</h3>
-                    <p>Receive real-time notifications for events. See <a href="#" wire:click="setSection('webhooks')">Webhooks</a> for setup.</p>
 
                     <h3>File Import/Export</h3>
                     <p>Bulk data operations via CSV/Excel files:</p>
@@ -588,24 +558,15 @@
                         <li>Export reports</li>
                     </ul>
 
-                    <h3>Direct Database Connection</h3>
-                    <p>Enterprise customers can request direct database access for advanced integrations.</p>
-
                     <h2>Setting Up Integrations</h2>
                     <ol>
                         <li>Navigate to <strong>Integrations</strong></li>
                         <li>Click <strong>"Add Integration"</strong></li>
-                        <li>Select integration type</li>
+                        <li>Select a manufacturer</li>
                         <li>Enter credentials/API keys</li>
-                        <li>Configure sync settings</li>
-                        <li>Test connection</li>
-                        <li>Activate</li>
+                        <li>Test the connection</li>
+                        <li>Sync machines</li>
                     </ol>
-
-                    <div class="alert alert-info">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span>Need a custom integration? Contact our integration team at <a href="mailto:integrations@mines.com">integrations@mines.com</a></span>
-                    </div>
                 </div>
             @endif
 
@@ -618,8 +579,8 @@
                     
                     <h3>1. Generate API Token</h3>
                     <ol>
-                        <li>Go to <strong>Settings</strong> → <strong>API Tokens</strong></li>
-                        <li>Click <strong>"Create New Token"</strong></li>
+                        <li>Open <strong>API Tokens</strong> from your account menu (top right)</li>
+                        <li>Click <strong>"Create"</strong></li>
                         <li>Name your token (e.g., "Production Integration")</li>
                         <li>Select permissions</li>
                         <li>Copy the token (shown only once!)</li>
@@ -630,12 +591,12 @@
                     <div class="mockup-code">
                         <pre data-prefix="$"><code>curl -H "Authorization: Bearer REPLACE_WITH_YOUR_API_TOKEN" \</code></pre>
                         <pre data-prefix=""><code>     -H "Accept: application/json" \</code></pre>
-                        <pre data-prefix=""><code>     https://api.mines.com/api/machines</code></pre>
+                        <pre data-prefix=""><code>     {{ config('app.url') }}/api/machines</code></pre>
                     </div>
 
                     <h2>Base URL</h2>
                     <div class="mockup-code">
-                        <pre data-prefix=""><code>https://api.mines.com/api</code></pre>
+                        <pre data-prefix=""><code>{{ config('app.url') }}/api</code></pre>
                     </div>
 
                     <h2>Common Endpoints</h2>
@@ -754,19 +715,19 @@
                     
                     <h3>Create Machine</h3>
                     <div class="mockup-code">
-                        <pre data-prefix="$"><code>curl -X POST https://api.mines.com/api/machines \</code></pre>
+                        <pre data-prefix="$"><code>curl -X POST {{ config('app.url') }}/api/machines \</code></pre>
                         <pre data-prefix=""><code>  -H "Authorization: Bearer REPLACE_WITH_YOUR_API_TOKEN" \</code></pre>
                         <pre data-prefix=""><code>  -H "Content-Type: application/json" \</code></pre>
                         <pre data-prefix=""><code>  -d '{</code></pre>
                         <pre data-prefix=""><code>    "name": "Haul Truck 01",</code></pre>
-                        <pre data-prefix=""><code>    "machine_type": "haul_truck",</code></pre>
+                        <pre data-prefix=""><code>    "machine_type": "truck",</code></pre>
                         <pre data-prefix=""><code>    "serial_number": "HT-12345"</code></pre>
                         <pre data-prefix=""><code>  }'</code></pre>
                     </div>
 
                     <h3>Record Fuel Transaction</h3>
                     <div class="mockup-code">
-                        <pre data-prefix="$"><code>curl -X POST https://api.mines.com/api/fuel/transactions \</code></pre>
+                        <pre data-prefix="$"><code>curl -X POST {{ config('app.url') }}/api/fuel/transactions \</code></pre>
                         <pre data-prefix=""><code>  -H "Authorization: Bearer REPLACE_WITH_YOUR_API_TOKEN" \</code></pre>
                         <pre data-prefix=""><code>  -H "Content-Type: application/json" \</code></pre>
                         <pre data-prefix=""><code>  -d '{</code></pre>
@@ -780,8 +741,7 @@
 
                     <h2>Rate Limits</h2>
                     <ul>
-                        <li><strong>Standard:</strong> 60 requests per minute</li>
-                        <li><strong>Enterprise:</strong> 300 requests per minute</li>
+                        <li>60 requests per minute, per user</li>
                         <li>Rate limit headers included in all responses</li>
                     </ul>
 
@@ -832,103 +792,10 @@
             @if($activeSection === 'webhooks')
                 <div class="prose prose-invert max-w-none">
                     <h1>Webhooks</h1>
-                    <p>Receive real-time notifications when events occur in Mines.</p>
-
-                    <h2>Setting Up Webhooks</h2>
-                    <ol>
-                        <li>Go to <strong>Integrations</strong> → <strong>Webhooks</strong></li>
-                        <li>Click <strong>"Create Webhook"</strong></li>
-                        <li>Enter your endpoint URL</li>
-                        <li>Select events to subscribe to</li>
-                        <li>Save (webhook secret will be generated)</li>
-                    </ol>
-
-                    <h2>Available Events</h2>
-                    
-                    <h3>Machine Events</h3>
-                    <ul>
-                        <li><code>machine.created</code> - New machine added</li>
-                        <li><code>machine.updated</code> - Machine details changed</li>
-                        <li><code>machine.status_changed</code> - Status update (active/idle/offline)</li>
-                        <li><code>machine.location_updated</code> - GPS location changed</li>
-                        <li><code>machine.offline</code> - Machine went offline</li>
-                    </ul>
-
-                    <h3>Geofence Events</h3>
-                    <ul>
-                        <li><code>geofence.entry</code> - Machine entered geofence</li>
-                        <li><code>geofence.exit</code> - Machine exited geofence</li>
-                        <li><code>geofence.violation</code> - Restricted area violation</li>
-                    </ul>
-
-                    <h3>Fuel Events</h3>
-                    <ul>
-                        <li><code>fuel.transaction_created</code> - New fuel transaction</li>
-                        <li><code>fuel.tank_low</code> - Tank below minimum level</li>
-                        <li><code>fuel.tank_critical</code> - Tank critically low</li>
-                        <li><code>fuel.budget_exceeded</code> - Budget limit exceeded</li>
-                    </ul>
-
-                    <h3>Maintenance Events</h3>
-                    <ul>
-                        <li><code>maintenance.schedule_due</code> - Maintenance due</li>
-                        <li><code>maintenance.schedule_overdue</code> - Maintenance overdue</li>
-                        <li><code>maintenance.health_warning</code> - Health score below threshold</li>
-                        <li><code>maintenance.health_critical</code> - Critical health issue</li>
-                        <li><code>maintenance.fault_code</code> - Fault code detected</li>
-                        <li><code>maintenance.work_order_completed</code> - Work order finished</li>
-                    </ul>
-
-                    <h2>Webhook Payload</h2>
-                    <p>All webhooks have this structure:</p>
-                    <div class="mockup-code">
-                        <pre data-prefix=""><code>{</code></pre>
-                        <pre data-prefix=""><code>  "event": "machine.status_changed",</code></pre>
-                        <pre data-prefix=""><code>  "timestamp": "2026-01-20T14:30:00Z",</code></pre>
-                        <pre data-prefix=""><code>  "team_id": 1,</code></pre>
-                        <pre data-prefix=""><code>  "data": {</code></pre>
-                        <pre data-prefix=""><code>    "machine_id": 5,</code></pre>
-                        <pre data-prefix=""><code>    "old_status": "active",</code></pre>
-                        <pre data-prefix=""><code>    "new_status": "idle"</code></pre>
-                        <pre data-prefix=""><code>  }</code></pre>
-                        <pre data-prefix=""><code>}</code></pre>
+                    <div class="alert alert-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <span><strong>Not yet available.</strong> Outbound webhooks (Mines pushing event notifications to your own endpoint) aren't built yet. If you need to react to events in real time today, poll the relevant <a href="#" wire:click="setSection('api-access')">REST API</a> endpoint on an interval.</span>
                     </div>
-
-                    <h2>Verifying Webhooks</h2>
-                    <p>Each webhook includes a signature in the <code>X-Webhook-Signature</code> header. Verify it:</p>
-                    <div class="mockup-code">
-                        <pre data-prefix=""><code>const crypto = require('crypto');</code></pre>
-                        <pre data-prefix=""><code></code></pre>
-                        <pre data-prefix=""><code>const signature = req.headers['x-webhook-signature'];</code></pre>
-                        <pre data-prefix=""><code>const payload = JSON.stringify(req.body);</code></pre>
-                        <pre data-prefix=""><code>const secret = 'your_webhook_secret';</code></pre>
-                        <pre data-prefix=""><code></code></pre>
-                        <pre data-prefix=""><code>const hash = crypto</code></pre>
-                        <pre data-prefix=""><code>  .createHmac('sha256', secret)</code></pre>
-                        <pre data-prefix=""><code>  .update(payload)</code></pre>
-                        <pre data-prefix=""><code>  .digest('hex');</code></pre>
-                        <pre data-prefix=""><code></code></pre>
-                        <pre data-prefix=""><code>if (hash !== signature) {</code></pre>
-                        <pre data-prefix=""><code>  throw new Error('Invalid signature');</code></pre>
-                        <pre data-prefix=""><code>}</code></pre>
-                    </div>
-
-                    <h2>Best Practices</h2>
-                    <ul>
-                        <li><strong>Return 200 quickly:</strong> Process webhook asynchronously</li>
-                        <li><strong>Verify signatures:</strong> Always validate the signature</li>
-                        <li><strong>Handle retries:</strong> Make your endpoint idempotent</li>
-                        <li><strong>Use HTTPS:</strong> Webhook URLs must use HTTPS</li>
-                        <li><strong>Monitor failures:</strong> Check webhook logs regularly</li>
-                    </ul>
-
-                    <h2>Retry Policy</h2>
-                    <ul>
-                        <li>Failed webhooks retry up to 3 times</li>
-                        <li>Exponential backoff: 5s, 30s, 5m</li>
-                        <li>After 3 failures, webhook is disabled</li>
-                        <li>Re-enable in webhook settings</li>
-                    </ul>
                 </div>
             @endif
 
@@ -939,7 +806,7 @@
 
                     <h2>Adding Team Members</h2>
                     <ol>
-                        <li>Go to <strong>Settings</strong> → <strong>Team</strong></li>
+                        <li>Open <strong>Team</strong> from your account menu, or go to <strong>Settings</strong> → <strong>Users &amp; Roles</strong></li>
                         <li>Click <strong>"Invite Member"</strong></li>
                         <li>Enter email address</li>
                         <li>Select role</li>
@@ -958,23 +825,23 @@
                             <tbody>
                                 <tr>
                                     <td><strong>Owner</strong></td>
-                                    <td>Full access including billing and team management</td>
+                                    <td>The person who created the team. Full access, including billing.</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Admin</strong></td>
-                                    <td>Full access except billing</td>
+                                    <td><strong>Administrator</strong></td>
+                                    <td>Full access to every feature and data set. Team membership and billing are Owner-only, regardless of role.</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Manager</strong></td>
-                                    <td>View all data, create/edit machines, schedules, transactions</td>
+                                    <td><strong>Fleet Manager</strong></td>
+                                    <td>Can manage machines, geofences, and reports, but not team or billing settings</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Operator</strong></td>
-                                    <td>View data, record transactions, update machine status</td>
+                                    <td>Can view machines and maps, and acknowledge alerts</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Viewer</strong></td>
-                                    <td>Read-only access to all data</td>
+                                    <td>Read-only access to dashboards, machines, and reports</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -983,9 +850,8 @@
                     <h2>Managing Members</h2>
                     <ul>
                         <li><strong>Edit Role:</strong> Change member permissions</li>
-                        <li><strong>Deactivate:</strong> Temporarily remove access</li>
-                        <li><strong>Remove:</strong> Permanently remove from team</li>
-                        <li><strong>Resend Invite:</strong> Send invitation email again</li>
+                        <li><strong>Remove:</strong> Remove from team</li>
+                        <li><strong>Cancel Invitation:</strong> Withdraw a pending invite before it's accepted</li>
                     </ul>
                 </div>
             @endif
@@ -996,39 +862,13 @@
                     <p>Generate comprehensive reports on fleet operations.</p>
 
                     <h2>Available Reports</h2>
-                    
-                    <h3>Fleet Reports</h3>
                     <ul>
-                        <li>Fleet utilization summary</li>
-                        <li>Machine activity logs</li>
-                        <li>Distance and hours by machine</li>
-                        <li>Status history</li>
-                    </ul>
-
-                    <h3>Fuel Reports</h3>
-                    <ul>
-                        <li>Fuel consumption by machine</li>
-                        <li>Tank level history</li>
-                        <li>Transaction history</li>
-                        <li>Cost analysis</li>
-                        <li>Efficiency trends</li>
-                    </ul>
-
-                    <h3>Maintenance Reports</h3>
-                    <ul>
-                        <li>Work order summary</li>
-                        <li>Maintenance costs</li>
-                        <li>Downtime analysis</li>
-                        <li>Component replacement history</li>
-                        <li>Health score trends</li>
-                    </ul>
-
-                    <h3>Geofence Reports</h3>
-                    <ul>
-                        <li>Entry/exit logs</li>
-                        <li>Dwell time analysis</li>
-                        <li>Productivity by zone</li>
-                        <li>Tonnage reports</li>
+                        <li><strong>Production Summary:</strong> Loads, cycles, tonnage, and BCM across your fleet</li>
+                        <li><strong>Fleet Utilization:</strong> Machine activity and status history</li>
+                        <li><strong>Maintenance Schedule:</strong> Upcoming and completed service work</li>
+                        <li><strong>Fuel Consumption:</strong> Transaction history and cost analysis</li>
+                        <li><strong>Material Tracking:</strong> Material moved by area and machine</li>
+                        <li><strong>Downtime Analysis:</strong> Machine downtime by cause</li>
                     </ul>
 
                     <h2>Generating Reports</h2>
@@ -1036,19 +876,14 @@
                         <li>Navigate to <strong>Reports</strong></li>
                         <li>Select report type</li>
                         <li>Choose date range</li>
-                        <li>Apply filters (machines, areas, etc.)</li>
                         <li>Click <strong>"Generate"</strong></li>
-                        <li>Export in desired format (PDF, CSV, Excel)</li>
+                        <li>Export in your chosen format (PDF, CSV, Excel)</li>
                     </ol>
 
-                    <h2>Scheduled Reports</h2>
-                    <p>Automate report generation:</p>
-                    <ol>
-                        <li>Create a report configuration</li>
-                        <li>Set schedule (daily, weekly, monthly)</li>
-                        <li>Add email recipients</li>
-                        <li>Reports automatically emailed on schedule</li>
-                    </ol>
+                    <div class="alert alert-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>The report form lets you mark a report to auto-repeat on a schedule, but automatic recurring generation and emailing isn't wired up yet -- for now, generate reports on demand.</span>
+                    </div>
                 </div>
             @endif
 
@@ -1058,50 +893,14 @@
                     <p>Stay informed about critical events and conditions.</p>
 
                     <h2>Alert Types</h2>
-                    
-                    <h3>Machine Alerts</h3>
+                    <p>Alerts are generated automatically by the platform's monitoring services -- there's currently no way to configure custom thresholds. Types include:</p>
                     <ul>
-                        <li>Machine offline</li>
-                        <li>Status change</li>
-                        <li>Speeding violations</li>
-                        <li>Harsh braking</li>
+                        <li><strong>Machine:</strong> Offline, status changes</li>
+                        <li><strong>Fuel:</strong> Tank low, tank critical, budget exceeded</li>
+                        <li><strong>Maintenance:</strong> Service due, service overdue, health warnings</li>
+                        <li><strong>Geofence:</strong> Unauthorized entry, excessive dwell time</li>
+                        <li><strong>Operator Fatigue:</strong> High or critical fatigue score during a shift</li>
                     </ul>
-
-                    <h3>Fuel Alerts</h3>
-                    <ul>
-                        <li>Tank low</li>
-                        <li>Tank critical</li>
-                        <li>High consumption</li>
-                        <li>Unusual patterns</li>
-                        <li>Budget exceeded</li>
-                    </ul>
-
-                    <h3>Maintenance Alerts</h3>
-                    <ul>
-                        <li>Service due</li>
-                        <li>Service overdue</li>
-                        <li>Health warning</li>
-                        <li>Critical health</li>
-                        <li>Fault codes</li>
-                    </ul>
-
-                    <h3>Geofence Alerts</h3>
-                    <ul>
-                        <li>Unauthorized entry</li>
-                        <li>Excessive dwell time</li>
-                        <li>After-hours activity</li>
-                    </ul>
-
-                    <h2>Configuring Alerts</h2>
-                    <ol>
-                        <li>Go to <strong>Alerts</strong></li>
-                        <li>Click <strong>"Configure Alerts"</strong></li>
-                        <li>Select alert type</li>
-                        <li>Set thresholds/conditions</li>
-                        <li>Choose notification method (email, SMS, push)</li>
-                        <li>Add recipients</li>
-                        <li>Save</li>
-                    </ol>
 
                     <h2>Alert Priority</h2>
                     <ul>
@@ -1115,9 +914,13 @@
                     <ul>
                         <li><strong>Acknowledge:</strong> Mark alert as seen</li>
                         <li><strong>Resolve:</strong> Mark issue as fixed</li>
-                        <li><strong>Snooze:</strong> Temporarily silence</li>
-                        <li><strong>Escalate:</strong> Notify additional people</li>
+                        <li><strong>Dismiss:</strong> Close an alert with a required reason</li>
                     </ul>
+
+                    <div class="alert alert-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>You can turn email delivery for alerts on or off under <strong>Settings</strong> → <strong>Notifications</strong>.</span>
+                    </div>
                 </div>
             @endif
 
@@ -1126,21 +929,12 @@
                     <h1>Mine Areas</h1>
                     <p>Define and manage operational areas within your mine site.</p>
 
-                    <h2>Area Types</h2>
-                    <ul>
-                        <li><strong>Pit:</strong> Open pit mining areas</li>
-                        <li><strong>Stockpile:</strong> Material storage areas</li>
-                        <li><strong>Processing:</strong> Crushing, screening, processing facilities</li>
-                        <li><strong>Dump:</strong> Waste dump areas</li>
-                        <li><strong>Facility:</strong> Administrative and support buildings</li>
-                    </ul>
-
                     <h2>Creating Mine Areas</h2>
                     <ol>
                         <li>Navigate to <strong>Mine Areas</strong></li>
                         <li>Click <strong>"Create Area"</strong></li>
-                        <li>Draw boundary on map</li>
-                        <li>Set area type and details</li>
+                        <li>Draw the boundary on the map</li>
+                        <li>Set name, manager, and status (Active, Inactive, or Planning)</li>
                         <li>Assign machines (optional)</li>
                         <li>Save</li>
                     </ol>
@@ -1160,24 +954,14 @@
                     <h1>Dashboard</h1>
                     <p>Your central command center for fleet operations.</p>
 
-                    <h2>Dashboard Widgets</h2>
+                    <h2>Dashboard Sections</h2>
                     <ul>
-                        <li><strong>Fleet Status:</strong> Active/idle/offline machine counts</li>
-                        <li><strong>Live Map:</strong> Real-time machine locations</li>
-                        <li><strong>Recent Alerts:</strong> Latest notifications</li>
-                        <li><strong>Fuel Summary:</strong> Current fuel levels and consumption</li>
-                        <li><strong>Maintenance Due:</strong> Upcoming service schedules</li>
-                        <li><strong>Performance Metrics:</strong> KPIs and statistics</li>
+                        <li><strong>Get set up:</strong> A checklist guiding a new team through creating its first mine area and machine (disappears once both exist)</li>
+                        <li><strong>Stat cards:</strong> Total machines, active machines, active alerts, and geofences</li>
+                        <li><strong>Recent Alerts:</strong> The latest unresolved alerts, with a link to view all</li>
+                        <li><strong>Machine Status &amp; Quick Actions:</strong> A breakdown of machine statuses, plus shortcuts to Fleet, the Live Map, and AI Insights</li>
                     </ul>
-
-                    <h2>Customizing Dashboard</h2>
-                    <ol>
-                        <li>Click <strong>"Customize"</strong> button</li>
-                        <li>Drag widgets to rearrange</li>
-                        <li>Click widget settings to configure</li>
-                        <li>Add/remove widgets as needed</li>
-                        <li>Save layout</li>
-                    </ol>
+                    <p>The dashboard refreshes itself automatically every 10 seconds.</p>
                 </div>
             @endif
 
@@ -1205,10 +989,9 @@
                     <h2>Location History</h2>
                     <p>Access complete location history with:</p>
                     <ul>
-                        <li>Breadcrumb trails</li>
-                        <li>Stop detection</li>
-                        <li>Distance calculations</li>
-                        <li>Export to KML/GPX</li>
+                        <li>Breadcrumb trails on the map</li>
+                        <li>Total distance travelled</li>
+                        <li>Export to CSV</li>
                     </ul>
                 </div>
             @endif
@@ -1225,15 +1008,15 @@
                                 <tr>
                                     <th>Permission</th>
                                     <th>Owner</th>
-                                    <th>Admin</th>
-                                    <th>Manager</th>
+                                    <th>Administrator</th>
+                                    <th>Fleet Manager</th>
                                     <th>Operator</th>
                                     <th>Viewer</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>View dashboard</td>
+                                    <td>View dashboard, machines, live map, geofences</td>
                                     <td>✓</td>
                                     <td>✓</td>
                                     <td>✓</td>
@@ -1241,15 +1024,7 @@
                                     <td>✓</td>
                                 </tr>
                                 <tr>
-                                    <td>View machines</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                </tr>
-                                <tr>
-                                    <td>Create/edit machines</td>
+                                    <td>Create/update machines and geofences</td>
                                     <td>✓</td>
                                     <td>✓</td>
                                     <td>✓</td>
@@ -1257,7 +1032,7 @@
                                     <td>-</td>
                                 </tr>
                                 <tr>
-                                    <td>Delete machines</td>
+                                    <td>Delete machines and geofences</td>
                                     <td>✓</td>
                                     <td>✓</td>
                                     <td>-</td>
@@ -1265,20 +1040,12 @@
                                     <td>-</td>
                                 </tr>
                                 <tr>
-                                    <td>Record fuel transactions</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Create work orders</td>
+                                    <td>View reports</td>
                                     <td>✓</td>
                                     <td>✓</td>
                                     <td>✓</td>
                                     <td>-</td>
-                                    <td>-</td>
+                                    <td>✓</td>
                                 </tr>
                                 <tr>
                                     <td>Generate reports</td>
@@ -1289,7 +1056,23 @@
                                     <td>-</td>
                                 </tr>
                                 <tr>
-                                    <td>Manage team</td>
+                                    <td>Acknowledge alerts</td>
+                                    <td>✓</td>
+                                    <td>✓</td>
+                                    <td>✓</td>
+                                    <td>✓</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Resolve alerts</td>
+                                    <td>✓</td>
+                                    <td>✓</td>
+                                    <td>✓</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Manage integrations</td>
                                     <td>✓</td>
                                     <td>✓</td>
                                     <td>-</td>
@@ -1297,7 +1080,7 @@
                                     <td>-</td>
                                 </tr>
                                 <tr>
-                                    <td>Manage billing</td>
+                                    <td>Manage team members &amp; billing</td>
                                     <td>✓</td>
                                     <td>-</td>
                                     <td>-</td>
@@ -1307,45 +1090,38 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="alert alert-info mt-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Managing team members, renaming the team, and billing are restricted to the team's Owner (the person who created it) regardless of any role assigned to other members.</span>
+                    </div>
                 </div>
             @endif
 
             @if($activeSection === 'settings')
                 <div class="prose prose-invert max-w-none">
                     <h1>Settings</h1>
-                    <p>Configure your Mines platform.</p>
+                    <p>The Settings page has three tabs.</p>
 
-                    <h2>General Settings</h2>
+                    <h2>General</h2>
                     <ul>
-                        <li><strong>Company Name:</strong> Your organization name</li>
-                        <li><strong>Time Zone:</strong> Local time zone for reports</li>
-                        <li><strong>Date Format:</strong> Preferred date display format</li>
-                        <li><strong>Units:</strong> Metric or Imperial measurements</li>
+                        <li><strong>Team Name</strong> and <strong>Team Email</strong></li>
+                        <li><strong>Time Zone</strong></li>
+                        <li><strong>Language</strong></li>
+                        <li><strong>Currency</strong></li>
                     </ul>
 
-                    <h2>Notification Settings</h2>
+                    <h2>Users &amp; Roles</h2>
+                    <p>Invite members, change roles, and remove members. See <a href="#" wire:click="setSection('team-management')">Team Management</a>.</p>
+
+                    <h2>Notifications</h2>
                     <ul>
-                        <li>Email notification preferences</li>
-                        <li>SMS alert settings</li>
-                        <li>Push notification configuration</li>
-                        <li>Alert frequency</li>
+                        <li><strong>Email Alerts:</strong> Receive alert notifications by email</li>
+                        <li><strong>Email Reports:</strong> Receive report notifications by email</li>
+                        <li><strong>In-App Alerts:</strong> Show notifications inside the app</li>
+                        <li><strong>Quiet Hours:</strong> A window during which notifications are held back</li>
                     </ul>
 
-                    <h2>API Settings</h2>
-                    <ul>
-                        <li>Generate API tokens</li>
-                        <li>View API usage</li>
-                        <li>Configure webhooks</li>
-                        <li>API rate limits</li>
-                    </ul>
-
-                    <h2>Security Settings</h2>
-                    <ul>
-                        <li>Two-factor authentication</li>
-                        <li>Session timeout</li>
-                        <li>IP whitelist</li>
-                        <li>Audit logs</li>
-                    </ul>
+                    <p>Two-factor authentication is managed from your <strong>Profile</strong> page, not Settings.</p>
                 </div>
             @endif
         </div>

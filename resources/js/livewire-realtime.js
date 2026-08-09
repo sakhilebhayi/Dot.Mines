@@ -40,7 +40,6 @@ function setupLivewireListeners() {
      * Initialize Reverb for the current user/team
      */
     window.Livewire.on('realtime:init', ({ userId, teamId }) => {
-        console.log('📡 Initializing Reverb for user:', userId, 'team:', teamId);
         ReverbService.init(userId, teamId);
         
         // Initialize toast service
@@ -53,7 +52,6 @@ function setupLivewireListeners() {
      * Subscribe to machine location updates
      */
     window.Livewire.on('realtime:machine-location', ({ machineId }) => {
-        console.log('🎯 Subscribing to machine location:', machineId);
         ReverbService.subscribeMachineLocation(machineId, (data) => {
             ReverbService.emit('machineLocationUpdated', data);
             
@@ -70,7 +68,6 @@ function setupLivewireListeners() {
      * Subscribe to team-wide location updates
      */
     window.Livewire.on('realtime:team-locations', () => {
-        console.log('🎯 Subscribing to team locations');
         ReverbService.subscribeTeamLocations((data) => {
             ReverbService.emit('teamLocationUpdated', data);
             
@@ -87,7 +84,6 @@ function setupLivewireListeners() {
      * Subscribe to team alerts
      */
     window.Livewire.on('realtime:team-alerts', () => {
-        console.log('🎯 Subscribing to team alerts');
         ReverbService.subscribeTeamAlerts((data) => {
             ReverbService.emit('alertTriggered', data);
             
@@ -108,7 +104,6 @@ function setupLivewireListeners() {
      * Subscribe to geofence events
      */
     window.Livewire.on('realtime:geofence-events', ({ geofenceId }) => {
-        console.log('🎯 Subscribing to geofence events:', geofenceId);
         ReverbService.subscribeGeofenceEvents(
             geofenceId,
             (data) => {
@@ -156,7 +151,6 @@ function setupLivewireListeners() {
      * Subscribe to machine status changes
      */
     window.Livewire.on('realtime:machine-status', ({ machineId }) => {
-        console.log('🎯 Subscribing to machine status:', machineId);
         ReverbService.subscribeMachineStatus(machineId, (data) => {
             ReverbService.emit('machineStatusChanged', data);
             
@@ -182,7 +176,6 @@ function setupLivewireListeners() {
      * Subscribe to presence (active users)
      */
     window.Livewire.on('realtime:presence', () => {
-        console.log('🎯 Subscribing to presence');
         ReverbService.subscribePresence(
             (users) => ReverbService.emit('usersJoined', users),
             (user) => ReverbService.emit('userLeft', user)
@@ -212,7 +205,6 @@ function setupLivewireListeners() {
         ReverbService.on(eventName, callback);
     };
 
-    console.log('✅ Livewire realtime event listeners initialized');
 }
 
 // Start setup when script loads

@@ -5,7 +5,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div class="animate-slide-in-left">
                 <h1 class="text-3xl font-display font-semibold bg-gradient-to-r from-[var(--gold)] to-[var(--umber)] bg-clip-text text-transparent">
-                    🤖 AI Optimization Dashboard
+                    AI Optimization Dashboard
                 </h1>
                 <p class="mt-1 text-sm text-[var(--sand)]">
                     Intelligent recommendations and insights powered by AI
@@ -147,15 +147,15 @@
                 <nav class="-mb-px flex space-x-8">
                     <button wire:click="$set('activeTab', 'recommendations')" 
                         class="@if($activeTab === 'recommendations') border-[var(--gold)] text-[var(--gold)] @else border-transparent text-[var(--sand)] hover:text-[var(--stone)] hover:border-[var(--line)] @endif whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200">
-                        📋 Recommendations ({{ $recommendations->count() }})
+                        Recommendations ({{ $recommendations->count() }})
                     </button>
                     <button wire:click="$set('activeTab', 'insights')" 
                         class="@if($activeTab === 'insights') border-[var(--gold)] text-[var(--gold)] @else border-transparent text-[var(--sand)] hover:text-[var(--stone)] hover:border-[var(--line)] @endif whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200">
-                        💡 Insights ({{ $insights->count() }})
+                        Insights ({{ $insights->count() }})
                     </button>
                     <button wire:click="$set('activeTab', 'alerts')" 
                         class="@if($activeTab === 'alerts') border-[var(--gold)] text-[var(--gold)] @else border-transparent text-[var(--sand)] hover:text-[var(--stone)] hover:border-[var(--line)] @endif whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200">
-                        🚨 Alerts ({{ $predictiveAlerts->count() }})
+                        Alerts ({{ $predictiveAlerts->count() }})
                     </button>
                 </nav>
             </div>

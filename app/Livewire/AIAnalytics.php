@@ -2,18 +2,20 @@
 
 namespace App\Livewire;
 
-use App\Models\AIRecommendation;
-use App\Models\AIInsight;
-use App\Models\AIPredictiveAlert;
 use App\Models\AIAgent;
 use App\Models\AIAnalysisSession;
+use App\Models\AIInsight;
+use App\Models\AIPredictiveAlert;
+use App\Models\AIRecommendation;
+use Illuminate\View\View;
 use Livewire\Component;
-use Carbon\Carbon;
 
 class AIAnalytics extends Component
 {
     public string $timeRange = '30'; // days
+
     public string $selectedAgent = 'all';
+
     public bool $showDetails = true;
 
     public function mount(): void
@@ -31,10 +33,10 @@ class AIAnalytics extends Component
         $this->selectedAgent = $agentType;
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         $team = auth()->user()->currentTeam;
-        $startDate = now()->subDays((int)$this->timeRange);
+        $startDate = now()->subDays((int) $this->timeRange);
 
         // Get agents
         $agents = AIAgent::all();
@@ -76,6 +78,7 @@ class AIAnalytics extends Component
                 'implemented' => $recommendations->where('status', 'implemented')->count(),
                 'pending' => $recommendations->where('status', 'pending')->count(),
                 'accuracy' => $agent->accuracy_score,
+                'predictions_made' => $agent->predictions_made,
                 'total_savings' => $recommendations->where('status', 'implemented')->sum('estimated_savings'),
             ];
         });
@@ -91,6 +94,7 @@ class AIAnalytics extends Component
             ->get()
             ->map(function ($item) {
                 $item->rate = $item->total > 0 ? ($item->implemented / $item->total) * 100 : 0;
+
                 return $item;
             });
 

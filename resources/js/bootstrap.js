@@ -32,7 +32,6 @@ if (pusherKey) {
         },
     });
     
-    console.log('Echo initialized with Pusher');
 } else {
     // Fallback to Reverb (local development)
     const reverbKey = import.meta.env.VITE_REVERB_APP_KEY;
@@ -54,7 +53,6 @@ if (pusherKey) {
             },
         });
         
-        console.log('Echo initialized with Reverb');
     } else {
         console.warn('No broadcasting credentials configured. Real-time updates disabled.');
     }

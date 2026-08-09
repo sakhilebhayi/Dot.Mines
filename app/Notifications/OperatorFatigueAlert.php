@@ -21,10 +21,17 @@ class OperatorFatigueAlert extends Notification
     public function __construct(public OperatorFatigue $fatigue) {}
 
     /**
+     * Respects the recipient's Settings -> Notifications -> "Email Alerts"
+     * preference (defaults to on for users who haven't visited that page).
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
+        if (($notifiable->notification_preferences['email_alerts'] ?? true) === false) {
+            return [];
+        }
+
         return ['mail'];
     }
 

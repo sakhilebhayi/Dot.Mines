@@ -18,7 +18,7 @@
                     wire:confirm="Unassign {{ count($selectedMachineIds) }} machine(s)?"
                     class="px-6 py-2 bg-red-600 text-[var(--stone)] rounded-lg hover:bg-red-700 transition font-medium"
                 >
-                    🗑️ Unassign Selected
+                    Unassign Selected
                 </button>
             @endif
         </div>

@@ -21,7 +21,7 @@ class AIRecommendationPolicy
     public function view(User $user, AIRecommendation $recommendation): bool
     {
         return $user->current_team_id === $recommendation->team_id &&
-               ($user->hasPermission('view_recommendations') || $user->hasRole('owner'));
+               ($user->hasPermission('view_recommendations') || $user->ownsTeam($recommendation->team));
     }
 
     /**
@@ -41,12 +41,10 @@ class AIRecommendationPolicy
             return false;
         }
 
-        // Owners and admins may act; anyone else needs the explicit permission.
-        if ($user->hasRole('owner') || $user->hasRole('admin') || $user->hasRole('administrator')) {
-            return true;
-        }
-
-        return $user->hasPermission('update_recommendations');
+        // hasPermission() already grants every permission to the 'admin' role,
+        // so the only case to add here is the team owner acting without an
+        // 'admin' role assignment.
+        return $user->hasPermission('update_recommendations') || $user->ownsTeam($recommendation->team);
     }
 
     /**

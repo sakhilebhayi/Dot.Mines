@@ -16,8 +16,9 @@
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -59,7 +60,7 @@
             }
         </style>
     </head>
-    <body class="font-sans antialiased bg-gray-900 text-gray-100">
+    <body class="antialiased bg-[var(--ink)] text-[var(--stone)]" style="font-family: var(--font-body);">
         <x-banner />
         
         <!-- Notification System -->
@@ -92,7 +93,7 @@
                         'bg-green-600/90 border border-green-500': notification.type === 'success',
                         'bg-red-600/90 border border-red-500': notification.type === 'error',
                         'bg-yellow-600/90 border border-yellow-500': notification.type === 'warning',
-                        'bg-blue-600/90 border border-blue-500': notification.type === 'info'
+                        'bg-[var(--gold)]/90 border border-[var(--gold)]': notification.type === 'info'
                     }">
                     <!-- Icon -->
                     <div class="flex-shrink-0">
@@ -119,12 +120,12 @@
                     </div>
                     
                     <!-- Message -->
-                    <div class="flex-1 text-white font-medium" x-text="notification.message"></div>
+                    <div class="flex-1 text-[var(--stone)] font-medium" x-text="notification.message"></div>
                     
                     <!-- Close Button -->
                     <button 
                         @click="removeNotification(notification.id)"
-                        class="flex-shrink-0 text-white hover:text-gray-200 transition-colors">
+                        class="flex-shrink-0 text-[var(--stone)]/70 hover:text-[var(--stone)] transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -135,20 +136,20 @@
 
         <!-- Flash Messages Handler -->
         @if (session('success'))
-            <div x-data x-init="$dispatch('notify', { type: 'success', message: '{{ session('success') }}' })"></div>
+            <div x-data x-init="$dispatch('notify', { type: 'success', message: @js(session('success')) })"></div>
         @endif
         @if (session('error'))
-            <div x-data x-init="$dispatch('notify', { type: 'error', message: '{{ session('error') }}' })"></div>
+            <div x-data x-init="$dispatch('notify', { type: 'error', message: @js(session('error')) })"></div>
         @endif
         @if (session('warning'))
-            <div x-data x-init="$dispatch('notify', { type: 'warning', message: '{{ session('warning') }}' })"></div>
+            <div x-data x-init="$dispatch('notify', { type: 'warning', message: @js(session('warning')) })"></div>
         @endif
         @if (session('info'))
-            <div x-data x-init="$dispatch('notify', { type: 'info', message: '{{ session('info') }}' })"></div>
+            <div x-data x-init="$dispatch('notify', { type: 'info', message: @js(session('info')) })"></div>
         @endif
         @if ($errors->any())
             @foreach ($errors->all() as $error)
-                <div x-data x-init="$dispatch('notify', { type: 'error', message: '{{ $error }}' })"></div>
+                <div x-data x-init="$dispatch('notify', { type: 'error', message: @js($error) })"></div>
             @endforeach
         @endif
         
@@ -167,7 +168,7 @@
             class="fixed top-0 left-0 right-0 z-[9999]"
             style="display: none;"
         >
-            <div class="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-shimmer" style="background-size: 200% 100%;"></div>
+            <div class="h-1 bg-gradient-to-r from-[var(--gold)] via-[var(--umber)] to-[var(--gold)] animate-shimmer" style="background-size: 200% 100%;"></div>
         </div>
 
         <!-- Global Loading Overlay (for longer operations) -->
@@ -189,15 +190,16 @@
             class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] flex items-center justify-center"
             style="display: none;"
         >
-            <div class="bg-slate-800 rounded-xl p-8 shadow-2xl flex flex-col items-center gap-4 transform transition-all duration-300">
+            <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-xl p-8 shadow-2xl flex flex-col items-center gap-4 transform transition-all duration-300">
                 <div class="relative">
-                    <svg class="animate-spin h-16 w-16 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-16 w-16 text-[var(--gold)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>\n                    <div class="absolute inset-0 rounded-full animate-ping bg-blue-500 opacity-20"></div>
+                    </svg>
+                    <div class="absolute inset-0 rounded-full animate-ping bg-[var(--gold)] opacity-20"></div>
                 </div>
-                <p class="text-white font-medium text-lg">Processing...</p>
-                <p class="text-gray-400 text-sm">Please wait a moment</p>
+                <p class="text-[var(--stone)] font-medium text-lg">Processing...</p>
+                <p class="text-[var(--sand)] text-sm">Please wait a moment</p>
             </div>
         </div>
 
@@ -211,7 +213,7 @@
                 @livewire('navbar')
 
                 <!-- Page Content -->
-                <main class="flex-1 overflow-auto bg-gray-900">
+                <main class="flex-1 overflow-auto bg-[var(--ink)]">
                     <div class="p-6 page-transition">
                         @yield('content')
                         @isset($slot)

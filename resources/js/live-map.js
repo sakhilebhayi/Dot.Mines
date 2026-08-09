@@ -42,7 +42,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function debugLog(...args) {
         if (window && window.console) {
-            console.log('[LiveMap Debug]', ...args);
         }
     }
 
@@ -76,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 try {
                     map.remove();
                 } catch (e) {
-                    console.log('Error removing old map:', e);
                 }
                 map = null;
             }

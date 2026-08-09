@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Livewire\AIOptimizationDashboard;
 use App\Models\AIRecommendation;
-use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,13 +14,22 @@ class AIOptimizationDashboardApprovalTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * The real team owner: Team::user_id, per TeamPolicy and every other
+     * ownership check in this app -- there is no 'owner' row in the custom
+     * roles table (TeamRoleProvisioner only ever provisions
+     * admin/fleet_manager/operator/viewer), so a user can never actually
+     * reach this state via an assigned Role in production.
+     */
     private function ownerUser(Team $team): User
     {
-        $user = User::factory()->create(['current_team_id' => $team->id]);
-        $role = Role::factory()->create(['team_id' => $team->id, 'name' => 'owner']);
-        $user->roles()->attach($role->id);
+        $owner = User::factory()->create(['current_team_id' => $team->id]);
+        // user_id isn't mass-assignable on Team (by design), so update() would
+        // silently no-op here -- set and save it directly.
+        $team->user_id = $owner->id;
+        $team->save();
 
-        return $user;
+        return $owner;
     }
 
     public function test_implementing_a_recommendation_writes_a_decision_log_row(): void

@@ -35,7 +35,6 @@ class ReverbService {
             this.isConnected = true;
             this.reconnectAttempts = 0;
 
-            console.log('✅ Reverb service initialized for user:', userId, 'team:', teamId);
         } catch (error) {
             console.error('❌ Failed to initialize Reverb service:', error);
             this.handleReconnection();
@@ -59,12 +58,10 @@ class ReverbService {
             const channel = window.Echo.channel(channelName);
 
             channel.listen('MachineLocationUpdated', (data) => {
-                console.log('📍 Location update received:', data);
                 callback(data);
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to machine location updates: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -86,12 +83,10 @@ class ReverbService {
             const channel = window.Echo.channel(channelName);
 
             channel.listen('MachineLocationUpdated', (data) => {
-                console.log('📍 Team location update:', data);
                 callback(data);
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to team locations: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -113,12 +108,10 @@ class ReverbService {
             const channel = window.Echo.channel(channelName);
 
             channel.listen('AlertTriggered', (data) => {
-                console.log('🚨 Alert triggered:', data);
                 callback(data);
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to team alerts: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -142,17 +135,14 @@ class ReverbService {
             const channel = window.Echo.channel(channelName);
 
             channel.listen('GeofenceEntryDetected', (data) => {
-                console.log('🚪 Geofence entry detected:', data);
                 entryCallback(data);
             });
 
             channel.listen('GeofenceExitDetected', (data) => {
-                console.log('🚪 Geofence exit detected:', data);
                 exitCallback(data);
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to geofence events: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -170,7 +160,6 @@ class ReverbService {
             const channel = window.Echo.channel(channelName);
 
             channel.listen('MachineOffline', (data) => {
-                console.log('📴 Machine offline:', data);
                 callback({
                     type: 'offline',
                     ...data
@@ -178,7 +167,6 @@ class ReverbService {
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to machine status: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -200,20 +188,16 @@ class ReverbService {
         try {
             const channel = window.Echo.join(channelName)
                 .here((users) => {
-                    console.log('👥 Current users:', users);
                     joinCallback(users);
                 })
                 .joining((user) => {
-                    console.log('👤 User joined:', user);
                     joinCallback([user]);
                 })
                 .leaving((user) => {
-                    console.log('👤 User left:', user);
                     leaveCallback(user);
                 });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to presence: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -228,7 +212,6 @@ class ReverbService {
             try {
                 window.Echo.leave(channelName);
                 this.subscriptions.delete(channelName);
-                console.log(`✅ Unsubscribed from: ${channelName}`);
             } catch (error) {
                 console.error(`❌ Failed to unsubscribe from ${channelName}:`, error);
             }
@@ -242,7 +225,6 @@ class ReverbService {
         for (const channelName of this.subscriptions.keys()) {
             this.unsubscribe(channelName);
         }
-        console.log('✅ Unsubscribed from all channels');
     }
 
     /**
@@ -280,7 +262,6 @@ class ReverbService {
     handleReconnection() {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
-            console.log(`⏳ Reconnecting... Attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
             setTimeout(() => {
                 this.init(this.userId, this.teamId);
             }, this.reconnectDelay);
@@ -313,7 +294,6 @@ class ReverbService {
         this.unsubscribeAll();
         this.listeners.clear();
         this.isConnected = false;
-        console.log('✅ ReverbService disposed');
     }
 }
 

@@ -209,7 +209,12 @@ class AIOptimizationService
                 'description' => $this->getAgentDescription($type),
                 'status' => 'active',
                 'capabilities' => $this->getAgentCapabilities($type),
-                'accuracy_score' => 0.75, // Initial score
+                // No accuracy_score here: it defaults to 0 in the schema and
+                // is only ever meaningful once AIPredictiveAlert::recordAccuracy()
+                // has logged real outcomes (predictions_made > 0). A hardcoded
+                // "initial score" here would show as a fixed, never-changing
+                // percentage on the AI Analytics page regardless of how the
+                // agent actually performs.
             ]
         );
     }

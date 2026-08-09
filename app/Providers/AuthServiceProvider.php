@@ -2,18 +2,22 @@
 
 namespace App\Providers;
 
-use App\Models\Machine;
-use App\Models\Geofence;
+use App\Models\AIRecommendation;
 use App\Models\Alert;
+use App\Models\Geofence;
 use App\Models\Integration;
-use App\Models\Report;
+use App\Models\Machine;
+use App\Models\MineArea;
 use App\Models\Notification;
-use App\Policies\MachinePolicy;
-use App\Policies\GeofencePolicy;
+use App\Models\Report;
+use App\Policies\AIRecommendationPolicy;
 use App\Policies\AlertPolicy;
+use App\Policies\GeofencePolicy;
 use App\Policies\IntegrationPolicy;
-use App\Policies\ReportPolicy;
+use App\Policies\MachinePolicy;
+use App\Policies\MineAreaPolicy;
 use App\Policies\NotificationPolicy;
+use App\Policies\ReportPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -28,9 +32,10 @@ class AuthServiceProvider extends ServiceProvider
         Geofence::class => GeofencePolicy::class,
         Alert::class => AlertPolicy::class,
         Integration::class => IntegrationPolicy::class,
+        MineArea::class => MineAreaPolicy::class,
         Report::class => ReportPolicy::class,
         Notification::class => NotificationPolicy::class,
-        \App\Models\AIRecommendation::class => \App\Policies\AIRecommendationPolicy::class,
+        AIRecommendation::class => AIRecommendationPolicy::class,
     ];
 
     /**

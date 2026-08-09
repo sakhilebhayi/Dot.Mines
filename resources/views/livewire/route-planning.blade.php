@@ -421,7 +421,6 @@
         // Load geofences data - using inline script to avoid DOMContentLoaded race condition
         try {
             geofences = @json($geofences ?? []);
-            console.log('Geofences loaded:', geofences.length);
         } catch(e) {
             console.error('Error loading geofences:', e);
             geofences = [];
@@ -429,8 +428,6 @@
 
         function initializeRoutePlanningMap() {
             // Debug: Check what's available
-            console.log('Checking for Leaflet... window.L:', typeof window.L, 'L:', typeof L);
-            console.log('Scripts in DOM:', document.querySelectorAll('script[src*="leaflet"]').length);
             
             // Check if Leaflet is loaded (check both window.L and global L)
             if (typeof window.L === 'undefined' && typeof L === 'undefined') {
@@ -444,7 +441,6 @@
                     }
                     return;
                 }
-                console.log('Leaflet not loaded yet, retry', initRetryCount);
                 setTimeout(initializeRoutePlanningMap, 200);
                 return;
             }
@@ -457,18 +453,15 @@
             // Check if map container exists
             const mapContainer = document.getElementById('route-planning-map');
             if (!mapContainer) {
-                console.log('Map container not found, retrying...');
                 setTimeout(initializeRoutePlanningMap, 100);
                 return;
             }
             
             // Check if map is already initialized
             if (map) {
-                console.log('Map already initialized');
                 return;
             }
             
-            console.log('Initializing route planning map...');
             
             try {
                 // Initialize map
@@ -503,7 +496,6 @@
                     loadingEl.style.display = 'none';
                 }
                 
-                console.log('Map initialized successfully');
             } catch (error) {
                 console.error('Error initializing map:', error);
                 const loadingEl = document.getElementById('map-loading');
@@ -514,21 +506,17 @@
 
             // Map click handler for setting start/end points
             map.on('click', function(e) {
-                console.log('Map clicked at:', e.latlng);
                 
                 // Get current state from global object
                 const viewMode = window.routePlanningState.viewMode;
                 const startLat = window.routePlanningState.startLat;
                 const endLat = window.routePlanningState.endLat;
                 
-                console.log('View mode:', viewMode);
                 
                 if (viewMode === 'create') {
-                    console.log('Current startLat:', startLat);
                     
                     if (!startLat) {
                         // Set start point
-                        console.log('Setting start point');
                         @this.set('startLat', e.latlng.lat);
                         @this.set('startLon', e.latlng.lng);
                         
@@ -551,11 +539,9 @@
                         
                         startMarker.bindPopup('<strong>Start Point</strong><br>Lat: ' + e.latlng.lat.toFixed(6) + '<br>Lng: ' + e.latlng.lng.toFixed(6)).openPopup();
                     } else {
-                        console.log('Current endLat:', endLat);
                         
                         if (!endLat) {
                             // Set end point
-                            console.log('Setting end point');
                             @this.set('endLat', e.latlng.lat);
                             @this.set('endLon', e.latlng.lng);
                             
@@ -578,7 +564,6 @@
                             
                             endMarker.bindPopup('<strong>End Point</strong><br>Lat: ' + e.latlng.lat.toFixed(6) + '<br>Lng: ' + e.latlng.lng.toFixed(6)).openPopup();
                         } else {
-                            console.log('Both start and end points are already set');
                         }
                     }
                 }
@@ -587,13 +572,11 @@
             // Listen for route calculated event
             // Livewire event listener
             Livewire.on('routeCalculated', (routeData) => {
-                console.log('Route calculated Livewire event received');
                 renderCalculatedRoute(routeData[0] || routeData);
             });
             // DOM event fallback (dispatchBrowserEvent)
             window.addEventListener('routeCalculated', (e) => {
                 try {
-                    console.log('Route calculated DOM event received');
                     const detail = e.detail || e?.detail || e;
                     renderCalculatedRoute(detail[0] || detail);
                 } catch (err) {
@@ -603,12 +586,10 @@
 
             // Listen for view route event
             Livewire.on('viewRoute', (routeData) => {
-                console.log('View route Livewire event received');
                 renderCalculatedRoute(routeData[0] || routeData);
             });
             window.addEventListener('viewRoute', (e) => {
                 try {
-                    console.log('View route DOM event received');
                     const detail = e.detail || e?.detail || e;
                     renderCalculatedRoute(detail[0] || detail);
                 } catch (err) {
@@ -618,7 +599,6 @@
             
             // Listen for clear markers event
             function clearMapMarkersHandler() {
-                console.log('Clearing map markers');
                 if (startMarker) {
                     map.removeLayer(startMarker);
                     startMarker = null;
@@ -646,7 +626,6 @@
             setTimeout(() => {
                 if (map) {
                     map.invalidateSize();
-                    console.log('Map size invalidated');
                 }
             }, 250);
             
@@ -664,9 +643,7 @@
         }
 
         // Initialize map - Leaflet is loaded inline above, so it should be available
-        console.log('Checking Leaflet availability:', typeof L);
         if (typeof L !== 'undefined') {
-            console.log('Leaflet loaded successfully, initializing map');
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initializeRoutePlanningMap);
             } else {
@@ -677,7 +654,6 @@
             // Fallback: try waiting a bit
             setTimeout(function() {
                 if (typeof L !== 'undefined') {
-                    console.log('Leaflet loaded after delay');
                     initializeRoutePlanningMap();
                 } else {
                     console.error('Leaflet still not available after delay');
@@ -722,7 +698,6 @@
         }
 
         function renderCalculatedRoute(routeData) {
-            console.log('Rendering calculated route:', routeData);
             
             // Clear existing route
             if (routeLayer) {
@@ -738,7 +713,6 @@
             if (routeData.route_geometry && routeData.route_geometry.length > 0) {
                 // Use full route geometry from OSRM for road-following paths
                 coordinates = routeData.route_geometry;
-                console.log('Using OSRM route geometry with', coordinates.length, 'points');
             } else {
                 // Fallback: Build coordinates from start, waypoints, and end
                 coordinates = [[routeData.start_latitude, routeData.start_longitude]];
@@ -752,7 +726,6 @@
 
                 // Add end point
                 coordinates.push([routeData.end_latitude, routeData.end_longitude]);
-                console.log('Using waypoint-based route with', coordinates.length, 'points');
             }
 
             // Draw route polyline with smooth curves
@@ -796,9 +769,9 @@
                 <div style="min-width: 200px;">
                     <strong>Route Summary</strong><br>
                     <div style="margin-top: 8px; font-size: 13px;">
-                        📏 Distance: <strong>${totalDistance}</strong><br>
+                        Distance: <strong>${totalDistance}</strong><br>
                         ⏱️ Time: <strong>${totalTime}</strong><br>
-                        ⛽ Fuel: <strong>${totalFuel}</strong>
+                        Fuel: <strong>${totalFuel}</strong>
                     </div>
                 </div>
             `);
@@ -808,5 +781,4 @@
         }
     </script>
 </div>
-
 

@@ -428,7 +428,7 @@
                     </div>
 
                     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/25 rounded-lg p-3 text-[var(--sand)] text-sm">
-                        <p>💡 <strong>Tip:</strong> You can define the exact boundary coordinates by editing in map view after creation.</p>
+                        <p><strong>Tip:</strong> You can define the exact boundary coordinates by editing in map view after creation.</p>
                     </div>
 
                     <!-- Form Actions -->

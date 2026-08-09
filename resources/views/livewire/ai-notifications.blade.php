@@ -27,7 +27,7 @@
         <div class="p-4 border-b border-[var(--line)]">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-[var(--stone)]">
-                    🚨 AI Alerts
+                    AI Alerts
                 </h3>
                 @if($unreadCount > 0)
                 <button wire:click="acknowledgeAll" class="text-xs text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium">

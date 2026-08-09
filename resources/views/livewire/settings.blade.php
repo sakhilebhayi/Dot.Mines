@@ -12,19 +12,19 @@
                 wire:click="setActiveTab('general')"
                 class="px-4 py-3 font-medium {{ $activeTab === 'general' ? 'text-[var(--gold)] border-b-2 border-[var(--gold)]' : 'text-[var(--sand)] hover:text-[var(--sand)]' }}"
             >
-                🏢 General
+                General
             </button>
             <button 
                 wire:click="setActiveTab('users')"
                 class="px-4 py-3 font-medium {{ $activeTab === 'users' ? 'text-[var(--gold)] border-b-2 border-[var(--gold)]' : 'text-[var(--sand)] hover:text-[var(--sand)]' }}"
             >
-                👥 Users & Roles
+                Users &amp; Roles
             </button>
             <button 
                 wire:click="setActiveTab('notifications')"
                 class="px-4 py-3 font-medium {{ $activeTab === 'notifications' ? 'text-[var(--gold)] border-b-2 border-[var(--gold)]' : 'text-[var(--sand)] hover:text-[var(--sand)]' }}"
             >
-                🔔 Notifications
+                Notifications
             </button>
         </div>
 
@@ -112,15 +112,18 @@
             <!-- USERS & ROLES TAB -->
             @if($activeTab === 'users')
                 <div class="space-y-6">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-between mb-2">
                         <h2 class="text-2xl font-bold text-[var(--stone)]">Users & Roles</h2>
-                        <button 
+                        <button
                             wire:click="toggleInviteForm"
                             class="bg-white/10 hover:bg-white/20 border border-[var(--line)] text-[var(--stone)] px-4 py-2 rounded-lg font-medium transition"
                         >
                             {{ $showInviteForm ? 'Cancel' : '+ Invite User' }}
                         </button>
                     </div>
+                    <p class="text-sm text-[var(--sand)] mb-6">
+                        To rename the team or delete it entirely, use the <a href="{{ route('teams.show', auth()->user()->currentTeam) }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)] underline">Team page</a>.
+                    </p>
 
                     <!-- Invite Form -->
                     @if($showInviteForm)

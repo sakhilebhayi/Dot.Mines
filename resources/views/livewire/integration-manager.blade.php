@@ -117,7 +117,7 @@
                                             wire:loading.attr="disabled"
                                             wire:target="testConnection({{ $integration['id'] }})"
                                         >
-                                            <span wire:loading.remove wire:target="testConnection({{ $integration['id'] }})">🧪 Test</span>
+                                            <span wire:loading.remove wire:target="testConnection({{ $integration['id'] }})">Test</span>
                                             <span wire:loading wire:target="testConnection({{ $integration['id'] }})" class="flex items-center gap-1">
                                                 <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                                 Testing...
@@ -130,7 +130,7 @@
                                             wire:loading.attr="disabled"
                                             wire:target="syncMachines({{ $integration['id'] }})"
                                         >
-                                            <span wire:loading.remove wire:target="syncMachines({{ $integration['id'] }})">🔄 Sync</span>
+                                            <span wire:loading.remove wire:target="syncMachines({{ $integration['id'] }})">Sync</span>
                                             <span wire:loading wire:target="syncMachines({{ $integration['id'] }})" class="flex items-center gap-1">
                                                 <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                                 Syncing...
@@ -142,7 +142,7 @@
                                             class="px-3 py-2 bg-red-900/60 hover:bg-red-800 text-red-200 rounded text-sm transition"
                                             title="Delete integration"
                                         >
-                                            🗑️ Delete
+                                            Delete
                                         </button>
                                     </div>
                                 </td>
@@ -271,7 +271,7 @@
                             <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @endif
                         <p class="text-[var(--sand)] text-sm mt-2">
-                            💡 Tip: Your credentials are encrypted and stored securely. You can test the connection before saving.
+                            Tip: Your credentials are encrypted and stored securely. You can test the connection before saving.
                         </p>
                 </div>
 
