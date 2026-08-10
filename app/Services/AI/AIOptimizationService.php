@@ -24,7 +24,8 @@ class AIOptimizationService
         protected FuelPredictorAgent $fuelPredictor,
         protected MaintenancePredictorAgent $maintenancePredictor,
         protected CostAnalyzerAgent $costAnalyzer,
-        protected AnomalyDetectorAgent $anomalyDetector
+        protected AnomalyDetectorAgent $anomalyDetector,
+        protected DispatchAdvisorAgent $dispatchAdvisor
     ) {
         $this->agents = [
             AIAgent::TYPE_FLEET_OPTIMIZER => $fleetOptimizer,
@@ -33,6 +34,7 @@ class AIOptimizationService
             AIAgent::TYPE_MAINTENANCE_PREDICTOR => $maintenancePredictor,
             AIAgent::TYPE_COST_ANALYZER => $costAnalyzer,
             AIAgent::TYPE_ANOMALY_DETECTOR => $anomalyDetector,
+            AIAgent::TYPE_DISPATCH_ADVISOR => $dispatchAdvisor,
         ];
     }
 
@@ -229,6 +231,7 @@ class AIOptimizationService
             AIAgent::TYPE_PRODUCTION_OPTIMIZER => 'Production Optimizer',
             AIAgent::TYPE_COST_ANALYZER => 'Cost Analyzer',
             AIAgent::TYPE_ANOMALY_DETECTOR => 'Anomaly Detector',
+            AIAgent::TYPE_DISPATCH_ADVISOR => 'Dispatch Advisor',
             default => 'Unknown Agent',
         };
     }
@@ -243,6 +246,7 @@ class AIOptimizationService
             AIAgent::TYPE_PRODUCTION_OPTIMIZER => 'Optimizes production schedules and forecasts output',
             AIAgent::TYPE_COST_ANALYZER => 'Analyzes costs and identifies optimization opportunities',
             AIAgent::TYPE_ANOMALY_DETECTOR => 'Detects unusual patterns and potential issues',
+            AIAgent::TYPE_DISPATCH_ADVISOR => 'Flags live queue imbalances and recommends active reroutes between loading/dump points',
             default => '',
         };
     }
@@ -257,6 +261,7 @@ class AIOptimizationService
             AIAgent::TYPE_PRODUCTION_OPTIMIZER => ['output_forecasting', 'schedule_optimization', 'resource_allocation'],
             AIAgent::TYPE_COST_ANALYZER => ['cost_breakdown', 'savings_identification', 'budget_optimization'],
             AIAgent::TYPE_ANOMALY_DETECTOR => ['pattern_detection', 'outlier_identification', 'risk_assessment'],
+            AIAgent::TYPE_DISPATCH_ADVISOR => ['queue_monitoring', 'live_reroute_recommendation', 'dwell_time_analysis'],
             default => [],
         };
     }
@@ -270,6 +275,7 @@ class AIOptimizationService
             'maintenance' => AIAgent::TYPE_MAINTENANCE_PREDICTOR,
             'production' => AIAgent::TYPE_PRODUCTION_OPTIMIZER,
             'cost' => AIAgent::TYPE_COST_ANALYZER,
+            'dispatch' => AIAgent::TYPE_DISPATCH_ADVISOR,
             default => AIAgent::TYPE_ANOMALY_DETECTOR,
         };
     }
