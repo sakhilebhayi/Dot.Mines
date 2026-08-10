@@ -74,17 +74,23 @@ class MobileNavigationTest extends TestCase
     }
 
     /**
-     * dashboard resolves through <x-app-layout> -> layouts/app.blade.php.
-     * components/layouts/app.blade.php is not reached by any route today,
-     * but the two files are kept in sync by convention (see
-     * ToastNotificationLayoutTest) so it doesn't silently drift and regress
-     * if it's ever wired up.
+     * Correction: an earlier version of this test (and the comment above
+     * the backdrop block itself, and the commit that added it) claimed
+     * components/layouts/app.blade.php is "not reached by any route" and
+     * only asserted the string was present in the file. That was wrong.
+     * config('livewire.layout') = 'components.layouts.app' makes this file
+     * the default layout for every Livewire component bound directly as a
+     * route target with no #[Layout(...)] override -- including /alerts,
+     * used here. This now proves the backdrop actually reaches a real
+     * response on one of those routes, not just that the string exists
+     * somewhere in the file.
      */
-    public function test_the_sibling_layout_file_has_the_same_backdrop(): void
+    public function test_the_sibling_livewire_default_layout_also_has_the_backdrop(): void
     {
-        $path = resource_path('views/components/layouts/app.blade.php');
+        $response = $this->actingAs($this->actingUser())->get('/alerts');
 
-        $this->assertStringContainsString('fixed inset-0 bg-black/60 z-[45] md:hidden', file_get_contents($path));
+        $response->assertOk();
+        $response->assertSee('fixed inset-0 bg-black/60 z-[45] md:hidden', false);
     }
 
     public function test_sidebar_has_a_mobile_only_close_button(): void

@@ -105,9 +105,17 @@
 
         <!-- Mobile nav backdrop -- kept in sync with the same block in the
              sibling resources/views/layouts/app.blade.php (see wiki.md for
-             why this file is duplicated). No route currently renders this
-             file, but it must not silently drift out of sync with the
-             mobile drawer the sidebar/navbar components rely on. -->
+             why this file is duplicated). Corrected: this file is NOT dead
+             code -- config('livewire.layout') = 'components.layouts.app'
+             makes it the default layout for every Livewire component bound
+             directly as a route target with no #[Layout(...)] override,
+             which includes /alerts, /fuel, /production, /maintenance,
+             /operator-fatigue, /mine-areas/{id}(/assignments),
+             /ai-optimization, /ai-analytics, /documentation, /billing, and
+             /fleet/replay(/route-planning) -- confirmed live by hitting
+             /alerts and finding this file's own fonts-comment marker in the
+             response. Those pages had no mobile-nav backdrop at all before
+             this block was added. -->
         <div
             x-data="{ mobileOpen: false }"
             @mobile-nav-changed.window="mobileOpen = $event.detail.open"
