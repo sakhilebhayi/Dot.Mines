@@ -84,4 +84,52 @@ class AIOptimizationDashboardApprovalTest extends TestCase
         ]);
         $this->assertSame('rejected', $recommendation->fresh()->status);
     }
+
+    /**
+     * Regression test: proposed_action, data (Context), and impact_analysis
+     * (Evidence) previously existed only in the database -- nothing in the
+     * recommendation card rendered any of them. A user had to click Implement
+     * or Reject, opening the confirm dialog, before ever seeing what the
+     * proposed action even was. This asserts all three are visible on the
+     * card itself, before any decision button is clicked.
+     */
+    public function test_recommendation_card_shows_proposed_action_context_and_evidence_before_any_decision(): void
+    {
+        $team = Team::factory()->create();
+        $owner = $this->ownerUser($team);
+        AIRecommendation::factory()->create([
+            'team_id' => $team->id,
+            'proposed_action' => 'Reroute Truck 7 via the optimized path to capture the savings above.',
+            'data' => ['current_utilization' => 42.5, 'wasted_hours_per_day' => 8],
+            'impact_analysis' => ['recommended_action' => 'Reassign or consider selling/renting out'],
+        ]);
+
+        $component = Livewire::actingAs($owner)
+            ->test(AIOptimizationDashboard::class)
+            ->set('activeTab', 'recommendations');
+
+        $component->assertSee('Reroute Truck 7 via the optimized path to capture the savings above.');
+        $component->assertSee('Current utilization');
+        $component->assertSee('42.5');
+        $component->assertSee('Wasted hours per day');
+        $component->assertSee('Recommended action');
+        $component->assertSee('Reassign or consider selling/renting out');
+    }
+
+    public function test_recommendation_card_omits_the_context_evidence_disclosure_when_neither_is_present(): void
+    {
+        $team = Team::factory()->create();
+        $owner = $this->ownerUser($team);
+        AIRecommendation::factory()->create([
+            'team_id' => $team->id,
+            'data' => [],
+            'impact_analysis' => [],
+        ]);
+
+        $component = Livewire::actingAs($owner)
+            ->test(AIOptimizationDashboard::class)
+            ->set('activeTab', 'recommendations');
+
+        $component->assertDontSee('View context & evidence');
+    }
 }

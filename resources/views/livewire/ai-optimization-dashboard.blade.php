@@ -199,6 +199,11 @@
                                 <p class="text-sm text-[var(--sand)] mb-3">
                                     {{ $recommendation->description }}
                                 </p>
+                                @if($recommendation->proposed_action)
+                                    <p class="text-sm text-[var(--gold)] mb-3">
+                                        <strong>Proposed action:</strong> {{ $recommendation->proposed_action }}
+                                    </p>
+                                @endif
                                 <div class="flex items-center gap-4 text-sm">
                                     <div class="flex items-center gap-1">
                                         <svg class="w-4 h-4 text-[var(--sand)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,6 +242,57 @@
                             @endif
                         </div>
                         
+                        {{--
+                            Context (data) and Evidence (impact_analysis) used to exist only in
+                            the database, never rendered anywhere -- a user had to click Implement
+                            or Reject before seeing even the proposed action, let alone the
+                            evidence behind it. Each agent populates these as a flat key => scalar
+                            array (see app/Services/AI/*Agent.php); non-scalar values (e.g. a raw
+                            machine_ids array) are skipped here rather than dumped as "Array".
+                        --}}
+                        @if(!empty($recommendation->data) || !empty($recommendation->impact_analysis))
+                            <details class="mt-4 pt-4 border-t border-[var(--line)] group">
+                                <summary class="text-sm font-semibold text-[var(--sand)] cursor-pointer select-none list-none flex items-center gap-1">
+                                    <svg class="w-4 h-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    View context &amp; evidence
+                                </summary>
+                                <div class="mt-3 space-y-3">
+                                    @if(!empty($recommendation->data))
+                                        <div>
+                                            <h4 class="text-xs font-semibold text-[var(--sand)] uppercase tracking-wide mb-1">Context</h4>
+                                            <dl class="text-sm space-y-0.5">
+                                                @foreach($recommendation->data as $key => $value)
+                                                    @if(!is_array($value))
+                                                        <div class="flex gap-2">
+                                                            <dt class="text-[var(--sand)]/70">{{ ucfirst(str_replace('_', ' ', $key)) }}:</dt>
+                                                            <dd class="text-[var(--stone)]">{{ $value }}</dd>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </dl>
+                                        </div>
+                                    @endif
+                                    @if(!empty($recommendation->impact_analysis))
+                                        <div>
+                                            <h4 class="text-xs font-semibold text-[var(--sand)] uppercase tracking-wide mb-1">Evidence</h4>
+                                            <dl class="text-sm space-y-0.5">
+                                                @foreach($recommendation->impact_analysis as $key => $value)
+                                                    @if(!is_array($value))
+                                                        <div class="flex gap-2">
+                                                            <dt class="text-[var(--sand)]/70">{{ ucfirst(str_replace('_', ' ', $key)) }}:</dt>
+                                                            <dd class="text-[var(--stone)]">{{ $value }}</dd>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </dl>
+                                        </div>
+                                    @endif
+                                </div>
+                            </details>
+                        @endif
+
                         @if($recommendation->actionable_steps)
                             <div class="mt-4 pt-4 border-t border-[var(--line)]">
                                 <h4 class="text-sm font-semibold text-[var(--sand)] mb-2">Action Steps:</h4>
