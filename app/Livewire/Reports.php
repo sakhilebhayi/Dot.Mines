@@ -50,6 +50,7 @@ class Reports extends Component
         'fuel_consumption' => 'Fuel Consumption',
         'material_tracking' => 'Material Tracking',
         'downtime_analysis' => 'Downtime Analysis',
+        'compliance' => 'Compliance (MHSA/DMRE)',
     ];
 
     public function mount()

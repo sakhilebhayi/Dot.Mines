@@ -75,12 +75,17 @@ class ReportGenerator extends Component
             'description' => 'Machine downtime events, root causes, and impact analysis',
             'icon' => '⏸️',
         ],
+        'compliance' => [
+            'label' => 'Compliance (MHSA/DMRE)',
+            'description' => 'Violation register with remediation deadlines, resolution status, and compliance score for regulator submission',
+            'icon' => '📋',
+        ],
     ];
 
     /** @var array<string, string> */
     protected array $rules = [
         'reportName' => 'required|string|max:255',
-        'reportType' => 'required|in:production,fleet_utilization,maintenance_schedule,fuel_consumption,material_tracking,downtime_analysis',
+        'reportType' => 'required|in:production,fleet_utilization,maintenance_schedule,fuel_consumption,material_tracking,downtime_analysis,compliance',
         'description' => 'nullable|string|max:1000',
         'startDate' => 'required|date|before_or_equal:today',
         'endDate' => 'required|date|after_or_equal:startDate|before_or_equal:today',

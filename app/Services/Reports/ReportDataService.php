@@ -2,6 +2,7 @@
 
 namespace App\Services\Reports;
 
+use App\Models\ComplianceViolation;
 use App\Models\FuelTransaction;
 use App\Models\GeofenceEntry;
 use App\Models\Machine;
@@ -38,6 +39,7 @@ class ReportDataService
             'fuel_consumption' => $this->fuelConsumption($team->id, $start, $end, $machineIds),
             'material_tracking' => $this->materialTracking($team->id, $start, $end, $geofenceIds),
             'downtime_analysis' => $this->downtimeAnalysis($team->id, $start, $end, $machineIds),
+            'compliance' => $this->compliance($team->id, $start, $end),
             default => throw new \InvalidArgumentException("Unsupported report type: {$report->type}"),
         };
     }
@@ -258,6 +260,55 @@ class ReportDataService
             'summary' => [
                 'Downtime Events' => $records->count(),
                 'Total Downtime Hours' => round($totalDowntimeHours, 2),
+            ],
+        ];
+    }
+
+    /**
+     * Mine Health and Safety Act (MHSA) / DMRE-style compliance export --
+     * violation register with detection date, severity, remediation
+     * deadline, and resolution status, plus a compliance score summary
+     * a Mine Manager can attach to a regulator submission.
+     */
+    private function compliance(int $teamId, Carbon $start, Carbon $end): array
+    {
+        $violations = ComplianceViolation::where('team_id', $teamId)
+            ->whereBetween('detected_at', [$start, $end])
+            ->orderBy('detected_at')
+            ->get();
+
+        $rows = $violations->map(fn (ComplianceViolation $v) => [
+            $v->detected_at?->format('Y-m-d H:i'),
+            ucfirst(str_replace('_', ' ', $v->violation_type)),
+            ucfirst($v->severity),
+            $v->description,
+            $v->remediation_deadline?->format('Y-m-d') ?? '—',
+            $v->resolved_at !== null
+                ? 'Resolved '.$v->resolved_at->format('Y-m-d')
+                : ($v->remediation_deadline && $v->remediation_deadline->isPast() ? 'Overdue' : 'Open'),
+        ])->all();
+
+        $resolvedCount = $violations->whereNotNull('resolved_at')->count();
+        $overdueCount = $violations->filter(fn (ComplianceViolation $v) => $v->resolved_at === null
+            && $v->remediation_deadline !== null
+            && $v->remediation_deadline->isPast()
+        )->count();
+        $criticalCount = $violations->where('severity', 'critical')->count();
+
+        // 100 minus a weighted deduction for unresolved and overdue violations,
+        // floored at 0 -- mirrors the deduction-based scoring already used
+        // elsewhere in the codebase for compliance scoring.
+        $score = 100 - ($violations->count() - $resolvedCount) * 5 - $overdueCount * 10 - $criticalCount * 5;
+
+        return [
+            'headers' => ['Detected', 'Violation Type', 'Severity', 'Description', 'Remediation Deadline', 'Status'],
+            'rows' => $rows,
+            'summary' => [
+                'Total Violations' => $violations->count(),
+                'Resolved' => $resolvedCount,
+                'Overdue' => $overdueCount,
+                'Critical' => $criticalCount,
+                'Compliance Score' => max(0, min(100, $score)),
             ],
         ];
     }

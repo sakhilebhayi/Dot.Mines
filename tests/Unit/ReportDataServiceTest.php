@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\ComplianceViolation;
 use App\Models\FuelTransaction;
 use App\Models\Machine;
 use App\Models\ProductionRecord;
@@ -115,6 +116,68 @@ class ReportDataServiceTest extends TestCase
 
         $this->assertCount(1, $data['rows']);
         $this->assertSame(100.0, $data['summary']['Total Produced']);
+    }
+
+    public function test_compliance_report_reflects_real_violations_and_scores_them(): void
+    {
+        $team = Team::factory()->create();
+
+        ComplianceViolation::create([
+            'team_id' => $team->id,
+            'violation_type' => 'safety_procedure',
+            'description' => 'Operator missing PPE on site inspection',
+            'severity' => 'critical',
+            'detected_at' => now()->subDays(3),
+            'remediation_deadline' => now()->subDay(), // overdue, unresolved
+        ]);
+
+        ComplianceViolation::create([
+            'team_id' => $team->id,
+            'violation_type' => 'environmental',
+            'description' => 'Dust suppression system offline',
+            'severity' => 'medium',
+            'detected_at' => now()->subDays(2),
+            'remediation_deadline' => now()->addDays(5),
+            'resolved_at' => now()->subDay(),
+        ]);
+
+        $report = $this->reportFor($team, 'compliance');
+        $data = app(ReportDataService::class)->build($report);
+
+        $this->assertCount(2, $data['rows']);
+        $this->assertSame(2, $data['summary']['Total Violations']);
+        $this->assertSame(1, $data['summary']['Resolved']);
+        $this->assertSame(1, $data['summary']['Overdue']);
+        $this->assertSame(1, $data['summary']['Critical']);
+        // 100 - 1 unresolved*5 - 1 overdue*10 - 1 critical*5 = 80
+        $this->assertSame(80, $data['summary']['Compliance Score']);
+    }
+
+    public function test_compliance_report_is_scoped_to_the_reports_own_team(): void
+    {
+        $team = Team::factory()->create();
+        $otherTeam = Team::factory()->create();
+
+        ComplianceViolation::create([
+            'team_id' => $team->id,
+            'violation_type' => 'safety_procedure',
+            'description' => 'Own team violation',
+            'severity' => 'low',
+            'detected_at' => now()->subDay(),
+        ]);
+        ComplianceViolation::create([
+            'team_id' => $otherTeam->id,
+            'violation_type' => 'safety_procedure',
+            'description' => 'Other team violation',
+            'severity' => 'critical',
+            'detected_at' => now()->subDay(),
+        ]);
+
+        $report = $this->reportFor($team, 'compliance');
+        $data = app(ReportDataService::class)->build($report);
+
+        $this->assertCount(1, $data['rows']);
+        $this->assertSame(1, $data['summary']['Total Violations']);
     }
 
     public function test_unsupported_type_throws_instead_of_silently_returning_nothing(): void
