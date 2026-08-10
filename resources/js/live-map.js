@@ -98,6 +98,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }).setView([centerLat, centerLng], zoomLevel);
 
             debugLog('Map initialized:', map);
+
+            // Give the real-time map manager the live Leaflet instance so
+            // WebSocket-driven marker updates (see livewire-realtime.js)
+            // have somewhere to draw. Without this, RealtimeMapManager's
+            // internal `this.map` stays null and updateMachineMarker() is a
+            // silent no-op.
+            if (window.RealtimeMapManager) {
+                window.RealtimeMapManager.init(map);
+            }
+
             const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19

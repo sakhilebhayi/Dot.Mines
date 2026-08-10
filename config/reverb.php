@@ -1,107 +1,104 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Reverb Server Configuration
-    |--------------------------------------------------------------------------
-    |
-    | This configuration defines the settings for the Reverb WebSocket server.
-    | Adjust these settings based on your deployment environment.
-    |
-    */
-
-    'host' => env('REVERB_HOST', '0.0.0.0'),
-
-    'port' => env('REVERB_PORT', 8080),
-
-    'scheme' => env('REVERB_SCHEME', 'http'),
-
-    'app_id' => env('REVERB_APP_ID', env('APP_ID', 'default-app')),
-
-    'app_key' => env('REVERB_APP_KEY', env('APP_KEY')),
-
-    'app_secret' => env('REVERB_APP_SECRET', env('APP_SECRET')),
 
     /*
     |--------------------------------------------------------------------------
-    | SSL Configuration
+    | Default Reverb Server
     |--------------------------------------------------------------------------
     |
-    | Configure SSL certificates for HTTPS WebSocket connections.
-    | Leave null to disable SSL.
+    | This option controls the default server used by Reverb to handle
+    | incoming messages as well as broadcasting message to all your
+    | connected clients. At this time only "reverb" is supported.
     |
     */
 
-    'ssl' => [
-        'certPath' => env('REVERB_SSL_CERT_PATH'),
-        'keyPath' => env('REVERB_SSL_KEY_PATH'),
-        'passphrase' => env('REVERB_SSL_PASSPHRASE'),
+    'default' => env('REVERB_SERVER', 'reverb'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reverb Servers
+    |--------------------------------------------------------------------------
+    |
+    | Here you may define details for each of the supported Reverb servers.
+    | REVERB_SERVER_HOST/PORT is what the `reverb:start` process actually
+    | binds to; REVERB_HOST/PORT/SCHEME below (under "apps") is the public
+    | hostname/port clients are told to connect to, which may differ behind
+    | a reverse proxy.
+    |
+    */
+
+    'servers' => [
+
+        'reverb' => [
+            'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
+            'port' => env('REVERB_SERVER_PORT', env('REVERB_PORT', 8080)),
+            'path' => env('REVERB_SERVER_PATH', ''),
+            'hostname' => env('REVERB_HOST'),
+            'options' => [
+                'tls' => [],
+            ],
+            'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
+            'scaling' => [
+                'enabled' => env('REVERB_SCALING_ENABLED', false),
+                'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
+                'server' => [
+                    'url' => env('REDIS_URL'),
+                    'host' => env('REDIS_HOST', '127.0.0.1'),
+                    'port' => env('REDIS_PORT', '6379'),
+                    'username' => env('REDIS_USERNAME'),
+                    'password' => env('REDIS_PASSWORD'),
+                    'database' => env('REDIS_DB', '0'),
+                    'timeout' => env('REDIS_TIMEOUT', 60),
+                ],
+            ],
+            'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
+            'telescope_ingest_interval' => env('REVERB_TELESCOPE_INGEST_INTERVAL', 15),
+        ],
+
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Allowed Origins
+    | Reverb Applications
     |--------------------------------------------------------------------------
     |
-    | Define which origins are allowed to connect to the WebSocket server.
-    | This is important for security.
+    | Here you may define how Reverb applications are managed. Dot.Mines has
+    | a single app identity per environment (REVERB_APP_ID/KEY/SECRET in
+    | .env) — never shared with other Dot platforms.
     |
     */
 
-    'allowed_origins' => [
-        env('APP_URL', 'http://localhost'),
-    ],
+    'apps' => [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Ping Interval
-    |--------------------------------------------------------------------------
-    |
-    | The interval (in seconds) at which the server sends ping messages to
-    | keep connections alive.
-    |
-    */
+        'provider' => 'config',
 
-    'ping_interval' => 30,
+        'apps' => [
+            [
+                'key' => env('REVERB_APP_KEY'),
+                'secret' => env('REVERB_APP_SECRET'),
+                'app_id' => env('REVERB_APP_ID'),
+                'options' => [
+                    'host' => env('REVERB_HOST'),
+                    'port' => env('REVERB_PORT', 443),
+                    'scheme' => env('REVERB_SCHEME', 'https'),
+                    'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                ],
+                'allowed_origins' => [env('APP_URL', 'http://localhost')],
+                'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
+                'activity_timeout' => env('REVERB_APP_ACTIVITY_TIMEOUT', 30),
+                'max_connections' => env('REVERB_APP_MAX_CONNECTIONS', 10_000),
+                'max_message_size' => env('REVERB_APP_MAX_MESSAGE_SIZE', 524_288),
+                'accept_client_events_from' => env('REVERB_APP_ACCEPT_CLIENT_EVENTS_FROM', 'members'),
+                'rate_limiting' => [
+                    'enabled' => env('REVERB_APP_RATE_LIMITING_ENABLED', true),
+                    'max_attempts' => env('REVERB_APP_RATE_LIMIT_MAX_ATTEMPTS', 100),
+                    'decay_seconds' => env('REVERB_APP_RATE_LIMIT_DECAY_SECONDS', 1),
+                    'terminate_on_limit' => env('REVERB_APP_RATE_LIMIT_TERMINATE', true),
+                ],
+            ],
+        ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Maximum Message Size
-    |--------------------------------------------------------------------------
-    |
-    | The maximum size of messages (in bytes) that can be sent through
-    | the WebSocket server.
-    |
-    */
-
-    'max_message_size' => 524288, // 512 KB
-
-    /*
-    |--------------------------------------------------------------------------
-    | Maximum Connections
-    |--------------------------------------------------------------------------
-    |
-    | The maximum number of concurrent WebSocket connections allowed.
-    | Set to 0 for unlimited (not recommended for production).
-    |
-    */
-
-    'max_connections' => 10000,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Throttle Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure throttling to prevent abuse and spam.
-    |
-    */
-
-    'throttle' => [
-        'enabled' => true,
-        'messages_per_second' => 100,
-        'ban_duration' => 60, // seconds
     ],
 
 ];

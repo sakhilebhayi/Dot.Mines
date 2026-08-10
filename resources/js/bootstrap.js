@@ -4,56 +4,35 @@ import Pusher from 'pusher-js';
 
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+// Reverb speaks the Pusher protocol, so laravel-echo still needs a Pusher
+// client available globally even though we no longer use Pusher's cloud.
 window.Pusher = Pusher;
 
 /**
  * Laravel Echo Configuration
- * Sets up WebSocket connections for real-time updates
- * Supports both Pusher (cloud) and Reverb (local) broadcasting
+ * Sets up the WebSocket connection to this app's own Laravel Reverb server.
  */
 
-// Get broadcasting driver from environment
-const broadcastDriver = import.meta.env.VITE_BROADCAST_DRIVER || 'pusher';
-const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY;
-const pusherCluster = import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1';
+const reverbKey = import.meta.env.VITE_REVERB_APP_KEY;
 
-if (pusherKey) {
-    // Use Pusher for real-time broadcasting
+if (reverbKey) {
     window.Echo = new Echo({
-        broadcaster: 'pusher',
-        key: pusherKey,
-        cluster: pusherCluster,
-        forceTLS: true,
-        encrypted: true,
+        broadcaster: 'reverb',
+        key: reverbKey,
+        wsHost: import.meta.env.VITE_REVERB_HOST,
+        wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
+        wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
+        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+        enabledTransports: ['ws', 'wss'],
+        // Private-channel auth hits /broadcasting/auth with the session
+        // cookie; only the CSRF header is needed alongside it (this is not
+        // bearer-token auth).
         auth: {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
             },
         },
     });
-    
 } else {
-    // Fallback to Reverb (local development)
-    const reverbKey = import.meta.env.VITE_REVERB_APP_KEY;
-    const host = new URL(window.location.href).host;
-    
-    if (reverbKey) {
-        window.Echo = new Echo({
-            broadcaster: 'reverb',
-            key: reverbKey,
-            wsHost: host.split(':')[0],
-            wsPort: 8080,
-            wssPort: 443,
-            forceTLS: false,
-            enabledTransports: ['ws', 'wss'],
-            auth: {
-                headers: {
-                    Authorization: `Bearer ${document.querySelector('meta[name="csrf-token"]')?.content || ''}`,
-                },
-            },
-        });
-        
-    } else {
-        console.warn('No broadcasting credentials configured. Real-time updates disabled.');
-    }
+    console.warn('No Reverb credentials configured (VITE_REVERB_APP_KEY missing). Real-time updates disabled.');
 }

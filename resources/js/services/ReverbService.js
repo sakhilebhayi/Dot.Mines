@@ -55,7 +55,7 @@ class ReverbService {
         }
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
             channel.listen('MachineLocationUpdated', (data) => {
                 callback(data);
@@ -80,7 +80,7 @@ class ReverbService {
         }
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
             channel.listen('MachineLocationUpdated', (data) => {
                 callback(data);
@@ -105,7 +105,7 @@ class ReverbService {
         }
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
             channel.listen('AlertTriggered', (data) => {
                 callback(data);
@@ -132,7 +132,7 @@ class ReverbService {
         }
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
             channel.listen('GeofenceEntryDetected', (data) => {
                 entryCallback(data);
@@ -157,7 +157,7 @@ class ReverbService {
         const channelName = `machine.${machineId}`;
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
             channel.listen('MachineOffline', (data) => {
                 callback({
