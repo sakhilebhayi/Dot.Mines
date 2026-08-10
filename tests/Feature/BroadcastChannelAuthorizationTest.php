@@ -101,6 +101,48 @@ class BroadcastChannelAuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_team_member_can_authorize_maintenance_alerts_channel(): void
+    {
+        $owner = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $owner->id]);
+        $member = User::factory()->create(['current_team_id' => $team->id]);
+        $team->users()->attach($member->id);
+
+        $this->authRequest($member, "private-team.{$team->id}.alerts")
+            ->assertOk();
+    }
+
+    public function test_non_member_cannot_authorize_maintenance_alerts_channel(): void
+    {
+        $owner = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $owner->id]);
+        $outsider = User::factory()->create();
+
+        $this->authRequest($outsider, "private-team.{$team->id}.alerts")
+            ->assertForbidden();
+    }
+
+    public function test_team_member_can_authorize_compliance_channel(): void
+    {
+        $owner = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $owner->id]);
+        $member = User::factory()->create(['current_team_id' => $team->id]);
+        $team->users()->attach($member->id);
+
+        $this->authRequest($member, "private-team.{$team->id}.compliance")
+            ->assertOk();
+    }
+
+    public function test_non_member_cannot_authorize_compliance_channel(): void
+    {
+        $owner = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $owner->id]);
+        $outsider = User::factory()->create();
+
+        $this->authRequest($outsider, "private-team.{$team->id}.compliance")
+            ->assertForbidden();
+    }
+
     public function test_unauthenticated_user_cannot_authorize_any_private_channel(): void
     {
         $owner = User::factory()->create();

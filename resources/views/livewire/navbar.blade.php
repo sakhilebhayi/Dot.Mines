@@ -84,6 +84,36 @@
                 </div>
             @endif
 
+            <!--
+                Real-time connection indicator. Driven entirely client-side by
+                the 'realtime-connection-changed' window event dispatched from
+                resources/js/livewire-realtime.js's connection monitor -- no
+                server roundtrip, since connection state is only known in the
+                browser. Users should never be left assuming they're seeing
+                live data while the socket is actually down.
+            -->
+            <div
+                x-data="{ state: 'connecting' }"
+                x-init="window.addEventListener('realtime-connection-changed', (e) => { state = e.detail.state })"
+                class="hidden sm:flex items-center gap-1.5"
+                :title="{
+                    connected: 'Live updates connected',
+                    connecting: 'Connecting to live updates…',
+                    reconnecting: 'Reconnecting to live updates…',
+                    disconnected: 'Live updates disconnected',
+                }[state]"
+            >
+                <span
+                    class="w-2 h-2 rounded-full"
+                    :class="{
+                        connected: 'bg-green-500',
+                        connecting: 'bg-amber-500 animate-pulse',
+                        reconnecting: 'bg-amber-500 animate-pulse',
+                        disconnected: 'bg-red-500',
+                    }[state]"
+                ></span>
+            </div>
+
             <!-- Notifications (real AI alert data, not the static sample content this used to show) -->
             <livewire:ai-notifications />
 

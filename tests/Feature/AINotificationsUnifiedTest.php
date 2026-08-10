@@ -6,6 +6,7 @@ use App\Livewire\AINotifications;
 use App\Models\AIPredictiveAlert;
 use App\Models\Alert;
 use App\Models\FuelAlert;
+use App\Models\Notification;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -238,6 +239,87 @@ class AINotificationsUnifiedTest extends TestCase
         $this->assertFalse($titles->contains('Medium issue'));
     }
 
+    /**
+     * MaintenanceAlertTriggered/ComplianceViolationDetected/SensorReadingRecorded
+     * already persist a real App\Models\Notification row via
+     * RealTimeAlertService, but the bell never queried that table.
+     */
+    public function test_bell_shows_notification_model_rows(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        Notification::factory()->create([
+            'team_id' => $team->id,
+            'type' => 'maintenance_alert',
+            'title' => 'Predicted maintenance',
+            'alert_level' => 'high',
+        ]);
+
+        $component = Livewire::actingAs($user)->test(AINotifications::class);
+        $titles = $component->get('notifications')->pluck('title');
+
+        $this->assertTrue($titles->contains('Predicted maintenance'));
+        $component->assertSet('unreadCount', 1);
+    }
+
+    public function test_notification_already_read_by_this_user_does_not_appear(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        $notification = Notification::factory()->create(['team_id' => $team->id]);
+        $notification->markAsRead($user->id);
+
+        Livewire::actingAs($user)
+            ->test(AINotifications::class)
+            ->assertSet('unreadCount', 0);
+    }
+
+    /**
+     * Notification's read-tracking is per-user (notification_read pivot),
+     * unlike Alert/AIPredictiveAlert/FuelAlert's single shared
+     * acknowledged/acknowledged_by pair -- one teammate acknowledging it
+     * must not hide it from another teammate who hasn't seen it yet.
+     */
+    public function test_acknowledging_a_notification_only_marks_it_read_for_that_user(): void
+    {
+        $owner = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $owner->id]);
+        $userA = User::factory()->create(['current_team_id' => $team->id]);
+        $team->users()->attach($userA->id);
+        $userB = User::factory()->create(['current_team_id' => $team->id]);
+        $team->users()->attach($userB->id);
+
+        $notification = Notification::factory()->create(['team_id' => $team->id]);
+
+        Livewire::actingAs($userA)
+            ->test(AINotifications::class)
+            ->call('acknowledge', $notification->id, 'notification')
+            ->assertSet('unreadCount', 0);
+
+        Livewire::actingAs($userB)
+            ->test(AINotifications::class)
+            ->assertSet('unreadCount', 1);
+    }
+
+    public function test_acknowledge_all_clears_notification_rows_too(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        Notification::factory()->create(['team_id' => $team->id]);
+
+        Livewire::actingAs($user)
+            ->test(AINotifications::class)
+            ->assertSet('unreadCount', 1)
+            ->call('acknowledgeAll')
+            ->assertSet('unreadCount', 0);
+    }
+
     public function test_a_teams_alerts_never_leak_to_another_team(): void
     {
         $user = User::factory()->create();
@@ -255,6 +337,7 @@ class AINotificationsUnifiedTest extends TestCase
             'status' => 'active',
             'triggered_at' => now(),
         ]);
+        Notification::factory()->create(['team_id' => $otherTeam->id]);
 
         Livewire::actingAs($user)
             ->test(AINotifications::class)

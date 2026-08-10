@@ -2,25 +2,37 @@
 
 namespace App\Livewire;
 
-use App\Models\Machine;
+use App\Models\ActivityLog;
 use App\Models\Geofence;
+use App\Models\Machine;
+use App\Models\MineArea;
 use App\Traits\RealtimeUpdates;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class LiveMap extends Component
 {
     use RealtimeUpdates;
 
     public float $centerLat = -28.4793; // South Africa center latitude
+
     public array $activityFeed = [];
+
     public bool $isLoading = true;
+
     public float $centerLng = 24.6727; // South Africa center longitude
+
     public int $zoomLevel = 12;
+
     public string $mapStyle = 'satellite'; // 'osm' or 'satellite'
+
     public bool $showGeofences = true;
+
     public bool $showMachines = true;
+
     public string $selectedStatus = '';
+
     public ?int $selectedMineAreaId = null;
 
     public function mount(): void
@@ -53,7 +65,7 @@ class LiveMap extends Component
     public function loadActivityFeed()
     {
         $team = Auth::user()->currentTeam;
-        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $team->id)
+        $this->activityFeed = ActivityLog::where('team_id', $team->id)
             ->latest('created_at')
             ->take(10)
             ->get()
@@ -66,9 +78,27 @@ class LiveMap extends Component
             ->toArray();
     }
 
+    /**
+     * WebSocket delivery isn't guaranteed while disconnected -- machine
+     * location/status updates broadcast during a drop are simply lost, not
+     * queued for replay. When the connection recovers (dispatched by
+     * livewire-realtime.js's connection monitor), re-fetch from the
+     * database -- the authoritative source of truth -- instead of trusting
+     * whatever the map happened to have before the drop.
+     */
+    #[On('realtime-reconnected')]
+    public function reconcileAfterReconnect(): void
+    {
+        $this->dispatch('map-updated', [
+            'mapStyle' => $this->mapStyle,
+            'machines' => $this->showMachines ? $this->getMachines() : [],
+            'geofences' => $this->showGeofences ? $this->getGeofences() : [],
+        ]);
+    }
+
     public function toggleGeofences(): void
     {
-        $this->showGeofences = !$this->showGeofences;
+        $this->showGeofences = ! $this->showGeofences;
         $this->dispatch('map-updated', [
             'mapStyle' => $this->mapStyle,
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
@@ -78,7 +108,7 @@ class LiveMap extends Component
 
     public function toggleMachines(): void
     {
-        $this->showMachines = !$this->showMachines;
+        $this->showMachines = ! $this->showMachines;
         $this->dispatch('map-updated', [
             'mapStyle' => $this->mapStyle,
             'machines' => $this->showMachines ? $this->getMachines() : [],
@@ -118,8 +148,9 @@ class LiveMap extends Component
     public function getMineAreas()
     {
         $team = Auth::user()->currentTeam;
+
         // Return active mine areas with coordinates decoded for client-side use
-        return \App\Models\MineArea::forTeam($team->id)
+        return MineArea::forTeam($team->id)
             ->byStatus('active')
             ->orderBy('name')
             ->get()

@@ -41,11 +41,27 @@ function setupLivewireListeners() {
      */
     window.Livewire.on('realtime:init', ({ userId, teamId }) => {
         ReverbService.init(userId, teamId);
-        
+
         // Initialize toast service
         getService('ToastNotificationService').then(service => {
             service.init();
         });
+
+        // Surface connection state as a window event so any UI (e.g. the
+        // navbar's connection indicator) can react without depending on
+        // ReverbService/Echo directly. On reconnect after a real drop,
+        // refresh data that WebSocket delivery may have missed while
+        // disconnected -- the backend database, not the socket, is the
+        // source of truth.
+        ReverbService.monitorConnection(
+            (state) => {
+                window.dispatchEvent(new CustomEvent('realtime-connection-changed', { detail: { state } }));
+            },
+            () => {
+                window.Livewire.dispatch('alert-created');
+                window.Livewire.dispatch('realtime-reconnected');
+            }
+        );
     });
 
     /**
@@ -86,7 +102,7 @@ function setupLivewireListeners() {
     window.Livewire.on('realtime:team-alerts', () => {
         ReverbService.subscribeTeamAlerts((data) => {
             ReverbService.emit('alertTriggered', data);
-            
+
             // Show toast notification
             getService('ToastNotificationService').then(toastService => {
                 toastService.showAlert({
@@ -97,6 +113,54 @@ function setupLivewireListeners() {
                     duration: 0 // Don't auto-dismiss critical/high alerts
                 });
             });
+
+            // Refresh the notification bell (AINotifications.php listens
+            // for this Livewire event).
+            window.Livewire.dispatch('alert-created');
+        });
+    });
+
+    /**
+     * Subscribe to predictive maintenance alerts
+     */
+    window.Livewire.on('realtime:maintenance-alerts', () => {
+        ReverbService.subscribeMaintenanceAlerts((data) => {
+            ReverbService.emit('maintenanceAlertTriggered', data);
+
+            getService('ToastNotificationService').then(toastService => {
+                toastService.showAlert({
+                    title: `Maintenance Alert: ${data.machine_name || 'Machine'}`,
+                    description: data.predicted_date
+                        ? `Predicted maintenance needed on ${data.predicted_date}`
+                        : 'Predicted maintenance needed soon',
+                    priority: data.severity || 'medium',
+                    type: 'alert',
+                    duration: 0
+                });
+            });
+
+            window.Livewire.dispatch('alert-created');
+        });
+    });
+
+    /**
+     * Subscribe to compliance violations
+     */
+    window.Livewire.on('realtime:compliance-violations', () => {
+        ReverbService.subscribeComplianceViolations((data) => {
+            ReverbService.emit('complianceViolationDetected', data);
+
+            getService('ToastNotificationService').then(toastService => {
+                toastService.showAlert({
+                    title: `Compliance Violation: ${data.violation_type || 'Unknown'}`,
+                    description: data.description,
+                    priority: data.severity || 'medium',
+                    type: 'alert',
+                    duration: 0
+                });
+            });
+
+            window.Livewire.dispatch('alert-created');
         });
     });
 

@@ -73,6 +73,21 @@ class BroadcastServiceProvider extends ServiceProvider
         });
 
         /**
+         * Maintenance alert channel (App\Events\MaintenanceAlertTriggered
+         * broadcasts here, not on alerts.team.{teamId} above).
+         */
+        Broadcast::channel('team.{teamId}.alerts', function (User $user, int $teamId) {
+            return static::belongsToTeamId($user, $teamId) ? ['id' => $user->id, 'name' => $user->name] : false;
+        });
+
+        /**
+         * Compliance violation channel (App\Events\ComplianceViolationDetected).
+         */
+        Broadcast::channel('team.{teamId}.compliance', function (User $user, int $teamId) {
+            return static::belongsToTeamId($user, $teamId) ? ['id' => $user->id, 'name' => $user->name] : false;
+        });
+
+        /**
          * Global team presence channel for dashboard updates
          */
         Broadcast::channel('team.presence.{teamId}', function (User $user, int $teamId) {

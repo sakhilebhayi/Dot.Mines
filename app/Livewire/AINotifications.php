@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\AIPredictiveAlert;
 use App\Models\Alert;
 use App\Models\FuelAlert;
+use App\Models\Notification;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -16,7 +17,10 @@ use Livewire\Component;
  * anywhere in the app despite both being real, live data with their own
  * severity/status/acknowledge lifecycle. A user could have a machine
  * actually offline right now and the bell would show nothing, or "no unread
- * alerts" while a fuel budget was exceeded. Now merges all three sources.
+ * alerts" while a fuel budget was exceeded. Now merges all four sources
+ * (also App\Models\Notification -- RealTimeAlertService already persists a
+ * Notification row for maintenance/compliance/sensor-reading alerts, but
+ * nothing here ever read them until now).
  *
  * Also now respects User::wantsInAppAlert() (the "In-App Alerts" toggle and
  * quiet hours), neither of which anything previously read.
@@ -102,12 +106,29 @@ class AINotifications extends Component
                 'location' => $a->machine?->name ?? $a->fuelTank?->name,
             ]);
 
+        $notificationAlerts = Notification::where('team_id', $team->id)
+            ->whereDoesntHave('readBy', fn ($q) => $q->where('user_id', auth()->id()))
+            ->latest('created_at')
+            ->limit(10)
+            ->get()
+            ->toBase()
+            ->map(fn (Notification $n) => [
+                'source' => 'notification',
+                'id' => $n->id,
+                'severity' => $n->alert_level,
+                'title' => $n->title,
+                'message' => $n->message,
+                'created_at' => $n->created_at,
+                'location' => null,
+            ]);
+
         $user = auth()->user();
         $minSeverity = $user->notification_preferences['min_severity'] ?? 'low';
 
         $this->notifications = $aiAlerts
             ->concat($operationalAlerts)
             ->concat($fuelAlerts)
+            ->concat($notificationAlerts)
             ->filter(fn (array $n) => $this->meetsSeverityThreshold($n['severity'], $minSeverity))
             // "In-App Alerts" and quiet hours used to be stored preferences
             // that nothing ever read -- toggling either off in Settings had
@@ -157,6 +178,12 @@ class AINotifications extends Component
                 'acknowledged_at' => now(),
                 'acknowledged_by' => auth()->id(),
             ]),
+            // Notification's "read" tracking is per-user (readBy pivot),
+            // not a single shared acknowledged/acknowledged_by pair like
+            // the other three sources -- markAsRead() records this user
+            // specifically, so the notification can still be unread for
+            // teammates.
+            'notification' => Notification::where('team_id', $team->id)->find($id)?->markAsRead(auth()->id()),
             default => null,
         };
 
@@ -190,6 +217,11 @@ class AINotifications extends Component
             'acknowledged_at' => now(),
             'acknowledged_by' => auth()->id(),
         ]);
+
+        Notification::where('team_id', $team->id)
+            ->whereDoesntHave('readBy', fn ($q) => $q->where('user_id', auth()->id()))
+            ->get()
+            ->each(fn (Notification $n) => $n->markAsRead(auth()->id()));
 
         $this->loadNotifications();
     }
