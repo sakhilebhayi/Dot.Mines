@@ -56,12 +56,35 @@ class MobileNavigationTest extends TestCase
         $response->assertSee('window.mobileNav.toggle()', false);
     }
 
+    /**
+     * This used to only assert the substring 'window.mobileNav.close()',
+     * which the sidebar's own mobile close button also emits -- so the test
+     * passed regardless of whether a backdrop element existed at all. It
+     * now asserts the backdrop's own distinguishing markup: the fixed
+     * full-screen overlay div, gated to mobile, wired to the same close
+     * call on click.
+     */
     public function test_page_has_a_mobile_backdrop_that_closes_the_drawer(): void
     {
         $response = $this->actingAs($this->actingUser())->get('/dashboard');
 
         $response->assertOk();
-        $response->assertSee('window.mobileNav.close()', false);
+        $response->assertSee('fixed inset-0 bg-black/60 z-[45] md:hidden', false);
+        $response->assertSee('@click="window.mobileNav.close()"', false);
+    }
+
+    /**
+     * dashboard resolves through <x-app-layout> -> layouts/app.blade.php.
+     * components/layouts/app.blade.php is not reached by any route today,
+     * but the two files are kept in sync by convention (see
+     * ToastNotificationLayoutTest) so it doesn't silently drift and regress
+     * if it's ever wired up.
+     */
+    public function test_the_sibling_layout_file_has_the_same_backdrop(): void
+    {
+        $path = resource_path('views/components/layouts/app.blade.php');
+
+        $this->assertStringContainsString('fixed inset-0 bg-black/60 z-[45] md:hidden', file_get_contents($path));
     }
 
     public function test_sidebar_has_a_mobile_only_close_button(): void

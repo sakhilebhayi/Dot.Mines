@@ -103,6 +103,27 @@
             <div x-data x-init="$dispatch('notify', { type: 'info', message: @js(session('info')) })"></div>
         @endif
 
+        <!-- Mobile nav backdrop -- kept in sync with the same block in the
+             sibling resources/views/layouts/app.blade.php (see wiki.md for
+             why this file is duplicated). No route currently renders this
+             file, but it must not silently drift out of sync with the
+             mobile drawer the sidebar/navbar components rely on. -->
+        <div
+            x-data="{ mobileOpen: false }"
+            @mobile-nav-changed.window="mobileOpen = $event.detail.open"
+            x-show="mobileOpen"
+            x-transition:enter="transition-opacity ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="window.mobileNav.close()"
+            class="fixed inset-0 bg-black/60 z-[45] md:hidden"
+            style="display: none;"
+            aria-hidden="true"
+        ></div>
+
         <div class="min-h-screen flex">
             <!-- Sidebar Navigation -->
             @livewire('sidebar')
