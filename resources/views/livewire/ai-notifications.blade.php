@@ -27,7 +27,7 @@
         <div class="p-4 border-b border-[var(--line)]">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-[var(--stone)]">
-                    AI Alerts
+                    Notifications
                 </h3>
                 @if($unreadCount > 0)
                 <button wire:click="acknowledgeAll" class="text-xs text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium">
@@ -44,13 +44,13 @@
                 <div class="flex items-start gap-3">
                     <!-- Severity Icon -->
                     <div class="flex-shrink-0 mt-1">
-                        @if($notification->severity === 'critical')
+                        @if($notification['severity'] === 'critical')
                             <div class="p-2 bg-red-500/15 rounded-lg">
                                 <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                 </svg>
                             </div>
-                        @elseif($notification->severity === 'high')
+                        @elseif($notification['severity'] === 'high')
                             <div class="p-2 bg-orange-500/15 rounded-lg">
                                 <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -69,24 +69,27 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-start justify-between gap-2 mb-1">
                             <h4 class="text-sm font-semibold text-[var(--stone)]">
-                                {{ $notification->title }}
+                                {{ $notification['title'] }}
                             </h4>
                             <span class="px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap
-                                @if($notification->severity === 'critical') bg-red-900 text-red-200
-                                @elseif($notification->severity === 'high') bg-orange-900 text-orange-200
+                                @if($notification['severity'] === 'critical') bg-red-900 text-red-200
+                                @elseif($notification['severity'] === 'high') bg-orange-900 text-orange-200
                                 @else bg-yellow-900 text-yellow-200 @endif">
-                                {{ strtoupper($notification->severity) }}
+                                {{ strtoupper($notification['severity']) }}
                             </span>
                         </div>
                         <p class="text-xs text-[var(--sand)] mb-2 line-clamp-2">
-                            {{ $notification->description }}
+                            {{ $notification['message'] }}
                         </p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-[var(--sand)]">
-                                {{ $notification->created_at->diffForHumans() }}
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs text-[var(--sand)] truncate">
+                                {{ $notification['created_at']?->diffForHumans() }}
+                                @if($notification['location'])
+                                    · {{ $notification['location'] }}
+                                @endif
                             </span>
-                            <button wire:click="acknowledge({{ $notification->id }})" 
-                                class="text-xs text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium">
+                            <button wire:click="acknowledge({{ $notification['id'] }}, '{{ $notification['source'] }}')"
+                                class="text-xs text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium flex-shrink-0">
                                 Acknowledge
                             </button>
                         </div>
@@ -105,7 +108,7 @@
         <!-- Footer -->
         @if($notifications->count() > 0)
         <div class="p-3 border-t border-[var(--line)]">
-            <a href="{{ route('ai-optimization') }}" 
+            <a href="{{ route('alerts') }}"
                class="block text-center text-sm text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium"
                @click="open = false">
                 View all alerts →

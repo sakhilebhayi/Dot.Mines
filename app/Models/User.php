@@ -168,6 +168,77 @@ class User extends Authenticatable
     }
 
     /**
+     * Whether an in-app alert of the given severity should reach this user.
+     * 'critical' always passes -- neither the "In-App Alerts" toggle nor
+     * quiet hours can suppress it, the same mandatory floor already applied
+     * to the notification bell's severity threshold.
+     */
+    public function wantsInAppAlert(?string $severity = null): bool
+    {
+        if ($severity === 'critical') {
+            return true;
+        }
+
+        if (($this->notification_preferences['in_app_alerts'] ?? true) === false) {
+            return false;
+        }
+
+        return ! $this->isInQuietHours();
+    }
+
+    /**
+     * Whether an email alert of the given severity should be sent to this
+     * user. Same mandatory-critical floor as wantsInAppAlert().
+     */
+    public function wantsEmailAlert(?string $severity = null): bool
+    {
+        if ($severity === 'critical') {
+            return true;
+        }
+
+        if (($this->notification_preferences['email_alerts'] ?? true) === false) {
+            return false;
+        }
+
+        return ! $this->isInQuietHours();
+    }
+
+    /**
+     * Whether this user wants "report ready" emails -- the one preference
+     * this toggle is named after and, until now, never actually gated.
+     */
+    public function wantsEmailReports(): bool
+    {
+        return ($this->notification_preferences['email_reports'] ?? true) !== false;
+    }
+
+    /**
+     * Quiet hours support an overnight window (e.g. 22:00-08:00), where the
+     * end time is numerically before the start time.
+     */
+    public function isInQuietHours(): bool
+    {
+        $preferences = $this->notification_preferences ?? [];
+
+        if (($preferences['quiet_hours_enabled'] ?? false) !== true) {
+            return false;
+        }
+
+        $start = $preferences['quiet_hours_start'] ?? null;
+        $end = $preferences['quiet_hours_end'] ?? null;
+
+        if (! $start || ! $end) {
+            return false;
+        }
+
+        $now = now()->format('H:i');
+
+        return $start <= $end
+            ? ($now >= $start && $now < $end)
+            : ($now >= $start || $now < $end);
+    }
+
+    /**
      * Check if user has all of the given permissions
      */
     public function hasAllPermissions($permissions): bool
@@ -234,8 +305,20 @@ class User extends Authenticatable
         return $this->hasMany(Team::class, 'user_id');
     }
 
+    /**
+     * This override existed only to add a return type; it silently dropped
+     * HasTeams::currentTeam()'s lazy fallback to the user's personal team,
+     * so any user reaching here with current_team_id still null (freshly
+     * registered, or a route not covered by the ensure_team middleware)
+     * got a hard null instead of their own team. Restored to match the
+     * trait's real behavior.
+     */
     public function currentTeam(): BelongsTo
     {
+        if (is_null($this->current_team_id) && $this->id) {
+            $this->switchTeam($this->personalTeam());
+        }
+
         return $this->belongsTo(Team::class, 'current_team_id');
     }
 }

@@ -78,7 +78,7 @@ class RunAIAnalysis extends Command
                 continue;
             } finally {
                 // Remove the team instance so subsequent iterations or other code are not affected
-                if (app()->hasInstance('current_team_id')) {
+                if (app()->bound('current_team_id')) {
                     app()->forgetInstance('current_team_id');
                 }
             }

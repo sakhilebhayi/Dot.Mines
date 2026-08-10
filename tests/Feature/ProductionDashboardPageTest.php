@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\ProductionDashboard;
+use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -38,5 +42,52 @@ class ProductionDashboardPageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Production Dashboard');
+    }
+
+    /**
+     * dateFilter defaults to the string 'month' and used to be passed
+     * straight into where('record_date', $this->dateFilter) -- an equality
+     * match against a preset keyword instead of a range. SQLite tolerates
+     * comparing a date column to an arbitrary string (silently returns zero
+     * rows), which is why this shipped without failing tests; Postgres
+     * rejects it outright with SQLSTATE[22007], a hard 500 on every load of
+     * /production. Assert the filter now returns a real date-bounded range.
+     */
+    public function test_date_filter_returns_records_within_the_selected_range(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        $recent = ProductionRecord::create([
+            'team_id' => $team->id,
+            'record_date' => Carbon::today()->subDays(10),
+            'shift' => 'day',
+            'quantity_produced' => 100,
+            'unit' => 'tonnes',
+            'status' => 'completed',
+        ]);
+
+        $stale = ProductionRecord::create([
+            'team_id' => $team->id,
+            'record_date' => Carbon::today()->subYears(2),
+            'shift' => 'day',
+            'quantity_produced' => 50,
+            'unit' => 'tonnes',
+            'status' => 'completed',
+        ]);
+
+        // productionRecords is a computed property, not rendered by the
+        // Blade view -- assert against the component's data directly rather
+        // than the HTML output.
+        $ids = Livewire::actingAs($user)
+            ->test(ProductionDashboard::class)
+            ->set('dateFilter', 'month')
+            ->instance()
+            ->productionRecords
+            ->pluck('id');
+
+        $this->assertTrue($ids->contains($recent->id));
+        $this->assertFalse($ids->contains($stale->id));
     }
 }

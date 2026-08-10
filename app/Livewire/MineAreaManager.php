@@ -6,6 +6,7 @@ use App\Models\MineArea;
 use App\Services\MineAreaService;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -183,8 +184,9 @@ class MineAreaManager extends Component
             }
             $this->resetForm();
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to save mine area', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
         }
     }
 
@@ -200,8 +202,9 @@ class MineAreaManager extends Component
             $this->getService()->delete($mineArea);
             $this->dispatchBrowserEvent('notify', ['message' => 'Mine area deleted successfully', 'type' => 'success']);
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error deleting mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to delete mine area', ['mine_area_id' => $mineArea->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't delete this mine area. Please try again.", 'type' => 'error']);
         }
     }
 
@@ -306,8 +309,9 @@ class MineAreaManager extends Component
             $this->switchToListMode();
             $this->resetForm();
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to save mine area boundary', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
         }
     }
 

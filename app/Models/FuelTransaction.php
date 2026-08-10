@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,7 +26,7 @@ class FuelTransaction extends Model
      * @property string|float $unit_price
      * @property string|float $total_cost
      * @property string|null $fuel_type
-     * @property \Carbon\Carbon $transaction_date
+     * @property Carbon $transaction_date
      * @property string|float|null $odometer_reading
      * @property string|float|null $machine_hours
      * @property string|null $supplier
@@ -35,8 +36,8 @@ class FuelTransaction extends Model
      * @property int|null $to_tank_id
      * @property string|null $notes
      * @property float|null $cost_per_liter
-     * @property \Carbon\Carbon $created_at
-     * @property \Carbon\Carbon $updated_at
+     * @property Carbon $created_at
+     * @property Carbon $updated_at
      *
      * @method static \Illuminate\Database\Eloquent\Builder|FuelTransaction where(string $column, mixed $operator = null, mixed $value = null)
      * @method static \Illuminate\Database\Eloquent\Builder|FuelTransaction whereIn(string $column, array $values)
@@ -45,7 +46,6 @@ class FuelTransaction extends Model
      * @method static FuelTransaction findOrFail(mixed $id, array $columns = ['*'])
      * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
      */
-
     protected $fillable = [
         'team_id',
         'monthly_allocation_id',
@@ -56,6 +56,7 @@ class FuelTransaction extends Model
         'quantity_liters',
         'unit_price',
         'total_cost',
+        'currency',
         'fuel_type',
         'transaction_date',
         'odometer_reading',
@@ -114,9 +115,10 @@ class FuelTransaction extends Model
      */
     public function getCostPerLiterAttribute(): ?float
     {
-        if ($this->quantity_liters == 0 || !$this->total_cost) {
+        if ($this->quantity_liters == 0 || ! $this->total_cost) {
             return null;
         }
+
         return round($this->total_cost / $this->quantity_liters, 2);
     }
 

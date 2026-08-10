@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Database\Factories\TeamFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
@@ -15,14 +19,14 @@ use Laravel\Jetstream\Team as JetstreamTeam;
  * @property int $user_id
  * @property string $name
  * @property string|null $personal_team
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property-read \App\Models\User $owner
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read User $owner
+ * @property-read Collection<int, User> $users
  */
 class Team extends JetstreamTeam
 {
-    /** @use HasFactory<\Database\Factories\TeamFactory> */
+    /** @use HasFactory<TeamFactory> */
     use HasFactory;
 
     /**
@@ -33,6 +37,10 @@ class Team extends JetstreamTeam
     protected $fillable = [
         'name',
         'personal_team',
+        'email',
+        'timezone',
+        'language',
+        'currency',
     ];
 
     /**
@@ -69,7 +77,7 @@ class Team extends JetstreamTeam
     /**
      * Get the owner of the team.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User>
+     * @return BelongsTo<User>
      */
     public function owner()
     {

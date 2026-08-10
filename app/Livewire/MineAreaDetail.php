@@ -378,9 +378,9 @@ class MineAreaDetail extends Component
             $this->closeUploadModal();
             $this->dispatchBrowserEvent('notify', ['message' => 'Mine plan uploaded successfully', 'type' => 'success']);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to upload mine plan', ['error' => $e->getMessage()]);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to upload mine plan: '.$e->getMessage(), 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't upload that file. Check that it's a supported format and under the size limit, then try again.", 'type' => 'error']);
         }
     }
 

@@ -533,16 +533,17 @@
                     <h1>Integrations Overview</h1>
                     <p>Connect Mines with your existing systems and hardware.</p>
 
-                    <h2>Available Integrations</h2>
-                    <p>Mines connects directly to major heavy equipment manufacturers' telematics systems, so machine data flows in automatically instead of being entered by hand:</p>
+                    <h2>Manufacturer Integrations</h2>
+                    <p>Mines is building direct connections to major heavy equipment manufacturers' telematics systems, so machine data can eventually flow in automatically instead of being entered by hand. This is in active development — until a given manufacturer connection is verified against a real account, machine data should be tracked via the REST API or entered manually:</p>
                     <ul>
-                        <li><strong>Volvo, Caterpillar, Komatsu, Bell, Hitachi:</strong> Heavy equipment telematics</li>
-                        <li><strong>John Deere, Liebherr, Hyundai, Doosan, JCB, CASE:</strong> Construction equipment</li>
-                        <li><strong>Sany, XCMG, Kobelco, New Holland, Takeuchi, Kubota, Bobcat, Yanmar:</strong> Additional manufacturer integrations</li>
-                        <li><strong>Atlas Copco, Sandvik, Epiroc:</strong> Drilling equipment</li>
-                        <li><strong>C-Track:</strong> GPS tracking</li>
+                        <li><strong>Bell:</strong> Implemented against Bell Equipment's published ISO 15143-3 fleet API (real OAuth2 + endpoints, unit-tested) — pending a first live sync confirmation</li>
+                        <li><strong>Volvo, Caterpillar, Komatsu, Hitachi:</strong> Heavy equipment telematics</li>
+                        <li><strong>Liebherr, Hyundai, Doosan, JCB:</strong> Construction equipment</li>
+                        <li><strong>Sany, XCMG, Kobelco, Kubota:</strong> Additional manufacturer integrations</li>
+                        <li><strong>Epiroc, Roundebult, Kawasaki, C-Track:</strong> Drilling, mining equipment, and GPS tracking</li>
+                        <li><strong>John Deere, CASE, New Holland, Takeuchi, Bobcat, Yanmar, Atlas Copco, Sandvik:</strong> Not yet available</li>
                     </ul>
-                    <p>See the <a href="{{ route('integrations') }}">Integrations</a> page in your account for the full, current list and each provider's connection status.</p>
+                    <p>See the <a href="{{ route('integrations') }}">Integrations</a> page in your account for the current, real connection status of each provider — a manufacturer being listed here means a connector exists, not that a live connection has been confirmed.</p>
 
                     <h2>Integration Methods</h2>
 

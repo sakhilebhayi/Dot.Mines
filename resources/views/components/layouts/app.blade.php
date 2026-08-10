@@ -45,15 +45,20 @@
                 }
             }"
             @notify.window="addNotification($event.detail.type, $event.detail.message)"
-            class="fixed top-4 right-4 z-[10000] space-y-2 max-w-md">
+            @keydown.escape.window="notifications = []"
+            aria-label="Notifications"
+            class="fixed top-24 right-4 z-[10000] space-y-2 max-w-md">
             <template x-for="notification in notifications" :key="notification.id">
                 <div x-show="true"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 transform translate-x-8"
+                     :role="notification.type === 'error' ? 'alert' : 'status'"
+                     :aria-live="notification.type === 'error' ? 'assertive' : 'polite'"
+                     aria-atomic="true"
+                     x-transition:enter="transition ease-out duration-300 motion-reduce:duration-0"
+                     x-transition:enter-start="opacity-0 transform translate-x-8 motion-reduce:translate-x-0"
                      x-transition:enter-end="opacity-100 transform translate-x-0"
-                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave="transition ease-in duration-200 motion-reduce:duration-0"
                      x-transition:leave-start="opacity-100 transform translate-x-0"
-                     x-transition:leave-end="opacity-0 transform translate-x-8"
+                     x-transition:leave-end="opacity-0 transform translate-x-8 motion-reduce:translate-x-0"
                      class="relative rounded-lg shadow-2xl p-4 flex items-start gap-3 backdrop-blur-sm border"
                      :class="{
                         'bg-green-600/90 border-green-500': notification.type === 'success',
@@ -61,7 +66,7 @@
                         'bg-yellow-600/90 border-yellow-500': notification.type === 'warning',
                         'bg-[var(--gold)]/90 border-[var(--gold)]': notification.type === 'info'
                      }">
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0" aria-hidden="true">
                         <template x-if="notification.type === 'success'">
                             <svg class="w-6 h-6 text-[var(--stone)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </template>
@@ -74,10 +79,11 @@
                         <template x-if="notification.type === 'info'">
                             <svg class="w-6 h-6 text-[var(--ink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </template>
+                        <span class="sr-only" x-text="{success: 'Success', error: 'Error', warning: 'Warning', info: 'Info'}[notification.type]"></span>
                     </div>
                     <div class="flex-1 font-medium" :class="notification.type === 'info' ? 'text-[var(--ink)]' : 'text-[var(--stone)]'" x-text="notification.message"></div>
-                    <button @click="removeNotification(notification.id)" class="flex-shrink-0 transition-colors" :class="notification.type === 'info' ? 'text-[var(--ink)]/70 hover:text-[var(--ink)]' : 'text-[var(--stone)]/70 hover:text-[var(--stone)]'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <button @click="removeNotification(notification.id)" aria-label="Dismiss notification" class="flex-shrink-0 transition-colors" :class="notification.type === 'info' ? 'text-[var(--ink)]/70 hover:text-[var(--ink)]' : 'text-[var(--stone)]/70 hover:text-[var(--stone)]'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
             </template>
@@ -102,7 +108,7 @@
             @livewire('sidebar')
 
             <!-- Main Content -->
-            <div class="flex-1 flex flex-col">
+            <div class="flex-1 flex flex-col min-w-0">
                 <!-- Top Navigation -->
                 @livewire('navbar')
 

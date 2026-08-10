@@ -1,7 +1,23 @@
-<nav class="bg-[var(--ink-soft)] border-b border-[var(--line)] sticky top-0 z-40">
+<nav class="bg-[var(--ink-soft)] border-b border-[var(--line)] sticky top-0 z-40"
+     x-data="{ mobileOpen: false }"
+     @mobile-nav-changed.window="mobileOpen = $event.detail.open">
     <div class="px-6 py-4 flex justify-between items-center">
         <!-- Left Section -->
         <div class="flex items-center gap-4">
+            <!-- Mobile nav toggle -->
+            <button
+                @click="window.mobileNav.toggle()"
+                type="button"
+                class="md:hidden -ml-2 p-2 rounded-lg text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] transition-colors"
+                aria-label="Toggle navigation menu"
+                aria-controls="mobile-sidebar"
+                :aria-expanded="mobileOpen.toString()"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
             @php
                 $routeName = optional(request()->route())->getName();
                     $mapping = [

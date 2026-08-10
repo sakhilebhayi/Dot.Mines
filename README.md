@@ -70,7 +70,7 @@
 | ⛽ **Fuel Management** | Tank management, allocation, forecasting, and budget tracking |
 | 🔧 **Maintenance** | Preventive and corrective booking with automated status sync |
 | 🏭 **Production Tracking** | Live load comparisons, shift targets, and trend analysis |
-| 🔌 **OEM Integrations** | Native APIs for 20+ manufacturers including CAT, Komatsu, Volvo |
+| 🔌 **OEM Integrations** | Service layer + credential management for 25 manufacturers — no manufacturer connection has been verified against a real account yet (see [OEM Integrations](#oem-integrations)) |
 | 📊 **Reporting** | Compliance, maintenance, production, and incident export to PDF/CSV |
 | 💳 **Billing** | Stripe-powered subscriptions with fleet slot enforcement |
 | 🔒 **Multi-tenant** | Team-based isolation with granular role and policy access control |
@@ -198,25 +198,19 @@ A structured, real-time activity stream that replaces WhatsApp channels for mine
 
 ### OEM Integrations
 
-Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
+A service class exists per manufacturer (25 total) with a common `BaseManufacturerService` base, credential storage, and an Integration Manager UI — but **no manufacturer connection has ever been verified against a real account**. This section previously described these as "Native API integrations... via their telemetry APIs" with "webhook-based real-time telemetry ingestion"; neither claim was accurate. There is no telemetry webhook receiver in this codebase at all — the only webhook endpoint that exists handles inbound Stripe billing events. Every manufacturer sync is poll-based (a scheduled job calls the manufacturer's REST API on an interval), not push-based.
 
-| Manufacturer | Platform |
-|---|---|
-| Caterpillar | VisionLink |
-| Komatsu | KOMTRAX |
-| Volvo | CareTrack |
-| Sandvik | — |
-| Epiroc | — |
-| Liebherr | — |
-| Hitachi | — |
-| Hyundai | — |
-| John Deere | — |
-| Doosan | — |
-| JCB | — |
-| Bobcat | — |
-| Kawasaki, Kobelco, Yanmar, Kubota, XCMG, CASE, New Holland, Atlas Copco, Bell, Sany, Takeuchi, Roundebult, CTrack | — |
+**Bell** is implemented against Bell Equipment's own published ISO 15143-3 (AEMP 2.0) API spec and Postman collection — real OAuth2 token exchange, real endpoint paths, XML parsing, and 12 unit/integration tests — but has not yet completed a live sync against a real account (see [wiki.md §5.1](wiki.md)).
 
-- Webhook-based real-time telemetry ingestion
+16 other manufacturers have a service class that attempts real HTTP calls to endpoints inferred from public docs, but **those endpoint shapes have not been confirmed against a real account** — treat them as unverified until a real credential set is tested end-to-end:
+
+Caterpillar, Komatsu, Volvo, Epiroc, Liebherr, Hitachi, Hyundai, Doosan, JCB, Sany, XCMG, Kobelco, Kubota, Roundebult, Kawasaki, CTrack
+
+8 are honestly marked "coming soon" in the app (their `testConnection()` reports unavailability rather than faking success):
+
+John Deere, CASE, New Holland, Takeuchi, Bobcat, Yanmar, Atlas Copco, Sandvik
+
+- Poll-based sync via scheduled jobs (`SyncIntegrationMachinesJob`, `SyncMachineMetricsJob`)
 - Credentials stored per-team, never exposed in API responses
 - Extensible base manufacturer service for adding new integrations
 - Integration Manager in application settings

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.marketing')
 @section('title', 'Platform Capabilities')
 @section('content')
 <div class="max-w-5xl mx-auto py-12 px-4">
@@ -10,7 +10,7 @@
         </div>
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-xl p-6 shadow-lg flex flex-col gap-4">
             <h2 class="text-2xl font-semibold text-[var(--stone)]">API & Integrations</h2>
-            <p class="text-[var(--sand)]">RESTful API, webhooks, and integrations with popular mining and ERP software.</p>
+            <p class="text-[var(--sand)]">Full REST API for programmatic access. Manufacturer telematics integrations are in active development — track machines directly today via the API or manual entry.</p>
         </div>
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-xl p-6 shadow-lg flex flex-col gap-4">
             <h2 class="text-2xl font-semibold text-[var(--stone)]">Custom Reporting</h2>

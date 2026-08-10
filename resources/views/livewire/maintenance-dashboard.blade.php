@@ -234,7 +234,7 @@
             @endif
         </div>
     </div>
-            <div class="stat-value text-sm">${{ number_format($maintenanceStats['total_cost'], 2) }}</div>
+            <div class="stat-value text-sm">R{{ number_format($maintenanceStats['total_cost'], 2) }}</div>
         </div>
         
         <div class="stat bg-base-200 rounded-lg">

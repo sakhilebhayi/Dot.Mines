@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.marketing')
 @section('title', 'Fuel & Cost Management')
 @section('content')
 <div class="max-w-4xl mx-auto py-12 px-4">

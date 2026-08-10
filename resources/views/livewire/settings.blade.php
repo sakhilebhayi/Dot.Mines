@@ -251,6 +251,20 @@
                             </label>
                         </div>
 
+                        <!-- Minimum Severity -->
+                        <div class="bg-white/5 rounded-lg p-4 border border-[var(--line)]">
+                            <p class="font-medium text-[var(--stone)]">Notification Bell Threshold</p>
+                            <p class="text-sm text-[var(--sand)] mb-3">Only show alerts at or above this severity in the notification bell. Critical alerts always show, regardless of this setting.</p>
+                            <select
+                                wire:model="notificationMinSeverity"
+                                class="w-full bg-white/5 text-[var(--stone)] px-3 py-2 rounded border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none">
+                                <option value="low">All alerts (low and up)</option>
+                                <option value="medium">Medium and up</option>
+                                <option value="high">High and up</option>
+                                <option value="critical">Critical only</option>
+                            </select>
+                        </div>
+
                         <!-- Quiet Hours -->
                         <div class="bg-white/5 rounded-lg p-4 border border-[var(--line)] space-y-4">
                             <div class="flex items-center justify-between">

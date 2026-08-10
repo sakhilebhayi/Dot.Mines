@@ -10,8 +10,13 @@ class AtlasCopcoService extends BaseManufacturerService implements ManufacturerS
 
     public function testConnection(): bool
     {
-        // Implement Atlas Copco API connection test
-        return true;
+        // No real Atlas Copco API integration has been built yet -- this
+        // used to unconditionally return true, reporting a successful
+        // connection test regardless of whether any credentials were
+        // even provided.
+        $this->lastError = 'Atlas Copco integration is not yet available.';
+
+        return false;
     }
 
     public function fetchMachines(): array

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Jobs\GenerateReportJob;
 use App\Models\Machine;
 use App\Models\Report;
 use App\Traits\BrowserEventBridge;
@@ -200,6 +201,8 @@ class ReportGenerator extends Component
                 'status' => 'pending',
                 'filters' => $filters,
             ]);
+
+            GenerateReportJob::dispatch($report);
 
             Log::info('User generated report', [
                 'user_id' => $user->id,

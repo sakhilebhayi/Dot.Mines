@@ -18,8 +18,11 @@ class MachineLocationUpdateJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Integration $integration;
+
     public int $tries = 3;
+
     public int $timeout = 120;
+
     public array $backoff = [30, 90, 300]; // 30s, 90s, 5 mins
 
     /**
@@ -52,6 +55,7 @@ class MachineLocationUpdateJob implements ShouldQueue
                 Log::warning('Integration not connected, skipping location update', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -64,6 +68,7 @@ class MachineLocationUpdateJob implements ShouldQueue
                 Log::info('No active machines found for integration', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -77,6 +82,7 @@ class MachineLocationUpdateJob implements ShouldQueue
                 Log::debug('No location data received from integration', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -85,14 +91,14 @@ class MachineLocationUpdateJob implements ShouldQueue
             foreach ($locations as $location) {
                 $machine = $machines->firstWhere('manufacturer_id', $location['manufacturer_id'] ?? null);
 
-                if (!$machine) {
+                if (! $machine) {
                     continue;
                 }
 
                 // Check if location has actually changed
                 $hasChanged = $this->hasLocationChanged($machine, $location);
 
-                if (!$hasChanged) {
+                if (! $hasChanged) {
                     continue;
                 }
 
@@ -136,7 +142,7 @@ class MachineLocationUpdateJob implements ShouldQueue
                 'total_locations' => count($locations),
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Location update job failed', [
                 'integration_id' => $this->integration->id,
                 'error' => $e->getMessage(),
@@ -147,7 +153,7 @@ class MachineLocationUpdateJob implements ShouldQueue
             throw $e;
         } finally {
             // Clear the injected team context to avoid leakage into other jobs
-            if (app()->hasInstance('current_team_id')) {
+            if (app()->bound('current_team_id')) {
                 app()->forgetInstance('current_team_id');
             }
         }
@@ -160,7 +166,7 @@ class MachineLocationUpdateJob implements ShouldQueue
     private function hasLocationChanged(Machine $machine, array $newLocation): bool
     {
         // Always update if no previous location
-        if (!$machine->last_location_latitude || !$machine->last_location_longitude) {
+        if (! $machine->last_location_latitude || ! $machine->last_location_longitude) {
             return true;
         }
 
@@ -216,9 +222,13 @@ class MachineLocationUpdateJob implements ShouldQueue
             'error' => $exception->getMessage(),
         ]);
 
-        // Mark integration as having issues
+        // Mark integration as having issues. last_error is exposed directly
+        // via Api\IntegrationController::show() and the Integration Manager
+        // UI -- it used to store the raw exception message verbatim, which
+        // can include third-party API response bodies or internal details.
+        // The real message is already logged above for us.
         $this->integration->update([
-            'last_error' => 'Location update failed: ' . $exception->getMessage(),
+            'last_error' => 'Location update failed. Check the integration credentials and try syncing again.',
             'last_error_at' => now(),
         ]);
     }

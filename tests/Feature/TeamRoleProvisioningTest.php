@@ -28,8 +28,8 @@ class TeamRoleProvisioningTest extends TestCase
         $user = (new CreateNewUser)->create([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'password' => 'password12345',
-            'password_confirmation' => 'password12345',
+            'password' => 'Password12345!',
+            'password_confirmation' => 'Password12345!',
             'terms' => true,
         ]);
 

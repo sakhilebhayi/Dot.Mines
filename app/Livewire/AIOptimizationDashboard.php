@@ -9,6 +9,7 @@ use App\Models\AiRecommendationAction;
 use App\Services\AI\AIOptimizationService;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -71,8 +72,17 @@ class AIOptimizationDashboard extends Component
 
             $this->dispatch('analysis-completed');
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'AI analysis completed successfully!']);
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Analysis failed: '.$e->getMessage()]);
+        } catch (\Throwable $e) {
+            // The raw exception message (which can include third-party API
+            // responses, stack details, or internal identifiers) used to go
+            // straight to the user. Log it for us; tell them something
+            // useful instead.
+            Log::error('AI analysis failed', [
+                'user_id' => auth()->id(),
+                'team_id' => auth()->user()?->current_team_id,
+                'error' => $e->getMessage(),
+            ]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'AI analysis could not be completed right now. Please try again in a few minutes.']);
         }
 
         $this->analysisRunning = false;

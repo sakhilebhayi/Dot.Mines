@@ -35,6 +35,8 @@
                 <div class="mt-3">
                     @if(in_array($key, array_map(fn($i) => $i['provider'], $integrations)))
                         <span class="inline-block px-2 py-1 bg-green-900 text-green-200 text-xs rounded">Connected</span>
+                    @elseif(($mfr['status'] ?? 'available') === 'coming_soon')
+                        <span class="inline-block px-2 py-1 bg-yellow-900 text-yellow-200 text-xs rounded">Coming Soon</span>
                     @else
                         <span class="inline-block px-2 py-1 bg-white/10 text-[var(--sand)] text-xs rounded">Available</span>
                     @endif
@@ -98,11 +100,12 @@
                                             @if($integration['last_sync_status'] === 'success')
                                                 <span class="text-green-400">Success</span>
                                             @elseif($integration['last_sync_status'] === 'failed')
-                                                <span class="text-red-400">Failed</span>
+                                                <span class="text-red-400" @if($integration['last_error']) title="{{ $integration['last_error'] }}" @endif>Failed</span>
                                             @else
                                                 <span class="text-[var(--sand)]">Not synced</span>
                                             @endif
                                         </p>
+                                        <p class="text-[var(--sand)] text-xs mt-0.5">{{ $integration['machines_count'] }} machine{{ $integration['machines_count'] === 1 ? '' : 's' }} synced</p>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-[var(--sand)] text-sm">
@@ -191,7 +194,7 @@
                             <option value="">Select a manufacturer...</option>
                             @foreach($availableManufacturers as $key => $mfr)
                                 <option value="{{ $key }}">
-                                    {{ $mfr['icon'] }} {{ $mfr['name'] }}
+                                    {{ $mfr['icon'] }} {{ $mfr['name'] }}@if(($mfr['status'] ?? 'available') === 'coming_soon') (Coming Soon){{ ' ' }}@endif
                                 </option>
                             @endforeach
                         </select>
@@ -205,8 +208,10 @@
                                     @case('volvo')
                                     @case('cat')
                                     @case('komatsu')
-                                    @case('bell')
                                         <div>Requires API Key and Secret from OEM portal.</div>
+                                        @break
+                                    @case('bell')
+                                        <div>Requires an ISO 15143-3 export account from Bell Equipment (username, password, and client secret for the ISO_Export_Service client).</div>
                                         @break
                                     @case('ctrack')
                                         <div>Requires API Key, Secret, and custom endpoint URL.</div>
@@ -257,6 +262,16 @@
                             <input type="password" wire:model="formData.credentials.client_secret" placeholder="Enter Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                             <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
                             <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.deere.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                        @elseif($formData['provider'] === 'bell')
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">ISO Export Username *</label>
+                            <input type="text" wire:model="formData.credentials.username" placeholder="yourcompany-fleetauth@bell.co.za" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Password *</label>
+                            <input type="password" wire:model="formData.credentials.password" placeholder="Enter your Bell ISO export password" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Client Secret *</label>
+                            <input type="password" wire:model="formData.credentials.client_secret" placeholder="Enter your Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Client ID</label>
+                            <input type="text" wire:model="formData.credentials.client_id" placeholder="ISO_Export_Service" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <p class="text-[var(--sand)] text-xs mt-1">Bell issues this to every ISO 15143-3 export consumer -- leave as-is unless Bell told you otherwise.</p>
                         @elseif(in_array($formData['provider'], ['atlas-copco','sandvik','epiroc']))
                             <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
                             <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />

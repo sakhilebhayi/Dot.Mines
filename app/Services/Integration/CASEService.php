@@ -10,8 +10,13 @@ class CASEService extends BaseManufacturerService implements ManufacturerService
 
     public function testConnection(): bool
     {
-        // Implement CASE API connection test
-        return true;
+        // No real CASE API integration has been built yet -- this
+        // used to unconditionally return true, reporting a successful
+        // connection test regardless of whether any credentials were
+        // even provided.
+        $this->lastError = 'CASE integration is not yet available.';
+
+        return false;
     }
 
     public function fetchMachines(): array

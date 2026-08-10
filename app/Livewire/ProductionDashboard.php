@@ -2,48 +2,67 @@
 
 namespace App\Livewire;
 
-use App\Services\ProductionService;
-use App\Models\ProductionRecord;
-use App\Models\ProductionTarget;
-use App\Models\MineArea;
 use App\Models\Machine;
+use App\Models\MineArea;
+use App\Models\ProductionRecord;
+use App\Models\Team;
+use App\Services\ProductionService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class ProductionDashboard extends Component
 {
     use WithPagination;
 
     public string $viewMode = 'overview'; // overview, records, targets, analytics
+
     public string $search = '';
+
     public string $dateFilter = 'month';
+
     public ?string $startDate = null;
+
     public ?string $endDate = null;
+
     public ?int $mineAreaFilter = null;
+
     public string $statusFilter = '';
+
     public bool $showCreateModal = false;
+
     public bool $showEditModal = false;
+
     public ?int $editingRecordId = null;
 
     // Form fields
     public ?string $record_date = null;
+
     public string $shift = 'day';
+
     public string $quantity_produced = '';
+
     public string $target_quantity = '';
+
     public ?int $mine_area_id = null;
+
     public ?int $machine_id = null;
+
     public string $status = 'completed';
+
     public string $notes = '';
 
     protected ?ProductionService $productionService = null;
-    protected ?\App\Models\Team $team = null;
+
+    protected ?Team $team = null;
+
     public int $teamId = 0;
 
     private function productionService(): ProductionService
     {
         assert($this->productionService !== null);
+
         return $this->productionService;
     }
 
@@ -89,7 +108,17 @@ class ProductionDashboard extends Component
         }
 
         if ($this->dateFilter) {
-            $query->where('record_date', $this->dateFilter);
+            $start = match ($this->dateFilter) {
+                'day' => Carbon::today(),
+                'week' => Carbon::today()->subWeek(),
+                'month' => Carbon::today()->subMonth(),
+                'year' => Carbon::today()->subYear(),
+                default => null,
+            };
+
+            if ($start) {
+                $query->where('record_date', '>=', $start->format('Y-m-d'));
+            }
         }
 
         return $query->orderByDesc('record_date')->paginate(15);
@@ -123,7 +152,7 @@ class ProductionDashboard extends Component
     {
         $stats = $this->statistics;
         $activeAreas = MineArea::forTeam($this->teamId)->where('status', 'active')->count();
-        
+
         return [
             'total_loads' => $stats['total_records'] ?? 0,
             'total_cycles' => $stats['completed_records'] ?? 0,
@@ -146,7 +175,7 @@ class ProductionDashboard extends Component
     public function getDailyChartProperty()
     {
         $trend = $this->trend;
-        if (!$trend || $trend->isEmpty()) {
+        if (! $trend || $trend->isEmpty()) {
             return [];
         }
 
@@ -184,12 +213,12 @@ class ProductionDashboard extends Component
     public function getAreaPerformanceProperty()
     {
         $mineAreas = $this->mineAreas;
-        if (!$mineAreas || $mineAreas->isEmpty()) {
+        if (! $mineAreas || $mineAreas->isEmpty()) {
             return [];
         }
 
         return $mineAreas->map(function ($area) {
-                $records = ProductionRecord::where('team_id', $this->teamId)
+            $records = ProductionRecord::where('team_id', $this->teamId)
                 ->where('mine_area_id', $area->id)
                 ->betweenDates(Carbon::parse($this->startDate), Carbon::parse($this->endDate))
                 ->get();
@@ -253,7 +282,7 @@ class ProductionDashboard extends Component
         ]);
 
         if ($this->editingRecordId) {
-            /** @var \App\Models\ProductionRecord $record */
+            /** @var ProductionRecord $record */
             $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($this->editingRecordId);
             $this->productionService()->updateProductionRecord($record, [
                 ...$validated,
@@ -274,7 +303,7 @@ class ProductionDashboard extends Component
 
     public function deleteRecord($id)
     {
-        /** @var \App\Models\ProductionRecord $record */
+        /** @var ProductionRecord $record */
         $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($id);
         $this->productionService()->deleteProductionRecord($record);
     }

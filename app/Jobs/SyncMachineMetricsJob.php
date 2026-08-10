@@ -16,8 +16,16 @@ class SyncMachineMetricsJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Machine $machine;
+
     public int $tries = 2;
+
     public int $timeout = 60;
+
+    // Matches the sibling sync jobs (SyncIntegrationMachinesJob,
+    // MachineLocationUpdateJob, MachineStatusMonitoringJob), which all
+    // already had an explicit backoff -- this one didn't, so its 2 retries
+    // fired back-to-back instead of giving a transient failure time to clear.
+    public array $backoff = [30, 120]; // 30s, 2 mins
 
     /**
      * Create a new job instance.
@@ -46,29 +54,36 @@ class SyncMachineMetricsJob implements ShouldQueue
                 ->where('provider', $this->machine->manufacturer)
                 ->first();
 
-            if (!$integration || $integration->status !== 'connected') {
+            if (! $integration || $integration->status !== 'connected') {
                 Log::warning('Integration not available or not connected', [
                     'machine_id' => $this->machine->id,
                 ]);
+
                 return;
             }
 
             // Get service and fetch metrics
-            $service = $this->getServiceForIntegration($integration);
-            if (!$service) {
+            $service = $integrationService->getServiceForIntegration($integration);
+            if (! $service) {
                 return;
             }
 
-            $metrics = $service->fetchMachineMetrics($this->machine->external_id);
+            // Machine has no 'external_id' column -- 'manufacturer_id' is the
+            // real fillable field for "ID from manufacturer system".
+            $metrics = $service->fetchMachineMetrics($this->machine->manufacturer_id);
 
-            if (!empty($metrics)) {
-                $this->machine->metrics()->create($metrics);
-                
+            if (! empty($metrics)) {
+                // team_id is NOT NULL on machine_metrics and isn't filled
+                // automatically by the relationship.
+                $this->machine->metrics()->create(array_merge($metrics, [
+                    'team_id' => $this->machine->team_id,
+                ]));
+
                 Log::info('Machine metrics synced successfully', [
                     'machine_id' => $this->machine->id,
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Exception during metrics sync', [
                 'machine_id' => $this->machine->id,
                 'error' => $e->getMessage(),
@@ -76,26 +91,9 @@ class SyncMachineMetricsJob implements ShouldQueue
 
             throw $e;
         } finally {
-            if (app()->hasInstance('current_team_id')) {
+            if (app()->bound('current_team_id')) {
                 app()->forgetInstance('current_team_id');
             }
         }
-    }
-
-    /**
-     * Get service instance for integration
-     */
-    private function getServiceForIntegration($integration)
-    {
-        $credentials = json_decode($integration->credentials, true) ?? [];
-        
-        return match ($integration->provider) {
-            'volvo' => app(\App\Services\Integration\VolvoService::class, ['credentials' => $credentials]),
-            'cat' => app(\App\Services\Integration\CATService::class, ['credentials' => $credentials]),
-            'komatsu' => app(\App\Services\Integration\KomatsuService::class, ['credentials' => $credentials]),
-            'bell' => app(\App\Services\Integration\BellService::class, ['credentials' => $credentials]),
-            'ctrack' => app(\App\Services\Integration\CTrackService::class, ['credentials' => $credentials]),
-            default => null,
-        };
     }
 }

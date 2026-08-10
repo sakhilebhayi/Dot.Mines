@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Services\TeamRoleProvisioner;
 use App\Traits\BrowserEventBridge;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Jetstream\Contracts\InvitesTeamMembers;
 use Livewire\Attributes\Validate;
@@ -53,12 +54,21 @@ class Settings extends Component
 
     public bool $quietHoursEnabled = false;
 
+    /**
+     * Filters what severity of alert/fuel-alert/AI-alert appears in the
+     * notification bell. 'critical' is never filterable -- AINotifications
+     * always shows it regardless of this setting, so a user can't
+     * accidentally hide something that genuinely needs immediate attention.
+     */
+    public string $notificationMinSeverity = 'low';
+
     /** @var array<string, string> */
     protected array $rules = [
         'teamEmail' => 'nullable|email|max:255',
         'timezone' => 'required|timezone',
         'language' => 'required|in:en,es,fr,de,pt,zh,ar,af,zu',
         'currency' => 'required|in:USD,EUR,GBP,ZAR,AUD,CAD,JPY,CNY,INR,BRL',
+        'notificationMinSeverity' => 'required|in:low,medium,high,critical',
     ];
 
     public function mount()
@@ -77,6 +87,7 @@ class Settings extends Component
         $this->quietHoursEnabled = $preferences['quiet_hours_enabled'] ?? false;
         $this->quietHoursStart = $preferences['quiet_hours_start'] ?? '22:00';
         $this->quietHoursEnd = $preferences['quiet_hours_end'] ?? '08:00';
+        $this->notificationMinSeverity = $preferences['min_severity'] ?? 'low';
 
         $this->loadTeamMembers();
     }
@@ -176,8 +187,9 @@ class Settings extends Component
             $this->loadTeamMembers();
         } catch (ValidationException $e) {
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => collect($e->errors())->flatten()->first() ?? 'Failed to invite user']);
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to invite user: '.$e->getMessage()]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to invite team member', ['team_id' => $team->id ?? null, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => "We couldn't send that invitation. Please check the email address and try again."]);
         }
     }
 
@@ -243,6 +255,7 @@ class Settings extends Component
                     'quiet_hours_enabled' => $this->quietHoursEnabled,
                     'quiet_hours_start' => $this->quietHoursStart,
                     'quiet_hours_end' => $this->quietHoursEnd,
+                    'min_severity' => $this->notificationMinSeverity,
                 ],
             ]);
 

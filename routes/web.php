@@ -28,7 +28,7 @@ use Livewire\Mechanisms\HandleRequests\HandleRequests;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 // Cookie Policy — Jetstream's termsAndPrivacyPolicy feature covers terms.show/policy.show
 // natively. There's no Jetstream equivalent for a Cookie Policy, so this one is wired by hand,

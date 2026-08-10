@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 use Laravel\Jetstream\Events\TeamMemberAdded;
 use Laravel\Jetstream\Events\TeamMemberUpdated;
 
@@ -43,6 +44,22 @@ class AppServiceProvider extends ServiceProvider
 
         // Configure rate limiting
         $this->configureRateLimiting();
+
+        // Password::default() (used by every Fortify password flow via
+        // PasswordValidationRules::passwordRules() -- registration, password
+        // update, password reset) falls back to Laravel's own bare minimum
+        // (min 8 characters, nothing else) unless a default is registered
+        // here. There was no composition requirement and no breach check
+        // against known-leaked passwords at all before this.
+        Password::defaults(function () {
+            $rule = Password::min(8)->letters()->mixedCase()->numbers()->symbols();
+
+            // ->uncompromised() calls the (k-anonymity, privacy-preserving)
+            // HaveIBeenPwned API -- a real network call on every password
+            // submission, which has no place slowing down or flaking the
+            // test suite.
+            return $this->app->runningUnitTests() ? $rule : $rule->uncompromised();
+        });
 
         // Register real-time event scheduling
         $this->app->booted(function () {
@@ -135,17 +152,12 @@ class AppServiceProvider extends ServiceProvider
                 });
         });
 
-        // Login rate limiting - 5 attempts per minute
-        RateLimiter::for('login', function (Request $request) {
-            return Limit::perMinute(5)
-                ->by($request->email.'|'.$request->ip())
-                ->response(function () {
-                    return response()->json([
-                        'message' => 'Too many login attempts. Please try again later.',
-                        'retry_after' => 60,
-                    ], 429);
-                });
-        });
+        // Login rate limiting is defined in FortifyServiceProvider (which
+        // boots after this provider, so its registration is the one that
+        // actually takes effect) and applied via config('fortify.limiters.
+        // login') to Fortify's own /login route -- a duplicate 'login'
+        // limiter here was pure dead code, silently discarded on every
+        // request, confirmed via RateLimiter's internal $limiters array.
 
         // Webhook endpoints - higher limit for integrations (120 per minute)
         RateLimiter::for('webhooks', function (Request $request) {

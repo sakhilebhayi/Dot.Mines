@@ -10,8 +10,13 @@ class TakeuchiService extends BaseManufacturerService implements ManufacturerSer
 
     public function testConnection(): bool
     {
-        // Implement Takeuchi API connection test
-        return true;
+        // No real Takeuchi API integration has been built yet -- this
+        // used to unconditionally return true, reporting a successful
+        // connection test regardless of whether any credentials were
+        // even provided.
+        $this->lastError = 'Takeuchi integration is not yet available.';
+
+        return false;
     }
 
     public function fetchMachines(): array

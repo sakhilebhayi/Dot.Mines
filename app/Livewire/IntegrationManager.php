@@ -72,6 +72,8 @@ class IntegrationManager extends Component
                     'created_at' => $integration->created_at->format('M d, Y'),
                     'last_sync_at' => $integration->last_sync_at?->format('M d, Y H:i') ?? 'Never',
                     'last_sync_status' => $integration->last_sync_status ?? 'pending',
+                    'machines_count' => $integration->machines_count ?? 0,
+                    'last_error' => $integration->last_error,
                 ];
             })
             ->toArray();
@@ -119,16 +121,36 @@ class IntegrationManager extends Component
             return;
         }
 
-        $this->validate([
+        $rules = [
             'formData.provider' => 'required|string',
             'formData.name' => 'required|string|max:100',
             'formData.connection_type' => 'required|string',
             'formData.sync_frequency' => 'required|string',
-            'formData.credentials.api_key' => 'required|string',
-            'formData.credentials.api_secret' => 'required|string',
             'formData.notification_email' => 'nullable|email',
             'formData.endpoint' => 'nullable|string',
-        ]);
+        ];
+
+        // Bell uses OAuth2 Resource Owner Password Credentials (username,
+        // password, client secret), not the api_key/api_secret pair every
+        // other provider's form collects -- requiring those here would
+        // reject every real Bell submission before it reached the service.
+        if ($this->formData['provider'] === 'bell') {
+            $rules['formData.credentials.username'] = 'required|string';
+            $rules['formData.credentials.password'] = 'required|string';
+            $rules['formData.credentials.client_secret'] = 'required|string';
+        } else {
+            $rules['formData.credentials.api_key'] = 'required|string';
+            $rules['formData.credentials.api_secret'] = 'required|string';
+        }
+
+        $this->validate($rules);
+
+        // Bell issues this same client_id to every ISO 15143-3 export
+        // consumer -- default it so a user who doesn't touch that field
+        // (it's optional in the form) still gets a working credential set.
+        if ($this->formData['provider'] === 'bell' && empty($this->formData['credentials']['client_id'])) {
+            $this->formData['credentials']['client_id'] = 'ISO_Export_Service';
+        }
 
         try {
             $this->authorize('create', Integration::class);
@@ -137,7 +159,13 @@ class IntegrationManager extends Component
                 'team_id' => $this->team->id,
                 'provider' => $this->formData['provider'],
                 'name' => $this->formData['name'],
-                'credentials' => json_encode($this->formData['credentials']),
+                // Both fields are cast ('credentials' => 'encrypted:json', 'config' =>
+                // 'json') -- Eloquent encodes them on save. Pre-encoding here used to
+                // double-encode: the DB ended up storing a JSON string containing an
+                // escaped JSON string, so every ->credentials/->config read back a
+                // PHP string instead of an array and every manufacturer service's
+                // $credentials['...'] access silently failed.
+                'credentials' => $this->formData['credentials'],
                 'status' => 'pending',
                 // 'webhook.receive' isn't registered -- there's no generic per-provider inbound
                 // webhook endpoint built yet (only the outbound Stripe billing webhook exists,
@@ -146,18 +174,18 @@ class IntegrationManager extends Component
                 'webhook_url' => $this->formData['connection_type'] === 'webhook' && Route::has('webhook.receive')
                     ? route('webhook.receive', ['provider' => $this->formData['provider']])
                     : null,
-                'config' => json_encode([
+                'config' => [
                     'endpoint' => $this->formData['endpoint'],
                     'connection_type' => $this->formData['connection_type'],
                     'sync_frequency' => $this->formData['sync_frequency'],
                     'notification_email' => $this->formData['notification_email'],
-                ]),
+                ],
             ]);
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Integration created successfully!']);
             $this->closeAddModal();
             $this->loadIntegrations();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to create integration', ['error' => $e->getMessage()]);
             $this->addError('general', 'Failed to create integration. Please try again.');
         }
@@ -199,7 +227,7 @@ class IntegrationManager extends Component
             $this->selectedIntegration = $integrationId;
             $this->showTestModal = true;
             $this->loadIntegrations();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Test connection failed', ['error' => $e->getMessage()]);
             $this->testResult = [
                 'success' => false,
@@ -237,7 +265,7 @@ class IntegrationManager extends Component
             }
 
             $this->loadIntegrations();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Sync machines failed', ['error' => $e->getMessage()]);
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Error starting sync']);
         }
@@ -259,7 +287,7 @@ class IntegrationManager extends Component
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Integration deleted successfully!']);
             $this->loadIntegrations();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Delete integration failed', ['error' => $e->getMessage()]);
             $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Error deleting integration']);
         }

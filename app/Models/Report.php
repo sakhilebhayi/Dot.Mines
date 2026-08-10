@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use App\Mail\ReportReadyMail;
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use App\Mail\ReportReadyMail;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Report Model
- * 
+ *
  * Stores generated reports with configuration and file storage
  *
  * @property int $id
@@ -25,10 +26,10 @@ use App\Mail\ReportReadyMail;
  * @property string|null $format
  * @property array|null $filters
  * @property int|string|null $generated_by
- * @property \Carbon\Carbon|null $generated_at
- * @property \Carbon\Carbon|null $expires_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon|null $generated_at
+ * @property Carbon|null $expires_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Report where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Report whereIn(string $column, array $values)
@@ -46,6 +47,7 @@ class Report extends Model
         'title',
         'type', // truck_sensors, tire_condition, load_cycle, fuel, engine_parts, maintenance, custom
         'status', // pending, completed, failed
+        'error_message',
         'file_path',
         'file_size',
         'format', // pdf, csv, xlsx
@@ -107,11 +109,19 @@ class Report extends Model
             'generated_at' => now(),
         ]);
 
-        // Send report-ready emails to team users (fallback: all team users)
+        // Send report-ready emails to everyone on the team. team->users() is
+        // Jetstream's pivot-only relation, which excludes the owner unless
+        // they were separately attached as a member -- for a solo team (the
+        // common case for a brand-new team) that silently emailed nobody.
+        // allUsers() merges the pivot members with the owner.
         try {
             if ($this->team) {
-                $emails = $this->team->users()->pluck('email')->filter()->unique()->toArray();
-                if (!empty($emails)) {
+                // "Email Reports" was a real, saved preference that nothing
+                // ever read -- every team member got this regardless.
+                $emails = $this->team->allUsers()
+                    ->filter(fn ($user) => $user->wantsEmailReports())
+                    ->pluck('email')->filter()->unique()->toArray();
+                if (! empty($emails)) {
                     foreach (array_chunk($emails, 50) as $batch) {
                         Mail::to($batch)->queue(new ReportReadyMail($this));
                     }
@@ -127,10 +137,11 @@ class Report extends Model
     /**
      * Mark report as failed
      */
-    public function markFailed()
+    public function markFailed(?string $errorMessage = null)
     {
         return $this->update([
             'status' => 'failed',
+            'error_message' => $errorMessage,
         ]);
     }
 }

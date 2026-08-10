@@ -16,8 +16,11 @@ class SyncIntegrationMachinesJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected Integration $integration;
+
     public int $tries = 3;
+
     public int $timeout = 300;
+
     public array $backoff = [60, 300, 900]; // 1 min, 5 mins, 15 mins
 
     /**
@@ -44,6 +47,7 @@ class SyncIntegrationMachinesJob implements ShouldQueue
                 Log::warning('Integration not connected, skipping sync', [
                     'integration_id' => $this->integration->id,
                 ]);
+
                 return;
             }
 
@@ -67,7 +71,7 @@ class SyncIntegrationMachinesJob implements ShouldQueue
                     'error' => $result['error'] ?? 'Unknown error',
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Exception during machine sync', [
                 'integration_id' => $this->integration->id,
                 'error' => $e->getMessage(),

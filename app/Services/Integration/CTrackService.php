@@ -6,7 +6,7 @@ use Exception;
 
 /**
  * C-Track Fleet Management Integration Service
- * 
+ *
  * API Documentation: https://www.ctrack.com/api-documentation
  * GPS tracking and fleet management system
  */
@@ -19,39 +19,37 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Test connection to C-Track API
-     * 
-     * @return bool
      */
     public function testConnection(): bool
     {
         try {
             $response = $this->makeRequest('GET', '/v3/vehicles', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
     /**
      * Fetch vehicles from C-Track API
-     * 
-     * @return array
      */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/v3/vehicles');
-            
+
             $machines = [];
-            if (!empty($response['data']['vehicles'])) {
+            if (! empty($response['data']['vehicles'])) {
                 foreach ($response['data']['vehicles'] as $vehicle) {
                     $machines[] = $this->parseMachineData($vehicle);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -59,6 +57,7 @@ class CTrackService extends BaseManufacturerService
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch vehicles', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -69,97 +68,91 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch current location for vehicle
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/location");
-            
+
             return $this->parseLocation($response['data'] ?? []);
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return null;
         }
     }
 
     /**
      * Fetch tracking metrics and history for vehicle
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $history = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/history");
             $events = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/events");
-            
-            $metrics = array_merge(
+
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier one, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($history['data'] ?? []),
                 $this->parseMetrics($events['data'] ?? [])
             );
-            
+
             return $metrics;
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [];
         }
     }
 
     /**
      * Fetch geofence violations and alerts
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/events", [
-                'query' => ['type' => 'alert']
+                'query' => ['type' => 'alert'],
             ]);
-            
+
             $alerts = [];
-            if (!empty($response['data']['events'])) {
+            if (! empty($response['data']['events'])) {
                 foreach ($response['data']['events'] as $event) {
                     if (($event['type'] ?? '') === 'alert') {
                         $alerts[] = $this->parseAlert($event);
                     }
                 }
             }
-            
+
             return $alerts;
         } catch (Exception $e) {
             $this->logError('Failed to fetch alerts', $e);
+
             return [];
         }
     }
 
     /**
      * Fetch machine details from C-Track API
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineDetails(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}");
+
             return $response ?? [];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machine details', $e);
+
             return [];
         }
     }
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -173,8 +166,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {
@@ -183,8 +174,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Get API error if any occurred
-     * 
-     * @return string|null
      */
     public function getLastError(): ?string
     {
@@ -193,21 +182,19 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch current location for vehicle
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -217,27 +204,29 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch tracking metrics and history for vehicle
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMetrics(string $machineId): array
     {
         try {
             $history = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/history");
             $events = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/events");
-            
-            $metrics = array_merge(
+
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier one, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($history['data'] ?? []),
                 $this->parseMetrics($events['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -248,32 +237,30 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch geofence violations and alerts
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchAlerts(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/events", [
-                'query' => ['type' => 'alert']
+                'query' => ['type' => 'alert'],
             ]);
-            
+
             $alerts = [];
-            if (!empty($response['data']['events'])) {
+            if (! empty($response['data']['events'])) {
                 foreach ($response['data']['events'] as $event) {
                     if (($event['type'] ?? '') === 'alert') {
                         $alerts[] = $this->parseAlert($event);
                     }
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch alerts', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -284,9 +271,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse vehicle data from C-Track format
-     * 
-     * @param array $data
-     * @return array
      */
     protected function parseMachineData(array $data): array
     {
@@ -312,9 +296,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse location data from C-Track format
-     * 
-     * @param array $data
-     * @return array
      */
     protected function parseLocation(array $data): array
     {
@@ -331,9 +312,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse tracking summary/metric data from C-Track format
-     * 
-     * @param array $data
-     * @return array
      */
     protected function parseMetric(array $data): array
     {
@@ -351,9 +329,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse event/alert data from C-Track format
-     * 
-     * @param array $data
-     * @return array
      */
     protected function parseAlert(array $data): array
     {
@@ -370,9 +345,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Map C-Track vehicle status to standard status
-     * 
-     * @param string $status
-     * @return string
      */
     protected function parseStatus(string $status): string
     {

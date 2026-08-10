@@ -64,10 +64,16 @@
         <x-banner />
         
         <!-- Notification System -->
-        <div x-data="{ 
+        <div x-data="{
             notifications: [],
             addNotification(type, message) {
-                const id = Date.now();
+                // Date.now() alone collides when two notify events fire in
+                // the same millisecond (confirmed live: 3 simultaneous
+                // toasts all got the identical id) -- Alpine's x-for :key
+                // then treats them as the same tracked element and drops
+                // all but one. Matches the sibling components/layouts/app.blade.php
+                // copy, which already avoided this.
+                const id = Date.now() + Math.random();
                 this.notifications.push({ id, type, message });
                 setTimeout(() => {
                     this.removeNotification(id);
@@ -78,16 +84,21 @@
             }
         }"
         @notify.window="addNotification($event.detail.type, $event.detail.message)"
-        class="fixed top-4 right-4 z-[10000] space-y-2 max-w-md">
+        @keydown.escape.window="notifications = []"
+        aria-label="Notifications"
+        class="fixed top-24 right-4 z-[10000] space-y-2 max-w-md">
             <template x-for="notification in notifications" :key="notification.id">
-                <div 
+                <div
                     x-show="true"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 transform translate-x-8"
+                    :role="notification.type === 'error' ? 'alert' : 'status'"
+                    :aria-live="notification.type === 'error' ? 'assertive' : 'polite'"
+                    aria-atomic="true"
+                    x-transition:enter="transition ease-out duration-300 motion-reduce:duration-0"
+                    x-transition:enter-start="opacity-0 transform translate-x-8 motion-reduce:translate-x-0"
                     x-transition:enter-end="opacity-100 transform translate-x-0"
-                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave="transition ease-in duration-200 motion-reduce:duration-0"
                     x-transition:leave-start="opacity-100 transform translate-x-0"
-                    x-transition:leave-end="opacity-0 transform translate-x-8"
+                    x-transition:leave-end="opacity-0 transform translate-x-8 motion-reduce:translate-x-0"
                     class="relative rounded-lg shadow-2xl p-4 flex items-start gap-3 backdrop-blur-sm"
                     :class="{
                         'bg-green-600/90 border border-green-500': notification.type === 'success',
@@ -95,8 +106,13 @@
                         'bg-yellow-600/90 border border-yellow-500': notification.type === 'warning',
                         'bg-[var(--gold)]/90 border border-[var(--gold)]': notification.type === 'info'
                     }">
-                    <!-- Icon -->
-                    <div class="flex-shrink-0">
+                    <!-- Icon. Note: the info-type toast (bg-[var(--gold)], an
+                         amber/mid-tone) needs dark icon+text -- --stone
+                         (#f4efe4, near-white) on gold is a real contrast
+                         failure that the sibling components/layouts/app.blade.php
+                         copy already avoided by special-casing info to
+                         text-[var(--ink)]. Matched here. -->
+                    <div class="flex-shrink-0" aria-hidden="true">
                         <template x-if="notification.type === 'success'">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -113,20 +129,23 @@
                             </svg>
                         </template>
                         <template x-if="notification.type === 'info'">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 text-[var(--ink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </template>
+                        <span class="sr-only" x-text="{success: 'Success', error: 'Error', warning: 'Warning', info: 'Info'}[notification.type]"></span>
                     </div>
-                    
+
                     <!-- Message -->
-                    <div class="flex-1 text-[var(--stone)] font-medium" x-text="notification.message"></div>
-                    
+                    <div class="flex-1 font-medium" :class="notification.type === 'info' ? 'text-[var(--ink)]' : 'text-[var(--stone)]'" x-text="notification.message"></div>
+
                     <!-- Close Button -->
-                    <button 
+                    <button
                         @click="removeNotification(notification.id)"
-                        class="flex-shrink-0 text-[var(--stone)]/70 hover:text-[var(--stone)] transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        aria-label="Dismiss notification"
+                        class="flex-shrink-0 transition-colors"
+                        :class="notification.type === 'info' ? 'text-[var(--ink)]/70 hover:text-[var(--ink)]' : 'text-[var(--stone)]/70 hover:text-[var(--stone)]'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
@@ -203,12 +222,29 @@
             </div>
         </div>
 
+        <!-- Mobile nav backdrop -->
+        <div
+            x-data="{ mobileOpen: false }"
+            @mobile-nav-changed.window="mobileOpen = $event.detail.open"
+            x-show="mobileOpen"
+            x-transition:enter="transition-opacity ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="window.mobileNav.close()"
+            class="fixed inset-0 bg-black/60 z-[45] md:hidden"
+            style="display: none;"
+            aria-hidden="true"
+        ></div>
+
         <div class="min-h-screen flex">
             <!-- Sidebar Navigation -->
             @livewire('sidebar')
 
             <!-- Main Content -->
-            <div class="flex-1 flex flex-col">
+            <div class="flex-1 flex flex-col min-w-0">
                 <!-- Top Navigation -->
                 @livewire('navbar')
 

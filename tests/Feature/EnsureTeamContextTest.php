@@ -52,4 +52,25 @@ class EnsureTeamContextTest extends TestCase
 
         $response->assertOk();
     }
+
+    /**
+     * The real bug: CreateNewUser::createTeam() attaches a new team via
+     * teams.user_id (ownership) and never inserts a team_user pivot row, so
+     * $user->teams() -- the fallback this middleware used to rely on
+     * exclusively -- is empty for every freshly registered user. Their very
+     * first authenticated request used to bounce them to teams.create
+     * despite already owning a team from registration.
+     */
+    public function test_a_user_who_owns_a_team_but_has_no_pivot_membership_still_resolves_it(): void
+    {
+        $user = User::factory()->create(['current_team_id' => null]);
+        $team = Team::factory()->create(['user_id' => $user->id, 'personal_team' => true]);
+
+        $this->assertTrue($user->teams()->count() === 0, 'Precondition: no team_user pivot row exists.');
+
+        $response = $this->actingAs($user)->get('/fleet');
+
+        $response->assertOk();
+        $this->assertSame($team->id, $user->fresh()->current_team_id);
+    }
 }
