@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MinePlanDownloadController;
+use App\Http\Controllers\RealtimeHealthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportDownloadController;
 use App\Http\Controllers\WebhookController;
@@ -185,6 +186,11 @@ Route::middleware([
 // Stripe Webhooks (no auth required)
 Route::post('/webhooks/stripe', [WebhookController::class, 'handleStripe'])
     ->name('webhooks.stripe');
+
+// Real-time infrastructure health check -- unauthenticated like Laravel's
+// own /up (bootstrap/app.php), for uptime monitors/load balancers.
+Route::get('/up/realtime', [RealtimeHealthController::class, 'check'])
+    ->name('health.realtime');
 
 // Public marketing/outer pages
 Route::view('/features', 'pages.features')->name('features');
