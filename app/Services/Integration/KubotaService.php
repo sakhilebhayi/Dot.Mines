@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * Kubota Diagnostics Integration Service
- * 
+ *
  * Contact Kubota dealer for API access
  * Requires Kubota dealer ID
  */
@@ -19,11 +19,13 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
     {
         try {
             $response = $this->makeRequest('GET', '/api/v1/machines', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
@@ -32,14 +34,14 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
     {
         try {
             $response = $this->makeRequest('GET', '/api/v1/machines');
-            
+
             $machines = [];
-            if (!empty($response['data']['machines'])) {
+            if (! empty($response['data']['machines'])) {
                 foreach ($response['data']['machines'] as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -47,6 +49,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machines', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -59,13 +62,14 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
     {
         try {
             $response = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -79,19 +83,24 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
             $telemetry = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/telemetry");
             $diagnostics = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/diagnostics");
             $service = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/service-history");
-            
-            $metrics = array_merge(
+
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier ones, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($telemetry['data'] ?? []),
                 $this->parseMetrics($diagnostics['data'] ?? []),
                 $this->parseMetrics($service['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -105,20 +114,21 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
         try {
             // Kubota uses diagnostics endpoint for alerts
             $response = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/diagnostics");
-            
+
             $alerts = [];
-            if (!empty($response['data']['alerts'])) {
+            if (! empty($response['data']['alerts'])) {
                 foreach ($response['data']['alerts'] as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch diagnostics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -134,14 +144,12 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine details from Kubota API
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -150,14 +158,12 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -166,14 +172,12 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -182,14 +186,12 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -198,9 +200,6 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -214,8 +213,6 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {

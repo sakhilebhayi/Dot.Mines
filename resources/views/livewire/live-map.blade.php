@@ -126,7 +126,7 @@
     
     @vite(['resources/js/live-map.js'])
 
-    <style>
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
     #map {
         width: 100%;
         height: 100%;

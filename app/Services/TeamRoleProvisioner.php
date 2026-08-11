@@ -48,6 +48,11 @@ class TeamRoleProvisioner
             ['name' => 'update_geofences', 'display_name' => 'Update Geofences', 'group' => 'geofences', 'description' => 'Update pit information'],
             ['name' => 'delete_geofences', 'display_name' => 'Delete Geofences', 'group' => 'geofences', 'description' => 'Remove pit areas'],
 
+            ['name' => 'view_mine_areas', 'display_name' => 'View Mine Areas', 'group' => 'mine_areas', 'description' => 'View mine area boundaries and details'],
+            ['name' => 'create_mine_areas', 'display_name' => 'Create Mine Areas', 'group' => 'mine_areas', 'description' => 'Create new mine areas'],
+            ['name' => 'update_mine_areas', 'display_name' => 'Update Mine Areas', 'group' => 'mine_areas', 'description' => 'Update mine area details'],
+            ['name' => 'delete_mine_areas', 'display_name' => 'Delete Mine Areas', 'group' => 'mine_areas', 'description' => 'Remove mine areas'],
+
             ['name' => 'view_reports', 'display_name' => 'View Reports', 'group' => 'reports', 'description' => 'View generated reports'],
             ['name' => 'create_reports', 'display_name' => 'Create Reports', 'group' => 'reports', 'description' => 'Generate new reports'],
             ['name' => 'update_reports', 'display_name' => 'Update Reports', 'group' => 'reports', 'description' => 'Update report settings'],
@@ -68,6 +73,9 @@ class TeamRoleProvisioner
             ['name' => 'manage_settings', 'display_name' => 'Manage Settings', 'group' => 'settings', 'description' => 'Modify team settings'],
             ['name' => 'manage_users', 'display_name' => 'Manage Users', 'group' => 'settings', 'description' => 'Add/remove team members'],
             ['name' => 'manage_roles', 'display_name' => 'Manage Roles', 'group' => 'settings', 'description' => 'Assign roles to users'],
+
+            ['name' => 'view_recommendations', 'display_name' => 'View AI Recommendations', 'group' => 'ai', 'description' => 'View AI-generated recommendations and insights'],
+            ['name' => 'update_recommendations', 'display_name' => 'Act on AI Recommendations', 'group' => 'ai', 'description' => 'Implement or reject AI-generated recommendations'],
         ];
 
         $roles = [
@@ -84,10 +92,12 @@ class TeamRoleProvisioner
                     'view_machines', 'create_machines', 'update_machines', 'track_machines', 'view_metrics',
                     'view_live_map',
                     'view_geofences', 'create_geofences', 'update_geofences',
+                    'view_mine_areas', 'create_mine_areas', 'update_mine_areas',
                     'view_reports', 'create_reports',
                     'view_integrations',
                     'view_alerts', 'acknowledge_alerts', 'resolve_alerts',
                     'view_settings',
+                    'view_recommendations', 'update_recommendations',
                 ],
             ],
             'operator' => [
@@ -98,7 +108,9 @@ class TeamRoleProvisioner
                     'view_machines', 'track_machines', 'view_metrics',
                     'view_live_map',
                     'view_geofences',
+                    'view_mine_areas',
                     'view_alerts', 'acknowledge_alerts',
+                    'view_recommendations',
                 ],
             ],
             'viewer' => [
@@ -109,8 +121,10 @@ class TeamRoleProvisioner
                     'view_machines', 'view_metrics',
                     'view_live_map',
                     'view_geofences',
+                    'view_mine_areas',
                     'view_reports',
                     'view_alerts',
+                    'view_recommendations',
                 ],
             ],
         ];

@@ -44,5 +44,14 @@ class FortifyServiceProvider extends ServiceProvider
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
+
+        // Applied to every Fortify route via config('fortify.middleware') --
+        // 'login'/'two-factor' above already have their own tighter 5/min
+        // limiters; this is the general-purpose one that actually protects
+        // password.email/password.update (forgot/reset password) and
+        // register, none of which had any rate limiting at all before.
+        RateLimiter::for('fortify', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
     }
 }

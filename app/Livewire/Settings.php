@@ -2,9 +2,11 @@
 
 namespace App\Livewire;
 
-use App\Models\User;
 use App\Services\TeamRoleProvisioner;
 use App\Traits\BrowserEventBridge;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Laravel\Jetstream\Contracts\InvitesTeamMembers;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -52,12 +54,21 @@ class Settings extends Component
 
     public bool $quietHoursEnabled = false;
 
+    /**
+     * Filters what severity of alert/fuel-alert/AI-alert appears in the
+     * notification bell. 'critical' is never filterable -- AINotifications
+     * always shows it regardless of this setting, so a user can't
+     * accidentally hide something that genuinely needs immediate attention.
+     */
+    public string $notificationMinSeverity = 'low';
+
     /** @var array<string, string> */
     protected array $rules = [
         'teamEmail' => 'nullable|email|max:255',
         'timezone' => 'required|timezone',
         'language' => 'required|in:en,es,fr,de,pt,zh,ar,af,zu',
         'currency' => 'required|in:USD,EUR,GBP,ZAR,AUD,CAD,JPY,CNY,INR,BRL',
+        'notificationMinSeverity' => 'required|in:low,medium,high,critical',
     ];
 
     public function mount()
@@ -68,6 +79,15 @@ class Settings extends Component
         $this->timezone = $team->timezone ?? 'UTC';
         $this->language = $team->language ?? 'en';
         $this->currency = $team->currency ?? 'USD';
+
+        $preferences = auth()->user()->notification_preferences ?? [];
+        $this->emailAlerts = $preferences['email_alerts'] ?? true;
+        $this->emailReports = $preferences['email_reports'] ?? true;
+        $this->inAppAlerts = $preferences['in_app_alerts'] ?? true;
+        $this->quietHoursEnabled = $preferences['quiet_hours_enabled'] ?? false;
+        $this->quietHoursStart = $preferences['quiet_hours_start'] ?? '22:00';
+        $this->quietHoursEnd = $preferences['quiet_hours_end'] ?? '08:00';
+        $this->notificationMinSeverity = $preferences['min_severity'] ?? 'low';
 
         $this->loadTeamMembers();
     }
@@ -147,37 +167,29 @@ class Settings extends Component
             $team = auth()->user()->currentTeam;
             $this->authorize('addTeamMember', $team);
 
-            // Check if user already invited/member
-            $existingUser = User::where('email', $this->inviteEmail)->first();
-            if ($existingUser && $team->users->contains($existingUser->id)) {
-                $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User is already a team member']);
-
-                return;
-            }
-
-            // In production, would send actual invitation email
-            // For now, create the user if they don't exist
-            if (! $existingUser) {
-                $existingUser = User::create([
-                    'name' => explode('@', $this->inviteEmail)[0],
-                    'email' => $this->inviteEmail,
-                    'password' => bcrypt('temporary_password_change_on_login'),
-                ]);
-            }
-
-            // Add user to team
-            $team->users()->attach($existingUser->id);
-
-            // Assign role (provisions this team's roles/permissions first if they don't exist yet)
-            TeamRoleProvisioner::assignRole($existingUser, $team, $this->selectedRole);
+            // Delegate to Jetstream's own invitation action (also used by
+            // teams.show) instead of creating the account ourselves: it
+            // creates a real TeamInvitation row and queues the actual
+            // invitation email. The account used to be created here directly
+            // with a hardcoded literal password and no email ever sent --
+            // the invited person had no way to learn it or sign in.
+            app(InvitesTeamMembers::class)->invite(
+                auth()->user(),
+                $team,
+                $this->inviteEmail,
+                $this->selectedRole
+            );
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => "Invitation sent to {$this->inviteEmail}"]);
             $this->showInviteForm = false;
             $this->inviteEmail = '';
             $this->selectedRole = 'operator';
             $this->loadTeamMembers();
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to invite user: '.$e->getMessage()]);
+        } catch (ValidationException $e) {
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => collect($e->errors())->flatten()->first() ?? 'Failed to invite user']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to invite team member', ['team_id' => $team->id ?? null, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => "We couldn't send that invitation. Please check the email address and try again."]);
         }
     }
 
@@ -235,17 +247,17 @@ class Settings extends Component
         try {
             // Store in user preferences
             $user = auth()->user();
-            $preferences = [
-                'email_alerts' => $this->emailAlerts,
-                'email_reports' => $this->emailReports,
-                'in_app_alerts' => $this->inAppAlerts,
-                'quiet_hours_enabled' => $this->quietHoursEnabled,
-                'quiet_hours_start' => $this->quietHoursStart,
-                'quiet_hours_end' => $this->quietHoursEnd,
-            ];
-
-            // Store preferences (would use a proper preferences table in production)
-            // For now, just dispatch success
+            auth()->user()->update([
+                'notification_preferences' => [
+                    'email_alerts' => $this->emailAlerts,
+                    'email_reports' => $this->emailReports,
+                    'in_app_alerts' => $this->inAppAlerts,
+                    'quiet_hours_enabled' => $this->quietHoursEnabled,
+                    'quiet_hours_start' => $this->quietHoursStart,
+                    'quiet_hours_end' => $this->quietHoursEnd,
+                    'min_severity' => $this->notificationMinSeverity,
+                ],
+            ]);
 
             $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Notification settings saved']);
         } catch (\Exception $e) {

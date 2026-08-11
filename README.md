@@ -70,7 +70,7 @@
 | ⛽ **Fuel Management** | Tank management, allocation, forecasting, and budget tracking |
 | 🔧 **Maintenance** | Preventive and corrective booking with automated status sync |
 | 🏭 **Production Tracking** | Live load comparisons, shift targets, and trend analysis |
-| 🔌 **OEM Integrations** | Native APIs for 20+ manufacturers including CAT, Komatsu, Volvo |
+| 🔌 **OEM Integrations** | Service layer + credential management for 25 manufacturers — no manufacturer connection has been verified against a real account yet (see [OEM Integrations](#oem-integrations)) |
 | 📊 **Reporting** | Compliance, maintenance, production, and incident export to PDF/CSV |
 | 💳 **Billing** | Stripe-powered subscriptions with fleet slot enforcement |
 | 🔒 **Multi-tenant** | Team-based isolation with granular role and policy access control |
@@ -198,25 +198,19 @@ A structured, real-time activity stream that replaces WhatsApp channels for mine
 
 ### OEM Integrations
 
-Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
+A service class exists per manufacturer (25 total) with a common `BaseManufacturerService` base, credential storage, and an Integration Manager UI — but **no manufacturer connection has ever been verified against a real account**. This section previously described these as "Native API integrations... via their telemetry APIs" with "webhook-based real-time telemetry ingestion"; neither claim was accurate. There is no telemetry webhook receiver in this codebase at all — the only webhook endpoint that exists handles inbound Stripe billing events. Every manufacturer sync is poll-based (a scheduled job calls the manufacturer's REST API on an interval), not push-based.
 
-| Manufacturer | Platform |
-|---|---|
-| Caterpillar | VisionLink |
-| Komatsu | KOMTRAX |
-| Volvo | CareTrack |
-| Sandvik | — |
-| Epiroc | — |
-| Liebherr | — |
-| Hitachi | — |
-| Hyundai | — |
-| John Deere | — |
-| Doosan | — |
-| JCB | — |
-| Bobcat | — |
-| Kawasaki, Kobelco, Yanmar, Kubota, XCMG, CASE, New Holland, Atlas Copco, Bell, Sany, Takeuchi, Roundebult, CTrack | — |
+**Bell** is implemented against Bell Equipment's own published ISO 15143-3 (AEMP 2.0) API spec and Postman collection — real OAuth2 token exchange, real endpoint paths, XML parsing, and 12 unit/integration tests — but has not yet completed a live sync against a real account (see [wiki.md §5.1](wiki.md)).
 
-- Webhook-based real-time telemetry ingestion
+16 other manufacturers have a service class that attempts real HTTP calls to endpoints inferred from public docs, but **those endpoint shapes have not been confirmed against a real account** — treat them as unverified until a real credential set is tested end-to-end:
+
+Caterpillar, Komatsu, Volvo, Epiroc, Liebherr, Hitachi, Hyundai, Doosan, JCB, Sany, XCMG, Kobelco, Kubota, Roundebult, Kawasaki, CTrack
+
+8 are honestly marked "coming soon" in the app (their `testConnection()` reports unavailability rather than faking success):
+
+John Deere, CASE, New Holland, Takeuchi, Bobcat, Yanmar, Atlas Copco, Sandvik
+
+- Poll-based sync via scheduled jobs (`SyncIntegrationMachinesJob`, `SyncMachineMetricsJob`)
 - Credentials stored per-team, never exposed in API responses
 - Extensible base manufacturer service for adding new integrations
 - Integration Manager in application settings
@@ -835,15 +829,16 @@ vendor/bin/psalm
    chown -R www-data:www-data storage bootstrap/cache
    ```
 
-7. **Start queue worker** (use `deploy/queue-worker.service` for systemd or `deploy/queue-worker.supervisord.conf` for Supervisor)
+7. **Start queue worker** (use `deploy/queue-worker.service` for systemd or `deploy/queue-worker.supervisord.conf` for Supervisor). Requires `QUEUE_CONNECTION=redis`, matching `.env.production.example`.
    ```bash
-   php artisan queue:work --tries=3 --timeout=90
+   php artisan queue:work redis --tries=3 --timeout=90
    ```
 
-8. **Start WebSocket server**
+8. **Start the Reverb WebSocket server** (use `deploy/reverb.service` for systemd or `deploy/reverb.supervisord.conf` for Supervisor) -- never run this as a bare foreground command in production, it needs the same process supervision as the queue worker.
    ```bash
-   php artisan reverb:start --host=0.0.0.0 --port=8080
+   php artisan reverb:start
    ```
+   Binds to `REVERB_SERVER_HOST`/`REVERB_SERVER_PORT` (loopback-only by default in `.env.production.example`) -- it is not meant to be reachable directly from the internet. See "WebSocket Reverse Proxy" below for how browsers actually reach it over `wss://`.
 
 ### Web Server Configuration
 
@@ -853,7 +848,17 @@ vendor/bin/psalm
 server {
     listen 80;
     server_name your-domain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name your-domain.com;
     root /var/www/mines/public;
+
+    ssl_certificate     /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
@@ -879,20 +884,64 @@ server {
     location ~ /\.(?!well-known).* {
         deny all;
     }
+
+    # Only Reverb's client-facing path (/app/{key}, what Echo/pusher-js
+    # connects to) is proxied here. Its server-to-server publish API
+    # (/apps/{id}/events etc.) is deliberately NOT exposed publicly --
+    # config/broadcasting.php's reverb connection talks to it directly over
+    # the internal REVERB_SERVER_HOST/PORT instead, so it never needs to be
+    # reachable from outside this box.
+
+    # WebSocket Reverse Proxy -- proxies wss://your-domain.com/app/... to the
+    # internal reverb:start process (REVERB_SERVER_HOST/PORT, loopback-only
+    # by default). The Upgrade/Connection headers are what turn this from a
+    # plain HTTP proxy into a WebSocket one; without them the client's
+    # protocol upgrade handshake fails and Echo falls back to polling or
+    # errors outright. Long read_timeout because these are meant to be
+    # long-lived connections, not request/response.
+    location /app {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
 }
 ```
 
 #### Apache
 
+Requires `mod_proxy`, `mod_proxy_wstunnel`, and `mod_ssl` enabled (`a2enmod proxy proxy_wstunnel ssl`).
+
 ```apache
 <VirtualHost *:80>
     ServerName your-domain.com
+    Redirect permanent / https://your-domain.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName your-domain.com
     DocumentRoot /var/www/mines/public
+
+    SSLEngine on
+    SSLCertificateFile      /etc/letsencrypt/live/your-domain.com/fullchain.pem
+    SSLCertificateKeyFile   /etc/letsencrypt/live/your-domain.com/privkey.pem
 
     <Directory /var/www/mines/public>
         AllowOverride All
         Require all granted
     </Directory>
+
+    # WebSocket Reverse Proxy -- see the Nginx /app block above for what
+    # this achieves and why. ProxyPass's own ws:// scheme (rather than
+    # http://) is what makes mod_proxy_wstunnel handle the Upgrade
+    # handshake instead of treating this as a normal HTTP proxy.
+    ProxyPass        /app ws://127.0.0.1:8080/app
+    ProxyPassReverse /app ws://127.0.0.1:8080/app
 </VirtualHost>
 ```
 

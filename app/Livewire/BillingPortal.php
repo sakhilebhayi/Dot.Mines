@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Services\StripeService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class BillingPortal extends Component
@@ -53,6 +54,8 @@ class BillingPortal extends Component
 
     // Stats
     public float $totalPaid = 0;
+
+    public string $totalPaidCurrency = 'ZAR';
 
     public ?string $nextBillingDate = null;
 
@@ -136,10 +139,19 @@ class BillingPortal extends Component
     {
         $team = Auth::user()->currentTeam;
 
-        // Calculate total paid
-        $this->totalPaid = Payment::where('team_id', $team->id)
-            ->where('status', 'succeeded')
-            ->sum('amount');
+        // Calculate total paid. Payments are (in practice) all recorded in
+        // whichever single currency Stripe actually charged this team's
+        // subscription in, so summing raw amounts and labelling with the
+        // most recent payment's currency is accurate for the real, current
+        // usage pattern -- there's no per-currency grouping since a team
+        // isn't expected to be billed in more than one currency at once.
+        $succeededPayments = Payment::where('team_id', $team->id)
+            ->where('status', 'succeeded');
+
+        $this->totalPaid = (clone $succeededPayments)->sum('amount');
+        $this->totalPaidCurrency = (clone $succeededPayments)->latest()->value('currency')
+            ?? $team->currency
+            ?? 'ZAR';
 
         // Get recent payments
         $this->recentPayments = Payment::where('team_id', $team->id)
@@ -187,9 +199,10 @@ class BillingPortal extends Component
             // ...existing Stripe checkout logic...
             $this->showConfirmModal = false;
             session()->flash('success', 'Subscription initiated! You will be redirected to payment.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->showConfirmModal = false;
-            session()->flash('error', 'An error occurred: '.$e->getMessage());
+            Log::error('Failed to start subscription checkout', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            session()->flash('error', "We couldn't start checkout. Please try again, or contact support if this keeps happening.");
         }
     }
 
@@ -211,8 +224,9 @@ class BillingPortal extends Component
 
             return redirect($portalUrl);
 
-        } catch (\Exception $e) {
-            session()->flash('error', 'An error occurred: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Failed to open billing portal', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            session()->flash('error', "We couldn't open the billing portal. Please try again, or contact support if this keeps happening.");
         }
     }
 
@@ -237,8 +251,9 @@ class BillingPortal extends Component
                 session()->flash('error', 'Unable to cancel subscription. Please contact support.');
             }
 
-        } catch (\Exception $e) {
-            session()->flash('error', 'An error occurred: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Failed to cancel subscription', ['subscription_id' => $this->currentSubscription->id ?? null, 'error' => $e->getMessage()]);
+            session()->flash('error', "We couldn't cancel your subscription. Please try again, or contact support if this keeps happening.");
         }
     }
 
@@ -263,8 +278,9 @@ class BillingPortal extends Component
                 session()->flash('error', 'Unable to resume subscription. Please contact support.');
             }
 
-        } catch (\Exception $e) {
-            session()->flash('error', 'An error occurred: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Failed to resume subscription', ['subscription_id' => $this->currentSubscription->id ?? null, 'error' => $e->getMessage()]);
+            session()->flash('error', "We couldn't resume your subscription. Please try again, or contact support if this keeps happening.");
         }
     }
 

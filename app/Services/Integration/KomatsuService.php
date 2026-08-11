@@ -6,7 +6,7 @@ use Exception;
 
 /**
  * Komatsu KOMTRAX Integration Service
- * 
+ *
  * Handles integration with Komatsu KOMTRAX API
  * Requires customer ID and Komatsu representative approval
  * Contact: Komatsu representative for API access
@@ -20,38 +20,36 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Test connection to Komatsu KOMTRAX API
-     * 
-     * @return bool
      */
     public function testConnection(): bool
     {
         try {
             // Test with machines endpoint
             $response = $this->makeRequest('GET', '/api/v2/machines');
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
 
     /**
      * Fetch machines from Komatsu KOMTRAX API
-     * 
-     * @return array
      */
     public function fetchMachines(): array
     {
         try {
             $response = $this->makeRequest('GET', '/api/v2/machines');
-            
+
             $machines = [];
-            if (!empty($response['machines'])) {
+            if (! empty($response['machines'])) {
                 foreach ($response['machines'] as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -59,6 +57,7 @@ class KomatsuService extends BaseManufacturerService
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machines', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -69,21 +68,19 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch location data for equipment
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchLocation(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -93,9 +90,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch performance/metrics for equipment
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -105,11 +99,11 @@ class KomatsuService extends BaseManufacturerService
             $fuelConsumption = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/fuel-consumption");
             $workingModes = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/working-modes");
             $status = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/status");
-            
+
             $metrics = [];
-            
+
             // Add operating hours
-            if (!empty($operatingHours['operatingHours'])) {
+            if (! empty($operatingHours['operatingHours'])) {
                 $metrics[] = [
                     'type' => 'operating_hours',
                     'value' => $operatingHours['operatingHours']['total'] ?? 0,
@@ -117,9 +111,9 @@ class KomatsuService extends BaseManufacturerService
                     'timestamp' => $operatingHours['timestamp'] ?? now(),
                 ];
             }
-            
+
             // Add fuel consumption
-            if (!empty($fuelConsumption['fuelConsumption'])) {
+            if (! empty($fuelConsumption['fuelConsumption'])) {
                 $metrics[] = [
                     'type' => 'fuel_consumption',
                     'value' => $fuelConsumption['fuelConsumption']['total'] ?? 0,
@@ -127,31 +121,32 @@ class KomatsuService extends BaseManufacturerService
                     'timestamp' => $fuelConsumption['timestamp'] ?? now(),
                 ];
             }
-            
+
             // Add working modes
-            if (!empty($workingModes['workingModes'])) {
+            if (! empty($workingModes['workingModes'])) {
                 $metrics[] = [
                     'type' => 'working_mode',
                     'value' => $workingModes['workingModes']['current'] ?? 'unknown',
                     'timestamp' => $workingModes['timestamp'] ?? now(),
                 ];
             }
-            
+
             // Add machine status
-            if (!empty($status['status'])) {
+            if (! empty($status['status'])) {
                 $metrics[] = [
                     'type' => 'machine_status',
                     'value' => $status['status'],
                     'timestamp' => $status['timestamp'] ?? now(),
                 ];
             }
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -162,29 +157,27 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch alerts/cautions for equipment
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchAlerts(string $machineId): array
     {
         try {
             // KOMTRAX uses 'cautions' instead of 'alerts'
             $response = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/cautions");
-            
+
             $alerts = [];
-            if (!empty($response['cautions'])) {
+            if (! empty($response['cautions'])) {
                 foreach ($response['cautions'] as $caution) {
                     $alerts[] = $this->parseAlert($caution);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch alerts', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -195,9 +188,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse equipment data from Komatsu format
-     * 
-     * @param array $data
-     * @return array
      */
     protected function parseMachineData(array $data): array
     {
@@ -222,9 +212,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse location data from Komatsu format
-     * 
-     * @param array $data
-     * @return array
      */
     protected function parseLocation(array $data): array
     {
@@ -239,9 +226,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse performance/metric data from Komatsu format
-     * 
-     * @param array $data
-     * @return array
      */
     protected function parseMetric(array $data): array
     {
@@ -259,9 +243,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse alert/notification data from Komatsu format
-     * 
-     * @param array $data
-     * @return array
      */
     protected function parseAlert(array $data): array
     {
@@ -278,9 +259,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Map Komatsu status to standard status
-     * 
-     * @param string $status
-     * @return string
      */
     protected function parseStatus(string $status): string
     {
@@ -301,14 +279,12 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine details from Komatsu API
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -317,14 +293,12 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -333,15 +307,16 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
-            return $result['metrics'] ?? [];
+
+            // fetchMetrics() builds a list of {type, value, unit, timestamp}
+            // readings, not the flat MachineMetric-column shape the sync
+            // pipeline expects -- see normalizeMetricsForStorage().
+            return $this->normalizeMetricsForStorage($result['metrics'] ?? []);
         } catch (Exception $e) {
             return [];
         }
@@ -349,14 +324,12 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -365,9 +338,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -381,8 +351,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {
@@ -391,8 +359,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Get API error if any occurred
-     * 
-     * @return string|null
      */
     public function getLastError(): ?string
     {

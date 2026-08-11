@@ -8,12 +8,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * The /documentation page had no feature test coverage before this file.
- * Regression test: every content section wrapped its text in Tailwind
- * Typography's `prose` class with no `prose-invert`, so on this app's
- * always-dark background the body text rendered in prose's light-mode dark
- * gray/black palette -- effectively invisible. Added `prose-invert`
- * everywhere (18 sections) instead of one section at a time.
+ * Regression test: every content section on /documentation wrapped its text
+ * in Tailwind Typography's `prose` class with no `prose-invert`, so on this
+ * app's always-dark background the body text rendered in prose's
+ * light-mode dark gray/black palette -- effectively invisible. Added
+ * `prose-invert` across all sections.
  */
 class DocumentationPageTest extends TestCase
 {

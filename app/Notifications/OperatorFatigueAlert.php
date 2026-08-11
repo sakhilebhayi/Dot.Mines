@@ -21,10 +21,20 @@ class OperatorFatigueAlert extends Notification
     public function __construct(public OperatorFatigue $fatigue) {}
 
     /**
+     * Respects the recipient's Settings -> Notifications -> "Email Alerts"
+     * preference and quiet hours (defaults to on for users who haven't
+     * visited that page). A critical fatigue alert always sends -- an
+     * operator who should be pulled off machinery isn't something quiet
+     * hours should be able to silently swallow.
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
+        if (! $notifiable->wantsEmailAlert($this->fatigue->alert_level)) {
+            return [];
+        }
+
         return ['mail'];
     }
 

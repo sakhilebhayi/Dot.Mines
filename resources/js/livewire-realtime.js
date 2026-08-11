@@ -40,20 +40,34 @@ function setupLivewireListeners() {
      * Initialize Reverb for the current user/team
      */
     window.Livewire.on('realtime:init', ({ userId, teamId }) => {
-        console.log('📡 Initializing Reverb for user:', userId, 'team:', teamId);
         ReverbService.init(userId, teamId);
-        
+
         // Initialize toast service
         getService('ToastNotificationService').then(service => {
             service.init();
         });
+
+        // Surface connection state as a window event so any UI (e.g. the
+        // navbar's connection indicator) can react without depending on
+        // ReverbService/Echo directly. On reconnect after a real drop,
+        // refresh data that WebSocket delivery may have missed while
+        // disconnected -- the backend database, not the socket, is the
+        // source of truth.
+        ReverbService.monitorConnection(
+            (state) => {
+                window.dispatchEvent(new CustomEvent('realtime-connection-changed', { detail: { state } }));
+            },
+            () => {
+                window.Livewire.dispatch('alert-created');
+                window.Livewire.dispatch('realtime-reconnected');
+            }
+        );
     });
 
     /**
      * Subscribe to machine location updates
      */
     window.Livewire.on('realtime:machine-location', ({ machineId }) => {
-        console.log('🎯 Subscribing to machine location:', machineId);
         ReverbService.subscribeMachineLocation(machineId, (data) => {
             ReverbService.emit('machineLocationUpdated', data);
             
@@ -70,7 +84,6 @@ function setupLivewireListeners() {
      * Subscribe to team-wide location updates
      */
     window.Livewire.on('realtime:team-locations', () => {
-        console.log('🎯 Subscribing to team locations');
         ReverbService.subscribeTeamLocations((data) => {
             ReverbService.emit('teamLocationUpdated', data);
             
@@ -87,10 +100,9 @@ function setupLivewireListeners() {
      * Subscribe to team alerts
      */
     window.Livewire.on('realtime:team-alerts', () => {
-        console.log('🎯 Subscribing to team alerts');
         ReverbService.subscribeTeamAlerts((data) => {
             ReverbService.emit('alertTriggered', data);
-            
+
             // Show toast notification
             getService('ToastNotificationService').then(toastService => {
                 toastService.showAlert({
@@ -101,6 +113,54 @@ function setupLivewireListeners() {
                     duration: 0 // Don't auto-dismiss critical/high alerts
                 });
             });
+
+            // Refresh the notification bell (AINotifications.php listens
+            // for this Livewire event).
+            window.Livewire.dispatch('alert-created');
+        });
+    });
+
+    /**
+     * Subscribe to predictive maintenance alerts
+     */
+    window.Livewire.on('realtime:maintenance-alerts', () => {
+        ReverbService.subscribeMaintenanceAlerts((data) => {
+            ReverbService.emit('maintenanceAlertTriggered', data);
+
+            getService('ToastNotificationService').then(toastService => {
+                toastService.showAlert({
+                    title: `Maintenance Alert: ${data.machine_name || 'Machine'}`,
+                    description: data.predicted_date
+                        ? `Predicted maintenance needed on ${data.predicted_date}`
+                        : 'Predicted maintenance needed soon',
+                    priority: data.severity || 'medium',
+                    type: 'alert',
+                    duration: 0
+                });
+            });
+
+            window.Livewire.dispatch('alert-created');
+        });
+    });
+
+    /**
+     * Subscribe to compliance violations
+     */
+    window.Livewire.on('realtime:compliance-violations', () => {
+        ReverbService.subscribeComplianceViolations((data) => {
+            ReverbService.emit('complianceViolationDetected', data);
+
+            getService('ToastNotificationService').then(toastService => {
+                toastService.showAlert({
+                    title: `Compliance Violation: ${data.violation_type || 'Unknown'}`,
+                    description: data.description,
+                    priority: data.severity || 'medium',
+                    type: 'alert',
+                    duration: 0
+                });
+            });
+
+            window.Livewire.dispatch('alert-created');
         });
     });
 
@@ -108,7 +168,6 @@ function setupLivewireListeners() {
      * Subscribe to geofence events
      */
     window.Livewire.on('realtime:geofence-events', ({ geofenceId }) => {
-        console.log('🎯 Subscribing to geofence events:', geofenceId);
         ReverbService.subscribeGeofenceEvents(
             geofenceId,
             (data) => {
@@ -156,7 +215,6 @@ function setupLivewireListeners() {
      * Subscribe to machine status changes
      */
     window.Livewire.on('realtime:machine-status', ({ machineId }) => {
-        console.log('🎯 Subscribing to machine status:', machineId);
         ReverbService.subscribeMachineStatus(machineId, (data) => {
             ReverbService.emit('machineStatusChanged', data);
             
@@ -182,7 +240,6 @@ function setupLivewireListeners() {
      * Subscribe to presence (active users)
      */
     window.Livewire.on('realtime:presence', () => {
-        console.log('🎯 Subscribing to presence');
         ReverbService.subscribePresence(
             (users) => ReverbService.emit('usersJoined', users),
             (user) => ReverbService.emit('userLeft', user)
@@ -212,7 +269,6 @@ function setupLivewireListeners() {
         ReverbService.on(eventName, callback);
     };
 
-    console.log('✅ Livewire realtime event listeners initialized');
 }
 
 // Start setup when script loads

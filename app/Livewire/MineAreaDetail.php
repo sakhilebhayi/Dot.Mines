@@ -163,6 +163,8 @@ class MineAreaDetail extends Component
 
     public function assignMachine()
     {
+        $this->authorize('update', $this->mineArea);
+
         $this->validate([
             'selectedMachineId' => 'required|exists:machines,id',
         ]);
@@ -189,6 +191,8 @@ class MineAreaDetail extends Component
 
     public function unassignMachine(int $machineId)
     {
+        $this->authorize('update', $this->mineArea);
+
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->findOrFail($machineId);
 
@@ -234,6 +238,8 @@ class MineAreaDetail extends Component
 
     public function saveProductionRecord()
     {
+        $this->authorize('update', $this->mineArea);
+
         $this->validate([
             'productionDate' => 'required|date',
             'quantityProduced' => 'required|numeric|min:0',
@@ -273,6 +279,8 @@ class MineAreaDetail extends Component
 
     public function saveProductionTarget()
     {
+        $this->authorize('update', $this->mineArea);
+
         $this->validate([
             'targetStartDate' => 'required|date',
             'targetEndDate' => 'required|date|after_or_equal:targetStartDate',
@@ -318,6 +326,8 @@ class MineAreaDetail extends Component
 
     public function uploadMinePlan()
     {
+        $this->authorize('update', $this->mineArea);
+
         $this->validate([
             'planTitle' => 'required|string|max:255',
             'planFile' => 'required|file|max:51200',
@@ -368,14 +378,16 @@ class MineAreaDetail extends Component
             $this->closeUploadModal();
             $this->dispatchBrowserEvent('notify', ['message' => 'Mine plan uploaded successfully', 'type' => 'success']);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to upload mine plan', ['error' => $e->getMessage()]);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to upload mine plan: '.$e->getMessage(), 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't upload that file. Check that it's a supported format and under the size limit, then try again.", 'type' => 'error']);
         }
     }
 
     public function deleteMinePlan(int $planId)
     {
+        $this->authorize('delete', $this->mineArea);
+
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $disk = data_get($plan->metadata, 'disk', 'public');
@@ -387,6 +399,8 @@ class MineAreaDetail extends Component
 
     public function activateMinePlan(int $planId)
     {
+        $this->authorize('update', $this->mineArea);
+
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $plan->update(['status' => 'active']);
@@ -396,6 +410,8 @@ class MineAreaDetail extends Component
 
     public function archiveMinePlan(int $planId)
     {
+        $this->authorize('update', $this->mineArea);
+
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $plan->update(['status' => 'archived']);
@@ -421,6 +437,8 @@ class MineAreaDetail extends Component
 
     public function createAreaAlert()
     {
+        $this->authorize('create', Alert::class);
+
         $this->validate([
             'alertTitle' => 'required|string|max:255',
             'alertPriority' => 'required|in:critical,high,medium,low',
@@ -452,6 +470,7 @@ class MineAreaDetail extends Component
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
+        $this->authorize('acknowledge', $alert);
         $alert->acknowledge(Auth::id());
 
         $this->dispatchBrowserEvent('notify', ['message' => 'Alert acknowledged', 'type' => 'success']);
@@ -461,6 +480,7 @@ class MineAreaDetail extends Component
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
+        $this->authorize('resolve', $alert);
         $alert->resolve(Auth::id());
 
         $this->dispatchBrowserEvent('notify', ['message' => 'Alert resolved', 'type' => 'success']);
@@ -487,6 +507,7 @@ class MineAreaDetail extends Component
 
         $team = Auth::user()->currentTeam;
         $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->selectedGeofenceId);
+        $this->authorize('update', $geofence);
         $geofence->update(['mine_area_id' => $this->mineArea->id]);
 
         $this->closeGeofenceModal();
@@ -497,6 +518,7 @@ class MineAreaDetail extends Component
     {
         $team = Auth::user()->currentTeam;
         $geofence = Geofence::where('team_id', $team->id)->findOrFail($geofenceId);
+        $this->authorize('update', $geofence);
         $geofence->update(['mine_area_id' => null]);
 
         $this->dispatchBrowserEvent('notify', ['message' => "{$geofence->name} unlinked from area", 'type' => 'success']);

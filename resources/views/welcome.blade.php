@@ -17,7 +17,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <style>
+        <style nonce="{{ request()->attributes->get('csp_nonce') }}">
             :root {
                 --ink: #211a14;
                 --ink-soft: #2c2319;
@@ -63,6 +63,14 @@
                 background-repeat: no-repeat;
                 transition: background-size 220ms var(--ease-out);
             }
+
+            [x-cloak] { display: none !important; }
+
+            .hero-photo { background-image: url('https://images.unsplash.com/photo-1523848309072-c199db53f137?q=80&w=2400&auto=format&fit=crop'); }
+            .hero-scrim-vertical { background: linear-gradient(180deg, rgba(33,26,20,0.55) 0%, rgba(33,26,20,0.72) 45%, #211a14 92%); }
+            .hero-scrim-horizontal { background: linear-gradient(90deg, #211a14 0%, rgba(33,26,20,0.55) 38%, transparent 68%); }
+            .cta-photo { background-image: url('https://images.unsplash.com/photo-1709489662983-3674d790b224?q=80&w=2400&auto=format&fit=crop'); }
+            .cta-scrim { background: linear-gradient(180deg, #211a14 0%, rgba(33,26,20,0.82) 50%, #211a14 100%); }
         </style>
     </head>
     <body class="antialiased">
@@ -82,6 +90,7 @@
                 <div class="hidden md:flex items-center gap-8 font-mono text-[13px] tracking-wide uppercase text-[var(--sand)]">
                     <a href="#capabilities" class="link-underline hover:text-[var(--stone)] pb-0.5">Product</a>
                     <a href="#features" class="link-underline hover:text-[var(--stone)] pb-0.5">Features</a>
+                    <a href="{{ route('pricing') }}" class="link-underline hover:text-[var(--stone)] pb-0.5">Pricing</a>
                 </div>
 
                 @if (Route::has('login'))
@@ -119,10 +128,11 @@
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  class="md:hidden border-t border-[var(--line)] bg-[#211a14]"
-                 style="display: none;">
+                 x-cloak>
                 <div class="flex flex-col px-5 py-4 gap-1 font-mono text-sm uppercase tracking-wide">
                     <a href="#capabilities" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Product</a>
                     <a href="#features" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Features</a>
+                    <a href="{{ route('pricing') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Pricing</a>
                     @guest
                         <a href="{{ route('login') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Sign in</a>
                     @endguest
@@ -133,9 +143,9 @@
         <!-- Hero -->
         <section class="relative min-h-[100dvh] flex items-end overflow-hidden">
             <!-- Photo: excavators at a mine, by Dominik Vanyi, unsplash.com/photos/Mk2ls9UBO2E -->
-            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1523848309072-c199db53f137?q=80&w=2400&auto=format&fit=crop');"></div>
-            <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(33,26,20,0.55) 0%, rgba(33,26,20,0.72) 45%, #211a14 92%);"></div>
-            <div class="absolute inset-0" style="background: linear-gradient(90deg, #211a14 0%, rgba(33,26,20,0.55) 38%, transparent 68%);"></div>
+            <div class="absolute inset-0 bg-cover bg-center hero-photo"></div>
+            <div class="absolute inset-0 hero-scrim-vertical"></div>
+            <div class="absolute inset-0 hero-scrim-horizontal"></div>
 
             <!-- Headframe silhouette — line-art nod to the real headframe icon in the Dot.Mines mark -->
             <svg class="hidden lg:block absolute right-[6%] bottom-0 h-[78%] w-auto opacity-[0.14] pointer-events-none" viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -259,8 +269,8 @@
         <!-- CTA -->
         <section class="relative py-28 sm:py-36 px-5 sm:px-8 overflow-hidden">
             <!-- Photo: open-pit quarry, by MiningWatch Portugal, unsplash.com/photos/YG0qc-e6hgg -->
-            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1709489662983-3674d790b224?q=80&w=2400&auto=format&fit=crop');"></div>
-            <div class="absolute inset-0" style="background: linear-gradient(180deg, #211a14 0%, rgba(33,26,20,0.82) 50%, #211a14 100%);"></div>
+            <div class="absolute inset-0 bg-cover bg-center cta-photo"></div>
+            <div class="absolute inset-0 cta-scrim"></div>
 
             <div class="relative z-10 max-w-2xl mx-auto text-center reveal" data-reveal>
                 <h2 class="font-display font-semibold text-3xl sm:text-4xl text-[var(--stone)] leading-tight mb-5">
@@ -290,6 +300,7 @@
                     <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="h-11 w-auto opacity-90">
                 </a>
                 <div class="flex items-center gap-6 font-mono text-xs tracking-wide uppercase text-[var(--sand)]">
+                    <a href="{{ route('pricing') }}" class="hover:text-[var(--stone)] transition-colors">Pricing</a>
                     <a href="{{ route('policy.show') }}" class="hover:text-[var(--stone)] transition-colors">Privacy</a>
                     <a href="{{ route('cookies') }}" class="hover:text-[var(--stone)] transition-colors">Cookies</a>
                     <a href="{{ route('terms.show') }}" class="hover:text-[var(--stone)] transition-colors">Terms</a>
@@ -300,7 +311,7 @@
             </div>
         </footer>
 
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
                 const io = new IntersectionObserver((entries) => {
                     entries.forEach((entry) => {

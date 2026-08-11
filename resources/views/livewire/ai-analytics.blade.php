@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-3xl font-bold text-[var(--stone)]">📊 AI Analytics & Insights</h1>
+                <h1 class="text-3xl font-bold text-[var(--stone)]">AI Analytics &amp; Insights</h1>
                 <p class="mt-1 text-sm text-[var(--sand)]">
                     Comprehensive analytics and performance metrics for AI optimization
                 </p>
@@ -72,8 +72,16 @@
                     </div>
                     <span class="text-sm font-medium opacity-90">AI Power</span>
                 </div>
-                <h3 class="text-3xl font-bold mb-1">{{ round($agents->avg('accuracy_score') * 100, 1) }}%</h3>
-                <p class="text-sm opacity-90">Average Accuracy</p>
+                @php
+                    $agentsWithOutcomes = $agents->where('predictions_made', '>', 0);
+                @endphp
+                @if($agentsWithOutcomes->isEmpty())
+                    <h3 class="text-3xl font-bold mb-1">&mdash;</h3>
+                    <p class="text-sm opacity-90">No accuracy data yet</p>
+                @else
+                    <h3 class="text-3xl font-bold mb-1">{{ round($agentsWithOutcomes->avg('accuracy_score') * 100, 1) }}%</h3>
+                    <p class="text-sm opacity-90">Average Accuracy</p>
+                @endif
             </div>
         </div>
 
@@ -81,7 +89,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Category Breakdown Chart -->
             <div class="bg-[var(--ink-soft)] rounded-xl shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">📊 Recommendations by Category</h3>
+                <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Recommendations by Category</h3>
                 <div class="space-y-3">
                     @foreach($categoryBreakdown as $item)
                     <div>
@@ -105,7 +113,7 @@
 
             <!-- Priority Distribution -->
             <div class="bg-[var(--ink-soft)] rounded-xl shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">⚡ Priority Distribution</h3>
+                <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Priority Distribution</h3>
                 <div class="grid grid-cols-2 gap-4">
                     @foreach($priorityDistribution as $item)
                     <div class="text-center p-4 rounded-lg @if($item->priority === 'critical') bg-red-900/20 @elseif($item->priority === 'high') bg-orange-900/20 @elseif($item->priority === 'medium') bg-yellow-900/20 @else bg-green-900/20 @endif">
@@ -123,14 +131,18 @@
 
         <!-- Agent Performance Section -->
         <div class="bg-[var(--ink-soft)] rounded-xl shadow-lg p-6 mb-6">
-            <h3 class="text-lg font-semibold text-[var(--stone)] mb-6">🤖 AI Agent Performance</h3>
+            <h3 class="text-lg font-semibold text-[var(--stone)] mb-6">AI Agent Performance</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 @foreach($agentPerformance as $agent)
                 <div class="bg-gradient-to-br from-white/5 to-white/10 rounded-lg p-4 border border-[var(--line)] hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="font-semibold text-[var(--stone)] text-sm">{{ $agent['name'] }}</h4>
                         <span class="text-xs px-2 py-1 rounded-full bg-blue-900 text-blue-200">
-                            {{ round($agent['accuracy'] * 100) }}%
+                            @if($agent['predictions_made'] > 0)
+                                {{ round($agent['accuracy'] * 100) }}%
+                            @else
+                                No data yet
+                            @endif
                         </span>
                     </div>
                     <div class="space-y-2">
@@ -162,7 +174,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Savings Timeline -->
             <div class="bg-[var(--ink-soft)] rounded-xl shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">💰 Savings Timeline</h3>
+                <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Savings Timeline</h3>
                 @if($savingsTimeline->count() > 0)
                 <div class="space-y-2">
                     @php
@@ -189,7 +201,7 @@
 
             <!-- Implementation Rate Trend -->
             <div class="bg-[var(--ink-soft)] rounded-xl shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">📈 Implementation Rate Trend</h3>
+                <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Implementation Rate Trend</h3>
                 @if($implementationRate->count() > 0)
                 <div class="space-y-2">
                     @foreach($implementationRate->take(10) as $item)
@@ -215,7 +227,7 @@
 
         <!-- Top Recommendations -->
         <div class="bg-[var(--ink-soft)] rounded-xl shadow-lg p-6 mb-6">
-            <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">🏆 Top Implemented Recommendations</h3>
+            <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Top Implemented Recommendations</h3>
             @if($topRecommendations->count() > 0)
             <div class="space-y-3">
                 @foreach($topRecommendations as $rec)
@@ -238,7 +250,7 @@
 
         <!-- Recent Analysis Sessions -->
         <div class="bg-[var(--ink-soft)] rounded-xl shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">🔄 Recent Analysis Sessions</h3>
+            <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Recent Analysis Sessions</h3>
             @if($recentSessions->count() > 0)
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-[var(--line)]">

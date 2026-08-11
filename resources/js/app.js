@@ -7,6 +7,45 @@ window.Alpine = Alpine;
 if (window.Alpine) {
 	window.Alpine.__fromLivewire = true;
 }
+
+// Shared mobile-nav drawer state. The sidebar, navbar, and backdrop are
+// three separate Livewire/Blade roots, so a plain local `x-data` property on
+// one isn't visible to the others.
+//
+// This deliberately does NOT use Alpine.store(): `livewire.js` (a plain,
+// non-module <script>, so it executes synchronously wherever it sits in the
+// document) calls Alpine.start() on its own bundled Alpine instance before
+// this file -- a Vite `type="module"` bundle, which the browser always
+// defers until after the document has finished parsing -- ever runs.
+// Confirmed live: window.Alpine.store('nav', ...) registers successfully,
+// but toggling it has zero effect on the actual page, because `window.
+// Alpine` at that point is a second, never-started Alpine instance, not the
+// one Livewire already initialized and bound the page's directives to.
+//
+// Plain window CustomEvents sidestep this entirely -- they don't go through
+// Alpine at all, so it doesn't matter which Alpine instance is "live".
+// Each Blade root keeps its own local `mobileOpen` (Alpine reactivity
+// *within* a single root already works correctly -- it's only cross-root
+// global state, like a store, that hit the instance mismatch above) and
+// stays in sync by listening for 'mobile-nav-changed'.
+let mobileNavOpen = false;
+
+function setMobileNavOpen(open) {
+	mobileNavOpen = open;
+	document.body.classList.toggle('overflow-hidden', open);
+	window.dispatchEvent(new CustomEvent('mobile-nav-changed', { detail: { open } }));
+}
+
+window.mobileNav = {
+	toggle: () => setMobileNavOpen(!mobileNavOpen),
+	close: () => setMobileNavOpen(false),
+};
+
+window.addEventListener('keydown', (event) => {
+	if (event.key === 'Escape' && mobileNavOpen) {
+		setMobileNavOpen(false);
+	}
+});
 import './bootstrap';
 import './animations';  // Enhanced UX/UI animations
 import './livewire-realtime';

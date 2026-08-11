@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MinePlanDownloadController;
+use App\Http\Controllers\RealtimeHealthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportDownloadController;
 use App\Http\Controllers\WebhookController;
@@ -20,19 +21,15 @@ use App\Livewire\RoutePlanning;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\Report;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Laravel\Jetstream\Jetstream;
 use Livewire\Mechanisms\HandleRequests\HandleRequests;
 
-// Include test routes for session/CSRF debugging (remove in production)
-if (config('app.debug')) {
-    require __DIR__.'/test-session.php';
-}
-
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 // Cookie Policy — Jetstream's termsAndPrivacyPolicy feature covers terms.show/policy.show
 // natively. There's no Jetstream equivalent for a Cookie Policy, so this one is wired by hand,
@@ -177,14 +174,23 @@ Route::middleware([
         return view('settings.index');
     })->name('settings');
 
+    // /team/settings used to render a "Coming soon" stub. Team management
+    // (name, members, roles, deletion) is fully built already at
+    // teams.show -- redirect here instead of maintaining a second,
+    // half-built copy of the same page.
     Route::get('/team/settings', function () {
-        return view('team.settings');
+        return redirect()->route('teams.show', Auth::user()->currentTeam);
     })->name('team.settings');
 });
 
 // Stripe Webhooks (no auth required)
 Route::post('/webhooks/stripe', [WebhookController::class, 'handleStripe'])
     ->name('webhooks.stripe');
+
+// Real-time infrastructure health check -- unauthenticated like Laravel's
+// own /up (bootstrap/app.php), for uptime monitors/load balancers.
+Route::get('/up/realtime', [RealtimeHealthController::class, 'check'])
+    ->name('health.realtime');
 
 // Public marketing/outer pages
 Route::view('/features', 'pages.features')->name('features');

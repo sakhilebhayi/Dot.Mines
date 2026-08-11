@@ -269,7 +269,7 @@
                         @foreach($recentPayments as $payment)
                             <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                                 <div>
-                                    <p class="text-[var(--stone)] font-medium">${{ number_format($payment['amount'], 2) }}</p>
+                                    <p class="text-[var(--stone)] font-medium">{{ \App\Support\Currency::format($payment['amount'], $payment['currency'] ?? null) }}</p>
                                     <p class="text-sm text-[var(--sand)]">{{ \Carbon\Carbon::parse($payment['created_at'])->format('M j, Y') }}</p>
                                 </div>
                                 <span class="px-3 py-1 rounded-full text-xs font-medium
@@ -294,7 +294,7 @@
                 <div class="space-y-4">
                     <div>
                         <p class="text-sm text-[var(--sand)]">Total Paid</p>
-                        <p class="text-2xl font-bold text-[var(--stone)]">${{ number_format($totalPaid, 2) }}</p>
+                        <p class="text-2xl font-bold text-[var(--stone)]">{{ \App\Support\Currency::format($totalPaid, $totalPaidCurrency) }}</p>
                     </div>
                     @if($currentSubscription)
                         <div>
@@ -326,7 +326,7 @@
                                         {{ ucfirst($invoice['status']) }}
                                     </span>
                                 </div>
-                                <p class="text-sm text-[var(--sand)] mb-2">${{ number_format($invoice['total'], 2) }}</p>
+                                <p class="text-sm text-[var(--sand)] mb-2">{{ \App\Support\Currency::format($invoice['total'], $invoice['currency'] ?? null) }}</p>
                                 <p class="text-xs text-[var(--sand)]/70">{{ \Carbon\Carbon::parse($invoice['created_at'])->format('M j, Y') }}</p>
                                 @if($invoice['pdf_url'])
                                     <button wire:click="downloadInvoice({{ $invoice['id'] }})" 

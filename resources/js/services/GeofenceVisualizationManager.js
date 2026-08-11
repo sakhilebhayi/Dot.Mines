@@ -28,7 +28,6 @@ class GeofenceVisualizationManager {
      */
     init(leafletMap) {
         this.map = leafletMap;
-        console.log('✅ GeofenceVisualizationManager initialized');
     }
 
     /**
@@ -109,7 +108,6 @@ class GeofenceVisualizationManager {
             this.unhighlightGeofence(id);
         });
 
-        console.log(`✅ Geofence drawn: ${name}`);
     }
 
     /**
@@ -160,7 +158,6 @@ class GeofenceVisualizationManager {
             machineName
         });
 
-        console.log(`📍 Machine entered geofence: ${machineName} → ${data.geofence_name}`);
     }
 
     /**
@@ -192,7 +189,6 @@ class GeofenceVisualizationManager {
             machineName
         });
 
-        console.log(`📍 Machine exited geofence: ${machineName} ← ${data.geofence_name}`);
     }
 
     /**
@@ -325,7 +321,6 @@ class GeofenceVisualizationManager {
         if (geofenceData && this.map) {
             this.map.removeLayer(geofenceData.polygon);
             this.geofences.delete(geofenceId);
-            console.log(`✅ Geofence removed: ${geofenceId}`);
         }
     }
 
@@ -337,7 +332,6 @@ class GeofenceVisualizationManager {
             this.removeGeofence(id);
         }
         this.entryExitMarkers.clear();
-        console.log('✅ All geofences cleared');
     }
 
     /**

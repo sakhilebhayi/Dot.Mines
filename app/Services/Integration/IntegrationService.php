@@ -2,13 +2,13 @@
 
 namespace App\Services\Integration;
 
+use App\Contracts\ManufacturerServiceInterface;
+use App\Models\Alert;
 use App\Models\Integration;
 use App\Models\Machine;
 use App\Models\MachineMetric;
-use App\Models\Alert;
-use App\Contracts\ManufacturerServiceInterface;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class IntegrationService
 {
@@ -16,10 +16,6 @@ class IntegrationService
 
     /**
      * Register a manufacturer service
-     *
-     * @param string $name
-     * @param ManufacturerServiceInterface $service
-     * @return void
      */
     public function register(string $name, ManufacturerServiceInterface $service): void
     {
@@ -28,9 +24,6 @@ class IntegrationService
 
     /**
      * Get a registered service
-     *
-     * @param string $name
-     * @return ManufacturerServiceInterface|null
      */
     public function get(string $name): ?ManufacturerServiceInterface
     {
@@ -39,8 +32,6 @@ class IntegrationService
 
     /**
      * Get all registered services
-     *
-     * @return array
      */
     public function all(): array
     {
@@ -49,16 +40,13 @@ class IntegrationService
 
     /**
      * Test connection to a manufacturer API
-     *
-     * @param Integration $integration
-     * @return array
      */
     public function testConnection(Integration $integration): array
     {
         try {
             $service = $this->getServiceForIntegration($integration);
-            
-            if (!$service) {
+
+            if (! $service) {
                 return [
                     'success' => false,
                     'error' => "Service not found for manufacturer: {$integration->provider}",
@@ -70,9 +58,9 @@ class IntegrationService
             return [
                 'success' => $result,
                 'message' => $result ? 'Connection successful' : 'Connection failed',
-                'error' => !$result ? $service->getLastError() : null,
+                'error' => ! $result ? $service->getLastError() : null,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Integration test connection failed', [
                 'integration_id' => $integration->id,
                 'error' => $e->getMessage(),
@@ -87,22 +75,35 @@ class IntegrationService
 
     /**
      * Sync all machines for an integration
-     *
-     * @param Integration $integration
-     * @return array
      */
     public function syncMachines(Integration $integration): array
     {
         try {
             $service = $this->getServiceForIntegration($integration);
-            
-            if (!$service) {
+
+            if (! $service) {
                 return ['success' => false, 'error' => 'Service not found'];
             }
 
             $machines = $service->fetchMachines();
 
-            if (empty($machines)) {
+            // fetchMachines() returns ['success' => bool, 'machines' => [...],
+            // 'count' => int, ...] -- this used to iterate that whole result
+            // array directly, so the first "machine" synced on every single
+            // call, for every manufacturer, was actually the boolean
+            // `success` value, fatalling instantly on syncMachine()'s array
+            // type hint. Never caught because nothing had ever synced real
+            // data through it before.
+            if (! ($machines['success'] ?? false)) {
+                return [
+                    'success' => false,
+                    'error' => $machines['error'] ?? 'Failed to fetch machines',
+                ];
+            }
+
+            $machineList = $machines['machines'] ?? [];
+
+            if (empty($machineList)) {
                 return [
                     'success' => true,
                     'message' => 'No machines found',
@@ -111,8 +112,21 @@ class IntegrationService
             }
 
             $synced = 0;
-            foreach ($machines as $machineData) {
-                $this->syncMachine($integration, $machineData);
+            foreach ($machineList as $machineData) {
+                $machine = $this->syncMachine($integration, $machineData);
+
+                // fetchMachines() only carries alerts that happen to be
+                // inline in the fleet-list response -- for providers like
+                // Bell, whose caution codes are a separate per-machine
+                // time-series call by design, that's always empty.
+                // fetchMachineAlerts() has existed on every manufacturer
+                // service since ManufacturerServiceInterface was written,
+                // but nothing ever called it, so real fault/caution codes
+                // never reached the Alert table for any provider.
+                if ($machine && $machine->manufacturer_id) {
+                    $this->syncMachineAlertsFromService($service, $machine);
+                }
+
                 $synced++;
             }
 
@@ -123,7 +137,7 @@ class IntegrationService
                 'message' => "Synced {$synced} machines",
                 'count' => $synced,
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Integration machine sync failed', [
                 'integration_id' => $integration->id,
                 'error' => $e->getMessage(),
@@ -137,61 +151,163 @@ class IntegrationService
     }
 
     /**
-     * Sync a single machine
+     * Fetch current locations for a set of machines (identified by their
+     * manufacturer_id) from the integration's provider. Used by
+     * MachineLocationUpdateJob, which is scheduled every 10 seconds --
+     * this method didn't exist at all, so that job fataled on every run
+     * for every team with a connected integration.
      *
-     * @param Integration $integration
-     * @param array $machineData
-     * @return Machine|null
+     * @param  list<string>  $manufacturerIds
+     * @return list<array<string, mixed>>
+     */
+    public function getMachineLocations(Integration $integration, array $manufacturerIds): array
+    {
+        $service = $this->getServiceForIntegration($integration);
+
+        if (! $service || empty($manufacturerIds)) {
+            return [];
+        }
+
+        $locations = [];
+        foreach ($manufacturerIds as $manufacturerId) {
+            try {
+                $location = $service->fetchMachineLocation($manufacturerId);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to fetch machine location', [
+                    'integration_id' => $integration->id,
+                    'manufacturer_id' => $manufacturerId,
+                    'error' => $e->getMessage(),
+                ]);
+
+                continue;
+            }
+
+            if ($location) {
+                $locations[] = array_merge($location, ['manufacturer_id' => $manufacturerId]);
+            }
+        }
+
+        return $locations;
+    }
+
+    /**
+     * Fetch current connectivity status for a set of machines (identified
+     * by their manufacturer_id). Used by MachineStatusMonitoringJob, which
+     * is scheduled every 20 seconds -- this method didn't exist at all
+     * either, for the same reason as getMachineLocations() above.
+     *
+     * A machine is only reported here when the provider actually answered
+     * for it -- if a fetch fails or returns nothing, this stays silent
+     * about that machine rather than guessing it's offline; the caller's
+     * own stale-data timeout already covers machines nothing was heard
+     * from.
+     *
+     * @param  list<string>  $manufacturerIds
+     * @return list<array<string, mixed>>
+     */
+    public function getMachineStatuses(Integration $integration, array $manufacturerIds): array
+    {
+        $service = $this->getServiceForIntegration($integration);
+
+        if (! $service || empty($manufacturerIds)) {
+            return [];
+        }
+
+        $statuses = [];
+        foreach ($manufacturerIds as $manufacturerId) {
+            try {
+                $location = $service->fetchMachineLocation($manufacturerId);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to fetch machine status', [
+                    'integration_id' => $integration->id,
+                    'manufacturer_id' => $manufacturerId,
+                    'error' => $e->getMessage(),
+                ]);
+
+                continue;
+            }
+
+            // A successful location fetch is the only real connectivity
+            // signal available through this interface -- there's no
+            // dedicated "status" endpoint on ManufacturerServiceInterface.
+            if ($location) {
+                $statuses[] = [
+                    'manufacturer_id' => $manufacturerId,
+                    'online' => true,
+                    'status' => 'active',
+                ];
+            }
+        }
+
+        return $statuses;
+    }
+
+    /**
+     * Sync a single machine
      */
     public function syncMachine(Integration $integration, array $machineData): ?Machine
     {
         try {
             $externalId = $machineData['external_id'] ?? $machineData['id'] ?? null;
 
-            if (!$externalId) {
+            if (! $externalId) {
                 return null;
             }
 
-            // Find or create machine
+            // Find or create machine. Machine has no 'external_id' or
+            // 'latitude'/'longitude' columns at all -- the real fillable
+            // fields are 'manufacturer_id' ("ID from manufacturer system",
+            // exactly what this is) and 'last_location_latitude'/
+            // 'last_location_longitude'. The where() below used to throw a
+            // real "column does not exist" SQL error on every sync attempt
+            // that got this far; the create()/update() calls would have
+            // silently dropped the non-fillable fields instead of erroring.
             $machine = Machine::where('team_id', $integration->team_id)
-                ->where('external_id', $externalId)
+                ->where('manufacturer_id', $externalId)
                 ->where('manufacturer', $integration->provider)
                 ->first();
 
-            if (!$machine) {
+            if (! $machine) {
                 $machine = Machine::create([
                     'team_id' => $integration->team_id,
                     'name' => $machineData['model'] ?? 'Unknown Machine',
+                    // machine_type is NOT NULL with no default and this
+                    // create() never set it at all; manufacturer telemetry
+                    // APIs don't return this app's own adt/excavator/dozer/
+                    // etc categorization, so 'other' is the honest fallback
+                    // -- a real user can reclassify it from the Fleet page.
+                    'machine_type' => $machineData['type'] ?? 'other',
                     'manufacturer' => $integration->provider,
                     'model' => $machineData['model'] ?? null,
                     'serial_number' => $machineData['serial_number'] ?? null,
-                    'external_id' => $externalId,
+                    'manufacturer_id' => $externalId,
+                    'integration_id' => $integration->id,
                     'status' => $machineData['status'] ?? 'idle',
-                    'latitude' => $machineData['last_location']['latitude'] ?? null,
-                    'longitude' => $machineData['last_location']['longitude'] ?? null,
+                    'last_location_latitude' => $machineData['last_location']['latitude'] ?? null,
+                    'last_location_longitude' => $machineData['last_location']['longitude'] ?? null,
                     'capacity' => $machineData['capacity'] ?? null,
                 ]);
             } else {
                 $machine->update([
                     'status' => $machineData['status'] ?? 'idle',
-                    'latitude' => $machineData['last_location']['latitude'] ?? $machine->latitude,
-                    'longitude' => $machineData['last_location']['longitude'] ?? $machine->longitude,
+                    'last_location_latitude' => $machineData['last_location']['latitude'] ?? $machine->last_location_latitude,
+                    'last_location_longitude' => $machineData['last_location']['longitude'] ?? $machine->last_location_longitude,
                     'last_location_update' => now(),
                 ]);
             }
 
             // Sync metrics if available
-            if (!empty($machineData['metrics'])) {
+            if (! empty($machineData['metrics'])) {
                 $this->syncMachineMetrics($machine, $machineData['metrics']);
             }
 
             // Sync alerts if available
-            if (!empty($machineData['alerts'])) {
+            if (! empty($machineData['alerts'])) {
                 $this->syncMachineAlerts($machine, $machineData['alerts']);
             }
 
             return $machine;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to sync individual machine', [
                 'integration_id' => $integration->id,
                 'error' => $e->getMessage(),
@@ -203,10 +319,6 @@ class IntegrationService
 
     /**
      * Sync machine metrics
-     *
-     * @param Machine $machine
-     * @param array $metrics
-     * @return void
      */
     protected function syncMachineMetrics(Machine $machine, array $metrics): void
     {
@@ -215,7 +327,7 @@ class IntegrationService
             $metric->machine_id = $machine->id;
             $metric->team_id = $machine->team_id;
             $metric->save();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::warning('Failed to sync machine metrics', [
                 'machine_id' => $machine->id,
                 'error' => $e->getMessage(),
@@ -225,10 +337,6 @@ class IntegrationService
 
     /**
      * Sync machine alerts
-     *
-     * @param Machine $machine
-     * @param array $alerts
-     * @return void
      */
     protected function syncMachineAlerts(Machine $machine, array $alerts): void
     {
@@ -236,16 +344,20 @@ class IntegrationService
             foreach ($alerts as $alertData) {
                 $externalId = $alertData['external_id'] ?? null;
 
-                if (!$externalId) {
+                if (! $externalId) {
                     continue;
                 }
 
-                // Avoid duplicate alerts
+                // Avoid duplicate alerts. Alert has no 'external_id' column
+                // either -- store it in 'metadata' (a real json column) and
+                // query it via the same JSON-path syntax used elsewhere in
+                // this app, instead of a plain where() on a column that
+                // doesn't exist.
                 $existing = Alert::where('machine_id', $machine->id)
-                    ->where('external_id', $externalId)
+                    ->where('metadata->external_id', $externalId)
                     ->first();
 
-                if (!$existing) {
+                if (! $existing) {
                     Alert::create([
                         'team_id' => $machine->team_id,
                         'machine_id' => $machine->id,
@@ -254,11 +366,12 @@ class IntegrationService
                         'type' => $alertData['type'] ?? 'sensor',
                         'priority' => $alertData['priority'] ?? 'medium',
                         'status' => $alertData['status'] ?? 'new',
-                        'external_id' => $externalId,
+                        'triggered_at' => now(),
+                        'metadata' => ['external_id' => $externalId],
                     ]);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::warning('Failed to sync machine alerts', [
                 'machine_id' => $machine->id,
                 'error' => $e->getMessage(),
@@ -267,90 +380,120 @@ class IntegrationService
     }
 
     /**
-     * Get service instance for an integration
-     *
-     * @param Integration $integration
-     * @return ManufacturerServiceInterface|null
+     * Calls the manufacturer service's own fetchMachineAlerts() for one
+     * machine and routes any results through the same dedup/create path as
+     * inline alerts. Isolated in its own try/catch so one machine's alert
+     * fetch failing (a manufacturer endpoint that doesn't exist, a
+     * transient error) never aborts the rest of the sync -- syncMachines()
+     * already tolerates individual machine failures the same way.
      */
-    protected function getServiceForIntegration(Integration $integration): ?ManufacturerServiceInterface
+    private function syncMachineAlertsFromService(ManufacturerServiceInterface $service, Machine $machine): void
     {
-        $credentials = json_decode($integration->credentials, true) ?? [];
+        try {
+            $alerts = $service->fetchMachineAlerts($machine->manufacturer_id);
+
+            if (! empty($alerts)) {
+                $this->syncMachineAlerts($machine, $alerts);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to fetch machine alerts during sync', [
+                'machine_id' => $machine->id,
+                'manufacturer_id' => $machine->manufacturer_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Get service instance for an integration
+     */
+    public function getServiceForIntegration(Integration $integration): ?ManufacturerServiceInterface
+    {
+        // Integration::credentials is already cast to an array ('json' cast
+        // in the model) -- json_decode()-ing it again threw a TypeError
+        // ("Argument #1 ($json) must be of type string, array given") on
+        // every single test/sync attempt, for every manufacturer, before
+        // any manufacturer-specific code ever ran.
+        $credentials = $integration->credentials ?? [];
+
         return match ($integration->provider) {
-            'volvo' => app(\App\Services\Integration\VolvoService::class, ['credentials' => $credentials]),
-            'cat' => app(\App\Services\Integration\CATService::class, ['credentials' => $credentials]),
-            'komatsu' => app(\App\Services\Integration\KomatsuService::class, ['credentials' => $credentials]),
-            'bell' => app(\App\Services\Integration\BellService::class, ['credentials' => $credentials]),
-            'hitachi' => app(\App\Services\Integration\HitachiService::class, ['credentials' => $credentials]),
-            'john-deere' => app(\App\Services\Integration\JohnDeereService::class, ['credentials' => $credentials]),
-            'liebherr' => app(\App\Services\Integration\LiebherrService::class, ['credentials' => $credentials]),
-            'hyundai' => app(\App\Services\Integration\HyundaiService::class, ['credentials' => $credentials]),
-            'doosan' => app(\App\Services\Integration\DoosanService::class, ['credentials' => $credentials]),
-            'jcb' => app(\App\Services\Integration\JCBService::class, ['credentials' => $credentials]),
-            'case' => app(\App\Services\Integration\CASEService::class, ['credentials' => $credentials]),
-            'sany' => app(\App\Services\Integration\SanyService::class, ['credentials' => $credentials]),
-            'xcmg' => app(\App\Services\Integration\XCMGService::class, ['credentials' => $credentials]),
-            'kobelco' => app(\App\Services\Integration\KobelcoService::class, ['credentials' => $credentials]),
-            'new-holland' => app(\App\Services\Integration\NewHollandService::class, ['credentials' => $credentials]),
-            'takeuchi' => app(\App\Services\Integration\TakeuchiService::class, ['credentials' => $credentials]),
-            'kubota' => app(\App\Services\Integration\KubotaService::class, ['credentials' => $credentials]),
-            'bobcat' => app(\App\Services\Integration\BobcatService::class, ['credentials' => $credentials]),
-            'yanmar' => app(\App\Services\Integration\YanmarService::class, ['credentials' => $credentials]),
-            'atlas-copco' => app(\App\Services\Integration\AtlasCopcoService::class, ['credentials' => $credentials]),
-            'sandvik' => app(\App\Services\Integration\SandvikService::class, ['credentials' => $credentials]),
-            'epiroc' => app(\App\Services\Integration\EpirocService::class, ['credentials' => $credentials]),
-            'ctrack' => app(\App\Services\Integration\CTrackService::class, ['credentials' => $credentials]),
-            'roundebult' => app(\App\Services\Integration\RoundebultService::class, ['credentials' => $credentials]),
-            'kawasaki' => app(\App\Services\Integration\KawasakiService::class, ['credentials' => $credentials]),
+            'volvo' => app(VolvoService::class, ['credentials' => $credentials]),
+            'cat' => app(CATService::class, ['credentials' => $credentials]),
+            'komatsu' => app(KomatsuService::class, ['credentials' => $credentials]),
+            'bell' => app(BellService::class, ['credentials' => $credentials]),
+            'hitachi' => app(HitachiService::class, ['credentials' => $credentials]),
+            'john-deere' => app(JohnDeereService::class, ['credentials' => $credentials]),
+            'liebherr' => app(LiebherrService::class, ['credentials' => $credentials]),
+            'hyundai' => app(HyundaiService::class, ['credentials' => $credentials]),
+            'doosan' => app(DoosanService::class, ['credentials' => $credentials]),
+            'jcb' => app(JCBService::class, ['credentials' => $credentials]),
+            'case' => app(CASEService::class, ['credentials' => $credentials]),
+            'sany' => app(SanyService::class, ['credentials' => $credentials]),
+            'xcmg' => app(XCMGService::class, ['credentials' => $credentials]),
+            'kobelco' => app(KobelcoService::class, ['credentials' => $credentials]),
+            'new-holland' => app(NewHollandService::class, ['credentials' => $credentials]),
+            'takeuchi' => app(TakeuchiService::class, ['credentials' => $credentials]),
+            'kubota' => app(KubotaService::class, ['credentials' => $credentials]),
+            'bobcat' => app(BobcatService::class, ['credentials' => $credentials]),
+            'yanmar' => app(YanmarService::class, ['credentials' => $credentials]),
+            'atlas-copco' => app(AtlasCopcoService::class, ['credentials' => $credentials]),
+            'sandvik' => app(SandvikService::class, ['credentials' => $credentials]),
+            'epiroc' => app(EpirocService::class, ['credentials' => $credentials]),
+            'ctrack' => app(CTrackService::class, ['credentials' => $credentials]),
+            'roundebult' => app(RoundebultService::class, ['credentials' => $credentials]),
+            'kawasaki' => app(KawasakiService::class, ['credentials' => $credentials]),
             default => null,
         };
     }
 
     /**
      * Get available manufacturers
-     *
-     * @return array
      */
     public function getAvailableManufacturers(): array
     {
+        // 'status' reflects whether the manufacturer's service class actually
+        // attempts a real API call (only verifiable this way -- these are
+        // third-party APIs this app can't reach in CI/testing to confirm
+        // credentials genuinely work end to end). 8 of the 25 have no real
+        // implementation at all: their testConnection() always returned
+        // true regardless of what credentials were entered, until that was
+        // fixed to honestly report 'not yet available' instead.
         return [
-            'volvo' => [ 'name' => 'Volvo', 'icon' => '🔵', 'description' => 'Volvo Heavy Equipment', 'status' => 'available' ],
-            'cat' => [ 'name' => 'Caterpillar', 'icon' => '🟡', 'description' => 'Caterpillar Heavy Equipment', 'status' => 'available' ],
-            'komatsu' => [ 'name' => 'Komatsu', 'icon' => '🔶', 'description' => 'Komatsu Heavy Equipment', 'status' => 'available' ],
-            'bell' => [ 'name' => 'Bell', 'icon' => '🟠', 'description' => 'Bell Haul Trucks', 'status' => 'available' ],
-            'hitachi' => [ 'name' => 'Hitachi', 'icon' => '🟧', 'description' => 'Hitachi Construction Machinery', 'status' => 'available' ],
-            'john-deere' => [ 'name' => 'John Deere', 'icon' => '🟩', 'description' => 'John Deere Equipment', 'status' => 'available' ],
-            'liebherr' => [ 'name' => 'Liebherr', 'icon' => '🟨', 'description' => 'Liebherr Mining Equipment', 'status' => 'available' ],
-            'hyundai' => [ 'name' => 'Hyundai', 'icon' => '🟦', 'description' => 'Hyundai Construction Equipment', 'status' => 'available' ],
-            'doosan' => [ 'name' => 'Doosan', 'icon' => '🟧', 'description' => 'Doosan Heavy Equipment', 'status' => 'available' ],
-            'jcb' => [ 'name' => 'JCB', 'icon' => '🟨', 'description' => 'JCB Construction Equipment', 'status' => 'available' ],
-            'case' => [ 'name' => 'CASE', 'icon' => '🟫', 'description' => 'CASE Construction Equipment', 'status' => 'available' ],
-            'sany' => [ 'name' => 'Sany', 'icon' => '🟥', 'description' => 'Sany Heavy Equipment', 'status' => 'available' ],
-            'xcmg' => [ 'name' => 'XCMG', 'icon' => '🟦', 'description' => 'XCMG Construction Equipment', 'status' => 'available' ],
-            'kobelco' => [ 'name' => 'Kobelco', 'icon' => '🟦', 'description' => 'Kobelco Construction Machinery', 'status' => 'available' ],
-            'new-holland' => [ 'name' => 'New Holland', 'icon' => '🟨', 'description' => 'New Holland Equipment', 'status' => 'available' ],
-            'takeuchi' => [ 'name' => 'Takeuchi', 'icon' => '🟥', 'description' => 'Takeuchi Compact Equipment', 'status' => 'available' ],
-            'kubota' => [ 'name' => 'Kubota', 'icon' => '🟧', 'description' => 'Kubota Construction Equipment', 'status' => 'available' ],
-            'bobcat' => [ 'name' => 'Bobcat', 'icon' => '⬜', 'description' => 'Bobcat Compact Equipment', 'status' => 'available' ],
-            'yanmar' => [ 'name' => 'Yanmar', 'icon' => '🟨', 'description' => 'Yanmar Mini Excavators', 'status' => 'available' ],
-            'atlas-copco' => [ 'name' => 'Atlas Copco', 'icon' => '🟡', 'description' => 'Atlas Copco Drilling Equipment', 'status' => 'available' ],
-            'sandvik' => [ 'name' => 'Sandvik', 'icon' => '🟥', 'description' => 'Sandvik Mining Equipment', 'status' => 'available' ],
-            'epiroc' => [ 'name' => 'Epiroc', 'icon' => '🟦', 'description' => 'Epiroc Drilling Equipment', 'status' => 'available' ],
-            'ctrack' => [ 'name' => 'C-Track', 'icon' => '📍', 'description' => 'C-Track GPS Tracking', 'status' => 'available' ],
-            'roundebult' => [ 'name' => 'Roundebult', 'icon' => '⛏️', 'description' => 'Roundebult Mining Machines', 'status' => 'available' ],
-            'kawasaki' => [ 'name' => 'Kawasaki', 'icon' => '🏗️', 'description' => 'Kawasaki Mining Equipment', 'status' => 'available' ],
+            'volvo' => ['name' => 'Volvo', 'icon' => '🔵', 'description' => 'Volvo Heavy Equipment', 'status' => 'available'],
+            'cat' => ['name' => 'Caterpillar', 'icon' => '🟡', 'description' => 'Caterpillar Heavy Equipment', 'status' => 'available'],
+            'komatsu' => ['name' => 'Komatsu', 'icon' => '🔶', 'description' => 'Komatsu Heavy Equipment', 'status' => 'available'],
+            'bell' => ['name' => 'Bell', 'icon' => '🟠', 'description' => 'Bell Equipment ISO 15143-3 Fleet API', 'status' => 'available'],
+            'hitachi' => ['name' => 'Hitachi', 'icon' => '🟧', 'description' => 'Hitachi Construction Machinery', 'status' => 'available'],
+            'john-deere' => ['name' => 'John Deere', 'icon' => '🟩', 'description' => 'John Deere Equipment', 'status' => 'coming_soon'],
+            'liebherr' => ['name' => 'Liebherr', 'icon' => '🟨', 'description' => 'Liebherr Mining Equipment', 'status' => 'available'],
+            'hyundai' => ['name' => 'Hyundai', 'icon' => '🟦', 'description' => 'Hyundai Construction Equipment', 'status' => 'available'],
+            'doosan' => ['name' => 'Doosan', 'icon' => '🟧', 'description' => 'Doosan Heavy Equipment', 'status' => 'available'],
+            'jcb' => ['name' => 'JCB', 'icon' => '🟨', 'description' => 'JCB Construction Equipment', 'status' => 'available'],
+            'case' => ['name' => 'CASE', 'icon' => '🟫', 'description' => 'CASE Construction Equipment', 'status' => 'coming_soon'],
+            'sany' => ['name' => 'Sany', 'icon' => '🟥', 'description' => 'Sany Heavy Equipment', 'status' => 'available'],
+            'xcmg' => ['name' => 'XCMG', 'icon' => '🟦', 'description' => 'XCMG Construction Equipment', 'status' => 'available'],
+            'kobelco' => ['name' => 'Kobelco', 'icon' => '🟦', 'description' => 'Kobelco Construction Machinery', 'status' => 'available'],
+            'new-holland' => ['name' => 'New Holland', 'icon' => '🟨', 'description' => 'New Holland Equipment', 'status' => 'coming_soon'],
+            'takeuchi' => ['name' => 'Takeuchi', 'icon' => '🟥', 'description' => 'Takeuchi Compact Equipment', 'status' => 'coming_soon'],
+            'kubota' => ['name' => 'Kubota', 'icon' => '🟧', 'description' => 'Kubota Construction Equipment', 'status' => 'available'],
+            'bobcat' => ['name' => 'Bobcat', 'icon' => '⬜', 'description' => 'Bobcat Compact Equipment', 'status' => 'coming_soon'],
+            'yanmar' => ['name' => 'Yanmar', 'icon' => '🟨', 'description' => 'Yanmar Mini Excavators', 'status' => 'coming_soon'],
+            'atlas-copco' => ['name' => 'Atlas Copco', 'icon' => '🟡', 'description' => 'Atlas Copco Drilling Equipment', 'status' => 'coming_soon'],
+            'sandvik' => ['name' => 'Sandvik', 'icon' => '🟥', 'description' => 'Sandvik Mining Equipment', 'status' => 'coming_soon'],
+            'epiroc' => ['name' => 'Epiroc', 'icon' => '🟦', 'description' => 'Epiroc Drilling Equipment', 'status' => 'available'],
+            'ctrack' => ['name' => 'C-Track', 'icon' => '📍', 'description' => 'C-Track GPS Tracking', 'status' => 'available'],
+            'roundebult' => ['name' => 'Roundebult', 'icon' => '⛏️', 'description' => 'Roundebult Mining Machines', 'status' => 'available'],
+            'kawasaki' => ['name' => 'Kawasaki', 'icon' => '🏗️', 'description' => 'Kawasaki Mining Equipment', 'status' => 'available'],
         ];
     }
 
     /**
      * Get integration status
-     *
-     * @param Integration $integration
-     * @return array
      */
     public function getStatus(Integration $integration): array
     {
         $cacheKey = "integration_{$integration->id}_status";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($integration) {
             return [
                 'id' => $integration->id,

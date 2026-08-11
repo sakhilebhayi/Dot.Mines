@@ -2,30 +2,32 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
-use App\Jobs\SyncIntegrationMachinesJob;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 /**
  * Integration API Controller
- * 
+ *
  * Handles manufacturer API integrations (Volvo, CAT, etc.)
  */
 class IntegrationController extends Controller
 {
-    public function __construct(protected IntegrationService $integrationService)
-    {}
+    public function __construct(protected IntegrationService $integrationService) {}
 
     /**
      * List all integrations for current team
-     * 
+     *
      * GET /api/integrations
      */
     public function index()
     {
+        $this->authorize('viewAny', Integration::class);
+
         $integrations = Integration::where('team_id', auth()->user()->current_team_id)
             ->select('id', 'provider', 'name', 'status', 'last_sync_at', 'last_sync_status', 'machines_count', 'last_error')
             ->get();
@@ -38,12 +40,12 @@ class IntegrationController extends Controller
 
     /**
      * Get a single integration
-     * 
+     *
      * GET /api/integrations/{id}
      */
     public function show(Integration $integration)
     {
-        $this->authorizeTeam($integration);
+        $this->authorize('view', $integration);
 
         return response()->json([
             'success' => true,
@@ -64,11 +66,13 @@ class IntegrationController extends Controller
 
     /**
      * Create a new integration
-     * 
+     *
      * POST /api/integrations
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Integration::class);
+
         $validator = Validator::make($request->all(), [
             'provider' => 'required|string|in:volvo,cat,komatsu,bell,ctrack',
             'name' => 'required|string|max:255',
@@ -113,22 +117,24 @@ class IntegrationController extends Controller
                     'status' => $integration->status,
                 ],
             ], Response::HTTP_CREATED);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('Failed to create integration', ['provider' => $request->provider, 'error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to create integration: ' . $e->getMessage(),
+                'error' => 'Failed to create the integration. Please check the credentials and try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Update an integration
-     * 
+     *
      * PUT /api/integrations/{id}
      */
     public function update(Request $request, Integration $integration)
     {
-        $this->authorizeTeam($integration);
+        $this->authorize('update', $integration);
 
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
@@ -155,22 +161,24 @@ class IntegrationController extends Controller
                     'name' => $integration->name,
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('Failed to update integration', ['integration_id' => $integration->id, 'error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to update integration: ' . $e->getMessage(),
+                'error' => 'Failed to update the integration. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Delete an integration
-     * 
+     *
      * DELETE /api/integrations/{id}
      */
     public function destroy(Integration $integration)
     {
-        $this->authorizeTeam($integration);
+        $this->authorize('delete', $integration);
 
         try {
             $integration->delete();
@@ -179,22 +187,24 @@ class IntegrationController extends Controller
                 'success' => true,
                 'message' => 'Integration deleted successfully',
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('Failed to delete integration', ['integration_id' => $integration->id, 'error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to delete integration: ' . $e->getMessage(),
+                'error' => 'Failed to delete the integration. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Test connection to manufacturer API
-     * 
+     *
      * POST /api/integrations/{id}/test
      */
     public function test(Integration $integration)
     {
-        $this->authorizeTeam($integration);
+        $this->authorize('test', $integration);
 
         $result = $this->integrationService->testConnection($integration);
 
@@ -213,12 +223,12 @@ class IntegrationController extends Controller
 
     /**
      * Trigger manual sync for integration
-     * 
+     *
      * POST /api/integrations/{id}/sync
      */
     public function sync(Integration $integration)
     {
-        $this->authorizeTeam($integration);
+        $this->authorize('sync', $integration);
 
         try {
             SyncIntegrationMachinesJob::dispatch($integration);
@@ -227,22 +237,24 @@ class IntegrationController extends Controller
                 'success' => true,
                 'message' => 'Sync job dispatched successfully',
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('Failed to dispatch integration sync', ['integration_id' => $integration->id, 'error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to dispatch sync: ' . $e->getMessage(),
+                'error' => 'Failed to start the sync. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * Get machines synced from this integration
-     * 
+     *
      * GET /api/integrations/{id}/machines
      */
     public function machines(Integration $integration)
     {
-        $this->authorizeTeam($integration);
+        $this->authorize('view', $integration);
 
         $machines = $integration->machines()
             ->select('id', 'name', 'model', 'status', 'manufacturer', 'latitude', 'longitude')
@@ -256,7 +268,7 @@ class IntegrationController extends Controller
 
     /**
      * Get available manufacturers
-     * 
+     *
      * GET /api/integrations/manufacturers
      */
     public function manufacturers()
@@ -266,15 +278,4 @@ class IntegrationController extends Controller
             'data' => $this->integrationService->getAvailableManufacturers(),
         ]);
     }
-
-    /**
-     * Verify team ownership
-     */
-    protected function authorizeTeam(Integration $integration)
-    {
-        if ($integration->team_id !== auth()->user()->current_team_id) {
-            abort(403, 'Unauthorized');
-        }
-    }
 }
-

@@ -8,7 +8,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
         </div>
-        <script>window.scrollTo(0,0);</script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
     @else
         <!-- Chart Visualization Placeholder removed -->
     <!-- Header Section with gradient -->
@@ -16,7 +16,6 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-[var(--stone)] flex items-center gap-2">
-                    <span class="text-3xl">🚜</span>
                     Fleet Management
                 </h1>
                 <p class="text-[var(--sand)] text-sm mt-1">
@@ -732,7 +731,7 @@
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-8 w-full max-w-md animate-scale-in">
                 <h2 class="text-xl font-display font-semibold text-[var(--stone)] mb-4 flex items-center gap-2">
-                    <span class="text-[var(--gold)]">🏞️</span> Assign Machine to Mine Area
+                    Assign Machine to Mine Area
                 </h2>
                 <div class="mb-4">
                     <label for="mineAreaSelect" class="block text-sm font-medium text-[var(--sand)] mb-2">Select Mine Area</label>
@@ -823,7 +822,7 @@
 
     @endif
 </div>
-<style>
+<style nonce="{{ request()->attributes->get('csp_nonce') }}">
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

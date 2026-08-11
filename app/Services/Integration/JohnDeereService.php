@@ -10,8 +10,13 @@ class JohnDeereService extends BaseManufacturerService implements ManufacturerSe
 
     public function testConnection(): bool
     {
-        // Implement John Deere API connection test
-        return true;
+        // No real John Deere API integration has been built yet -- this
+        // used to unconditionally return true, reporting a successful
+        // connection test regardless of whether any credentials were
+        // even provided.
+        $this->lastError = 'John Deere integration is not yet available.';
+
+        return false;
     }
 
     public function fetchMachines(): array

@@ -9,20 +9,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Regression test: the navbar's notification bell showed hardcoded sample
- * text ("Low fuel alert on Machine #1", "Machine #3 entered North Pit")
- * instead of real data -- a fully-working AINotifications component existed
- * in the codebase but was never embedded anywhere, so nobody ever saw real
- * alerts there. Wired <livewire:ai-notifications /> into the navbar in its
- * place. Doing so surfaced two pre-existing bugs, invisible until the
- * component was actually rendered for the first time:
- *  1. AINotifications::$notifications was typed `array` but
- *     loadNotifications() always assigned it an Eloquent Collection, which
- *     crashes on render.
- *  2. The view read `$notification->message`, but the real column is
- *     `description` -- the notification body text was always blank.
- * This test proves the whole chain (embed -> real query -> real render,
- * with real body text) now works.
+ * Regression test: the navbar's notification bell used to show hardcoded
+ * sample text instead of real data, even though a working AINotifications
+ * component existed but was never embedded anywhere. Embedding it surfaced
+ * two further bugs: $notifications was typed `array` but loadNotifications()
+ * always assigned an Eloquent Collection (crashes on render), and the view
+ * read $notification->message when the real column is `description`. This
+ * proves the full chain -- embed, query, render, real body text -- works.
  */
 class NavbarNotificationsTest extends TestCase
 {

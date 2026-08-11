@@ -165,7 +165,7 @@
                                     @elseif($report->status === 'pending')
                                         <span class="px-3 py-1 bg-yellow-900 text-yellow-300 rounded-lg text-sm font-medium">Pending</span>
                                     @elseif($report->status === 'failed')
-                                        <span class="px-3 py-1 bg-red-900 text-red-300 rounded-lg text-sm font-medium">Failed</span>
+                                        <span class="px-3 py-1 bg-red-900 text-red-300 rounded-lg text-sm font-medium" @if($report->error_message) title="{{ $report->error_message }}" @endif>Failed</span>
                                     @else
                                         <span class="px-3 py-1 bg-purple-900 text-purple-300 rounded-lg text-sm font-medium">{{ ucfirst($report->status) }}</span>
                                     @endif

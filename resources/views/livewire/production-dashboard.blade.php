@@ -6,7 +6,6 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
                 <h1 class="text-3xl font-display font-semibold text-[var(--stone)] flex items-center gap-2">
-                    <span class="text-3xl">📊</span>
                     Production Dashboard
                 </h1>
                 <p class="mt-1 text-sm text-[var(--sand)]">

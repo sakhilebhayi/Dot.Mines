@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * XCMG Xrea (XCMG Remote Expert Assistant) Integration Service
- * 
+ *
  * Contact XCMG for API access
  * Requires XCMG company ID
  */
@@ -19,11 +19,13 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
     {
         try {
             $response = $this->makeRequest('GET', '/iot/v1/devices', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
@@ -32,14 +34,14 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
     {
         try {
             $response = $this->makeRequest('GET', '/iot/v1/devices');
-            
+
             $machines = [];
-            if (!empty($response['data']['devices'])) {
+            if (! empty($response['data']['devices'])) {
                 foreach ($response['data']['devices'] as $device) {
                     $machines[] = $this->parseMachineData($device);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -47,6 +49,7 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch devices', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -59,13 +62,14 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
     {
         try {
             $response = $this->makeRequest('GET', "/iot/v1/devices/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -79,19 +83,24 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
             $status = $this->makeRequest('GET', "/iot/v1/devices/{$machineId}/status");
             $parameters = $this->makeRequest('GET', "/iot/v1/devices/{$machineId}/parameters");
             $workData = $this->makeRequest('GET', "/iot/v1/devices/{$machineId}/work-data");
-            
-            $metrics = array_merge(
+
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier ones, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($status['data'] ?? []),
                 $this->parseMetrics($parameters['data'] ?? []),
                 $this->parseMetrics($workData['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -104,20 +113,21 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
     {
         try {
             $response = $this->makeRequest('GET', "/iot/v1/devices/{$machineId}/faults");
-            
+
             $alerts = [];
-            if (!empty($response['data']['faults'])) {
+            if (! empty($response['data']['faults'])) {
                 foreach ($response['data']['faults'] as $fault) {
                     $alerts[] = $this->parseAlert($fault);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch faults', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -133,14 +143,12 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine details from XCMG API
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -149,14 +157,12 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -165,14 +171,12 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -181,14 +185,12 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -197,9 +199,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -213,8 +212,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {

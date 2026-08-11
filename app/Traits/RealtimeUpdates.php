@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Trait RealtimeUpdates
- * 
+ *
  * Adds real-time update capabilities to Livewire components
  * Provides methods to initialize WebSocket listeners and handle real-time data
  */
@@ -59,7 +59,6 @@ trait RealtimeUpdates
 
     /**
      * Subscribe to machine location updates (for LiveMap component)
-     * @param string $machineId
      */
     public function subscribeToMachineLocation(string $machineId): void
     {
@@ -83,8 +82,23 @@ trait RealtimeUpdates
     }
 
     /**
+     * Subscribe to predictive maintenance alerts
+     */
+    public function subscribeToMaintenanceAlerts(): void
+    {
+        $this->dispatch('realtime:maintenance-alerts');
+    }
+
+    /**
+     * Subscribe to compliance violations
+     */
+    public function subscribeToComplianceViolations(): void
+    {
+        $this->dispatch('realtime:compliance-violations');
+    }
+
+    /**
      * Subscribe to geofence events
-     * @param string $geofenceId
      */
     public function subscribeToGeofenceEvents(string $geofenceId): void
     {
@@ -93,7 +107,6 @@ trait RealtimeUpdates
 
     /**
      * Subscribe to machine status (online/offline)
-     * @param string $machineId
      */
     public function subscribeToMachineStatus(string $machineId): void
     {
@@ -110,7 +123,6 @@ trait RealtimeUpdates
 
     /**
      * Stop listening to a specific channel
-     * @param string $machineId
      */
     public function stopListeningToMachine(string $machineId): void
     {

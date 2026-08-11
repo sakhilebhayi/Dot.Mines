@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,9 +20,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float $accuracy_score
  * @property int $predictions_made
  * @property int $successful_predictions
- * @property \Carbon\Carbon|null $last_trained_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon|null $last_trained_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|AIAgent where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|AIAgent whereIn(string $column, array $values)
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class AIAgent extends Model
 {
     use HasFactory;
+
     protected $table = 'ai_agents';
 
     protected $fillable = [
@@ -57,12 +59,20 @@ class AIAgent extends Model
 
     // Agent types
     const TYPE_FLEET_OPTIMIZER = 'fleet_optimizer';
+
     const TYPE_ROUTE_ADVISOR = 'route_advisor';
+
     const TYPE_FUEL_PREDICTOR = 'fuel_predictor';
+
     const TYPE_MAINTENANCE_PREDICTOR = 'maintenance_predictor';
+
     const TYPE_PRODUCTION_OPTIMIZER = 'production_optimizer';
+
     const TYPE_COST_ANALYZER = 'cost_analyzer';
+
     const TYPE_ANOMALY_DETECTOR = 'anomaly_detector';
+
+    const TYPE_DISPATCH_ADVISOR = 'dispatch_advisor';
 
     public function recommendations(): HasMany
     {
@@ -90,9 +100,9 @@ class AIAgent extends Model
         if ($wasSuccessful) {
             $this->increment('successful_predictions');
         }
-        
-        $this->accuracy_score = $this->predictions_made > 0 
-            ? $this->successful_predictions / $this->predictions_made 
+
+        $this->accuracy_score = $this->predictions_made > 0
+            ? $this->successful_predictions / $this->predictions_made
             : 0;
         $this->save();
     }

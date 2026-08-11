@@ -13,12 +13,11 @@ use Tests\TestCase;
 /**
  * Regression test: Settings::inviteUser(), removeUser(), updateUserRole(),
  * and saveGeneralSettings() never called $this->authorize(), despite
- * app/Policies/TeamPolicy.php defining addTeamMember/updateTeamMember/
- * removeTeamMember/update specifically for these actions. Any authenticated
- * member of a team -- regardless of role -- could invite new members,
- * assign arbitrary roles (including admin), remove other members, or rename
- * the team. Fixed by wiring the existing policy into each action; this test
- * proves a non-owner is now blocked and the owner still works.
+ * TeamPolicy defining addTeamMember/updateTeamMember/removeTeamMember/update
+ * specifically for these actions. Any team member of any role could invite
+ * new members, assign arbitrary roles (including admin), remove other
+ * members, or rename the team. Fixed by wiring the policy into each action;
+ * proves a non-owner is blocked and the owner still works.
  */
 class SettingsTeamAuthorizationTest extends TestCase
 {
@@ -60,7 +59,17 @@ class SettingsTeamAuthorizationTest extends TestCase
             ->set('selectedRole', 'operator')
             ->call('inviteUser');
 
-        $this->assertDatabaseHas('users', ['email' => 'newperson@example.com']);
+        // Regression: this used to create a real users row immediately with a
+        // hardcoded literal password and send no email at all. Inviting now
+        // goes through Jetstream's own invitation flow (a pending
+        // team_invitations row + a real queued email) -- the account isn't
+        // created until the invitation is accepted.
+        $this->assertDatabaseHas('team_invitations', [
+            'team_id' => $team->id,
+            'email' => 'newperson@example.com',
+            'role' => 'operator',
+        ]);
+        $this->assertDatabaseMissing('users', ['email' => 'newperson@example.com']);
     }
 
     public function test_non_owner_team_member_cannot_change_another_members_role(): void

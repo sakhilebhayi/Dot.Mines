@@ -14,11 +14,10 @@ use Tests\TestCase;
 /**
  * Regression test: BillingPortal::subscribe(), manageBilling(),
  * cancelSubscription(), and resumeSubscription() never checked whether the
- * acting user actually owns the team, so any team member -- any role --
- * could cancel/resume the team's paid Stripe subscription or open the
- * Stripe billing portal. Fixed by gating each action on the existing
- * TeamPolicy::update (ownsTeam) check, same precedent as
- * app/Livewire/Settings.php. This proves a non-owner is blocked.
+ * acting user actually owns the team, so any team member of any role could
+ * cancel/resume the team's paid Stripe subscription or open the Stripe
+ * billing portal. Fixed by gating each action on TeamPolicy::update
+ * (ownsTeam). Proves a non-owner is blocked.
  */
 class BillingAuthorizationTest extends TestCase
 {

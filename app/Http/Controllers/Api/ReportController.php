@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Jobs\GenerateReportJob;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Report API Controller
- * 
+ *
  * Handles report generation and management
  */
 class ReportController extends Controller
 {
     /**
      * List all reports for current team
-     * 
+     *
      * GET /api/reports
      */
     public function index(Request $request)
@@ -55,7 +57,7 @@ class ReportController extends Controller
 
     /**
      * Get a single report
-     * 
+     *
      * GET /api/reports/{id}
      */
     public function show(Report $report)
@@ -67,7 +69,7 @@ class ReportController extends Controller
 
     /**
      * Generate a new report
-     * 
+     *
      * POST /api/reports/generate
      */
     public function generate(Request $request)
@@ -88,7 +90,18 @@ class ReportController extends Controller
 
         $report = Report::create($validated);
 
-        // TODO: Dispatch GenerateReportJob based on type
+        // NOTE: this endpoint's 'type' values (truck_sensors, tire_condition,
+        // load_cycle, fuel, engine_parts, maintenance, custom) predate and
+        // don't match the 6 types the web UI (ReportGenerator) actually
+        // offers and ReportDataService knows how to build (production,
+        // fleet_utilization, maintenance_schedule, fuel_consumption,
+        // material_tracking, downtime_analysis) -- this API isn't called
+        // from anywhere in the app today. Dispatching it here means a
+        // report created through this endpoint fails cleanly with a real
+        // error_message instead of hanging at 'pending' forever, but none
+        // of these type values will actually generate a file until
+        // ReportDataService is extended to support them.
+        GenerateReportJob::dispatch($report);
 
         return response()->json([
             'data' => $report,
@@ -98,14 +111,14 @@ class ReportController extends Controller
 
     /**
      * Download report file
-     * 
+     *
      * GET /api/reports/{id}/download
      */
     public function download(Report $report)
     {
         $this->authorize('view', $report);
 
-        if (!$report->isAvailable()) {
+        if (! $report->isAvailable()) {
             return response()->json([
                 'message' => 'Report is not available for download',
             ], Response::HTTP_NOT_FOUND);
@@ -131,7 +144,7 @@ class ReportController extends Controller
         }
 
         // Authorize was already called earlier; use Storage::download to serve safely and add security headers.
-        $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $report->title) . '.' . $report->format;
+        $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $report->title).'.'.$report->format;
         $mime = Storage::disk($disk)->mimeType($relative) ?? 'application/octet-stream';
 
         $securityHeaders = [
@@ -141,13 +154,13 @@ class ReportController extends Controller
 
         return Storage::disk($disk)->download($relative, $filename, array_merge($securityHeaders, [
             'Content-Type' => $mime,
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]));
     }
 
     /**
      * Delete a report
-     * 
+     *
      * DELETE /api/reports/{id}
      */
     public function destroy(Report $report)
@@ -172,7 +185,7 @@ class ReportController extends Controller
 
     /**
      * Get available report templates
-     * 
+     *
      * GET /api/reports/templates
      */
     public function templates()
@@ -223,7 +236,7 @@ class ReportController extends Controller
 
     /**
      * Get report statistics
-     * 
+     *
      * GET /api/reports/stats
      */
     public function stats()

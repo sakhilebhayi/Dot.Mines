@@ -2,23 +2,34 @@
 
 namespace App\Livewire;
 
-use App\Models\Machine;
+use App\Models\ActivityLog;
 use App\Models\Alert;
 use App\Models\Geofence;
+use App\Models\Machine;
+use App\Models\MineArea;
 use App\Models\Team;
 use App\Services\QueryCacheService;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class Dashboard extends Component
 {
     public int $totalMachines = 0;
+
     public int $activeMachines = 0;
+
     public int $activeAlerts = 0;
+
     public int $totalGeofences = 0;
+
+    public int $totalMineAreas = 0;
+
     public array $recentAlerts = [];
+
     public array $machineStatus = [];
+
     public array $activityFeed = [];
+
     public bool $isLoading = true;
 
     public function mount(): void
@@ -81,6 +92,7 @@ class Dashboard extends Component
             ->where('status', 'active')
             ->count();
         $this->totalGeofences = $stats['total_geofences'];
+        $this->totalMineAreas = MineArea::where('team_id', $team->id)->count();
 
         // Recent Alerts (with eager loading)
         $this->recentAlerts = Alert::where('team_id', $team->id)
@@ -112,7 +124,7 @@ class Dashboard extends Component
             ->toArray();
 
         // Activity Feed
-        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $team->id)
+        $this->activityFeed = ActivityLog::where('team_id', $team->id)
             ->with('user')
             ->latest('created_at')
             ->take(10)

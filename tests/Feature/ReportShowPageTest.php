@@ -9,14 +9,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * /reports/{report} had no feature test coverage before this file.
- * Regression test: the page's Download link used to point straight at
+ * Regression test: the page's download link used to point straight at
  * Storage::url($report->file_path) -- a raw storage URL with none of
  * ReportDownloadController's checks (signed-URL requirement, team match,
- * completed-status, path traversal). Fixed to route through the existing
- * (already-built, already-secured) reports.signed-download controller
- * instead. This confirms the page renders and the download link now points
- * at that signed route rather than a raw storage URL.
+ * completed-status, path traversal). It now routes through the existing,
+ * already-secured reports.signed-download controller instead. Confirms the
+ * page renders and the download link points at the signed route.
  */
 class ReportShowPageTest extends TestCase
 {

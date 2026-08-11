@@ -5,14 +5,13 @@ namespace App\Livewire;
 use App\Models\Alert;
 use App\Models\Geofence;
 use App\Traits\BrowserEventBridge;
-use App\Traits\RealtimeUpdates;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Alerts extends Component
 {
-    use BrowserEventBridge, RealtimeUpdates, WithPagination;
+    use BrowserEventBridge, WithPagination;
 
     public string $search = '';
 
@@ -60,9 +59,9 @@ class Alerts extends Component
 
     public function mount(): void
     {
-        // Initialize real-time updates
-        $this->initializeRealtimeUpdates();
-        $this->subscribeToTeamAlerts();
+        // Team alert/maintenance/compliance subscriptions are now
+        // initialized globally by Navbar (present on every authenticated
+        // page), so nothing further is needed here.
     }
 
     public function getAlerts()

@@ -2,17 +2,17 @@
 
 namespace App\Services;
 
+use App\Models\ProductionForecast;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
-use App\Models\ProductionForecast;
 use Carbon\Carbon;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\Paginator;
 
 class ProductionService
 {
     /**
-     * @return \Illuminate\Pagination\Paginator<ProductionRecord>
+     * @return Paginator<ProductionRecord>
      */
     public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null)
     {
@@ -67,7 +67,7 @@ class ProductionService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function createProductionRecord(int $teamId, array $data): ProductionRecord
     {
@@ -87,15 +87,16 @@ class ProductionService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function updateProductionRecord(ProductionRecord $record, array $data): ProductionRecord
     {
         $record->update($data);
+
         return $record;
     }
 
-    public function deleteProductionRecord(ProductionRecord $record): bool|null
+    public function deleteProductionRecord(ProductionRecord $record): ?bool
     {
         return $record->delete();
     }
@@ -112,7 +113,7 @@ class ProductionService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function createTarget(int $teamId, array $data): ProductionTarget
     {
@@ -162,6 +163,7 @@ class ProductionService
 
         return $records->groupBy('mine_area_id')->map(function ($areaRecords) {
             $area = $areaRecords->first()?->mineArea;
+
             return [
                 'mine_area_id' => $area?->id,
                 'mine_area_name' => $area?->name ?? 'Unknown',
@@ -170,6 +172,39 @@ class ProductionService
                 'record_count' => $areaRecords->count(),
             ];
         });
+    }
+
+    /**
+     * Production per machine over the trailing 30 days -- mirrors
+     * getProductionByMineArea() but grouped by machine instead of area.
+     * Real per-machine breakdown was entirely missing: getProductionStatistics()
+     * only ever aggregated at the team level.
+     *
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    public function getProductionByMachine(int $teamId): \Illuminate\Support\Collection
+    {
+        $records = ProductionRecord::forTeam($teamId)
+            ->whereNotNull('machine_id')
+            ->where('record_date', '>=', Carbon::now()->subDays(30))
+            ->with('machine')
+            ->get();
+
+        return $records->groupBy('machine_id')->map(function ($machineRecords) {
+            $machine = $machineRecords->first()?->machine;
+            $totalProduced = $machineRecords->sum('quantity_produced');
+            $totalTarget = $machineRecords->sum('target_quantity');
+
+            return [
+                'machine_id' => $machine?->id,
+                'machine_name' => $machine?->name ?? 'Unknown',
+                'total_produced' => $totalProduced,
+                'total_target' => $totalTarget,
+                'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100 : null,
+                'record_count' => $machineRecords->count(),
+                'average_per_record' => $machineRecords->count() > 0 ? $totalProduced / $machineRecords->count() : 0,
+            ];
+        })->sortByDesc('total_produced')->values();
     }
 
     /**

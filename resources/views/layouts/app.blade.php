@@ -16,8 +16,9 @@
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -29,7 +30,7 @@
         @stack('styles')
         
         <!-- Map Container Fixes -->
-        <style>
+        <style nonce="{{ request()->attributes->get('csp_nonce') }}">
             /* Ensure map containers are visible and have proper z-index */
             .leaflet-container {
                 background: #1f2937 !important;
@@ -59,14 +60,20 @@
             }
         </style>
     </head>
-    <body class="font-sans antialiased bg-gray-900 text-gray-100">
+    <body class="antialiased bg-[var(--ink)] text-[var(--stone)]" style="font-family: var(--font-body);">
         <x-banner />
         
         <!-- Notification System -->
-        <div x-data="{ 
+        <div x-data="{
             notifications: [],
             addNotification(type, message) {
-                const id = Date.now();
+                // Date.now() alone collides when two notify events fire in
+                // the same millisecond (confirmed live: 3 simultaneous
+                // toasts all got the identical id) -- Alpine's x-for :key
+                // then treats them as the same tracked element and drops
+                // all but one. Matches the sibling components/layouts/app.blade.php
+                // copy, which already avoided this.
+                const id = Date.now() + Math.random();
                 this.notifications.push({ id, type, message });
                 setTimeout(() => {
                     this.removeNotification(id);
@@ -77,25 +84,35 @@
             }
         }"
         @notify.window="addNotification($event.detail.type, $event.detail.message)"
-        class="fixed top-4 right-4 z-[10000] space-y-2 max-w-md">
+        @keydown.escape.window="notifications = []"
+        aria-label="Notifications"
+        class="fixed top-24 right-4 z-[10000] space-y-2 max-w-md">
             <template x-for="notification in notifications" :key="notification.id">
-                <div 
+                <div
                     x-show="true"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 transform translate-x-8"
+                    :role="notification.type === 'error' ? 'alert' : 'status'"
+                    :aria-live="notification.type === 'error' ? 'assertive' : 'polite'"
+                    aria-atomic="true"
+                    x-transition:enter="transition ease-out duration-300 motion-reduce:duration-0"
+                    x-transition:enter-start="opacity-0 transform translate-x-8 motion-reduce:translate-x-0"
                     x-transition:enter-end="opacity-100 transform translate-x-0"
-                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave="transition ease-in duration-200 motion-reduce:duration-0"
                     x-transition:leave-start="opacity-100 transform translate-x-0"
-                    x-transition:leave-end="opacity-0 transform translate-x-8"
+                    x-transition:leave-end="opacity-0 transform translate-x-8 motion-reduce:translate-x-0"
                     class="relative rounded-lg shadow-2xl p-4 flex items-start gap-3 backdrop-blur-sm"
                     :class="{
                         'bg-green-600/90 border border-green-500': notification.type === 'success',
                         'bg-red-600/90 border border-red-500': notification.type === 'error',
                         'bg-yellow-600/90 border border-yellow-500': notification.type === 'warning',
-                        'bg-blue-600/90 border border-blue-500': notification.type === 'info'
+                        'bg-[var(--gold)]/90 border border-[var(--gold)]': notification.type === 'info'
                     }">
-                    <!-- Icon -->
-                    <div class="flex-shrink-0">
+                    <!-- Icon. Note: the info-type toast (bg-[var(--gold)], an
+                         amber/mid-tone) needs dark icon+text -- --stone
+                         (#f4efe4, near-white) on gold is a real contrast
+                         failure that the sibling components/layouts/app.blade.php
+                         copy already avoided by special-casing info to
+                         text-[var(--ink)]. Matched here. -->
+                    <div class="flex-shrink-0" aria-hidden="true">
                         <template x-if="notification.type === 'success'">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -112,20 +129,23 @@
                             </svg>
                         </template>
                         <template x-if="notification.type === 'info'">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 text-[var(--ink)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </template>
+                        <span class="sr-only" x-text="{success: 'Success', error: 'Error', warning: 'Warning', info: 'Info'}[notification.type]"></span>
                     </div>
-                    
+
                     <!-- Message -->
-                    <div class="flex-1 text-white font-medium" x-text="notification.message"></div>
-                    
+                    <div class="flex-1 font-medium" :class="notification.type === 'info' ? 'text-[var(--ink)]' : 'text-[var(--stone)]'" x-text="notification.message"></div>
+
                     <!-- Close Button -->
-                    <button 
+                    <button
                         @click="removeNotification(notification.id)"
-                        class="flex-shrink-0 text-white hover:text-gray-200 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        aria-label="Dismiss notification"
+                        class="flex-shrink-0 transition-colors"
+                        :class="notification.type === 'info' ? 'text-[var(--ink)]/70 hover:text-[var(--ink)]' : 'text-[var(--stone)]/70 hover:text-[var(--stone)]'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
@@ -135,20 +155,20 @@
 
         <!-- Flash Messages Handler -->
         @if (session('success'))
-            <div x-data x-init="$dispatch('notify', { type: 'success', message: '{{ session('success') }}' })"></div>
+            <div x-data x-init="$dispatch('notify', { type: 'success', message: @js(session('success')) })"></div>
         @endif
         @if (session('error'))
-            <div x-data x-init="$dispatch('notify', { type: 'error', message: '{{ session('error') }}' })"></div>
+            <div x-data x-init="$dispatch('notify', { type: 'error', message: @js(session('error')) })"></div>
         @endif
         @if (session('warning'))
-            <div x-data x-init="$dispatch('notify', { type: 'warning', message: '{{ session('warning') }}' })"></div>
+            <div x-data x-init="$dispatch('notify', { type: 'warning', message: @js(session('warning')) })"></div>
         @endif
         @if (session('info'))
-            <div x-data x-init="$dispatch('notify', { type: 'info', message: '{{ session('info') }}' })"></div>
+            <div x-data x-init="$dispatch('notify', { type: 'info', message: @js(session('info')) })"></div>
         @endif
         @if ($errors->any())
             @foreach ($errors->all() as $error)
-                <div x-data x-init="$dispatch('notify', { type: 'error', message: '{{ $error }}' })"></div>
+                <div x-data x-init="$dispatch('notify', { type: 'error', message: @js($error) })"></div>
             @endforeach
         @endif
         
@@ -167,7 +187,7 @@
             class="fixed top-0 left-0 right-0 z-[9999]"
             style="display: none;"
         >
-            <div class="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-shimmer" style="background-size: 200% 100%;"></div>
+            <div class="h-1 bg-gradient-to-r from-[var(--gold)] via-[var(--umber)] to-[var(--gold)] animate-shimmer" style="background-size: 200% 100%;"></div>
         </div>
 
         <!-- Global Loading Overlay (for longer operations) -->
@@ -189,29 +209,47 @@
             class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] flex items-center justify-center"
             style="display: none;"
         >
-            <div class="bg-slate-800 rounded-xl p-8 shadow-2xl flex flex-col items-center gap-4 transform transition-all duration-300">
+            <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-xl p-8 shadow-2xl flex flex-col items-center gap-4 transform transition-all duration-300">
                 <div class="relative">
-                    <svg class="animate-spin h-16 w-16 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-16 w-16 text-[var(--gold)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>\n                    <div class="absolute inset-0 rounded-full animate-ping bg-blue-500 opacity-20"></div>
+                    </svg>
+                    <div class="absolute inset-0 rounded-full animate-ping bg-[var(--gold)] opacity-20"></div>
                 </div>
-                <p class="text-white font-medium text-lg">Processing...</p>
-                <p class="text-gray-400 text-sm">Please wait a moment</p>
+                <p class="text-[var(--stone)] font-medium text-lg">Processing...</p>
+                <p class="text-[var(--sand)] text-sm">Please wait a moment</p>
             </div>
         </div>
+
+        <!-- Mobile nav backdrop -->
+        <div
+            x-data="{ mobileOpen: false }"
+            @mobile-nav-changed.window="mobileOpen = $event.detail.open"
+            x-show="mobileOpen"
+            x-transition:enter="transition-opacity ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="window.mobileNav.close()"
+            class="fixed inset-0 bg-black/60 z-[45] md:hidden"
+            style="display: none;"
+            aria-hidden="true"
+        ></div>
 
         <div class="min-h-screen flex">
             <!-- Sidebar Navigation -->
             @livewire('sidebar')
 
             <!-- Main Content -->
-            <div class="flex-1 flex flex-col">
+            <div class="flex-1 flex flex-col min-w-0">
                 <!-- Top Navigation -->
                 @livewire('navbar')
 
                 <!-- Page Content -->
-                <main class="flex-1 overflow-auto bg-gray-900">
+                <main class="flex-1 overflow-auto bg-[var(--ink)]">
                     <div class="p-6 page-transition">
                         @yield('content')
                         @isset($slot)
@@ -224,7 +262,7 @@
 
         @stack('modals')
 
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             // Prevent Livewire from warning about multiple Alpine instances when Alpine
             // is bundled by Vite (`resources/js/app.js`). We mark the global Alpine
             // object as coming from Livewire so Livewire won't attempt to re-initialize it.
@@ -242,7 +280,7 @@
 
         @livewireScripts
 
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             // Ensure fetch requests include CSRF token and X-Requested-With for servers
             // that require these headers (helps Livewire POSTs avoid 403).
             (function() {

@@ -88,7 +88,7 @@
     <!-- Leaflet Map Scripts -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             (function () {
                 const lat = {{ $mineArea->latitude ?? 'null' }};
                 const lng = {{ $mineArea->longitude ?? 'null' }};

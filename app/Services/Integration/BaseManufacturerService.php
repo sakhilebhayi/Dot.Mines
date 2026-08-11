@@ -3,24 +3,30 @@
 namespace App\Services\Integration;
 
 use App\Contracts\ManufacturerServiceInterface;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 abstract class BaseManufacturerService implements ManufacturerServiceInterface
 {
     protected string $manufacturer;
+
     protected string $baseUrl;
+
     protected string $apiKey;
+
     protected string $apiSecret;
+
     protected ?string $lastError = null;
+
     protected int $timeout = 30;
+
     protected int $retries = 3;
+
     protected int $retryDelay = 1000; // milliseconds
 
     /**
      * Initialize the service with API credentials
-     *
-     * @param array $credentials
      */
     public function __construct(array $credentials = [])
     {
@@ -31,12 +37,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Make HTTP request to manufacturer API with retry logic
-     *
-     * @param string $method
-     * @param string $endpoint
-     * @param array $data
-     * @param array $headers
-     * @return array
      */
     protected function request(
         string $method,
@@ -44,8 +44,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
         array $data = [],
         array $headers = []
     ): array {
-        $url = rtrim($this->baseUrl, '/') . '/' . ltrim($endpoint, '/');
-        
+        $url = rtrim($this->baseUrl, '/').'/'.ltrim($endpoint, '/');
+
         $attempt = 0;
         $lastException = null;
 
@@ -72,7 +72,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
             } catch (\Exception $e) {
                 $lastException = $e;
                 $this->lastError = $e->getMessage();
-                
+
                 Log::warning("Integration API Exception: {$this->lastError}", [
                     'manufacturer' => $this->manufacturer,
                     'endpoint' => $endpoint,
@@ -95,25 +95,53 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     }
 
     /**
+     * Alias for request(). 17 of the 24 manufacturer subclasses call this
+     * name (consistently, across every one of them) while this class only
+     * ever defined request() -- meaning testConnection()/fetchMachines()/etc
+     * on Bell, CAT, C-Track, Doosan, Epiroc, Hitachi, Hyundai, JCB,
+     * Kawasaki, Kobelco, Komatsu, Kubota, Liebherr, Roundebult, Sany, Volvo,
+     * and XCMG threw an uncaught "call to undefined method" fatal error
+     * (PHP's Error, not Exception, so their own catch (Exception $e) blocks
+     * never caught it) the instant a user actually tested or synced one of
+     * those integrations.
+     */
+    protected function makeRequest(
+        string $method,
+        string $endpoint,
+        array $data = [],
+        array $headers = []
+    ): array {
+        return $this->request($method, $endpoint, $data, $headers);
+    }
+
+    /**
+     * Alias used by the same 17 subclasses as makeRequest() above, for the
+     * same reason -- this class never defined it.
+     */
+    protected function logError(string $message, \Throwable $e): void
+    {
+        $this->lastError = $e->getMessage();
+
+        Log::error("Integration Error: {$message}", [
+            'manufacturer' => $this->manufacturer,
+            'error' => $e->getMessage(),
+        ]);
+    }
+
+    /**
      * Get authentication headers for API requests
-     *
-     * @param array $additionalHeaders
-     * @return array
      */
     protected function getAuthHeaders(array $additionalHeaders = []): array
     {
         return array_merge([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer '.$this->apiKey,
         ], $additionalHeaders);
     }
 
     /**
      * Parse machine data from API response to standard format
-     *
-     * @param array $rawData
-     * @return array
      */
     protected function parseMachineData(array $rawData): array
     {
@@ -135,9 +163,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse location data from API response
-     *
-     * @param array $rawData
-     * @return array|null
      */
     protected function parseLocation(array $rawData): ?array
     {
@@ -156,22 +181,24 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     }
 
     /**
-     * Parse metrics from API response
-     *
-     * @param array $rawData
-     * @return array
+     * Parse metrics from API response into MachineMetric's own fillable
+     * column names -- this used to use 'timestamp'/'engine_temp'/
+     * 'fuel_consumption'/'coolant_temp', none of which are real MachineMetric
+     * columns ('recorded_at'/'engine_temperature'/'fuel_consumption_rate'/
+     * 'coolant_temperature' are), so every one of those four fields was
+     * silently dropped by mass assignment on every single metrics sync, for
+     * every manufacturer service that calls this method.
      */
     protected function parseMetrics(array $rawData): array
     {
         return [
-            'timestamp' => $rawData['timestamp'] ?? now(),
+            'recorded_at' => $rawData['timestamp'] ?? now(),
             'engine_rpm' => $rawData['engine_rpm'] ?? null,
-            'engine_temp' => $rawData['engine_temp'] ?? null,
+            'engine_temperature' => $rawData['engine_temp'] ?? null,
             'fuel_level' => $rawData['fuel_level'] ?? null,
-            'fuel_consumption' => $rawData['fuel_consumption'] ?? null,
-            'hydraulic_pressure' => $rawData['hydraulic_pressure'] ?? null,
+            'fuel_consumption_rate' => $rawData['fuel_consumption'] ?? null,
             'oil_pressure' => $rawData['oil_pressure'] ?? null,
-            'coolant_temp' => $rawData['coolant_temp'] ?? null,
+            'coolant_temperature' => $rawData['coolant_temp'] ?? null,
             'battery_voltage' => $rawData['battery_voltage'] ?? null,
             'operating_hours' => $rawData['operating_hours'] ?? null,
             'load_weight' => $rawData['load_weight'] ?? null,
@@ -180,10 +207,96 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     }
 
     /**
-     * Parse alerts from API response
+     * Several manufacturer services call parseMetrics() 2-3 times (once per
+     * API endpoint -- e.g. performance/production/maintenance) and combine
+     * the results with a plain array_merge(). Since parseMetrics() always
+     * returns the exact same set of keys, a plain array_merge() means
+     * whichever call came *last* silently overwrites every field from the
+     * earlier calls, even where the earlier source had a real value and the
+     * later one had null -- in practice, only the final endpoint's data ever
+     * survived. This keeps the first non-null value found for each field
+     * instead, and unions raw_data rather than letting later ones replace it.
      *
-     * @param array $alerts
-     * @return array
+     * @return array<string, mixed>
+     */
+    protected function mergeMetricsPreferNonNull(array ...$metricSets): array
+    {
+        $merged = [];
+        $rawData = [];
+
+        foreach ($metricSets as $index => $set) {
+            foreach ($set as $key => $value) {
+                if ($key === 'raw_data') {
+                    $rawData[] = $value;
+
+                    continue;
+                }
+
+                if (! array_key_exists($key, $merged) || $merged[$key] === null) {
+                    $merged[$key] = $value;
+                }
+            }
+        }
+
+        $merged['raw_data'] = $rawData;
+
+        return $merged;
+    }
+
+    /**
+     * SyncMachineMetricsJob and IntegrationService::syncMachineMetrics()
+     * both mass-assign whatever fetchMachineMetrics() returns directly onto
+     * a MachineMetric -- they expect one flat array of its own fillable
+     * columns, not a list of {type, value, unit, timestamp} readings (the
+     * shape parseMetric()/the manual $metrics[] = [...] pattern builds).
+     * Passing that list straight through, as several manufacturer services
+     * did, meant the create() call still succeeded but silently produced an
+     * almost-empty row (just team_id/machine_id) every time, since none of
+     * 'type'/'value'/'unit' are real column names.
+     *
+     * This doesn't attempt to map each manufacturer's own invented reading
+     * "type" strings (fuel_used, engineHours, productivity, ...) onto real
+     * MachineMetric columns -- those names were never derived from a real,
+     * confirmed OEM API response (see BellService for what that looks like
+     * once a real spec actually exists), so guessing a mapping here would
+     * just trade one kind of fabrication for another. Every reading is kept
+     * as-is in raw_data instead, so nothing already being fetched is lost,
+     * and recorded_at is set to the latest reading's own timestamp -- the
+     * row is now structurally valid and inspectable rather than silently
+     * empty, ready for real field mapping once a real response is seen.
+     *
+     * @param  list<array<string, mixed>>  $readings
+     */
+    protected function normalizeMetricsForStorage(array $readings): array
+    {
+        if (empty($readings)) {
+            return [];
+        }
+
+        $latest = collect($readings)
+            ->pluck('timestamp')
+            ->filter()
+            ->map(function ($timestamp) {
+                try {
+                    return $timestamp instanceof \DateTimeInterface
+                        ? Carbon::instance($timestamp)
+                        : Carbon::parse((string) $timestamp);
+                } catch (\Throwable) {
+                    return null;
+                }
+            })
+            ->filter()
+            ->sortDesc()
+            ->first();
+
+        return [
+            'recorded_at' => $latest ?? now(),
+            'raw_data' => $readings,
+        ];
+    }
+
+    /**
+     * Parse alerts from API response
      */
     protected function parseAlerts(array $alerts): array
     {
@@ -202,9 +315,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Map machine status from manufacturer format to standard
-     *
-     * @param string $status
-     * @return string
      */
     protected function parseStatus(string $status): string
     {
@@ -224,9 +334,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Map alert type from manufacturer format to standard
-     *
-     * @param string $type
-     * @return string
      */
     protected function mapAlertType(string $type): string
     {
@@ -246,9 +353,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Map alert priority from manufacturer format to standard
-     *
-     * @param string $severity
-     * @return string
      */
     protected function mapAlertPriority(string $severity): string
     {
@@ -267,8 +371,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Get manufacturer name
-     *
-     * @return string
      */
     public function getManufacturer(): string
     {
@@ -277,8 +379,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Get last error message
-     *
-     * @return string|null
      */
     public function getLastError(): ?string
     {
@@ -288,8 +388,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     /**
      * Test the connection to the manufacturer API
      * Concrete classes should override this
-     *
-     * @return bool
      */
     public function testConnection(): bool
     {
@@ -313,7 +411,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch machine details from the manufacturer API
      * Concrete classes should override this
      *
-     * @param string $machineId
      * @return array<string, mixed>
      */
     public function fetchMachineDetails(string $machineId): array
@@ -326,7 +423,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch real-time location for a machine
      * Concrete classes should override this
      *
-     * @param string $machineId
      * @return array<string, mixed>|null
      */
     public function fetchMachineLocation(string $machineId): ?array
@@ -339,7 +435,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch machine metrics/diagnostics
      * Concrete classes should override this
      *
-     * @param string $machineId
      * @return array<string, mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
@@ -352,7 +447,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch machine alerts/faults
      * Concrete classes should override this
      *
-     * @param string $machineId
      * @return array<string, mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
@@ -365,7 +459,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch all data for a machine (comprehensive sync)
      * Concrete classes should override this
      *
-     * @param string $machineId
      * @return array<string, mixed>
      */
     public function fetchMachineData(string $machineId): array
@@ -376,10 +469,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Log integration activity
-     *
-     * @param string $action
-     * @param array $details
-     * @return void
      */
     protected function logActivity(string $action, array $details = []): void
     {

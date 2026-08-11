@@ -329,3 +329,46 @@
     scrollbar-width: thin;
     scrollbar-color: rgb(55, 65, 81) rgb(17, 24, 39);
 }
+
+/* Dashboard entrance animations (moved from resources/views/livewire/dashboard.blade.php
+   so they ship once in the compiled stylesheet instead of being re-rendered inline on
+   every wire:poll update, which broke CSP since each Livewire response gets its own nonce) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-down {
+    animation: slideDown 0.5s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.4s ease-out forwards;
+    opacity: 0;
+}

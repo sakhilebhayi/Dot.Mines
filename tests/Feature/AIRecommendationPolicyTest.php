@@ -22,10 +22,18 @@ class AIRecommendationPolicyTest extends TestCase
         return $user;
     }
 
+    /**
+     * The real team owner: Team::user_id, per TeamPolicy and every other
+     * ownership check in this app -- there is no 'owner' row in the custom
+     * roles table (TeamRoleProvisioner only ever provisions
+     * admin/fleet_manager/operator/viewer), so a user can never actually
+     * reach this state via an assigned Role in production.
+     */
     public function test_owner_can_update_a_recommendation_on_their_team(): void
     {
-        $team = Team::factory()->create();
-        $owner = $this->userWithRole($team, 'owner');
+        $owner = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $owner->id]);
+        $owner->update(['current_team_id' => $team->id]);
         $recommendation = AIRecommendation::factory()->create(['team_id' => $team->id]);
 
         $this->assertTrue($owner->can('update', $recommendation));

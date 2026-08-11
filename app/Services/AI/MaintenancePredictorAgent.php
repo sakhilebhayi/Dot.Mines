@@ -3,13 +3,10 @@
 namespace App\Services\AI;
 
 use App\Models\AIAgent;
-use App\Models\Team;
-use App\Models\Machine;
-use App\Models\MaintenanceRecord;
-use App\Models\MaintenanceSchedule;
-use App\Models\MachineHealthStatus;
 use App\Models\AIPredictiveAlert;
-use Carbon\Carbon;
+use App\Models\Machine;
+use App\Models\MaintenanceSchedule;
+use App\Models\Team;
 
 /**
  * Maintenance Predictor AI Agent
@@ -26,10 +23,6 @@ class MaintenancePredictorAgent
         $predictionAnalysis = $this->predictMaintenanceNeeds($team);
         $recommendations = array_merge($recommendations, $predictionAnalysis['recommendations']);
         $insights = array_merge($insights, $predictionAnalysis['insights']);
-
-        // Analyze health patterns
-        $healthAnalysis = $this->analyzeHealthPatterns($team);
-        $recommendations = array_merge($recommendations, $healthAnalysis['recommendations']);
 
         // Optimize maintenance schedules
         $scheduleAnalysis = $this->optimizeMaintenanceSchedules($team);
@@ -57,12 +50,12 @@ class MaintenancePredictorAgent
             if ($riskScore > 0.7) {
                 // High risk of breakdown
                 $daysUntilBreakdown = $this->estimateDaysUntilBreakdown($machine, $riskScore);
-                
+
                 $recommendations[] = [
                     'category' => 'maintenance',
                     'priority' => 'critical',
                     'title' => "High Breakdown Risk: {$machine->name}",
-                    'description' => "AI predicts " . round($riskScore * 100) . "% probability of breakdown within {$daysUntilBreakdown} days for {$machine->name}. Immediate inspection recommended.",
+                    'description' => 'AI predicts '.round($riskScore * 100)."% probability of breakdown within {$daysUntilBreakdown} days for {$machine->name}. Immediate inspection recommended.",
                     'confidence_score' => $riskScore,
                     'estimated_savings' => 150000, // Average breakdown cost
                     'related_machine_id' => $machine->id,
@@ -139,45 +132,6 @@ class MaintenancePredictorAgent
         ];
     }
 
-    protected function analyzeHealthPatterns(Team $team): array
-    {
-        $recommendations = [];
-
-        $machines = Machine::where('team_id', $team->id)
-            ->whereHas('healthStatus')
-            ->with('healthStatus')
-            ->get();
-
-        foreach ($machines as $machine) {
-            $health = $machine->healthStatus;
-            
-            // Check for degrading trends
-            $trend = $this->analyzeHealthTrend($machine);
-            
-            if ($trend['is_degrading'] && $trend['rate'] > 5) {
-                $recommendations[] = [
-                    'category' => 'maintenance',
-                    'priority' => 'high',
-                    'title' => "Degrading Health Pattern: {$machine->name}",
-                    'description' => "Machine health declining at {$trend['rate']}% per week. Intervention recommended before critical failure.",
-                    'confidence_score' => 0.79,
-                    'related_machine_id' => $machine->id,
-                    'data' => [
-                        'current_health_score' => $health?->overall_health_score,
-                        'degradation_rate' => round($trend['rate'], 2),
-                        'estimated_critical_date' => $trend['estimated_critical_date'],
-                    ],
-                    'impact_analysis' => [
-                        'time_to_critical' => $trend['days_to_critical'] . ' days',
-                        'recommended_action' => 'Schedule comprehensive inspection',
-                    ],
-                ];
-            }
-        }
-
-        return ['recommendations' => $recommendations];
-    }
-
     protected function optimizeMaintenanceSchedules(Team $team): array
     {
         $recommendations = [];
@@ -209,8 +163,8 @@ class MaintenancePredictorAgent
                         'actual_usage_rate' => round($actualUsage, 2),
                     ],
                     'impact_analysis' => [
-                        'cost_impact' => $optimalInterval > $scheduledInterval 
-                            ? 'Reduce maintenance frequency to save costs' 
+                        'cost_impact' => $optimalInterval > $scheduledInterval
+                            ? 'Reduce maintenance frequency to save costs'
                             : 'Increase maintenance frequency to prevent failures',
                     ],
                 ];
@@ -236,7 +190,7 @@ class MaintenancePredictorAgent
             ->where('status', 'completed')
             ->orderByDesc('completed_at')
             ->first();
-        
+
         if ($lastMaintenance) {
             $daysSinceLastMaintenance = now()->diffInDays($lastMaintenance->completed_at);
             $riskFactors['maintenance'] = min(($daysSinceLastMaintenance / 180) * 0.25, 0.25);
@@ -249,8 +203,8 @@ class MaintenancePredictorAgent
         $riskFactors['health'] = ((100 - $healthScore) / 100) * 0.25;
 
         // Factor 4: Age of machine (20% weight)
-        $machineAge = $machine->year_of_manufacture 
-            ? now()->year - $machine->year_of_manufacture 
+        $machineAge = $machine->year_of_manufacture
+            ? now()->year - $machine->year_of_manufacture
             : 5;
         $riskFactors['age'] = min(($machineAge / 20) * 0.2, 0.2); // 20 years is max
 
@@ -261,7 +215,8 @@ class MaintenancePredictorAgent
     {
         // Higher risk = fewer days until breakdown
         $baseDays = 90;
-        return max(7, (int)($baseDays * (1 - $riskScore)));
+
+        return max(7, (int) ($baseDays * (1 - $riskScore)));
     }
 
     protected function getContributingFactors(Machine $machine): array
@@ -269,24 +224,24 @@ class MaintenancePredictorAgent
         $factors = [];
 
         if ($machine->healthStatus?->overall_health_score < 60) {
-            $factors[] = 'Low health score: ' . $machine->healthStatus->overall_health_score;
+            $factors[] = 'Low health score: '.$machine->healthStatus->overall_health_score;
         }
 
         $lastMaintenance = $machine->maintenanceRecords()->latest('completed_at')->first();
-        if (!$lastMaintenance || now()->diffInDays($lastMaintenance->completed_at) > 90) {
+        if (! $lastMaintenance || now()->diffInDays($lastMaintenance->completed_at) > 90) {
             $factors[] = 'Overdue maintenance';
         }
 
         $highUsage = $machine->metrics()
             ->whereDate('recorded_at', '>=', now()->subDays(7))
             ->avg('operating_hours');
-        
+
         if ($highUsage > 18) {
-            $factors[] = 'High utilization: ' . round($highUsage, 1) . ' hours/day';
+            $factors[] = 'High utilization: '.round($highUsage, 1).' hours/day';
         }
 
         if ($machine->year_of_manufacture && (now()->year - $machine->year_of_manufacture) > 10) {
-            $factors[] = 'Age: ' . (now()->year - $machine->year_of_manufacture) . ' years';
+            $factors[] = 'Age: '.(now()->year - $machine->year_of_manufacture).' years';
         }
 
         return $factors;
@@ -302,20 +257,6 @@ class MaintenancePredictorAgent
         return $recentHours < 12; // Less than 12 hours/day = low demand
     }
 
-    protected function analyzeHealthTrend(Machine $machine): array
-    {
-        // Simplified trend analysis
-        $currentHealth = $machine->healthStatus?->overall_health_score ?? 80;
-        $degradationRate = rand(3, 8); // In production, calculate from historical data
-
-        return [
-            'is_degrading' => $currentHealth < 75,
-            'rate' => $degradationRate,
-            'days_to_critical' => (int)(($currentHealth - 40) / ($degradationRate / 7)),
-            'estimated_critical_date' => now()->addDays((int)(($currentHealth - 40) / ($degradationRate / 7)))->format('Y-m-d'),
-        ];
-    }
-
     protected function getMachineUsageRate(Machine $machine): float
     {
         return $machine->metrics()
@@ -326,16 +267,23 @@ class MaintenancePredictorAgent
     protected function calculateOptimalInterval(Machine $machine, float $usageRate): int
     {
         // Higher usage = shorter intervals
-        if ($usageRate > 16) return 30;
-        if ($usageRate > 12) return 45;
-        if ($usageRate > 8) return 60;
+        if ($usageRate > 16) {
+            return 30;
+        }
+        if ($usageRate > 12) {
+            return 45;
+        }
+        if ($usageRate > 8) {
+            return 60;
+        }
+
         return 90;
     }
 
     protected function createPredictiveAlert(Team $team, Machine $machine, float $riskScore, int $daysUntil): void
     {
         $agent = AIAgent::where('type', AIAgent::TYPE_MAINTENANCE_PREDICTOR)->first();
-        
+
         if ($agent) {
             AIPredictiveAlert::create([
                 'team_id' => $team->id,

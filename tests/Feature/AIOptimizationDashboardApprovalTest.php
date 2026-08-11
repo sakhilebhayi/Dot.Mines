@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Livewire\AIOptimizationDashboard;
 use App\Models\AIRecommendation;
-use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,13 +14,22 @@ class AIOptimizationDashboardApprovalTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * The real team owner: Team::user_id, per TeamPolicy and every other
+     * ownership check in this app -- there is no 'owner' row in the custom
+     * roles table (TeamRoleProvisioner only ever provisions
+     * admin/fleet_manager/operator/viewer), so a user can never actually
+     * reach this state via an assigned Role in production.
+     */
     private function ownerUser(Team $team): User
     {
-        $user = User::factory()->create(['current_team_id' => $team->id]);
-        $role = Role::factory()->create(['team_id' => $team->id, 'name' => 'owner']);
-        $user->roles()->attach($role->id);
+        $owner = User::factory()->create(['current_team_id' => $team->id]);
+        // user_id isn't mass-assignable on Team (by design), so update() would
+        // silently no-op here -- set and save it directly.
+        $team->user_id = $owner->id;
+        $team->save();
 
-        return $user;
+        return $owner;
     }
 
     public function test_implementing_a_recommendation_writes_a_decision_log_row(): void
@@ -75,5 +83,53 @@ class AIOptimizationDashboardApprovalTest extends TestCase
             'actioned_by' => $owner->id,
         ]);
         $this->assertSame('rejected', $recommendation->fresh()->status);
+    }
+
+    /**
+     * Regression test: proposed_action, data (Context), and impact_analysis
+     * (Evidence) previously existed only in the database -- nothing in the
+     * recommendation card rendered any of them. A user had to click Implement
+     * or Reject, opening the confirm dialog, before ever seeing what the
+     * proposed action even was. This asserts all three are visible on the
+     * card itself, before any decision button is clicked.
+     */
+    public function test_recommendation_card_shows_proposed_action_context_and_evidence_before_any_decision(): void
+    {
+        $team = Team::factory()->create();
+        $owner = $this->ownerUser($team);
+        AIRecommendation::factory()->create([
+            'team_id' => $team->id,
+            'proposed_action' => 'Reroute Truck 7 via the optimized path to capture the savings above.',
+            'data' => ['current_utilization' => 42.5, 'wasted_hours_per_day' => 8],
+            'impact_analysis' => ['recommended_action' => 'Reassign or consider selling/renting out'],
+        ]);
+
+        $component = Livewire::actingAs($owner)
+            ->test(AIOptimizationDashboard::class)
+            ->set('activeTab', 'recommendations');
+
+        $component->assertSee('Reroute Truck 7 via the optimized path to capture the savings above.');
+        $component->assertSee('Current utilization');
+        $component->assertSee('42.5');
+        $component->assertSee('Wasted hours per day');
+        $component->assertSee('Recommended action');
+        $component->assertSee('Reassign or consider selling/renting out');
+    }
+
+    public function test_recommendation_card_omits_the_context_evidence_disclosure_when_neither_is_present(): void
+    {
+        $team = Team::factory()->create();
+        $owner = $this->ownerUser($team);
+        AIRecommendation::factory()->create([
+            'team_id' => $team->id,
+            'data' => [],
+            'impact_analysis' => [],
+        ]);
+
+        $component = Livewire::actingAs($owner)
+            ->test(AIOptimizationDashboard::class)
+            ->set('activeTab', 'recommendations');
+
+        $component->assertDontSee('View context & evidence');
     }
 }

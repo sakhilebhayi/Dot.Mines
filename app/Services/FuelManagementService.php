@@ -8,8 +8,10 @@ use App\Models\FuelConsumptionMetric;
 use App\Models\FuelTank;
 use App\Models\FuelTransaction;
 use App\Models\Machine;
-use Illuminate\Support\Facades\DB;
+use App\Models\Team;
+use App\Support\Currency;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class FuelManagementService
 {
@@ -19,6 +21,14 @@ class FuelManagementService
     public function recordTransaction(array $data): FuelTransaction
     {
         return DB::transaction(function () use ($data) {
+            // currency wasn't in $fillable until it was wired up to
+            // Team::currency (see Team::$fillable) -- default new
+            // transactions to the team's chosen currency rather than the
+            // fuel_transactions column's hardcoded 'ZAR' default.
+            if (! isset($data['currency']) && isset($data['team_id'])) {
+                $data['currency'] = Team::find($data['team_id'])?->currency ?? 'ZAR';
+            }
+
             $transaction = FuelTransaction::create($data);
 
             // Update tank level based on transaction type
@@ -50,18 +60,18 @@ class FuelManagementService
             case 'delivery':
                 $tank->increment('current_level_liters', $transaction->quantity_liters);
                 break;
-            
+
             case 'dispensing':
             case 'spillage':
             case 'theft':
                 $tank->decrement('current_level_liters', $transaction->quantity_liters);
                 break;
-            
+
             case 'adjustment':
                 $tank->current_level_liters = $transaction->quantity_liters;
                 $tank->save();
                 break;
-            
+
             case 'transfer':
                 if ($transaction->from_tank_id) {
                     $fromTank = FuelTank::find($transaction->from_tank_id);
@@ -83,7 +93,7 @@ class FuelManagementService
         // Check tank level alerts
         if ($transaction->fuel_tank_id) {
             $tank = $transaction->fuelTank;
-            
+
             if ($tank->isCritical()) {
                 $this->createFuelAlert([
                     'team_id' => $tank->team_id,
@@ -109,6 +119,49 @@ class FuelManagementService
         if ($transaction->machine_id && $transaction->transaction_type === 'dispensing') {
             $this->checkMachineConsumptionPatterns($transaction);
         }
+
+        // Theft/spillage used to just silently decrement the tank level,
+        // exactly like a normal dispensing entry -- nobody was ever
+        // notified a real loss had actually been logged.
+        if (in_array($transaction->transaction_type, ['theft', 'spillage'], true)) {
+            $this->createFuelLossAlert($transaction);
+        }
+    }
+
+    /**
+     * Fires for every theft/spillage transaction. Deliberately does not go
+     * through createFuelAlert()'s dedup (one alert per type per team per
+     * 24h) -- that rule makes sense for a recurring condition like a low
+     * tank, but a second real loss report the same day, possibly at a
+     * different tank or machine, is exactly the kind of thing that must
+     * never be silently suppressed.
+     */
+    protected function createFuelLossAlert(FuelTransaction $transaction): FuelAlert
+    {
+        $label = $transaction->transaction_type === 'theft' ? 'Theft' : 'Spillage';
+        $location = $transaction->fuelTank?->name ?? $transaction->machine?->name ?? 'an unrecorded location';
+        $quantity = number_format((float) $transaction->quantity_liters, 2);
+        $costSuffix = $transaction->total_cost
+            ? ' ('.Currency::format($transaction->total_cost, $transaction->currency ?? 'ZAR').')'
+            : '';
+
+        return FuelAlert::create([
+            'team_id' => $transaction->team_id,
+            'fuel_tank_id' => $transaction->fuel_tank_id,
+            'machine_id' => $transaction->machine_id,
+            'alert_type' => 'fuel_loss_reported',
+            'title' => "Fuel {$label} Reported: {$location}",
+            'message' => "{$quantity}L reported as {$transaction->transaction_type} at {$location}{$costSuffix}.",
+            'severity' => $transaction->transaction_type === 'theft' ? 'critical' : 'warning',
+            'status' => 'active',
+            'triggered_at' => now(),
+            'metadata' => [
+                'fuel_transaction_id' => $transaction->id,
+                'transaction_type' => $transaction->transaction_type,
+                'quantity_liters' => (float) $transaction->quantity_liters,
+                'total_cost' => $transaction->total_cost !== null ? (float) $transaction->total_cost : null,
+            ],
+        ]);
     }
 
     /**
@@ -117,7 +170,7 @@ class FuelManagementService
     protected function checkMachineConsumptionPatterns(FuelTransaction $transaction): void
     {
         $machine = $transaction->machine;
-        
+
         // Get average daily consumption for this machine
         $avgConsumption = FuelConsumptionMetric::where('machine_id', $machine->id)
             ->where('date', '>=', now()->subDays(30))
@@ -174,7 +227,7 @@ class FuelManagementService
             // Update status if exceeded
             if ($budget->isExceeded() && $budget->status !== 'exceeded') {
                 $budget->update(['status' => 'exceeded']);
-                
+
                 // Create budget alert
                 $this->createFuelAlert([
                     'team_id' => $budget->team_id,
@@ -244,11 +297,48 @@ class FuelManagementService
      */
     public function getTeamAnalytics(int $teamId, Carbon $startDate, Carbon $endDate): array
     {
-        // Total fuel consumed
+        // Total fuel removed from tanks -- dispensing (legitimate use) plus
+        // theft/spillage (loss). Kept as-is for anything relying on this
+        // matching real tank drawdown; the loss portion used to be silently
+        // lumped in here with no separate visibility at all.
         $totalConsumed = FuelTransaction::where('team_id', $teamId)
             ->whereIn('transaction_type', ['dispensing', 'spillage', 'theft'])
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->sum('quantity_liters');
+
+        // Legitimate consumption vs. loss, broken out separately -- a team
+        // could not previously see "how much fuel did we actually lose to
+        // theft/spillage this period" anywhere; it was invisible inside the
+        // total above.
+        $dispensedTotal = FuelTransaction::where('team_id', $teamId)
+            ->where('transaction_type', 'dispensing')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('quantity_liters');
+
+        $lossByType = FuelTransaction::where('team_id', $teamId)
+            ->whereIn('transaction_type', ['theft', 'spillage'])
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->select('transaction_type', DB::raw('SUM(quantity_liters) as liters'), DB::raw('SUM(total_cost) as cost'))
+            ->groupBy('transaction_type')
+            ->get()
+            ->keyBy('transaction_type');
+
+        $theftLiters = round((float) ($lossByType->get('theft')->liters ?? 0), 2);
+        $theftCost = round((float) ($lossByType->get('theft')->cost ?? 0), 2);
+        $spillageLiters = round((float) ($lossByType->get('spillage')->liters ?? 0), 2);
+        $spillageCost = round((float) ($lossByType->get('spillage')->cost ?? 0), 2);
+
+        $losses = [
+            'theft' => ['liters' => $theftLiters, 'cost' => $theftCost],
+            'spillage' => ['liters' => $spillageLiters, 'cost' => $spillageCost],
+            'total_liters' => round($theftLiters + $spillageLiters, 2),
+            'total_cost' => round($theftCost + $spillageCost, 2),
+            // What share of everything removed from a tank was loss rather
+            // than legitimate use -- 0 when nothing at all was recorded.
+            'percent_of_total' => $totalConsumed > 0
+                ? round((($theftLiters + $spillageLiters) / $totalConsumed) * 100, 1)
+                : 0,
+        ];
 
         // Total cost
         $totalCost = FuelTransaction::where('team_id', $teamId)
@@ -328,9 +418,17 @@ class FuelManagementService
             ],
             'totals' => [
                 'fuel_consumed' => round($totalConsumed, 2),
+                // Legitimate dispensing only -- fuel_consumed above still
+                // includes loss, kept for backward compatibility with
+                // anything relying on it matching real tank drawdown.
+                'fuel_dispensed' => round($dispensedTotal, 2),
                 'total_cost' => round($totalCost, 2),
                 'average_price_per_liter' => $avgPrice,
             ],
+            // Broken out from 'totals' above -- previously invisible,
+            // silently folded into fuel_consumed with no way to see how
+            // much was actually lost vs. legitimately used.
+            'losses' => $losses,
             'consumption_by_machine' => $consumptionByMachine,
             'daily_trend' => $dailyTrend,
             'tank_status' => $tankStatus,

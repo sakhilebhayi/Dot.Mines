@@ -7,7 +7,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
         </div>
-        <script>window.scrollTo(0,0);</script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
     @else
         <!-- Greeting -->
         <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 mb-8 border border-[var(--line)]">
@@ -16,12 +16,37 @@
                     $hour = now()->format('H');
                     $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good Evening');
                 @endphp
-                {{ $greeting }}, {{ auth()->user()->name }}! 👋
+                {{ $greeting }}, {{ auth()->user()->name }}!
             </h1>
             <p class="text-[var(--sand)] text-sm">
                 {{ now()->format('l, F j, Y') }} • {{ auth()->user()->currentTeam->name }}
             </p>
         </div>
+
+        <!-- Getting Started: shown until the team has set up its first mine area and machine -->
+        @if ($totalMineAreas === 0 || $totalMachines === 0)
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 mb-8 border border-[var(--gold)]/40">
+                <h2 class="text-lg font-display font-semibold text-[var(--stone)] mb-1">Get {{ auth()->user()->currentTeam->name }} set up</h2>
+                <p class="text-[var(--sand)] text-sm mb-5">Three steps to a working fleet dashboard.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <a href="{{ route('mine-areas') }}" class="flex flex-col gap-2 p-4 rounded-lg border {{ $totalMineAreas > 0 ? 'border-[var(--line)] opacity-60' : 'border-[var(--gold)]/50 hover:border-[var(--gold)]' }} transition-colors">
+                        <span class="text-xs font-mono uppercase tracking-wide text-[var(--gold)]">Step 1</span>
+                        <span class="font-semibold text-[var(--stone)]">{{ $totalMineAreas > 0 ? 'Mine area created ✓' : 'Create a mine area' }}</span>
+                        <span class="text-xs text-[var(--sand)]">Define the site your machines and geofences belong to.</span>
+                    </a>
+                    <a href="{{ route('fleet') }}" class="flex flex-col gap-2 p-4 rounded-lg border {{ $totalMachines > 0 ? 'border-[var(--line)] opacity-60' : 'border-[var(--gold)]/50 hover:border-[var(--gold)]' }} transition-colors">
+                        <span class="text-xs font-mono uppercase tracking-wide text-[var(--gold)]">Step 2</span>
+                        <span class="font-semibold text-[var(--stone)]">{{ $totalMachines > 0 ? 'Machine added ✓' : 'Add your first machine' }}</span>
+                        <span class="text-xs text-[var(--sand)]">Register a machine to start tracking location and status.</span>
+                    </a>
+                    <a href="{{ route('teams.show', auth()->user()->currentTeam) }}" class="flex flex-col gap-2 p-4 rounded-lg border border-[var(--line)] hover:border-[var(--gold)] transition-colors">
+                        <span class="text-xs font-mono uppercase tracking-wide text-[var(--gold)]">Step 3</span>
+                        <span class="font-semibold text-[var(--stone)]">Invite your team</span>
+                        <span class="text-xs text-[var(--sand)]">Bring in operators and managers to collaborate.</span>
+                    </a>
+                </div>
+            </div>
+        @endif
 
     <!-- Statistics Cards -->
     <div class="flex flex-col gap-6 mb-8 md:grid md:grid-cols-2 lg:grid-cols-4 md:flex-none overflow-x-auto pb-2">
@@ -124,7 +149,7 @@
         <div class="lg:col-span-2 bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)]">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-display font-semibold text-[var(--stone)] flex items-center gap-2">
-                    <span class="text-2xl">🚨</span>
+                    
                     Recent Alerts
                 </h2>
                 <a href="{{ route('alerts') }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)] text-sm font-medium transition-colors">
@@ -186,7 +211,7 @@
         <!-- Machine Status & Quick Actions -->
         <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)] mt-6 lg:mt-0">
             <h2 class="text-xl font-display font-semibold text-[var(--stone)] mb-6 flex items-center gap-2">
-                <span class="text-2xl">🚜</span>
+                
                 Fleet Status
             </h2>
 
@@ -272,45 +297,4 @@
     </div>
 
     @endif
-    <style>
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes scaleIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
-
-    .animate-fade-in {
-        animation: fadeIn 0.6s ease-out;
-    }
-
-    .animate-slide-down {
-        animation: slideDown 0.5s ease-out;
-    }
-
-    .animate-scale-in {
-        animation: scaleIn 0.4s ease-out forwards;
-        opacity: 0;
-    }
-    </style>
 </div>

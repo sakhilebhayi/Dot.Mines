@@ -2,17 +2,23 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\ScanBladeUnescaped;
+use App\Listeners\NotifyOnJobFailed;
+use App\Mail\WelcomeMail;
 use App\Services\RealtimeEventScheduler;
+use App\Services\TeamRoleProvisioner;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Auth\Events\Registered;
-use App\Mail\WelcomeMail;
-use App\Console\Commands\ScanBladeUnescaped;
+use Illuminate\Validation\Rules\Password;
+use Laravel\Jetstream\Events\TeamMemberAdded;
+use Laravel\Jetstream\Events\TeamMemberUpdated;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +45,22 @@ class AppServiceProvider extends ServiceProvider
         // Configure rate limiting
         $this->configureRateLimiting();
 
+        // Password::default() (used by every Fortify password flow via
+        // PasswordValidationRules::passwordRules() -- registration, password
+        // update, password reset) falls back to Laravel's own bare minimum
+        // (min 8 characters, nothing else) unless a default is registered
+        // here. There was no composition requirement and no breach check
+        // against known-leaked passwords at all before this.
+        Password::defaults(function () {
+            $rule = Password::min(8)->letters()->mixedCase()->numbers()->symbols();
+
+            // ->uncompromised() calls the (k-anonymity, privacy-preserving)
+            // HaveIBeenPwned API -- a real network call on every password
+            // submission, which has no place slowing down or flaking the
+            // test suite.
+            return $this->app->runningUnitTests() ? $rule : $rule->uncompromised();
+        });
+
         // Register real-time event scheduling
         $this->app->booted(function () {
             $schedule = $this->app->make('Illuminate\Console\Scheduling\Schedule');
@@ -54,10 +76,38 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        // Listen for failed queue jobs and notify monitoring
-        Event::listen(\Illuminate\Queue\Events\JobFailed::class, function ($event) {
+        // Jetstream's native team pages (teams.show) manage membership through
+        // its own team_user pivot role and never touch our custom
+        // roles/permissions tables, so a member added or role-changed there
+        // previously had no rows in the RBAC system and was silently denied
+        // every $this->authorize() check even though the team page showed
+        // them with a real role. JetstreamServiceProvider registers the same
+        // four role keys (admin/fleet_manager/operator/viewer) as
+        // TeamRoleProvisioner's catalog, so this is a direct 1:1 sync -- on
+        // every add, invitation acceptance (same AddTeamMember action), and
+        // role update.
+        Event::listen([TeamMemberAdded::class, TeamMemberUpdated::class], function ($event) {
+            $pivotRole = $event->team->users()->find($event->user->id)?->membership?->role;
+
+            if (! $pivotRole) {
+                return;
+            }
+
             try {
-                $listener = new \App\Listeners\NotifyOnJobFailed();
+                TeamRoleProvisioner::assignRole($event->user, $event->team, $pivotRole);
+            } catch (\Throwable $e) {
+                Log::error('Failed to sync Jetstream team role into RBAC system', [
+                    'team_id' => $event->team->id,
+                    'user_id' => $event->user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        });
+
+        // Listen for failed queue jobs and notify monitoring
+        Event::listen(JobFailed::class, function ($event) {
+            try {
+                $listener = new NotifyOnJobFailed;
                 $listener->handle($event);
             } catch (\Throwable $e) {
                 Log::error('Failed to notify on job failure', ['error' => $e->getMessage()]);
@@ -97,22 +147,17 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function () {
                     return response()->json([
                         'message' => 'Too many requests. Please try again later.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });
 
-        // Login rate limiting - 5 attempts per minute
-        RateLimiter::for('login', function (Request $request) {
-            return Limit::perMinute(5)
-                ->by($request->email . '|' . $request->ip())
-                ->response(function () {
-                    return response()->json([
-                        'message' => 'Too many login attempts. Please try again later.',
-                        'retry_after' => 60
-                    ], 429);
-                });
-        });
+        // Login rate limiting is defined in FortifyServiceProvider (which
+        // boots after this provider, so its registration is the one that
+        // actually takes effect) and applied via config('fortify.limiters.
+        // login') to Fortify's own /login route -- a duplicate 'login'
+        // limiter here was pure dead code, silently discarded on every
+        // request, confirmed via RateLimiter's internal $limiters array.
 
         // Webhook endpoints - higher limit for integrations (120 per minute)
         RateLimiter::for('webhooks', function (Request $request) {
@@ -121,7 +166,7 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function () {
                     return response()->json([
                         'message' => 'Webhook rate limit exceeded.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });
@@ -133,7 +178,7 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function () {
                     return response()->json([
                         'message' => 'Report generation rate limit exceeded.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });
@@ -145,7 +190,7 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function () {
                     return response()->json([
                         'message' => 'Download rate limit exceeded.',
-                        'retry_after' => 60
+                        'retry_after' => 60,
                     ], 429);
                 });
         });

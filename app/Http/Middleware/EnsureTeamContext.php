@@ -33,9 +33,17 @@ class EnsureTeamContext
         // Get team_id from route or use user's current team
         $teamId = $request->route('team_id') ?? $user->current_team_id;
 
-        // If no team_id, set to user's default team
+        // If no team_id, set to user's default team. $user->teams() is only
+        // the team_user pivot (teams they were invited into) -- it misses a
+        // team they own, since CreateNewUser::createTeam() attaches
+        // ownership via teams.user_id and never inserts a pivot row. Every
+        // freshly registered user owns their personal team but isn't a
+        // "member" of it by this definition, so the old teams()-only lookup
+        // found nothing and bounced them to teams.create on their very
+        // first authenticated request. Prefer their personal team, then any
+        // other owned team, then any team they're a member of.
         if (! $teamId) {
-            $teamId = $user->teams()->first()?->id;
+            $teamId = ($user->personalTeam() ?? $user->ownedTeams()->first() ?? $user->teams()->first())?->id;
             if ($teamId) {
                 $user->update(['current_team_id' => $teamId]);
             }

@@ -8,7 +8,7 @@
     </x-slot>
 
     <x-slot name="content">
-        <div class="max-w-xl text-sm text-gray-600">
+        <div class="max-w-xl text-sm text-[var(--sand)]">
             {{ __('Once a team is deleted, all of its resources and data will be permanently deleted. Before deleting this team, please download any data or information regarding this team that you wish to retain.') }}
         </div>
 
@@ -21,11 +21,11 @@
         <!-- Delete Team Confirmation Modal -->
         <x-confirmation-modal wire:model.live="confirmingTeamDeletion">
             <x-slot name="title">
-                <span class="text-gray-100">{{ __('Delete Team') }}</span>
+                <span class="text-[var(--stone)]">{{ __('Delete Team') }}</span>
             </x-slot>
 
             <x-slot name="content">
-                <span class="text-gray-100">{{ __('Are you sure you want to delete this team? Once a team is deleted, all of its resources and data will be permanently deleted.') }}</span>
+                <span class="text-[var(--stone)]">{{ __('Are you sure you want to delete this team? Once a team is deleted, all of its resources and data will be permanently deleted.') }}</span>
             </x-slot>
 
             <x-slot name="footer">

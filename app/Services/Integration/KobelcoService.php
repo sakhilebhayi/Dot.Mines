@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * Kobelco KIMS (Kobelco Information Management System) Integration Service
- * 
+ *
  * Contact Kobelco for KIMS API access
  * Requires Kobelco customer code
  */
@@ -19,11 +19,13 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
     {
         try {
             $response = $this->makeRequest('GET', '/api/v1/machines', [
-                'query' => ['limit' => 1]
+                'query' => ['limit' => 1],
             ]);
-            return !empty($response) && $response['success'] !== false;
+
+            return ! empty($response) && $response['success'] !== false;
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
+
             return false;
         }
     }
@@ -32,14 +34,14 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
     {
         try {
             $response = $this->makeRequest('GET', '/api/v1/machines');
-            
+
             $machines = [];
-            if (!empty($response['data']['machines'])) {
+            if (! empty($response['data']['machines'])) {
                 foreach ($response['data']['machines'] as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'machines' => $machines,
@@ -47,6 +49,7 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machines', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -59,13 +62,14 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
     {
         try {
             $response = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/location");
-            
+
             return [
                 'success' => true,
                 'location' => $this->parseLocation($response['data'] ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -78,18 +82,23 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
         try {
             $operatingStatus = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/operating-status");
             $workRecords = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/work-records");
-            
-            $metrics = array_merge(
+
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier one, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($operatingStatus['data'] ?? []),
                 $this->parseMetrics($workRecords['data'] ?? [])
             );
-            
+
             return [
                 'success' => true,
                 'metrics' => $metrics,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch metrics', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -102,20 +111,21 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
     {
         try {
             $response = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/alerts");
-            
+
             $alerts = [];
-            if (!empty($response['data']['alerts'])) {
+            if (! empty($response['data']['alerts'])) {
                 foreach ($response['data']['alerts'] as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
-            
+
             return [
                 'success' => true,
                 'alerts' => $alerts,
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch alerts', $e);
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -131,14 +141,12 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine details from Kobelco API
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
         $location = $this->fetchLocation($machineId);
+
         return [
             'location' => $location['location'] ?? [],
             'success' => $location['success'] ?? false,
@@ -147,14 +155,12 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine location
-     * 
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
             $result = $this->fetchLocation($machineId);
+
             return ($result['location'] ?? null) ?? null;
         } catch (Exception $e) {
             return null;
@@ -163,14 +169,12 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine metrics
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
+
             return $result['metrics'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -179,14 +183,12 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine alerts
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
             $result = $this->fetchAlerts($machineId);
+
             return $result['alerts'] ?? [];
         } catch (Exception $e) {
             return [];
@@ -195,9 +197,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch comprehensive machine data
-     * 
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -211,8 +210,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Get the manufacturer name
-     * 
-     * @return string
      */
     public function getManufacturer(): string
     {

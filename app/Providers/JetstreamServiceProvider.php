@@ -45,17 +45,30 @@ class JetstreamServiceProvider extends ServiceProvider
     {
         Jetstream::defaultApiTokenPermissions(['read']);
 
+        // These four keys/names must match App\Services\TeamRoleProvisioner's
+        // role catalog exactly -- AppServiceProvider syncs Jetstream's team_user
+        // pivot role into that RBAC system on every add/invite/role-change, and
+        // a mismatched key here would silently leave a team member with no
+        // real permissions despite Jetstream showing them a role.
         Jetstream::role('admin', 'Administrator', [
             'create',
             'read',
             'update',
             'delete',
-        ])->description('Administrator users can perform any action.');
+        ])->description('Full access to every feature and data set. Team membership and billing remain Owner-only.');
 
-        Jetstream::role('editor', 'Editor', [
-            'read',
+        Jetstream::role('fleet_manager', 'Fleet Manager', [
             'create',
+            'read',
             'update',
-        ])->description('Editor users have the ability to read, create, and update.');
+        ])->description('Can manage machines, geofences, and reports, but not team or billing settings.');
+
+        Jetstream::role('operator', 'Operator', [
+            'read',
+        ])->description('Can view machines and maps, and acknowledge alerts.');
+
+        Jetstream::role('viewer', 'Viewer', [
+            'read',
+        ])->description('Read-only access to dashboards, machines, and reports.');
     }
 }

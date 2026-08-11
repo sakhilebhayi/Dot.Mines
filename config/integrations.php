@@ -86,30 +86,46 @@ return [
         ],
         'bell' => [
             'name' => 'Bell',
-            'api_system' => 'Fleetmatic',
-            'base_url' => env('BELL_API_BASE_URL', 'https://api.fleetmatic.bell.com'),
-            'api_version' => 'v1',
-            'api_key_env' => 'BELL_API_KEY',
-            'api_secret_env' => 'BELL_API_SECRET',
-            'account_id_env' => 'BELL_ACCOUNT_ID',
-            'webhook_url_env' => 'BELL_WEBHOOK_URL',
-            'auth_type' => 'bearer_token', // Bearer Token Authentication
-            'token_endpoint' => '/auth/token',
+            'api_system' => 'ISO 15143-3 (AEMP 2.0) Fleet API',
+            // Real endpoints from Bell's own "BELL_ISO15143-3 SSO" Postman
+            // collection -- the previous 'Fleetmatic' base_url/paths below it
+            // were guessed and never matched a real Bell endpoint.
+            'base_url' => env('BELL_API_BASE_URL', 'https://b-fleet03.bellequipment.com:8080'),
+            'token_url' => env('BELL_TOKEN_URL', 'https://sso.bellequipment.com/connect/token'),
+            'api_version' => null, // ISO 15143-3 itself is the versioning; no /v1 path segment.
+            'client_id_env' => 'BELL_CLIENT_ID', // Bell issues 'ISO_Export_Service' to every ISO export consumer.
+            'scope' => 'ISO_Exports',
+            'username_env' => 'BELL_USERNAME',
+            'password_env' => 'BELL_PASSWORD',
+            'client_secret_env' => 'BELL_CLIENT_SECRET',
+            // OAuth2 Resource Owner Password Credentials (RFC 6749 §4.3):
+            // grant_type=password, plus client_id/client_secret, against
+            // token_url above. Distinct from the 'oauth2' (client credentials)
+            // and 'bearer_token' (pre-issued static token) auth types used by
+            // other manufacturers in this file.
+            'auth_type' => 'oauth2_password',
             'supported_endpoints' => [
-                'vehicles' => '/fleetmatic/v1/vehicles',
-                'location' => '/fleetmatic/v1/vehicles/{vehicleId}/location',
-                'telemetry' => '/fleetmatic/v1/vehicles/{vehicleId}/telemetry',
-                'fuelLevel' => '/fleetmatic/v1/vehicles/{vehicleId}/fuel',
-                'engineData' => '/fleetmatic/v1/vehicles/{vehicleId}/engine',
-                'alerts' => '/fleetmatic/v1/vehicles/{vehicleId}/alerts',
-                'trips' => '/fleetmatic/v1/vehicles/{vehicleId}/trips',
+                'fleet' => '/Fleet',
+                'locations' => '/Fleet/Equipment/{equipmentId}/Locations/{startDateUTC}/{endDateUTC}',
+                'operatingHours' => '/Fleet/Equipment/{equipmentId}/CumulativeOperatingHours/{startDateUTC}/{endDateUTC}',
+                'idleHours' => '/Fleet/Equipment/{equipmentId}/CumulativeIdleHours/{startDateUTC}/{endDateUTC}',
+                'fuelUsed' => '/Fleet/Equipment/{equipmentId}/CumulativeFuelUsed/{startDateUTC}/{endDateUTC}',
+                'fuelUsedLast24Hours' => '/Fleet/Equipment/{equipmentId}/FuelUsedInThePreceding24Hours/{startDateUTC}/{endDateUTC}',
+                'fuelRemainingRatio' => '/Fleet/Equipment/{equipmentId}/FuelRemainingRatio/{startDateUTC}/{endDateUTC}',
+                'defRemaining' => '/Fleet/Equipment/{equipmentId}/DEFRemaining/{startDateUTC}/{endDateUTC}',
+                'distance' => '/Fleet/Equipment/{equipmentId}/Distance/{startDateUTC}/{endDateUTC}',
+                'cautionCodes' => '/Fleet/Equipment/{equipmentId}/CautionCodes/{startDateUTC}/{endDateUTC}',
+                'engineCondition' => '/Fleet/Equipment/{equipmentId}/EngineCondition/{startDateUTC}/{endDateUTC}',
+                'loadCount' => '/Fleet/Equipment/{equipmentId}/CumulativeLoadCount/{startDateUTC}/{endDateUTC}',
+                'payloadTotals' => '/Fleet/Equipment/{equipmentId}/CumulativePayloadTotals/{startDateUTC}/{endDateUTC}',
+                'regenerationHours' => '/Fleet/Equipment/{equipmentId}/CumulativeActiveRegenerationHours/{startDateUTC}/{endDateUTC}',
             ],
-            'sync_interval' => 300,
+            'sync_interval' => 900, // Bell's own reference spec suggests polling every 15 minutes.
             'retry_attempts' => 3,
             'rate_limit' => 80, // requests per minute
             'requires_bell_contact' => true,
-            'documentation' => 'Contact Bell Equipment for API access',
-            'notes' => 'Requires Bell account ID and API access approval',
+            'documentation' => 'Contact Bell Equipment to be issued an ISO 15143-3 export account (username/password + client secret for the ISO_Export_Service client)',
+            'notes' => 'Requires a Bell-issued ISO 15143-3 export account. Implemented against Bell\'s published Postman collection; response XML shape has not yet been confirmed against a live sync -- see BellService docblock.',
         ],
         'hitachi' => [
             'name' => 'Hitachi Construction Machinery',

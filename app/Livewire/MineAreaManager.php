@@ -6,6 +6,7 @@ use App\Models\MineArea;
 use App\Services\MineAreaService;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -156,14 +157,20 @@ class MineAreaManager extends Component
             'manager_contact' => $this->manager_contact,
         ];
 
+        if ($this->editingMineAreaId) {
+            $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
+            if (! $mineArea) {
+                $this->dispatchBrowserEvent('notify', ['message' => 'Mine area not found', 'type' => 'error']);
+
+                return;
+            }
+            $this->authorize('update', $mineArea);
+        } else {
+            $this->authorize('create', MineArea::class);
+        }
+
         try {
             if ($this->editingMineAreaId) {
-                $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
-                if (! $mineArea) {
-                    $this->dispatchBrowserEvent('notify', ['message' => 'Mine area not found', 'type' => 'error']);
-
-                    return;
-                }
                 $this->getService()->update($mineArea, $data);
                 $this->dispatchBrowserEvent('notify', ['message' => 'Mine area updated successfully', 'type' => 'success']);
                 $this->showEditModal = false;
@@ -177,8 +184,9 @@ class MineAreaManager extends Component
             }
             $this->resetForm();
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to save mine area', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
         }
     }
 
@@ -188,13 +196,15 @@ class MineAreaManager extends Component
         if ($mineArea->team_id !== $team->id) {
             abort(403);
         }
+        $this->authorize('delete', $mineArea);
 
         try {
             $this->getService()->delete($mineArea);
             $this->dispatchBrowserEvent('notify', ['message' => 'Mine area deleted successfully', 'type' => 'success']);
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error deleting mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to delete mine area', ['mine_area_id' => $mineArea->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't delete this mine area. Please try again.", 'type' => 'error']);
         }
     }
 
@@ -263,6 +273,8 @@ class MineAreaManager extends Component
 
     public function saveMineAreaWithBoundary()
     {
+        $this->authorize('create', MineArea::class);
+
         $this->validate();
 
         if (empty($this->boundaryCoordinates)) {
@@ -297,8 +309,9 @@ class MineAreaManager extends Component
             $this->switchToListMode();
             $this->resetForm();
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to save mine area boundary', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
         }
     }
 

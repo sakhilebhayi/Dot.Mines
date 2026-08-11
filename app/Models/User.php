@@ -3,13 +3,19 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\Carbon;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * User Model
@@ -17,7 +23,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $id
  * @property string $name
  * @property string $email
- * @property \Carbon\Carbon|null $email_verified_at
+ * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token
  * @property int|null $current_team_id
@@ -25,17 +31,18 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $two_factor_confirmed
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Team> $ownedTeams
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Collection<int, PersonalAccessToken> $tokens
+ * @property-read Collection<int, Team> $ownedTeams
  */
 class User extends Authenticatable
 {
     use HasApiTokens;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use HasProfilePhoto;
     use HasTeams;
     use Notifiable;
@@ -51,6 +58,7 @@ class User extends Authenticatable
         'email',
         'password',
         'current_team_id',
+        'notification_preferences',
     ];
 
     /**
@@ -84,6 +92,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_preferences' => 'array',
         ];
     }
 
@@ -159,6 +168,77 @@ class User extends Authenticatable
     }
 
     /**
+     * Whether an in-app alert of the given severity should reach this user.
+     * 'critical' always passes -- neither the "In-App Alerts" toggle nor
+     * quiet hours can suppress it, the same mandatory floor already applied
+     * to the notification bell's severity threshold.
+     */
+    public function wantsInAppAlert(?string $severity = null): bool
+    {
+        if ($severity === 'critical') {
+            return true;
+        }
+
+        if (($this->notification_preferences['in_app_alerts'] ?? true) === false) {
+            return false;
+        }
+
+        return ! $this->isInQuietHours();
+    }
+
+    /**
+     * Whether an email alert of the given severity should be sent to this
+     * user. Same mandatory-critical floor as wantsInAppAlert().
+     */
+    public function wantsEmailAlert(?string $severity = null): bool
+    {
+        if ($severity === 'critical') {
+            return true;
+        }
+
+        if (($this->notification_preferences['email_alerts'] ?? true) === false) {
+            return false;
+        }
+
+        return ! $this->isInQuietHours();
+    }
+
+    /**
+     * Whether this user wants "report ready" emails -- the one preference
+     * this toggle is named after and, until now, never actually gated.
+     */
+    public function wantsEmailReports(): bool
+    {
+        return ($this->notification_preferences['email_reports'] ?? true) !== false;
+    }
+
+    /**
+     * Quiet hours support an overnight window (e.g. 22:00-08:00), where the
+     * end time is numerically before the start time.
+     */
+    public function isInQuietHours(): bool
+    {
+        $preferences = $this->notification_preferences ?? [];
+
+        if (($preferences['quiet_hours_enabled'] ?? false) !== true) {
+            return false;
+        }
+
+        $start = $preferences['quiet_hours_start'] ?? null;
+        $end = $preferences['quiet_hours_end'] ?? null;
+
+        if (! $start || ! $end) {
+            return false;
+        }
+
+        $now = now()->format('H:i');
+
+        return $start <= $end
+            ? ($now >= $start && $now < $end)
+            : ($now >= $start || $now < $end);
+    }
+
+    /**
      * Check if user has all of the given permissions
      */
     public function hasAllPermissions($permissions): bool
@@ -195,7 +275,7 @@ class User extends Authenticatable
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
@@ -213,20 +293,32 @@ class User extends Authenticatable
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
         return $this->roles()->detach($role->id);
     }
 
-    public function ownedTeams(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'user_id');
     }
 
-    public function currentTeam(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * This override existed only to add a return type; it silently dropped
+     * HasTeams::currentTeam()'s lazy fallback to the user's personal team,
+     * so any user reaching here with current_team_id still null (freshly
+     * registered, or a route not covered by the ensure_team middleware)
+     * got a hard null instead of their own team. Restored to match the
+     * trait's real behavior.
+     */
+    public function currentTeam(): BelongsTo
     {
+        if (is_null($this->current_team_id) && $this->id) {
+            $this->switchTeam($this->personalTeam());
+        }
+
         return $this->belongsTo(Team::class, 'current_team_id');
     }
 }

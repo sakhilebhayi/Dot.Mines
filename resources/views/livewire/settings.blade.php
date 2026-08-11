@@ -12,19 +12,19 @@
                 wire:click="setActiveTab('general')"
                 class="px-4 py-3 font-medium {{ $activeTab === 'general' ? 'text-[var(--gold)] border-b-2 border-[var(--gold)]' : 'text-[var(--sand)] hover:text-[var(--sand)]' }}"
             >
-                🏢 General
+                General
             </button>
             <button 
                 wire:click="setActiveTab('users')"
                 class="px-4 py-3 font-medium {{ $activeTab === 'users' ? 'text-[var(--gold)] border-b-2 border-[var(--gold)]' : 'text-[var(--sand)] hover:text-[var(--sand)]' }}"
             >
-                👥 Users & Roles
+                Users &amp; Roles
             </button>
             <button 
                 wire:click="setActiveTab('notifications')"
                 class="px-4 py-3 font-medium {{ $activeTab === 'notifications' ? 'text-[var(--gold)] border-b-2 border-[var(--gold)]' : 'text-[var(--sand)] hover:text-[var(--sand)]' }}"
             >
-                🔔 Notifications
+                Notifications
             </button>
         </div>
 
@@ -112,15 +112,18 @@
             <!-- USERS & ROLES TAB -->
             @if($activeTab === 'users')
                 <div class="space-y-6">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-between mb-2">
                         <h2 class="text-2xl font-bold text-[var(--stone)]">Users & Roles</h2>
-                        <button 
+                        <button
                             wire:click="toggleInviteForm"
                             class="bg-white/10 hover:bg-white/20 border border-[var(--line)] text-[var(--stone)] px-4 py-2 rounded-lg font-medium transition"
                         >
                             {{ $showInviteForm ? 'Cancel' : '+ Invite User' }}
                         </button>
                     </div>
+                    <p class="text-sm text-[var(--sand)] mb-6">
+                        To rename the team or delete it entirely, use the <a href="{{ route('teams.show', auth()->user()->currentTeam) }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)] underline">Team page</a>.
+                    </p>
 
                     <!-- Invite Form -->
                     @if($showInviteForm)
@@ -246,6 +249,20 @@
                                 >
                                 <div class="w-11 h-6 bg-white/10 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[var(--gold)]/40 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--gold)]"></div>
                             </label>
+                        </div>
+
+                        <!-- Minimum Severity -->
+                        <div class="bg-white/5 rounded-lg p-4 border border-[var(--line)]">
+                            <p class="font-medium text-[var(--stone)]">Notification Bell Threshold</p>
+                            <p class="text-sm text-[var(--sand)] mb-3">Only show alerts at or above this severity in the notification bell. Critical alerts always show, regardless of this setting.</p>
+                            <select
+                                wire:model="notificationMinSeverity"
+                                class="w-full bg-white/5 text-[var(--stone)] px-3 py-2 rounded border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none">
+                                <option value="low">All alerts (low and up)</option>
+                                <option value="medium">Medium and up</option>
+                                <option value="high">High and up</option>
+                                <option value="critical">Critical only</option>
+                            </select>
                         </div>
 
                         <!-- Quiet Hours -->

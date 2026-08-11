@@ -2,7 +2,6 @@
 @if(($cushion['available'] ?? false))
     <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)] mb-8">
         <div class="flex items-center gap-2 mb-3">
-            <span class="text-lg">⛽</span>
             <h3 class="text-sm font-bold text-[var(--stone)] uppercase tracking-wide">Fuel Cushion</h3>
         </div>
 

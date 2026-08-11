@@ -1,7 +1,23 @@
-<nav class="bg-[var(--ink-soft)] border-b border-[var(--line)] sticky top-0 z-40">
+<nav class="bg-[var(--ink-soft)] border-b border-[var(--line)] sticky top-0 z-40"
+     x-data="{ mobileOpen: false }"
+     @mobile-nav-changed.window="mobileOpen = $event.detail.open">
     <div class="px-6 py-4 flex justify-between items-center">
         <!-- Left Section -->
         <div class="flex items-center gap-4">
+            <!-- Mobile nav toggle -->
+            <button
+                @click="window.mobileNav.toggle()"
+                type="button"
+                class="md:hidden -ml-2 p-2 rounded-lg text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] transition-colors"
+                aria-label="Toggle navigation menu"
+                aria-controls="mobile-sidebar"
+                :aria-expanded="mobileOpen.toString()"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
             @php
                 $routeName = optional(request()->route())->getName();
                     $mapping = [
@@ -26,7 +42,8 @@
                     'integrations' => 'Integrations',
                     'billing.index' => 'Billing',
                     'settings' => 'Settings',
-                    'team.settings' => 'Team Settings',
+                    'teams.show' => 'Team Settings',
+                    'api-tokens.index' => 'API Tokens',
                 ];
 
                 $pageTitle = null;
@@ -67,6 +84,36 @@
                 </div>
             @endif
 
+            <!--
+                Real-time connection indicator. Driven entirely client-side by
+                the 'realtime-connection-changed' window event dispatched from
+                resources/js/livewire-realtime.js's connection monitor -- no
+                server roundtrip, since connection state is only known in the
+                browser. Users should never be left assuming they're seeing
+                live data while the socket is actually down.
+            -->
+            <div
+                x-data="{ state: 'connecting' }"
+                x-init="window.addEventListener('realtime-connection-changed', (e) => { state = e.detail.state })"
+                class="hidden sm:flex items-center gap-1.5"
+                :title="{
+                    connected: 'Live updates connected',
+                    connecting: 'Connecting to live updates…',
+                    reconnecting: 'Reconnecting to live updates…',
+                    disconnected: 'Live updates disconnected',
+                }[state]"
+            >
+                <span
+                    class="w-2 h-2 rounded-full"
+                    :class="{
+                        connected: 'bg-green-500',
+                        connecting: 'bg-amber-500 animate-pulse',
+                        reconnecting: 'bg-amber-500 animate-pulse',
+                        disconnected: 'bg-red-500',
+                    }[state]"
+                ></span>
+            </div>
+
             <!-- Notifications (real AI alert data, not the static sample content this used to show) -->
             <livewire:ai-notifications />
 
@@ -98,6 +145,12 @@
                             </a>
                             <a href="{{ route('integrations') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 Integrations
+                            </a>
+                            <a href="{{ route('api-tokens.index') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
+                                API Tokens
+                            </a>
+                            <a href="{{ route('teams.show', auth()->user()->currentTeam) }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
+                                Team
                             </a>
                             <a href="{{ route('billing.index') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 Billing
