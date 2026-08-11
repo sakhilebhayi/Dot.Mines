@@ -27,7 +27,40 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->guardAgainstDebugModeInProduction();
+    }
+
+    /**
+     * Refuse to boot for HTTP requests if the app is misconfigured with
+     * APP_ENV=production and APP_DEBUG=true. That combination leaks stack
+     * traces, SQL queries, and other internals to any visitor who triggers
+     * an error page — it has previously reached production silently.
+     *
+     * Scoped to HTTP only (not console) so `php artisan` commands aren't
+     * blocked while diagnosing the misconfiguration on the box itself.
+     */
+    private function guardAgainstDebugModeInProduction(): void
+    {
+        if ($this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            return;
+        }
+
+        if (self::shouldRefuseBoot($this->app->environment('production'), config('app.debug') === true)) {
+            throw new \RuntimeException(
+                'Refusing to boot: APP_ENV=production with APP_DEBUG=true. This leaks stack traces, '.
+                'SQL queries, and other internals to any visitor who triggers an error page. '.
+                'Set APP_DEBUG=false in the production .env and redeploy.'
+            );
+        }
+    }
+
+    /**
+     * Pure predicate for the debug-in-production guard, kept separate from
+     * the container/env lookups above so it can be unit tested directly.
+     */
+    public static function shouldRefuseBoot(bool $isProductionEnvironment, bool $debugEnabled): bool
+    {
+        return $isProductionEnvironment && $debugEnabled;
     }
 
     /**
