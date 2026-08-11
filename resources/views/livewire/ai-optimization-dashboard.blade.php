@@ -440,7 +440,7 @@
     </div>
 </div>
 
-<style>
+<style nonce="{{ request()->attributes->get('csp_nonce') }}">
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="/vendor/leaflet.css" />
     <link rel="stylesheet" href="/vendor/leaflet-draw/leaflet.draw.css" />
 
-    <style>
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
         #mine-area-map,
         #mine-area-draw-map {
             background: #1f2937;
@@ -513,7 +513,7 @@
     <script src="/vendor/leaflet.js"></script>
     <script src="/vendor/leaflet-draw/leaflet.draw.umd.js"></script>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         let mineAreaMap = null;
         let drawnItems = null;
         let geofenceLayerGroup;

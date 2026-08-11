@@ -30,7 +30,7 @@
         @stack('styles')
         
         <!-- Map Container Fixes -->
-        <style>
+        <style nonce="{{ request()->attributes->get('csp_nonce') }}">
             /* Ensure map containers are visible and have proper z-index */
             .leaflet-container {
                 background: #1f2937 !important;
@@ -262,7 +262,7 @@
 
         @stack('modals')
 
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             // Prevent Livewire from warning about multiple Alpine instances when Alpine
             // is bundled by Vite (`resources/js/app.js`). We mark the global Alpine
             // object as coming from Livewire so Livewire won't attempt to re-initialize it.
@@ -280,7 +280,7 @@
 
         @livewireScripts
 
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             // Ensure fetch requests include CSRF token and X-Requested-With for servers
             // that require these headers (helps Livewire POSTs avoid 403).
             (function() {

@@ -8,7 +8,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
         </div>
-        <script>window.scrollTo(0,0);</script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
     @else
         <!-- Chart Visualization Placeholder removed -->
     <!-- Header Section with gradient -->
@@ -822,7 +822,7 @@
 
     @endif
 </div>
-<style>
+<style nonce="{{ request()->attributes->get('csp_nonce') }}">
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

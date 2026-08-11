@@ -62,7 +62,7 @@
             @vite($viteEntries)
         @endif
 
-        <style>
+        <style nonce="{{ request()->attributes->get('csp_nonce') }}">
             :root {
                 --paper: #211a14;
                 --ink: #f4efe4;

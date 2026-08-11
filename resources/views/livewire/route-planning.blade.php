@@ -2,7 +2,7 @@
     <!-- Leaflet CSS - loaded directly in component -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     
-    <style>
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
         /* Map specific styles */
         #route-planning-map {
             background: #1f2937;
@@ -23,7 +23,7 @@
         }
     </style>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         // Fallback: ensure the calculate form calls the Livewire method if submit interception fails.
         // This was previously nested inside the <style> tag above, where browsers parse it as inert
         // CSS text and never execute it -- moved out so it actually runs.
@@ -102,7 +102,7 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                     </svg>
                 </div>
-                <script>window.scrollTo(0,0);</script>
+                <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
             @else
             @if($viewMode === 'create')
                 <!-- Create Route Form -->
@@ -401,7 +401,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.13.0/leaflet-providers.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         // Initialize with safe defaults
         window.routePlanningState = {
             viewMode: 'create',

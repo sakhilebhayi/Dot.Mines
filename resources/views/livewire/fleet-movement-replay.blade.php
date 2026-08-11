@@ -7,7 +7,7 @@
     <!-- Leaflet CSS - loaded directly in component -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     
-    <style>
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
         /* Map specific styles */
         #replay-map {
             background: #1f2937;
@@ -46,7 +46,7 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                     </svg>
                 </div>
-                <script>window.scrollTo(0,0);</script>
+                <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
             @else
             <!-- Machine Selection -->
             <div class="mb-4">
@@ -317,7 +317,7 @@
             </div>
             @endif
             
-            <script>
+            <script nonce="{{ request()->attributes->get('csp_nonce') }}">
                 // Hide overlay when data is loaded
                 function hideMapOverlay() {
                     const overlay = document.getElementById('map-overlay');
@@ -341,7 +341,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.13.0/leaflet-providers.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         // Initialize with safe defaults - all at window scope
         window.replayState = {
             centerLat: {{ $centerLat ?? -26.2041 }},
@@ -1584,7 +1584,7 @@
         });
     </script>
     
-    <style>
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
         @keyframes pulse-marker {
             0%, 100% {
                 transform: scale(1);

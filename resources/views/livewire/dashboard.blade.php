@@ -7,7 +7,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
         </div>
-        <script>window.scrollTo(0,0);</script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
     @else
         <!-- Greeting -->
         <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 mb-8 border border-[var(--line)]">
@@ -297,45 +297,4 @@
     </div>
 
     @endif
-    <style>
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes scaleIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
-
-    .animate-fade-in {
-        animation: fadeIn 0.6s ease-out;
-    }
-
-    .animate-slide-down {
-        animation: slideDown 0.5s ease-out;
-    }
-
-    .animate-scale-in {
-        animation: scaleIn 0.4s ease-out forwards;
-        opacity: 0;
-    }
-    </style>
 </div>
