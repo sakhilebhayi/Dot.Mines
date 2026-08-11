@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Console\Commands\ScanBladeUnescaped;
 use App\Listeners\NotifyOnJobFailed;
+use App\Livewire\AINotifications;
 use App\Mail\WelcomeMail;
 use App\Services\RealtimeEventScheduler;
 use App\Services\TeamRoleProvisioner;
@@ -19,6 +20,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Jetstream\Events\TeamMemberAdded;
 use Laravel\Jetstream\Events\TeamMemberUpdated;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +43,19 @@ class AppServiceProvider extends ServiceProvider
                 ScanBladeUnescaped::class,
             ]);
         }
+
+        // Livewire auto-derives a component's tag name from its class name via
+        // Str::studly(), which turns "ai-notifications" into "AiNotifications"
+        // (single-cap "Ai"), not "AINotifications" (the actual class, matching
+        // this codebase's AI* naming convention -- AIAnalytics, AIOptimizationDashboard,
+        // etc). On a case-insensitive filesystem (macOS) the autoloader finds the
+        // file anyway and PHP's own class-name lookup is case-insensitive, so
+        // this masked itself in local dev. On production's case-sensitive
+        // filesystem the autoloader can't find "AiNotifications.php" and
+        // <livewire:ai-notifications /> in navbar.blade.php throws
+        // ComponentNotFoundException on every authenticated page. Registering
+        // the name explicitly sidesteps the studly/kebab round-trip entirely.
+        Livewire::component('ai-notifications', AINotifications::class);
 
         // Configure rate limiting
         $this->configureRateLimiting();
