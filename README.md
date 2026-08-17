@@ -8,7 +8,7 @@
 
 **A comprehensive fleet management system for mining operations**
 
-![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white)
 ![Livewire](https://img.shields.io/badge/Livewire-3.x-FB70A9?logo=livewire&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)
@@ -72,7 +72,7 @@
 | 🏭 **Production Tracking** | Live load comparisons, shift targets, and trend analysis |
 | 🔌 **OEM Integrations** | Service layer + credential management for 25 manufacturers — no manufacturer connection has been verified against a real account yet (see [OEM Integrations](#oem-integrations)) |
 | 📊 **Reporting** | Compliance, maintenance, production, and incident export to PDF/CSV |
-| 💳 **Billing** | Stripe-powered subscriptions with fleet slot enforcement |
+| 💳 **Billing** | Paystack-powered subscriptions with fleet slot enforcement |
 | 🔒 **Multi-tenant** | Team-based isolation with granular role and policy access control |
 
 ---
@@ -200,7 +200,7 @@ A structured, real-time activity stream that replaces WhatsApp channels for mine
 
 A service class exists per manufacturer (25 total) with a common `BaseManufacturerService` base, credential storage, and an Integration Manager UI — but **no manufacturer connection has ever been verified against a real account**. This section previously described these as "Native API integrations... via their telemetry APIs" with "webhook-based real-time telemetry ingestion"; neither claim was accurate. There is no telemetry webhook receiver in this codebase at all — the only webhook endpoint that exists handles inbound Stripe billing events. Every manufacturer sync is poll-based (a scheduled job calls the manufacturer's REST API on an interval), not push-based.
 
-**Bell** is implemented against Bell Equipment's own published ISO 15143-3 (AEMP 2.0) API spec and Postman collection — real OAuth2 token exchange, real endpoint paths, XML parsing, and 12 unit/integration tests — but has not yet completed a live sync against a real account (see [wiki.md §5.1](wiki.md)).
+**Bell** is implemented against Bell Equipment's own published ISO 15143-3 (AEMP 2.0) API spec — real OAuth2 token exchange, real endpoint paths, XML parsing, and per-machine signal polling (locations, cumulative load count, cumulative payload, fuel, operating hours, engine condition). Bell telemetry is polled every 5 minutes and bridged to the Production dashboard so loads, cycles, and payload data are visible without manual entry.
 
 16 other manufacturers have a service class that attempts real HTTP calls to endpoints inferred from public docs, but **those endpoint shapes have not been confirmed against a real account** — treat them as unverified until a real credential set is tested end-to-end:
 
@@ -252,7 +252,7 @@ John Deere, CASE, New Holland, Takeuchi, Bobcat, Yanmar, Atlas Copco, Sandvik
 
 ### Billing & Subscriptions
 
-- **Stripe-powered** subscription plans and invoicing
+- **Paystack-powered** subscription plans and invoicing
 - Fleet slot enforcement at machine addition — blocks over-limit additions
 - **Billing portal** for self-service subscription management
 - Invoice history and payment records
@@ -271,7 +271,7 @@ John Deere, CASE, New Holland, Takeuchi, Bobcat, Yanmar, Atlas Copco, Sandvik
 
 | Layer | Technology |
 |---|---|
-| **Backend** | PHP 8.2+, Laravel 12.x |
+| **Backend** | PHP 8.3+, Laravel 12.x |
 | **Frontend** | Livewire 3.x, Alpine.js 3.x |
 | **Database** | PostgreSQL 16+ |
 | **Styling** | Tailwind CSS 3.x, DaisyUI 5.x |
@@ -280,7 +280,7 @@ John Deere, CASE, New Holland, Takeuchi, Bobcat, Yanmar, Atlas Copco, Sandvik
 | **Real-time** | Laravel Reverb (WebSockets), Laravel Echo, Pusher.js |
 | **Queue** | Laravel Queue (database driver) |
 | **Auth** | Laravel Jetstream + Sanctum |
-| **Payments** | Stripe (via Laravel Cashier) |
+| **Payments** | Paystack |
 | **File Storage** | AWS S3 (via Flysystem) |
 | **Search** | Laravel Scout |
 | **Error Monitoring** | Sentry |
@@ -292,7 +292,7 @@ John Deere, CASE, New Holland, Takeuchi, Bobcat, Yanmar, Atlas Copco, Sandvik
 
 ## 📦 Requirements
 
-- **PHP** 8.2 or higher
+- **PHP** 8.3 or higher
 - **Composer** 2.x
 - **Node.js** 18+ and npm
 - **PostgreSQL** 16+
@@ -382,9 +382,9 @@ AWS_SECRET_ACCESS_KEY=
 AWS_DEFAULT_REGION=us-east-1
 AWS_BUCKET=
 
-# Stripe
-STRIPE_KEY=
-STRIPE_SECRET=
+# Paystack
+PAYSTACK_PUBLIC_KEY=
+PAYSTACK_SECRET_KEY=
 
 # Sentry
 SENTRY_LARAVEL_DSN=
@@ -394,30 +394,6 @@ SENTRY_LARAVEL_DSN=
 
 ```bash
 php artisan key:generate
-```
-- Fuel allocation, transactions, and consumption metrics
-- Monthly fuel budgets and alert thresholds
-- Fuel consumption forecasting via AI
-
-### OEM Integrations
-- Native API integrations for 20+ manufacturers: Caterpillar, Komatsu, Volvo, Sandvik, Epiroc, Liebherr, Hitachi, Hyundai, John Deere, Doosan, JCB, Bobcat, Kawasaki, Kobelco, Yanmar, Kubota, XCMG, CASE, New Holland, Atlas Copco, Bell, Sany, Takeuchi, Roundebult, and CTrack
-- Webhook-based real-time telemetry ingestion
-- Extensible base manufacturer service for adding new integrations
-
-### Fleet Market
-- Fleet brands can list equipment for sale to mines
-- Subscription-gated listing access
-
-### Shift & Team Management
-- Configurable shift templates per mine (A/B/C)
-- Operator fatigue tracking
-- Role-based access: operators, supervisors, safety officers, managers, admins
-
-### Billing
-- Stripe-powered subscription plans and invoicing
-- Fleet slot enforcement at machine addition
-- Billing portal for self-service subscription management
-
 ```
 
 ### 2. Install PHP Dependencies
@@ -609,10 +585,11 @@ Navigate to the **Live Map** to view real-time fleet locations:
 ### Production Dashboard
 
 1. Navigate to **Production**
-2. View recorded loads vs reported loads side by side
-3. Use interactive charts with tooltips, zoom, and filtering
-4. Filter by machine, section, shift, or date range
-5. Compare actuals against targets; track week-on-week and month-on-month trends
+2. View OEM telemetry summary (total loads, payload, utilisation) auto-synced from Bell
+3. See the **Bell Fleet — Per-Truck Production** table: loads, cycles, payload, GPS location, and last-active time per machine
+4. Compare recorded sensor loads vs manually reported loads side by side
+5. Use interactive charts with tooltips, zoom, and filtering
+6. Filter by machine, section, shift, or date range
 
 ### Fleet Market
 
@@ -644,64 +621,78 @@ Generate a token from your user profile settings.
 
 ### Endpoints
 
+All API routes are versioned under `/api/v1/`. Authentication via Bearer token (Sanctum).
+
 ```bash
 # Fleet
-GET    /api/machines
-GET    /api/machines/{id}
-POST   /api/machines/{id}/assignments
+GET    /api/v1/machines
+GET    /api/v1/machines/{id}
+POST   /api/v1/machines/{id}/assignments
 
 # Mine Areas & Geofences
-GET    /api/mine-areas
-GET    /api/geofences
-POST   /api/geofences
+GET    /api/v1/mine-areas
+GET    /api/v1/geofences
+POST   /api/v1/geofences
 
 # Maintenance
-GET    /api/maintenance-records
-GET    /api/maintenance-schedules
+GET    /api/v1/maintenance-records
+GET    /api/v1/maintenance/schedules
 
 # Fuel
-GET    /api/fuel-tanks
-GET    /api/fuel-transactions
-POST   /api/fuel-transactions
+GET    /api/v1/fuel/tanks
+GET    /api/v1/fuel/transactions
+POST   /api/v1/fuel/transactions
 
 # Operations Feed
-GET    /api/feed
-POST   /api/feed
-DELETE /api/feed/{id}
-POST   /api/feed/{id}/acknowledge
-GET    /api/feed/{id}/acknowledgements
-POST   /api/feed/{id}/comments
-PUT    /api/feed/comments/{comment_id}
-DELETE /api/feed/comments/{comment_id}
-GET    /api/feed/{id}/comments
-POST   /api/feed/{id}/like
-GET    /api/feed/{id}/likes
-POST   /api/feed/{id}/approve
-POST   /api/feed/{id}/reject
-POST   /api/feed/{id}/attachments
+GET    /api/v1/feed
+POST   /api/v1/feed
+DELETE /api/v1/feed/{id}
+POST   /api/v1/feed/{id}/acknowledge
+POST   /api/v1/feed/{id}/comments
+POST   /api/v1/feed/{id}/like
+POST   /api/v1/feed/{id}/approve
+POST   /api/v1/feed/{id}/reject
+POST   /api/v1/feed/{id}/attachments
 
 # Production
-GET    /api/production-records
-GET    /api/production-targets
+GET    /api/v1/production-records
+GET    /api/v1/production-targets
 
 # Alerts & Compliance
-GET    /api/alerts
-GET    /api/compliance-reports
-GET    /api/compliance-violations
+GET    /api/v1/alerts
+GET    /api/v1/compliance-reports
+GET    /api/v1/compliance-violations
 
 # Shifts
-GET    /api/shift-templates
+GET    /api/v1/shift-templates
 
 # IoT Sensors
-GET    /api/iot-sensors
-GET    /api/iot-sensors/{id}/readings
+GET    /api/v1/iot-sensors
+GET    /api/v1/iot-sensors/{id}/readings
+
+# Integrations
+GET    /api/v1/integrations
+POST   /api/v1/integrations
+PUT    /api/v1/integrations/{id}
+DELETE /api/v1/integrations/{id}
+POST   /api/v1/integrations/{id}/sync
+POST   /api/v1/integrations/{id}/test
 
 # Reports
-GET    /api/reports
+GET    /api/v1/reports
+POST   /api/v1/reports            (async generation — 202 Accepted)
+GET    /api/v1/reports/{id}/download
+GET    /api/v1/reports/stats
+GET    /api/v1/reports/templates
 
 # Routes & Waypoints
-GET    /api/routes
-GET    /api/routes/{id}/waypoints
+GET    /api/v1/routes
+GET    /api/v1/routes/{id}/waypoints
+
+# Health
+GET    /health                    (liveness probe — DB + cache + queue + storage)
+GET    /ready                     (readiness probe — DB only, lightweight)
+GET    /up/realtime               (Reverb WebSocket health)
 ```
 
 ---
@@ -789,7 +780,34 @@ vendor/bin/psalm
 
 ---
 
-## 🚢 Deployment
+## � Security
+
+The platform ships with a hardened HTTP response layer applied to every web request:
+
+| Header | Value | Purpose |
+|---|---|---|
+| `Content-Security-Policy` | nonce-based script-src, `unsafe-inline` style-src | XSS mitigation |
+| `X-Frame-Options` | `DENY` | Clickjacking prevention |
+| `X-Content-Type-Options` | `nosniff` | MIME-sniffing prevention |
+| `X-XSS-Protection` | `0` | Disables legacy auditor (CSP is the defence) |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Referrer leakage control |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | HTTPS enforcement (production only) |
+| `Permissions-Policy` | geolocation, microphone, camera, payment, usb all blocked | Browser feature lockdown |
+| `Cross-Origin-Opener-Policy` | `same-origin` | Cross-origin window isolation |
+| `Cross-Origin-Resource-Policy` | `same-origin` | No-cors fetch protection |
+| `X-DNS-Prefetch-Control` | `off` | DNS pre-resolution leakage |
+
+Additional hardening:
+- **APP_DEBUG=true is blocked in production** — the app refuses to boot HTTP requests if both `APP_ENV=production` and `APP_DEBUG=true` are set, preventing internal stack trace leaks
+- **Session encryption** — configurable via `SESSION_ENCRYPT=true`
+- **Integration credentials encrypted at rest** — stored with `encrypted:json` cast
+- **Email verification** enforced on all authenticated routes
+- **RBAC** — every API and Livewire action is guarded by Policies and Gates
+- Secret scanning via `gitleaks` runs in the pre-commit hook
+
+---
+
+## �🚢 Deployment
 
 ### Production Checklist
 
@@ -1026,6 +1044,6 @@ This project is proprietary software. All rights reserved.
 
 Built for Mining Operations
 
-**Version 3.0** · April 2026
+**Version 3.1** · August 2026
 
 </div>
