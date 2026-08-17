@@ -191,6 +191,106 @@ class IntegrationManager extends Component
         }
     }
 
+    /**
+     * The spec's single "Connect" action: validate -> save -> authenticate
+     * -> fetch -> store -> dispatch ongoing sync, all in one click. Shares
+     * createIntegration()'s own validation rules exactly (including Bell's
+     * separate credential fields) so a submission that would have been
+     * accepted by the old two-step flow is accepted here too.
+     */
+    public function connectIntegration()
+    {
+        if (! $this->team) {
+            $this->addError('general', 'No team context available');
+
+            return;
+        }
+
+        $rules = [
+            'formData.provider' => 'required|string',
+            'formData.name' => 'required|string|max:100',
+            'formData.connection_type' => 'required|string',
+            'formData.sync_frequency' => 'required|string',
+            'formData.notification_email' => 'nullable|email',
+            'formData.endpoint' => 'nullable|string',
+        ];
+
+        if ($this->formData['provider'] === 'bell') {
+            $rules['formData.credentials.username'] = 'required|string';
+            $rules['formData.credentials.password'] = 'required|string';
+            $rules['formData.credentials.client_secret'] = 'required|string';
+        } else {
+            $rules['formData.credentials.api_key'] = 'required|string';
+            $rules['formData.credentials.api_secret'] = 'required|string';
+        }
+
+        $this->validate($rules);
+
+        if ($this->formData['provider'] === 'bell' && empty($this->formData['credentials']['client_id'])) {
+            $this->formData['credentials']['client_id'] = 'ISO_Export_Service';
+        }
+
+        try {
+            $this->authorize('create', Integration::class);
+
+            $integration = Integration::create([
+                'team_id' => $this->team->id,
+                'provider' => $this->formData['provider'],
+                'name' => $this->formData['name'],
+                'credentials' => $this->formData['credentials'],
+                'status' => 'pending',
+                'webhook_url' => $this->formData['connection_type'] === 'webhook' && Route::has('webhook.receive')
+                    ? route('webhook.receive', ['provider' => $this->formData['provider']])
+                    : null,
+                'config' => [
+                    'endpoint' => $this->formData['endpoint'],
+                    'connection_type' => $this->formData['connection_type'],
+                    'sync_frequency' => $this->formData['sync_frequency'],
+                    'notification_email' => $this->formData['notification_email'],
+                ],
+            ]);
+
+            $this->testResult = app(IntegrationService::class)->connect($integration);
+            $this->showTestModal = true;
+            $this->closeAddModal();
+            $this->loadIntegrations();
+        } catch (\Throwable $e) {
+            Log::error('Failed to connect integration', ['error' => $e->getMessage()]);
+            $this->addError('general', 'Failed to connect integration. Please try again.');
+        }
+    }
+
+    /**
+     * Re-runs the same deep check against an already-saved integration's
+     * existing credentials -- the spec's "allow the user to retry without
+     * re-entering credentials unnecessarily." Distinct from testConnection()
+     * (the shallow, pre-existing action left untouched for backward
+     * compatibility) so both remain independently callable.
+     */
+    public function retestConnection($integrationId)
+    {
+        if (! $this->team) {
+            $this->testResult = ['success' => false, 'message' => 'No team context available'];
+            $this->showTestModal = true;
+
+            return;
+        }
+
+        try {
+            $integration = Integration::where('team_id', $this->team->id)->findOrFail($integrationId);
+            $this->authorize('test', $integration);
+
+            $this->testResult = app(IntegrationService::class)->connect($integration);
+            $this->selectedIntegration = $integrationId;
+            $this->showTestModal = true;
+            $this->loadIntegrations();
+        } catch (\Throwable $e) {
+            Log::error('Retest connection failed', ['error' => $e->getMessage()]);
+            $this->testResult = ['success' => false, 'message' => 'Error testing connection'];
+            $this->showTestModal = true;
+        }
+    }
+
     public function testConnection($integrationId)
     {
         if (! $this->team) {
