@@ -61,9 +61,28 @@ class SyncIntegrationMachinesJob implements ShouldQueue
             ]);
 
             if ($result['success']) {
+                // Refresh last_synced_at (and record count) for every
+                // stream this integration already established during
+                // connect() -- never invent a stream that isn't already in
+                // capabilities, a scheduled run only refreshes what
+                // connect() already confirmed was real.
+                $streams = $this->integration->sync_streams ?? [];
+                $now = now()->toIso8601String();
+                $count = $result['count'] ?? 0;
+
+                foreach ($this->integration->capabilities ?? [] as $capability) {
+                    $streams[$capability] = [
+                        'status' => 'active',
+                        'last_synced_at' => $now,
+                        'records' => $count,
+                    ];
+                }
+
+                $this->integration->update(['sync_streams' => $streams]);
+
                 Log::info('Machine sync completed successfully', [
                     'integration_id' => $this->integration->id,
-                    'machines_synced' => $result['count'] ?? 0,
+                    'machines_synced' => $count,
                 ]);
             } else {
                 Log::error('Machine sync failed', [
