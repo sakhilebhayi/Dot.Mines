@@ -32,8 +32,8 @@ class IntegrationManager extends Component
         'provider' => '',
         'name' => '',
         'endpoint' => '',
-        'connection_type' => '',
-        'sync_frequency' => 'manual',
+        'connection_type' => 'poll',
+        'sync_frequency' => 'every_15_minutes',
         'notification_email' => '',
         'credentials' => [
             'api_key' => '',
@@ -124,8 +124,6 @@ class IntegrationManager extends Component
         $rules = [
             'formData.provider' => 'required|string',
             'formData.name' => 'required|string|max:100',
-            'formData.connection_type' => 'required|string',
-            'formData.sync_frequency' => 'required|string',
             'formData.notification_email' => 'nullable|email',
             'formData.endpoint' => 'nullable|string',
         ];
