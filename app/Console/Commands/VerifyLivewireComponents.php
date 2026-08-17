@@ -43,7 +43,6 @@ class VerifyLivewireComponents extends Command
             'machine-assignment-manager',
             'machine-detail',
             'maintenance-dashboard',
-            'mine-plan-uploader',
             'navbar',
             'report-generator',
             'reports',

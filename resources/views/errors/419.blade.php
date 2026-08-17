@@ -1,29 +1,13 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>419 – Session Expired | {{ config('app.name', 'Mines') }}</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f59e0b' rx='15'/><path d='M20 45 L20 30 L35 37 L35 52 L20 45 M35 52 L50 45 L50 60 L35 67 L35 52 M50 60 L65 53 L65 68 L50 75 L50 60 M35 37 L50 30 L50 45 L35 52 L35 37 M50 45 L65 38 L65 53 L50 60 L50 45 M50 30 L65 23 L80 30 L65 38 L50 30' fill='%231e293b' stroke='%231e293b' stroke-width='2'/></svg>">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Figtree', sans-serif; background: #111827; color: #f3f4f6; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .container { max-width: 480px; text-align: center; }
-        .code { font-size: 6rem; font-weight: 600; color: #f59e0b; line-height: 1; }
-        h1 { font-size: 1.5rem; font-weight: 600; margin: 1rem 0 0.5rem; }
-        p { color: #9ca3af; margin-bottom: 2rem; line-height: 1.6; }
-        a { display: inline-block; padding: 0.625rem 1.5rem; background: #f59e0b; color: #111827; border-radius: 0.5rem; font-weight: 600; text-decoration: none; transition: background 0.15s; }
-        a:hover { background: #d97706; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="code">419</div>
-        <h1>Session Expired</h1>
-        <p>Your session has expired for security reasons. Please refresh the page and try again.</p>
-        <a href="{{ url()->previous() ?: url('/') }}">Refresh Page</a>
-    </div>
-</body>
-</html>
+@extends('errors._ecosystem-layout', ['code' => 419])
+
+@section('icon')
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8a5f18" stroke-width="1.75"><circle cx="12" cy="13" r="8" stroke-linecap="round"/><path d="M12 9v4l2.5 2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 2h6" stroke-linecap="round"/></svg>
+@endsection
+
+@section('title', 'Your session timed out')
+@section('message', 'For your security, this form expires after a while of inactivity. Nothing was lost — go back and try submitting again.')
+
+@section('actions')
+    <a href="{{ url()->previous() === url()->current() ? '/' : url()->previous() }}" class="press" style="padding: 12px 24px; background: var(--accent); color: #211a14; font-family: var(--font-display); font-weight: 600; font-size: 15px; border-radius: 999px; text-decoration: none;">Go back and retry</a>
+    <a href="/" class="press link-underline" style="padding: 12px 24px; color: var(--ink); font-size: 15px; text-decoration: none;">Go home</a>
+@endsection

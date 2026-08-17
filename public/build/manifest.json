@@ -1,6 +1,6 @@
 {
-  "_charts-V-MippKz.js": {
-    "file": "assets/charts-V-MippKz.js",
+  "_charts-l0sNRNKZ.js": {
+    "file": "assets/charts-l0sNRNKZ.js",
     "name": "charts"
   },
   "_maps-Cw9GkuGu.js": {
@@ -24,7 +24,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CsKQxoaQ.css",
+    "file": "assets/app-Ar9Nxcvl.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -33,22 +33,27 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CJOf-ILm.js",
+    "file": "assets/app-Dg59cIBX.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_vendor-DeTL862i.js",
-      "_charts-V-MippKz.js",
       "_maps-Cw9GkuGu.js"
     ],
     "css": [
-      "assets/app-CG6DamIu.css"
+      "assets/app-CLLlcC51.css"
     ],
     "assets": [
       "assets/layers-BWBAp2CZ.png",
       "assets/layers-2x-Bpkbi35X.png",
       "assets/marker-icon-hN30_KVU.png"
     ]
+  },
+  "resources/js/live-map.js": {
+    "file": "assets/live-map-BwOGgMhg.js",
+    "name": "live-map",
+    "src": "resources/js/live-map.js",
+    "isEntry": true
   }
 }

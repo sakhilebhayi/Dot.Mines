@@ -37,8 +37,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch vehicles from C-Track API
-     *
-     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
@@ -86,8 +84,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch tracking metrics and history for vehicle
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -95,7 +91,11 @@ class CTrackService extends BaseManufacturerService
             $history = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/history");
             $events = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/events");
 
-            $metrics = array_merge(
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier one, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($history['data'] ?? []),
                 $this->parseMetrics($events['data'] ?? [])
             );
@@ -110,8 +110,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch geofence violations and alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -139,15 +137,13 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch machine details from C-Track API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
         try {
             $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}");
 
-            return $response;
+            return $response ?? [];
         } catch (Exception $e) {
             $this->logError('Failed to fetch machine details', $e);
 
@@ -157,8 +153,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {
@@ -188,8 +182,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch current location for vehicle
-     *
-     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -212,8 +204,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch tracking metrics and history for vehicle
-     *
-     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -221,7 +211,11 @@ class CTrackService extends BaseManufacturerService
             $history = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/history");
             $events = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/events");
 
-            $metrics = array_merge(
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier one, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($history['data'] ?? []),
                 $this->parseMetrics($events['data'] ?? [])
             );
@@ -243,8 +237,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch geofence violations and alerts
-     *
-     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
@@ -279,8 +271,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse vehicle data from C-Track format
-     *
-     * @return array<mixed>
      */
     protected function parseMachineData(array $data): array
     {
@@ -306,8 +296,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse location data from C-Track format
-     *
-     * @return array<mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -324,12 +312,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse tracking summary/metric data from C-Track format
-     *
-     * @return array<mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -347,12 +329,6 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse event/alert data from C-Track format
-     *
-     * @return array<mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
     protected function parseAlert(array $data): array
     {

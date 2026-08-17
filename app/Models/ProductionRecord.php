@@ -44,6 +44,8 @@ class ProductionRecord extends Model
         'shift',
         'quantity_produced',
         'system_quantity',
+        'loads_moved',
+        'cycles_completed',
         'unit',
         'target_quantity',
         'notes',
@@ -60,6 +62,8 @@ class ProductionRecord extends Model
             'quantity_produced' => 'decimal:2',
             'system_quantity' => 'decimal:2',
             'target_quantity' => 'decimal:2',
+            'loads_moved' => 'integer',
+            'cycles_completed' => 'integer',
             'record_date' => 'date',
             'metadata' => 'array',
         ];

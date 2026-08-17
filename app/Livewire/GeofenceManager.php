@@ -4,13 +4,14 @@ namespace App\Livewire;
 
 use App\Models\Geofence;
 use App\Models\MineArea;
-use Illuminate\Contracts\View\View;
+use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class GeofenceManager extends Component
 {
+    use BrowserEventBridge;
     use WithPagination;
 
     public string $search = '';
@@ -38,7 +39,6 @@ class GeofenceManager extends Component
 
     public float $centerLongitude = 0;
 
-    /** @var array<string, mixed> */
     public array $coordinates = [];
 
     /** @var array<string, string> */
@@ -51,15 +51,11 @@ class GeofenceManager extends Component
 
     public function mount(): void
     {
-        $this->teamId = Auth::user()->currentTeam?->id;
+        $this->teamId = Auth::user()->currentTeam->id ?? null;
     }
 
     public function toggleSort(string $column): void
     {
-        $allowed = ['name', 'created_at'];
-        if (! in_array($column, $allowed, true)) {
-            return;
-        }
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -83,7 +79,7 @@ class GeofenceManager extends Component
     public function resetForm(): void
     {
         $this->editingGeofenceId = null;
-        $this->teamId = Auth::user()->currentTeam?->id;
+        $this->teamId = Auth::user()->currentTeam->id ?? null;
         $this->mineAreaId = null;
         $this->name = '';
         $this->description = '';
@@ -96,7 +92,7 @@ class GeofenceManager extends Component
     public function editGeofence(Geofence $geofence): void
     {
         $this->editingGeofenceId = $geofence->id;
-        $this->teamId = Auth::user()->current_team_id;
+        $this->teamId = auth()->user()->current_team_id;
         $this->mineAreaId = $geofence->mine_area_id;
         $this->name = $geofence->name;
         $this->description = $geofence->description ?? '';
@@ -136,12 +132,12 @@ class GeofenceManager extends Component
             $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->editingGeofenceId);
             $this->authorize('update', $geofence);
             $geofence->update($data);
-            $this->dispatch('notify', ...['message' => 'Geofence updated successfully', 'type' => 'success']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Geofence updated successfully', 'type' => 'success']);
         } else {
-            $data['team_id'] = $team->id;
             $this->authorize('create', Geofence::class);
+            $data['team_id'] = $team->id;
             Geofence::create($data);
-            $this->dispatch('notify', ...['message' => 'Geofence created successfully', 'type' => 'success']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Geofence created successfully', 'type' => 'success']);
         }
 
         $this->closeModal();
@@ -149,17 +145,14 @@ class GeofenceManager extends Component
 
     public function deleteGeofence(Geofence $geofence): void
     {
-        if ($geofence->team_id !== Auth::user()->currentTeam->id) {
-            abort(403);
-        }
-
         $this->authorize('delete', $geofence);
+
         $geofenceName = $geofence->name;
         $geofence->delete();
-        $this->dispatch('notify', ...['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
     }
 
-    public function render(): View
+    public function render()
     {
         $team = Auth::user()->currentTeam;
 

@@ -21,7 +21,7 @@ class AIRecommendationPolicy
     public function view(User $user, AIRecommendation $recommendation): bool
     {
         return $user->current_team_id === $recommendation->team_id &&
-               ($user->hasPermission('view_recommendations') || $user->hasRole('owner'));
+               ($user->hasPermission('view_recommendations') || $user->ownsTeam($recommendation->team));
     }
 
     /**
@@ -37,19 +37,14 @@ class AIRecommendationPolicy
      */
     public function update(User $user, AIRecommendation $recommendation): bool
     {
-        // Owners and admins may act across teams
-        if ($user->hasRole('owner') || $user->hasRole('admin') || $user->hasRole('administrator')) {
-            return true;
+        if ($user->current_team_id !== $recommendation->team_id) {
+            return false;
         }
 
-        // Only users with explicit permission or elevated roles may act on recommendations.
-        if ($user->current_team_id === $recommendation->team_id
-            && ($user->hasPermission('update_recommendations')
-                || $user->hasRole(['manager', 'fleet_manager', 'supervisor']))) {
-            return true;
-        }
-
-        return false;
+        // hasPermission() already grants every permission to the 'admin' role,
+        // so the only case to add here is the team owner acting without an
+        // 'admin' role assignment.
+        return $user->hasPermission('update_recommendations') || $user->ownsTeam($recommendation->team);
     }
 
     /**

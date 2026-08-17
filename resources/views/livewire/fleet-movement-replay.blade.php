@@ -1,5 +1,5 @@
 <div>
-<div class="h-screen flex flex-col bg-slate-900" 
+<div class="h-screen flex flex-col bg-[var(--ink)]" 
      data-path-coords="{{ json_encode($pathCoordinates ?? []) }}"
      data-geofences="{{ json_encode($geofences ?? []) }}"
      data-routes="{{ json_encode($routes ?? []) }}"
@@ -7,15 +7,28 @@
     <!-- Leaflet CSS - loaded directly in component -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
+        /* Map specific styles */
+        #replay-map {
+            background: #1f2937;
+        }
+        
+        #replay-map .leaflet-container {
+            background: #1f2937;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    
     <!-- Header -->
-    <div class="bg-gray-800 border-b border-gray-700 p-6">
+    <div class="bg-[var(--ink-soft)] border-b border-[var(--line)] p-6">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-white">Fleet Movement Replay</h1>
-                    <p class="text-gray-400 mt-1">Review historical vehicle movements and routes</p>
+                    <h1 class="text-3xl font-bold text-[var(--stone)]">Fleet Movement Replay</h1>
+                    <p class="text-[var(--sand)] mt-1">Review historical vehicle movements and routes</p>
                 </div>
-                <a href="{{ route('fleet') }}" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                <a href="{{ route('fleet') }}" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded-lg transition-colors">
                     Back to Fleet
                 </a>
             </div>
@@ -24,11 +37,11 @@
 
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
         <!-- Left Sidebar - Controls -->
-        <div class="w-full md:w-96 bg-gray-800 border-b md:border-b-0 md:border-r border-gray-700 overflow-y-auto p-4 md:p-6">
+        <div class="w-full md:w-96 bg-[var(--ink-soft)] border-b md:border-b-0 md:border-r border-[var(--line)] overflow-y-auto p-4 md:p-6">
             <!-- Loading Spinner -->
             @if ($isLoading)
                 <div class="flex justify-center items-center h-96">
-                    <svg class="animate-spin h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-12 w-12 text-[var(--gold)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                     </svg>
@@ -37,8 +50,8 @@
             @else
             <!-- Machine Selection -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-300 mb-2">Select Machine</label>
-                <select wire:model.live="selectedMachine" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500">
+                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Select Machine</label>
+                <select wire:model.live="selectedMachine" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
                     <option value="">-- Choose a Machine --</option>
                     @foreach($machines as $machineType => $machineGroup)
                         <optgroup label="{{ strtoupper(str_replace('_', ' ', $machineType)) }}">
@@ -52,39 +65,37 @@
 
             <!-- Date Range -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
-                <input type="date" wire:model="startDate" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500">
+                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Start Date</label>
+                <input type="date" wire:model="startDate" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
             </div>
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-300 mb-2">End Date</label>
-                <input type="date" wire:model="endDate" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500">
+                <label class="block text-sm font-medium text-[var(--sand)] mb-2">End Date</label>
+                <input type="date" wire:model="endDate" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
             </div>
 
             <!-- Action Buttons -->
             <div class="grid grid-cols-2 gap-2 mb-6">
-                <button wire:click="loadReplay" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2">
+                <button wire:click="loadReplay" class="px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg transition-colors font-display font-semibold flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
                     Load Replay
                 </button>
-                <button wire:click="showRecentActivities" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2">
+                <button wire:click="showRecentActivities" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-[var(--stone)] rounded-lg transition-colors font-medium flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     Recent
                 </button>
-                <button wire:click="exportReplayData" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2">
+                <button wire:click="exportReplayData" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-[var(--stone)] rounded-lg transition-colors font-medium flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                     Export
                 </button>
-                <button wire:click="showRoutes"
-                    class="px-4 py-2 rounded-lg transition-all font-medium flex items-center justify-center gap-2
-                           {{ $showRoutesPanel ? 'bg-purple-500 ring-2 ring-purple-300 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white' }}">
+                <button wire:click="showRoutes" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-[var(--stone)] rounded-lg transition-all font-medium flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
@@ -92,126 +103,59 @@
                 </button>
             </div>
 
-            <!-- Route Paths Panel -->
-            @if($showRoutesPanel)
-                <div class="bg-gray-800/80 border border-purple-700/60 rounded-lg p-4 mb-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-sm font-semibold text-purple-300 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                            </svg>
-                            Route Paths
-                        </h4>
-                        <button wire:click="showRoutes" class="text-xs text-gray-400 hover:text-white" title="Close panel">✕</button>
-                    </div>
-
-                    @if(count($routes ?? []) > 0)
-                        <div class="space-y-3 max-h-72 overflow-y-auto pr-1">
-                            @foreach($routes as $ri => $route)
-                                <div class="bg-gray-700/60 rounded-lg p-3 border border-gray-600 hover:border-purple-600 transition-colors">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-sm font-medium text-amber-400 truncate pr-2">{{ $route['name'] }}</span>
-                                        <button onclick="focusRoute({{ $ri }})"
-                                            class="shrink-0 text-xs px-2 py-0.5 bg-purple-700 hover:bg-purple-600 text-white rounded transition-colors">
-                                            Focus
-                                        </button>
-                                    </div>
-                                    <div class="text-xs text-gray-400 space-y-1.5">
-                                        <!-- Start -->
-                                        <div class="flex items-center gap-2">
-                                            <span class="w-5 h-5 shrink-0 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center leading-none">S</span>
-                                            <span class="truncate">{{ $route['start_location'] ?? '–' }}</span>
-                                        </div>
-                                        <!-- Intermediate count -->
-                                        @php $wpCount = count($route['waypoints'] ?? []); @endphp
-                                        @if($wpCount > 2)
-                                            <div class="flex items-center gap-2 text-gray-500">
-                                                <span class="w-5 h-5 shrink-0 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center justify-center leading-none">·</span>
-                                                <span>{{ $wpCount - 2 }} intermediate {{ Str::plural('waypoint', $wpCount - 2) }}</span>
-                                            </div>
-                                        @endif
-                                        <!-- Finish -->
-                                        <div class="flex items-center gap-2">
-                                            <span class="w-5 h-5 shrink-0 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center leading-none">F</span>
-                                            <span class="truncate">{{ $route['end_location'] ?? '–' }}</span>
-                                        </div>
-                                    </div>
-                                    @if(isset($route['total_distance']) && $route['total_distance'])
-                                        <div class="mt-2 text-xs text-gray-500">
-                                            Distance: {{ number_format($route['total_distance'] / 1000, 1) }} km
-                                        </div>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                        <p class="text-xs text-gray-500 mt-2">
-                            <span class="text-green-400 font-medium">S</span> = start &nbsp;
-                            <span class="text-amber-400 font-medium">#</span> = waypoint &nbsp;
-                            <span class="text-red-400 font-medium">F</span> = finish
-                        </p>
-                    @else
-                        <div class="text-center py-4">
-                            <p class="text-sm text-gray-400 mb-1">No routes defined</p>
-                            <p class="text-xs text-gray-500">Load replay data to auto-calculate a route, or define routes in
-                                <a href="{{ route('fleet.route-planning') }}" class="text-purple-400 hover:text-purple-300">Route Planning</a>.</p>
-                        </div>
-                    @endif
-                </div>
-            @endif
-
             <!-- Recent Activities (for selected machine / date range) -->
             @if($showActivities)
-                <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4">
+                <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-4 mb-4">
                     <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-sm font-semibold text-white">Recent Activities</h4>
-                        <button wire:click="hideRecentActivities" class="text-xs text-gray-400 hover:text-gray-300">Close</button>
+                        <h4 class="text-sm font-semibold text-[var(--stone)]">Recent Activities</h4>
+                        <button wire:click="hideRecentActivities" class="text-xs text-[var(--sand)] hover:text-[var(--stone)]">Close</button>
                     </div>
                     @if(count($machineActivities) > 0)
-                        <ul class="space-y-2 text-sm text-gray-300 max-h-64 overflow-y-auto">
+                        <ul class="space-y-2 text-sm text-[var(--sand)] max-h-64 overflow-y-auto">
                             @foreach($machineActivities as $act)
                                 <li>
-                                    <div class="text-xs text-gray-400">{{ $act['created_at'] }} — {{ $act['user'] }}</div>
+                                    <div class="text-xs text-[var(--sand)]">{{ $act['created_at'] }} — {{ $act['user'] }}</div>
                                     <div class="font-medium">{{ $act['action'] }}</div>
-                                    <div class="text-gray-400 text-sm">{{ $act['description'] }}</div>
+                                    <div class="text-[var(--sand)] text-sm">{{ $act['description'] }}</div>
                                 </li>
                             @endforeach
                         </ul>
                     @else
-                        <p class="text-sm text-gray-400">No activities found for the selected machine/date range.</p>
+                        <p class="text-sm text-[var(--sand)]">No activities found for the selected machine/date range.</p>
                     @endif
                 </div>
             @endif
 
             <!-- Enhanced Playback Player -->
-            <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 shadow-2xl border border-gray-700 mb-6">
+            <div class="bg-gradient-to-br from-[var(--ink-soft)] to-[var(--ink)] rounded-xl p-6 shadow-2xl border border-[var(--line)] mb-6">
                 @if($selectedMachine && $totalPositions > 0)
                     <!-- Player Header -->
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[var(--gold)] to-[var(--gold-soft)] rounded-lg flex items-center justify-center shadow-lg">
+                                <svg class="w-6 h-6 text-[var(--ink)]" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
                                     <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v6h16V7a2 2 0 00-2-2H4z" clip-rule="evenodd"/>
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-white">Movement Replay</h3>
-                                <p class="text-sm text-gray-400">{{ $totalPositions }} recorded positions</p>
+                                <h3 class="text-lg font-bold text-[var(--stone)]">Movement Replay</h3>
+                                <p class="text-sm text-[var(--sand)]">{{ $totalPositions }} recorded positions</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-xs text-gray-400 mb-1">Current Time</div>
-                            <div class="text-sm font-mono text-amber-400" id="current-timestamp">--:--:--</div>
+                            <div class="text-xs text-[var(--sand)] mb-1">Current Time</div>
+                            <div class="text-sm font-mono text-[var(--gold)]" id="current-timestamp">--:--:--</div>
                         </div>
                     </div>
 
                     <!-- Progress Bar with Timeline -->
                     <div class="mb-6">
-                        <div class="relative h-3 bg-gray-700 rounded-full overflow-hidden mb-2">
+                        <div class="relative h-3 bg-white/10 rounded-full overflow-hidden mb-2">
                             <!-- Background progress -->
-                            <div class="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-amber-600/20"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-[var(--gold)]/20 to-[var(--gold-soft)]/20"></div>
                             <!-- Active progress -->
-                            <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-300" 
+                            <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-soft)] transition-all duration-300" 
                                  style="width: {{ $totalPositions > 0 ? (($currentPosition + 1) / $totalPositions * 100) : 0 }}%">
                             </div>
                             <!-- Glow effect -->
@@ -230,9 +174,9 @@
                                style="margin-top: -10px;">
                         
                         <!-- Timeline markers -->
-                        <div class="flex justify-between text-xs text-gray-500 mt-1 px-1">
+                        <div class="flex justify-between text-xs text-[var(--sand)]/70 mt-1 px-1">
                             <span id="start-time">{{ $startDate }}</span>
-                            <span class="text-amber-400 font-mono">{{ $currentPosition + 1 }} / {{ $totalPositions }}</span>
+                            <span class="text-[var(--gold)] font-mono">{{ $currentPosition + 1 }} / {{ $totalPositions }}</span>
                             <span id="end-time">{{ $endDate }}</span>
                         </div>
                     </div>
@@ -241,9 +185,9 @@
                     <div class="flex items-center justify-center gap-3 mb-6">
                         <!-- Previous Frame -->
                         <button wire:click="previousFrame" 
-                                class="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-all transform hover:scale-105 group"
+                                class="p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all transform hover:scale-105 group"
                                 title="Previous Frame">
-                            <svg class="w-5 h-5 text-gray-300 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-5 h-5 text-[var(--sand)] group-hover:text-[var(--stone)]" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z"/>
                             </svg>
                         </button>
@@ -253,7 +197,7 @@
                             <button wire:click="pause"
                                     class="p-3 bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 rounded-lg transition-all transform hover:scale-105 group"
                                     title="Pause">
-                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-[var(--stone)]" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M5 4a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V4zm8 0a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2h-2a2 2 0 01-2-2V4z"/>
                                 </svg>
                             </button>
@@ -261,7 +205,7 @@
                             <button wire:click="play" data-speed="{{ $playbackSpeed }}"
                                     class="p-3 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg transition-all transform hover:scale-105 group"
                                     title="Play">
-                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-[var(--stone)]" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.34-5.89a1.5 1.5 0 000-2.54L6.3 2.84z"/>
                                 </svg>
                             </button>
@@ -271,16 +215,16 @@
                         <button wire:click="stop"
                                 class="p-3 bg-red-600 hover:bg-red-700 rounded-lg transition-all transform hover:scale-105 group"
                                 title="Stop & Reset">
-                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-5 h-5 text-[var(--stone)]" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
                             </svg>
                         </button>
 
                         <!-- Next Frame -->
                         <button wire:click="nextFrame" 
-                                class="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-all transform hover:scale-105 group"
+                                class="p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all transform hover:scale-105 group"
                                 title="Next Frame">
-                            <svg class="w-5 h-5 text-gray-300 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-5 h-5 text-[var(--sand)] group-hover:text-[var(--stone)]" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z"/>
                             </svg>
                         </button>
@@ -289,20 +233,20 @@
                     <!-- Speed Control & Additional Options -->
                     <div class="space-y-4">
                         <!-- Playback Speed -->
-                        <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <div class="bg-[var(--ink-soft)]/50 rounded-lg p-4 border border-[var(--line)]">
                             <div class="flex items-center justify-between mb-3">
-                                <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                                <label class="text-sm font-medium text-[var(--sand)] flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-[var(--gold)]" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                                     </svg>
                                     Playback Speed
                                 </label>
-                                <span class="text-amber-400 font-bold text-lg">{{ $playbackSpeed }}x</span>
+                                <span class="text-[var(--gold)] font-bold text-lg">{{ $playbackSpeed }}x</span>
                             </div>
                             <div class="flex gap-2">
                                 @foreach([0.25, 0.5, 1, 2, 4, 8] as $speed)
                                     <button wire:click="setSpeed({{ $speed }})" 
-                                            class="flex-1 px-2 py-2 rounded-lg text-sm font-medium transition-all {{ $playbackSpeed == $speed ? 'bg-amber-600 text-white shadow-lg' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }}">
+                                            class="flex-1 px-2 py-2 rounded-lg text-sm font-medium transition-all {{ $playbackSpeed == $speed ? 'bg-[var(--gold)] text-[var(--ink)] shadow-lg' : 'bg-white/10 text-[var(--sand)] hover:bg-white/20' }}">
                                         {{ $speed }}x
                                     </button>
                                 @endforeach
@@ -310,25 +254,25 @@
                         </div>
 
                         <!-- Playback Options -->
-                        <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                            <label class="text-sm font-medium text-gray-300 mb-3 block flex items-center gap-2">
-                                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="bg-[var(--ink-soft)]/50 rounded-lg p-4 border border-[var(--line)]">
+                            <label class="text-sm font-medium text-[var(--sand)] mb-3 block flex items-center gap-2">
+                                <svg class="w-4 h-4 text-[var(--gold)]" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
                                 </svg>
                                 Options
                             </label>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" wire:model="autoReplay" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-amber-600 focus:ring-amber-500">
-                                    <span class="text-sm text-gray-400 group-hover:text-gray-300">Loop replay</span>
+                                    <input type="checkbox" wire:model="autoReplay" class="w-4 h-4 rounded bg-white/10 border-[var(--line)] text-[var(--gold)] focus:ring-[var(--gold)]">
+                                    <span class="text-sm text-[var(--sand)] group-hover:text-[var(--sand)]">Loop replay</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" wire:model="showTrail" checked class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-amber-600 focus:ring-amber-500">
-                                    <span class="text-sm text-gray-400 group-hover:text-gray-300">Show trail</span>
+                                    <input type="checkbox" wire:model="showTrail" checked class="w-4 h-4 rounded bg-white/10 border-[var(--line)] text-[var(--gold)] focus:ring-[var(--gold)]">
+                                    <span class="text-sm text-[var(--sand)] group-hover:text-[var(--sand)]">Show trail</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" wire:model="smoothPan" checked class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-amber-600 focus:ring-amber-500">
-                                    <span class="text-sm text-gray-400 group-hover:text-gray-300">Smooth camera</span>
+                                    <input type="checkbox" wire:model="smoothPan" checked class="w-4 h-4 rounded bg-white/10 border-[var(--line)] text-[var(--gold)] focus:ring-[var(--gold)]">
+                                    <span class="text-sm text-[var(--sand)] group-hover:text-[var(--sand)]">Smooth camera</span>
                                 </label>
                             </div>
                         </div>
@@ -336,14 +280,14 @@
                 @else
                     <!-- Empty State - Waiting for Data -->
                     <div class="text-center py-12">
-                        <div class="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-10 h-10 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-10 h-10 text-[var(--sand)]/60" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
                                 <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v6h16V7a2 2 0 00-2-2H4z" clip-rule="evenodd"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-white mb-2">Ready to Replay</h3>
-                        <p class="text-gray-400 text-sm">Select a machine, date range, and click "Load Replay" to view historical movements</p>
+                        <h3 class="text-lg font-semibold text-[var(--stone)] mb-2">Ready to Replay</h3>
+                        <p class="text-[var(--sand)] text-sm">Select a machine, date range, and click "Load Replay" to view historical movements</p>
                     </div>
                 @endif
             </div>
@@ -352,28 +296,28 @@
         </div>
 
         <!-- Map Container -->
-        <div class="flex-1 relative bg-gray-800" style="min-height: 400px;" wire:ignore>
+        <div class="flex-1 relative bg-[var(--ink-soft)]" style="min-height: 400px;" wire:ignore>
             <!-- Map always visible -->
             <div id="replay-map" class="w-full h-full absolute inset-0" style="min-height: 400px;"></div>
             
             <!-- Hover overlay when no data loaded -->
             @if(!$selectedMachine || $totalPositions == 0)
-            <div class="absolute inset-0 bg-gray-900/90 backdrop-blur-sm flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none z-[400]" id="map-overlay">
+            <div class="absolute inset-0 bg-[var(--ink)]/90 backdrop-blur-sm flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none z-[400]" id="map-overlay">
                 <div class="text-center p-8 pointer-events-auto">
                     @if(!$selectedMachine)
                         <div class="text-6xl mb-4">🚜</div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Select a Machine</h3>
-                        <p class="text-gray-400 mb-2">Choose a machine and date range to replay its movement history.</p>
+                        <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">Select a Machine</h3>
+                        <p class="text-[var(--sand)] mb-2">Choose a machine and date range to replay its movement history.</p>
                     @else
                         <div class="text-6xl mb-4">📉</div>
-                        <h3 class="text-xl font-semibold text-white mb-2">No Data Available</h3>
-                        <p class="text-gray-400 mb-2">No movement data found for the selected time range.</p>
+                        <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Data Available</h3>
+                        <p class="text-[var(--sand)] mb-2">No movement data found for the selected time range.</p>
                     @endif
                 </div>
             </div>
             @endif
             
-            <script>
+            <script nonce="{{ request()->attributes->get('csp_nonce') }}">
                 // Hide overlay when data is loaded
                 function hideMapOverlay() {
                     const overlay = document.getElementById('map-overlay');
@@ -393,12 +337,11 @@
         </div>
     </div>
 
-
     <!-- Leaflet JS - loaded directly in component -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.13.0/leaflet-providers.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         // Initialize with safe defaults - all at window scope
         window.replayState = {
             centerLat: {{ $centerLat ?? -26.2041 }},
@@ -426,7 +369,6 @@
         window.pathPolyline = null;
         window.geofencePolygons = [];
         window.routePolylines = [];
-        window.routeWaypointMarkers = [];
         window.trailPolyline = null;
         window.machineType = '';
         window._replayHasInvalidLayer = false;
@@ -533,23 +475,15 @@
                     });
 
                     if (window.routes && window.routes.length > 0) {
-                        console.log('Raw routes payload:', rawRoutes.slice(0,5));
-                        console.log('Normalized routes:', window.routes.slice(0,5));
                     }
                     
                     // Clear the snapped coordinate cache when new data is loaded
                     window.snappedCoordinateCache = {};
                     
-                    console.log('Initial data loaded from attributes:', {
-                        pathCoords: window.pathCoordinates?.length || 0,
-                        geofences: window.geofences?.length || 0,
-                        routes: window.routes?.length || 0
-                    });
                     
                     // Log route details for debugging
                     if (window.routes?.length > 0) {
                         window.routes.forEach((route, idx) => {
-                            console.log(`Route ${idx}: ${route.name} with ${route.waypoints?.length || 0} waypoints`);
                         });
                     }
                 } catch (err) {
@@ -580,8 +514,6 @@
 
         function initReplayMap() {
             // Debug: Check what's available
-            console.log('Checking for Leaflet... window.L:', typeof window.L, 'L:', typeof L);
-            console.log('Path coordinates:', window.pathCoordinates?.length);
             
             // Check if Leaflet is loaded (check both window.L and global L)
             if (typeof window.L === 'undefined' && typeof L === 'undefined') {
@@ -590,7 +522,6 @@
                     console.error('Leaflet failed to load after maximum retries');
                     return;
                 }
-                console.log('Leaflet not loaded yet, retry', window.initRetryCount);
                 setTimeout(initReplayMap, 200);
                 return;
             }
@@ -598,18 +529,15 @@
             // Check if map container exists
             const mapContainer = document.getElementById('replay-map');
             if (!mapContainer) {
-                console.log('Map container not found, retrying...');
                 setTimeout(initReplayMap, 100);
                 return;
             }
             
             // Check if map is already initialized
             if (window.replayMap) {
-                console.log('Map already initialized');
                 return;
             }
             
-            console.log('Initializing replay map...');
             
             try {
                 // Initialize map
@@ -634,7 +562,6 @@
                     'Satellite': satelliteLayer
                 }).addTo(window.replayMap);
                 
-                console.log('Map initialized successfully');
                 
                 // Invalidate size after short delay
                 setTimeout(() => {
@@ -651,7 +578,6 @@
         function renderPathOnMap() {
             try {
                 if (!window.replayMap || !Array.isArray(window.pathCoordinates) || window.pathCoordinates.length === 0) {
-                    console.log('Cannot render path - map or coordinates missing');
                     return;
                 }
                 
@@ -677,8 +603,6 @@
                     }
                     pathLatLngs.push([Number(snapped.lat), Number(snapped.lng)]);
                 }
-                if (skipped > 0) console.log(`Skipped ${skipped} invalid path points when rendering`);
-                
                 // Filter to ensure only finite numeric lat/lng pairs are passed to Leaflet
                 const validPathLatLngs = pathLatLngs.filter(pt => Array.isArray(pt) && pt.length >= 2 && isFinite(Number(pt[0])) && isFinite(Number(pt[1]))).map(pt => [Number(pt[0]), Number(pt[1])]);
                 if (validPathLatLngs.length < 2) {
@@ -760,12 +684,9 @@
                     }
                 }
                 
-                console.log('Path rendered with', pathLatLngs.length, 'points (snapped to routes)');
                 
                 // Log first and last points to verify snapping
                 if (pathLatLngs.length > 0) {
-                    console.log('Path start:', pathLatLngs[0]);
-                    console.log('Path end:', pathLatLngs[pathLatLngs.length - 1]);
                 }
             } catch (err) {
                 console.error('Error rendering path on map:', err);
@@ -775,7 +696,6 @@
         function renderGeofencesOnMap() {
             try {
                 if (!window.replayMap || !Array.isArray(window.geofences) || window.geofences.length === 0) {
-                    console.log('No geofences to render');
                     return;
                 }
                 
@@ -815,7 +735,6 @@
                     }
                 });
                 
-                console.log('Rendered', window.geofencePolygons.length, 'geofences');
             } catch (err) {
                 console.error('Error rendering geofences on map:', err);
             }
@@ -824,7 +743,6 @@
         function renderRoutesOnMap() {
             try {
                 if (!window.replayMap || !Array.isArray(window.routes) || window.routes.length === 0) {
-                    console.log('No routes to render');
                     return;
                 }
                 
@@ -908,74 +826,11 @@
                     }
                 });
                 
-                console.log('Rendered', window.routePolylines.length, 'routes on map');
-
-                // ── Waypoint markers: Start (S), Finish (F), numbered intermediates ──
-                window.routeWaypointMarkers.forEach(m => { try { window.replayMap.removeLayer(m); } catch(e){} });
-                window.routeWaypointMarkers = [];
-
-                const addWaypointMarkers = () => {
-                    window.routes.forEach(route => {
-                        const wps = route.waypoints;
-                        if (!wps || wps.length === 0) return;
-                        const maxIdx = wps.length - 1;
-                        wps.forEach((wp, wpIdx) => {
-                            const nn = normalizeCoord(wp);
-                            if (!nn || !isFinite(nn.lat) || !isFinite(nn.lng)) return;
-                            const isStart  = wpIdx === 0;
-                            const isFinish = wpIdx === maxIdx;
-                            // Skip dense intermediate waypoints to avoid marker spam
-                            if (!isStart && !isFinish && wps.length > 25) return;
-                            let iconHtml, sz;
-                            if (isStart) {
-                                iconHtml = `<div style="width:26px;height:26px;background:#22c55e;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.6)">S</div>`;
-                                sz = 26;
-                            } else if (isFinish) {
-                                iconHtml = `<div style="width:26px;height:26px;background:#ef4444;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.6)">F</div>`;
-                                sz = 26;
-                            } else {
-                                iconHtml = `<div style="width:18px;height:18px;background:#f59e0b;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">${wpIdx}</div>`;
-                                sz = 18;
-                            }
-                            const popupLabel = isStart  ? `🟢 Start — ${route.name}` :
-                                               isFinish ? `🔴 Finish — ${route.name}` :
-                                                          `🟡 Waypoint ${wpIdx} — ${route.name}`;
-                            const marker = L.marker([Number(nn.lat), Number(nn.lng)], {
-                                icon: L.divIcon({ html: iconHtml, className: '', iconSize: [sz, sz], iconAnchor: [sz/2, sz/2] }),
-                                zIndexOffset: isStart || isFinish ? 1100 : 200
-                            }).bindPopup(`<b>${popupLabel}</b><br>Lat: ${Number(nn.lat).toFixed(5)}, Lng: ${Number(nn.lng).toFixed(5)}`);
-                            marker.addTo(window.replayMap);
-                            window.routeWaypointMarkers.push(marker);
-                        });
-                    });
-                    console.log('Added', window.routeWaypointMarkers.length, 'route waypoint markers');
-                };
-
-                if (window.replayMap && typeof window.replayMap.whenReady === 'function') {
-                    window.replayMap.whenReady(addWaypointMarkers);
-                } else {
-                    addWaypointMarkers();
-                }
             } catch (err) {
                 console.error('Error rendering routes on map:', err);
             }
         }
         
-        // Focus the map view on a single route by index
-        function focusRoute(routeIdx) {
-            if (!window.replayMap || !Array.isArray(window.routes) || routeIdx < 0 || routeIdx >= window.routes.length) return;
-            const route = window.routes[routeIdx];
-            const wps = (route.waypoints || []).map(wp => normalizeCoord(wp)).filter(Boolean);
-            if (wps.length === 0) return;
-            try {
-                const bounds = L.latLngBounds(wps.map(c => [c.lat, c.lng]));
-                if (bounds.isValid()) {
-                    window.replayMap.fitBounds(bounds, { padding: [50, 50], animate: false });
-                }
-            } catch(e) { console.warn('focusRoute error:', e); }
-        }
-        window.focusRoute = focusRoute; // exposed for blade onclick
-
         // Calculate distance between two coordinates (in meters)
         function calculateDistance(lat1, lng1, lat2, lng2) {
             const R = 6371000; // Earth's radius in meters
@@ -1206,7 +1061,6 @@
                         setTimeout(() => {
                             try {
                                 window.replayMap.fitBounds(effectiveBounds, { padding: [50, 50] });
-                                console.log('Map zoomed to route area');
                             } catch (fbErr) {
                                 console.error('Error applying fitBounds (deferred):', fbErr);
                             }
@@ -1391,15 +1245,9 @@
             if (now - (window._replayLastRenderAt || 0) < 180) {
                 // Prevent spamming Leaflet with rapid updates which can trigger
                 // renderer exceptions during animations.
-                console.log('Skipping render: throttled');
                 return;
             }
             window._replayLastRenderAt = now;
-
-            console.log('=== Rendering map elements ===');
-            console.log('Path coordinates:', window.pathCoordinates?.length || 0);
-            console.log('Routes available:', window.routes?.length || 0);
-            console.log('Geofences:', window.geofences?.length || 0);
 
             renderPathOnMap();
             renderGeofencesOnMap();
@@ -1410,18 +1258,15 @@
                 updateMachineMarker(0);
             }
 
-            console.log('=== Map rendering complete ===');
         }
         
         // Listen for Livewire component updates
         function initializeLivewireListeners() {
             document.addEventListener('livewire:updated', (e) => {
-                console.log('Livewire updated, refreshing data from DOM...');
                 try {
                     // Re-run the attribute parsing/normalization so we always have
                     // consistent `{lat, lng}` objects regardless of raw JSON shape
                     loadDataFromAttributes();
-                    console.log('Machine selected event');
 
                     // Wait a moment for Livewire to re-render, then load new data
                     setTimeout(() => {
@@ -1450,25 +1295,16 @@
                 let playbackInterval = null;
 
                 Livewire.on('replay-loaded', () => {
-                    console.log('Replay loaded event');
                     setTimeout(() => {
                         try {
                             loadDataFromAttributes();
-                            console.log('After loading attributes:', {
-                                pathCoords: window.pathCoordinates?.length || 0,
-                                geofences: window.geofences?.length || 0,
-                                routes: window.routes?.length || 0
-                            });
 
                             if (Array.isArray(window.pathCoordinates) && window.pathCoordinates.length > 0) {
-                                console.log('Rendering map elements with path data...');
                                 renderMapElements();
                                 centerOnSelectedMachine();
                                 hideMapOverlay();
                                 updateTimerDisplay();
-                                console.log('Map rendering completed');
                             } else {
-                                console.log('No path coordinates available yet');
                                 showMapOverlay();
                             }
                         } catch (err) {
@@ -1478,27 +1314,14 @@
                 });
 
                 Livewire.on('show-routes', () => {
-                    console.log('Show routes event received');
                     setTimeout(() => {
                         try {
                             loadDataFromAttributes();
                             if (Array.isArray(window.routes) && window.routes.length > 0) {
                                 renderRoutesOnMap();
-                                // Fit map to encompass all route waypoints
-                                try {
-                                    const allCoords = window.routes
-                                        .flatMap(r => (r.waypoints || []).map(wp => normalizeCoord(wp)).filter(Boolean))
-                                        .map(c => [c.lat, c.lng]);
-                                    if (allCoords.length > 0) {
-                                        const bounds = L.latLngBounds(allCoords);
-                                        if (bounds.isValid()) {
-                                            window.replayMap.fitBounds(bounds, { padding: [60, 60], animate: false });
-                                        }
-                                    }
-                                } catch(e) { zoomToRouteArea(); }
+                                zoomToRouteArea();
                                 hideMapOverlay();
                             } else {
-                                console.log('No routes available to show');
                             }
                         } catch (err) {
                             console.error('Error showing routes:', err);
@@ -1510,7 +1333,6 @@
                     try {
                         const position = typeof data?.position === 'number' ? data.position : 0;
                         if (position >= 0 && Array.isArray(window.pathCoordinates) && position < window.pathCoordinates.length) {
-                            console.log('Seeking to position', position);
                             updateMachineMarker(position);
                             updateTimerDisplay();
                         }
@@ -1520,7 +1342,6 @@
                 });
 
                 Livewire.on('replay-play', (payload) => {
-                    console.log('Replay playing');
                     if (playbackInterval) clearInterval(playbackInterval);
 
                     // Playback driven by client but authoritative state stored server-side.
@@ -1566,7 +1387,6 @@
                 });
 
                 Livewire.on('replay-pause', () => {
-                    console.log('Replay paused');
                     try {
                         if (playbackInterval) {
                             clearInterval(playbackInterval);
@@ -1576,7 +1396,6 @@
                 });
 
                 Livewire.on('replay-stop', () => {
-                    console.log('Replay stopped');
                     try {
                         if (playbackInterval) {
                             clearInterval(playbackInterval);
@@ -1765,29 +1584,95 @@
         });
     </script>
     
-    <script>
-    (function injectReplayStyles() {
-        if (document.getElementById('replay-styles')) return;
-        var s = document.createElement('style');
-        s.id = 'replay-styles';
-        s.textContent = [
-            '#replay-map{background:#1f2937}',
-            '#replay-map .leaflet-container{background:#1f2937;height:100%;width:100%}',
-            '@keyframes pulse-marker{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(59,130,246,0.6)}50%{transform:scale(1.05);box-shadow:0 6px 16px rgba(59,130,246,0.8)}}',
-            '@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}',
-            '@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}',
-            '.animate-shimmer{animation:shimmer 3s infinite}',
-            '.replay-marker{animation:pulse 2s infinite}',
-            'input[type="range"].slider-thumb{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}',
-            'input[type="range"].slider-thumb::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);cursor:grab;box-shadow:0 4px 12px rgba(245,158,11,0.6);border:3px solid white;transition:all 0.2s ease}',
-            'input[type="range"].slider-thumb::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 6px 16px rgba(245,158,11,0.8)}',
-            'input[type="range"].slider-thumb::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.1)}',
-            'input[type="range"].slider-thumb::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);cursor:grab;box-shadow:0 4px 12px rgba(245,158,11,0.6);border:3px solid white;transition:all 0.2s ease}',
-            'input[type="range"].slider-thumb::-moz-range-thumb:hover{transform:scale(1.2);box-shadow:0 6px 16px rgba(245,158,11,0.8)}',
-            'input[type="range"].slider-thumb::-moz-range-thumb:active{cursor:grabbing;transform:scale(1.1)}',
-        ].join('');
-        document.head.appendChild(s);
-    })();
-    </script>
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
+        @keyframes pulse-marker {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.6);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 6px 16px rgba(59, 130, 246, 0.8);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .animate-shimmer {
+            animation: shimmer 3s infinite;
+        }
+
+        .replay-marker {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Custom Range Slider Styling */
+        input[type="range"].slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"].slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--umber) 100%);
+            cursor: grab;
+            box-shadow: 0 4px 12px rgba(217, 158, 43, 0.6);
+            border: 3px solid white;
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"].slider-thumb::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(217, 158, 43, 0.8);
+        }
+
+        input[type="range"].slider-thumb::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        input[type="range"].slider-thumb::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--umber) 100%);
+            cursor: grab;
+            box-shadow: 0 4px 12px rgba(217, 158, 43, 0.6);
+            border: 3px solid white;
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"].slider-thumb::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(217, 158, 43, 0.8);
+        }
+
+        input[type="range"].slider-thumb::-moz-range-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+    </style>
 </div>
 </div>

@@ -2,19 +2,18 @@
 
 namespace App\Livewire;
 
-use App\Actions\Jetstream\InviteTeamMember;
-use App\Models\DigestSubscription;
-use App\Models\Role;
-use App\Models\User;
-use App\Models\UserFeedPreference;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
+use App\Services\TeamRoleProvisioner;
+use App\Traits\BrowserEventBridge;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Laravel\Jetstream\Contracts\InvitesTeamMembers;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class Settings extends Component
 {
+    use BrowserEventBridge;
+
     public string $activeTab = 'general';
 
     // General Settings
@@ -34,7 +33,6 @@ class Settings extends Component
     public string $currency = 'USD';
 
     // Users & Roles
-    /** @var array<string, mixed> */
     public array $teamMembers = [];
 
     public string $inviteEmail = '';
@@ -56,54 +54,45 @@ class Settings extends Component
 
     public bool $quietHoursEnabled = false;
 
-    // Feed Notification Preferences
-    /** @var array<string, mixed> */
-    public array $feedCategoryPrefs = [
-        'breakdown' => true,
-        'shift_update' => true,
-        'safety_alert' => true,
-        'production' => true,
-        'general' => false,
-    ];
+    /**
+     * Filters what severity of alert/fuel-alert/AI-alert appears in the
+     * notification bell. 'critical' is never filterable -- AINotifications
+     * always shows it regardless of this setting, so a user can't
+     * accidentally hide something that genuinely needs immediate attention.
+     */
+    public string $notificationMinSeverity = 'low';
 
-    public bool $feedNotifyOnComment = true;
-
-    public bool $feedNotifyOnReply = true;
-
-    public bool $feedNotifyOnApproval = true;
-
-    public bool $feedNotifyOnMention = true;
-
-    public bool $digestSubscribed = false;
-
-    /** @var array<string, string|array<mixed>> */
-    protected $rules = [
-        'teamName' => 'required|string|max:255',
+    /** @var array<string, string> */
+    protected array $rules = [
         'teamEmail' => 'nullable|email|max:255',
         'timezone' => 'required|timezone',
         'language' => 'required|in:en,es,fr,de,pt,zh,ar,af,zu',
         'currency' => 'required|in:USD,EUR,GBP,ZAR,AUD,CAD,JPY,CNY,INR,BRL',
+        'notificationMinSeverity' => 'required|in:low,medium,high,critical',
     ];
 
-    public function mount(): void
+    public function mount()
     {
-        $team = Auth::user()->currentTeam;
-
-        if ($team === null) {
-            return;
-        }
-
+        $team = auth()->user()->currentTeam;
         $this->teamName = $team->name;
         $this->teamEmail = $team->email ?? '';
         $this->timezone = $team->timezone ?? 'UTC';
         $this->language = $team->language ?? 'en';
         $this->currency = $team->currency ?? 'USD';
 
+        $preferences = auth()->user()->notification_preferences ?? [];
+        $this->emailAlerts = $preferences['email_alerts'] ?? true;
+        $this->emailReports = $preferences['email_reports'] ?? true;
+        $this->inAppAlerts = $preferences['in_app_alerts'] ?? true;
+        $this->quietHoursEnabled = $preferences['quiet_hours_enabled'] ?? false;
+        $this->quietHoursStart = $preferences['quiet_hours_start'] ?? '22:00';
+        $this->quietHoursEnd = $preferences['quiet_hours_end'] ?? '08:00';
+        $this->notificationMinSeverity = $preferences['min_severity'] ?? 'low';
+
         $this->loadTeamMembers();
-        $this->loadFeedPreferences();
     }
 
-    public function render(): View
+    public function render()
     {
         return view('livewire.settings', [
             'roles' => $this->getRoles(),
@@ -113,18 +102,20 @@ class Settings extends Component
         ]);
     }
 
-    public function setActiveTab(string $tab): void
+    public function setActiveTab(string $tab)
     {
         $this->activeTab = $tab;
     }
 
     // ==================== GENERAL SETTINGS ====================
 
-    public function saveGeneralSettings(): void
+    public function saveGeneralSettings()
     {
         $this->validate();
 
-        $team = Auth::user()->currentTeam;
+        $team = auth()->user()->currentTeam;
+        $this->authorize('update', $team);
+
         $team->update([
             'name' => $this->teamName,
             'email' => $this->teamEmail,
@@ -133,14 +124,14 @@ class Settings extends Component
             'currency' => $this->currency,
         ]);
 
-        $this->dispatch('notify', ...['type' => 'success', 'message' => 'General settings updated']);
+        $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'General settings updated']);
     }
 
     // ==================== USERS & ROLES ====================
 
-    public function loadTeamMembers(): void
+    public function loadTeamMembers()
     {
-        $team = Auth::user()->currentTeam;
+        $team = auth()->user()->currentTeam;
         $this->teamMembers = $team->users()
             ->with('roles')
             ->get()
@@ -156,7 +147,7 @@ class Settings extends Component
             ->toArray();
     }
 
-    public function toggleInviteForm(): void
+    public function toggleInviteForm()
     {
         $this->showInviteForm = ! $this->showInviteForm;
         if (! $this->showInviteForm) {
@@ -165,7 +156,7 @@ class Settings extends Component
         }
     }
 
-    public function inviteUser(): void
+    public function inviteUser()
     {
         $this->validate([
             'inviteEmail' => 'required|email|max:255',
@@ -173,165 +164,109 @@ class Settings extends Component
         ]);
 
         try {
-            /** @var User $authUser */
-            $authUser = Auth::user();
-            $team = $authUser->currentTeam;
+            $team = auth()->user()->currentTeam;
+            $this->authorize('addTeamMember', $team);
 
-            if ($team === null) {
-                $this->dispatch('notify', ...['type' => 'error', 'message' => 'No active team selected.']);
-
-                return;
-            }
-
-            app(InviteTeamMember::class)->invite(
-                $authUser,
+            // Delegate to Jetstream's own invitation action (also used by
+            // teams.show) instead of creating the account ourselves: it
+            // creates a real TeamInvitation row and queues the actual
+            // invitation email. The account used to be created here directly
+            // with a hardcoded literal password and no email ever sent --
+            // the invited person had no way to learn it or sign in.
+            app(InvitesTeamMembers::class)->invite(
+                auth()->user(),
                 $team,
                 $this->inviteEmail,
-                $this->selectedRole,
+                $this->selectedRole
             );
 
-            $this->dispatch('notify', ...['type' => 'success', 'message' => "Invitation sent to {$this->inviteEmail}"]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => "Invitation sent to {$this->inviteEmail}"]);
             $this->showInviteForm = false;
             $this->inviteEmail = '';
             $this->selectedRole = 'operator';
+            $this->loadTeamMembers();
         } catch (ValidationException $e) {
-            $message = collect($e->errors())->flatten()->first() ?? 'Failed to invite user';
-            $this->dispatch('notify', ...['type' => 'error', 'message' => $message]);
-        } catch (\Exception $e) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to invite user: '.$e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => collect($e->errors())->flatten()->first() ?? 'Failed to invite user']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to invite team member', ['team_id' => $team->id ?? null, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => "We couldn't send that invitation. Please check the email address and try again."]);
         }
     }
 
-    public function removeUser(int $userId): void
+    public function removeUser($userId)
     {
         try {
-            $team = Auth::user()->currentTeam;
-            $currentUser = Auth::user();
+            $team = auth()->user()->currentTeam;
+            $this->authorize('removeTeamMember', $team);
+            $currentUser = auth()->user();
 
             // Prevent removing self
-            if ($userId === $currentUser->id) {
-                $this->dispatch('notify', ...['type' => 'error', 'message' => 'Cannot remove yourself from the team']);
+            if ((int) $userId === (int) $currentUser->id) {
+                $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Cannot remove yourself from the team']);
 
                 return;
             }
 
             $team->users()->detach($userId);
-            $this->dispatch('notify', ...['type' => 'success', 'message' => 'User removed from team']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'User removed from team']);
             $this->loadTeamMembers();
         } catch (\Exception $e) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to remove user']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to remove user']);
         }
     }
 
-    public function updateUserRole(int $userId, string $newRole): void
+    public function updateUserRole($userId, $newRole)
     {
         try {
-            $team = Auth::user()->currentTeam;
+            $team = auth()->user()->currentTeam;
+            $this->authorize('updateTeamMember', $team);
 
             // Ensure the user is a member of this team
             if (! $team->users()->where('id', $userId)->exists()) {
-                $this->dispatch('notify', ...['type' => 'error', 'message' => 'User is not a member of this team']);
+                $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'User is not a member of this team']);
 
                 return;
             }
 
-            $team = Auth::user()->currentTeam;
+            $team = auth()->user()->currentTeam;
             $user = $team->users()->findOrFail($userId);
-            // Remove old roles
-            $user->roles()->detach();
 
-            // Add new role
-            $role = Role::where('name', $newRole)->first();
-            if ($role) {
-                $user->roles()->attach($role->id);
-            }
+            TeamRoleProvisioner::assignRole($user, $team, $newRole);
 
-            $this->dispatch('notify', ...['type' => 'success', 'message' => 'User role updated']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'User role updated']);
             $this->loadTeamMembers();
         } catch (\Exception $e) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to update role']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to update role']);
         }
-    }
-
-    // ==================== FEED NOTIFICATION PREFERENCES ====================
-
-    public function loadFeedPreferences(): void
-    {
-        $user = Auth::user();
-        $teamId = $user->current_team_id;
-
-        $pref = UserFeedPreference::where('user_id', $user->id)
-            ->where('team_id', $teamId)
-            ->first();
-
-        if ($pref) {
-            $this->feedCategoryPrefs = array_merge($this->feedCategoryPrefs, $pref->category_preferences ?? []);
-            $this->feedNotifyOnComment = $pref->notify_on_comment;
-            $this->feedNotifyOnReply = $pref->notify_on_reply;
-            $this->feedNotifyOnApproval = $pref->notify_on_approval;
-            $this->feedNotifyOnMention = $pref->notify_on_mention;
-        }
-
-        $this->digestSubscribed = DigestSubscription::where('user_id', $user->id)
-            ->where('team_id', $teamId)
-            ->where('enabled', true)
-            ->exists();
-    }
-
-    public function saveFeedPreferences(): void
-    {
-        $user = Auth::user();
-        $teamId = $user->current_team_id;
-
-        UserFeedPreference::updateOrCreate(
-            ['user_id' => $user->id, 'team_id' => $teamId],
-            [
-                'category_preferences' => $this->feedCategoryPrefs,
-                'notify_on_comment' => $this->feedNotifyOnComment,
-                'notify_on_reply' => $this->feedNotifyOnReply,
-                'notify_on_approval' => $this->feedNotifyOnApproval,
-                'notify_on_mention' => $this->feedNotifyOnMention,
-            ]
-        );
-
-        DigestSubscription::updateOrCreate(
-            ['user_id' => $user->id, 'team_id' => $teamId],
-            ['enabled' => $this->digestSubscribed]
-        );
-
-        $this->dispatch('notify', type: 'success', message: 'Feed notification preferences saved.');
     }
 
     // ==================== NOTIFICATION SETTINGS ====================
 
-    public function saveNotificationSettings(): void
+    public function saveNotificationSettings()
     {
         try {
             // Store in user preferences
-            $user = Auth::user();
-            $preferences = [
-                'email_alerts' => $this->emailAlerts,
-                'email_reports' => $this->emailReports,
-                'in_app_alerts' => $this->inAppAlerts,
-                'quiet_hours_enabled' => $this->quietHoursEnabled,
-                'quiet_hours_start' => $this->quietHoursStart,
-                'quiet_hours_end' => $this->quietHoursEnd,
-            ];
+            $user = auth()->user();
+            auth()->user()->update([
+                'notification_preferences' => [
+                    'email_alerts' => $this->emailAlerts,
+                    'email_reports' => $this->emailReports,
+                    'in_app_alerts' => $this->inAppAlerts,
+                    'quiet_hours_enabled' => $this->quietHoursEnabled,
+                    'quiet_hours_start' => $this->quietHoursStart,
+                    'quiet_hours_end' => $this->quietHoursEnd,
+                    'min_severity' => $this->notificationMinSeverity,
+                ],
+            ]);
 
-            // Store preferences (would use a proper preferences table in production)
-            // For now, just dispatch success
-
-            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Notification settings saved']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Notification settings saved']);
         } catch (\Exception $e) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to save settings']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to save settings']);
         }
     }
 
     // ==================== HELPER METHODS ====================
 
-    /**
-     * @return array<mixed>
-     */
     private function getRoles(): array
     {
         return [
@@ -342,9 +277,6 @@ class Settings extends Component
         ];
     }
 
-    /**
-     * @return array<mixed>
-     */
     private function getTimezones(): array
     {
         return [
@@ -359,9 +291,6 @@ class Settings extends Component
         ];
     }
 
-    /**
-     * @return array<mixed>
-     */
     private function getLanguages(): array
     {
         return [
@@ -377,9 +306,6 @@ class Settings extends Component
         ];
     }
 
-    /**
-     * @return array<mixed>
-     */
     private function getCurrencies(): array
     {
         return [

@@ -8,6 +8,7 @@ use Database\Factories\AIPredictiveAlertFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * AIPredictiveAlert Model
@@ -118,5 +119,29 @@ class AIPredictiveAlert extends Model
     public function scopeUnacknowledged(Builder $query): void
     {
         $query->where('is_acknowledged', false);
+    }
+
+    /** @return BelongsTo<Machine, $this> */
+    public function machine(): BelongsTo
+    {
+        return $this->belongsTo(Machine::class, 'related_machine_id');
+    }
+
+    /** @return BelongsTo<Team, $this> */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    /** @return BelongsTo<AIAgent, $this> */
+    public function agent(): BelongsTo
+    {
+        return $this->belongsTo(AIAgent::class);
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function acknowledgedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'acknowledged_by');
     }
 }

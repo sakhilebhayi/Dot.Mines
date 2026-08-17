@@ -1,31 +1,28 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "dot-ecosystem/mines",
     "type": "project",
-    "description": "Mines - Mining Fleet Management Platform",
+    "description": "Dot.Mines - Mining Fleet Management Platform",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
-        "dedoc/scramble": "^0.13.26",
         "doctrine/dbal": "^4.4",
         "laravel/framework": "^12.0",
-        "laravel/horizon": "^5.47",
         "laravel/jetstream": "^5.4",
-        "laravel/pulse": "^1.7",
         "laravel/reverb": "^1.7",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.23",
         "laravel/tinker": "^2.10.1",
-        "league/flysystem-aws-s3-v3": "^3.0",
+        "league/commonmark": "^2.9",
         "livewire/livewire": "^3.6.4",
-        "sentry/sentry-laravel": "^4.0",
-        "shuchkin/simplexlsxgen": "^1.5"
+        "phpoffice/phpspreadsheet": "^5.9",
+        "sentry/sentry-laravel": "^4.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "laravel/boost": "^2.4",
+        "laravel/boost": "^2.5",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
         "laravel/sail": "^1.41",
@@ -59,7 +56,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74,#a3e635\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" \"php artisan reverb:start\" --names=server,queue,logs,vite,reverb --kill-others"
         ],
         "test": [
             "@php artisan config:clear --ansi",

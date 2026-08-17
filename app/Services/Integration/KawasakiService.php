@@ -35,8 +35,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch machines from Kawasaki API
-     *
-     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
@@ -68,8 +66,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch location data for a machine
-     *
-     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -92,8 +88,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch metrics for a machine
-     *
-     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -124,8 +118,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch alerts for a machine
-     *
-     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
@@ -156,8 +148,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Parse machine data from Kawasaki format
-     *
-     * @return array<mixed>
      */
     protected function parseMachineData(array $data): array
     {
@@ -181,8 +171,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Parse location data from Kawasaki format
-     *
-     * @return array<mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -197,12 +185,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Parse metric data from Kawasaki format
-     *
-     * @return array<mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -217,12 +199,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Parse alert data from Kawasaki format
-     *
-     * @return array<mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
     protected function parseAlert(array $data): array
     {
@@ -258,8 +234,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch machine details from Kawasaki API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -288,15 +262,16 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
 
-            return $result['metrics'] ?? [];
+            // fetchMetrics() builds a list of {type, value, unit, timestamp}
+            // readings, not the flat MachineMetric-column shape the sync
+            // pipeline expects -- see normalizeMetricsForStorage().
+            return $this->normalizeMetricsForStorage($result['metrics'] ?? []);
         } catch (Exception $e) {
             return [];
         }
@@ -304,8 +279,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -320,8 +293,6 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

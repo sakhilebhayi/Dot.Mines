@@ -75,7 +75,7 @@ class GenerateReportJobTest extends TestCase
 
         $report = Report::factory()->create([
             'team_id' => $this->makeTeam()->id,
-            'type' => 'fuel',
+            'type' => 'fuel_consumption',
             'format' => 'csv',
             'status' => 'pending',
             'filters' => [],
@@ -96,7 +96,7 @@ class GenerateReportJobTest extends TestCase
 
         $report = Report::factory()->create([
             'team_id' => $this->makeTeam()->id,
-            'type' => 'maintenance',
+            'type' => 'maintenance_schedule',
             'format' => 'csv',
             'status' => 'pending',
             'filters' => [],

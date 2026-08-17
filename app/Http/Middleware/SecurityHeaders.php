@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Foundation\Vite;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -21,29 +22,38 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Generate nonce BEFORE calling $next() so Blade views can read it
-        // via request()->attributes->get('csp_nonce') during rendering.
-        // Generating it after $next() means the nonce in the HTML and the
-        // nonce in the CSP header would always be different (making nonces useless).
+        // Content Security Policy - Helps prevent XSS attacks
+        // Stronger CSP: remove 'unsafe-inline' and 'unsafe-eval'. Prefer nonces or SRI
+        // for inline assets. Generate a per-request nonce and add it to script/style-src.
+        //
+        // This must run BEFORE $next($request): the view is rendered inside $next(),
+        // so the nonce needs to exist first for both Vite (@vite tags) and any manual
+        // nonce="{{ ... }}" attributes in Blade to pick it up.
         $nonce = bin2hex(random_bytes(12));
+
+        // Share nonce with views. Views can read via request()->attributes->get('csp_nonce'),
+        // and @vite()-generated <script>/<link> tags pick it up automatically.
         $request->attributes->set('csp_nonce', $nonce);
+        app(Vite::class)->useCspNonce($nonce);
 
         $response = $next($request);
 
-        // Content Security Policy - Helps prevent XSS attacks
-        // 'unsafe-inline' is required in style-src because Leaflet.js dynamically
-        // sets inline style="" attributes and injects <style> elements via JavaScript;
-        // these cannot carry a nonce and cannot be hashed.
-        // 'unsafe-eval' is required because Alpine.js evaluates x-* expressions
-        // using new Function(), which triggers unsafe-eval.
         $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com";
-        $styleSrc = "'self' 'unsafe-inline' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://fonts.bunny.net https://unpkg.com";
+        // Nonce must NOT appear in style-src — CSP spec §8.2: when a nonce is present
+        // the browser ignores 'unsafe-inline', which breaks Livewire/Alpine inline styles.
+        $styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://fonts.bunny.net https://unpkg.com";
 
         $csp = "default-src 'self'; ".
                "script-src {$scriptSrc}; ".
                "script-src-elem {$scriptSrc}; ".
                "style-src {$styleSrc}; ".
                "style-src-elem {$styleSrc}; ".
+               // Alpine.js (x-show/x-transition) and Livewire mutate element.style directly at
+               // runtime — nonces and hashes never apply to style="" attribute mutations per the
+               // CSP spec, only to <style>/<script> elements. Scoping 'unsafe-inline' to just the
+               // attribute vector (not style-src-elem, not script-src) keeps new <style> tags and
+               // all scripts nonce-locked while still allowing this first-party JS to toggle styles.
+               "style-src-attr 'self' 'unsafe-inline'; ".
                "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net; ".
                "img-src 'self' data: https: blob:; ".
                "connect-src 'self' https://unpkg.com https://cdnjs.cloudflare.com https://*.pusher.com https://*.pusherapp.com ws: wss:; ".

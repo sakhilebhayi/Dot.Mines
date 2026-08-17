@@ -1,279 +1,333 @@
-<div class="min-h-screen bg-slate-900 p-6" wire:poll.10s="loadIntegrations">
-    <div class="max-w-6xl mx-auto">
-
-        {{-- Header --}}
-        <div class="flex items-center justify-between mb-8">
+<div class="px-6 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-white">Integrations</h1>
-                <p class="text-slate-400 mt-1">Connect your equipment manufacturer APIs — machines sync automatically to your fleet.</p>
+                <h2 class="text-3xl font-display font-semibold text-[var(--stone)]">Integrations</h2>
+                <p class="text-[var(--sand)] mt-2">Manage your equipment manufacturer connections</p>
             </div>
-            <button wire:click="openAddModal"
-                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Add Integration
+            <button
+                wire:click="openAddModal"
+                class="px-6 py-3 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-display font-semibold transition"
+            >
+                + Add Integration
             </button>
         </div>
 
-        {{-- Provider Grid --}}
-        <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-3 mb-8">
-            @foreach($availableProviders as $slug => $provider)
-                @php $isConnected = collect($integrations)->contains('provider', $slug); @endphp
-                <div class="bg-slate-800 border {{ $isConnected ? 'border-emerald-500/50' : 'border-slate-700' }} rounded-lg p-3 text-center relative">
-                    @if($isConnected)
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-400 rounded-full"></span>
-                    @endif
-                    <div class="text-2xl mb-1">{{ $provider['icon'] }}</div>
-                    <p class="text-white text-xs font-medium leading-tight">{{ $provider['name'] }}</p>
-                    <p class="text-slate-500 text-[10px] mt-0.5">{{ $isConnected ? 'Connected' : 'Available' }}</p>
-                </div>
-            @endforeach
+        <div class="mt-4 p-4 bg-[var(--gold)]/10 border border-[var(--gold)]/20 rounded-lg text-[var(--sand)] text-sm">
+            <strong class="text-[var(--stone)]">Integration Setup Guide:</strong><br>
+            1. Select your equipment manufacturer.<br>
+            2. Enter your API credentials (get these from your provider dashboard).<br>
+            3. Optionally set a custom API endpoint, sync frequency, and connection type.<br>
+            4. Test the connection before saving.<br>
+            5. For webhook integrations, copy the provided URL and set it in your provider dashboard.<br>
+            6. You will receive alerts at your notification email if sync fails.
         </div>
-
-        {{-- Active Integrations --}}
-        @if(count($integrations) > 0)
-            <div class="space-y-3">
-                @foreach($integrations as $integration)
-                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition-colors">
-                        <div class="flex items-center justify-between gap-4">
-                            <div class="flex items-center gap-4 min-w-0">
-                                <div class="text-3xl flex-shrink-0">
-                                    {{ $availableProviders[$integration['provider']]['icon'] ?? '📦' }}
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <p class="text-white font-semibold">{{ $integration['name'] }}</p>
-                                        @php
-                                            $statusColour = match($integration['status']) {
-                                                'connected' => 'bg-emerald-500/20 text-emerald-300',
-                                                'testing'   => 'bg-amber-500/20 text-amber-300',
-                                                'disconnected', 'error' => 'bg-red-500/20 text-red-300',
-                                                default     => 'bg-slate-700 text-slate-300',
-                                            };
-                                        @endphp
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold {{ $statusColour }}">
-                                            {{ ucfirst($integration['status']) }}
-                                        </span>
-                                    </div>
-                                    <p class="text-slate-400 text-sm mt-0.5">
-                                        {{ $availableProviders[$integration['provider']]['name'] ?? $integration['provider'] }}
-                                        &middot; Last sync: {{ $integration['last_sync_at'] }}
-                                        @if($integration['machines_count'] > 0)
-                                            &middot; {{ $integration['machines_count'] }} machines
-                                        @endif
-                                    </p>
-                                    @if($integration['last_error'])
-                                        <p class="text-red-400 text-xs mt-1 truncate max-w-md">⚠ {{ $integration['last_error'] }}</p>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-2 flex-shrink-0">
-                                <select
-                                    wire:change="updateSyncFrequency({{ $integration['id'] }}, $event.target.value)"
-                                    class="text-xs bg-slate-700 border border-slate-600 text-slate-300 rounded px-2 py-1.5 focus:outline-none focus:border-blue-500"
-                                    title="Sync frequency">
-                                    @foreach([
-                                        'every_5_minutes'  => 'Every 5 min',
-                                        'every_15_minutes' => 'Every 15 min',
-                                        'hourly'           => 'Hourly',
-                                        'every_6_hours'    => 'Every 6 hrs',
-                                        'daily'            => 'Daily',
-                                        'manual'           => 'Manual only',
-                                    ] as $value => $label)
-                                        <option value="{{ $value }}" {{ $integration['sync_frequency'] === $value ? 'selected' : '' }}>
-                                            {{ $label }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                <button wire:click="syncNow({{ $integration['id'] }})"
-                                    wire:loading.attr="disabled" wire:target="syncNow({{ $integration['id'] }})"
-                                    class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-emerald-100 rounded text-xs font-medium transition-colors">
-                                    <span wire:loading.remove wire:target="syncNow({{ $integration['id'] }})">🔄 Sync Now</span>
-                                    <span wire:loading wire:target="syncNow({{ $integration['id'] }})">Queuing…</span>
-                                </button>
-
-                                <button wire:click="retestConnection({{ $integration['id'] }})"
-                                    class="px-3 py-1.5 bg-blue-800 hover:bg-blue-700 text-blue-200 rounded text-xs font-medium transition-colors">
-                                    🧪 Re-test
-                                </button>
-
-                                <button wire:click="openDetailPanel({{ $integration['id'] }})"
-                                    class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded text-xs font-medium transition-colors">
-                                    Logs
-                                </button>
-
-                                <button wire:click="deleteIntegration({{ $integration['id'] }})"
-                                    wire:confirm="Delete this integration? Synced machines remain but future syncs stop."
-                                    class="px-3 py-1.5 bg-red-900 hover:bg-red-800 text-red-300 rounded text-xs font-medium transition-colors">
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <div class="bg-slate-800 border border-slate-700 rounded-xl p-16 text-center">
-                <div class="text-5xl mb-4">🔌</div>
-                <h3 class="text-xl font-semibold text-white mb-2">No integrations yet</h3>
-                <p class="text-slate-400 mb-6">Add your first OEM API connection to start syncing machines automatically.</p>
-                <button wire:click="openAddModal"
-                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                    + Add Integration
-                </button>
-            </div>
-        @endif
     </div>
 
-    {{-- Add Integration Modal --}}
+    <!-- Available Manufacturers Info -->
+    <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 mb-8">
+        @foreach($availableManufacturers as $key => $mfr)
+            <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-4 text-center">
+                <div class="text-3xl mb-2">{{ $mfr['icon'] }}</div>
+                <h3 class="text-[var(--stone)] font-semibold">{{ $mfr['name'] }}</h3>
+                <p class="text-[var(--sand)] text-xs mt-1">{{ $mfr['description'] }}</p>
+                <div class="mt-3">
+                    @if(in_array($key, array_map(fn($i) => $i['provider'], $integrations)))
+                        <span class="inline-block px-2 py-1 bg-green-900 text-green-200 text-xs rounded">Connected</span>
+                    @elseif(($mfr['status'] ?? 'available') === 'coming_soon')
+                        <span class="inline-block px-2 py-1 bg-yellow-900 text-yellow-200 text-xs rounded">Coming Soon</span>
+                    @else
+                        <span class="inline-block px-2 py-1 bg-white/10 text-[var(--sand)] text-xs rounded">Available</span>
+                    @endif
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <!-- Integrations List -->
+    @if(count($integrations) > 0)
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-[var(--ink)] border-b border-[var(--line)]">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-[var(--stone)] font-semibold">Manufacturer</th>
+                            <th class="px-6 py-4 text-left text-[var(--stone)] font-semibold">Status</th>
+                            <th class="px-6 py-4 text-left text-[var(--stone)] font-semibold">Last Sync</th>
+                            <th class="px-6 py-4 text-left text-[var(--stone)] font-semibold">Created</th>
+                            <th class="px-6 py-4 text-right text-[var(--stone)] font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($integrations as $integration)
+                            <tr class="border-t border-[var(--line)] hover:bg-white/5 transition">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <span class="text-2xl mr-3">
+                                            {{ $availableManufacturers[$integration['provider']]['icon'] ?? '📦' }}
+                                        </span>
+                                        <div>
+                                            <p class="text-[var(--stone)] font-medium">
+                                                {{ $availableManufacturers[$integration['provider']]['name'] ?? ucfirst($integration['provider']) }}
+                                            </p>
+                                            <p class="text-[var(--sand)] text-sm">{{ $integration['provider'] }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    @if($integration['status'] === 'connected')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-900 text-green-200">
+                                            <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                                            Connected
+                                        </span>
+                                    @elseif($integration['status'] === 'pending')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-900 text-yellow-200">
+                                            <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2"></span>
+                                            Pending
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-900 text-red-200">
+                                            <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
+                                            Disconnected
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="text-[var(--stone)] text-sm">{{ $integration['last_sync_at'] }}</p>
+                                        <p class="text-[var(--sand)] text-xs">
+                                            @if($integration['last_sync_status'] === 'success')
+                                                <span class="text-green-400">Success</span>
+                                            @elseif($integration['last_sync_status'] === 'failed')
+                                                <span class="text-red-400" @if($integration['last_error']) title="{{ $integration['last_error'] }}" @endif>Failed</span>
+                                            @else
+                                                <span class="text-[var(--sand)]">Not synced</span>
+                                            @endif
+                                        </p>
+                                        <p class="text-[var(--sand)] text-xs mt-0.5">{{ $integration['machines_count'] }} machine{{ $integration['machines_count'] === 1 ? '' : 's' }} synced</p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-[var(--sand)] text-sm">
+                                    {{ $integration['created_at'] }}
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button 
+                                            wire:click="testConnection({{ $integration['id'] }})"
+                                            class="px-3 py-2 bg-white/10 hover:bg-white/20 text-[var(--stone)] rounded text-sm transition flex items-center gap-1"
+                                            title="Test connection"
+                                            wire:loading.attr="disabled"
+                                            wire:target="testConnection({{ $integration['id'] }})"
+                                        >
+                                            <span wire:loading.remove wire:target="testConnection({{ $integration['id'] }})">Test</span>
+                                            <span wire:loading wire:target="testConnection({{ $integration['id'] }})" class="flex items-center gap-1">
+                                                <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                Testing...
+                                            </span>
+                                        </button>
+                                        <button 
+                                            wire:click="syncMachines({{ $integration['id'] }})"
+                                            class="px-3 py-2 bg-green-900/60 hover:bg-green-800 text-green-200 rounded text-sm transition flex items-center gap-1"
+                                            title="Sync machines"
+                                            wire:loading.attr="disabled"
+                                            wire:target="syncMachines({{ $integration['id'] }})"
+                                        >
+                                            <span wire:loading.remove wire:target="syncMachines({{ $integration['id'] }})">Sync</span>
+                                            <span wire:loading wire:target="syncMachines({{ $integration['id'] }})" class="flex items-center gap-1">
+                                                <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                Syncing...
+                                            </span>
+                                        </button>
+                                        <button 
+                                            wire:click="deleteIntegration({{ $integration['id'] }})"
+                                            wire:confirm="Are you sure you want to delete this integration?"
+                                            class="px-3 py-2 bg-red-900/60 hover:bg-red-800 text-red-200 rounded text-sm transition"
+                                            title="Delete integration"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @else
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-12 text-center">
+            <div class="text-4xl mb-4">📦</div>
+            <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Integrations Yet</h3>
+            <p class="text-[var(--sand)] mb-6">Get started by adding your first equipment manufacturer integration</p>
+            <button 
+                wire:click="openAddModal"
+                class="px-6 py-3 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-display font-semibold transition"
+            >
+                + Add Your First Integration
+            </button>
+        </div>
+    @endif
+
+    <!-- Add Integration Modal -->
     @if($showAddModal)
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg">
-                <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-white">Add Integration</h2>
-                    <button wire:click="closeAddModal" class="text-slate-400 hover:text-white text-xl leading-none">✕</button>
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
+            <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="p-6 border-b border-[var(--line)]">
+                    <h3 class="text-xl font-bold text-[var(--stone)]">Add New Integration</h3>
                 </div>
 
-                <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div class="p-6 space-y-4">
                     @error('general')
-                        <div class="p-3 bg-red-900/50 border border-red-700 rounded text-red-300 text-sm">{{ $message }}</div>
+                        <div class="p-4 bg-red-900 border border-red-700 rounded text-red-200 text-sm">
+                            {{ $message }}
+                        </div>
                     @enderror
 
+                    <!-- Provider Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1.5">Manufacturer *</label>
-                        <select wire:model.live="formData.provider"
-                            class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-sm">
-                            <option value="">Select a manufacturer…</option>
-                            @foreach($availableProviders as $slug => $provider)
-                                <option value="{{ $slug }}">{{ $provider['icon'] }} {{ $provider['name'] }}</option>
+                        <label class="block text-[var(--stone)] font-medium mb-2">Manufacturer *</label>
+                        <select 
+                            wire:model="formData.provider"
+                            class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
+                        >
+                            <option value="">Select a manufacturer...</option>
+                            @foreach($availableManufacturers as $key => $mfr)
+                                <option value="{{ $key }}">
+                                    {{ $mfr['icon'] }} {{ $mfr['name'] }}@if(($mfr['status'] ?? 'available') === 'coming_soon') (Coming Soon){{ ' ' }}@endif
+                                </option>
                             @endforeach
                         </select>
-                        @error('formData.provider') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                        @error('provider')
+                            <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                        @if($formData['provider'])
+                            <div class="mt-3 text-xs text-[var(--sand)] bg-[var(--gold)]/10 rounded p-2">
+                                <strong>Integration requirements for {{ $availableManufacturers[$formData['provider']]['name'] ?? $formData['provider'] }}:</strong>
+                                @switch($formData['provider'])
+                                    @case('volvo')
+                                    @case('cat')
+                                    @case('komatsu')
+                                        <div>Requires API Key and Secret from OEM portal.</div>
+                                        @break
+                                    @case('bell')
+                                        <div>Requires an ISO 15143-3 export account from Bell Equipment (username, password, and client secret for the ISO_Export_Service client).</div>
+                                        @break
+                                    @case('ctrack')
+                                        <div>Requires API Key, Secret, and custom endpoint URL.</div>
+                                        @break
+                                    @case('john-deere')
+                                        <div>Requires OAuth Client ID/Secret and endpoint.</div>
+                                        @break
+                                    @case('liebherr')
+                                    @case('hyundai')
+                                    @case('doosan')
+                                    @case('jcb')
+                                    @case('case')
+                                    @case('sany')
+                                    @case('xcmg')
+                                    @case('kobelco')
+                                    @case('new-holland')
+                                    @case('takeuchi')
+                                    @case('kubota')
+                                    @case('bobcat')
+                                    @case('yanmar')
+                                        <div>Requires API Key and Secret from manufacturer.</div>
+                                        @break
+                                    @case('atlas-copco')
+                                    @case('sandvik')
+                                    @case('epiroc')
+                                        <div>Requires API Key, Secret, and site code.</div>
+                                        @break
+                                    @default
+                                        <div>Standard API credentials required.</div>
+                                @endswitch
+                            </div>
+                        @endif
                     </div>
 
+                    <!-- API Key -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1.5">Integration Name *</label>
-                        <input type="text" wire:model="formData.name"
-                            placeholder="e.g. Site A — Bell Fleet"
-                            class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-sm placeholder-slate-500">
-                        @error('formData.name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    @if($formData['provider'] && count($credentialFields) > 0)
-                        <div class="border-t border-slate-700 pt-4">
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">API Credentials</p>
-                            @foreach($credentialFields as $field)
-                                <div class="mb-3">
-                                    <label class="block text-sm font-medium text-slate-300 mb-1.5">
-                                        {{ $field['label'] }}{{ ($field['required'] ?? false) ? ' *' : '' }}
-                                    </label>
-                                    <input
-                                        type="{{ $field['type'] }}"
-                                        wire:model="formData.credentials.{{ $field['key'] }}"
-                                        placeholder="{{ $field['placeholder'] ?? '' }}"
-                                        class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-sm placeholder-slate-500">
-                                    @if(!empty($field['hint']))
-                                        <p class="text-slate-500 text-xs mt-1">{{ $field['hint'] }}</p>
-                                    @endif
-                                    @error("credentials.{$field['key']}") <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1.5">Sync Frequency</label>
-                        <select wire:model="formData.sync_frequency"
-                            class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 text-sm">
-                            <option value="every_5_minutes">Every 5 minutes</option>
-                            <option value="every_15_minutes">Every 15 minutes</option>
-                            <option value="hourly">Hourly</option>
-                            <option value="every_6_hours">Every 6 hours</option>
-                            <option value="daily">Daily</option>
-                            <option value="manual">Manual only</option>
-                        </select>
-                    </div>
-
-                    <div class="bg-blue-900/20 border border-blue-700/40 rounded-lg p-3 text-xs text-blue-300">
-                        <strong>After saving:</strong> we'll immediately test your credentials. If successful,
-                        machines appear in your Fleet page within one sync cycle. Credentials are encrypted at rest.
-                    </div>
+                        @if($formData['provider'] === 'ctrack')
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
+                            <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.ctrack.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                        @elseif($formData['provider'] === 'john-deere')
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">OAuth Client ID *</label>
+                            <input type="text" wire:model="formData.credentials.client_id" placeholder="Enter Client ID" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">OAuth Client Secret *</label>
+                            <input type="password" wire:model="formData.credentials.client_secret" placeholder="Enter Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
+                            <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.deere.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                        @elseif($formData['provider'] === 'bell')
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">ISO Export Username *</label>
+                            <input type="text" wire:model="formData.credentials.username" placeholder="yourcompany-fleetauth@bell.co.za" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Password *</label>
+                            <input type="password" wire:model="formData.credentials.password" placeholder="Enter your Bell ISO export password" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Client Secret *</label>
+                            <input type="password" wire:model="formData.credentials.client_secret" placeholder="Enter your Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Client ID</label>
+                            <input type="text" wire:model="formData.credentials.client_id" placeholder="ISO_Export_Service" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <p class="text-[var(--sand)] text-xs mt-1">Bell issues this to every ISO 15143-3 export consumer -- leave as-is unless Bell told you otherwise.</p>
+                        @elseif(in_array($formData['provider'], ['atlas-copco','sandvik','epiroc']))
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Site Code *</label>
+                            <input type="text" wire:model="formData.credentials.site_code" placeholder="Enter site code" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                        @else
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                        @endif
+                        <p class="text-[var(--sand)] text-sm mt-2">
+                            Tip: Your credentials are encrypted and stored securely. You can test the connection before saving.
+                        </p>
                 </div>
 
-                <div class="px-6 py-4 border-t border-slate-700 flex gap-3">
-                    <button wire:click="closeAddModal"
-                        class="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                <div class="p-6 border-t border-[var(--line)] flex gap-3">
+                    <button 
+                        wire:click="closeAddModal"
+                        class="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded font-medium transition"
+                    >
                         Cancel
                     </button>
-                    <button wire:click="createIntegration"
-                        wire:loading.attr="disabled" wire:target="createIntegration"
-                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                        <span wire:loading.remove wire:target="createIntegration">Save &amp; Test Connection</span>
-                        <span wire:loading wire:target="createIntegration">Saving…</span>
+                    <button 
+                        wire:click="createIntegration"
+                        class="flex-1 px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded font-display font-semibold transition"
+                    >
+                        Create Integration
                     </button>
                 </div>
             </div>
         </div>
     @endif
 
-    {{-- Sync Logs Panel --}}
-    @if($showDetailPanel && $detailIntegrationId !== null)
-        @php $detailIntegration = collect($integrations)->firstWhere('id', $detailIntegrationId); @endphp
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-2xl">
-                <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-bold text-white">Sync History</h2>
-                        <p class="text-slate-400 text-sm">{{ $detailIntegration['name'] ?? '' }}</p>
-                    </div>
-                    <button wire:click="closeDetailPanel" class="text-slate-400 hover:text-white text-xl leading-none">✕</button>
-                </div>
-
-                <div class="p-6 max-h-[60vh] overflow-y-auto">
-                    @if(count($syncLogs) > 0)
-                        <table class="w-full text-sm">
-                            <thead class="border-b border-slate-700">
-                                <tr>
-                                    <th class="text-left px-2 py-2 text-slate-400 text-xs">Started</th>
-                                    <th class="text-left px-2 py-2 text-slate-400 text-xs">Duration</th>
-                                    <th class="text-left px-2 py-2 text-slate-400 text-xs">Status</th>
-                                    <th class="text-left px-2 py-2 text-slate-400 text-xs">Machines</th>
-                                    <th class="text-left px-2 py-2 text-slate-400 text-xs">Error</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-700/50">
-                                @foreach($syncLogs as $log)
-                                    <tr class="hover:bg-slate-700/30">
-                                        <td class="px-2 py-2 text-slate-300 font-mono text-xs">{{ $log['started_at'] }}</td>
-                                        <td class="px-2 py-2 text-slate-400 text-xs">{{ $log['duration'] }}</td>
-                                        <td class="px-2 py-2">
-                                            @php
-                                                $c = match($log['status']) {
-                                                    'success' => 'text-emerald-400',
-                                                    'running' => 'text-amber-400',
-                                                    'failed'  => 'text-red-400',
-                                                    default   => 'text-slate-400',
-                                                };
-                                            @endphp
-                                            <span class="text-xs font-semibold {{ $c }}">{{ ucfirst($log['status']) }}</span>
-                                        </td>
-                                        <td class="px-2 py-2 text-slate-300 text-xs">{{ $log['machines_synced'] }}</td>
-                                        <td class="px-2 py-2 text-red-400 text-xs truncate max-w-xs">{{ $log['error_message'] ?? '—' }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+    <!-- Test Connection Modal -->
+    @if($showTestModal && $testResult)
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
+            <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="p-6 text-center">
+                    @if($testResult['success'])
+                        <div class="text-5xl mb-4">✅</div>
+                        <h3 class="text-xl font-bold text-green-400 mb-2">Connection Successful</h3>
+                        <p class="text-[var(--sand)]">{{ $testResult['message'] }}</p>
                     @else
-                        <div class="text-center py-8 text-slate-400 text-sm">No sync history yet.</div>
+                        <div class="text-5xl mb-4">❌</div>
+                        <h3 class="text-xl font-bold text-red-400 mb-2">Connection Failed</h3>
+                        <p class="text-[var(--sand)]">{{ $testResult['message'] }}</p>
                     @endif
                 </div>
-
-                <div class="px-6 py-4 border-t border-slate-700">
-                    <button wire:click="closeDetailPanel"
-                        class="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                <div class="p-6 border-t border-[var(--line)]">
+                    <button 
+                        wire:click="$set('showTestModal', false)"
+                        class="w-full px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded font-display font-semibold transition"
+                    >
                         Close
                     </button>
                 </div>

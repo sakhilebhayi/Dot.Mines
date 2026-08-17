@@ -4,7 +4,7 @@ namespace App\Actions\Jetstream;
 
 use App\Models\Team;
 use App\Models\User;
-use App\Services\TeamRoleService;
+use App\Services\TeamRoleProvisioner;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Jetstream\Contracts\CreatesTeams;
@@ -33,7 +33,9 @@ class CreateTeam implements CreatesTeams
             'personal_team' => false,
         ]));
 
-        TeamRoleService::provisionTeam($team, $user);
+        // Give the team's creator full access -- see TeamRoleProvisioner for why
+        // this is required (hasPermission() has nothing to check against otherwise).
+        TeamRoleProvisioner::assignRole($user, $team, 'admin');
 
         return $team;
     }

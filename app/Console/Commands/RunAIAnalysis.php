@@ -14,7 +14,7 @@ class RunAIAnalysis extends Command
 
     public function handle(AIOptimizationService $aiService): int
     {
-        $this->info('🤖 Starting AI Analysis...');
+        $this->info('Starting AI analysis...');
 
         $teams = $this->option('team') === 'all'
             ? Team::all()
@@ -33,7 +33,7 @@ class RunAIAnalysis extends Command
         $totalSavings = 0;
 
         foreach ($teams as $team) {
-            $this->line("📊 Analyzing: <fg=cyan>{$team->name}</>");
+            $this->line("Analyzing: <fg=cyan>{$team->name}</>");
 
             // Ensure team scoping for models using HasTeamFilters in non-request contexts
             app()->instance('current_team_id', $team->id);
@@ -49,11 +49,11 @@ class RunAIAnalysis extends Command
                 $totalInsights += $insights;
                 $totalSavings += $savings;
 
-                $this->line("  ✓ Generated {$recommendations} recommendations");
-                $this->line("  ✓ Discovered {$insights} insights");
+                $this->line("  <fg=green>✓</> Generated {$recommendations} recommendations");
+                $this->line("  <fg=green>✓</> Discovered {$insights} insights");
 
                 if ($savings > 0) {
-                    $this->line('  ✓ Potential savings: R'.number_format($savings, 2));
+                    $this->line('  <fg=green>✓</> Potential savings: R'.number_format($savings, 2));
                 }
 
                 // Show top 3 critical recommendations
@@ -63,7 +63,7 @@ class RunAIAnalysis extends Command
 
                 if ($critical->count() > 0) {
                     $this->newLine();
-                    $this->warn('  ⚠️  Critical Recommendations:');
+                    $this->warn('  Critical recommendations:');
                     foreach ($critical as $rec) {
                         $this->line("    • {$rec->title}");
                     }
@@ -72,7 +72,7 @@ class RunAIAnalysis extends Command
                 $this->newLine();
 
             } catch (\Exception $e) {
-                $this->error("  ✗ Failed: {$e->getMessage()}");
+                $this->error("  Failed: {$e->getMessage()}");
                 $this->newLine();
 
                 continue;
@@ -85,9 +85,7 @@ class RunAIAnalysis extends Command
         }
 
         // Summary
-        $this->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        $this->info('📈 Analysis Complete!');
-        $this->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        $this->info('Analysis complete.');
         $this->line("Total Recommendations: <fg=green>{$totalRecommendations}</>");
         $this->line("Total Insights: <fg=blue>{$totalInsights}</>");
 
@@ -96,7 +94,7 @@ class RunAIAnalysis extends Command
         }
 
         $this->newLine();
-        $this->info('✓ View recommendations at: /ai-optimization');
+        $this->info('View recommendations at: /ai-optimization');
 
         return self::SUCCESS;
     }

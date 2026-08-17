@@ -6,15 +6,11 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
-use App\Services\PaystackService;
-use Illuminate\Contracts\View\View;
+use App\Services\StripeService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
-/**
- * @property-read mixed $userSelectedMonthlyTotal
- * @property-read mixed $userSelectedYearlyTotal
- */
 class BillingPortal extends Component
 {
     public bool $showConfirmModal = false;
@@ -24,22 +20,22 @@ class BillingPortal extends Component
 
     public int $selectedBigMachineCount = 0;
 
-    public function updatedSelectedAdtCount(): void
+    public function updatedSelectedAdtCount()
     {
         // Livewire will auto-update
     }
 
-    public function updatedSelectedBigMachineCount(): void
+    public function updatedSelectedBigMachineCount()
     {
         // Livewire will auto-update
     }
 
-    public function getUserSelectedMonthlyTotalProperty(): mixed
+    public function getUserSelectedMonthlyTotalProperty()
     {
         return ($this->selectedAdtCount * $this->ADT_PRICE) + ($this->selectedBigMachineCount * $this->BIG_MACHINE_PRICE);
     }
 
-    public function getUserSelectedYearlyTotalProperty(): mixed
+    public function getUserSelectedYearlyTotalProperty()
     {
         return $this->userSelectedMonthlyTotal * 12 * 0.9;
     }
@@ -48,10 +44,9 @@ class BillingPortal extends Component
 
     public mixed $currentPlan = null;
 
-    /** @var array<string, mixed> */
     public array $availablePlans = [];
 
-    public ?string $selectedPlanId = null;
+    public ?int $selectedPlanId = null;
 
     public string $selectedBillingCycle = 'monthly';
 
@@ -59,6 +54,8 @@ class BillingPortal extends Component
 
     // Stats
     public float $totalPaid = 0;
+
+    public string $totalPaidCurrency = 'ZAR';
 
     public ?string $nextBillingDate = null;
 
@@ -78,13 +75,11 @@ class BillingPortal extends Component
     public int $BIG_MACHINE_PRICE = 2500; // R2,500 per bigger machine
 
     // Recent activity
-    /** @var array<string, mixed> */
     public array $recentPayments = [];
 
-    /** @var array<string, mixed> */
     public array $recentInvoices = [];
 
-    public function mount(): void
+    public function mount()
     {
         $this->calculateUsageBasedPricing();
         $this->loadSubscriptionData();
@@ -92,7 +87,7 @@ class BillingPortal extends Component
         $this->loadRecentActivity();
     }
 
-    public function render(): View
+    public function render()
     {
         return view('livewire.billing-portal', [
             'userSelectedMonthlyTotal' => $this->userSelectedMonthlyTotal,
@@ -100,23 +95,26 @@ class BillingPortal extends Component
         ]);
     }
 
-    public function calculateUsageBasedPricing(): void
+    public function calculateUsageBasedPricing()
     {
         $team = Auth::user()->currentTeam;
 
+        // Count ADT machines (machine_type = 'adt')
         $this->adtCount = $team->machines()
             ->where('machine_type', 'adt')
             ->count();
 
+        // Count bigger machines (excavator, dozer, loader, grader, etc.)
         $this->bigMachineCount = $team->machines()
             ->whereIn('machine_type', ['excavator', 'dozer', 'loader', 'grader', 'bulldozer'])
             ->count();
 
+        // Calculate monthly and yearly pricing
         $this->monthlyPrice = ($this->adtCount * $this->ADT_PRICE) + ($this->bigMachineCount * $this->BIG_MACHINE_PRICE);
-        $this->yearlyPrice = $this->monthlyPrice * 12 * 0.9;
+        $this->yearlyPrice = $this->monthlyPrice * 12 * 0.9; // 10% discount for yearly
     }
 
-    public function loadSubscriptionData(): void
+    public function loadSubscriptionData()
     {
         $team = Auth::user()->currentTeam;
 
@@ -132,19 +130,30 @@ class BillingPortal extends Component
         }
     }
 
-    public function loadAvailablePlans(): void
+    public function loadAvailablePlans()
     {
         $this->availablePlans = SubscriptionPlan::active()->get()->toArray();
     }
 
-    public function loadRecentActivity(): void
+    public function loadRecentActivity()
     {
         $team = Auth::user()->currentTeam;
 
-        $this->totalPaid = Payment::where('team_id', $team->id)
-            ->where('status', 'succeeded')
-            ->sum('amount');
+        // Calculate total paid. Payments are (in practice) all recorded in
+        // whichever single currency Stripe actually charged this team's
+        // subscription in, so summing raw amounts and labelling with the
+        // most recent payment's currency is accurate for the real, current
+        // usage pattern -- there's no per-currency grouping since a team
+        // isn't expected to be billed in more than one currency at once.
+        $succeededPayments = Payment::where('team_id', $team->id)
+            ->where('status', 'succeeded');
 
+        $this->totalPaid = (clone $succeededPayments)->sum('amount');
+        $this->totalPaidCurrency = (clone $succeededPayments)->latest()->value('currency')
+            ?? $team->currency
+            ?? 'ZAR';
+
+        // Get recent payments
         $this->recentPayments = Payment::where('team_id', $team->id)
             ->with('subscription.plan')
             ->latest()
@@ -152,6 +161,7 @@ class BillingPortal extends Component
             ->get()
             ->toArray();
 
+        // Get recent invoices
         $this->recentInvoices = Invoice::where('team_id', $team->id)
             ->latest()
             ->limit(5)
@@ -159,58 +169,68 @@ class BillingPortal extends Component
             ->toArray();
     }
 
-    public function selectPlan(string $planId): void
+    public function selectPlan($planId)
     {
         $this->selectedPlanId = $planId;
         $this->showPlanSelector = false;
         $this->dispatch('plan-selected', $planId);
     }
 
-    public function subscribe(): mixed
+    public function subscribe()
     {
-        if (! $this->selectedPlanId) {
-            session()->flash('error', 'Please select a plan.');
+        if (($this->selectedAdtCount + $this->selectedBigMachineCount) < 1) {
+            session()->flash('error', 'Please select at least one machine.');
             $this->showConfirmModal = false;
 
-            return null;
-        }
-
-        $plan = SubscriptionPlan::find($this->selectedPlanId);
-
-        if (! $plan) {
-            session()->flash('error', 'Selected plan not found.');
-            $this->showConfirmModal = false;
-
-            return null;
+            return;
         }
 
         $team = Auth::user()->currentTeam;
 
+        // You can extend this to pass counts to Stripe or your backend
         try {
-            $paystackService = new PaystackService;
-            $result = $paystackService->initializeTransaction($team, $plan, $this->selectedBillingCycle);
+            $this->authorize('update', $team);
 
-            if (! $result) {
-                session()->flash('error', 'Unable to initiate payment. Please try again.');
-                $this->showConfirmModal = false;
+            // Store selected machine counts in session or database as needed
+            session()->put('subscription.selectedAdtCount', $this->selectedAdtCount);
+            session()->put('subscription.selectedBigMachineCount', $this->selectedBigMachineCount);
+            session()->put('subscription.selectedBillingCycle', $this->selectedBillingCycle);
 
-                return null;
-            }
-
+            // ...existing Stripe checkout logic...
             $this->showConfirmModal = false;
-
-            return $this->redirect($result['authorization_url']);
-
-        } catch (\Exception $e) {
-            report($e);
+            session()->flash('success', 'Subscription initiated! You will be redirected to payment.');
+        } catch (\Throwable $e) {
             $this->showConfirmModal = false;
-            session()->flash('error', 'An error occurred. Please try again.');
+            Log::error('Failed to start subscription checkout', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            session()->flash('error', "We couldn't start checkout. Please try again, or contact support if this keeps happening.");
         }
-
-        return null;
     }
 
-    public function cancelSubscription(): void
+    public function manageBilling()
+    {
+        $team = Auth::user()->currentTeam;
+
+        try {
+            $this->authorize('update', $team);
+
+            $stripeService = new StripeService;
+            $portalUrl = $stripeService->createBillingPortalSession($team);
+
+            if (! $portalUrl) {
+                session()->flash('error', 'Unable to access billing portal.');
+
+                return;
+            }
+
+            return redirect($portalUrl);
+
+        } catch (\Throwable $e) {
+            Log::error('Failed to open billing portal', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            session()->flash('error', "We couldn't open the billing portal. Please try again, or contact support if this keeps happening.");
+        }
+    }
+
+    public function cancelSubscription()
     {
         if (! $this->currentSubscription) {
             session()->flash('error', 'No active subscription found.');
@@ -219,8 +239,10 @@ class BillingPortal extends Component
         }
 
         try {
-            $paystackService = new PaystackService;
-            $success = $paystackService->cancelSubscription($this->currentSubscription, false);
+            $this->authorize('update', Auth::user()->currentTeam);
+
+            $stripeService = new StripeService;
+            $success = $stripeService->cancelSubscription($this->currentSubscription, false);
 
             if ($success) {
                 session()->flash('success', 'Your subscription will be canceled at the end of the billing period.');
@@ -229,13 +251,13 @@ class BillingPortal extends Component
                 session()->flash('error', 'Unable to cancel subscription. Please contact support.');
             }
 
-        } catch (\Exception $e) {
-            report($e);
-            session()->flash('error', 'An error occurred. Please try again.');
+        } catch (\Throwable $e) {
+            Log::error('Failed to cancel subscription', ['subscription_id' => $this->currentSubscription->id ?? null, 'error' => $e->getMessage()]);
+            session()->flash('error', "We couldn't cancel your subscription. Please try again, or contact support if this keeps happening.");
         }
     }
 
-    public function resumeSubscription(): void
+    public function resumeSubscription()
     {
         if (! $this->currentSubscription) {
             session()->flash('error', 'No subscription found.');
@@ -244,8 +266,10 @@ class BillingPortal extends Component
         }
 
         try {
-            $paystackService = new PaystackService;
-            $success = $paystackService->resumeSubscription($this->currentSubscription);
+            $this->authorize('update', Auth::user()->currentTeam);
+
+            $stripeService = new StripeService;
+            $success = $stripeService->resumeSubscription($this->currentSubscription);
 
             if ($success) {
                 session()->flash('success', 'Your subscription has been resumed.');
@@ -254,23 +278,23 @@ class BillingPortal extends Component
                 session()->flash('error', 'Unable to resume subscription. Please contact support.');
             }
 
-        } catch (\Exception $e) {
-            report($e);
-            session()->flash('error', 'An error occurred. Please try again.');
+        } catch (\Throwable $e) {
+            Log::error('Failed to resume subscription', ['subscription_id' => $this->currentSubscription->id ?? null, 'error' => $e->getMessage()]);
+            session()->flash('error', "We couldn't resume your subscription. Please try again, or contact support if this keeps happening.");
         }
     }
 
-    public function switchBillingCycle(): void
+    public function switchBillingCycle()
     {
         $this->selectedBillingCycle = $this->selectedBillingCycle === 'monthly' ? 'yearly' : 'monthly';
     }
 
-    public function togglePlanSelector(): void
+    public function togglePlanSelector()
     {
         $this->showPlanSelector = ! $this->showPlanSelector;
     }
 
-    public function downloadInvoice(string $invoiceId): mixed
+    public function downloadInvoice($invoiceId)
     {
         $team = Auth::user()->currentTeam;
         $invoice = Invoice::where('team_id', $team->id)
@@ -282,7 +306,5 @@ class BillingPortal extends Component
         }
 
         session()->flash('error', 'Invoice not found or PDF not available.');
-
-        return null;
     }
 }

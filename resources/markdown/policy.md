@@ -1,72 +1,78 @@
-# Privacy Policy
+_Last updated: 7 August 2026_
 
-**Last updated: May 2026**
+This Privacy Policy explains how **BluePin Inc** ("BluePin", "we", "us", "our"), the company responsible for Dot.Mines, collects, uses, stores, and shares personal information when you use Dot.Mines and the wider Dot Ecosystem it connects to. It is written to align with South Africa's **Protection of Personal Information Act 4 of 2013 ("POPIA")**.
 
-## 1. Introduction
+## 1. Who we are
 
-Mines ("we", "us", or "our") operates the mining fleet management platform available at mines.infodot.co.za (the "Service"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Service.
+BluePin Inc is the responsible party for the personal information Dot.Mines processes. Our Information Officer can be reached at [privacy@infodot.co.za](mailto:privacy@infodot.co.za) for any question, request, or concern about your personal information.
 
-By accessing or using the Service, you agree to the collection and use of information in accordance with this policy.
+## 2. What we collect
 
-## 2. Information We Collect
+- **Account information** — your name, email address, and password (stored as a salted hash, never in plain text), via your Dot Ecosystem account.
+- **Team information** — the team you belong to, since fleet, sites, and compliance records on Dot.Mines are scoped to a team.
+- **Fleet and operations data** — machine, route, and waypoint records; live location and fleet-movement history; geofence entries and mine-area assignments your team creates.
+- **Sensor and telemetry data** — IoT sensor readings, machine health and metric data, fuel consumption and transaction records, and maintenance and component-replacement history collected from connected equipment.
+- **Operator data** — operator fatigue monitoring readings tied to shifts, where your team has enabled that feature, used to raise safety alerts rather than for general surveillance.
+- **Compliance data** — compliance reports and violation records your team generates or that Dot.Mines' monitoring produces.
+- **Billing information** — subscription plan, invoice, and payment records. Card details themselves are collected and stored by our payment processor (Stripe), never by Dot.Mines directly.
+- **Technical information** — IP address, browser and device information, and session activity, collected automatically for security and to keep you signed in.
 
-### 2.1 Information You Provide
+## 3. Why we process your information
 
-- **Account information** — name, email address, and password when you register.
-- **Team and mine data** — mine area names, machine records, geofence coordinates, and operational data you enter into the platform.
-- **Communications** — content of feed posts, comments, and messages submitted through the Service.
+We process personal information to:
 
-### 2.2 Information Collected Automatically
+- create and maintain your account, and authenticate you when you sign in;
+- let you sign in once and move between connected Dot Ecosystem platforms without re-entering your credentials;
+- operate fleet tracking, geofencing, production and fuel reporting, maintenance scheduling, and compliance reporting for your team;
+- generate AI-assisted insights, predictive maintenance alerts, and recommendations from the operational and sensor data your team's equipment produces;
+- process subscription payments and generate invoices; and
+- keep Dot.Mines secure and prevent abuse.
 
-- **Device and usage data** — IP address, browser type, operating system, pages visited, and timestamps.
-- **Session data** — authentication tokens and session identifiers stored in cookies.
-- **Location data** — GPS coordinates associated with machines and geofences that you configure.
+## 4. Ecosystem single sign-on
 
-## 3. How We Use Your Information
+When you use another Dot Ecosystem platform to sign in to Dot.Mines (or vice versa), a short-lived, single-use authentication token confirms who you are without exposing your password to the connected platform.
 
-We use the information collected to:
+## 5. AI-assisted features
 
-- Provide, operate, and maintain the Service.
-- Authenticate users and enforce access control.
-- Display real-time fleet and operational data to your team.
-- Send notifications, alerts, and email digests relevant to your mine operations.
-- Monitor and improve platform performance and security.
-- Comply with legal obligations.
+Dot.Mines uses AI models to analyse fleet, sensor, and production data your team generates — for example to predict maintenance needs, flag anomalies, or suggest production optimisations. These features process your team's operational data, not personal information about you individually, beyond the operator-level fatigue and shift data described above where enabled.
 
-## 4. Data Sharing and Disclosure
+## 6. Payments
 
-We do not sell, trade, or rent your personal information to third parties. We may share data with:
-
-- **Service providers** — trusted vendors (e.g., AWS for file storage, Stripe for billing, Sentry for error monitoring) who process data on our behalf under data processing agreements.
-- **Your team members** — operational data is shared within your mine team as required by the platform's functionality.
-- **Law enforcement** — where required by applicable law or to protect the rights and safety of users.
-
-## 5. Data Retention
-
-We retain your data for as long as your account is active or as needed to provide the Service. You may request deletion of your account and associated data by contacting us.
-
-## 6. Security
-
-We implement industry-standard security measures including encrypted connections (HTTPS), hashed passwords, and access-controlled data isolation per team. No method of transmission or storage is 100% secure; we cannot guarantee absolute security.
+Subscription payments are processed by Stripe. We store the resulting invoice, subscription status, and payment history, but never your full card number — that's held by Stripe under its own privacy and security practices.
 
 ## 7. Cookies
 
-The Service uses session cookies for authentication and CSRF protection. You may configure your browser to refuse cookies, but some parts of the Service may not function correctly without them.
+Dot.Mines uses a small number of strictly necessary cookies to keep you signed in and to protect your account and forms from cross-site attacks. See our [Cookie Policy](/cookies) for the full list and what each one does.
 
-## 8. Your Rights
+## 8. How long we keep your information
 
-Depending on your jurisdiction, you may have the right to:
+We keep your account and team data for as long as your account is active. Fleet, sensor, maintenance, and compliance records are retained for as long as your team keeps them, since they form an operational and safety history that may also be needed to meet regulatory retention obligations. If you delete your account, we remove your personal account information within a reasonable period.
 
-- Access the personal data we hold about you.
-- Request correction of inaccurate data.
-- Request deletion of your data.
-- Object to or restrict certain processing.
+## 9. How we protect your information
 
-To exercise these rights, contact us using the details below.
+Passwords are hashed, never stored in plain text. Ecosystem sign-on tokens are short-lived and single-use. Fleet, sensor, and compliance data is scoped to your team. Report and mine-plan downloads use signed, time-limited URLs. We apply reasonable technical and organisational security measures appropriate to the information we hold.
 
-## 9. Contact Us
+## 10. Your rights under POPIA
 
-If you have questions about this Privacy Policy, please contact us at:
+As a data subject under POPIA, you have the right to:
 
-**Infodot**  
-Email: privacy@infodot.co.za
+- ask us to confirm what personal information we hold about you, and to access it;
+- ask us to correct or delete personal information that is inaccurate, out of date, incomplete, misleading, or obtained unlawfully;
+- object, on reasonable grounds, to the processing of your personal information;
+- withdraw any consent you've given us, at any time, for a specific purpose;
+- ask us not to use your information for direct marketing; and
+- lodge a complaint with the Information Regulator (South Africa) at [inforegulator.org.za](https://inforegulator.org.za) if you believe we have processed your personal information unlawfully.
+
+To exercise any of these rights, contact our Information Officer at [privacy@infodot.co.za](mailto:privacy@infodot.co.za).
+
+## 11. Children
+
+Dot.Mines is not directed at children, and we do not knowingly collect personal information from children without the consent of a parent or guardian as required by POPIA.
+
+## 12. Changes to this policy
+
+We may update this Privacy Policy from time to time. We'll change the "Last updated" date above when we do, and for material changes we'll take reasonable steps to let you know before they take effect.
+
+## 13. Contact us
+
+Questions about this Privacy Policy can be sent to [privacy@infodot.co.za](mailto:privacy@infodot.co.za).

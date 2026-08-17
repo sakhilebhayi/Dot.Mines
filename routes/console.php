@@ -118,11 +118,17 @@ Schedule::job(new ArchiveOldMetricsJob)
     ->withoutOverlapping()
     ->onOneServer();
 
-// Nightly: sync Bell OEM daily KPI data into ProductionRecord rows so the
-// production dashboard shows real data without manual entry.
-// Runs just after midnight to capture the full previous day's production.
+// Nightly: full KPI reconciliation for the past 7 days.
 Schedule::job(new SyncBellProductionRecordsJob(lookbackDays: 7))
     ->dailyAt('00:30')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Daytime: keep today's production records current every 30 minutes.
+// SyncBellPayloadJob also dispatches this after each payload pull (every 5 min),
+// so this acts as a safety-net for environments where the payload job is paused.
+Schedule::job(new SyncBellProductionRecordsJob(lookbackDays: 1))
+    ->everyThirtyMinutes()
     ->withoutOverlapping()
     ->onOneServer();
 

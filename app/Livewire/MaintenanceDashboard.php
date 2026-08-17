@@ -8,15 +8,15 @@ use App\Models\MaintenanceAlert;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use App\Services\AI\MaintenancePredictorAgent;
-use App\Services\MachineFaultCodeService;
+use App\Traits\BrowserEventBridge;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class MaintenanceDashboard extends Component
 {
+    use BrowserEventBridge;
+
     public string $selectedPeriod = 'month';
 
     public bool $showCriticalOnly = false;
@@ -47,19 +47,19 @@ class MaintenanceDashboard extends Component
 
     public string $technician_notes = '';
 
-    public function openBookingModal(): void
+    public function openBookingModal()
     {
         $this->resetForm();
         $this->showBookingModal = true;
     }
 
-    public function closeBookingModal(): void
+    public function closeBookingModal()
     {
         $this->showBookingModal = false;
         $this->resetForm();
     }
 
-    public function resetForm(): void
+    public function resetForm()
     {
         $this->editingScheduleId = null;
         $this->machine_id = '';
@@ -74,7 +74,7 @@ class MaintenanceDashboard extends Component
         $this->technician_notes = '';
     }
 
-    public function bookMaintenance(): void
+    public function bookMaintenance()
     {
         $this->validate([
             'machine_id' => 'required|exists:machines,id',
@@ -98,7 +98,7 @@ class MaintenanceDashboard extends Component
             ->first();
 
         if (! $machine) {
-            $this->dispatch('notify', ...['message' => 'Invalid machine selected', 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Invalid machine selected', 'type' => 'error']);
 
             return;
         }
@@ -127,7 +127,7 @@ class MaintenanceDashboard extends Component
                 'type' => $this->maintenance_type,
             ]);
 
-            $this->dispatch('notify', ...['message' => 'Maintenance scheduled successfully', 'type' => 'success']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Maintenance scheduled successfully', 'type' => 'success']);
             $this->closeBookingModal();
 
         } catch (\Exception $e) {
@@ -136,17 +136,23 @@ class MaintenanceDashboard extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ...['message' => 'Failed to schedule maintenance', 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to schedule maintenance', 'type' => 'error']);
         }
     }
 
-    public function completeScheduledMaintenance(int $recordId): void
+    public function completeScheduledMaintenance($recordId)
     {
+        if (! is_numeric($recordId)) {
+            $this->dispatchBrowserEvent('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
+
+            return;
+        }
+
         $record = MaintenanceRecord::where('team_id', auth()->user()->current_team_id)
             ->find($recordId);
 
         if (! $record) {
-            $this->dispatch('notify', ...['message' => 'Record not found or access denied', 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Record not found or access denied', 'type' => 'error']);
 
             return;
         }
@@ -163,24 +169,30 @@ class MaintenanceDashboard extends Component
                 'record_id' => $recordId,
             ]);
 
-            $this->dispatch('notify', ...['message' => 'Maintenance marked as completed', 'type' => 'success']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Maintenance marked as completed', 'type' => 'success']);
         } catch (\Exception $e) {
             Log::error('Failed to complete maintenance', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ...['message' => 'Failed to update maintenance status', 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to update maintenance status', 'type' => 'error']);
         }
     }
 
-    public function cancelScheduledMaintenance(int $recordId): void
+    public function cancelScheduledMaintenance($recordId)
     {
+        if (! is_numeric($recordId)) {
+            $this->dispatchBrowserEvent('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
+
+            return;
+        }
+
         $record = MaintenanceRecord::where('team_id', auth()->user()->current_team_id)
             ->find($recordId);
 
         if (! $record) {
-            $this->dispatch('notify', ...['message' => 'Record not found or access denied', 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Record not found or access denied', 'type' => 'error']);
 
             return;
         }
@@ -193,21 +205,21 @@ class MaintenanceDashboard extends Component
                 'record_id' => $recordId,
             ]);
 
-            $this->dispatch('notify', ...['message' => 'Maintenance cancelled', 'type' => 'info']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Maintenance cancelled', 'type' => 'info']);
         } catch (\Exception $e) {
             Log::error('Failed to cancel maintenance', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ...['message' => 'Failed to cancel maintenance', 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to cancel maintenance', 'type' => 'error']);
         }
     }
 
     /**
      * Get delayed machines with reasons and color codes
      */
-    protected function getDelayedMachines(int $teamId): mixed
+    protected function getDelayedMachines($teamId)
     {
         $delayedMachines = [];
 
@@ -246,7 +258,7 @@ class MaintenanceDashboard extends Component
     /**
      * Calculate delay information for a machine
      */
-    protected function calculateMachineDelay(mixed $machine): mixed
+    protected function calculateMachineDelay($machine)
     {
         $delayInfo = [
             'is_delayed' => false,
@@ -318,7 +330,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get color code based on delay duration
      */
-    protected function getDelayColorCode(int|float $hours): string
+    protected function getDelayColorCode($hours)
     {
         if ($hours >= 48) {
             return 'red'; // Critical - 2+ days
@@ -334,7 +346,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get delay severity label
      */
-    protected function getDelaySeverity(int|float $hours): string
+    protected function getDelaySeverity($hours)
     {
         if ($hours >= 48) {
             return 'Critical';
@@ -347,7 +359,7 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function render(): View
+    public function render()
     {
         $teamId = auth()->user()->current_team_id;
 
@@ -463,19 +475,8 @@ class MaintenanceDashboard extends Component
         // Get AI-powered maintenance predictions
         $aiAgent = new MaintenancePredictorAgent;
         $aiAnalysis = $aiAgent->analyze(auth()->user()->currentTeam);
-        /** @var array<int, mixed> $aiRecs */
-        $aiRecs = $aiAnalysis['recommendations'] ?? [];
-        $aiRecommendations = collect($aiRecs)->take(5);
-        /** @var array<int, mixed> $aiIns */
-        $aiIns = $aiAnalysis['insights'] ?? [];
-        $aiInsights = collect($aiIns)->take(3);
-
-        // ── Active fault codes — from all integrated OEM sources ─────────────
-        // MachineFaultCodeService aggregates Bell caution codes, future OEMs,
-        // and any other fault sources. UI never touches OEM-specific tables.
-        $teamMachineIds = Machine::where('team_id', $teamId)->pluck('id')->all();
-        $activeFaultCodes = app(MachineFaultCodeService::class)
-            ->getActiveFaultCodes($teamMachineIds);
+        $aiRecommendations = collect($aiAnalysis['recommendations'] ?? [])->take(5);
+        $aiInsights = collect($aiAnalysis['insights'] ?? [])->take(3);
 
         return view('livewire.maintenance-dashboard', [
             'healthStatuses' => $healthStatuses,
@@ -493,12 +494,10 @@ class MaintenanceDashboard extends Component
             'delayStats' => $delayStats,
             'aiRecommendations' => $aiRecommendations,
             'aiInsights' => $aiInsights,
-            'activeFaultCodes' => $activeFaultCodes,
         ]);
     }
 
-    /** @return array<string, CarbonInterface> */
-    protected function getDateRange(): array
+    protected function getDateRange()
     {
         return match ($this->selectedPeriod) {
             'today' => ['start' => now()->startOfDay(), 'end' => now()->endOfDay()],

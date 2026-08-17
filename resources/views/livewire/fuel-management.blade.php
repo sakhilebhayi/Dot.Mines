@@ -1,14 +1,14 @@
 <div>
-<div class="p-6 bg-gray-900 min-h-screen text-gray-100">
+<div class="p-6 bg-[var(--ink)] min-h-screen text-[var(--stone)]">
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <h1 class="text-3xl font-bold">Fuel Management</h1>
-            <p class="text-gray-600 mt-2">Monitor fuel levels, track consumption, and manage fuel operations</p>
+            <h1 class="text-3xl font-display font-semibold">Fuel Management</h1>
+            <p class="text-[var(--sand)] mt-2">Monitor fuel levels, track consumption, and manage fuel operations</p>
         </div>
         <div class="flex items-center gap-3">
             <button 
                 wire:click="openManageModal" 
-                class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
+                class="px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg transition-colors flex items-center gap-2 font-display font-semibold"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -20,12 +20,12 @@
 
     <!-- Current Month Allocation Card -->
     @if($currentAllocation)
-    <div class="card bg-gradient-to-br from-blue-900 to-blue-800 text-white mb-6 border border-blue-700">
+    <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink-soft)] text-[var(--stone)] mb-6 border border-[var(--line)]">
         <div class="card-body">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="card-title text-2xl">{{ $currentAllocation->period_name }} Fuel Allocation</h2>
                 @if($currentAllocation->mine_area_id && $currentAllocation->mineArea)
-                    <span class="badge badge-lg bg-purple-600 text-white border-purple-500">
+                    <span class="badge badge-lg bg-[var(--gold)] text-[var(--ink)] border-[var(--gold)]">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -33,33 +33,33 @@
                         {{ $currentAllocation->mineArea->name }}
                     </span>
                 @else
-                    <span class="badge badge-lg bg-gray-600 text-white border-gray-500">
+                    <span class="badge badge-lg bg-white/10 text-[var(--stone)] border-[var(--line)]">
                         General Team Allocation
                     </span>
                 @endif
             </div>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                 <div class="stat bg-white/10 rounded-lg p-4">
-                    <div class="stat-title text-blue-200">Allocated</div>
+                    <div class="stat-title text-[var(--sand)]">Allocated</div>
                     <div class="stat-value text-2xl">{{ number_format($currentAllocation->allocated_liters) }}L</div>
-                    <div class="stat-desc text-blue-300">R{{ number_format($currentAllocation->total_budget_zar, 2) }}</div>
+                    <div class="stat-desc text-[var(--sand)]">R{{ number_format($currentAllocation->total_budget_zar, 2) }}</div>
                 </div>
                 <div class="stat bg-white/10 rounded-lg p-4">
-                    <div class="stat-title text-blue-200">Consumed</div>
+                    <div class="stat-title text-[var(--sand)]">Consumed</div>
                     <div class="stat-value text-2xl {{ $currentAllocation->isExceeded() ? 'text-red-400' : '' }}">
                         {{ number_format($currentAllocation->consumed_liters) }}L
                     </div>
-                    <div class="stat-desc text-blue-300">R{{ number_format($currentAllocation->spent_zar, 2) }}</div>
+                    <div class="stat-desc text-[var(--sand)]">R{{ number_format($currentAllocation->spent_zar, 2) }}</div>
                 </div>
                 <div class="stat bg-white/10 rounded-lg p-4">
-                    <div class="stat-title text-blue-200">Remaining</div>
+                    <div class="stat-title text-[var(--sand)]">Remaining</div>
                     <div class="stat-value text-2xl {{ $currentAllocation->isNearingLimit() ? 'text-yellow-400' : 'text-green-400' }}">
                         {{ number_format($currentAllocation->remaining_liters) }}L
                     </div>
-                    <div class="stat-desc text-blue-300">R{{ number_format($currentAllocation->remaining_budget_zar, 2) }}</div>
+                    <div class="stat-desc text-[var(--sand)]">R{{ number_format($currentAllocation->remaining_budget_zar, 2) }}</div>
                 </div>
                 <div class="stat bg-white/10 rounded-lg p-4">
-                    <div class="stat-title text-blue-200">Usage</div>
+                    <div class="stat-title text-[var(--sand)]">Usage</div>
                     <div class="stat-value text-2xl">{{ number_format($currentAllocation->consumption_percentage, 1) }}%</div>
                     <progress class="progress progress-success w-full mt-2" value="{{ $currentAllocation->consumption_percentage }}" max="100"></progress>
                 </div>
@@ -86,11 +86,11 @@
 
     <!-- Refuel Modal -->
     @if($showRefuelModal)
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" wire:click="closeRefuelModal">
-        <div class="bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4 border border-gray-700 shadow-lg" x-on:click.stop>
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeRefuelModal">
+        <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-lg w-full mx-4 border border-[var(--line)] shadow-lg" x-on:click.stop>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold">Refuel Tank</h3>
-                <button class="text-gray-400 hover:text-gray-600" wire:click="closeRefuelModal">
+                <button class="text-[var(--sand)] hover:text-[var(--stone)]" wire:click="closeRefuelModal">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -99,21 +99,21 @@
             <form wire:submit.prevent="refuelTank" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">Tank</label>
-                    <div class="text-gray-200">{{ $tanks->firstWhere('id', $refuelTankId)?->name ?? 'Selected Tank' }}</div>
+                    <div class="text-[var(--stone)]">{{ $tanks->firstWhere('id', $refuelTankId)?->name ?? 'Selected Tank' }}</div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Quantity (Liters)</label>
-                    <input type="number" step="0.01" min="0.01" wire:model.live="refuelQuantity" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                    <input type="number" step="0.01" min="0.01" wire:model.live="refuelQuantity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                     @error('refuelQuantity') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Unit Price (ZAR)</label>
-                    <input type="number" step="0.01" min="0" wire:model.live="refuelUnitPrice" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                    <label class="block text-sm font-medium mb-1">Unit Price ({{ $teamCurrency }})</label>
+                    <input type="number" step="0.01" min="0" wire:model.live="refuelUnitPrice" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                     @error('refuelUnitPrice') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Notes</label>
-                    <input type="text" wire:model.live="refuelNotes" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                    <input type="text" wire:model.live="refuelNotes" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" wire:click="closeRefuelModal" class="btn btn-ghost">Cancel</button>
@@ -126,10 +126,10 @@
 
     <!-- Delete Confirmation Modal -->
     @if($showDeleteConfirm)
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" wire:click="closeDeleteConfirm">
-        <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-700 shadow-lg" x-on:click.stop>
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeDeleteConfirm">
+        <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-md w-full mx-4 border border-[var(--line)] shadow-lg" x-on:click.stop>
             <h3 class="text-lg font-bold mb-2">Confirm Delete</h3>
-            <p class="mb-4 text-gray-300">Are you sure you want to delete the tank "{{ $tanks->firstWhere('id', $confirmDeleteTankId)?->name ?? 'Selected Tank' }}"? This action cannot be undone.</p>
+            <p class="mb-4 text-[var(--sand)]">Are you sure you want to delete the tank "{{ $tanks->firstWhere('id', $confirmDeleteTankId)?->name ?? 'Selected Tank' }}"? This action cannot be undone.</p>
             <div class="flex justify-end gap-2">
                 <button type="button" wire:click="closeDeleteConfirm" class="btn btn-ghost">Cancel</button>
                 <button type="button" wire:click="performDeleteConfirmed" class="btn btn-error" wire:loading.attr="disabled">Delete</button>
@@ -140,7 +140,7 @@
 
     <!-- Period Selector -->
     <div class="mb-6 flex items-center gap-4">
-        <select wire:model.live="selectedPeriod" class="select select-bordered bg-white text-gray-900 [&>option]:text-gray-900">
+        <select wire:model.live="selectedPeriod" class="select select-bordered bg-white/5 border-[var(--line)] text-[var(--stone)] [&>option]:text-[var(--ink)]">
             <option value="today">Today</option>
             <option value="week">This Week</option>
             <option value="month">This Month</option>
@@ -154,7 +154,7 @@
         </label>
 
         <!-- Loading Indicator for Filter Changes -->
-        <div wire:loading wire:target="selectedPeriod,showLowFuelOnly" class="flex items-center gap-2 text-sm text-blue-500">
+        <div wire:loading wire:target="selectedPeriod,showLowFuelOnly" class="flex items-center gap-2 text-sm text-[var(--gold)]">
             <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -192,23 +192,37 @@
     </div>
 
     <!-- Transaction Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <div class="stat bg-base-200 rounded-lg">
             <div class="stat-title">Total Refueled</div>
             <div class="stat-value text-sm">{{ number_format($transactionStats['total_refueled']) }}L</div>
         </div>
-        
+
         <div class="stat bg-base-200 rounded-lg">
             <div class="stat-title">Total Consumed</div>
             <div class="stat-value text-sm">{{ number_format($transactionStats['total_consumed']) }}L</div>
         </div>
-        
+
+        @php
+            $totalLossLiters = $transactionStats['total_theft'] + $transactionStats['total_spillage'];
+        @endphp
+        <div class="stat bg-base-200 rounded-lg">
+            <div class="stat-title">Fuel Loss</div>
+            <div class="stat-value text-sm {{ $totalLossLiters > 0 ? 'text-red-500' : '' }}">{{ number_format($totalLossLiters, 1) }}L</div>
+            <div class="stat-desc">
+                {{ number_format($transactionStats['total_theft'], 1) }}L theft &middot; {{ number_format($transactionStats['total_spillage'], 1) }}L spillage
+                @if($transactionStats['total_loss_cost'] > 0)
+                    &middot; {{ \App\Support\Currency::format($transactionStats['total_loss_cost'], $teamCurrency) }}
+                @endif
+            </div>
+        </div>
+
         <div class="stat bg-base-200 rounded-lg">
             <div class="stat-title">Total Cost</div>
-            <div class="stat-value text-sm text-green-600">R{{ number_format($transactionStats['total_cost'], 2) }}</div>
-            <div class="stat-desc">South African Rands</div>
+            <div class="stat-value text-sm text-green-600">{{ \App\Support\Currency::format($transactionStats['total_cost'], $teamCurrency) }}</div>
+            <div class="stat-desc">{{ $teamCurrency }}</div>
         </div>
-        
+
         <div class="stat bg-base-200 rounded-lg">
             <div class="stat-title">Transactions</div>
             <div class="stat-value text-sm">{{ number_format($transactionStats['transaction_count']) }}</div>
@@ -239,16 +253,17 @@
     @if($aiRecommendations->count() > 0 || $aiInsights->count() > 0)
     <div class="mb-6">
         <div class="flex items-center gap-2 mb-4">
-            <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
-            <h2 class="text-2xl font-bold">Fuel Optimization Recommendations</h2>
+            <h2 class="text-2xl font-display font-semibold">AI Fuel Optimization</h2>
+            <span class="badge badge-primary">Powered by AI</span>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- AI Recommendations -->
             @if($aiRecommendations->count() > 0)
-            <div class="card bg-gray-800 text-white border border-gray-700">
+            <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] text-[var(--stone)] border border-[var(--line)]">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,16 +283,16 @@
                                     @endif
                                 ">{{ ucfirst($recommendation['priority']) }}</span>
                             </div>
-                            <p class="text-sm text-gray-200 mb-2">{{ $recommendation['description'] }}</p>
+                            <p class="text-sm text-[var(--sand)] mb-2">{{ $recommendation['description'] }}</p>
                             @if(isset($recommendation['estimated_savings']) && $recommendation['estimated_savings'] > 0)
                             <div class="flex items-center gap-2 text-green-300 text-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                <span>Potential Savings: R{{ number_format($recommendation['estimated_savings'], 2) }}/month</span>
+                                <span>Potential Savings: {{ \App\Support\Currency::format($recommendation['estimated_savings'], $teamCurrency) }}/month</span>
                             </div>
                             @endif
-                            <div class="flex items-center gap-2 mt-2 text-xs text-gray-300">
+                            <div class="flex items-center gap-2 mt-2 text-xs text-[var(--sand)]">
                                 <span>Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
                             </div>
                         </div>
@@ -289,7 +304,7 @@
 
             <!-- AI Insights -->
             @if($aiInsights->count() > 0)
-            <div class="card bg-gradient-to-br from-blue-900 to-cyan-900 text-white border border-blue-700">
+            <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] text-[var(--stone)] border border-[var(--line)]">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,7 +325,7 @@
                                     @endif
                                 ">{{ ucfirst($insight['type']) }}</span>
                             </div>
-                            <p class="text-sm text-gray-200">{{ $insight['description'] }}</p>
+                            <p class="text-sm text-[var(--sand)]">{{ $insight['description'] }}</p>
                         </div>
                         @endforeach
                     </div>
@@ -405,7 +420,7 @@
                                 <td>
                                     <strong>{{ number_format($consumer['total_consumed']) }}L</strong>
                                     @if($consumer['total_cost'] > 0)
-                                        <br><span class="text-xs text-success">R{{ number_format($consumer['total_cost'], 2) }}</span>
+                                        <br><span class="text-xs text-success">{{ \App\Support\Currency::format($consumer['total_cost'], $teamCurrency) }}</span>
                                     @endif
                                 </td>
                             </tr>
@@ -420,47 +435,6 @@
             </div>
         </div>
     </div>
-
-    {{-- ── Live Machine Fuel Levels (rendered when any OEM telemetry provides fuel data) --}}
-    @if (!empty($machineFuelLevels))
-    <div class="card bg-base-200 mb-6">
-        <div class="card-body">
-            <h2 class="card-title flex items-center gap-2">
-                <svg class="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                Live Machine Fuel Levels
-            </h2>
-            <p class="text-xs text-base-content/60 mb-3">Real-time fuel levels from integrated OEM telemetry</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                @foreach ($machines as $machine)
-                    @if (isset($machineFuelLevels[$machine->id]))
-                        @php
-                            $lvl = $machineFuelLevels[$machine->id];
-                            $pct = (float) $lvl['fuel_pct'];
-                            $barColor = $pct < 20 ? 'bg-red-500' : ($pct < 40 ? 'bg-amber-400' : 'bg-emerald-500');
-                            $textColor = $pct < 20 ? 'text-red-600' : ($pct < 40 ? 'text-amber-600' : 'text-emerald-600');
-                        @endphp
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center justify-between mb-1.5">
-                                <span class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ $machine->name }}</span>
-                                <span class="font-bold text-sm {{ $textColor }}">{{ number_format($pct, 0) }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-1">
-                                <div class="{{ $barColor }} h-1.5 rounded-full" style="width:{{ $pct }}%"></div>
-                            </div>
-                            @if (!empty($lvl['updated_date']))
-                                <p class="text-xs text-gray-400 dark:text-gray-500">
-                                    {{ \Carbon\Carbon::parse($lvl['updated_date'])->diffForHumans() }}
-                                </p>
-                            @endif
-                        </div>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    </div>
-    @endif
 
     <!-- Recent Transactions -->
     <div class="card bg-base-200">
@@ -494,7 +468,7 @@
                             <td>{{ $transaction->fuelTank?->name ?? 'N/A' }}</td>
                             <td>{{ $transaction->machine?->name ?? '-' }}</td>
                             <td>{{ number_format($transaction->quantity_liters) }}L</td>
-                            <td class="text-success font-semibold">R{{ number_format($transaction->total_cost, 2) }}</td>
+                            <td class="text-success font-semibold">{{ \App\Support\Currency::format($transaction->total_cost, $transaction->currency) }}</td>
                             <td>{{ $transaction->user?->name ?? 'System' }}</td>
                         </tr>
                         @empty
@@ -511,8 +485,8 @@
 
     <!-- Unified Manage Modal -->
     @if($showManageModal)
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" wire:click="closeManageModal">
-        <div class="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-gray-700 shadow-lg" x-on:click.stop>
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeManageModal">
+        <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-[var(--line)] shadow-lg" x-on:click.stop>
             @if(session('success'))
                 <div class="alert alert-success mb-4">
                     <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -526,8 +500,8 @@
                 </div>
             @endif
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-100">Manage Fuel</h2>
-                <button wire:click="closeManageModal" class="text-gray-400 hover:text-gray-600">
+                <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Manage Fuel</h2>
+                <button wire:click="closeManageModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -536,15 +510,15 @@
             <!-- Tabbed interface for actions -->
             <div class="mb-4 flex gap-2">
                 <button type="button" wire:click="setManageTab('dispense')"
-                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'dispense' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-200' }}">
+                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'dispense' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}">
                     Dispense Fuel
                 </button>
                 <button type="button" wire:click="setManageTab('allocation')"
-                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'allocation' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-200' }}">
+                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'allocation' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}">
                     Set Monthly Allocation
                 </button>
                 <button type="button" wire:click="setManageTab('tank')"
-                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'tank' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-200' }}">
+                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'tank' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}">
                     Add Fuel Tank
                 </button>
             </div>
@@ -554,7 +528,7 @@
                     <form wire:submit.prevent="recordDispensingTransaction" class="space-y-4">
                         <div>
                             <label class="block font-medium mb-1">Tank</label>
-                            <select wire:model.live="transactionTankId" class="select select-bordered w-full bg-gray-900 border-gray-700 text-gray-100">
+                            <select wire:model.live="transactionTankId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Tank</option>
                                 @foreach($tanks as $tank)
                                     <option value="{{ $tank->id }}">{{ $tank->name }} ({{ $tank->fuel_type }}) @if($tank->status !== 'active') — {{ ucfirst($tank->status) }} @endif</option>
@@ -567,14 +541,14 @@
                                     No active tanks found for this team. Click "Manage Fuel → Add Fuel Tank" to create one.
                                 </div>
                             @elseif(isset($canSeeInactiveTanks) && $canSeeInactiveTanks)
-                                <div class="mt-2 text-sm text-gray-300">
+                                <div class="mt-2 text-sm text-[var(--sand)]">
                                     Showing inactive tanks as well because your account has admin privileges for this team. Inactive tanks are marked in the dropdown.
                                 </div>
                             @endif
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Machine</label>
-                            <select wire:model.live="transactionMineAreaId" class="select select-bordered w-full bg-gray-900 border-gray-700 text-gray-100">
+                            <select wire:model.live="transactionMineAreaId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Machine</option>
                                 @foreach($machines as $machine)
                                     <option value="{{ $machine->id }}">{{ $machine->name }} ({{ $machine->machine_type }})</option>
@@ -584,7 +558,7 @@
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Quantity (Liters)</label>
-                            <input type="number" min="1" wire:model.live="transactionQuantity" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="number" min="1" wire:model.live="transactionQuantity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('transactionQuantity') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         @if($transactionError)
@@ -600,17 +574,17 @@
                     <form wire:submit.prevent="saveAllocation" class="space-y-4">
                         <div>
                             <label class="block font-medium mb-1">Year</label>
-                            <input type="number" min="2020" max="2100" wire:model.live="allocationYear" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="number" min="2020" max="2100" wire:model.live="allocationYear" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocationYear') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Month</label>
-                            <input type="number" min="1" max="12" wire:model.live="allocationMonth" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="number" min="1" max="12" wire:model.live="allocationMonth" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocationMonth') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Mine Area</label>
-                            <select wire:model.live="mineAreaId" class="select select-bordered w-full bg-gray-900 border-gray-700 text-gray-100">
+                            <select wire:model.live="mineAreaId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Area</option>
                                 @foreach($mineAreas as $area)
                                     <option value="{{ $area->id }}">{{ $area->name }}</option>
@@ -620,17 +594,17 @@
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Allocated Liters</label>
-                            <input type="number" min="1" wire:model.live="allocatedLiters" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="number" min="1" wire:model.live="allocatedLiters" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocatedLiters') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Fuel Price Per Liter (ZAR)</label>
-                            <input type="number" min="0.01" step="0.01" wire:model.live="fuelPricePerLiter" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="number" min="0.01" step="0.01" wire:model.live="fuelPricePerLiter" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('fuelPricePerLiter') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Notes</label>
-                            <input type="text" wire:model.live="allocationNotes" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="text" wire:model.live="allocationNotes" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocationNotes') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div class="flex justify-end gap-2">
@@ -644,22 +618,22 @@
                         <!-- Removed existing-tank select to only allow creating a new tank -->
                         <div>
                             <label class="block font-medium mb-1">Tank Name</label>
-                            <input type="text" wire:model.live="tankName" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="text" wire:model.live="tankName" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('tankName') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Fuel Type</label>
-                            <input type="text" wire:model.live="tankFuelType" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="text" wire:model.live="tankFuelType" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('tankFuelType') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Capacity (Liters)</label>
-                            <input type="number" min="1" wire:model.live="tankCapacity" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="number" min="1" wire:model.live="tankCapacity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('tankCapacity') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Mine Area</label>
-                            <select wire:model.live="tankMineAreaId" class="select select-bordered w-full bg-gray-900 border-gray-700 text-gray-100">
+                            <select wire:model.live="tankMineAreaId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Area</option>
                                 @foreach($mineAreas as $area)
                                     <option value="{{ $area->id }}">{{ $area->name }}</option>
@@ -669,7 +643,7 @@
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Minimum Level (Liters)</label>
-                            <input type="number" min="0" wire:model.live="tankMinimumLevel" class="input input-bordered w-full bg-gray-900 border-gray-700 text-gray-100" />
+                            <input type="number" min="0" wire:model.live="tankMinimumLevel" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('tankMinimumLevel') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div class="flex justify-end gap-2">

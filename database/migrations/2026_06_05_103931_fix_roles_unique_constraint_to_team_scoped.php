@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            // Drop the global unique on name alone — this prevents two teams
-            // from having a role with the same name (e.g. both having 'viewer').
-            $table->dropUnique('roles_name_unique');
+            if (Schema::hasIndex('roles', 'roles_name_unique')) {
+                $table->dropUnique('roles_name_unique');
+            }
 
-            // Replace with a composite unique scoped to team_id + name so role
-            // names are unique within a team but can be reused across teams.
-            $table->unique(['team_id', 'name'], 'roles_team_id_name_unique');
+            if (! Schema::hasIndex('roles', 'roles_team_id_name_unique')) {
+                $table->unique(['team_id', 'name'], 'roles_team_id_name_unique');
+            }
         });
     }
 

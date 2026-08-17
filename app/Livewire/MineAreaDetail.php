@@ -11,11 +11,10 @@ use App\Models\MinePlanUpload;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use App\Services\FileUploadService;
-use Illuminate\Contracts\View\View;
+use App\Traits\BrowserEventBridge;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -23,6 +22,7 @@ use Livewire\WithPagination;
 
 class MineAreaDetail extends Component
 {
+    use BrowserEventBridge;
     use WithFileUploads, WithPagination;
 
     public MineArea $mineArea;
@@ -45,8 +45,6 @@ class MineAreaDetail extends Component
 
     public ?float $quantityProduced = null;
 
-    public ?float $systemQuantity = null;
-
     public ?float $targetQuantity = null;
 
     public string $productionUnit = 'tonnes';
@@ -56,11 +54,6 @@ class MineAreaDetail extends Component
     public string $productionNotes = '';
 
     public string $productionPeriod = 'week'; // week, month, quarter
-
-    // Production comparison filters
-    public string $comparisonPeriod = '30'; // days: 7, 14, 30, 90
-
-    public string $comparisonMachineId = ''; // '' = all machines
 
     // Production Target
     public bool $showTargetModal = false;
@@ -110,8 +103,7 @@ class MineAreaDetail extends Component
 
     public ?int $selectedGeofenceId = null;
 
-    /** @return array<string, mixed> */
-    protected function rules(): array
+    protected function rules()
     {
         return [
             'selectedMachineId' => 'required_if:showAssignModal,true|nullable|exists:machines,id',
@@ -134,7 +126,7 @@ class MineAreaDetail extends Component
         ];
     }
 
-    public function mount(MineArea $mineArea): void
+    public function mount(MineArea $mineArea)
     {
         $team = Auth::user()->currentTeam;
         if ($mineArea->team_id !== $team->id) {
@@ -147,7 +139,7 @@ class MineAreaDetail extends Component
         $this->planEffectiveDate = now()->toDateString();
     }
 
-    public function setTab(string $tab): void
+    public function setTab(string $tab)
     {
         $this->activeTab = $tab;
         $this->resetPage();
@@ -155,22 +147,24 @@ class MineAreaDetail extends Component
 
     // === MACHINE ASSIGNMENT ===
 
-    public function openAssignModal(): void
+    public function openAssignModal()
     {
         $this->showAssignModal = true;
         $this->selectedMachineId = null;
         $this->assignmentReason = '';
     }
 
-    public function closeAssignModal(): void
+    public function closeAssignModal()
     {
         $this->showAssignModal = false;
         $this->selectedMachineId = null;
         $this->assignmentReason = '';
     }
 
-    public function assignMachine(): void
+    public function assignMachine()
     {
+        $this->authorize('update', $this->mineArea);
+
         $this->validate([
             'selectedMachineId' => 'required|exists:machines,id',
         ]);
@@ -178,10 +172,8 @@ class MineAreaDetail extends Component
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->findOrFail($this->selectedMachineId);
 
-        // Update machine's mine_area_id if column exists
-        if (Schema::hasColumn('machines', 'mine_area_id')) {
-            $machine->update(['mine_area_id' => $this->mineArea->id]);
-        }
+        // Update machine's mine_area_id
+        $machine->update(['mine_area_id' => $this->mineArea->id]);
 
         // Record assignment history
         MachineAreaAssignment::create([
@@ -194,11 +186,13 @@ class MineAreaDetail extends Component
         ]);
 
         $this->closeAssignModal();
-        $this->dispatch('notify', ...['message' => "{$machine->name} assigned to {$this->mineArea->name}", 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => "{$machine->name} assigned to {$this->mineArea->name}", 'type' => 'success']);
     }
 
-    public function unassignMachine(int $machineId): void
+    public function unassignMachine(int $machineId)
     {
+        $this->authorize('update', $this->mineArea);
+
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->findOrFail($machineId);
 
@@ -215,13 +209,11 @@ class MineAreaDetail extends Component
             ->first();
 
         if ($otherArea) {
-            if (Schema::hasColumn('machines', 'mine_area_id')) {
-                $machine->update(['mine_area_id' => $otherArea->id]);
-            }
-            $this->dispatch('notify', ...['message' => "{$machine->name} reassigned to {$otherArea->name} (cannot leave unassigned)", 'type' => 'success']);
+            $machine->update(['mine_area_id' => $otherArea->id]);
+            $this->dispatchBrowserEvent('notify', ['message' => "{$machine->name} reassigned to {$otherArea->name} (cannot leave unassigned)", 'type' => 'success']);
         } else {
             // No other active area exists — do not allow unassigning to null to preserve invariant
-            $this->dispatch('notify', ...['message' => "Cannot unassign {$machine->name}; at least one active mine area must be set. Assign to another area first.", 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => "Cannot unassign {$machine->name}; at least one active mine area must be set. Assign to another area first.", 'type' => 'error']);
 
             return;
         }
@@ -229,24 +221,25 @@ class MineAreaDetail extends Component
 
     // === PRODUCTION TRACKING ===
 
-    public function openProductionModal(): void
+    public function openProductionModal()
     {
         $this->showProductionModal = true;
         $this->productionDate = now()->toDateString();
         $this->quantityProduced = null;
-        $this->systemQuantity = null;
         $this->targetQuantity = null;
         $this->productionNotes = '';
         $this->productionMachineId = null;
     }
 
-    public function closeProductionModal(): void
+    public function closeProductionModal()
     {
         $this->showProductionModal = false;
     }
 
-    public function saveProductionRecord(): void
+    public function saveProductionRecord()
     {
+        $this->authorize('update', $this->mineArea);
+
         $this->validate([
             'productionDate' => 'required|date',
             'quantityProduced' => 'required|numeric|min:0',
@@ -262,7 +255,6 @@ class MineAreaDetail extends Component
             'record_date' => $this->productionDate,
             'shift' => $this->productionShift,
             'quantity_produced' => $this->quantityProduced,
-            'system_quantity' => $this->systemQuantity ?: null,
             'target_quantity' => $this->targetQuantity,
             'unit' => $this->productionUnit,
             'notes' => $this->productionNotes ?: null,
@@ -270,23 +262,25 @@ class MineAreaDetail extends Component
         ]);
 
         $this->closeProductionModal();
-        $this->dispatch('notify', ...['message' => 'Production record saved successfully', 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => 'Production record saved successfully', 'type' => 'success']);
     }
 
-    public function openTargetModal(): void
+    public function openTargetModal()
     {
         $this->showTargetModal = true;
         $this->targetValue = null;
         $this->targetDescription = '';
     }
 
-    public function closeTargetModal(): void
+    public function closeTargetModal()
     {
         $this->showTargetModal = false;
     }
 
-    public function saveProductionTarget(): void
+    public function saveProductionTarget()
     {
+        $this->authorize('update', $this->mineArea);
+
         $this->validate([
             'targetStartDate' => 'required|date',
             'targetEndDate' => 'required|date|after_or_equal:targetStartDate',
@@ -308,12 +302,12 @@ class MineAreaDetail extends Component
         ]);
 
         $this->closeTargetModal();
-        $this->dispatch('notify', ...['message' => 'Production target created successfully', 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => 'Production target created successfully', 'type' => 'success']);
     }
 
     // === MINE PLAN UPLOADS ===
 
-    public function openUploadModal(): void
+    public function openUploadModal()
     {
         $this->showUploadModal = true;
         $this->planTitle = '';
@@ -324,14 +318,16 @@ class MineAreaDetail extends Component
         $this->planEffectiveDate = now()->toDateString();
     }
 
-    public function closeUploadModal(): void
+    public function closeUploadModal()
     {
         $this->showUploadModal = false;
         $this->planFile = null;
     }
 
-    public function uploadMinePlan(): void
+    public function uploadMinePlan()
     {
+        $this->authorize('update', $this->mineArea);
+
         $this->validate([
             'planTitle' => 'required|string|max:255',
             'planFile' => 'required|file|max:51200',
@@ -340,12 +336,6 @@ class MineAreaDetail extends Component
         $team = Auth::user()->currentTeam;
 
         $file = $this->planFile;
-
-        if ($file === null) {
-            $this->addError('planFile', 'Please select a file to upload.');
-
-            return;
-        }
 
         try {
             $uploader = new FileUploadService;
@@ -386,46 +376,52 @@ class MineAreaDetail extends Component
             ]);
 
             $this->closeUploadModal();
-            $this->dispatch('notify', ...['message' => 'Mine plan uploaded successfully', 'type' => 'success']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Mine plan uploaded successfully', 'type' => 'success']);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to upload mine plan', ['error' => $e->getMessage()]);
-            $this->dispatch('notify', ...['message' => 'Failed to upload mine plan: '.$e->getMessage(), 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't upload that file. Check that it's a supported format and under the size limit, then try again.", 'type' => 'error']);
         }
     }
 
-    public function deleteMinePlan(int $planId): void
+    public function deleteMinePlan(int $planId)
     {
+        $this->authorize('delete', $this->mineArea);
+
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $disk = data_get($plan->metadata, 'disk', 'public');
         Storage::disk($disk)->delete($plan->file_path);
         $plan->delete();
 
-        $this->dispatch('notify', ...['message' => 'Mine plan deleted', 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => 'Mine plan deleted', 'type' => 'success']);
     }
 
-    public function activateMinePlan(int $planId): void
+    public function activateMinePlan(int $planId)
     {
+        $this->authorize('update', $this->mineArea);
+
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $plan->update(['status' => 'active']);
 
-        $this->dispatch('notify', ...['message' => 'Mine plan activated', 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => 'Mine plan activated', 'type' => 'success']);
     }
 
-    public function archiveMinePlan(int $planId): void
+    public function archiveMinePlan(int $planId)
     {
+        $this->authorize('update', $this->mineArea);
+
         $team = Auth::user()->currentTeam;
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $plan->update(['status' => 'archived']);
 
-        $this->dispatch('notify', ...['message' => 'Mine plan archived', 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => 'Mine plan archived', 'type' => 'success']);
     }
 
     // === AREA-SPECIFIC ALERTS ===
 
-    public function openAlertModal(): void
+    public function openAlertModal()
     {
         $this->showAlertModal = true;
         $this->alertTitle = '';
@@ -434,13 +430,15 @@ class MineAreaDetail extends Component
         $this->alertPriority = 'medium';
     }
 
-    public function closeAlertModal(): void
+    public function closeAlertModal()
     {
         $this->showAlertModal = false;
     }
 
-    public function createAreaAlert(): void
+    public function createAreaAlert()
     {
+        $this->authorize('create', Alert::class);
+
         $this->validate([
             'alertTitle' => 'required|string|max:255',
             'alertPriority' => 'required|in:critical,high,medium,low',
@@ -465,41 +463,43 @@ class MineAreaDetail extends Component
         ]);
 
         $this->closeAlertModal();
-        $this->dispatch('notify', ...['message' => 'Area alert created', 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => 'Area alert created', 'type' => 'success']);
     }
 
-    public function acknowledgeAlert(int $alertId): void
+    public function acknowledgeAlert(int $alertId)
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
+        $this->authorize('acknowledge', $alert);
         $alert->acknowledge(Auth::id());
 
-        $this->dispatch('notify', ...['message' => 'Alert acknowledged', 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => 'Alert acknowledged', 'type' => 'success']);
     }
 
-    public function resolveAlert(int $alertId): void
+    public function resolveAlert(int $alertId)
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
+        $this->authorize('resolve', $alert);
         $alert->resolve(Auth::id());
 
-        $this->dispatch('notify', ...['message' => 'Alert resolved', 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => 'Alert resolved', 'type' => 'success']);
     }
 
     // === GEOFENCE INTEGRATION ===
 
-    public function openGeofenceModal(): void
+    public function openGeofenceModal()
     {
         $this->showGeofenceModal = true;
         $this->selectedGeofenceId = null;
     }
 
-    public function closeGeofenceModal(): void
+    public function closeGeofenceModal()
     {
         $this->showGeofenceModal = false;
     }
 
-    public function linkGeofence(): void
+    public function linkGeofence()
     {
         $this->validate([
             'selectedGeofenceId' => 'required|exists:geofences,id',
@@ -507,55 +507,46 @@ class MineAreaDetail extends Component
 
         $team = Auth::user()->currentTeam;
         $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->selectedGeofenceId);
+        $this->authorize('update', $geofence);
         $geofence->update(['mine_area_id' => $this->mineArea->id]);
 
         $this->closeGeofenceModal();
-        $this->dispatch('notify', ...['message' => "{$geofence->name} linked to {$this->mineArea->name}", 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => "{$geofence->name} linked to {$this->mineArea->name}", 'type' => 'success']);
     }
 
-    public function unlinkGeofence(int $geofenceId): void
+    public function unlinkGeofence(int $geofenceId)
     {
         $team = Auth::user()->currentTeam;
         $geofence = Geofence::where('team_id', $team->id)->findOrFail($geofenceId);
+        $this->authorize('update', $geofence);
         $geofence->update(['mine_area_id' => null]);
 
-        $this->dispatch('notify', ...['message' => "{$geofence->name} unlinked from area", 'type' => 'success']);
+        $this->dispatchBrowserEvent('notify', ['message' => "{$geofence->name} unlinked from area", 'type' => 'success']);
     }
 
     // === RENDER ===
 
-    public function render(): View
+    public function render()
     {
         $team = Auth::user()->currentTeam;
 
-        // Refresh mine area with counts (guard columns that may not exist in all envs)
-        $countRelations = ['geofences', 'minePlanUploads', 'productionRecords'];
-        if (Schema::hasColumn('machines', 'mine_area_id')) {
-            $countRelations[] = 'machines';
-        }
-        $this->mineArea->loadCount($countRelations);
+        // Refresh mine area with counts
+        $this->mineArea->loadCount(['machines', 'geofences', 'minePlanUploads', 'productionRecords']);
 
         // Assigned machines
-        $hasMineAreaId = Schema::hasColumn('machines', 'mine_area_id');
-        if ($hasMineAreaId) {
-            $assignedMachines = Machine::where('team_id', $team->id)
-                ->where('mine_area_id', $this->mineArea->id)
-                ->orderBy('name')
-                ->get();
+        $assignedMachines = Machine::where('team_id', $team->id)
+            ->where('mine_area_id', $this->mineArea->id)
+            ->orderBy('name')
+            ->get();
 
-            // Available machines (not assigned to this area)
-            $availableMachines = Machine::where('team_id', $team->id)
-                ->where(function ($q) {
-                    $q->whereNull('mine_area_id')
-                        ->orWhere('mine_area_id', '!=', $this->mineArea->id);
-                })
-                ->orderBy('name')
-                ->get();
-        } else {
-            // Column missing – show all team machines as available, none as assigned
-            $assignedMachines = collect();
-            $availableMachines = Machine::where('team_id', $team->id)->orderBy('name')->get();
-        }
+        // Available machines (not assigned to this area)
+        $availableMachines = Machine::where('team_id', $team->id)
+            ->where(function ($q) {
+                $q->whereNull('mine_area_id')
+                    ->orWhere('mine_area_id', '!=', $this->mineArea->id);
+            })
+            ->orderBy('name')
+            ->get();
 
         // Assignment history
         $assignmentHistory = MachineAreaAssignment::where('mine_area_id', $this->mineArea->id)
@@ -625,13 +616,9 @@ class MineAreaDetail extends Component
             'activeAlertCount' => $activeAlertCount,
             'linkedGeofences' => $linkedGeofences,
             'availableGeofences' => $availableGeofences,
-            'comparisonData' => $this->buildComparisonData($team->id),
         ]);
     }
 
-    /**
-     * @return array<mixed>
-     */
     private function getProductionSummary(int $teamId): array
     {
         $now = now();
@@ -670,77 +657,6 @@ class MineAreaDetail extends Component
             'target' => $targetValue,
             'target_progress' => min($targetProgress, 100),
             'target_unit' => $monthTarget->unit ?? 'tonnes',
-        ];
-    }
-
-    /**
-     * Build comparison data: system-recorded vs operator-reported quantities.
-     * Grouped by date within the selected period, optionally filtered by machine.
-     *
-     * @return array{has_system_data: bool, rows: array, machines: mixed}
-     */
-    /** @return array<string, mixed> */
-    private function buildComparisonData(int $teamId): array
-    {
-        $days = (int) ($this->comparisonPeriod ?: 30);
-        $start = now()->subDays($days - 1)->startOfDay();
-
-        $query = ProductionRecord::where('mine_area_id', $this->mineArea->id)
-            ->where('team_id', $teamId)
-            ->where('record_date', '>=', $start->toDateString())
-            ->orderBy('record_date');
-
-        if ($this->comparisonMachineId !== '') {
-            $query->where('machine_id', (int) $this->comparisonMachineId);
-        }
-
-        $records = $query->get(['record_date', 'machine_id', 'quantity_produced', 'system_quantity', 'unit']);
-
-        // Group by date
-        $byDate = $records->groupBy(fn ($r) => $r->record_date->toDateString());
-
-        $rows = [];
-        for ($d = $start->copy(); $d->lte(now()); $d->addDay()) {
-            $key = $d->toDateString();
-            $group = $byDate->get($key, collect());
-
-            $operator = (float) $group->sum('quantity_produced');
-            $systemSum = $group->whereNotNull('system_quantity')->sum('system_quantity');
-            $hasSystem = $group->whereNotNull('system_quantity')->count() > 0;
-
-            $variance = null;
-            if ($hasSystem && $systemSum > 0) {
-                $variance = round((($operator - $systemSum) / $systemSum) * 100, 1);
-            }
-
-            $rows[] = [
-                'date' => $key,
-                'label' => $d->format('d M'),
-                'operator' => round($operator, 2),
-                'system' => $hasSystem ? round((float) $systemSum, 2) : null,
-                'variance_pct' => $variance,  // positive = operator over-reports, negative = under-reports
-                'has_system' => $hasSystem,
-            ];
-        }
-
-        $hasSystemData = collect($rows)->contains('has_system', true);
-
-        // Machines with records in the period (for filter dropdown)
-        $machines = ProductionRecord::where('mine_area_id', $this->mineArea->id)
-            ->where('team_id', $teamId)
-            ->where('record_date', '>=', $start->toDateString())
-            ->where('machine_id', '!=', null)
-            ->with('machine:id,name')
-            ->get(['machine_id'])
-            ->pluck('machine')
-            ->filter()
-            ->unique('id')
-            ->values();
-
-        return [
-            'has_system_data' => $hasSystemData,
-            'rows' => $rows,
-            'machines' => $machines,
         ];
     }
 }

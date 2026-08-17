@@ -48,7 +48,6 @@ class ToastNotificationService {
         // Preload sound
         this.loadSound('critical', '/audio/alert-critical.mp3');
 
-        console.log('✅ ToastNotificationService initialized');
     }
 
     /**
@@ -104,8 +103,6 @@ class ToastNotificationService {
                 this.dismiss(id);
             }, duration);
         }
-
-        console.log(`🔔 Toast shown: ${title} (${priority})`);
 
         return id;
     }
@@ -380,7 +377,6 @@ class ToastNotificationService {
         }
         this.toasts.clear();
         this.container = null;
-        console.log('✅ ToastNotificationService disposed');
     }
 }
 

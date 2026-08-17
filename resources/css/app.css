@@ -1,138 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../../tailwind.config.js";
 
-/* ==========================================
-   THEME VARIABLES
-   ========================================== */
-
-/*
- * Light theme  — default (:root)
- * These variables drive all theme-aware components.
- */
+/* Dot.Mines brand tokens — shared with the guest/marketing pages (welcome.blade.php,
+   layouts/guest.blade.php) so the authenticated dashboard reads as the same product. */
 :root {
-    --background:      #ffffff;
-    --surface:         #f8fafc;
-    --card:            #ffffff;
-    --text-primary:    #111827;
-    --text-secondary:  #6b7280;
-    --primary:         #2563eb;
-    --primary-hover:   #1d4ed8;
-    --border:          #e5e7eb;
-    --shadow:          rgba(0, 0, 0, 0.08);
-    --scrollbar-track: #f1f5f9;
-    --scrollbar-thumb: #cbd5e1;
-    --scrollbar-hover: #94a3b8;
+    --ink: #211a14;
+    --ink-soft: #2c2319;
+    --umber: #6b4226;
+    --gold: #d99e2b;
+    --gold-soft: #f0c669;
+    --stone: #f4efe4;
+    --sand: #c9b896;
+    --line: rgba(244, 239, 228, 0.12);
+    --font-display: 'Outfit', system-ui, sans-serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
-
-/*
- * Dark theme  — active when <html class="dark">
- */
-html.dark {
-    --background:      #0f172a;
-    --surface:         #1e293b;
-    --card:            #334155;
-    --text-primary:    #f8fafc;
-    --text-secondary:  #cbd5e1;
-    --primary:         #3b82f6;
-    --primary-hover:   #60a5fa;
-    --border:          #475569;
-    --shadow:          rgba(0, 0, 0, 0.4);
-    --scrollbar-track: #111827;
-    --scrollbar-thumb: #374151;
-    --scrollbar-hover: #4b5563;
-}
-
-/*
- * Global body theming — applies the variables to the base surface.
- * Individual components inherit or override as needed.
- */
-body {
-    background-color: var(--background);
-    color:            var(--text-primary);
-    transition:
-        background-color 0.3s ease,
-        color            0.3s ease;
-}
-
-/*
- * Smooth theme transition on ALL elements (excluding animated ones).
- * Respects prefers-reduced-motion.
- */
-*,
-*::before,
-*::after {
-    transition:
-        background-color 0.3s ease,
-        color            0.3s ease,
-        border-color     0.3s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* ==========================================
-   LIGHT MODE — Tailwind class overrides
-   Override the hardcoded dark-mode Tailwind
-   utility classes when in light mode.
-   ========================================== */
-
-/* --- Backgrounds --- */
-html:not(.dark) .bg-gray-900  { background-color: #f8fafc !important; }
-html:not(.dark) .bg-gray-800  { background-color: #ffffff !important; }
-html:not(.dark) .bg-gray-700  { background-color: #f1f5f9 !important; }
-html:not(.dark) .bg-gray-600  { background-color: #e2e8f0 !important; }
-
-/* Hover overrides */
-html:not(.dark) .hover\:bg-gray-800:hover { background-color: #f1f5f9 !important; }
-html:not(.dark) .hover\:bg-gray-700:hover { background-color: #f1f5f9 !important; }
-html:not(.dark) .hover\:bg-gray-600:hover { background-color: #e2e8f0 !important; }
-
-/* --- Text --- */
-html:not(.dark) .text-gray-100 { color: #111827 !important; }
-html:not(.dark) .text-gray-200 { color: #1f2937 !important; }
-html:not(.dark) .text-gray-300 { color: #374151 !important; }
-html:not(.dark) .text-gray-400 { color: #6b7280 !important; }
-
-/* text-white is context-sensitive — only remap inside structural chrome */
-html:not(.dark) nav .text-white,
-html:not(.dark) [data-sidebar] .text-white,
-html:not(.dark) aside .text-white,
-html:not(.dark) .sidebar-nav .text-white,
-html:not(.dark) .dropdown-menu .text-white  { color: #111827 !important; }
-
-/* --- Borders --- */
-html:not(.dark) .border-gray-700 { border-color: #e5e7eb !important; }
-html:not(.dark) .border-gray-600 { border-color: #d1d5db !important; }
-
-/* --- Shadows (surface elevation) --- */
-html:not(.dark) .shadow-lg  { box-shadow: 0 10px 15px -3px var(--shadow), 0 4px 6px -4px var(--shadow) !important; }
-html:not(.dark) .shadow-xl  { box-shadow: 0 20px 25px -5px var(--shadow), 0 8px 10px -6px var(--shadow) !important; }
-html:not(.dark) .shadow-2xl { box-shadow: 0 25px 50px -12px var(--shadow) !important; }
-
-/* --- Skeleton shimmer --- */
-html:not(.dark) .skeleton-loading {
-    background: linear-gradient(
-        90deg,
-        #e2e8f0 25%,
-        #f1f5f9 50%,
-        #e2e8f0 75%
-    ) !important;
-    background-size: 200% 100% !important;
-}
-
-/* ==========================================
-   LIGHT MODE — Scrollbar Styling
-   ========================================== */
-html:not(.dark) ::-webkit-scrollbar-track  { background: var(--scrollbar-track); }
-html:not(.dark) ::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 9999px; }
-html:not(.dark) ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
-html:not(.dark) * {
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-}
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
 
 [x-cloak] {
     display: none;
@@ -426,22 +311,64 @@ html:not(.dark) * {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--scrollbar-track);
+    @apply bg-gray-900;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 9999px;
-    transition: background-color 0.2s;
+    @apply bg-gray-700 rounded-full;
+    @apply hover:bg-gray-600;
+    @apply transition-colors duration-200;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-hover);
+    @apply bg-gray-600;
 }
 
 /* Firefox scrollbar */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-color: rgb(55, 65, 81) rgb(17, 24, 39);
 }
 
+/* Dashboard entrance animations (moved from resources/views/livewire/dashboard.blade.php
+   so they ship once in the compiled stylesheet instead of being re-rendered inline on
+   every wire:poll update, which broke CSP since each Livewire response gets its own nonce) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-down {
+    animation: slideDown 0.5s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.4s ease-out forwards;
+    opacity: 0;
+}

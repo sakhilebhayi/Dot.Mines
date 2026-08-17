@@ -4,7 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\Team;
 use App\Models\User;
-use App\Services\TeamRoleService;
+use App\Services\TeamRoleProvisioner;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -30,15 +30,13 @@ class CreateNewUser implements CreatesNewUsers
         ])->validate();
 
         return DB::transaction(function () use ($input) {
-            /** @var User $user */
-            $user = User::create([
+            return tap(User::create([
                 'name' => $input['name'],
                 'email' => $input['email'],
                 'password' => Hash::make($input['password']),
-            ]);
-            $this->createTeam($user);
-
-            return $user;
+            ]), function (User $user) {
+                $this->createTeam($user);
+            });
         });
     }
 
@@ -54,8 +52,10 @@ class CreateNewUser implements CreatesNewUsers
         ]);
 
         $user->ownedTeams()->save($team);
-        $user->forceFill(['current_team_id' => $team->id])->save();
 
-        TeamRoleService::provisionTeam($team, $user);
+        // Give the team's creator full access -- without this, hasPermission()
+        // returns false for everyone including the owner, since no role/permission
+        // rows exist for a team until something provisions them.
+        TeamRoleProvisioner::assignRole($user, $team, 'admin');
     }
 }

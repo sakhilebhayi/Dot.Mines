@@ -49,7 +49,7 @@ if (false) {
         
         /**
          * @param array<int|string, string> $columns
-         * @return \Illuminate\Support\Collection<int, static>
+         * @return \Illuminate\Database\Eloquent\Collection<int, static>
          */
         public function get($columns = ['*']) {}
         
@@ -67,7 +67,7 @@ if (false) {
         
         /**
          * @param array<int|string, string> $columns
-         * @return \Illuminate\Support\Collection<int, static>
+         * @return \Illuminate\Database\Eloquent\Collection<int, static>
          */
         public function all($columns = ['*']) {}
         
@@ -159,7 +159,7 @@ if (false) {
          * @param array<int|string, string> $columns
          * @param string $pageName
          * @param int|null $page
-         * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<static>
+         * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
          */
         public function paginate($perPage = 15, $columns = ['*'], $pageName = 'page', $page = null) {}
         

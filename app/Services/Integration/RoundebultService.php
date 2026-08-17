@@ -37,8 +37,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch machines from Roundebult API
-     *
-     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
@@ -70,8 +68,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch location data for a machine
-     *
-     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -94,8 +90,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch metrics for a machine
-     *
-     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -103,7 +97,11 @@ class RoundebultService extends BaseManufacturerService
             $metrics = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/metrics");
             $operations = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/operations");
 
-            $allMetrics = array_merge(
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier one, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $allMetrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($metrics['data'] ?? []),
                 $this->parseMetrics($operations['data'] ?? [])
             );
@@ -125,8 +123,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch alerts for a machine
-     *
-     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
@@ -157,8 +153,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse machine data from Roundebult format
-     *
-     * @return array<mixed>
      */
     protected function parseMachineData(array $data): array
     {
@@ -181,8 +175,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse location data from Roundebult format
-     *
-     * @return array<mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -197,12 +189,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse metric data from Roundebult format
-     *
-     * @return array<mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -217,12 +203,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse alert data from Roundebult format
-     *
-     * @return array<mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
     protected function parseAlert(array $data): array
     {
@@ -257,8 +237,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch machine details from Roundebult API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -287,8 +265,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -303,8 +279,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -319,8 +293,6 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

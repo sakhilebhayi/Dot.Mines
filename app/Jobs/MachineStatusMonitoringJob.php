@@ -23,7 +23,6 @@ class MachineStatusMonitoringJob implements ShouldQueue
 
     public int $timeout = 60;
 
-    /** @var array<int> */
     public array $backoff = [30, 120]; // 30s, 2 mins
 
     /**
@@ -140,7 +139,7 @@ class MachineStatusMonitoringJob implements ShouldQueue
                 'status_changes' => $statusChanges,
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Machine status monitoring job failed', [
                 'integration_id' => $this->integration->id,
                 'error' => $e->getMessage(),
@@ -157,7 +156,6 @@ class MachineStatusMonitoringJob implements ShouldQueue
     /**
      * Determine machine status based on integration data.
      */
-    /** @param array<string, mixed> $status */
     private function determineStatus(array $status, Machine $machine): string
     {
         // Check if integration reports the machine as offline/disconnected
@@ -240,7 +238,7 @@ class MachineStatusMonitoringJob implements ShouldQueue
                 ]);
             }
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error checking for timed out machines', [
                 'integration_id' => $this->integration->id,
                 'error' => $e->getMessage(),

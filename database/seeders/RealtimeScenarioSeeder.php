@@ -17,7 +17,7 @@ class RealtimeScenarioSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('🚀 Starting Real-Time Scenario Seeder...');
+        $this->command->info('Starting real-time scenario seeder...');
 
         $team = Team::create([
             'name' => 'Roundebult Mining Operations',
@@ -25,39 +25,39 @@ class RealtimeScenarioSeeder extends Seeder
             'personal_team' => false,
         ]);
 
-        $this->command->info('✓ Created team: '.$team->name);
+        $this->command->info('Created team: '.$team->name);
 
         $users = $this->createUsers($team);
-        $this->command->info('✓ Created '.count($users).' users');
+        $this->command->info('Created '.count($users).' users');
 
         $mineAreas = $this->createMineAreas($team);
-        $this->command->info('✓ Created '.count($mineAreas).' mine areas');
+        $this->command->info('Created '.count($mineAreas).' mine areas');
 
         $machines = $this->createMachines($team, $mineAreas);
-        $this->command->info('✓ Created '.count($machines).' machines');
+        $this->command->info('Created '.count($machines).' machines');
 
         $geofences = $this->createGeofences($team);
-        $this->command->info('✓ Created '.count($geofences).' geofences');
+        $this->command->info('Created '.count($geofences).' geofences');
 
         $maintenanceRecords = $this->createMaintenanceRecords($team, $machines, $users);
-        $this->command->info('✓ Created '.count($maintenanceRecords).' maintenance records');
+        $this->command->info('Created '.count($maintenanceRecords).' maintenance records');
 
         $fuelTransactions = $this->createFuelTransactions($team, $machines, $users);
-        $this->command->info('✓ Created '.count($fuelTransactions).' fuel transactions');
+        $this->command->info('Created '.count($fuelTransactions).' fuel transactions');
 
         $healthStatuses = $this->createHealthStatuses($machines);
-        $this->command->info('✓ Created '.count($healthStatuses).' health status records');
+        $this->command->info('Created '.count($healthStatuses).' health status records');
 
         $geofenceEntries = $this->createGeofenceEntries($machines, $geofences);
-        $this->command->info('✓ Created '.count($geofenceEntries).' geofence entries');
+        $this->command->info('Created '.count($geofenceEntries).' geofence entries');
 
         $alerts = $this->createAlerts($team, $machines);
-        $this->command->info('✓ Created '.count($alerts).' alerts');
+        $this->command->info('Created '.count($alerts).' alerts');
 
         $this->command->info('');
-        $this->command->info('✅ Real-Time Scenario Seed Complete!');
+        $this->command->info('Real-time scenario seed complete.');
         $this->command->info('');
-        $this->command->info('📋 Test Credentials:');
+        $this->command->info('Test Credentials:');
         $this->command->info('  Admin:     admin@roundebult.local / password');
         $this->command->info('  Manager:   manager@roundebult.local / password');
         $this->command->info('  Operator:  operator@roundebult.local / password');
@@ -65,9 +65,6 @@ class RealtimeScenarioSeeder extends Seeder
         $this->command->info('  Viewer:    viewer@roundebult.local / password');
     }
 
-    /**
-     * @return array<mixed>
-     */
     private function createUsers(Team $team): array
     {
         $userData = [
@@ -94,9 +91,6 @@ class RealtimeScenarioSeeder extends Seeder
         return $users;
     }
 
-    /**
-     * @return array<mixed>
-     */
     private function createMineAreas(Team $team): array
     {
         $areas = [
@@ -147,10 +141,6 @@ class RealtimeScenarioSeeder extends Seeder
         return $mineAreas;
     }
 
-    /**
-     * @param  array<mixed>  $mineAreas
-     * @return array<mixed>
-     */
     private function createMachines(Team $team, array $mineAreas): array
     {
         $machineData = [
@@ -173,7 +163,7 @@ class RealtimeScenarioSeeder extends Seeder
         $machines = [];
         foreach ($machineData as $data) {
             $data['team_id'] = $team->id;
-            if (isset($data['mine_area_id'])) {
+            if (isset($data['mine_area_id']) && $data['mine_area_id']) {
                 $data['mine_area_id'] = $mineAreas[$data['mine_area_id'] - 1]->id;
             }
             $machines[] = Machine::create($data);
@@ -182,9 +172,6 @@ class RealtimeScenarioSeeder extends Seeder
         return $machines;
     }
 
-    /**
-     * @return array<mixed>
-     */
     private function createGeofences(Team $team): array
     {
         $geofenceData = [
@@ -202,11 +189,6 @@ class RealtimeScenarioSeeder extends Seeder
         return $geofences;
     }
 
-    /**
-     * @param  array<mixed>  $machines
-     * @param  array<mixed>  $users
-     * @return array<mixed>
-     */
     private function createMaintenanceRecords(Team $team, array $machines, array $users): array
     {
         $records = [];
@@ -217,11 +199,6 @@ class RealtimeScenarioSeeder extends Seeder
         return $records;
     }
 
-    /**
-     * @param  array<mixed>  $machines
-     * @param  array<mixed>  $users
-     * @return array<mixed>
-     */
     private function createFuelTransactions(Team $team, array $machines, array $users): array
     {
         $transactions = [];
@@ -242,31 +219,18 @@ class RealtimeScenarioSeeder extends Seeder
         return $transactions;
     }
 
-    /**
-     * @param  array<mixed>  $machines
-     * @return array<mixed>
-     */
     private function createHealthStatuses(array $machines): array
     {
         // Skip health statuses for now - table structure varies
         return [];
     }
 
-    /**
-     * @param  array<mixed>  $machines
-     * @param  array<mixed>  $geofences
-     * @return array<mixed>
-     */
     private function createGeofenceEntries(array $machines, array $geofences): array
     {
         // Skip geofence entries due to complex schema requirements
         return [];
     }
 
-    /**
-     * @param  array<mixed>  $machines
-     * @return array<mixed>
-     */
     private function createAlerts(Team $team, array $machines): array
     {
         $alerts = [];

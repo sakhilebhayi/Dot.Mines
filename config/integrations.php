@@ -86,39 +86,46 @@ return [
         ],
         'bell' => [
             'name' => 'Bell',
-            'api_system' => 'Fleetmatic',
-            'team_id' => (int) env('BELL_TEAM_ID', 0),
+            'api_system' => 'ISO 15143-3 (AEMP 2.0) Fleet API',
+            // Real endpoints from Bell's own "BELL_ISO15143-3 SSO" Postman
+            // collection -- the previous 'Fleetmatic' base_url/paths below it
+            // were guessed and never matched a real Bell endpoint.
             'base_url' => env('BELL_API_BASE_URL', 'https://b-fleet03.bellequipment.com:8080'),
-            'api_version' => 'v1',
-            'api_key_env' => 'BELL_API_KEY',
-            'api_secret_env' => 'BELL_API_SECRET',
-            'account_id_env' => 'BELL_ACCOUNT_ID',
-            'webhook_url_env' => 'BELL_WEBHOOK_URL',
-            'auth_type' => 'bearer_token', // Bearer Token Authentication
-            'fleet_endpoint' => '/Fleet',
+            'token_url' => env('BELL_TOKEN_URL', 'https://sso.bellequipment.com/connect/token'),
+            'api_version' => null, // ISO 15143-3 itself is the versioning; no /v1 path segment.
+            'client_id_env' => 'BELL_CLIENT_ID', // Bell issues 'ISO_Export_Service' to every ISO export consumer.
+            'scope' => 'ISO_Exports',
+            'username_env' => 'BELL_USERNAME',
+            'password_env' => 'BELL_PASSWORD',
+            'client_secret_env' => 'BELL_CLIENT_SECRET',
+            // OAuth2 Resource Owner Password Credentials (RFC 6749 §4.3):
+            // grant_type=password, plus client_id/client_secret, against
+            // token_url above. Distinct from the 'oauth2' (client credentials)
+            // and 'bearer_token' (pre-issued static token) auth types used by
+            // other manufacturers in this file.
+            'auth_type' => 'oauth2_password',
             'supported_endpoints' => [
-                // Pattern: /Fleet/Equipment/{OEM ISO Identifier}/{Signal}/{startDateUTC}/{endDateUTC}
-                'fleet_snapshot' => '/Fleet',
-                'locations' => '/Fleet/Equipment/{id}/Locations/{from}/{to}',
-                'operating_hours' => '/Fleet/Equipment/{id}/CumulativeOperatingHours/{from}/{to}',
-                'fuel_used_cumulative' => '/Fleet/Equipment/{id}/CumulativeFuelUsed/{from}/{to}',
-                'fuel_used_24h' => '/Fleet/Equipment/{id}/FuelUsedInThePreceding24Hours/{from}/{to}',
-                'distance' => '/Fleet/Equipment/{id}/Distance/{from}/{to}',
-                'caution_codes' => '/Fleet/Equipment/{id}/CautionCodes/{from}/{to}',
-                'idle_hours' => '/Fleet/Equipment/{id}/CumulativeIdleHours/{from}/{to}',
-                'fuel_remaining_ratio' => '/Fleet/Equipment/{id}/FuelRemainingRatio/{from}/{to}',
-                'def_remaining' => '/Fleet/Equipment/{id}/DEFRemaining/{from}/{to}',
-                'engine_condition' => '/Fleet/Equipment/{id}/EngineCondition/{from}/{to}',
-                'load_count' => '/Fleet/Equipment/{id}/CumulativeLoadCount/{from}/{to}',
-                'payload_totals' => '/Fleet/Equipment/{id}/CumulativePayloadTotals/{from}/{to}',
-                'active_regen_hours' => '/Fleet/Equipment/{id}/CumulativeActiveRegenerationHours/{from}/{to}',
+                'fleet' => '/Fleet',
+                'locations' => '/Fleet/Equipment/{equipmentId}/Locations/{startDateUTC}/{endDateUTC}',
+                'operatingHours' => '/Fleet/Equipment/{equipmentId}/CumulativeOperatingHours/{startDateUTC}/{endDateUTC}',
+                'idleHours' => '/Fleet/Equipment/{equipmentId}/CumulativeIdleHours/{startDateUTC}/{endDateUTC}',
+                'fuelUsed' => '/Fleet/Equipment/{equipmentId}/CumulativeFuelUsed/{startDateUTC}/{endDateUTC}',
+                'fuelUsedLast24Hours' => '/Fleet/Equipment/{equipmentId}/FuelUsedInThePreceding24Hours/{startDateUTC}/{endDateUTC}',
+                'fuelRemainingRatio' => '/Fleet/Equipment/{equipmentId}/FuelRemainingRatio/{startDateUTC}/{endDateUTC}',
+                'defRemaining' => '/Fleet/Equipment/{equipmentId}/DEFRemaining/{startDateUTC}/{endDateUTC}',
+                'distance' => '/Fleet/Equipment/{equipmentId}/Distance/{startDateUTC}/{endDateUTC}',
+                'cautionCodes' => '/Fleet/Equipment/{equipmentId}/CautionCodes/{startDateUTC}/{endDateUTC}',
+                'engineCondition' => '/Fleet/Equipment/{equipmentId}/EngineCondition/{startDateUTC}/{endDateUTC}',
+                'loadCount' => '/Fleet/Equipment/{equipmentId}/CumulativeLoadCount/{startDateUTC}/{endDateUTC}',
+                'payloadTotals' => '/Fleet/Equipment/{equipmentId}/CumulativePayloadTotals/{startDateUTC}/{endDateUTC}',
+                'regenerationHours' => '/Fleet/Equipment/{equipmentId}/CumulativeActiveRegenerationHours/{startDateUTC}/{endDateUTC}',
             ],
-            'sync_interval' => 300,
+            'sync_interval' => 900, // Bell's own reference spec suggests polling every 15 minutes.
             'retry_attempts' => 3,
             'rate_limit' => 80, // requests per minute
             'requires_bell_contact' => true,
-            'documentation' => 'Contact Bell Equipment for API access',
-            'notes' => 'Requires Bell account ID and API access approval',
+            'documentation' => 'Contact Bell Equipment to be issued an ISO 15143-3 export account (username/password + client secret for the ISO_Export_Service client)',
+            'notes' => 'Requires a Bell-issued ISO 15143-3 export account. Implemented against Bell\'s published Postman collection; response XML shape has not yet been confirmed against a live sync -- see BellService docblock.',
         ],
         'hitachi' => [
             'name' => 'Hitachi Construction Machinery',
@@ -459,94 +466,5 @@ return [
             'medium' => ['medium', 'caution', 'notice'],
             'low' => ['low', 'info', 'informational'],
         ],
-    ],
-
-    /**
-     * Bell Equipment SSO — OAuth2 Password Credentials grant.
-     *
-     * Used to obtain a bearer token before calling any Bell API endpoint.
-     * Credentials are sent as a Basic Authentication header (client_id:client_secret).
-     *
-     * Token name: SSO_Token
-     * Grant type: password
-     * Scope:      ISO_Exports
-     */
-    'bell_sso' => [
-        'token_url' => env('BELL_SSO_TOKEN_URL', 'https://sso.bellequipment.com/connect/token'),
-        'grant_type' => env('BELL_SSO_GRANT_TYPE', 'password'),
-        'client_id' => env('BELL_SSO_CLIENT_ID', 'ISO_Export_Service'),
-        'client_secret' => env('BELL_SSO_CLIENT_SECRET', ''),
-        'username' => env('BELL_SSO_USERNAME', ''),
-        'password' => env('BELL_SSO_PASSWORD', ''),
-        'scope' => env('BELL_SSO_SCOPE', 'ISO_Exports'),
-    ],
-
-    /**
-     * Bell ISO15143-3 (AEMP) fleet API configuration.
-     *
-     * Set BELL_ISO15143_API_URL, BELL_ISO15143_USERNAME, and
-     * BELL_ISO15143_PASSWORD in your .env file.
-     */
-    'bell_iso15143' => [
-        'api_url' => env('BELL_ISO15143_API_URL', ''),
-        'client_id' => env('BELL_ISO15143_CLIENT_ID', 'ISO_Export_Service'),
-        'api_username' => env('BELL_ISO15143_USERNAME', ''),
-        'api_password' => env('BELL_ISO15143_PASSWORD', ''),
-        'client_secret' => env('BELL_ISO15143_CLIENT_SECRET', ''),
-    ],
-
-    /**
-     * Bell Fleetmatic REST API – historical telemetry endpoints.
-     *
-     * Used by SyncBellHistoricalDataJob (hourly) to backfill location trail,
-     * fuel usage, operating hours, idle hours, and load count per machine.
-     *
-     * Set BELL_HISTORICAL_BASE_URL, BELL_HISTORICAL_USERNAME, and
-     * BELL_HISTORICAL_PASSWORD in your .env file.
-     * Defaults to the same Fleetmatic base URL as the main Bell integration.
-     */
-    'bell_historical' => [
-        'base_url' => env('BELL_HISTORICAL_BASE_URL', env('BELL_API_BASE_URL', '')),
-        'api_username' => env('BELL_HISTORICAL_USERNAME', env('BELL_ISO15143_USERNAME', '')),
-        'api_password' => env('BELL_HISTORICAL_PASSWORD', env('BELL_ISO15143_PASSWORD', '')),
-    ],
-
-    /**
-     * Bell real-time polling configuration.
-     *
-     * ┌──────────────────────────────────────────────────────────────────┐
-     * │  BELL_LOCATION_POLL_SECONDS   │  How it's handled                │
-     * ├──────────────────────────────────────────────────────────────────┤
-     * │  300  (5 min, default)         │  Laravel cron scheduler          │
-     * │  120  (2 min)                  │  Laravel cron scheduler          │
-     * │   60  (1 min)                  │  Laravel cron scheduler          │
-     * │   30  (30 sec)                 │  bell:watch-locations (Supervisor)│
-     * │   15  (15 sec)                 │  bell:watch-locations (Supervisor)│
-     * │   10  (10 sec)                 │  bell:watch-locations (Supervisor)│
-     * │    5  (5 sec, max frequency)   │  bell:watch-locations (Supervisor)│
-     * └──────────────────────────────────────────────────────────────────┘
-     *
-     * For intervals < 60 s, run the persistent artisan command under Supervisor:
-     *   php artisan bell:watch-locations
-     *
-     * The cron scheduler registers a once-per-minute safety-net fallback for
-     * environments that don't have Supervisor configured.
-     */
-    'bell_polling' => [
-        // Seconds between consecutive Location API requests.
-        // Valid range: 5–300.  Values < 60 require bell:watch-locations.
-        'location_interval_seconds' => max(5, (int) env('BELL_LOCATION_POLL_SECONDS', 300)),
-
-        // Seconds between full ISO15143-3 fleet snapshots.
-        // Bell's own update cadence is ~15 min; requesting more often yields duplicates.
-        'snapshot_interval_seconds' => max(60, (int) env('BELL_SNAPSHOT_POLL_SECONDS', 300)),
-
-        // Lookback window = interval × multiplier (seconds fetched per poll cycle).
-        // Must be > 1.0 to guarantee overlap between consecutive windows.
-        'lookback_multiplier' => max(1.1, (float) env('BELL_LOCATION_LOOKBACK_MULTIPLIER', 2.0)),
-
-        // Wire:poll interval (seconds) for the Live Map Livewire component.
-        // Keeps the server-side machine list in sync when WebSocket is unavailable.
-        'ui_poll_seconds' => max(10, (int) env('BELL_UI_POLL_SECONDS', 30)),
     ],
 ];

@@ -2,29 +2,20 @@
 
 namespace App\Livewire;
 
-use App\Models\AIAgent;
 use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
 use App\Models\AIRecommendation;
-use App\Models\FuelTransaction;
-use App\Models\Machine;
-use App\Models\MachineMetric;
-use App\Models\MaintenanceRecord;
-use App\Models\ProductionRecord;
-use App\Models\User;
+use App\Models\AiRecommendationAction;
 use App\Services\AI\AIOptimizationService;
+use App\Traits\BrowserEventBridge;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-/**
- * @property-read array<string, mixed> $overviewData
- */
 class AIOptimizationDashboard extends Component
 {
-    use WithPagination;
+    use BrowserEventBridge, WithPagination;
 
     public string $activeTab = 'overview';
 
@@ -32,7 +23,6 @@ class AIOptimizationDashboard extends Component
 
     public string $selectedPriority = 'all';
 
-    /** @var array<string, mixed> */
     public array $filters = [
         'category' => '',
         'priority' => '',
@@ -47,108 +37,147 @@ class AIOptimizationDashboard extends Component
 
     public bool $showRecommendationConfirm = false;
 
+    public string $rejectReason = '';
+
     protected ?AIOptimizationService $aiService = null;
 
-    public function boot(AIOptimizationService $aiService): void
+    public function boot(AIOptimizationService $aiService)
     {
         $this->aiService = $aiService;
     }
 
-    public function mount(): void
+    public function mount()
     {
         // Auto-run analysis if no recent data
-        $teamId = Auth::user()->currentTeam?->id;
-        $lastRecommendation = $teamId ? AIRecommendation::where('team_id', $teamId)
+        $lastRecommendation = AIRecommendation::where('team_id', auth()->user()->currentTeam->id)
             ->latest()
-            ->first() : null;
+            ->first();
 
         if (! $lastRecommendation || $lastRecommendation->created_at->diffInHours(now()) > 24) {
             $this->runAnalysis();
         }
     }
 
-    public function runAnalysis(): void
+    public function runAnalysis()
     {
         $this->analysisRunning = true;
 
         try {
-            /** @var User|null $user */
-            $user = Auth::user();
-            $team = $user?->currentTeam;
-            if ($team) {
-                $this->aiService?->runComprehensiveAnalysis($team, $user);
-            }
+            $aiService = $this->aiService;
+            assert($aiService !== null);
+            $aiService->runComprehensiveAnalysis(
+                auth()->user()->currentTeam,
+                auth()->user()
+            );
 
             $this->dispatch('analysis-completed');
-            $this->dispatch('notify', ...['type' => 'success', 'message' => 'AI analysis completed successfully!']);
-        } catch (\Exception $e) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Analysis failed: '.$e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'AI analysis completed successfully!']);
+        } catch (\Throwable $e) {
+            // The raw exception message (which can include third-party API
+            // responses, stack details, or internal identifiers) used to go
+            // straight to the user. Log it for us; tell them something
+            // useful instead.
+            Log::error('AI analysis failed', [
+                'user_id' => auth()->id(),
+                'team_id' => auth()->user()?->current_team_id,
+                'error' => $e->getMessage(),
+            ]);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'AI analysis could not be completed right now. Please try again in a few minutes.']);
         }
 
         $this->analysisRunning = false;
     }
 
-    public function setCategory(string $category): void
+    public function setCategory($category)
     {
         $this->selectedCategory = $category;
         $this->resetPage();
     }
 
-    public function setPriority(string $priority): void
+    public function setPriority($priority)
     {
         $this->selectedPriority = $priority;
         $this->resetPage();
     }
 
-    public function implementRecommendation(int $recommendationId): void
+    public function implementRecommendation($recommendationId)
     {
-        $team = Auth::user()->currentTeam;
+        $team = auth()->user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
         try {
             $this->authorize('update', $recommendation);
 
-            $recommendation->markAsImplemented(Auth::user());
+            $recommendation->markAsImplemented(auth()->user());
 
-            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Recommendation marked as implemented!']);
+            AiRecommendationAction::create([
+                'team_id' => $team->id,
+                'ai_recommendation_id' => $recommendation->id,
+                'recommendation_hash' => sha1($recommendation->id.$recommendation->title),
+                'recommendation' => ['title' => $recommendation->title, 'description' => $recommendation->description],
+                'status' => 'implemented',
+                'actioned_by' => auth()->id(),
+                'actioned_at' => now(),
+            ]);
+
+            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Recommendation marked as implemented!']);
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'implemented']);
         } catch (AuthorizationException $e) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'You are not authorized to implement this recommendation.']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to implement this recommendation.']);
 
             return;
         }
     }
 
-    public function rejectRecommendation(int $recommendationId): void
+    public function rejectRecommendation($recommendationId, string $reason = '')
     {
-        $team = Auth::user()->currentTeam;
+        $team = auth()->user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
+
+        if (trim($reason) === '') {
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'A rejection reason is required.']);
+
+            return;
+        }
+
         try {
             $this->authorize('update', $recommendation);
 
             $recommendation->update(['status' => 'rejected']);
 
-            $this->dispatch('notify', ...['type' => 'success', 'message' => 'Recommendation rejected.']);
+            AiRecommendationAction::create([
+                'team_id' => $team->id,
+                'ai_recommendation_id' => $recommendation->id,
+                'recommendation_hash' => sha1($recommendation->id.$recommendation->title),
+                'recommendation' => ['title' => $recommendation->title, 'description' => $recommendation->description],
+                'status' => 'rejected',
+                'actioned_by' => auth()->id(),
+                'actioned_at' => now(),
+                'reject_reason' => $reason,
+            ]);
+
+            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Recommendation rejected.']);
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'rejected']);
         } catch (AuthorizationException $e) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'You are not authorized to reject this recommendation.']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'You are not authorized to reject this recommendation.']);
 
             return;
         }
     }
 
-    public function promptRecommendationAction(int $recommendationId, string $action): void
+    public function promptRecommendationAction($recommendationId, $action)
     {
         $this->pendingRecommendationId = $recommendationId;
         $this->pendingRecommendationAction = $action;
         $this->showRecommendationConfirm = true;
     }
 
-    public function confirmRecommendationAction(): void
+    public function confirmRecommendationAction()
     {
         if (! $this->pendingRecommendationId || ! in_array($this->pendingRecommendationAction, ['implement', 'reject'])) {
             $this->showRecommendationConfirm = false;
             $this->pendingRecommendationId = null;
             $this->pendingRecommendationAction = null;
+            $this->rejectReason = '';
 
             return;
         }
@@ -159,118 +188,48 @@ class AIOptimizationDashboard extends Component
         if ($action === 'implement') {
             $this->implementRecommendation($id);
         } else {
-            $this->rejectRecommendation($id);
+            $this->rejectRecommendation($id, $this->rejectReason);
+            if (trim($this->rejectReason) === '') {
+                // rejectRecommendation() already surfaced the error notification; keep the dialog open.
+                return;
+            }
         }
 
         $this->showRecommendationConfirm = false;
         $this->pendingRecommendationId = null;
         $this->pendingRecommendationAction = null;
+        $this->rejectReason = '';
         // Refresh pagination/list
         $this->resetPage();
     }
 
-    public function cancelRecommendationAction(): void
+    public function cancelRecommendationAction()
     {
         $this->showRecommendationConfirm = false;
         $this->pendingRecommendationId = null;
         $this->pendingRecommendationAction = null;
-    }
-
-    public function acknowledgeAlert(int $alertId): void
-    {
-        $team = Auth::user()->currentTeam;
-        $alert = AIPredictiveAlert::where('team_id', $team->id)->findOrFail($alertId);
-
-        $alert->update([
-            'is_acknowledged' => true,
-            'acknowledged_by' => Auth::id(),
-            'acknowledged_at' => now(),
-        ]);
-
-        $this->dispatch('notify', ...['type' => 'success', 'message' => 'Alert acknowledged.']);
-    }
-
-    /** @return array<string, mixed> */
-    public function getOverviewDataProperty(): array
-    {
-        /** @var User $user */
-        $user = Auth::user();
-        $team = $user->currentTeam;
-
-        if ($team === null) {
-            return [];
-        }
-
-        $allRecs = AIRecommendation::where('team_id', $team->id)->get();
-        $pending = $allRecs->where('status', 'pending');
-        $implemented = $allRecs->where('status', 'implemented');
-        $total = $allRecs->count();
-
-        $implementationRate = $total > 0
-            ? round(($implemented->count() / $total) * 100, 1)
-            : 0;
-
-        $categories = ['fleet', 'fuel', 'maintenance', 'production', 'route', 'cost'];
-        $byCategory = [];
-        foreach ($categories as $cat) {
-            $catRecs = $allRecs->where('category', $cat);
-            $catTotal = $catRecs->count();
-            $catImpl = $catRecs->where('status', 'implemented')->count();
-            $byCategory[$cat] = [
-                'label' => ucfirst($cat),
-                'total' => $catTotal,
-                'pending' => $catRecs->where('status', 'pending')->count(),
-                'implemented' => $catImpl,
-                'impl_rate_pct' => $catTotal > 0 ? round(($catImpl / $catTotal) * 100) : 0,
-                'avg_confidence' => $catRecs->isNotEmpty()
-                    ? round($catRecs->avg('confidence_score') * 100, 0)
-                    : 0,
-                'potential_savings' => round($catRecs->where('status', 'pending')->sum('estimated_savings'), 0),
-            ];
-        }
-
-        $agents = AIAgent::all();
-
-        // Data transparency: record counts from real system tables
-        $teamId = $team->id;
-        $dataPoints = [
-            'production_records' => ProductionRecord::where('team_id', $teamId)->count(),
-            'machines' => Machine::where('team_id', $teamId)->count(),
-            'maintenance_records' => MaintenanceRecord::where('team_id', $teamId)->count(),
-            'fuel_transactions' => FuelTransaction::where('team_id', $teamId)->count(),
-            'machine_metrics' => MachineMetric::where('team_id', $teamId)->count(),
-        ];
-
-        return [
-            'implementation_rate' => $implementationRate,
-            'realized_savings' => round($implemented->sum('estimated_savings'), 0),
-            'potential_savings' => round($pending->sum('estimated_savings'), 0),
-            'critical_pending' => $pending->where('priority', 'critical')->count(),
-            'avg_confidence' => $total > 0 ? round($allRecs->avg('confidence_score') * 100, 0) : 0,
-            'by_category' => $byCategory,
-            'agents' => $agents,
-            'top_opportunity' => $pending->sortByDesc('estimated_savings')->first(),
-            'data_points' => $dataPoints,
-        ];
+        $this->rejectReason = '';
     }
 
     // (Possibly missing function for alert acknowledgement should be implemented here if needed)
 
-    public function markInsightAsRead(int $insightId): void
+    public function markInsightAsRead($insightId)
     {
-        $team = Auth::user()->currentTeam;
+        $team = auth()->user()->currentTeam;
         $insight = AIInsight::where('team_id', $team->id)->findOrFail($insightId);
         $this->authorize('update', $insight);
         $insight->markAsRead();
-        $this->dispatch('notify', ...['type' => 'success', 'message' => 'Insight marked as read.']);
+        $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Insight marked as read.']);
     }
 
-    public function render(): View
+    public function render()
     {
-        $team = Auth::user()->currentTeam;
+        $team = auth()->user()->currentTeam;
 
         // Get dashboard data
-        $dashboardData = $this->aiService?->getDashboardInsights($team) ?? [];
+        $aiService = $this->aiService;
+        assert($aiService !== null);
+        $dashboardData = $aiService->getDashboardInsights($team);
 
         // Get recommendations with filters
         $recommendationsQuery = AIRecommendation::where('team_id', $team->id)
@@ -315,7 +274,6 @@ class AIOptimizationDashboard extends Component
             'insights' => $dashboardData['insights'],
             'recommendations' => $recommendations,
             'predictiveAlerts' => $predictiveAlerts,
-            'overviewData' => $this->overviewData,
         ]);
     }
 }

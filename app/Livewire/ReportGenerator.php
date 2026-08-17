@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Jobs\GenerateReportJob;
 use App\Models\Machine;
 use App\Models\Report;
-use App\Support\Reports\ReportGeneration;
-use Illuminate\Contracts\View\View;
+use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,6 +13,8 @@ use Livewire\Component;
 
 class ReportGenerator extends Component
 {
+    use BrowserEventBridge;
+
     public int $step = 1;
 
     public string $reportName = '';
@@ -27,10 +29,8 @@ class ReportGenerator extends Component
 
     public string $format = 'pdf';
 
-    /** @var array<array-key, mixed> */
     public array $selectedMachines = [];
 
-    /** @var array<string, mixed> */
     public array $selectedGeofences = [];
 
     public bool $includeMetrics = true;
@@ -44,7 +44,7 @@ class ReportGenerator extends Component
     public string $scheduleFrequency = 'weekly';
 
     /** @var array<string, array<string, string>> */
-    protected $reportTypes = [
+    protected array $reportTypes = [
         'production' => [
             'label' => 'Production Summary',
             'description' => 'Total material extracted, production rates, and efficiency metrics',
@@ -75,12 +75,17 @@ class ReportGenerator extends Component
             'description' => 'Machine downtime events, root causes, and impact analysis',
             'icon' => '⏸️',
         ],
+        'compliance' => [
+            'label' => 'Compliance (MHSA/DMRE)',
+            'description' => 'Violation register with remediation deadlines, resolution status, and compliance score for regulator submission',
+            'icon' => '📋',
+        ],
     ];
 
-    /** @var array<string, string|array<mixed>> */
-    protected $rules = [
+    /** @var array<string, string> */
+    protected array $rules = [
         'reportName' => 'required|string|max:255',
-        'reportType' => 'required|in:production,fleet_utilization,maintenance_schedule,fuel_consumption,material_tracking,downtime_analysis',
+        'reportType' => 'required|in:production,fleet_utilization,maintenance_schedule,fuel_consumption,material_tracking,downtime_analysis,compliance',
         'description' => 'nullable|string|max:1000',
         'startDate' => 'required|date|before_or_equal:today',
         'endDate' => 'required|date|after_or_equal:startDate|before_or_equal:today',
@@ -90,34 +95,34 @@ class ReportGenerator extends Component
     ];
 
     /** @var array<string, string> */
-    protected $messages = [
+    protected array $messages = [
         'reportName.required' => 'Please enter a report name.',
         'startDate.required' => 'Please select a start date.',
         'endDate.required' => 'Please select an end date.',
         'endDate.after_or_equal' => 'End date must be after or equal to start date.',
     ];
 
-    public function mount(): void
+    public function mount()
     {
         $this->startDate = now()->subDays(30)->format('Y-m-d');
         $this->endDate = now()->format('Y-m-d');
     }
 
-    public function getMachines(): mixed
+    public function getMachines()
     {
         $team = Auth::user()->currentTeam;
 
         return Machine::where('team_id', $team->id)->get();
     }
 
-    public function getGeofences(): mixed
+    public function getGeofences()
     {
         $team = Auth::user()->currentTeam;
 
         return DB::table('geofences')->where('team_id', $team->id)->get();
     }
 
-    public function nextStep(): void
+    public function nextStep()
     {
         if ($this->step === 1) {
             $this->validate([
@@ -135,14 +140,14 @@ class ReportGenerator extends Component
         }
     }
 
-    public function previousStep(): void
+    public function previousStep()
     {
         if ($this->step > 1) {
             $this->step--;
         }
     }
 
-    public function generateReport(): void
+    public function generateReport()
     {
         $this->validate();
 
@@ -150,7 +155,7 @@ class ReportGenerator extends Component
         $team = $user->currentTeam;
 
         if (! $team) {
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'No team selected']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'No team selected']);
 
             return;
         }
@@ -175,6 +180,8 @@ class ReportGenerator extends Component
         }
 
         try {
+            $this->authorize('generate', Report::class);
+
             // Prepare filters array with sanitized data
             $filters = [
                 'start_date' => $this->startDate,
@@ -200,7 +207,7 @@ class ReportGenerator extends Component
                 'filters' => $filters,
             ]);
 
-            ReportGeneration::dispatch($report);
+            GenerateReportJob::dispatch($report);
 
             Log::info('User generated report', [
                 'user_id' => $user->id,
@@ -221,31 +228,19 @@ class ReportGenerator extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ...['type' => 'error', 'message' => 'Failed to generate report']);
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to generate report']);
         }
     }
 
-    public function selectAllMachines(): void
+    public function selectAllMachines()
     {
-        $this->selectedMachines = $this->getMachines()
-            ->pluck('id')
-            ->map(fn ($id) => (string) $id)
-            ->values()
-            ->all();
-    }
-
-    public function clearMachines(): void
-    {
-        $this->selectedMachines = [];
+        $machines = $this->getMachines();
+        $this->selectedMachines = $machines->pluck('id')->toArray();
     }
 
     public function selectAllGeofences(): void
     {
-        $this->selectedGeofences = $this->getGeofences()
-            ->pluck('id')
-            ->map(fn ($id) => (string) $id)
-            ->values()
-            ->all();
+        $this->selectedGeofences = $this->getGeofences()->pluck('id')->toArray();
     }
 
     public function clearGeofences(): void
@@ -253,21 +248,21 @@ class ReportGenerator extends Component
         $this->selectedGeofences = [];
     }
 
-    public function toggleMachine(int $machineId): void
+    public function clearMachines()
     {
-        $machineId = (string) $machineId;
+        $this->selectedMachines = [];
+    }
 
-        if (in_array($machineId, $this->selectedMachines, true)) {
-            $this->selectedMachines = array_values(array_filter(
-                $this->selectedMachines,
-                fn ($id) => (string) $id !== $machineId
-            ));
+    public function toggleMachine($machineId)
+    {
+        if (in_array($machineId, $this->selectedMachines)) {
+            $this->selectedMachines = array_filter($this->selectedMachines, fn ($id) => $id !== $machineId);
         } else {
             $this->selectedMachines[] = $machineId;
         }
     }
 
-    public function render(): View
+    public function render()
     {
         return view('livewire.report-generator', [
             'reportTypes' => $this->reportTypes,

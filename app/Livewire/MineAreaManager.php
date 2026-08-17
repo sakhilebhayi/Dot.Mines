@@ -4,14 +4,15 @@ namespace App\Livewire;
 
 use App\Models\MineArea;
 use App\Services\MineAreaService;
-use Illuminate\Contracts\View\View;
+use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class MineAreaManager extends Component
 {
+    use BrowserEventBridge;
     use WithPagination;
 
     protected ?MineAreaService $service = null;
@@ -53,7 +54,6 @@ class MineAreaManager extends Component
     public string $manager_contact = '';
 
     // Map properties
-    /** @var array<string, mixed> */
     public ?array $boundaryCoordinates = null;
 
     public float $centerLat = -26.2041;
@@ -64,8 +64,8 @@ class MineAreaManager extends Component
 
     public bool $isDrawing = false;
 
-    /** @var array<string, string|array<mixed>> */
-    protected $rules = [
+    /** @var array<string, string> */
+    protected array $rules = [
         'name' => 'required|string|max:255',
         'description' => 'nullable|string|max:1000',
         'location' => 'nullable|string|max:255',
@@ -78,7 +78,7 @@ class MineAreaManager extends Component
         'boundaryCoordinates' => 'nullable|array',
     ];
 
-    public function mount(): void
+    public function mount()
     {
         $this->service = app(MineAreaService::class);
     }
@@ -92,17 +92,13 @@ class MineAreaManager extends Component
         return $this->service;
     }
 
-    public function updatedSearch(): void
+    public function updatedSearch()
     {
         $this->resetPage();
     }
 
-    public function toggleSort(string $column): void
+    public function toggleSort(string $column)
     {
-        $allowed = ['name', 'status', 'created_at'];
-        if (! in_array($column, $allowed, true)) {
-            return;
-        }
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -111,19 +107,19 @@ class MineAreaManager extends Component
         }
     }
 
-    public function openCreateModal(): void
+    public function openCreateModal()
     {
         $this->resetForm();
         $this->showCreateModal = true;
     }
 
-    public function closeCreateModal(): void
+    public function closeCreateModal()
     {
         $this->showCreateModal = false;
         $this->resetForm();
     }
 
-    public function openEditModal(MineArea $mineArea): void
+    public function openEditModal(MineArea $mineArea)
     {
         $this->editingMineAreaId = $mineArea->id;
         $this->name = $mineArea->name;
@@ -138,13 +134,13 @@ class MineAreaManager extends Component
         $this->showEditModal = true;
     }
 
-    public function closeEditModal(): void
+    public function closeEditModal()
     {
         $this->showEditModal = false;
         $this->resetForm();
     }
 
-    public function saveMineArea(): void
+    public function saveMineArea()
     {
         $this->validate();
 
@@ -161,49 +157,58 @@ class MineAreaManager extends Component
             'manager_contact' => $this->manager_contact,
         ];
 
+        if ($this->editingMineAreaId) {
+            $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
+            if (! $mineArea) {
+                $this->dispatchBrowserEvent('notify', ['message' => 'Mine area not found', 'type' => 'error']);
+
+                return;
+            }
+            $this->authorize('update', $mineArea);
+        } else {
+            $this->authorize('create', MineArea::class);
+        }
+
         try {
             if ($this->editingMineAreaId) {
-                $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
-                if (! $mineArea) {
-                    $this->dispatch('notify', ...['message' => 'Mine area not found', 'type' => 'error']);
-
-                    return;
-                }
                 $this->getService()->update($mineArea, $data);
-                $this->dispatch('notify', ...['message' => 'Mine area updated successfully', 'type' => 'success']);
+                $this->dispatchBrowserEvent('notify', ['message' => 'Mine area updated successfully', 'type' => 'success']);
                 $this->showEditModal = false;
             } else {
                 // Ensure center coordinates are provided to satisfy non-null DB columns
                 $data['center_latitude'] = $this->latitude ?? null;
                 $data['center_longitude'] = $this->longitude ?? null;
                 $this->getService()->create($team->id, $data);
-                $this->dispatch('notify', ...['message' => 'Mine area created successfully', 'type' => 'success']);
+                $this->dispatchBrowserEvent('notify', ['message' => 'Mine area created successfully', 'type' => 'success']);
                 $this->showCreateModal = false;
             }
             $this->resetForm();
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatch('notify', ...['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to save mine area', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
         }
     }
 
-    public function deleteMineArea(MineArea $mineArea): void
+    public function deleteMineArea(MineArea $mineArea)
     {
         $team = Auth::user()->currentTeam;
         if ($mineArea->team_id !== $team->id) {
             abort(403);
         }
+        $this->authorize('delete', $mineArea);
 
         try {
             $this->getService()->delete($mineArea);
-            $this->dispatch('notify', ...['message' => 'Mine area deleted successfully', 'type' => 'success']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Mine area deleted successfully', 'type' => 'success']);
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatch('notify', ...['message' => 'Error deleting mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to delete mine area', ['mine_area_id' => $mineArea->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't delete this mine area. Please try again.", 'type' => 'error']);
         }
     }
 
-    protected function resetForm(): void
+    protected function resetForm()
     {
         $this->editingMineAreaId = null;
         $this->name = '';
@@ -217,13 +222,13 @@ class MineAreaManager extends Component
         $this->manager_contact = '';
     }
 
-    public function switchToMapMode(): void
+    public function switchToMapMode()
     {
         $this->viewMode = 'map';
         $this->showCreateModal = false;
     }
 
-    public function switchToListMode(): void
+    public function switchToListMode()
     {
         $this->viewMode = 'list';
         // Ensure drawing state is cleared so the map/draw UI is not kept active
@@ -232,7 +237,7 @@ class MineAreaManager extends Component
         $this->showCreateModal = false;
     }
 
-    public function openCreateMapModal(): void
+    public function openCreateMapModal()
     {
         $this->resetForm();
         $this->boundaryCoordinates = null;
@@ -240,14 +245,13 @@ class MineAreaManager extends Component
         $this->switchToMapMode();
     }
 
-    public function closeMapModal(): void
+    public function closeMapModal()
     {
         $this->isDrawing = false;
         $this->boundaryCoordinates = null;
     }
 
-    /** @param array<mixed> $coordinates */
-    public function setBoundary(array $coordinates): void
+    public function setBoundary(array $coordinates)
     {
         $this->boundaryCoordinates = $coordinates;
         // Calculate center and approximate area from polygon
@@ -260,19 +264,21 @@ class MineAreaManager extends Component
         }
     }
 
-    public function clearBoundary(): void
+    public function clearBoundary()
     {
         $this->boundaryCoordinates = null;
         $this->latitude = null;
         $this->longitude = null;
     }
 
-    public function saveMineAreaWithBoundary(): void
+    public function saveMineAreaWithBoundary()
     {
+        $this->authorize('create', MineArea::class);
+
         $this->validate();
 
         if (empty($this->boundaryCoordinates)) {
-            $this->dispatch('notify', ...['message' => 'Please draw a boundary on the map', 'type' => 'error']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Please draw a boundary on the map', 'type' => 'error']);
 
             return;
         }
@@ -298,42 +304,29 @@ class MineAreaManager extends Component
             $data['center_latitude'] = $this->latitude ?? null;
             $data['center_longitude'] = $this->longitude ?? null;
             $this->getService()->create($team->id, $data);
-            $this->dispatch('notify', ...['message' => 'Mine area created successfully', 'type' => 'success']);
+            $this->dispatchBrowserEvent('notify', ['message' => 'Mine area created successfully', 'type' => 'success']);
             $this->isDrawing = false;
             $this->switchToListMode();
             $this->resetForm();
             $this->resetPage();
-        } catch (\Exception $e) {
-            $this->dispatch('notify', ...['message' => 'Error saving mine area: '.$e->getMessage(), 'type' => 'error']);
+        } catch (\Throwable $e) {
+            Log::error('Failed to save mine area boundary', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            $this->dispatchBrowserEvent('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
         }
     }
 
-    public function render(): View
+    public function render()
     {
         $team = Auth::user()->currentTeam;
 
-        $query = MineArea::forTeam($team->id);
-
-        // Build count relations conditionally based on schema
-        $countRelations = [
-            'geofences',
-            'alerts' => function ($q) {
+        $query = MineArea::forTeam($team->id)
+            ->withCount(['machines', 'geofences', 'alerts' => function ($q) {
                 $q->where('status', 'active');
-            },
-            'productionRecords' => function ($q) {
+            }, 'productionRecords' => function ($q) {
                 $q->where('record_date', today());
-            },
-            'minePlanUploads' => function ($q) {
+            }, 'minePlanUploads' => function ($q) {
                 $q->where('status', 'active');
-            },
-        ];
-
-        // Only count machines if the mine_area_id column exists in machines table
-        if (Schema::hasColumn('machines', 'mine_area_id')) {
-            $countRelations = array_merge(['machines'], $countRelations);
-        }
-
-        $query->withCount($countRelations);
+            }]);
 
         if ($this->search) {
             $query->where(function ($q) {

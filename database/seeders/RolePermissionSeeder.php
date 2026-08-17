@@ -3,13 +3,19 @@
 namespace Database\Seeders;
 
 use App\Models\Team;
-use App\Services\TeamRoleService;
+use App\Services\TeamRoleProvisioner;
 use Illuminate\Database\Seeder;
 
 class RolePermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * The actual permission/role catalog lives in TeamRoleProvisioner so the
+     * same definitions are used here, when a team is created at
+     * registration (App\Actions\Fortify\CreateNewUser,
+     * App\Actions\Jetstream\CreateTeam), and when a member is invited or
+     * re-roled (App\Livewire\Settings).
      */
     public function run(): void
     {
@@ -22,11 +28,8 @@ class RolePermissionSeeder extends Seeder
         }
 
         foreach ($teams as $team) {
-            // Provision roles and permissions for each team.
-            // For existing teams we pass null as the owner so no role reassignment happens.
-            TeamRoleService::provisionTeam($team, owner: null);
-
-            $this->command->info("Roles and permissions processed for team: {$team->name}");
+            TeamRoleProvisioner::provisionForTeam($team);
+            $this->command->info("Roles and permissions created for team: {$team->name}");
         }
     }
 }

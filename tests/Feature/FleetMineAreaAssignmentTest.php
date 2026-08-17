@@ -7,6 +7,7 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\TeamRoleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -20,6 +21,7 @@ class FleetMineAreaAssignmentTest extends TestCase
         $user = User::factory()->create();
         $team = Team::factory()->create(['user_id' => $user->id]);
         $user->forceFill(['current_team_id' => $team->id])->save();
+        TeamRoleService::provisionTeam($team, $user);
 
         return $user;
     }

@@ -10,8 +10,13 @@ class NewHollandService extends BaseManufacturerService implements ManufacturerS
 
     public function testConnection(): bool
     {
-        // Implement New Holland API connection test
-        return true;
+        // No real New Holland API integration has been built yet -- this
+        // used to unconditionally return true, reporting a successful
+        // connection test regardless of whether any credentials were
+        // even provided.
+        $this->lastError = 'New Holland integration is not yet available.';
+
+        return false;
     }
 
     /**

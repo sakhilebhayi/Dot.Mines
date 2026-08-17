@@ -23,7 +23,6 @@ class MachineLocationUpdateJob implements ShouldQueue
 
     public int $timeout = 120;
 
-    /** @var array<int> */
     public array $backoff = [30, 90, 300]; // 30s, 90s, 5 mins
 
     /**
@@ -143,7 +142,7 @@ class MachineLocationUpdateJob implements ShouldQueue
                 'total_locations' => count($locations),
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Location update job failed', [
                 'integration_id' => $this->integration->id,
                 'error' => $e->getMessage(),
@@ -164,7 +163,6 @@ class MachineLocationUpdateJob implements ShouldQueue
      * Determine if location has meaningfully changed.
      * Prevents unnecessary broadcasts if machine hasn't moved significantly.
      */
-    /** @param array<string, mixed> $newLocation */
     private function hasLocationChanged(Machine $machine, array $newLocation): bool
     {
         // Always update if no previous location
@@ -184,7 +182,7 @@ class MachineLocationUpdateJob implements ShouldQueue
         $significantDistance = $distance > 0.005; // ~5 meters
 
         // Also check if it's been more than 5 minutes since last update
-        $significantTime = $machine->last_location_update !== null && $machine->last_location_update->diffInMinutes(now()) >= 5;
+        $significantTime = $machine->last_location_update->diffInMinutes(now()) >= 5;
 
         return $significantDistance || $significantTime;
     }
@@ -224,9 +222,13 @@ class MachineLocationUpdateJob implements ShouldQueue
             'error' => $exception->getMessage(),
         ]);
 
-        // Mark integration as having issues
+        // Mark integration as having issues. last_error is exposed directly
+        // via Api\IntegrationController::show() and the Integration Manager
+        // UI -- it used to store the raw exception message verbatim, which
+        // can include third-party API response bodies or internal details.
+        // The real message is already logged above for us.
         $this->integration->update([
-            'last_error' => 'Location update failed: '.$exception->getMessage(),
+            'last_error' => 'Location update failed. Check the integration credentials and try syncing again.',
             'last_error_at' => now(),
         ]);
     }

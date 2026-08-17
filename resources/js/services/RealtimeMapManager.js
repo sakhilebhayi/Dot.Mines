@@ -33,7 +33,6 @@ class RealtimeMapManager {
      */
     init(leafletMap) {
         this.map = leafletMap;
-        console.log('✅ RealtimeMapManager initialized');
     }
 
     /**
@@ -73,7 +72,6 @@ class RealtimeMapManager {
             this.markers.set(id, marker);
             marker.addTo(this.map);
             
-            console.log(`✅ Added marker for machine: ${name}`);
         }
 
         // Update marker color based on status
@@ -409,7 +407,6 @@ class RealtimeMapManager {
         this.markers.clear();
         this.trails.clear();
         this.trailPoints.clear();
-        console.log('✅ RealtimeMapManager cleared');
     }
 
     /**

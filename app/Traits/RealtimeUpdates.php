@@ -84,6 +84,22 @@ trait RealtimeUpdates
     }
 
     /**
+     * Subscribe to predictive maintenance alerts
+     */
+    public function subscribeToMaintenanceAlerts(): void
+    {
+        $this->dispatch('realtime:maintenance-alerts');
+    }
+
+    /**
+     * Subscribe to compliance violations
+     */
+    public function subscribeToComplianceViolations(): void
+    {
+        $this->dispatch('realtime:compliance-violations');
+    }
+
+    /**
      * Subscribe to geofence events
      */
     public function subscribeToGeofenceEvents(string $geofenceId): void

@@ -2,14 +2,14 @@
 
 use App\Providers\AIServiceProvider;
 use App\Providers\AppServiceProvider;
+use App\Providers\BroadcastServiceProvider;
 use App\Providers\FortifyServiceProvider;
-use App\Providers\HorizonServiceProvider;
 use App\Providers\JetstreamServiceProvider;
 
 return [
-    AIServiceProvider::class,
     AppServiceProvider::class,
+    BroadcastServiceProvider::class,
     FortifyServiceProvider::class,
-    HorizonServiceProvider::class,
     JetstreamServiceProvider::class,
+    AIServiceProvider::class,
 ];

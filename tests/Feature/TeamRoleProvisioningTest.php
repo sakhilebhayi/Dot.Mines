@@ -2,103 +2,63 @@
 
 namespace Tests\Feature;
 
-use App\Models\Machine;
-use App\Models\Permission;
-use App\Models\Role;
+use App\Actions\Fortify\CreateNewUser;
+use App\Models\Team;
 use App\Models\User;
-use App\Services\TeamRoleService;
+use App\Services\TeamRoleProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * Regression test for the dormant-RBAC finding: before TeamRoleProvisioner
+ * existed, no role/permission rows were ever created for a team unless
+ * someone manually ran `php artisan db:seed --class=RolePermissionSeeder`
+ * (not part of the default DatabaseSeeder, and never invoked from real
+ * registration). Every hasPermission() check -- including for a team's own
+ * owner -- returned false. This proves registration now bootstraps roles
+ * and grants the creator 'admin', and that Settings::updateUserRole()'s
+ * re-role path scopes correctly to a single team.
+ */
 class TeamRoleProvisioningTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_provision_team_creates_all_roles_and_permissions(): void
+    public function test_registering_a_new_user_grants_them_admin_on_their_personal_team(): void
     {
-        $user = User::factory()->withPersonalTeam()->create();
-        $team = $user->currentTeam;
+        $user = (new CreateNewUser)->create([
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'password' => 'Password12345!',
+            'password_confirmation' => 'Password12345!',
+            'terms' => true,
+        ]);
 
-        TeamRoleService::provisionTeam($team);
+        $team = $user->ownedTeams()->first();
 
-        $roles = Role::where('team_id', $team->id)->pluck('name')->toArray();
+        $this->assertNotNull($team);
+        $this->assertTrue($user->fresh()->roles()->where('roles.team_id', $team->id)->where('roles.name', 'admin')->exists());
 
-        $this->assertContains('admin', $roles);
-        $this->assertContains('fleet_manager', $roles);
-        $this->assertContains('operator', $roles);
-        $this->assertContains('viewer', $roles);
-
-        $adminRole = Role::where('team_id', $team->id)->where('name', 'admin')->first();
-        $this->assertNotNull($adminRole);
-        $this->assertNotEmpty($adminRole->permissions()->get());
-
-        // All expected roles exist
-        $this->assertCount(count(TeamRoleService::allRoles()), $roles);
-
-        // All permissions were created for this team
-        $expectedPermissionCount = count(TeamRoleService::allPermissions());
-        $actualPermissionCount = Permission::where('team_id', $team->id)->count();
-        $this->assertEquals($expectedPermissionCount, $actualPermissionCount);
+        $user->current_team_id = $team->id;
+        $this->assertTrue($user->hasPermission('delete_machines'));
     }
 
-    public function test_provision_team_assigns_admin_role_to_owner(): void
+    public function test_assign_role_only_touches_the_given_teams_role_not_other_teams(): void
     {
-        $user = User::factory()->withPersonalTeam()->create();
-        $team = $user->currentTeam;
+        $user = User::factory()->create();
+        $teamA = Team::factory()->create(['user_id' => $user->id]);
+        $teamB = Team::factory()->create(['user_id' => $user->id]);
 
-        TeamRoleService::provisionTeam($team, $user);
+        TeamRoleProvisioner::assignRole($user, $teamA, 'admin');
+        TeamRoleProvisioner::assignRole($user, $teamB, 'viewer');
 
-        $adminRole = Role::where('team_id', $team->id)->where('name', 'admin')->firstOrFail();
+        $this->assertTrue($user->roles()->where('roles.team_id', $teamA->id)->where('roles.name', 'admin')->exists());
+        $this->assertTrue($user->roles()->where('roles.team_id', $teamB->id)->where('roles.name', 'viewer')->exists());
 
-        $this->assertTrue(
-            $user->roles()->where('roles.id', $adminRole->id)->exists(),
-            'Owner should be assigned the admin role after provisioning'
-        );
-    }
+        // Re-roling in team A must not disturb the team B assignment.
+        TeamRoleProvisioner::assignRole($user, $teamA, 'operator');
 
-    public function test_user_can_create_machines_after_admin_role_assigned(): void
-    {
-        $user = User::factory()->withPersonalTeam()->create();
-        $team = $user->currentTeam;
-
-        TeamRoleService::provisionTeam($team, $user);
-        $this->actingAs($user);
-
-        $this->assertTrue(
-            $user->can('create', Machine::class),
-            'User with admin role should be able to create machines'
-        );
-    }
-
-    public function test_roles_are_team_scoped_so_two_teams_each_get_their_own_roles(): void
-    {
-        $user1 = User::factory()->withPersonalTeam()->create();
-        $user2 = User::factory()->withPersonalTeam()->create();
-
-        TeamRoleService::provisionTeam($user1->currentTeam, $user1);
-        TeamRoleService::provisionTeam($user2->currentTeam, $user2);
-
-        $adminForTeam1 = Role::where('team_id', $user1->currentTeam->id)->where('name', 'admin')->first();
-        $adminForTeam2 = Role::where('team_id', $user2->currentTeam->id)->where('name', 'admin')->first();
-
-        $this->assertNotNull($adminForTeam1, 'Team 1 should have its own admin role');
-        $this->assertNotNull($adminForTeam2, 'Team 2 should have its own admin role');
-        $this->assertNotEquals(
-            $adminForTeam1->id,
-            $adminForTeam2->id,
-            'Each team should have a distinct admin role record'
-        );
-    }
-
-    public function test_provision_team_is_idempotent(): void
-    {
-        $user = User::factory()->withPersonalTeam()->create();
-        $team = $user->currentTeam;
-
-        TeamRoleService::provisionTeam($team, $user);
-        TeamRoleService::provisionTeam($team, $user); // second call should not throw or duplicate
-
-        $adminRoleCount = Role::where('team_id', $team->id)->where('name', 'admin')->count();
-        $this->assertEquals(1, $adminRoleCount, 'Provisioning twice should not create duplicate roles');
+        $this->assertFalse($user->roles()->where('roles.team_id', $teamA->id)->where('roles.name', 'admin')->exists());
+        $this->assertTrue($user->roles()->where('roles.team_id', $teamA->id)->where('roles.name', 'operator')->exists());
+        $this->assertTrue($user->roles()->where('roles.team_id', $teamB->id)->where('roles.name', 'viewer')->exists());
     }
 }

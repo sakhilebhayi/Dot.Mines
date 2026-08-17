@@ -13,39 +13,30 @@ use App\Models\MachineMetric;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use App\Models\MineArea;
-use App\Models\ProductionRecord;
-use App\Models\Role;
+use App\Models\MineAreaProduction;
 use App\Models\Route;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\Waypoint;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 
 class ComprehensiveDataSeeder extends Seeder
 {
     private Team $team;
 
-    private mixed $aiAgent = null;
+    private $aiAgent;
 
-    /** @var array<int|string, mixed> */
     private array $machines = [];
 
-    /** @var array<int|string, mixed> */
     private array $mineAreas = [];
 
-    /** @var array<int|string, mixed> */
     private array $excavators = [];
 
-    /** @var array<int|string, mixed> */
     private array $haulers = [];
 
-    /** @var array<int|string, mixed> */
     private array $users = [];
 
-    /** @var array<int|string, mixed> */
     private array $allTeams = [];
 
     /**
@@ -53,7 +44,7 @@ class ComprehensiveDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('🚀 Starting comprehensive multi-team data seeding...');
+        $this->command->info('Starting comprehensive multi-team data seeding...');
 
         // Define multiple teams to create
         $teamConfigs = $this->getTeamConfigurations();
@@ -61,7 +52,7 @@ class ComprehensiveDataSeeder extends Seeder
         foreach ($teamConfigs as $config) {
             $this->command->info('');
             $this->command->info('═══════════════════════════════════════════');
-            $this->command->info("🏢 Creating data for: {$config['name']}");
+            $this->command->info("Creating data for: {$config['name']}");
             $this->command->info('═══════════════════════════════════════════');
 
             // Reset arrays for this team
@@ -124,81 +115,72 @@ class ComprehensiveDataSeeder extends Seeder
             ];
         }
 
-        // Ensure roles/permissions exist, then assign role mix per team.
-        // This gives seeded users realistic access boundaries for live testing.
-        $this->call([RolePermissionSeeder::class]);
-        $this->assignRolesToTeamUsers();
-
         $this->command->info('');
-        $this->command->info('✅ Multi-team data seeding completed successfully!');
+        $this->command->info('Multi-team data seeding completed successfully.');
         $this->printSummary();
     }
 
-    private function assignRolesToTeamUsers(): void
-    {
-        $this->command->info('Assigning team roles to seeded users...');
-
-        foreach ($this->allTeams as $teamData) {
-            /** @var Team $team */
-            $team = $teamData['team'];
-
-            $teamRoleIds = Role::where('team_id', $team->id)->pluck('id');
-            if ($teamRoleIds->isEmpty()) {
-                continue;
-            }
-
-            /** @var Collection<int, User> $users */
-            $users = $team->users()->orderBy('users.id')->get();
-            if ($users->isEmpty()) {
-                continue;
-            }
-
-            // First users get broad coverage; remaining users are viewers.
-            $roleSequence = ['admin', 'fleet_manager', 'operator', 'viewer'];
-
-            foreach ($users as $index => $user) {
-                $targetRole = $roleSequence[min($index, count($roleSequence) - 1)];
-
-                // Role checks use current_team_id, so align user context first.
-                if ($user->current_team_id !== $team->id) {
-                    $user->update(['current_team_id' => $team->id]);
-                }
-
-                // Remove existing roles for this team only, then assign one role.
-                $user->roles()->detach($teamRoleIds);
-                $user->assignRole($targetRole);
-            }
-        }
-
-        $this->command->info('✓ Roles assigned for seeded team users');
-    }
-
-    /** @return array<int, array<string, mixed>> */
     private function getTeamConfigurations(): array
     {
-        // Roles are globally unique in this schema, so we seed one rich demo team
-        // with diverse users and equipment for full-platform testing.
         return [
             [
-                'name' => 'Mines Demo Operations',
-                'domain' => 'demo.mines.infodot.co.za',
-                'base_lat' => -25.8906,
-                'base_lon' => 28.2341,
+                'name' => 'Platinum Mining Corporation',
+                'domain' => 'platinummine.com',
+                'base_lat' => -26.19,
+                'base_lon' => 28.05,
                 'users' => [
-                    ['name' => 'Admin User', 'email' => 'admin@mines.infodot.co.za'],
-                    ['name' => 'Fleet Manager', 'email' => 'manager@mines.infodot.co.za'],
-                    ['name' => 'Shift Supervisor', 'email' => 'supervisor@mines.infodot.co.za'],
-                    ['name' => 'Field Operator', 'email' => 'operator@mines.infodot.co.za'],
-                    ['name' => 'Safety Officer', 'email' => 'safety@mines.infodot.co.za'],
-                    ['name' => 'Viewer User', 'email' => 'viewer@mines.infodot.co.za'],
+                    ['name' => 'John Anderson', 'email' => 'john@platinummine.com'],
+                    ['name' => 'Sarah Williams', 'email' => 'sarah@platinummine.com'],
+                    ['name' => 'Michael Chen', 'email' => 'michael@platinummine.com'],
+                    ['name' => 'Emma Davis', 'email' => 'emma@platinummine.com'],
+                ],
+                'areas' => 5,
+                'machines' => ['excavators' => 4, 'haulers' => 8, 'dozers' => 2, 'graders' => 2, 'support' => 2],
+            ],
+            [
+                'name' => 'Gold Fields Mining Ltd',
+                'domain' => 'goldfields.co.za',
+                'base_lat' => -26.55,
+                'base_lon' => 27.85,
+                'users' => [
+                    ['name' => 'David Thompson', 'email' => 'david@goldfields.co.za'],
+                    ['name' => 'Lisa Martinez', 'email' => 'lisa@goldfields.co.za'],
+                    ['name' => 'James Brown', 'email' => 'james@goldfields.co.za'],
+                ],
+                'areas' => 4,
+                'machines' => ['excavators' => 3, 'haulers' => 6, 'dozers' => 2, 'graders' => 1, 'support' => 1],
+            ],
+            [
+                'name' => 'Diamond Extraction Co',
+                'domain' => 'diamondco.co.za',
+                'base_lat' => -28.75,
+                'base_lon' => 24.75,
+                'users' => [
+                    ['name' => 'Robert Wilson', 'email' => 'robert@diamondco.co.za'],
+                    ['name' => 'Jennifer Taylor', 'email' => 'jennifer@diamondco.co.za'],
+                    ['name' => 'Thomas Moore', 'email' => 'thomas@diamondco.co.za'],
+                    ['name' => 'Patricia Johnson', 'email' => 'patricia@diamondco.co.za'],
+                    ['name' => 'Daniel White', 'email' => 'daniel@diamondco.co.za'],
                 ],
                 'areas' => 6,
-                'machines' => ['excavators' => 5, 'haulers' => 12, 'dozers' => 3, 'graders' => 2, 'support' => 3],
+                'machines' => ['excavators' => 5, 'haulers' => 10, 'dozers' => 3, 'graders' => 2, 'support' => 2],
+            ],
+            [
+                'name' => 'Coal Mining Solutions',
+                'domain' => 'coalmining.co.za',
+                'base_lat' => -25.85,
+                'base_lon' => 29.15,
+                'users' => [
+                    ['name' => 'Mark Anderson', 'email' => 'mark@coalmining.co.za'],
+                    ['name' => 'Linda Garcia', 'email' => 'linda@coalmining.co.za'],
+                    ['name' => 'Kevin Martinez', 'email' => 'kevin@coalmining.co.za'],
+                ],
+                'areas' => 3,
+                'machines' => ['excavators' => 2, 'haulers' => 5, 'dozers' => 1, 'graders' => 1, 'support' => 1],
             ],
         ];
     }
 
-    /** @param array<string, mixed> $config */
     private function createTeamAndUsers($config): void
     {
         $this->command->info('Creating team and users...');
@@ -241,10 +223,10 @@ class ComprehensiveDataSeeder extends Seeder
             }
         }
 
-        $this->command->info('✓ Created team and '.count($config['users']).' users');
+        $this->command->info('Created team and '.count($config['users']).' users');
     }
 
-    private function createMineAreas(int $areaCount): void
+    private function createMineAreas($areaCount): void
     {
         $this->command->info('Creating mine areas...');
 
@@ -277,14 +259,21 @@ class ComprehensiveDataSeeder extends Seeder
             $centerLat = $baseLat + $latOffset;
             $centerLon = $baseLon + $lonOffset;
 
-            $areaSqm = rand(5000, 15000);
-            $areaMetadata = [
-                'area_type' => $template['type'],
-                'material_types' => $template['type'] === 'pit' ? [$template['material']] : null,
+            $areaData = [
+                'team_id' => $this->team->id,
+                'name' => $template['name'].$number,
+                'description' => ucfirst($template['type']).' area for '.($template['material'] ?? 'operations'),
+                'type' => $template['type'],
+                'status' => 'active',
+                'center_latitude' => $centerLat,
+                'center_longitude' => $centerLon,
+                'coordinates' => $this->generatePolygonCoordinates($centerLat, $centerLon, 0.0008),
+                'area_sqm' => rand(5000, 15000),
             ];
 
             if ($template['type'] === 'pit') {
-                $areaMetadata['mining_targets'] = [
+                $areaData['material_types'] = [$template['material']];
+                $areaData['mining_targets'] = [
                     'daily' => rand(3000, 6000),
                     'weekly' => rand(20000, 40000),
                     'monthly' => rand(100000, 180000),
@@ -292,29 +281,13 @@ class ComprehensiveDataSeeder extends Seeder
                 ];
             }
 
-            $areaData = [
-                'team_id' => $this->team->id,
-                'name' => $template['name'].$number,
-                'description' => ucfirst($template['type']).' area for '.($template['material'] ?? 'operations'),
-                'status' => 'active',
-                'location' => $this->team->name,
-                'center_latitude' => $centerLat,
-                'center_longitude' => $centerLon,
-                'latitude' => $centerLat,
-                'longitude' => $centerLon,
-                'coordinates' => json_encode($this->generatePolygonCoordinates($centerLat, $centerLon, 0.0008)),
-                'area_size_hectares' => round($areaSqm / 10000, 2),
-                'metadata' => $areaMetadata,
-            ];
-
             $area = MineArea::create($areaData);
             $this->mineAreas[] = $area;
         }
 
-        $this->command->info('✓ Created '.count($this->mineAreas).' mine areas');
+        $this->command->info('Created '.count($this->mineAreas).' mine areas');
     }
 
-    /** @param array<string, mixed> $machineConfig */
     private function createMachines($machineConfig): void
     {
         $this->command->info('Creating fleet machines...');
@@ -478,54 +451,45 @@ class ComprehensiveDataSeeder extends Seeder
             $this->machines[] = $machine;
         }
 
-        $this->command->info('✓ Created '.count($this->machines).' machines');
+        $this->command->info('Created '.count($this->machines).' machines');
     }
 
     private function assignMachines(): void
     {
         $this->command->info('Assigning machines to mine areas...');
 
-        $hasMineAreaColumn = Schema::hasColumn('machines', 'mine_area_id');
-        $hasExcavatorColumn = Schema::hasColumn('machines', 'excavator_id');
-        $hasAssignedAtColumn = Schema::hasColumn('machines', 'assigned_to_excavator_at');
-
         // Assign excavators to pits
-        $pits = array_filter($this->mineAreas, fn ($area) => $this->getMineAreaType($area) === 'pit');
+        $pits = array_filter($this->mineAreas, fn ($area) => $area->type === 'pit');
 
         foreach ($this->excavators as $index => $excavator) {
             $pit = $pits[array_rand($pits)];
-            if ($hasMineAreaColumn) {
-                $excavator->update(['mine_area_id' => $pit->id]);
-            }
-
+            $excavator->update(['mine_area_id' => $pit->id]);
+            $excavator->mineAreas()->attach($pit->id, [
+                'assigned_at' => now()->subDays(rand(10, 90)),
+                'notes' => 'Primary excavator for this pit',
+            ]);
         }
 
         // Assign haulers to excavators and mine areas
         foreach ($this->haulers as $index => $hauler) {
             if ($hauler->status === 'active' && ! empty($this->excavators)) {
                 $excavator = $this->excavators[array_rand($this->excavators)];
-                $updateData = [];
-                if ($hasExcavatorColumn) {
-                    $updateData['excavator_id'] = $excavator->id;
-                }
-                if ($hasMineAreaColumn) {
-                    $updateData['mine_area_id'] = $excavator->mine_area_id;
-                }
-                if ($hasAssignedAtColumn) {
-                    $updateData['assigned_to_excavator_at'] = now()->subDays(rand(5, 60));
-                }
-                if (! empty($updateData)) {
-                    $hauler->update($updateData);
-                }
+                $hauler->update([
+                    'excavator_id' => $excavator->id,
+                    'mine_area_id' => $excavator->mine_area_id,
+                    'assigned_to_excavator_at' => now()->subDays(rand(5, 60)),
+                ]);
 
+                if ($excavator->mineArea) {
+                    $hauler->mineAreas()->attach($excavator->mine_area_id, [
+                        'assigned_at' => now()->subDays(rand(5, 60)),
+                        'notes' => "Hauling from excavator {$excavator->name}",
+                    ]);
+                }
             }
         }
 
-        if (! $hasMineAreaColumn || ! $hasExcavatorColumn) {
-            $this->command->warn('⚠ Machines table missing mine_area_id/excavator_id; assignments were partially skipped.');
-        }
-
-        $this->command->info('✓ Assigned machines to mine areas');
+        $this->command->info('Assigned machines to mine areas');
     }
 
     private function createGeofences(): void
@@ -538,17 +502,17 @@ class ComprehensiveDataSeeder extends Seeder
                 'mine_area_id' => $area->id,
                 'name' => "{$area->name} Boundary",
                 'description' => "Safety boundary for {$area->name}",
-                'type' => $this->getMineAreaType($area),
+                'type' => $area->type,
                 'center_latitude' => $area->center_latitude,
                 'center_longitude' => $area->center_longitude,
                 'coordinates' => $area->coordinates,
-                'area_sqm' => max(1000, ($area->area_size_hectares ?? 1) * 10000),
-                'perimeter_m' => max(100, sqrt(max(1, ($area->area_size_hectares ?? 1) * 10000)) * 4),
+                'area_sqm' => $area->area_sqm,
+                'perimeter_m' => $area->perimeter_m,
                 'status' => 'active',
             ]);
         }
 
-        $this->command->info('✓ Created geofences for all mine areas');
+        $this->command->info('Created geofences for all mine areas');
     }
 
     private function createRoutes(): void
@@ -557,16 +521,16 @@ class ComprehensiveDataSeeder extends Seeder
 
         $routeCount = 0;
 
-        $pits = array_values(array_filter($this->mineAreas, fn ($area) => $this->getMineAreaType($area) === 'pit'));
-        $dumps = array_values(array_filter($this->mineAreas, fn ($area) => in_array($this->getMineAreaType($area), ['stockpile', 'dump'])));
-
         foreach ($this->haulers as $hauler) {
-            if ($hauler->status !== 'active' || empty($pits) || empty($dumps)) {
+            if ($hauler->status !== 'active' || ! $hauler->excavator) {
                 continue;
             }
 
-            $loadingPoint = $pits[array_rand($pits)];
-            $dumpPoint = $dumps[array_rand($dumps)];
+            $loadingPoint = $hauler->mineArea;
+            $dumpPoint = array_values(array_filter(
+                $this->mineAreas,
+                fn ($area) => in_array($area->type, ['stockpile', 'dump'])
+            ))[0] ?? null;
 
             if (! $loadingPoint || ! $dumpPoint) {
                 continue;
@@ -608,7 +572,7 @@ class ComprehensiveDataSeeder extends Seeder
             $routeCount++;
         }
 
-        $this->command->info("✓ Created $routeCount routes");
+        $this->command->info("Created $routeCount routes");
     }
 
     private function generateMachineMetrics(): void
@@ -673,19 +637,17 @@ class ComprehensiveDataSeeder extends Seeder
             }
         }
 
-        $this->command->info("✓ Generated $metricsCount machine metrics");
+        $this->command->info("Generated $metricsCount machine metrics");
     }
 
     private function generateProductionData(): void
     {
         $this->command->info('Generating production data...');
 
-        $hasMineAreaColumn = Schema::hasColumn('machines', 'mine_area_id');
-
         $productionCount = 0;
 
         // Get only pit mine areas
-        $pits = array_filter($this->mineAreas, fn ($area) => $this->getMineAreaType($area) === 'pit');
+        $pits = array_filter($this->mineAreas, fn ($area) => $area->type === 'pit');
 
         // Generate production for last 30 days
         for ($day = 30; $day >= 0; $day--) {
@@ -693,15 +655,10 @@ class ComprehensiveDataSeeder extends Seeder
 
             foreach ($pits as $pit) {
                 // Get machines assigned to this pit
-                $pitMachines = $hasMineAreaColumn
-                    ? array_filter(
-                        $this->machines,
-                        fn ($m) => $m->mine_area_id === $pit->id && $m->status === 'active'
-                    )
-                    : array_filter(
-                        $this->machines,
-                        fn ($m) => in_array($m->machine_type, ['excavator', 'articulated_hauler']) && $m->status === 'active'
-                    );
+                $pitMachines = array_filter(
+                    $this->machines,
+                    fn ($m) => $m->mine_area_id === $pit->id && $m->status === 'active'
+                );
 
                 if (empty($pitMachines)) {
                     continue;
@@ -712,33 +669,25 @@ class ComprehensiveDataSeeder extends Seeder
                 $baseTonnage = $machineCount * rand(150, 300); // Per machine per day
 
                 // Get material types for this pit
-                $materials = data_get($pit->metadata, 'material_types', ['Platinum Ore']);
+                $materials = $pit->material_types ?? ['Platinum Ore'];
                 $material = $materials[array_rand($materials)];
 
                 $loads = $machineCount * rand(20, 40);
                 $cycles = $machineCount * rand(15, 30);
                 $tonnage = $baseTonnage + rand(-200, 200);
-                $bcm = $tonnage * (rand(70, 90) / 100); // BCM typically less than tonnage
+                $bcm = $tonnage * rand(0.7, 0.9); // BCM typically less than tonnage
 
-                $sampleMachine = array_values($pitMachines)[0] ?? null;
-
-                ProductionRecord::create([
-                    'team_id' => $this->team->id,
+                MineAreaProduction::create([
                     'mine_area_id' => $pit->id,
-                    'machine_id' => $sampleMachine?->id,
-                    'record_date' => $date->toDateString(),
-                    'shift' => ['day', 'night'][array_rand(['day', 'night'])],
-                    'quantity_produced' => $tonnage,
-                    'unit' => 'tonnes',
-                    'target_quantity' => max(0, $tonnage + rand(-300, 300)),
-                    'status' => 'completed',
-                    'metadata' => [
-                        'material_type' => $material,
-                        'loads' => $loads,
-                        'cycles' => $cycles,
-                        'bcm' => $bcm,
-                        'machines_used' => array_map(fn ($m) => $m->id, $pitMachines),
-                    ],
+                    'recorded_date' => $date->toDateString(),
+                    'material_type' => $material,
+                    'tonnage' => $tonnage,
+                    'volume_cubic_m' => $bcm * 1.3,
+                    'loads' => $loads,
+                    'cycles' => $cycles,
+                    'bcm' => $bcm,
+                    'machines_used' => array_map(fn ($m) => $m->id, $pitMachines),
+                    'status' => 'recorded',
                     'created_at' => $date,
                     'updated_at' => $date,
                 ]);
@@ -747,7 +696,7 @@ class ComprehensiveDataSeeder extends Seeder
             }
         }
 
-        $this->command->info("✓ Generated $productionCount production records");
+        $this->command->info("Generated $productionCount production records");
     }
 
     private function generateFuelData(): void
@@ -794,7 +743,7 @@ class ComprehensiveDataSeeder extends Seeder
             }
         }
 
-        $this->command->info("✓ Generated $transactionCount fuel transactions");
+        $this->command->info("Generated $transactionCount fuel transactions");
     }
 
     private function generateAlerts(): void
@@ -879,7 +828,7 @@ class ComprehensiveDataSeeder extends Seeder
             }
         }
 
-        $this->command->info("✓ Generated $alertCount alerts");
+        $this->command->info("Generated $alertCount alerts");
     }
 
     private function generateAIRecommendations(): void
@@ -953,7 +902,7 @@ class ComprehensiveDataSeeder extends Seeder
             AIRecommendation::create($rec);
         }
 
-        $this->command->info('✓ Generated '.count($recommendations).' AI recommendations');
+        $this->command->info('Generated '.count($recommendations).' AI recommendations');
     }
 
     private function assignMachineOperators(): void
@@ -977,7 +926,7 @@ class ComprehensiveDataSeeder extends Seeder
             $operatorCount++;
         }
 
-        $this->command->info("✓ Assigned {$operatorCount} operators to machines");
+        $this->command->info("Assigned {$operatorCount} operators to machines");
     }
 
     private function createMaintenanceSchedules(): void
@@ -1054,7 +1003,7 @@ class ComprehensiveDataSeeder extends Seeder
             }
         }
 
-        $this->command->info("✓ Created {$scheduleCount} maintenance schedules");
+        $this->command->info("Created {$scheduleCount} maintenance schedules");
     }
 
     private function generateMaintenanceRecords(): void
@@ -1078,7 +1027,7 @@ class ComprehensiveDataSeeder extends Seeder
 
                 $scheduledDate = now()->subDays($daysAgo);
                 $startedAt = $status !== 'scheduled' ? $scheduledDate->copy()->addHours(rand(1, 3)) : null;
-                $completedAt = ($status === 'completed' && $startedAt !== null) ? $startedAt->copy()->addHours(rand(1, 8)) : null;
+                $completedAt = $status === 'completed' ? $startedAt->copy()->addHours(rand(1, 8)) : null;
 
                 $laborHours = $completedAt ? $completedAt->diffInHours($startedAt) + (rand(0, 30) / 10) : rand(2, 8);
                 $laborCost = $laborHours * rand(350, 500); // R350-R500 per hour
@@ -1113,7 +1062,7 @@ class ComprehensiveDataSeeder extends Seeder
             }
         }
 
-        $this->command->info("✓ Generated {$recordCount} maintenance records");
+        $this->command->info("Generated {$recordCount} maintenance records");
     }
 
     private function generateActivityLogs(): void
@@ -1155,7 +1104,7 @@ class ComprehensiveDataSeeder extends Seeder
             }
         }
 
-        $this->command->info("✓ Generated {$logCount} activity logs");
+        $this->command->info("Generated {$logCount} activity logs");
     }
 
     private function getRandomMaintenanceTitle(): string
@@ -1210,7 +1159,6 @@ class ComprehensiveDataSeeder extends Seeder
         return $work[array_rand($work)];
     }
 
-    /** @return array<mixed> */
     private function getRandomPartsUsed(): array
     {
         $partsSets = [
@@ -1234,7 +1182,6 @@ class ComprehensiveDataSeeder extends Seeder
         return $partsSets[array_rand($partsSets)];
     }
 
-    /** @return array<int, array<float>> */
     private function generatePolygonCoordinates(float $centerLat, float $centerLon, float $radius): array
     {
         $coordinates = [];
@@ -1253,16 +1200,11 @@ class ComprehensiveDataSeeder extends Seeder
         return $coordinates;
     }
 
-    private function getMineAreaType(MineArea $area): string
-    {
-        return (string) data_get($area->metadata, 'area_type', 'pit');
-    }
-
     private function printSummary(): void
     {
         $this->command->info('');
         $this->command->info('═══════════════════════════════════════════');
-        $this->command->info('📊 Multi-Team Data Seeding Summary');
+        $this->command->info('Multi-Team Data Seeding Summary');
         $this->command->info('═══════════════════════════════════════════');
         $this->command->info('Total Teams: '.count($this->allTeams));
         $this->command->info('Total Users: '.User::count());
@@ -1270,7 +1212,7 @@ class ComprehensiveDataSeeder extends Seeder
 
         foreach ($this->allTeams as $teamData) {
             $team = $teamData['team'];
-            $this->command->info("🏢 {$team->name}:");
+            $this->command->info("{$team->name}:");
             $this->command->info('   Users: '.$teamData['users']);
             $this->command->info('   Mine Areas: '.$teamData['areas']);
             $this->command->info('   Machines: '.$teamData['machines']);
@@ -1284,7 +1226,7 @@ class ComprehensiveDataSeeder extends Seeder
         $this->command->info('═══════════════════════════════════════════');
         $this->command->info('Total Database Records:');
         $this->command->info('  Machine Metrics: '.MachineMetric::count());
-        $this->command->info('  Production Records: '.ProductionRecord::count());
+        $this->command->info('  Production Records: '.MineAreaProduction::count());
         $this->command->info('  Fuel Transactions: '.FuelTransaction::count());
         $this->command->info('  Activity Logs: '.ActivityLog::count());
         $this->command->info('═══════════════════════════════════════════');

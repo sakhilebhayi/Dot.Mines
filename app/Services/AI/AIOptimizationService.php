@@ -16,7 +16,6 @@ use Illuminate\Support\Collection;
  */
 class AIOptimizationService
 {
-    /** @var array<string, mixed> */
     protected array $agents = [];
 
     public function __construct(
@@ -24,31 +23,27 @@ class AIOptimizationService
         protected RouteAdvisorAgent $routeAdvisor,
         protected FuelPredictorAgent $fuelPredictor,
         protected MaintenancePredictorAgent $maintenancePredictor,
-        protected ProductionOptimizerAgent $productionOptimizer,
         protected CostAnalyzerAgent $costAnalyzer,
-        protected AnomalyDetectorAgent $anomalyDetector
+        protected AnomalyDetectorAgent $anomalyDetector,
+        protected DispatchAdvisorAgent $dispatchAdvisor
     ) {
         $this->agents = [
             AIAgent::TYPE_FLEET_OPTIMIZER => $fleetOptimizer,
             AIAgent::TYPE_ROUTE_ADVISOR => $routeAdvisor,
             AIAgent::TYPE_FUEL_PREDICTOR => $fuelPredictor,
             AIAgent::TYPE_MAINTENANCE_PREDICTOR => $maintenancePredictor,
-            AIAgent::TYPE_PRODUCTION_OPTIMIZER => $productionOptimizer,
             AIAgent::TYPE_COST_ANALYZER => $costAnalyzer,
             AIAgent::TYPE_ANOMALY_DETECTOR => $anomalyDetector,
+            AIAgent::TYPE_DISPATCH_ADVISOR => $dispatchAdvisor,
         ];
     }
 
     /**
      * Run comprehensive analysis across all AI agents
-     *
-     * @return Collection<string, mixed>
      */
     public function runComprehensiveAnalysis(Team $team, ?User $user = null): Collection
     {
-        /** @var Collection<int, AIRecommendation> $recommendations */
         $recommendations = collect();
-        /** @var Collection<int, AIInsight> $insights */
         $insights = collect();
 
         foreach ($this->agents as $type => $agent) {
@@ -82,6 +77,7 @@ class AIOptimizationService
                         'priority' => $rec['priority'],
                         'title' => $rec['title'],
                         'description' => $rec['description'],
+                        'proposed_action' => $rec['proposed_action'] ?? $rec['description'],
                         'data' => $rec['data'] ?? [],
                         'impact_analysis' => $rec['impact_analysis'] ?? [],
                         'confidence_score' => $rec['confidence_score'],
@@ -129,8 +125,6 @@ class AIOptimizationService
 
     /**
      * Get recommendations for a specific category
-     *
-     * @return Collection<int, mixed>
      */
     public function getRecommendationsForCategory(Team $team, string $category, ?User $user = null): Collection
     {
@@ -138,18 +132,13 @@ class AIOptimizationService
         $agent = $this->agents[$agentType] ?? null;
 
         if (! $agent) {
-            /** @var Collection<int, mixed> */
             return collect();
         }
 
         $agentModel = $this->getOrCreateAgent($agentType);
         $result = $agent->analyze($team);
 
-        /** @var array<int, mixed> $rawRecommendations */
-        $rawRecommendations = $result['recommendations'] ?? [];
-
-        /** @var Collection<int, AIRecommendation> */
-        return collect($rawRecommendations)->map(function ($rec) use ($team, $agentModel, $user): AIRecommendation {
+        return collect($result['recommendations'])->map(function ($rec) use ($team, $agentModel, $user) {
             return AIRecommendation::create([
                 'team_id' => $team->id,
                 'ai_agent_id' => $agentModel->id,
@@ -158,6 +147,7 @@ class AIOptimizationService
                 'priority' => $rec['priority'],
                 'title' => $rec['title'],
                 'description' => $rec['description'],
+                'proposed_action' => $rec['proposed_action'] ?? $rec['description'],
                 'data' => $rec['data'] ?? [],
                 'impact_analysis' => $rec['impact_analysis'] ?? [],
                 'confidence_score' => $rec['confidence_score'],
@@ -169,8 +159,6 @@ class AIOptimizationService
 
     /**
      * Get AI insights dashboard
-     *
-     * @return array<mixed>
      */
     public function getDashboardInsights(Team $team): array
     {
@@ -223,7 +211,12 @@ class AIOptimizationService
                 'description' => $this->getAgentDescription($type),
                 'status' => 'active',
                 'capabilities' => $this->getAgentCapabilities($type),
-                'accuracy_score' => 0.75, // Initial score
+                // No accuracy_score here: it defaults to 0 in the schema and
+                // is only ever meaningful once AIPredictiveAlert::recordAccuracy()
+                // has logged real outcomes (predictions_made > 0). A hardcoded
+                // "initial score" here would show as a fixed, never-changing
+                // percentage on the AI Analytics page regardless of how the
+                // agent actually performs.
             ]
         );
     }
@@ -238,6 +231,7 @@ class AIOptimizationService
             AIAgent::TYPE_PRODUCTION_OPTIMIZER => 'Production Optimizer',
             AIAgent::TYPE_COST_ANALYZER => 'Cost Analyzer',
             AIAgent::TYPE_ANOMALY_DETECTOR => 'Anomaly Detector',
+            AIAgent::TYPE_DISPATCH_ADVISOR => 'Dispatch Advisor',
             default => 'Unknown Agent',
         };
     }
@@ -252,13 +246,11 @@ class AIOptimizationService
             AIAgent::TYPE_PRODUCTION_OPTIMIZER => 'Optimizes production schedules and forecasts output',
             AIAgent::TYPE_COST_ANALYZER => 'Analyzes costs and identifies optimization opportunities',
             AIAgent::TYPE_ANOMALY_DETECTOR => 'Detects unusual patterns and potential issues',
+            AIAgent::TYPE_DISPATCH_ADVISOR => 'Flags live queue imbalances and recommends active reroutes between loading/dump points',
             default => '',
         };
     }
 
-    /**
-     * @return array<mixed>
-     */
     protected function getAgentCapabilities(string $type): array
     {
         return match ($type) {
@@ -269,6 +261,7 @@ class AIOptimizationService
             AIAgent::TYPE_PRODUCTION_OPTIMIZER => ['output_forecasting', 'schedule_optimization', 'resource_allocation'],
             AIAgent::TYPE_COST_ANALYZER => ['cost_breakdown', 'savings_identification', 'budget_optimization'],
             AIAgent::TYPE_ANOMALY_DETECTOR => ['pattern_detection', 'outlier_identification', 'risk_assessment'],
+            AIAgent::TYPE_DISPATCH_ADVISOR => ['queue_monitoring', 'live_reroute_recommendation', 'dwell_time_analysis'],
             default => [],
         };
     }
@@ -282,15 +275,11 @@ class AIOptimizationService
             'maintenance' => AIAgent::TYPE_MAINTENANCE_PREDICTOR,
             'production' => AIAgent::TYPE_PRODUCTION_OPTIMIZER,
             'cost' => AIAgent::TYPE_COST_ANALYZER,
+            'dispatch' => AIAgent::TYPE_DISPATCH_ADVISOR,
             default => AIAgent::TYPE_ANOMALY_DETECTOR,
         };
     }
 
-    /**
-     * @param  Collection<int, mixed>  $recommendations
-     * @param  Collection<int, mixed>  $insights
-     * @return array<mixed>
-     */
     protected function generateSummary(Collection $recommendations, Collection $insights): array
     {
         return [

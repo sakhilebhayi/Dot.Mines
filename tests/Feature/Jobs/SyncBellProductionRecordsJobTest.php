@@ -370,10 +370,12 @@ class SyncBellProductionRecordsJobTest extends TestCase
 
         $this->makeDailyKpi($bellEq, Carbon::yesterday()->toDateString(), payloadMoved: 5000);
 
+        Log::shouldReceive('debug')->zeroOrMoreTimes();
         Log::shouldReceive('info')
             ->with('SyncBellProductionRecordsJob completed', \Mockery::on(function ($ctx) {
-                return isset($ctx['synced']) && $ctx['synced'] === 1
-                    && isset($ctx['skipped']) && $ctx['skipped'] === 0;
+                return isset($ctx['kpi_synced']) && $ctx['kpi_synced'] === 1
+                    && isset($ctx['intraday_synced'])
+                    && isset($ctx['skipped']);
             }))
             ->once();
 

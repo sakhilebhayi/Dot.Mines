@@ -256,4 +256,3 @@ window.hideModal = function(modalElement) {
     }, 200);
 };
 
-console.log('✨ Enhanced animations initialized');

@@ -37,8 +37,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machines from Komatsu KOMTRAX API
-     *
-     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
@@ -70,8 +68,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch location data for equipment
-     *
-     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -80,7 +76,7 @@ class KomatsuService extends BaseManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response),
+                'location' => $this->parseLocation($response ?? []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -94,8 +90,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch performance/metrics for equipment
-     *
-     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -163,8 +157,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch alerts/cautions for equipment
-     *
-     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
@@ -196,8 +188,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse equipment data from Komatsu format
-     *
-     * @return array<mixed>
      */
     protected function parseMachineData(array $data): array
     {
@@ -222,8 +212,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse location data from Komatsu format
-     *
-     * @return array<mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -238,12 +226,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse performance/metric data from Komatsu format
-     *
-     * @return array<mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -261,12 +243,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse alert/notification data from Komatsu format
-     *
-     * @return array<mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
     protected function parseAlert(array $data): array
     {
@@ -303,8 +279,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine details from Komatsu API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -333,15 +307,16 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
             $result = $this->fetchMetrics($machineId);
 
-            return $result['metrics'] ?? [];
+            // fetchMetrics() builds a list of {type, value, unit, timestamp}
+            // readings, not the flat MachineMetric-column shape the sync
+            // pipeline expects -- see normalizeMetricsForStorage().
+            return $this->normalizeMetricsForStorage($result['metrics'] ?? []);
         } catch (Exception $e) {
             return [];
         }
@@ -349,8 +324,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -365,8 +338,6 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

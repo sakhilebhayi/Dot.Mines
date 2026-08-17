@@ -30,9 +30,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchMachines(): array
     {
         try {
@@ -61,9 +58,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchLocation(string $machineId): array
     {
         try {
@@ -83,16 +77,17 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchMetrics(string $machineId): array
     {
         try {
             $operatingStatus = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/operating-status");
             $workRecords = $this->makeRequest('GET', "/api/v1/machines/{$machineId}/work-records");
 
-            $metrics = array_merge(
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier one, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($operatingStatus['data'] ?? []),
                 $this->parseMetrics($workRecords['data'] ?? [])
             );
@@ -112,9 +107,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -149,8 +141,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine details from Kobelco API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -179,8 +169,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -195,8 +183,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -211,8 +197,6 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

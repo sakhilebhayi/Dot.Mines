@@ -41,7 +41,6 @@ class GenerateRoadsPathCoordinates extends Command
 
     protected int $days;
 
-    /** @var array<string, mixed> */
     protected array $stats = [
         'created' => 0,
         'deleted' => 0,
@@ -53,7 +52,7 @@ class GenerateRoadsPathCoordinates extends Command
      */
     public function handle(): int
     {
-        $this->info('🚀 Starting coordinate generation...');
+        $this->info('Starting coordinate generation...');
         $this->newLine();
 
         // Get options
@@ -65,7 +64,7 @@ class GenerateRoadsPathCoordinates extends Command
         // Get team
         $team = Team::find($this->teamId);
         if (! $team) {
-            $this->error("❌ Team with ID {$this->teamId} not found");
+            $this->error("Team with ID {$this->teamId} not found");
 
             return self::FAILURE;
         }
@@ -102,7 +101,7 @@ class GenerateRoadsPathCoordinates extends Command
             ->get();
 
         if ($routes->isEmpty()) {
-            $this->warn('⚠️  No routes found. Generating circular paths as fallback.');
+            $this->warn('No routes found. Generating circular paths as fallback.');
         }
 
         // Generate coordinates for each machine
@@ -116,7 +115,7 @@ class GenerateRoadsPathCoordinates extends Command
                 $progressBar->advance();
             } catch (\Exception $e) {
                 $this->stats['errors']++;
-                $this->error("\n❌ Error for {$machine->name}: {$e->getMessage()}");
+                $this->error("\nError for {$machine->name}: {$e->getMessage()}");
             }
         }
 
@@ -132,9 +131,9 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Handle deletion of Komatsu PC800-ALPHA coordinates
      */
-    protected function handleKomatsuDeletion(mixed $team): void
+    protected function handleKomatsuDeletion($team): void
     {
-        $this->warn('❌ Deleting coordinates for Komatsu PC800-ALPHA...');
+        $this->warn('Deleting coordinates for Komatsu PC800-ALPHA...');
 
         $komatsu = Machine::where('team_id', $team->id)
             ->where('name', 'like', '%PC800-ALPHA%')
@@ -152,7 +151,7 @@ class GenerateRoadsPathCoordinates extends Command
         $deleted = MachineMetric::where('machine_id', $komatsu->id)->delete();
 
         $this->info("   Previous records: {$previousCount}");
-        $this->info("   Deleted: {$deleted} ✅");
+        $this->info("   Deleted: {$deleted}");
         $this->newLine();
 
         $this->stats['deleted'] += $deleted;
@@ -161,7 +160,7 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Generate path coordinates for a single machine
      */
-    protected function generatePathForMachine(Machine $machine, mixed $routes): int
+    protected function generatePathForMachine(Machine $machine, $routes): int
     {
         // Delete existing metrics for this machine first
         MachineMetric::where('machine_id', $machine->id)
@@ -185,7 +184,7 @@ class GenerateRoadsPathCoordinates extends Command
      * Select the best route for a machine based on proximity
      * Returns null for machines without specific routes to force OSRM generation
      */
-    protected function selectBestRoute(Machine $machine, mixed $routes): mixed
+    protected function selectBestRoute(Machine $machine, $routes)
     {
         if ($routes->isEmpty()) {
             return null;
@@ -297,9 +296,6 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Sample exact points from OSRM route - NO interpolation
      * This guarantees all coordinates are on actual roads
-     *
-     * @param  array<mixed>  $routePoints
-     * @return array<mixed>
      */
     protected function sampleRoutePoints(array $routePoints, int $targetCount): array
     {
@@ -332,7 +328,6 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Interpolate points between two coordinates
      */
-    /** @return array<mixed> */
     protected function interpolateAlongRoute(
         float $startLat,
         float $startLng,
@@ -461,9 +456,6 @@ class GenerateRoadsPathCoordinates extends Command
      * Interpolate OSRM route geometry to get exact number of coordinates
      * Uses distance-based sampling to ensure we follow road curves precisely
      * and never cut through buildings, rivers, or non-road areas
-     *
-     * @param  array<mixed>  $routeGeometry
-     * @return array<mixed>
      */
     protected function interpolateRouteGeometry(array $routeGeometry, int $targetCount): array
     {
@@ -567,9 +559,6 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Densify route geometry by interpolating between points
      * Used when OSRM returns fewer points than we need
-     *
-     * @param  array<mixed>  $routeGeometry
-     * @return array<mixed>
      */
     protected function densifyRouteGeometry(array $routeGeometry, int $targetCount): array
     {
@@ -635,7 +624,6 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Save coordinates to database with calculated heading and speed
      */
-    /** @param array<mixed> $coordinates */
     protected function saveCoordinatesToDatabase(Machine $machine, array $coordinates): int
     {
         $startTime = Carbon::now()->subDays($this->days);
@@ -661,7 +649,7 @@ class GenerateRoadsPathCoordinates extends Command
             $speed = max(20, min(60, $baseSpeed + $speedVariation));
 
             // Calculate timestamp
-            $timestamp = $startTime->copy()->addMinutes((int) $index * (float) $timeInterval);
+            $timestamp = $startTime->copy()->addMinutes($index * $timeInterval);
 
             try {
                 MachineMetric::create([
@@ -733,9 +721,9 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Display generation results
      */
-    protected function displayResults(mixed $machines): void
+    protected function displayResults($machines): void
     {
-        $this->info('📊 Summary:');
+        $this->info('Summary:');
         $this->table(
             ['Metric', 'Value'],
             [
@@ -748,7 +736,7 @@ class GenerateRoadsPathCoordinates extends Command
 
         // Show per-machine breakdown
         $this->newLine();
-        $this->info('📋 Per-Machine Breakdown:');
+        $this->info('Per-Machine Breakdown:');
 
         $machineStats = [];
         foreach ($machines as $machine) {
@@ -760,7 +748,7 @@ class GenerateRoadsPathCoordinates extends Command
             $machineStats[] = [
                 'name' => $machine->name,
                 'coordinates' => $metricsCount,
-                'status' => $metricsCount > 0 ? '✅' : '❌',
+                'status' => $metricsCount > 0 ? '✓' : '✗',
             ];
         }
 
@@ -772,9 +760,9 @@ class GenerateRoadsPathCoordinates extends Command
         $this->newLine();
 
         if ($this->stats['errors'] === 0) {
-            $this->info('Status: ✅ SUCCESS');
+            $this->info('Status: SUCCESS');
         } else {
-            $this->warn('Status: ⚠️  COMPLETED WITH ERRORS');
+            $this->warn('Status: COMPLETED WITH ERRORS');
         }
     }
 }

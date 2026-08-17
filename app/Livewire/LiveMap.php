@@ -5,13 +5,10 @@ namespace App\Livewire;
 use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
-use App\Models\MapEvent;
 use App\Models\MineArea;
-use App\Models\Route;
-use App\Services\MachineTelemetryService;
 use App\Traits\RealtimeUpdates;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class LiveMap extends Component
@@ -20,8 +17,6 @@ class LiveMap extends Component
 
     public float $centerLat = -28.4793; // South Africa center latitude
 
-    /** @var array<string, mixed> */
-    /** @var array<int, array<string, mixed>> */
     public array $activityFeed = [];
 
     public bool $isLoading = true;
@@ -32,22 +27,9 @@ class LiveMap extends Component
 
     public string $mapStyle = 'satellite'; // 'osm' or 'satellite'
 
-    /** Wire:poll interval (seconds) — driven by BELL_UI_POLL_SECONDS config. */
-    public int $pollInterval = 30;
-
     public bool $showGeofences = true;
 
     public bool $showMachines = true;
-
-    public bool $showRoutes = false;
-
-    public bool $showTMP = false;
-
-    public bool $showHeatMap = false;
-
-    public bool $showEvents = true;
-
-    public string $eventTypeFilter = 'all';
 
     public string $selectedStatus = '';
 
@@ -55,18 +37,8 @@ class LiveMap extends Component
 
     public function mount(): void
     {
-        // Set the wire:poll interval from config (clamped to a safe minimum of 10s).
-        $this->pollInterval = max(10, (int) config('integrations.bell_polling.ui_poll_seconds', 30));
-
         // Try to center on first machine location if available, else default to South Africa
         $team = Auth::user()->currentTeam;
-
-        if ($team === null) {
-            $this->isLoading = false;
-
-            return;
-        }
-
         $firstMachine = Machine::where('team_id', $team->id)
             ->whereNotNull('last_location_latitude')
             ->whereNotNull('last_location_longitude')
@@ -90,28 +62,38 @@ class LiveMap extends Component
         $this->subscribeToTeamLocations();
     }
 
-    public function loadActivityFeed(): void
+    public function loadActivityFeed()
     {
         $team = Auth::user()->currentTeam;
-
-        if ($team === null) {
-            $this->activityFeed = [];
-
-            return;
-        }
-
-        $this->activityFeed = ActivityLog::with('user')
-            ->where('team_id', $team->id)
+        $this->activityFeed = ActivityLog::where('team_id', $team->id)
             ->latest('created_at')
             ->take(10)
             ->get()
             ->map(fn ($log) => [
-                'user' => $log->user?->name ?? 'System',
+                'user' => $log->user->name ?? 'System',
                 'action' => $log->action,
                 'description' => $log->description,
                 'created_at' => $log->created_at->diffForHumans(),
             ])
             ->toArray();
+    }
+
+    /**
+     * WebSocket delivery isn't guaranteed while disconnected -- machine
+     * location/status updates broadcast during a drop are simply lost, not
+     * queued for replay. When the connection recovers (dispatched by
+     * livewire-realtime.js's connection monitor), re-fetch from the
+     * database -- the authoritative source of truth -- instead of trusting
+     * whatever the map happened to have before the drop.
+     */
+    #[On('realtime-reconnected')]
+    public function reconcileAfterReconnect(): void
+    {
+        $this->dispatch('map-updated', [
+            'mapStyle' => $this->mapStyle,
+            'machines' => $this->showMachines ? $this->getMachines() : [],
+            'geofences' => $this->showGeofences ? $this->getGeofences() : [],
+        ]);
     }
 
     public function toggleGeofences(): void
@@ -121,7 +103,6 @@ class LiveMap extends Component
             'mapStyle' => $this->mapStyle,
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
             'machines' => $this->showMachines ? $this->getMachines() : [],
-            'routes' => $this->showRoutes ? $this->getRoutes() : [],
         ]);
     }
 
@@ -132,173 +113,7 @@ class LiveMap extends Component
             'mapStyle' => $this->mapStyle,
             'machines' => $this->showMachines ? $this->getMachines() : [],
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
-            'routes' => $this->showRoutes ? $this->getRoutes() : [],
         ]);
-    }
-
-    public function toggleRoutes(): void
-    {
-        $this->showRoutes = ! $this->showRoutes;
-        $this->dispatch('map-updated', [
-            'mapStyle' => $this->mapStyle,
-            'machines' => $this->showMachines ? $this->getMachines() : [],
-            'geofences' => $this->showGeofences ? $this->getGeofences() : [],
-            'routes' => $this->showRoutes ? $this->getRoutes() : [],
-        ]);
-    }
-
-    public function toggleTMP(): void
-    {
-        $this->showTMP = ! $this->showTMP;
-        $this->dispatch('tmp-layer-toggle', [
-            'show' => $this->showTMP,
-            'routes' => $this->getRoutes(),
-            'geofences' => $this->getGeofencesWithType(),
-        ]);
-    }
-
-    // ─── Map Events layer ─────────────────────────────────────────────────────
-
-    public function toggleEvents(): void
-    {
-        $this->showEvents = ! $this->showEvents;
-        $this->dispatch('events-layer-toggle', [
-            'show' => $this->showEvents,
-            'events' => $this->showEvents ? $this->getMapEvents() : [],
-        ]);
-    }
-
-    public function filterEventType(string $type): void
-    {
-        $allowed = array_merge(['all'], array_keys(MapEvent::TYPE_CONFIG));
-        if (! in_array($type, $allowed, true)) {
-            return;
-        }
-        $this->eventTypeFilter = $type;
-        if ($this->showEvents) {
-            $this->dispatch('events-layer-toggle', [
-                'show' => true,
-                'events' => $this->getMapEvents(),
-            ]);
-        }
-    }
-
-    /**
-     * Return the last 12 hours of geo-located map events for the current team.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    public function getMapEvents(): array
-    {
-        $team = Auth::user()->currentTeam;
-
-        $query = MapEvent::forTeam($team->id)
-            ->withLocation()
-            ->recent(12)
-            ->with(['machine', 'mineArea'])
-            ->latest('occurred_at')
-            ->limit(200);
-
-        if ($this->eventTypeFilter !== 'all') {
-            $query->ofType($this->eventTypeFilter);
-        }
-
-        return $query->get()->map(function (MapEvent $e): array {
-            $cfg = MapEvent::TYPE_CONFIG[$e->event_type]
-                ?? ['label' => 'Event', 'color' => '#94a3b8', 'emoji' => '📍'];
-
-            return [
-                'id' => $e->id,
-                'event_type' => $e->event_type,
-                'type_label' => $cfg['label'],
-                'color' => $cfg['color'],
-                'emoji' => $cfg['emoji'],
-                'title' => $e->title,
-                'notes' => $e->notes,
-                'latitude' => $e->latitude,
-                'longitude' => $e->longitude,
-                'occurred_at' => $e->occurred_at->toIso8601String(),
-                'occurred_human' => $e->occurred_at->diffForHumans(),
-                'machine_id' => $e->machine_id,
-                'machine_name' => $e->machine?->name ?? '—',
-                'mine_area' => $e->mineArea?->name ?? '—',
-                'metadata' => $e->metadata ?? [],
-            ];
-        })->toArray();
-    }
-
-    // ─── Heat Map layer ───────────────────────────────────────────────────────
-
-    public function toggleHeatMap(): void
-    {
-        $this->showHeatMap = ! $this->showHeatMap;
-        $this->dispatch('heatmap-toggle', [
-            'show' => $this->showHeatMap,
-            'points' => $this->showHeatMap ? $this->getHeatMapPoints() : [],
-        ]);
-    }
-
-    /**
-     * Build a weighted point cloud for Leaflet.heat.
-     *
-     * Each entry is [lat, lng, intensity (0.0–1.0)].
-     * Sources:
-     *   - Machine last-known positions (weight ∝ activity level)
-     *   - Geofence centres (weight ∝ zone type: dump/loading > pit > stockpile)
-     *
-     * @return array<int, array{float, float, float}>
-     */
-    public function getHeatMapPoints(): array
-    {
-        $team = Auth::user()->currentTeam;
-        $points = [];
-
-        // ── Machine positions ──────────────────────────────────────────────
-        $statusWeights = [
-            'active' => 1.0,
-            'idle' => 0.4,
-            'maintenance' => 0.2,
-            'offline' => 0.1,
-        ];
-
-        Machine::where('team_id', $team->id)
-            ->whereNotNull('last_location_latitude')
-            ->whereNotNull('last_location_longitude')
-            ->get(['status', 'last_location_latitude', 'last_location_longitude'])
-            ->each(function ($m) use (&$points, $statusWeights): void {
-                $weight = $statusWeights[$m->status] ?? 0.3;
-                $points[] = [
-                    (float) $m->last_location_latitude,
-                    (float) $m->last_location_longitude,
-                    $weight,
-                ];
-            });
-
-        // ── Geofence centres ───────────────────────────────────────────────
-        $geofenceWeights = [
-            'dump' => 0.9,
-            'loading' => 0.85,
-            'pit' => 0.7,
-            'stockpile' => 0.6,
-            'facility' => 0.45,
-            'restricted' => 0.3,
-            'safe' => 0.2,
-        ];
-
-        Geofence::where('team_id', $team->id)
-            ->whereNotNull('center_latitude')
-            ->whereNotNull('center_longitude')
-            ->get(['type', 'center_latitude', 'center_longitude'])
-            ->each(function ($g) use (&$points, $geofenceWeights): void {
-                $weight = $geofenceWeights[$g->type] ?? 0.4;
-                $points[] = [
-                    (float) $g->center_latitude,
-                    (float) $g->center_longitude,
-                    $weight,
-                ];
-            });
-
-        return $points;
     }
 
     public function changeMapStyle(string $style): void
@@ -308,11 +123,10 @@ class LiveMap extends Component
             'mapStyle' => $style,
             'machines' => $this->showMachines ? $this->getMachines() : [],
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
-            'routes' => $this->showRoutes ? $this->getRoutes() : [],
         ]);
     }
 
-    public function getMachines(): mixed
+    public function getMachines()
     {
         $team = Auth::user()->currentTeam;
 
@@ -328,44 +142,10 @@ class LiveMap extends Component
             $machinesQuery->where('mine_area_id', $this->selectedMineAreaId);
         }
 
-        $machines = $machinesQuery->get();
-        $machineIds = $machines->pluck('id')->all();
-
-        // Enrich with live telemetry for accurate status, fuel, hours, speed, and heading.
-        $telemetryMap = app(MachineTelemetryService::class)->forMachines($machineIds);
-
-        return $machines->map(function (Machine $machine) use ($telemetryMap) {
-            $tel = $telemetryMap[$machine->id] ?? null;
-
-            // Use live Bell telemetry coordinates when available (more recent than ISO snapshot).
-            $lat = ($tel !== null && $tel['latitude'] !== null) ? $tel['latitude'] : (float) $machine->last_location_latitude;
-            $lng = ($tel !== null && $tel['longitude'] !== null) ? $tel['longitude'] : (float) $machine->last_location_longitude;
-
-            $data = $machine->toArray();
-            // Override coordinates with live telemetry values.
-            $data['last_location_latitude'] = $lat;
-            $data['last_location_longitude'] = $lng;
-
-            // Live telemetry fields for map popup and marker behaviour.
-            $data['telemetry_status'] = $tel['status_label'] ?? ucfirst($machine->status);
-            $data['telemetry_status_key'] = $tel['status'] ?? 'offline';
-            $data['engine_running'] = $tel['engine_running'] ?? false;
-            $data['fuel_remaining_percent'] = $tel['fuel_remaining_percent'] ?? null;
-            $data['telemetry_operating_hours'] = $tel['operating_hours'] ?? $machine->operating_hours;
-            $data['telemetry_load_count'] = $tel['load_count'] ?? null;
-            $data['speed_kmh'] = $tel['speed_kmh'] ?? null;
-            $data['heading_degrees'] = $tel['heading_degrees'] ?? null;
-            $data['last_seen_human'] = $tel['last_seen_human'] ?? null;
-            $data['last_seen_at'] = $tel['last_seen_at'] ?? null;
-            $data['is_stale'] = $tel['is_stale'] ?? false;
-            $data['data_age_minutes'] = $tel['data_age_minutes'] ?? null;
-            $data['telemetry_source'] = $tel['telemetry_source'] ?? 'none';
-
-            return $data;
-        });
+        return $machinesQuery->get();
     }
 
-    public function getMineAreas(): mixed
+    public function getMineAreas()
     {
         $team = Auth::user()->currentTeam;
 
@@ -384,19 +164,18 @@ class LiveMap extends Component
             ->toArray();
     }
 
-    public function updatedSelectedMineAreaId(mixed $value): void
+    public function updatedSelectedMineAreaId($value): void
     {
         // When user selects a mine area, push an update to the map with filtered machines
         $this->dispatch('map-updated', [
             'mapStyle' => $this->mapStyle,
             'machines' => $this->getMachines(),
             'geofences' => $this->showGeofences ? $this->getGeofences() : [],
-            'routes' => $this->showRoutes ? $this->getRoutes() : [],
             'selectedMineAreaId' => $value,
         ]);
     }
 
-    public function getGeofences(): mixed
+    public function getGeofences()
     {
         $team = Auth::user()->currentTeam;
 
@@ -406,115 +185,17 @@ class LiveMap extends Component
                 return [
                     'id' => $geofence->id,
                     'name' => $geofence->name,
-                    'geofence_type' => $geofence->geofence_type ?? 'warning',
                     'center_latitude' => (float) $geofence->center_latitude,
                     'center_longitude' => (float) $geofence->center_longitude,
-                    'coordinates' => is_string($geofence->coordinates)
-                        ? json_decode($geofence->coordinates, true)
-                        : $geofence->coordinates ?? [],
+                    'coordinates' => is_string($geofence->coordinates) ? json_decode($geofence->coordinates, true) : $geofence->coordinates ?? [],
                 ];
             });
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function getGeofencesWithType(): array
-    {
-        return $this->getGeofences()->toArray();
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    public function getRoutes(): array
-    {
-        $team = Auth::user()->currentTeam;
-
-        return Route::where('team_id', $team->id)
-            ->where('status', 'active')
-            ->with(['waypoints' => fn ($q) => $q->orderBy('sequence_order')])
-            ->get()
-            ->map(fn ($route) => [
-                'id' => $route->id,
-                'name' => $route->name,
-                'start_latitude' => (float) $route->start_latitude,
-                'start_longitude' => (float) $route->start_longitude,
-                'end_latitude' => (float) $route->end_latitude,
-                'end_longitude' => (float) $route->end_longitude,
-                'total_distance' => (float) $route->total_distance,
-                'estimated_time' => (int) $route->estimated_time,
-                'route_geometry' => $route->route_geometry,
-                'waypoints' => $route->waypoints->map(fn ($w) => [
-                    'sequence_order' => $w->sequence_order,
-                    'latitude' => (float) $w->latitude,
-                    'longitude' => (float) $w->longitude,
-                    'waypoint_type' => $w->waypoint_type,
-                    'name' => $w->name,
-                    'distance_from_previous' => $w->distance_from_previous,
-                    'estimated_time_from_previous' => $w->estimated_time_from_previous,
-                ])->toArray(),
-            ])
-            ->toArray();
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    public function getTrafficPlanData(): array
-    {
-        $teamId = Auth::user()->currentTeam->id;
-
-        $restrictedZones = Geofence::where('team_id', $teamId)
-            ->where('geofence_type', 'restricted')
-            ->count();
-
-        $safeZones = Geofence::where('team_id', $teamId)
-            ->where('geofence_type', 'safe')
-            ->count();
-
-        $warningZones = Geofence::where('team_id', $teamId)
-            ->whereNotIn('geofence_type', ['restricted', 'safe'])
-            ->count();
-
-        $activeRoutesQuery = Route::where('team_id', $teamId)->where('status', 'active');
-        $activeRoutes = $activeRoutesQuery->count();
-
-        $routesWithSpeedLimit = (clone $activeRoutesQuery)
-            ->whereNotNull('speed_limit')
-            ->count();
-
-        return [
-            'restricted_zones' => $restrictedZones,
-            'safe_zones' => $safeZones,
-            'warning_zones' => $warningZones,
-            'active_routes' => $activeRoutes,
-            'routes_with_speed_limit' => $routesWithSpeedLimit,
-            'default_speed_limits' => [
-                'haul_road' => 40,
-                'loading_zone' => 20,
-                'shared_zone' => 15,
-            ],
-            'rules' => [
-                'avoid_restricted' => true,
-                'one_way_flow' => true,
-                'pedestrian_priority_shared_zones' => true,
-            ],
-        ];
-    }
-
-    public function refreshMachinePositions(): void
-    {
-        $this->dispatch('map-updated', [
-            'machines' => $this->getMachines(),
-        ]);
-    }
-
-    public function render(): View
+    public function render()
     {
         $machines = $this->getMachines();
         $geofences = $this->getGeofences();
-        $routes = $this->showRoutes ? $this->getRoutes() : [];
         $machineStatuses = Machine::where('team_id', Auth::user()->currentTeam->id)
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
@@ -524,16 +205,6 @@ class LiveMap extends Component
         return view('livewire.live-map', [
             'machines' => $machines,
             'geofences' => $geofences,
-            'routes' => $routes,
-            'showRoutes' => $this->showRoutes,
-            'showTMP' => $this->showTMP,
-            'showHeatMap' => $this->showHeatMap,
-            'showEvents' => $this->showEvents,
-            'eventTypeFilter' => $this->eventTypeFilter,
-            'mapEvents' => $this->showEvents ? $this->getMapEvents() : [],
-            'eventTypeConfig' => MapEvent::TYPE_CONFIG,
-            'tmpRoutes' => $this->getRoutes(),
-            'trafficPlanData' => $this->getTrafficPlanData(),
             'machineStatuses' => $machineStatuses,
             'mineAreas' => $this->getMineAreas(),
         ]);

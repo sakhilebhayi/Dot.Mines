@@ -7,7 +7,7 @@ use Livewire\Component;
 
 class Documentation extends Component
 {
-    public string $activeSection = 'onboarding';
+    public string $activeSection = 'getting-started';
 
     public string $search = '';
 

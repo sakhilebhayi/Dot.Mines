@@ -1,67 +1,55 @@
-# Terms of Service
+_Last updated: 7 August 2026_
 
-**Last updated: May 2026**
+These Terms & Conditions ("Terms") govern your use of Dot.Mines and any connected Dot Ecosystem platform you sign in to through it. Dot.Mines is operated by **BluePin Inc** ("BluePin", "we", "us", "our"). By creating an account or using Dot.Mines, you agree to these Terms.
 
-## 1. Acceptance of Terms
+## 1. Your account
 
-By accessing or using the Mines platform ("Service") operated by Infodot ("we", "us", or "our"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.
+You need an account to use Dot.Mines. You're responsible for keeping your password confidential and for everything that happens under your account and your team's fleet, sensor, and compliance data.
 
-## 2. Description of Service
+## 2. Ecosystem single sign-on
 
-Mines is a mining fleet management platform providing real-time GPS tracking, operational communications, maintenance management, fuel tracking, production monitoring, and related features for mining operations.
+Your Dot Ecosystem account is also your identity on Dot.Mines. Signing in through a connected platform issues a short-lived, single-use token that confirms who you are, without you re-entering your password.
 
-## 3. Accounts and Access
+## 3. Fleet, sensor, and compliance data
 
-- You must provide accurate information when creating an account.
-- You are responsible for maintaining the confidentiality of your credentials.
-- You must notify us immediately of any unauthorised use of your account.
-- Accounts are tied to a team (mine). Team administrators are responsible for managing user access within their team.
+Dot.Mines is a fleet operations and IoT monitoring platform covering live fleet tracking, geofencing, production and fuel reporting, maintenance scheduling, and compliance reporting. You're responsible for the accuracy of the data your team enters and the correct operation of any equipment or sensors your team connects — Dot.Mines doesn't independently verify machine condition, sensor calibration, or on-site compliance.
 
-## 4. Acceptable Use
+## 4. AI-assisted features
+
+Dot.Mines uses AI models to generate predictive maintenance alerts, anomaly flags, and production recommendations from your team's operational data. These are decision-support tools, not a substitute for your team's own safety judgment, maintenance inspections, or regulatory compliance obligations — you remain responsible for acting on (or not acting on) any AI-generated insight.
+
+## 5. Subscriptions and billing
+
+Some Dot.Mines features require a paid subscription. Subscription payments are processed by Stripe; charges, renewals, and cancellations are handled through the billing portal in the app. Fees are billed in advance on your plan's billing cycle and are non-refundable except where required by law.
+
+## 6. Acceptable use
 
 You agree not to:
 
-- Use the Service for any unlawful purpose or in violation of any applicable regulations.
-- Attempt to gain unauthorised access to any part of the Service or another team's data.
-- Upload malicious code, viruses, or any content intended to disrupt the Service.
-- Reverse-engineer, decompile, or otherwise attempt to extract the source code of the Service.
-- Use the Service to harass, threaten, or harm any person.
+- attempt to gain unauthorised access to Dot.Mines, another team's data, or any connected platform;
+- interfere with or disrupt Dot.Mines's infrastructure, sensor ingestion, or the ecosystem sign-on system; or
+- use Dot.Mines for any unlawful purpose.
 
-## 5. Data Ownership
+## 7. Availability and changes
 
-You retain ownership of all operational data (machine records, mine areas, feed posts, etc.) that you input into the Service. By using the Service, you grant us a limited licence to process that data solely to provide and improve the Service.
+We aim to keep Dot.Mines available and reliable, but we don't guarantee uninterrupted access, and we may change, suspend, or discontinue features from time to time.
 
-## 6. Subscriptions and Billing
+## 8. Disclaimers and limitation of liability
 
-- Access to the Service may require a paid subscription.
-- Subscriptions are billed through Stripe in accordance with the plan you select.
-- Fleet slot limits are enforced per your subscription tier.
-- Failure to maintain a valid payment method may result in suspension of access.
-- We reserve the right to modify pricing with reasonable notice.
-
-## 7. Service Availability
-
-We aim to provide continuous availability but do not guarantee uninterrupted access. The Service may be temporarily unavailable due to maintenance, upgrades, or circumstances beyond our control.
-
-## 8. Limitation of Liability
-
-To the maximum extent permitted by law, Infodot shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Service, including loss of data, revenue, or operational interruption.
+Dot.Mines is provided "as is." We don't guarantee the accuracy of sensor readings supplied by connected equipment, AI-generated predictions or recommendations, or production and compliance outcomes based on data your team enters or your equipment reports. To the fullest extent permitted by law, BluePin is not liable for indirect, incidental, or consequential loss arising from your use of Dot.Mines.
 
 ## 9. Termination
 
-We reserve the right to suspend or terminate your access to the Service at any time for breach of these Terms or for any other reason at our discretion. You may terminate your account at any time by contacting us.
+You may close your account at any time. We may suspend or terminate your access if you breach these Terms, or if we reasonably believe your account poses a risk to Dot.Mines, the Dot Ecosystem, or other users.
 
-## 10. Governing Law
+## 10. Changes to these Terms
 
-These Terms are governed by the laws of the Republic of South Africa. Any disputes shall be subject to the exclusive jurisdiction of the courts of South Africa.
+We may update these Terms from time to time. We'll change the "Last updated" date above when we do, and for material changes we'll take reasonable steps to let you know before they take effect.
 
-## 11. Changes to These Terms
+## 11. Governing law
 
-We may update these Terms from time to time. We will notify registered users of material changes. Continued use of the Service after changes are posted constitutes acceptance of the revised Terms.
+These Terms are governed by the laws of the Republic of South Africa, and any dispute arising from them will be subject to the jurisdiction of the South African courts.
 
-## 12. Contact Us
+## 12. Contact us
 
-For questions about these Terms, please contact:
-
-**Infodot**  
-Email: legal@infodot.co.za
+Questions about these Terms can be sent to [support@infodot.co.za](mailto:support@infodot.co.za). For anything about your personal information specifically, see our [Privacy Policy](/privacy-policy).

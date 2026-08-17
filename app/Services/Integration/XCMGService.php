@@ -30,9 +30,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchMachines(): array
     {
         try {
@@ -61,9 +58,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchLocation(string $machineId): array
     {
         try {
@@ -83,9 +77,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -93,7 +84,11 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
             $parameters = $this->makeRequest('GET', "/iot/v1/devices/{$machineId}/parameters");
             $workData = $this->makeRequest('GET', "/iot/v1/devices/{$machineId}/work-data");
 
-            $metrics = array_merge(
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier ones, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($status['data'] ?? []),
                 $this->parseMetrics($parameters['data'] ?? []),
                 $this->parseMetrics($workData['data'] ?? [])
@@ -114,9 +109,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -151,8 +143,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine details from XCMG API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -181,8 +171,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -197,8 +185,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -213,8 +199,6 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

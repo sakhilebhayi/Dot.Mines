@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Database\Factories\AIAgentFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,18 +15,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $type
  * @property string|null $description
  * @property string $status
- * @property array<string, mixed>|null $configuration
- * @property array<string, mixed>|null $capabilities
+ * @property array|null $configuration
+ * @property array|null $capabilities
  * @property float $accuracy_score
  * @property int $predictions_made
  * @property int $successful_predictions
  * @property Carbon|null $last_trained_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|AIAgent where(string $column, mixed $operator = null, mixed $value = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|AIAgent whereIn(string $column, array $values)
+ * @method static \Illuminate\Database\Eloquent\Builder|AIAgent orderBy(string $column, string $direction = 'asc')
+ * @method static AIAgent|null find(mixed $id, array $columns = ['*'])
+ * @method static AIAgent findOrFail(mixed $id, array $columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class AIAgent extends Model
 {
-    /** @use HasFactory<AIAgentFactory> */
     use HasFactory;
 
     protected $table = 'ai_agents';
@@ -46,18 +50,12 @@ class AIAgent extends Model
         'last_trained_at',
     ];
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'configuration' => 'array',
-            'capabilities' => 'array',
-            'accuracy_score' => 'float',
-            'last_trained_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'configuration' => 'array',
+        'capabilities' => 'array',
+        'accuracy_score' => 'float',
+        'last_trained_at' => 'datetime',
+    ];
 
     // Agent types
     const TYPE_FLEET_OPTIMIZER = 'fleet_optimizer';
@@ -74,25 +72,23 @@ class AIAgent extends Model
 
     const TYPE_ANOMALY_DETECTOR = 'anomaly_detector';
 
-    /** @return HasMany<AIRecommendation, $this> */
+    const TYPE_DISPATCH_ADVISOR = 'dispatch_advisor';
+
     public function recommendations(): HasMany
     {
         return $this->hasMany(AIRecommendation::class);
     }
 
-    /** @return HasMany<AIAnalysisSession, $this> */
     public function analysisSessions(): HasMany
     {
         return $this->hasMany(AIAnalysisSession::class);
     }
 
-    /** @return HasMany<AILearningData, $this> */
     public function learningData(): HasMany
     {
         return $this->hasMany(AILearningData::class);
     }
 
-    /** @return HasMany<AIPredictiveAlert, $this> */
     public function predictiveAlerts(): HasMany
     {
         return $this->hasMany(AIPredictiveAlert::class);
@@ -116,20 +112,12 @@ class AIAgent extends Model
         return $this->status === 'active';
     }
 
-    /**
-     * @param  Builder<static>  $query
-     * @return Builder<static>
-     */
-    public function scopeActive(Builder $query): Builder
+    public function scopeActive($query)
     {
         return $query->where('status', 'active');
     }
 
-    /**
-     * @param  Builder<static>  $query
-     * @return Builder<static>
-     */
-    public function scopeByType(Builder $query, string $type): Builder
+    public function scopeByType($query, string $type)
     {
         return $query->where('type', $type);
     }

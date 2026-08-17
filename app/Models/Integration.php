@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
-use Database\Factories\IntegrationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string|null $api_key
  * @property string|null $api_secret
- * @property array<string, mixed>|null $credentials
+ * @property array|null $credentials
  * @property string|null $webhook_url
  * @property string|null $webhook_secret
  * @property string $status
@@ -30,13 +29,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $last_sync_status
  * @property string|null $last_error
  * @property int $machines_count
- * @property array<string, mixed>|null $config
+ * @property array|null $config
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
 class Integration extends Model
 {
-    /** @use HasFactory<IntegrationFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [
@@ -52,6 +50,7 @@ class Integration extends Model
         'last_sync_at',
         'last_sync_status', // success, failed
         'last_error',
+        'last_error_at',
         'machines_count',
         'config', // JSON for provider-specific configuration
     ];
@@ -63,24 +62,24 @@ class Integration extends Model
         'credentials',
     ];
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'last_sync_at' => 'datetime',
-            'credentials' => 'encrypted:array',
-            'config' => 'array',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'last_sync_at' => 'datetime',
+        'last_error_at' => 'datetime',
+        // Real third-party API secrets live here (OAuth client secrets,
+        // passwords, tokens) -- encrypted:json transparently encrypts on
+        // write and decrypts on read, so every existing ->credentials array
+        // access/assignment keeps working unchanged. See the
+        // 2026_08_10_063135_encrypt_integration_credentials_at_rest
+        // migration for the column-type change and backfill this required.
+        'credentials' => 'encrypted:json',
+        'config' => 'json',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     /**
      * Get the team this integration belongs to
      */
-    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -89,19 +88,9 @@ class Integration extends Model
     /**
      * Get all machines synced from this integration
      */
-    /** @return HasMany<Machine, $this> */
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
-    }
-
-    /**
-     * Get sync audit logs for this integration
-     */
-    /** @return HasMany<IntegrationSyncLog, $this> */
-    public function syncLogs(): HasMany
-    {
-        return $this->hasMany(IntegrationSyncLog::class);
     }
 
     /**
@@ -115,7 +104,7 @@ class Integration extends Model
     /**
      * Mark integration as synced
      */
-    public function markSynced(): bool
+    public function markSynced()
     {
         return $this->update([
             'last_sync_at' => now(),
@@ -127,7 +116,7 @@ class Integration extends Model
     /**
      * Mark integration as errored
      */
-    public function markError(string $error): bool
+    public function markError($error)
     {
         return $this->update([
             'last_error' => $error,

@@ -1,7 +1,23 @@
-<nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-40">
+<nav class="bg-[var(--ink-soft)] border-b border-[var(--line)] sticky top-0 z-40"
+     x-data="{ mobileOpen: false }"
+     @mobile-nav-changed.window="mobileOpen = $event.detail.open">
     <div class="px-6 py-4 flex justify-between items-center">
         <!-- Left Section -->
         <div class="flex items-center gap-4">
+            <!-- Mobile nav toggle -->
+            <button
+                @click="window.mobileNav.toggle()"
+                type="button"
+                class="md:hidden -ml-2 p-2 rounded-lg text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] transition-colors"
+                aria-label="Toggle navigation menu"
+                aria-controls="mobile-sidebar"
+                :aria-expanded="mobileOpen.toString()"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
             @php
                 $routeName = optional(request()->route())->getName();
                     $mapping = [
@@ -26,7 +42,8 @@
                     'integrations' => 'Integrations',
                     'billing.index' => 'Billing',
                     'settings' => 'Settings',
-                    'team.settings' => 'Team Settings',
+                    'teams.show' => 'Team Settings',
+                    'api-tokens.index' => 'API Tokens',
                 ];
 
                 $pageTitle = null;
@@ -54,7 +71,7 @@
                 }
             @endphp
 
-            <h1 class="text-2xl font-bold text-white">{{ $pageTitle }}</h1>
+            <h1 class="text-2xl font-display font-semibold text-[var(--stone)]">{{ $pageTitle }}</h1>
         </div>
 
         <!-- Right Section -->
@@ -62,115 +79,87 @@
             <!-- Team Info -->
             @if ($team)
                 <div class="text-right hidden sm:block">
-                    <div class="text-sm text-gray-400">Current Team</div>
-                    <div class="text-sm font-semibold text-white">{{ $team->name }}</div>
+                    <div class="text-sm text-[var(--sand)]">Current Team</div>
+                    <div class="text-sm font-semibold text-[var(--stone)]">{{ $team->name }}</div>
                 </div>
             @endif
 
-            <!-- Theme Toggle -->
+            <!--
+                Real-time connection indicator. Driven entirely client-side by
+                the 'realtime-connection-changed' window event dispatched from
+                resources/js/livewire-realtime.js's connection monitor -- no
+                server roundtrip, since connection state is only known in the
+                browser. Users should never be left assuming they're seeing
+                live data while the socket is actually down.
+            -->
             <div
-                x-data="{
-                    mode: localStorage.getItem('theme-mode') || 'system',
-                    theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-                    cycle() {
-                        const next = this.mode === 'system'
-                            ? (this.theme === 'dark' ? 'light' : 'dark')
-                            : (this.mode === 'dark' ? 'light' : 'dark');
-                        this.mode = next;
-                        window.ThemeController.setMode(next);
-                    },
-                    label() {
-                        if (this.mode === 'system') return 'Theme: System (' + this.theme + ')';
-                        return this.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-                    }
-                }"
-                x-init="$el.addEventListener('theme-changed', e => { theme = e.detail.theme; })"
-                @theme-changed.window="theme = $event.detail.theme; mode = $event.detail.mode"
-                class="flex items-center"
+                x-data="{ state: 'connecting' }"
+                x-init="window.addEventListener('realtime-connection-changed', (e) => { state = e.detail.state })"
+                class="hidden sm:flex items-center gap-1.5"
+                :title="{
+                    connected: 'Live updates connected',
+                    connecting: 'Connecting to live updates…',
+                    reconnecting: 'Reconnecting to live updates…',
+                    disconnected: 'Live updates disconnected',
+                }[state]"
             >
-                {{-- 3-state cycle: system → dark → light → dark … --}}
-                <button
-                    @click="cycle()"
-                    :aria-label="label()"
-                    :title="label()"
-                    class="relative flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
-                >
-                    {{-- Sun icon — shown in dark mode (click → go light) --}}
-                    <svg
-                        x-show="theme === 'dark'"
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 rotate-90 scale-75"
-                        x-transition:enter-end="opacity-100 rotate-0 scale-100"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 rotate-0 scale-100"
-                        x-transition:leave-end="opacity-0 -rotate-90 scale-75"
-                        class="w-5 h-5 text-amber-400"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-
-                    {{-- Moon icon — shown in light mode (click → go dark) --}}
-                    <svg
-                        x-show="theme === 'light'"
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 rotate-90 scale-75"
-                        x-transition:enter-end="opacity-100 rotate-0 scale-100"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 rotate-0 scale-100"
-                        x-transition:leave-end="opacity-0 -rotate-90 scale-75"
-                        class="w-5 h-5 text-slate-500"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                </button>
+                <span
+                    class="w-2 h-2 rounded-full"
+                    :class="{
+                        connected: 'bg-green-500',
+                        connecting: 'bg-amber-500 animate-pulse',
+                        reconnecting: 'bg-amber-500 animate-pulse',
+                        disconnected: 'bg-red-500',
+                    }[state]"
+                ></span>
             </div>
 
-            <!-- Notifications Bell -->
-            <livewire:notification-bell />
+            <!-- Notifications (real AI alert data, not the static sample content this used to show) -->
+            <livewire:ai-notifications />
 
             <!-- User Profile -->
             <div class="relative">
-                <button wire:click="toggleProfileMenu" class="flex items-center gap-2 p-2 hover:bg-gray-700 rounded-lg transition-colors">
-                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
-                        <span class="text-sm font-bold text-gray-900">{{ substr($user?->name ?? 'U', 0, 1) }}</span>
+                <button wire:click="toggleProfileMenu" class="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors">
+                    <div class="w-8 h-8 bg-[var(--gold)] rounded-full flex items-center justify-center">
+                        <span class="text-sm font-bold text-[var(--ink)]">{{ substr($user?->name ?? 'U', 0, 1) }}</span>
                     </div>
-                    <span class="text-sm text-gray-300 hidden sm:block">{{ $user?->name }}</span>
+                    <span class="text-sm text-[var(--sand)] hidden sm:block">{{ $user?->name }}</span>
                 </button>
 
                 <!-- Profile Dropdown -->
                 @if ($profileMenuOpen)
-                    <div class="absolute right-0 mt-2 bg-gray-700 rounded-lg shadow-lg border border-gray-600 w-48">
-                        <div class="p-4 border-b border-gray-600">
-                            <p class="text-sm font-semibold text-white">{{ $user?->name }}</p>
-                            <p class="text-xs text-gray-400">{{ $user?->email }}</p>
+                    <div class="absolute right-0 mt-2 bg-[var(--ink-soft)] rounded-lg shadow-lg border border-[var(--line)] w-48">
+                        <div class="p-4 border-b border-[var(--line)]">
+                            <p class="text-sm font-semibold text-[var(--stone)]">{{ $user?->name }}</p>
+                            <p class="text-xs text-[var(--sand)]">{{ $user?->email }}</p>
                         </div>
                         <div class="p-2 space-y-1">
-                            <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-lg transition-colors">
+                            <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 My Profile
                             </a>
-                            <a href="{{ route('settings') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-lg transition-colors">
+                            <a href="{{ route('settings') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 Settings
                             </a>
-                            <a href="{{ route('documentation') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-lg transition-colors">
+                            <a href="{{ route('documentation') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 Documentation
                             </a>
-                            <a href="{{ route('integrations') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-lg transition-colors">
+                            <a href="{{ route('integrations') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 Integrations
                             </a>
-                            <a href="{{ route('billing.index') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 rounded-lg transition-colors">
+                            <a href="{{ route('api-tokens.index') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
+                                API Tokens
+                            </a>
+                            <a href="{{ route('teams.show', auth()->user()->currentTeam) }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
+                                Team
+                            </a>
+                            <a href="{{ route('billing.index') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
                                 Billing
                             </a>
                         </div>
-                        <div class="p-2 border-t border-gray-600">
+                        <div class="p-2 border-t border-[var(--line)]">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-600 rounded-lg transition-colors">
+                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 rounded-lg transition-colors">
                                     Logout
                                 </button>
                             </form>

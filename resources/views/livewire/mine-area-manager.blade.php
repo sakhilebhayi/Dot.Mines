@@ -1,38 +1,39 @@
 <div>
-<div class="h-screen flex flex-col bg-gray-900">
+<div class="h-screen flex flex-col bg-[var(--ink)]">
     <link rel="stylesheet" href="/vendor/leaflet.css" />
     <link rel="stylesheet" href="/vendor/leaflet-draw/leaflet.draw.css" />
 
-    <script>
-    (function injectMineAreaStyles() {
-        if (document.getElementById('mine-area-styles')) return;
-        var s = document.createElement('style');
-        s.id = 'mine-area-styles';
-        s.textContent = [
-            '#mine-area-map,#mine-area-draw-map{background:#1f2937;min-height:400px;height:100%;width:100%}',
-            '.leaflet-container{background:#1f2937!important}',
-            '.mine-area-search-input{width:100%;padding:0.5rem 1rem;border:1px solid #4b5563;border-radius:0.5rem;background-color:#374151;color:#111827;outline:none}',
-            '.dark .mine-area-search-input{color:#fff}',
-            '.mine-area-search-input::placeholder{color:#9ca3af;opacity:1}',
-            '.mine-area-search-input:focus{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,0.4)}',
-        ].join('');
-        document.head.appendChild(s);
-    })();
-    </script>
+    <style nonce="{{ request()->attributes->get('csp_nonce') }}">
+        #mine-area-map,
+        #mine-area-draw-map {
+            background: #1f2937;
+            min-height: 400px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .leaflet-container {
+            background: #1f2937 !important;
+        }
+
+        .mine-area-search-input {
+            @apply w-full px-4 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] placeholder-[var(--sand)]/60 focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)] outline-none;
+        }
+    </style>
 
     <!-- Header -->
-    <div class="bg-gray-800 border-b border-gray-700 p-6">
+    <div class="bg-[var(--ink-soft)] border-b border-[var(--line)] p-6">
             <div class="w-full px-6">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-white">Mine Areas</h1>
-                    <p class="mt-2 text-gray-400">Manage and organize your mining operation areas</p>
+                    <h1 class="text-3xl font-bold text-[var(--stone)]">Mine Areas</h1>
+                    <p class="mt-2 text-[var(--sand)]">Manage and organize your mining operation areas</p>
                 </div>
                 <div class="flex gap-2">
                     @if($viewMode === 'map' && $isDrawing)
                         <button type="button"
                             wire:click="switchToListMode" 
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded-lg transition-colors"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -42,7 +43,7 @@
                     @elseif($viewMode === 'list')
                         <button type="button"
                             wire:click="openCreateMapModal" 
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg transition-colors font-display font-semibold"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6 3m-6-3v-13m6 3l5.553-2.776A1 1 0 0121 5.618v10.764a1 1 0 01-1.447.894L15 20m0-13v13"></path>
@@ -51,7 +52,7 @@
                         </button>
                         <button type="button"
                             wire:click="openCreateModal" 
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded-lg transition-colors"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -69,42 +70,42 @@
         @if($viewMode === 'list')
             <!-- List View -->
             <div class="w-full flex flex-col overflow-auto">
-                <div class="bg-gray-800 w-full px-6 py-6 rounded-lg shadow space-y-4">
+                <div class="bg-[var(--ink-soft)] w-full px-6 py-6 rounded-lg shadow space-y-4">
                     <!-- Stats Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 border-b border-gray-700">
-                        <div class="bg-gray-800 rounded-lg p-4 shadow border border-gray-700">
-                            <p class="text-gray-400 text-sm">Total Areas</p>
-                            <p class="text-3xl font-bold text-white">{{ $stats['total_areas'] }}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 border-b border-[var(--line)]">
+                        <div class="bg-[var(--ink-soft)] rounded-lg p-4 shadow border border-[var(--line)]">
+                            <p class="text-[var(--sand)] text-sm">Total Areas</p>
+                            <p class="text-3xl font-bold text-[var(--stone)]">{{ $stats['total_areas'] }}</p>
                         </div>
-                        <div class="bg-gray-800 rounded-lg p-4 shadow border border-gray-700">
-                            <p class="text-gray-400 text-sm">Active Areas</p>
-                            <p class="text-3xl font-bold text-blue-400">{{ $stats['active_areas'] }}</p>
+                        <div class="bg-[var(--ink-soft)] rounded-lg p-4 shadow border border-[var(--line)]">
+                            <p class="text-[var(--sand)] text-sm">Active Areas</p>
+                            <p class="text-3xl font-bold text-green-400">{{ $stats['active_areas'] }}</p>
                         </div>
-                        <div class="bg-gray-800 rounded-lg p-4 shadow border border-gray-700">
-                            <p class="text-gray-400 text-sm">Total Area Size</p>
-                            <p class="text-3xl font-bold text-white">{{ number_format($stats['total_area_hectares'], 1) }} ha</p>
+                        <div class="bg-[var(--ink-soft)] rounded-lg p-4 shadow border border-[var(--line)]">
+                            <p class="text-[var(--sand)] text-sm">Total Area Size</p>
+                            <p class="text-3xl font-bold text-[var(--stone)]">{{ number_format($stats['total_area_hectares'], 1) }} ha</p>
                         </div>
-                        <div class="bg-gray-800 rounded-lg p-4 shadow border border-gray-700">
-                            <p class="text-gray-400 text-sm">With Managers</p>
-                            <p class="text-3xl font-bold text-white">{{ $stats['areas_with_manager'] }}</p>
+                        <div class="bg-[var(--ink-soft)] rounded-lg p-4 shadow border border-[var(--line)]">
+                            <p class="text-[var(--sand)] text-sm">With Managers</p>
+                            <p class="text-3xl font-bold text-[var(--stone)]">{{ $stats['areas_with_manager'] }}</p>
                         </div>
                     </div>
 
                     <!-- Filters -->
-                    <div class="p-6 border-b border-gray-700">
+                    <div class="p-6 border-b border-[var(--line)]">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <input 
                                     type="text"
                                     wire:model.live="search"
                                     placeholder="Search mine areas..."
-                                    class="mine-area-search-input text-gray-900"
+                                    class="mine-area-search-input"
                                 >
                             </div>
                             <div>
                                 <select 
                                     wire:model.live="statusFilter"
-                                    class="mine-area-search-input animated input-animate text-gray-900"
+                                    class="mine-area-search-input animated input-animate"
                                 >
                                     <option value="">All Statuses</option>
                                     <option value="active">Active</option>
@@ -118,10 +119,10 @@
                     <!-- Table -->
                     <div class="overflow-x-auto">
                         <table class="w-full">
-                            <thead class="bg-gray-700 border-b border-gray-600">
+                            <thead class="bg-white/5 border-b border-[var(--line)]">
                                 <tr>
                                     <th class="px-6 py-3 text-left">
-                                        <button type="button" wire:click="toggleSort('name')" class="flex items-center gap-2 font-semibold text-white">
+                                        <button type="button" wire:click="toggleSort('name')" class="flex items-center gap-2 font-semibold text-[var(--stone)]">
                                             Name
                                             @if($sortBy === 'name')
                                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -134,13 +135,13 @@
                                             @endif
                                         </button>
                                     </th>
-                                    <th class="px-6 py-3 text-left font-semibold text-white">Location</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-white">Machines</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-white">Geofences</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-white">Alerts</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-white">Plans</th>
+                                    <th class="px-6 py-3 text-left font-semibold text-[var(--stone)]">Location</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-[var(--stone)]">Machines</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-[var(--stone)]">Geofences</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-[var(--stone)]">Alerts</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-[var(--stone)]">Plans</th>
                                     <th class="px-6 py-3 text-left">
-                                        <button type="button" wire:click="toggleSort('status')" class="flex items-center gap-2 font-semibold text-white">
+                                        <button type="button" wire:click="toggleSort('status')" class="flex items-center gap-2 font-semibold text-[var(--stone)]">
                                             Status
                                             @if($sortBy === 'status')
                                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -153,19 +154,19 @@
                                             @endif
                                         </button>
                                     </th>
-                                    <th class="px-6 py-3 text-right font-semibold text-white">Actions</th>
+                                    <th class="px-6 py-3 text-right font-semibold text-[var(--stone)]">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-700">
+                            <tbody class="divide-y divide-[var(--line)]">
                                 @forelse($mineAreas as $area)
-                                    <tr class="hover:bg-gray-700 transition-colors cursor-pointer" onclick="window.location='{{ route('mine-areas.show', $area->id) }}'">
+                                    <tr class="hover:bg-white/5 transition-colors cursor-pointer" onclick="window.location='{{ route('mine-areas.show', $area->id) }}'">
                                         <td class="px-6 py-4">
                                             <div>
-                                                <p class="font-semibold text-white">{{ $area->name }}</p>
-                                                <p class="text-sm text-gray-400">{{ Str::limit($area->description, 50) }}</p>
+                                                <p class="font-semibold text-[var(--stone)]">{{ $area->name }}</p>
+                                                <p class="text-sm text-[var(--sand)]">{{ Str::limit($area->description, 50) }}</p>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 text-gray-300">
+                                        <td class="px-6 py-4 text-[var(--sand)]">
                                             {{ $area->location ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-center">
@@ -187,7 +188,7 @@
                                                     {{ $area->alerts_count }}
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-700 text-gray-400">0</span>
+                                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-white/10 text-[var(--sand)]">0</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 text-center">
@@ -213,13 +214,13 @@
                                             <div class="flex items-center justify-end gap-2" onclick="event.stopPropagation()">
                                                 <a 
                                                     href="{{ route('mine-areas.show', $area->id) }}"
-                                                    class="inline-flex items-center px-3 py-1 text-sm bg-amber-900 text-amber-200 rounded hover:bg-amber-800 transition-colors"
+                                                    class="inline-flex items-center px-3 py-1 text-sm bg-[var(--gold)] text-[var(--ink)] rounded hover:bg-[var(--gold-soft)] transition-colors font-medium"
                                                 >
                                                     View
                                                 </a>
                                                 <button type="button"
                                                     wire:click="openEditModal({{ $area->id }})"
-                                                    class="inline-flex items-center px-3 py-1 text-sm bg-blue-900 text-blue-200 rounded hover:bg-blue-800 transition-colors"
+                                                    class="inline-flex items-center px-3 py-1 text-sm bg-white/10 text-[var(--stone)] rounded hover:bg-white/20 transition-colors"
                                                 >
                                                     Edit
                                                 </button>
@@ -235,7 +236,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="px-6 py-8 text-center text-gray-400">
+                                        <td colspan="8" class="px-6 py-8 text-center text-[var(--sand)]">
                                             <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                                             </svg>
@@ -248,7 +249,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="p-6 border-t border-gray-700">
+                    <div class="p-6 border-t border-[var(--line)]">
                         {{ $mineAreas->links() }}
                     </div>
                 </div>
@@ -266,10 +267,10 @@
             <!-- Map View (Drawing Mode) -->
             <div class="w-full flex">
                 <!-- Left Sidebar - Form -->
-                <div class="w-96 bg-gray-800 border-r border-gray-700 overflow-y-auto p-6 space-y-4">
+                <div class="w-96 bg-[var(--ink-soft)] border-r border-[var(--line)] overflow-y-auto p-6 space-y-4">
                     <div>
-                        <h2 class="text-xl font-bold text-white mb-2">Create Mine Area</h2>
-                        <p class="text-gray-400 text-sm">Draw a boundary on the map, then fill in the details</p>
+                        <h2 class="text-xl font-bold text-[var(--stone)] mb-2">Create Mine Area</h2>
+                        <p class="text-[var(--sand)] text-sm">Draw a boundary on the map, then fill in the details</p>
                     </div>
 
                     @if($boundaryCoordinates)
@@ -284,41 +285,41 @@
 
                     <form wire:submit.prevent="saveMineAreaWithBoundary" class="space-y-3">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Name *</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Name *</label>
                             <input 
                                 type="text"
                                 wire:model="name"
                                 placeholder="Mine area name"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                             @error('name') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
                             <textarea 
                                 wire:model="description"
                                 placeholder="Area description"
                                 rows="2"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             ></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Location</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Location</label>
                             <input 
                                 type="text"
                                 wire:model="location"
                                 placeholder="Location details"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Status *</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Status *</label>
                             <select 
                                 wire:model="status"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
@@ -327,26 +328,26 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Manager Name</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Name</label>
                             <input 
                                 type="text"
                                 wire:model="manager_name"
                                 placeholder="Manager name"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                         </div>
 
-                        <div class="flex gap-2 pt-4 border-t border-gray-700">
+                        <div class="flex gap-2 pt-4 border-t border-[var(--line)]">
                             <button 
                                 type="button"
                                 wire:click="closeMapModal"
-                                class="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
+                                class="flex-1 px-3 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded-lg transition-colors text-sm"
                             >
                                 Cancel
                             </button>
                             <button 
                                 type="submit"
-                                class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+                                class="flex-1 px-3 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg transition-colors text-sm font-display font-semibold"
                             >
                                 Save Area
                             </button>
@@ -364,15 +365,15 @@
 
     <!-- Create/Edit Modal -->
     @if($showCreateModal || $showEditModal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
-                <div class="sticky top-0 bg-gray-700 border-b border-gray-600 p-6 flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-white">
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[var(--line)]">
+                <div class="sticky top-0 bg-[var(--ink-soft)] border-b border-[var(--line)] p-6 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-[var(--stone)]">
                         {{ $editingMineAreaId ? 'Edit Mine Area' : 'Create New Mine Area' }}
                     </h2>
                     <button type="button"
                         wire:click="@if($editingMineAreaId) closeEditModal @else closeCreateModal @endif"
-                        class="text-gray-400 hover:text-gray-300"
+                        class="text-[var(--sand)] hover:text-[var(--stone)]"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -383,25 +384,25 @@
                 <form wire:submit="saveMineArea" class="p-6 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">
                                 Name <span class="text-red-500">*</span>
                             </label>
                             <input 
                                 type="text"
                                 wire:model="name"
                                 placeholder="Enter mine area name"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                             @error('name') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">
                                 Status <span class="text-red-500">*</span>
                             </label>
                             <select 
                                 wire:model="status"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
@@ -412,36 +413,36 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
                         <textarea 
                             wire:model="description"
                             placeholder="Describe the mine area"
                             rows="3"
-                            class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                         ></textarea>
                         @error('description') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Location</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Location</label>
                             <input 
                                 type="text"
                                 wire:model="location"
                                 placeholder="e.g., North Pit, South Zone"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                             @error('location') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Area Size (hectares)</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Area Size (hectares)</label>
                             <input 
                                 type="number"
                                 step="0.01"
                                 wire:model.live="area_size_hectares"
                                 placeholder="0.00"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                             @error('area_size_hectares') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                         </div>
@@ -449,39 +450,39 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Manager Name</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Name</label>
                             <input 
                                 type="text"
                                 wire:model="manager_name"
                                 placeholder="Mining operations manager"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                             @error('manager_name') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Manager Contact</label>
+                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Contact</label>
                             <input 
                                 type="text"
                                 wire:model="manager_contact"
                                 placeholder="Phone or email"
-                                class="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
                             @error('manager_contact') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-600">
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-[var(--line)]">
                         <button 
                             type="button"
                             wire:click="@if($editingMineAreaId) closeEditModal @else closeCreateModal @endif"
-                            class="px-4 py-2 text-gray-300 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+                            class="px-4 py-2 text-[var(--sand)] bg-white/5 hover:bg-white/10 border border-[var(--line)] rounded-lg transition-colors"
                         >
                             Cancel
                         </button>
                         <button 
                             type="submit"
-                            class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                            class="px-4 py-2 text-[var(--ink)] bg-[var(--gold)] rounded-lg hover:bg-[var(--gold-soft)] transition-colors font-display font-semibold"
                         >
                             {{ $editingMineAreaId ? 'Update' : 'Create' }} Mine Area
                         </button>
@@ -493,13 +494,13 @@
 
 
     <!-- Map Loading Indicator -->
-    <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-gray-800 z-[999]" wire:ignore style="display: none;">
+    <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-[var(--ink-soft)] z-[999]" wire:ignore style="display: none;">
         <div class="text-center">
-            <svg class="animate-spin h-12 w-12 text-amber-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-12 w-12 text-[var(--gold)] mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="text-gray-300 text-sm">Loading map...</p>
+            <p class="text-[var(--sand)] text-sm">Loading map...</p>
         </div>
     </div>
 
@@ -512,7 +513,7 @@
     <script src="/vendor/leaflet.js"></script>
     <script src="/vendor/leaflet-draw/leaflet.draw.umd.js"></script>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         let mineAreaMap = null;
         let drawnItems = null;
         let geofenceLayerGroup;
@@ -599,7 +600,7 @@
                 initRetryCount++;
                 if (initRetryCount > MAX_INIT_RETRIES) {
                     if (loadingEl) {
-                        loadingEl.innerHTML = '<div class="text-center"><p class="text-red-400 mb-2">Map library failed to load</p><p class="text-gray-400 text-sm">Leaflet library could not be loaded from CDN</p><button onclick="location.reload()" class="mt-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded">Retry</button></div>';
+                        loadingEl.innerHTML = '<div class="text-center"><p class="text-red-400 mb-2">Map library failed to load</p><p class="text-[var(--sand)] text-sm">Leaflet library could not be loaded from CDN</p><button onclick="location.reload()" class="mt-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-[var(--stone)] rounded">Retry</button></div>';
                     }
                     // show a short visual hint to the user
                     if (window.showMapHint) window.showMapHint('Map detected but failed to initialize. Check console for details.');
@@ -733,7 +734,7 @@
                 // show visual hint
                 if (window.showMapHint) window.showMapHint('Map initialization error — check console');
                 if (loadingEl) {
-                    loadingEl.innerHTML = '<div class="text-center"><p class="text-red-400 mb-2">Failed to load map</p><p class="text-gray-400 text-sm">Please refresh the page</p></div>';
+                    loadingEl.innerHTML = '<div class="text-center"><p class="text-red-400 mb-2">Failed to load map</p><p class="text-[var(--sand)] text-sm">Please refresh the page</p></div>';
                 }
             }
             setTimeout(() => {

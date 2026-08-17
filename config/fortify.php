@@ -101,7 +101,12 @@ return [
     |
     */
 
-    'middleware' => ['web'],
+    // 'login'/'two-factor' below already get their own dedicated 5/min
+    // limiters -- 'throttle:fortify' adds a general 10/min-per-IP limiter
+    // to every Fortify route, closing the gap on the ones that had none at
+    // all: password.email/password.update (forgot/reset password) and
+    // register. See FortifyServiceProvider for the 'fortify' limiter itself.
+    'middleware' => ['web', 'throttle:fortify'],
 
     /*
     |--------------------------------------------------------------------------

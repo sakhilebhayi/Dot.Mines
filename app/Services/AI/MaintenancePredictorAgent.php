@@ -14,9 +14,6 @@ use App\Models\Team;
  */
 class MaintenancePredictorAgent
 {
-    /**
-     * @return array<mixed>
-     */
     public function analyze(Team $team): array
     {
         $recommendations = [];
@@ -26,10 +23,6 @@ class MaintenancePredictorAgent
         $predictionAnalysis = $this->predictMaintenanceNeeds($team);
         $recommendations = array_merge($recommendations, $predictionAnalysis['recommendations']);
         $insights = array_merge($insights, $predictionAnalysis['insights']);
-
-        // Analyze health patterns
-        $healthAnalysis = $this->analyzeHealthPatterns($team);
-        $recommendations = array_merge($recommendations, $healthAnalysis['recommendations']);
 
         // Optimize maintenance schedules
         $scheduleAnalysis = $this->optimizeMaintenanceSchedules($team);
@@ -41,9 +34,6 @@ class MaintenancePredictorAgent
         ];
     }
 
-    /**
-     * @return array<mixed>
-     */
     protected function predictMaintenanceNeeds(Team $team): array
     {
         $recommendations = [];
@@ -142,51 +132,6 @@ class MaintenancePredictorAgent
         ];
     }
 
-    /**
-     * @return array<mixed>
-     */
-    protected function analyzeHealthPatterns(Team $team): array
-    {
-        $recommendations = [];
-
-        $machines = Machine::where('team_id', $team->id)
-            ->whereHas('healthStatus')
-            ->with('healthStatus')
-            ->get();
-
-        foreach ($machines as $machine) {
-            $health = $machine->healthStatus;
-
-            // Check for degrading trends
-            $trend = $this->analyzeHealthTrend($machine);
-
-            if ($trend['is_degrading'] && $trend['rate'] > 5) {
-                $recommendations[] = [
-                    'category' => 'maintenance',
-                    'priority' => 'high',
-                    'title' => "Degrading Health Pattern: {$machine->name}",
-                    'description' => "Machine health declining at {$trend['rate']}% per week. Intervention recommended before critical failure.",
-                    'confidence_score' => 0.79,
-                    'related_machine_id' => $machine->id,
-                    'data' => [
-                        'current_health_score' => $health?->overall_health_score,
-                        'degradation_rate' => round($trend['rate'], 2),
-                        'estimated_critical_date' => $trend['estimated_critical_date'],
-                    ],
-                    'impact_analysis' => [
-                        'time_to_critical' => $trend['days_to_critical'].' days',
-                        'recommended_action' => 'Schedule comprehensive inspection',
-                    ],
-                ];
-            }
-        }
-
-        return ['recommendations' => $recommendations];
-    }
-
-    /**
-     * @return array<mixed>
-     */
     protected function optimizeMaintenanceSchedules(Team $team): array
     {
         $recommendations = [];
@@ -274,14 +219,11 @@ class MaintenancePredictorAgent
         return max(7, (int) ($baseDays * (1 - $riskScore)));
     }
 
-    /**
-     * @return array<mixed>
-     */
     protected function getContributingFactors(Machine $machine): array
     {
         $factors = [];
 
-        if ($machine->healthStatus !== null && $machine->healthStatus->overall_health_score < 60) {
+        if ($machine->healthStatus?->overall_health_score < 60) {
             $factors[] = 'Low health score: '.$machine->healthStatus->overall_health_score;
         }
 
@@ -313,23 +255,6 @@ class MaintenancePredictorAgent
             ->avg('operating_hours');
 
         return $recentHours < 12; // Less than 12 hours/day = low demand
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    protected function analyzeHealthTrend(Machine $machine): array
-    {
-        // Simplified trend analysis
-        $currentHealth = $machine->healthStatus?->overall_health_score ?? 80;
-        $degradationRate = rand(3, 8); // In production, calculate from historical data
-
-        return [
-            'is_degrading' => $currentHealth < 75,
-            'rate' => $degradationRate,
-            'days_to_critical' => (int) (($currentHealth - 40) / ($degradationRate / 7)),
-            'estimated_critical_date' => now()->addDays((int) (($currentHealth - 40) / ($degradationRate / 7)))->format('Y-m-d'),
-        ];
     }
 
     protected function getMachineUsageRate(Machine $machine): float

@@ -48,6 +48,10 @@ class SyncBellPayloadJob implements ShouldBeUnique, ShouldQueue
             'payload' => $payload,
             'loads' => $loads,
         ]);
+
+        // Immediately bridge today's intraday load/payload data into production_records
+        // so the Production page reflects current data without waiting for the nightly run.
+        SyncBellProductionRecordsJob::dispatch()->onQueue('default');
     }
 
     public function failed(\Throwable $exception): void

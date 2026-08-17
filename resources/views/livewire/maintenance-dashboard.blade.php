@@ -1,10 +1,10 @@
 <div>
-<div class="w-full" wire:poll.30s>
+<div class="w-full">
     <div class="p-6">
         <div class="mb-6 flex justify-between items-start">
             <div>
-                <h1 class="text-3xl font-bold">Maintenance & Health Monitoring</h1>
-                <p class="text-gray-600 mt-2">Track machine health, schedule maintenance, and manage work orders</p>
+                <h1 class="text-3xl font-display font-semibold">Maintenance & Health Monitoring</h1>
+                <p class="text-[var(--sand)] mt-2">Track machine health, schedule maintenance, and manage work orders</p>
             </div>
             <button wire:click="openBookingModal" class="btn btn-primary gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,7 +16,7 @@
 
     <!-- Period Selector -->
     <div class="mb-6 flex items-center gap-4">
-        <select wire:model.live="selectedPeriod" class="select select-bordered bg-white text-gray-900 [&>option]:text-gray-900">
+        <select wire:model.live="selectedPeriod" class="select select-bordered bg-white/5 border-[var(--line)] text-[var(--stone)] [&>option]:text-[var(--ink)]">
             <option value="today">Today</option>
             <option value="week">This Week</option>
             <option value="month">This Month</option>
@@ -30,7 +30,7 @@
         </label>
 
         <!-- Loading Indicator for Filter Changes -->
-        <div wire:loading wire:target="selectedPeriod,showCriticalOnly" class="flex items-center gap-2 text-sm text-blue-500">
+        <div wire:loading wire:target="selectedPeriod,showCriticalOnly" class="flex items-center gap-2 text-sm text-[var(--gold)]">
             <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -156,13 +156,13 @@
                                     <div>
                                         <strong>{{ $delay['machine']->name }}</strong>
                                         <br>
-                                        <span class="text-xs text-gray-500">{{ $delay['machine']->model }}</span>
+                                        <span class="text-xs text-[var(--sand)]">{{ $delay['machine']->model }}</span>
                                     </div>
                                 </td>
                                 <td>
                                     <strong>{{ number_format($delay['delay_hours'], 1) }}h</strong>
                                     @if($delay['delay_hours'] >= 24)
-                                        <br><span class="text-xs text-gray-500">{{ number_format($delay['delay_hours'] / 24, 1) }} days</span>
+                                        <br><span class="text-xs text-[var(--sand)]">{{ number_format($delay['delay_hours'] / 24, 1) }} days</span>
                                     @endif
                                 </td>
                                 <td>
@@ -184,15 +184,15 @@
                                     @if($delay['maintenance_type'])
                                         <span class="badge badge-ghost badge-sm">{{ ucfirst($delay['maintenance_type']) }}</span>
                                     @else
-                                        <span class="text-gray-400">-</span>
+                                        <span class="text-[var(--sand)]">-</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if($delay['expected_return'])
                                         {{ $delay['expected_return']->format('M d, H:i') }}
-                                        <br><span class="text-xs text-gray-500">{{ $delay['expected_return']->diffForHumans() }}</span>
+                                        <br><span class="text-xs text-[var(--sand)]">{{ $delay['expected_return']->diffForHumans() }}</span>
                                     @else
-                                        <span class="text-gray-400">Unknown</span>
+                                        <span class="text-[var(--sand)]">Unknown</span>
                                     @endif
                                 </td>
                             </tr>
@@ -229,12 +229,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <h3 class="text-xl font-bold text-green-600 mb-2">No Fleet Delays</h3>
-                    <p class="text-gray-500">All machines are operating as expected with no significant delays.</p>
+                    <p class="text-[var(--sand)]">All machines are operating as expected with no significant delays.</p>
                 </div>
             @endif
         </div>
     </div>
-            <div class="stat-value text-sm">${{ number_format($maintenanceStats['total_cost'], 2) }}</div>
+            <div class="stat-value text-sm">R{{ number_format($maintenanceStats['total_cost'], 2) }}</div>
         </div>
         
         <div class="stat bg-base-200 rounded-lg">
@@ -247,16 +247,17 @@
     @if($aiRecommendations->count() > 0 || $aiInsights->count() > 0)
     <div class="mb-6">
         <div class="flex items-center gap-2 mb-4">
-            <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
-            <h2 class="text-2xl font-bold">Predictive Maintenance</h2>
+            <h2 class="text-2xl font-bold">AI Predictive Maintenance</h2>
+            <span class="badge badge-primary">AI-Powered</span>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- AI Breakdown Predictions & Recommendations -->
             @if($aiRecommendations->count() > 0)
-            <div class="card bg-gray-800 text-white border border-gray-700">
+            <div class="card bg-gradient-to-br from-red-900 to-orange-900 text-[var(--stone)] border border-red-700">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,7 +278,7 @@
                                             $machine = \App\Models\Machine::find($recommendation['related_machine_id']);
                                         @endphp
                                         @if($machine)
-                                            <div class="text-xs text-gray-300 mb-2">
+                                            <div class="text-xs text-[var(--sand)] mb-2">
                                                 {{ $machine->manufacturer }} {{ $machine->model }}
                                             </div>
                                         @endif
@@ -290,7 +291,7 @@
                                     @endif
                                 ">{{ ucfirst($recommendation['priority']) }}</span>
                             </div>
-                            <p class="text-sm text-gray-200 mb-3">{{ $recommendation['description'] }}</p>
+                            <p class="text-sm text-[var(--sand)] mb-3">{{ $recommendation['description'] }}</p>
                             
                             @if(isset($recommendation['data']['risk_score']))
                             <div class="mb-2">
@@ -326,7 +327,7 @@
                             <details class="collapse collapse-arrow bg-white/5 mt-2">
                                 <summary class="collapse-title text-sm font-medium py-2 min-h-0">Recommended Actions</summary>
                                 <div class="collapse-content px-2 pb-2">
-                                    <ul class="text-xs space-y-1 list-disc list-inside text-gray-300">
+                                    <ul class="text-xs space-y-1 list-disc list-inside text-[var(--sand)]">
                                         @foreach($recommendation['impact_analysis']['recommended_actions'] as $action)
                                             <li>{{ $action }}</li>
                                         @endforeach
@@ -336,7 +337,7 @@
                             @endif
 
                             <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-                                <span class="text-xs text-gray-300">AI Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
+                                <span class="text-xs text-[var(--sand)]">AI Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
                                 <button wire:click="openBookingModal" class="btn btn-xs btn-warning gap-1">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -353,7 +354,7 @@
 
             <!-- AI Insights & Patterns -->
             @if($aiInsights->count() > 0)
-            <div class="card bg-gradient-to-br from-blue-900 to-indigo-900 text-white border border-blue-700">
+            <div class="card bg-gradient-to-br from-blue-900 to-indigo-900 text-[var(--stone)] border border-blue-700">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -374,10 +375,10 @@
                                     @endif
                                 ">{{ ucfirst($insight['type']) }}</span>
                             </div>
-                            <p class="text-sm text-gray-200">{{ $insight['description'] }}</p>
+                            <p class="text-sm text-[var(--sand)]">{{ $insight['description'] }}</p>
                             
                             @if(isset($insight['data']['risk_score']))
-                            <div class="mt-2 text-xs text-gray-300">
+                            <div class="mt-2 text-xs text-[var(--sand)]">
                                 Risk Score: <span class="font-bold">{{ $insight['data']['risk_score'] }}%</span>
                             </div>
                             @endif
@@ -386,8 +387,8 @@
                     </div>
 
                     <!-- AI Info Footer -->
-                    <div class="mt-4 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                        <p class="text-xs text-blue-200">
+                    <div class="mt-4 p-3 bg-[var(--gold)]/10 border border-[var(--gold)]/20 rounded-lg">
+                        <p class="text-xs text-[var(--sand)]">
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
@@ -430,51 +431,6 @@
                 </div>
                 @endforeach
             </div>
-        </div>
-    </div>
-    @endif
-
-    {{-- ── Active Fault Codes from integrated OEM sources ───────────────────── --}}
-    @if (isset($activeFaultCodes) && $activeFaultCodes->count() > 0)
-    <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 rounded-xl p-5 mb-6">
-        <div class="flex items-center gap-2 mb-3">
-            <svg class="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-            </svg>
-            <h2 class="text-lg font-bold text-orange-800 dark:text-orange-300">
-                Active Machine Fault Codes ({{ $activeFaultCodes->count() }})
-            </h2>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="text-left text-orange-700 dark:text-orange-400 border-b border-orange-200 dark:border-orange-700">
-                        <th class="pb-2 pr-4 font-semibold">Fault Code</th>
-                        <th class="pb-2 pr-4 font-semibold">Description</th>
-                        <th class="pb-2 pr-4 font-semibold">Severity</th>
-                        <th class="pb-2 pr-4 font-semibold">Source</th>
-                        <th class="pb-2 font-semibold">Detected</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-orange-100 dark:divide-orange-800/40">
-                    @foreach ($activeFaultCodes as $fault)
-                    <tr class="hover:bg-orange-100/50 dark:hover:bg-orange-900/30">
-                        <td class="py-2 pr-4 font-mono font-bold text-orange-900 dark:text-orange-200">{{ $fault['fault_code'] }}</td>
-                        <td class="py-2 pr-4 text-gray-700 dark:text-gray-300">{{ $fault['fault_description'] ?? '—' }}</td>
-                        <td class="py-2 pr-4">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                                @if (strtolower($fault['severity']) === 'critical') bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
-                                @elseif (strtolower($fault['severity']) === 'warning') bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
-                                @else bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
-                                @endif
-                            ">{{ $fault['severity'] }}</span>
-                        </td>
-                        <td class="py-2 pr-4 text-gray-500 dark:text-gray-400 text-xs">{{ $fault['source'] ?? '—' }}</td>
-                        <td class="py-2 text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap">{{ $fault['occurred_at'] }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
         </div>
     </div>
     @endif
@@ -559,7 +515,7 @@
         <!-- Planned Maintenance (Scheduled) -->
         <div class="card bg-base-200">
             <div class="card-body">
-                <h2 class="card-title text-blue-600">
+                <h2 class="card-title text-[var(--gold)]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -587,7 +543,7 @@
                                 </td>
                                 <td>
                                     {{ \Carbon\Carbon::parse($record->scheduled_date)->format('M d, Y') }}
-                                    <br><span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($record->scheduled_date)->diffForHumans() }}</span>
+                                    <br><span class="text-xs text-[var(--sand)]">{{ \Carbon\Carbon::parse($record->scheduled_date)->diffForHumans() }}</span>
                                 </td>
                                 <td>
                                     <span class="badge badge-sm 
@@ -620,9 +576,9 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center text-gray-500">
+                                <td colspan="5" class="text-center text-[var(--sand)]">
                                     <div class="py-8">
-                                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-12 h-12 mx-auto text-[var(--sand)] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
                                         <p>No planned maintenance scheduled</p>
@@ -670,9 +626,9 @@
                                 <td>
                                     @if($record->started_at)
                                         {{ $record->started_at->format('M d, Y H:i') }}
-                                        <br><span class="text-xs text-gray-500">{{ $record->started_at->diffForHumans() }}</span>
+                                        <br><span class="text-xs text-[var(--sand)]">{{ $record->started_at->diffForHumans() }}</span>
                                     @else
-                                        <span class="text-gray-400">Not started</span>
+                                        <span class="text-[var(--sand)]">Not started</span>
                                     @endif
                                 </td>
                                 <td>
@@ -697,9 +653,9 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center text-gray-500">
+                                <td colspan="5" class="text-center text-[var(--sand)]">
                                     <div class="py-8">
-                                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-12 h-12 mx-auto text-[var(--sand)] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
@@ -879,11 +835,11 @@
 
     <!-- Book Maintenance Modal -->
     @if($showBookingModal)
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" wire:click="closeBookingModal">
-        <div class="bg-gray-800 rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-gray-700 text-gray-100 shadow-lg" x-on:click.stop>
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeBookingModal">
+        <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-[var(--line)] text-[var(--stone)] shadow-lg" x-on:click.stop>
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-100">Book Maintenance</h2>
-                <button wire:click="closeBookingModal" class="text-gray-400 hover:text-gray-600">
+                <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Book Maintenance</h2>
+                <button wire:click="closeBookingModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -893,8 +849,8 @@
             <form wire:submit.prevent="bookMaintenance" class="space-y-4">
                 <!-- Machine Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-200 mb-2">Machine *</label>
-                    <select wire:model="machine_id" class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-gray-800" required>
+                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Machine *</label>
+                    <select wire:model="machine_id" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
                         <option value="">Select a machine...</option>
                         @foreach($machines as $machine)
                             <option value="{{ $machine->id }}">{{ $machine->name }} - {{ $machine->model }}</option>
@@ -906,8 +862,8 @@
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Maintenance Type -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-200 mb-2">Maintenance Type *</label>
-                            <select wire:model="maintenance_type" class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-gray-800" required>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Maintenance Type *</label>
+                            <select wire:model="maintenance_type" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
                             <option value="preventive">Preventive</option>
                             <option value="corrective">Corrective</option>
                             <option value="predictive">Predictive</option>
@@ -924,8 +880,8 @@
 
                     <!-- Priority -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-200 mb-2">Priority *</label>
-                        <select wire:model="priority" class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-gray-800" required>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Priority *</label>
+                        <select wire:model="priority" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
                             <option value="low">Low</option>
                             <option value="medium">Medium</option>
                             <option value="high">High</option>
@@ -937,11 +893,11 @@
 
                 <!-- Title -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-200 mb-2">Title *</label>
+                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Title *</label>
                     <input 
                         type="text" 
                         wire:model="title" 
-                        class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-100" 
+                        class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                         placeholder="e.g., Oil Change, Brake Inspection" 
                         required
                     >
@@ -950,10 +906,10 @@
 
                 <!-- Description -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-200 mb-2">Description</label>
+                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Description</label>
                     <textarea 
                         wire:model="description" 
-                        class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-100" 
+                        class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                         rows="3" 
                         placeholder="Additional details about the maintenance work..."
                     ></textarea>
@@ -963,11 +919,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Scheduled Date -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-200 mb-2">Scheduled Date *</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Scheduled Date *</label>
                         <input 
                             type="datetime-local" 
                             wire:model="scheduled_date" 
-                            class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-100" 
+                            class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                             required
                         >
                         @error('scheduled_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -975,13 +931,13 @@
 
                     <!-- Estimated Duration -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-200 mb-2">Estimated Duration (hours)</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Estimated Duration (hours)</label>
                         <input 
                             type="number" 
                             wire:model="estimated_duration_hours" 
                             step="0.5" 
                             min="0" 
-                            class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-100" 
+                            class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                             placeholder="0"
                         >
                         @error('estimated_duration_hours') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -991,13 +947,13 @@
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Estimated Cost -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-200 mb-2">Estimated Cost (ZAR)</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Estimated Cost (ZAR)</label>
                         <input 
                             type="number" 
                             wire:model="estimated_cost" 
                             step="0.01" 
                             min="0" 
-                            class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-100" 
+                            class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                             placeholder="0.00"
                         >
                         @error('estimated_cost') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -1005,11 +961,11 @@
 
                     <!-- Required Parts -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-200 mb-2">Required Parts</label>
+                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Required Parts</label>
                         <input 
                             type="text" 
                             wire:model="required_parts" 
-                            class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-100" 
+                            class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                             placeholder="e.g., Oil filter, Brake pads"
                         >
                         @error('required_parts') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -1018,10 +974,10 @@
 
                 <!-- Technician Notes -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-200 mb-2">Technician Notes</label>
+                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Technician Notes</label>
                     <textarea 
                         wire:model="technician_notes" 
-                        class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-100" 
+                        class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                         rows="2" 
                         placeholder="Special instructions or notes for the technician..."
                     ></textarea>
@@ -1032,7 +988,7 @@
                 <div class="flex gap-3 pt-4">
                     <button 
                         type="submit" 
-                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--stone)] rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
                         wire:loading.attr="disabled"
                         wire:target="bookMaintenance"
                     >
@@ -1053,7 +1009,7 @@
                     <button 
                         type="button" 
                         wire:click="closeBookingModal"
-                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
+                        class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded-lg transition-colors font-medium"
                     >
                         Cancel
                     </button>

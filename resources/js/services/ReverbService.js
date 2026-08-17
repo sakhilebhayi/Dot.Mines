@@ -1,9 +1,16 @@
 /**
  * Reverb WebSocket Service
  * Handles real-time event subscriptions and listeners
- * 
+ *
  * This service manages connections to Laravel Reverb for real-time updates
  * including machine locations, alerts, geofence events, and machine status changes.
+ *
+ * IMPORTANT: every channel.listen() call below must use the event's
+ * broadcastAs() name (e.g. '.machine.location.updated'), not its PHP class
+ * name. Laravel Echo's default EventFormatter prefixes a bare event name
+ * with the "App.Events" namespace and listens for that -- which never
+ * matches these events' overridden, short broadcastAs() names. A leading
+ * "." tells Echo to use the name exactly as given, un-namespaced.
  */
 
 class ReverbService {
@@ -35,7 +42,6 @@ class ReverbService {
             this.isConnected = true;
             this.reconnectAttempts = 0;
 
-            console.log('✅ Reverb service initialized for user:', userId, 'team:', teamId);
         } catch (error) {
             console.error('❌ Failed to initialize Reverb service:', error);
             this.handleReconnection();
@@ -56,15 +62,13 @@ class ReverbService {
         }
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
-            channel.listen('MachineLocationUpdated', (data) => {
-                console.log('📍 Location update received:', data);
+            channel.listen('.machine.location.updated', (data) => {
                 callback(data);
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to machine location updates: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -83,15 +87,13 @@ class ReverbService {
         }
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
-            channel.listen('MachineLocationUpdated', (data) => {
-                console.log('📍 Team location update:', data);
+            channel.listen('.machine.location.updated', (data) => {
                 callback(data);
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to team locations: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -110,15 +112,63 @@ class ReverbService {
         }
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
-            channel.listen('AlertTriggered', (data) => {
-                console.log('🚨 Alert triggered:', data);
+            channel.listen('.alert.triggered', (data) => {
                 callback(data);
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to team alerts: ${channelName}`);
+        } catch (error) {
+            console.error(`❌ Failed to subscribe to ${channelName}:`, error);
+        }
+    }
+
+    /**
+     * Subscribe to predictive maintenance alerts
+     * @param {Function} callback - Function called when a maintenance alert fires
+     */
+    subscribeMaintenanceAlerts(callback) {
+        const channelName = `team.${this.teamId}.alerts`;
+
+        if (this.subscriptions.has(channelName)) {
+            console.warn(`Already subscribed to ${channelName}`);
+            return;
+        }
+
+        try {
+            const channel = window.Echo.private(channelName);
+
+            channel.listen('.maintenance.alert', (data) => {
+                callback(data);
+            });
+
+            this.subscriptions.set(channelName, channel);
+        } catch (error) {
+            console.error(`❌ Failed to subscribe to ${channelName}:`, error);
+        }
+    }
+
+    /**
+     * Subscribe to compliance violations
+     * @param {Function} callback - Function called when a violation is detected
+     */
+    subscribeComplianceViolations(callback) {
+        const channelName = `team.${this.teamId}.compliance`;
+
+        if (this.subscriptions.has(channelName)) {
+            console.warn(`Already subscribed to ${channelName}`);
+            return;
+        }
+
+        try {
+            const channel = window.Echo.private(channelName);
+
+            channel.listen('.compliance.violation', (data) => {
+                callback(data);
+            });
+
+            this.subscriptions.set(channelName, channel);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -139,20 +189,17 @@ class ReverbService {
         }
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
-            channel.listen('GeofenceEntryDetected', (data) => {
-                console.log('🚪 Geofence entry detected:', data);
+            channel.listen('.geofence.entry.detected', (data) => {
                 entryCallback(data);
             });
 
-            channel.listen('GeofenceExitDetected', (data) => {
-                console.log('🚪 Geofence exit detected:', data);
+            channel.listen('.geofence.exit.detected', (data) => {
                 exitCallback(data);
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to geofence events: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -167,10 +214,9 @@ class ReverbService {
         const channelName = `machine.${machineId}`;
 
         try {
-            const channel = window.Echo.channel(channelName);
+            const channel = window.Echo.private(channelName);
 
-            channel.listen('MachineOffline', (data) => {
-                console.log('📴 Machine offline:', data);
+            channel.listen('.machine.offline', (data) => {
                 callback({
                     type: 'offline',
                     ...data
@@ -178,7 +224,6 @@ class ReverbService {
             });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to machine status: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
@@ -200,162 +245,68 @@ class ReverbService {
         try {
             const channel = window.Echo.join(channelName)
                 .here((users) => {
-                    console.log('👥 Current users:', users);
                     joinCallback(users);
                 })
                 .joining((user) => {
-                    console.log('👤 User joined:', user);
                     joinCallback([user]);
                 })
                 .leaving((user) => {
-                    console.log('👤 User left:', user);
                     leaveCallback(user);
                 });
 
             this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to presence: ${channelName}`);
         } catch (error) {
             console.error(`❌ Failed to subscribe to ${channelName}:`, error);
         }
     }
 
     /**
-     * Subscribe to the feed channel for a team.
-     * Handles live events AND missed-event catch-up on reconnection.
+     * Monitor the underlying Pusher-protocol connection and report a
+     * simplified UI state: 'connected' | 'connecting' | 'reconnecting' |
+     * 'disconnected'. pusher-js (which Reverb speaks) already handles the
+     * actual reconnection attempts -- this only observes and reports state,
+     * plus fires onReconnected() once when a connection is recovered after
+     * having dropped, so callers can reconcile data that may have been
+     * missed while disconnected.
      *
-     * @param {string} teamId
-     * @param {Object} callbacks
-     *   - onNewPost(postData)
-     *   - onAcknowledgementUpdated(data)
-     *   - onNewComment(data)
-     *   - onCommentUpdated(data)
-     *   - onCommentDeleted(data)
-     *   - onPostLiked(data)
-     *   - onPostStatusChanged(data)
-     *   - onMissedPosts(posts[])   – called once on reconnect with any posts missed offline
+     * @param {Function} onStateChange - Called with the simplified state string
+     * @param {Function} [onReconnected] - Called once when connection is regained after a drop
      */
-    subscribeFeed(teamId, callbacks = {}) {
-        const channelName = `feed.team.${teamId}`;
-        const storageKey  = `feed_last_seen_${teamId}`;
+    monitorConnection(onStateChange, onReconnected) {
+        const connection = window.Echo?.connector?.pusher?.connection;
 
-        if (this.subscriptions.has(channelName)) {
-            console.warn(`Already subscribed to ${channelName}`);
-            return;
+        if (!connection) {
+            console.warn('Cannot monitor connection: Echo/Pusher connection not available.');
+            return () => {};
         }
 
-        // Record the last time this client received a live feed event so we
-        // can request missed posts after a reconnect.
-        const touchLastSeen = () => {
-            localStorage.setItem(storageKey, new Date().toISOString());
+        let hadDropped = false;
+
+        const report = (pusherState) => {
+            let uiState;
+            if (pusherState === 'connected') {
+                uiState = 'connected';
+                if (hadDropped && onReconnected) {
+                    onReconnected();
+                }
+                hadDropped = false;
+            } else if (pusherState === 'connecting') {
+                uiState = hadDropped ? 'reconnecting' : 'connecting';
+            } else {
+                // 'unavailable', 'failed', 'disconnected'
+                uiState = 'disconnected';
+                hadDropped = true;
+            }
+            onStateChange(uiState);
         };
 
-        try {
-            const channel = window.Echo.private(channelName);
+        const handler = ({ current }) => report(current);
+        connection.bind('state_change', handler);
 
-            channel
-                .listen('.FeedPostCreated', (data) => {
-                    touchLastSeen();
-                    callbacks.onNewPost?.(data.post);
-                })
-                .listen('.FeedAcknowledgementUpdated', (data) => {
-                    touchLastSeen();
-                    callbacks.onAcknowledgementUpdated?.(data);
-                })
-                .listen('.FeedCommentCreated', (data) => {
-                    touchLastSeen();
-                    callbacks.onNewComment?.(data);
-                })
-                .listen('.FeedCommentUpdated', (data) => {
-                    touchLastSeen();
-                    callbacks.onCommentUpdated?.(data);
-                })
-                .listen('.FeedCommentDeleted', (data) => {
-                    touchLastSeen();
-                    callbacks.onCommentDeleted?.(data);
-                })
-                .listen('.FeedPostLiked', (data) => {
-                    touchLastSeen();
-                    callbacks.onPostLiked?.(data);
-                })
-                .listen('.FeedPostStatusChanged', (data) => {
-                    touchLastSeen();
-                    callbacks.onPostStatusChanged?.(data);
-                });
+        // Report the current state immediately so UI doesn't start blank.
+        report(connection.state);
 
-            this.subscriptions.set(channelName, channel);
-            console.log(`✅ Subscribed to feed channel: ${channelName}`);
-
-            // ── Reconnection / missed-event catch-up ──────────────────────────
-            // Echo uses Pusher-JS under the hood. We watch for the connection
-            // transitioning back to "connected" and fetch any posts published
-            // while the socket was down.
-            const pusherConn = window.Echo.connector?.pusher?.connection;
-
-            if (pusherConn) {
-                pusherConn.bind('state_change', ({ previous, current }) => {
-                    const wasDisconnected = ['disconnected', 'unavailable', 'failed'].includes(previous);
-
-                    if (wasDisconnected && current === 'connected') {
-                        console.log('🔄 Feed channel reconnected — fetching missed posts');
-                        this._fetchMissedFeedPosts(storageKey, teamId, callbacks.onMissedPosts);
-                    }
-                });
-            }
-
-            // If the page loads while already connected (normal page load), set
-            // the baseline timestamp so the next reconnect knows where to start.
-            if (!localStorage.getItem(storageKey)) {
-                touchLastSeen();
-            }
-        } catch (error) {
-            console.error(`❌ Failed to subscribe to feed channel ${channelName}:`, error);
-        }
-    }
-
-    /**
-     * Fetch any feed posts published after the last seen timestamp and pass
-     * them to the caller's onMissedPosts callback.
-     *
-     * @private
-     */
-    async _fetchMissedFeedPosts(storageKey, teamId, onMissedPosts) {
-        const since = localStorage.getItem(storageKey);
-
-        if (!since || typeof onMissedPosts !== 'function') {
-            return;
-        }
-
-        try {
-            const url = new URL('/api/feed', window.location.origin);
-            url.searchParams.set('since', since);
-            url.searchParams.set('per_page', '50');
-
-            const response = await fetch(url.toString(), {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
-            });
-
-            if (!response.ok) {
-                console.warn('Feed catch-up fetch failed:', response.status);
-                return;
-            }
-
-            const json = await response.json();
-            const missed = json.data ?? [];
-
-            if (missed.length > 0) {
-                console.log(`📬 Delivering ${missed.length} missed feed post(s)`);
-                onMissedPosts(missed);
-            }
-
-            // Advance the cursor so the next reconnect starts from now
-            localStorage.setItem(storageKey, new Date().toISOString());
-        } catch (err) {
-            console.error('❌ Feed catch-up fetch error:', err);
-        }
+        return () => connection.unbind('state_change', handler);
     }
 
     /**
@@ -367,7 +318,6 @@ class ReverbService {
             try {
                 window.Echo.leave(channelName);
                 this.subscriptions.delete(channelName);
-                console.log(`✅ Unsubscribed from: ${channelName}`);
             } catch (error) {
                 console.error(`❌ Failed to unsubscribe from ${channelName}:`, error);
             }
@@ -381,7 +331,6 @@ class ReverbService {
         for (const channelName of this.subscriptions.keys()) {
             this.unsubscribe(channelName);
         }
-        console.log('✅ Unsubscribed from all channels');
     }
 
     /**
@@ -419,7 +368,6 @@ class ReverbService {
     handleReconnection() {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
-            console.log(`⏳ Reconnecting... Attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
             setTimeout(() => {
                 this.init(this.userId, this.teamId);
             }, this.reconnectDelay);
@@ -452,7 +400,6 @@ class ReverbService {
         this.unsubscribeAll();
         this.listeners.clear();
         this.isConnected = false;
-        console.log('✅ ReverbService disposed');
     }
 }
 

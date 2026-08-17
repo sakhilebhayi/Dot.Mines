@@ -5,37 +5,35 @@ namespace App\Http\Controllers;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MineArea;
-use App\Models\User;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    public function view2(Request $request): View
+    public function view2(Request $request)
     {
-        /** @var User|null $user */
         $user = Auth::user();
 
-        // The route is inside the auth + ensure_team middleware group, so currentTeam
-        // should always be set. If for any reason it is not, return empty collections
-        // rather than exposing all records across tenants.
-        if ($user && $user->currentTeam) {
-            $teamId = $user->currentTeam->id;
-            $mineAreas = MineArea::where('team_id', $teamId)->get();
-            $geofences = Geofence::whereIn('mine_area_id', $mineAreas->pluck('id'))->get();
-            $machines = Machine::where('team_id', $teamId)->get();
-        } else {
-            $mineAreas = collect();
-            $geofences = collect();
-            $machines = collect();
+        // No unscoped fallback here: EnsureTeamContext only aborts when a
+        // team_id is present but invalid/unauthorized. A user who belongs to
+        // no team at all (e.g. removed from their last team) passes that
+        // middleware with no team set, so `currentTeam` can genuinely be
+        // null when this action runs. Falling through to `Model::all()` in
+        // that case would leak every team's mine areas/geofences/machines,
+        // so we abort instead of guessing a scope.
+        if (! $user || ! isset($user->currentTeam->id)) {
+            abort(403, 'No active team selected.');
         }
+
+        $teamId = $user->currentTeam->id;
+        $mineAreas = MineArea::where('team_id', $teamId)->get();
+        $geofences = Geofence::whereIn('mine_area_id', $mineAreas->pluck('id'))->get();
+        $machines = Machine::where('team_id', $teamId)->get();
 
         return view('reports.view-2', compact('mineAreas', 'geofences', 'machines'));
     }
 
-    public function generate(Request $request): RedirectResponse
+    public function generate(Request $request)
     {
         $data = $request->validate([
             'mine_area_id' => 'nullable|exists:mine_areas,id',

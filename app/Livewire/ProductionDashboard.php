@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\BellEquipment;
+use App\Models\BellEquipmentLocationHistory;
 use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\MineArea;
@@ -10,7 +12,6 @@ use App\Models\Team;
 use App\Services\MachineKpiService;
 use App\Services\ProductionService;
 use Carbon\Carbon;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -32,6 +33,7 @@ use Livewire\WithPagination;
  * @property-read array<mixed> $loadComparisonData
  * @property-read array<mixed> $areaPerformance
  * @property-read array{total_loads: int, total_payload_tonnes: float, avg_utilization: float, has_data: bool} $oemKpiSummary
+ * @property-read array<int, array<string, mixed>> $bellTruckBreakdown
  */
 class ProductionDashboard extends Component
 {
@@ -74,13 +76,20 @@ class ProductionDashboard extends Component
 
     public string $notes = '';
 
-    protected ProductionService $productionService;
+    protected ?ProductionService $productionService = null;
 
-    protected Team $team;
+    protected ?Team $team = null;
 
     public int $teamId = 0;
 
-    public function mount(): void
+    private function productionService(): ProductionService
+    {
+        assert($this->productionService !== null);
+
+        return $this->productionService;
+    }
+
+    public function mount()
     {
         $this->productionService = app(ProductionService::class);
         $this->team = Auth::user()->currentTeam;
@@ -93,9 +102,12 @@ class ProductionDashboard extends Component
     /**
      * Ensure services and team are available after Livewire hydration.
      */
-    public function hydrate(): void
+    public function hydrate()
     {
-        $this->productionService = app(ProductionService::class);
+        if (! $this->productionService) {
+            $this->productionService = app(ProductionService::class);
+        }
+
         $this->team = Auth::user()->currentTeam;
         $this->teamId = $this->team?->id ?? $this->teamId;
     }
@@ -111,7 +123,7 @@ class ProductionDashboard extends Component
         };
     }
 
-    public function getProductionRecordsProperty(): mixed
+    public function getProductionRecordsProperty()
     {
         $query = ProductionRecord::forTeam($this->teamId);
 
@@ -129,41 +141,48 @@ class ProductionDashboard extends Component
             $query->where('status', $this->statusFilter);
         }
 
-        if ($this->startDate && $this->endDate) {
-            $query->whereBetween('record_date', [$this->startDate, $this->endDate]);
+        if ($this->dateFilter) {
+            $start = match ($this->dateFilter) {
+                'day' => Carbon::today(),
+                'week' => Carbon::today()->subWeek(),
+                'month' => Carbon::today()->subMonth(),
+                'year' => Carbon::today()->subYear(),
+                default => null,
+            };
+
+            if ($start) {
+                $query->where('record_date', '>=', $start->format('Y-m-d'));
+            }
         }
 
         return $query->orderByDesc('record_date')->paginate(15);
     }
 
-    public function getStatisticsProperty(): mixed
+    public function getStatisticsProperty()
     {
-        return $this->productionService->getProductionStatistics(
+        return $this->productionService()->getProductionStatistics(
             $this->teamId,
-            Carbon::parse($this->startDate),
-            Carbon::parse($this->endDate)
+            Carbon::now()->subDays(30),
+            Carbon::now()
         );
     }
 
-    public function getTrendProperty(): mixed
+    public function getTrendProperty()
     {
-        $days = (int) Carbon::parse($this->startDate)->diffInDays(Carbon::parse($this->endDate)) + 1;
-
-        return $this->productionService->getProductionTrend($this->teamId, max($days, 1));
+        return $this->productionService()->getProductionTrend($this->teamId, 30);
     }
 
-    public function getTargetsProperty(): mixed
+    public function getTargetsProperty()
     {
-        return $this->productionService->getActiveTargets($this->teamId);
+        return $this->productionService()->getActiveTargets($this->teamId);
     }
 
-    public function getForecastsProperty(): mixed
+    public function getForecastsProperty()
     {
-        return $this->productionService->getRecentForecasts($this->teamId, 7);
+        return $this->productionService()->getRecentForecasts($this->teamId, 7);
     }
 
-    /** @return array<string, mixed> */
-    public function getSummaryProperty(): array
+    public function getSummaryProperty()
     {
         $stats = $this->statistics;
         $activeAreas = MineArea::forTeam($this->teamId)->where('status', 'active')->count();
@@ -177,18 +196,17 @@ class ProductionDashboard extends Component
         ];
     }
 
-    public function getMineAreasProperty(): mixed
+    public function getMineAreasProperty()
     {
         return MineArea::forTeam($this->teamId)->get();
     }
 
-    public function getMachinesProperty(): mixed
+    public function getMachinesProperty()
     {
         return Machine::where('team_id', $this->teamId)->get();
     }
 
-    /** @return array<int, array<string, mixed>> */
-    public function getDailyChartProperty(): array
+    public function getDailyChartProperty()
     {
         $trend = $this->trend;
         if (! $trend || $trend->isEmpty()) {
@@ -204,8 +222,7 @@ class ProductionDashboard extends Component
         })->toArray();
     }
 
-    /** @return array<empty> */
-    public function getMaterialBreakdownProperty(): array
+    public function getMaterialBreakdownProperty()
     {
         // Placeholder implementation - can be enhanced with actual material tracking
         return [];
@@ -226,6 +243,74 @@ class ProductionDashboard extends Component
             $this->startDate ?? today()->toDateString(),
             $this->endDate ?? today()->toDateString(),
         );
+    }
+
+    /**
+     * Per-truck Bell production breakdown for the selected date range.
+     * Reads from production_records (shift='oem_auto') synced from the Bell API.
+     * Includes latest known GPS location from bell_equipment_location_history.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getBellTruckBreakdownProperty(): array
+    {
+        $startDate = $this->startDate ?? today()->toDateString();
+        $endDate = $this->endDate ?? today()->toDateString();
+
+        $records = ProductionRecord::where('team_id', $this->teamId)
+            ->whereBetween('record_date', [$startDate, $endDate])
+            ->where('shift', 'oem_auto')
+            ->whereNotNull('machine_id')
+            ->with('machine')
+            ->get();
+
+        if ($records->isEmpty()) {
+            return [];
+        }
+
+        // Map machine_id → equipment_key for location lookup.
+        $machineIds = $records->pluck('machine_id')->unique()->values();
+        $bellByMachine = BellEquipment::whereIn('machine_id', $machineIds)
+            ->get()
+            ->keyBy('machine_id');
+
+        $equipmentKeys = $bellByMachine->pluck('equipment_key')->values()->all();
+
+        // Latest location per equipment_key via correlated subquery (no window functions needed).
+        $latestLocations = BellEquipmentLocationHistory::whereIn('equipment_key', $equipmentKeys)
+            ->where('recorded_at', function ($sub) {
+                $sub->selectRaw('MAX(inner_loc.recorded_at)')
+                    ->from('bell_equipment_location_history as inner_loc')
+                    ->whereColumn('inner_loc.equipment_key', 'bell_equipment_location_history.equipment_key');
+            })
+            ->get()
+            ->keyBy('equipment_key');
+
+        return $records
+            ->groupBy('machine_id')
+            ->map(function ($machineRecords, $machineId) use ($bellByMachine, $latestLocations) {
+                $machine = $machineRecords->first()->machine;
+                $bellEq = $bellByMachine->get($machineId);
+                $location = $bellEq ? $latestLocations->get($bellEq->equipment_key) : null;
+
+                return [
+                    'machine_id' => $machineId,
+                    'machine_name' => $machine?->name ?? 'Unknown Truck',
+                    'serial_number' => $bellEq?->serial_number,
+                    'model' => $bellEq?->model,
+                    'total_loads' => (int) $machineRecords->sum('loads_moved'),
+                    'total_cycles' => (int) $machineRecords->sum('cycles_completed'),
+                    'total_payload_tonnes' => round((float) $machineRecords->sum('system_quantity'), 2),
+                    'last_lat' => $location ? (float) $location->latitude : null,
+                    'last_lng' => $location ? (float) $location->longitude : null,
+                    'last_seen' => $location?->recorded_at?->diffForHumans(),
+                    'last_seen_raw' => $location?->recorded_at?->toIso8601String(),
+                    'last_record_date' => $machineRecords->max('record_date'),
+                ];
+            })
+            ->sortByDesc('total_payload_tonnes')
+            ->values()
+            ->toArray();
     }
 
     /** @return array<empty> */
@@ -290,7 +375,6 @@ class ProductionDashboard extends Component
         $startDate = Carbon::parse($this->startDate);
         $endDate = Carbon::parse($this->endDate);
 
-        // Reported: manually entered production records per machine
         $reported = ProductionRecord::forTeam($this->teamId)
             ->whereBetween('record_date', [$startDate, $endDate])
             ->whereNotNull('machine_id')
@@ -298,7 +382,6 @@ class ProductionDashboard extends Component
             ->get()
             ->groupBy('machine_id');
 
-        // Recorded: machine sensor data (each metric reading with load_weight > 0 is a load event)
         $recorded = MachineMetric::where('team_id', $this->teamId)
             ->whereBetween('recorded_at', [$startDate->startOfDay(), $endDate->endOfDay()])
             ->where('load_weight', '>', 0)
@@ -337,8 +420,7 @@ class ProductionDashboard extends Component
         })->values()->toArray();
     }
 
-    /** @return array<int, array<string, mixed>> */
-    public function getAreaPerformanceProperty(): array
+    public function getAreaPerformanceProperty()
     {
         $mineAreas = $this->mineAreas;
         if (! $mineAreas || $mineAreas->isEmpty()) {
@@ -364,19 +446,19 @@ class ProductionDashboard extends Component
         })->values()->toArray();
     }
 
-    public function openCreateModal(): void
+    public function openCreateModal()
     {
         $this->showCreateModal = true;
         $this->resetForm();
     }
 
-    public function closeCreateModal(): void
+    public function closeCreateModal()
     {
         $this->showCreateModal = false;
         $this->resetForm();
     }
 
-    public function openEditModal(int $id): void
+    public function openEditModal($id)
     {
         $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($id);
         $this->editingRecordId = $id;
@@ -391,13 +473,13 @@ class ProductionDashboard extends Component
         $this->showEditModal = true;
     }
 
-    public function closeEditModal(): void
+    public function closeEditModal()
     {
         $this->showEditModal = false;
         $this->resetForm();
     }
 
-    public function saveRecord(): void
+    public function saveRecord()
     {
         $validated = $this->validate([
             'record_date' => 'required|date',
@@ -410,14 +492,15 @@ class ProductionDashboard extends Component
         ]);
 
         if ($this->editingRecordId) {
+            /** @var ProductionRecord $record */
             $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($this->editingRecordId);
-            $this->productionService->updateProductionRecord($record, [
+            $this->productionService()->updateProductionRecord($record, [
                 ...$validated,
                 'notes' => $this->notes,
             ]);
             $this->showEditModal = false;
         } else {
-            $this->productionService->createProductionRecord($this->teamId, [
+            $this->productionService()->createProductionRecord($this->teamId, [
                 ...$validated,
                 'notes' => $this->notes,
             ]);
@@ -428,13 +511,14 @@ class ProductionDashboard extends Component
         $this->dispatch('record-saved');
     }
 
-    public function deleteRecord(int $id): void
+    public function deleteRecord($id)
     {
+        /** @var ProductionRecord $record */
         $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($id);
-        $this->productionService->deleteProductionRecord($record);
+        $this->productionService()->deleteProductionRecord($record);
     }
 
-    public function resetForm(): void
+    public function resetForm()
     {
         $this->record_date = Carbon::today()->format('Y-m-d');
         $this->shift = 'day';
@@ -447,13 +531,13 @@ class ProductionDashboard extends Component
         $this->editingRecordId = null;
     }
 
-    public function switchView(string $mode): void
+    public function switchView($mode)
     {
         $this->viewMode = $mode;
         $this->resetPage();
     }
 
-    public function render(): View
+    public function render()
     {
         return view('livewire.production-dashboard', [
             'records' => $this->productionRecords,
@@ -472,6 +556,7 @@ class ProductionDashboard extends Component
             'productionChartData' => $this->productionChartData,
             'loadComparisonData' => $this->loadComparisonData,
             'bellKpiSummary' => $this->oemKpiSummary,
+            'bellTruckBreakdown' => $this->bellTruckBreakdown,
         ]);
     }
 }

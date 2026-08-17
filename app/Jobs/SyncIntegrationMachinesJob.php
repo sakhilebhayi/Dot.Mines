@@ -21,7 +21,6 @@ class SyncIntegrationMachinesJob implements ShouldQueue
 
     public int $timeout = 300;
 
-    /** @var array<int> */
     public array $backoff = [60, 300, 900]; // 1 min, 5 mins, 15 mins
 
     /**
@@ -72,7 +71,7 @@ class SyncIntegrationMachinesJob implements ShouldQueue
                     'error' => $result['error'] ?? 'Unknown error',
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Exception during machine sync', [
                 'integration_id' => $this->integration->id,
                 'error' => $e->getMessage(),

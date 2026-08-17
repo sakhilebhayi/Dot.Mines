@@ -10,8 +10,13 @@ class BobcatService extends BaseManufacturerService implements ManufacturerServi
 
     public function testConnection(): bool
     {
-        // Implement Bobcat API connection test
-        return true;
+        // No real Bobcat API integration has been built yet -- this
+        // used to unconditionally return true, reporting a successful
+        // connection test regardless of whether any credentials were
+        // even provided.
+        $this->lastError = 'Bobcat integration is not yet available.';
+
+        return false;
     }
 
     /**

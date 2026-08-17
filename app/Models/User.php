@@ -9,12 +9,9 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
@@ -39,7 +36,6 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property Carbon $updated_at
  * @property-read Collection<int, PersonalAccessToken> $tokens
  * @property-read Collection<int, Team> $ownedTeams
- * @property-read Team|null $currentTeam
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -63,6 +59,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'current_team_id',
+        'notification_preferences',
     ];
 
     /**
@@ -96,14 +93,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_preferences' => 'array',
         ];
     }
 
     /**
      * Get roles for current team
      */
-    /** @return BelongsToMany<Role, $this> */
-    public function roles(): BelongsToMany
+    public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_user');
     }
@@ -111,30 +108,24 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get permissions through roles for current team
      */
-    public function permissions(): Builder
+    public function permissions()
     {
         // Return a query builder for permissions granted to this user via their roles.
         // We join through permission_role -> roles -> role_user so callers can further
         // scope by team or permission name.
-        /** @var Builder $query */
-        $query = Permission::query()
+        return Permission::query()
             ->select('permissions.*')
             ->join('permission_role', 'permissions.id', '=', 'permission_role.permission_id')
             ->join('roles', 'permission_role.role_id', '=', 'roles.id')
             ->join('role_user', 'roles.id', '=', 'role_user.role_id')
             ->where('role_user.user_id', $this->id)
-            ->where('roles.team_id', $this->current_team_id)
-            ->toBase();
-
-        return $query;
+            ->where('roles.team_id', $this->current_team_id);
     }
 
     /**
      * Check if user has a specific role in current team
-     *
-     * @param  string|array<string>  $role
      */
-    public function hasRole(string|array $role): bool
+    public function hasRole($role): bool
     {
         if (is_string($role)) {
             return $this->roles()
@@ -152,7 +143,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Check if user has a specific permission
      */
-    public function hasPermission(string $permission): bool
+    public function hasPermission($permission): bool
     {
         if ($this->hasRole('admin')) {
             return true; // Admins have all permissions
@@ -165,10 +156,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user has any of the given permissions
-     *
-     * @param  string|array<string>  $permissions
      */
-    public function hasAnyPermission(string|array $permissions): bool
+    public function hasAnyPermission($permissions): bool
     {
         if ($this->hasRole('admin')) {
             return true;
@@ -180,11 +169,80 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if user has all of the given permissions
-     *
-     * @param  string|array<string>  $permissions
+     * Whether an in-app alert of the given severity should reach this user.
+     * 'critical' always passes -- neither the "In-App Alerts" toggle nor
+     * quiet hours can suppress it, the same mandatory floor already applied
+     * to the notification bell's severity threshold.
      */
-    public function hasAllPermissions(string|array $permissions): bool
+    public function wantsInAppAlert(?string $severity = null): bool
+    {
+        if ($severity === 'critical') {
+            return true;
+        }
+
+        if (($this->notification_preferences['in_app_alerts'] ?? true) === false) {
+            return false;
+        }
+
+        return ! $this->isInQuietHours();
+    }
+
+    /**
+     * Whether an email alert of the given severity should be sent to this
+     * user. Same mandatory-critical floor as wantsInAppAlert().
+     */
+    public function wantsEmailAlert(?string $severity = null): bool
+    {
+        if ($severity === 'critical') {
+            return true;
+        }
+
+        if (($this->notification_preferences['email_alerts'] ?? true) === false) {
+            return false;
+        }
+
+        return ! $this->isInQuietHours();
+    }
+
+    /**
+     * Whether this user wants "report ready" emails -- the one preference
+     * this toggle is named after and, until now, never actually gated.
+     */
+    public function wantsEmailReports(): bool
+    {
+        return ($this->notification_preferences['email_reports'] ?? true) !== false;
+    }
+
+    /**
+     * Quiet hours support an overnight window (e.g. 22:00-08:00), where the
+     * end time is numerically before the start time.
+     */
+    public function isInQuietHours(): bool
+    {
+        $preferences = $this->notification_preferences ?? [];
+
+        if (($preferences['quiet_hours_enabled'] ?? false) !== true) {
+            return false;
+        }
+
+        $start = $preferences['quiet_hours_start'] ?? null;
+        $end = $preferences['quiet_hours_end'] ?? null;
+
+        if (! $start || ! $end) {
+            return false;
+        }
+
+        $now = now()->format('H:i');
+
+        return $start <= $end
+            ? ($now >= $start && $now < $end)
+            : ($now >= $start || $now < $end);
+    }
+
+    /**
+     * Check if user has all of the given permissions
+     */
+    public function hasAllPermissions($permissions): bool
     {
         if ($this->hasRole('admin')) {
             return true;
@@ -199,10 +257,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get all roles for user
-     *
-     * @return Collection<int, Role>
      */
-    public function getAllRoles(): Collection
+    public function getAllRoles()
     {
         return $this->roles()
             ->where('team_id', $this->current_team_id)
@@ -211,10 +267,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Assign a role to user
-     *
-     * @return bool|array<mixed>
      */
-    public function assignRole(string|Role $role): bool|array
+    public function assignRole($role)
     {
         if (is_string($role)) {
             $role = Role::where('team_id', $this->current_team_id)
@@ -232,7 +286,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Remove a role from user
      */
-    public function removeRole(string|Role $role): bool|int
+    public function removeRole($role)
     {
         if (is_string($role)) {
             $role = Role::where('team_id', $this->current_team_id)
@@ -247,23 +301,19 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->roles()->detach($role->id);
     }
 
-    /**
-     * Get the teams owned by the user.
-     *
-     * @return HasMany<Team>
-     */
-    /** @return HasMany<Team, $this> */
     public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'user_id');
     }
 
     /**
-     * Get the current team of the user's context.
-     *
-     * @return BelongsTo<Team>
+     * This override existed only to add a return type; it silently dropped
+     * HasTeams::currentTeam()'s lazy fallback to the user's personal team,
+     * so any user reaching here with current_team_id still null (freshly
+     * registered, or a route not covered by the ensure_team middleware)
+     * got a hard null instead of their own team. Restored to match the
+     * trait's real behavior.
      */
-    /** @return BelongsTo<Team, $this> */
     public function currentTeam(): BelongsTo
     {
         if (is_null($this->current_team_id) && $this->id) {
@@ -273,22 +323,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Team::class, 'current_team_id');
     }
 
-    /**
-     * Send the email verification notification.
-     * Falls back to synchronous delivery if the queue driver is unavailable.
-     */
     public function sendEmailVerificationNotification(): void
     {
-        try {
-            $this->notify(new VerifyEmailNotification);
-        } catch (\RedisException $e) {
-            Notification::sendNow($this, new VerifyEmailNotification);
-        }
-    }
-
-    /** @return HasMany<NotificationPreference, $this> */
-    public function notificationPreferences(): HasMany
-    {
-        return $this->hasMany(NotificationPreference::class);
+        $this->notify(new VerifyEmailNotification);
     }
 }

@@ -30,9 +30,6 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchMachines(): array
     {
         try {
@@ -61,9 +58,6 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchLocation(string $machineId): array
     {
         try {
@@ -83,9 +77,6 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -93,7 +84,11 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
             $telemetry = $this->makeRequest('GET', "/api/v2/equipment/{$machineId}/telemetry");
             $serviceIntervals = $this->makeRequest('GET', "/api/v2/equipment/{$machineId}/service-intervals");
 
-            $metrics = array_merge(
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier ones, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($operatingData['data'] ?? []),
                 $this->parseMetrics($telemetry['data'] ?? []),
                 $this->parseMetrics($serviceIntervals['data'] ?? [])
@@ -114,9 +109,6 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -151,8 +143,6 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
 
     /**
      * Fetch machine details from Liebherr API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -181,8 +171,6 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -197,8 +185,6 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -213,8 +199,6 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

@@ -6,15 +6,15 @@ use App\Models\ProductionForecast;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use Carbon\Carbon;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\Paginator;
 
 class ProductionService
 {
     /**
-     * @return LengthAwarePaginator<int, ProductionRecord>
+     * @return Paginator<ProductionRecord>
      */
-    public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null): LengthAwarePaginator
+    public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null)
     {
         $startDate = $startDate ?? Carbon::now()->subDays(30);
         $endDate = $endDate ?? Carbon::now();
@@ -172,6 +172,39 @@ class ProductionService
                 'record_count' => $areaRecords->count(),
             ];
         });
+    }
+
+    /**
+     * Production per machine over the trailing 30 days -- mirrors
+     * getProductionByMineArea() but grouped by machine instead of area.
+     * Real per-machine breakdown was entirely missing: getProductionStatistics()
+     * only ever aggregated at the team level.
+     *
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    public function getProductionByMachine(int $teamId): \Illuminate\Support\Collection
+    {
+        $records = ProductionRecord::forTeam($teamId)
+            ->whereNotNull('machine_id')
+            ->where('record_date', '>=', Carbon::now()->subDays(30))
+            ->with('machine')
+            ->get();
+
+        return $records->groupBy('machine_id')->map(function ($machineRecords) {
+            $machine = $machineRecords->first()?->machine;
+            $totalProduced = $machineRecords->sum('quantity_produced');
+            $totalTarget = $machineRecords->sum('target_quantity');
+
+            return [
+                'machine_id' => $machine?->id,
+                'machine_name' => $machine?->name ?? 'Unknown',
+                'total_produced' => $totalProduced,
+                'total_target' => $totalTarget,
+                'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100 : null,
+                'record_count' => $machineRecords->count(),
+                'average_per_record' => $machineRecords->count() > 0 ? $totalProduced / $machineRecords->count() : 0,
+            ];
+        })->sortByDesc('total_produced')->values();
     }
 
     /**

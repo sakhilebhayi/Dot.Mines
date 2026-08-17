@@ -6,6 +6,7 @@ use App\Http\Controllers\GdprController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MinePlanDownloadController;
 use App\Http\Controllers\PrivacyPolicyController;
+use App\Http\Controllers\RealtimeHealthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportDownloadController;
 use App\Http\Controllers\TermsOfServiceController;
@@ -19,8 +20,10 @@ use App\Livewire\Feed;
 use App\Livewire\FeedAdminPanel;
 use App\Livewire\FleetMovementReplay;
 use App\Livewire\FuelManagement;
+use App\Livewire\MachineAssignmentManager;
 use App\Livewire\MaintenanceDashboard;
 use App\Livewire\MineAreaDetail;
+use App\Livewire\OperatorFatigueTracker;
 use App\Livewire\ProductionDashboard;
 use App\Livewire\RoutePlanning;
 use App\Livewire\ShiftTemplateManager;
@@ -43,12 +46,17 @@ if (app()->environment('local') && config('app.debug')) {
 // Override Jetstream's terms/policy controllers to use safe markdown rendering
 Route::get('/terms-of-service', [TermsOfServiceController::class, 'show'])->name('terms.show');
 Route::get('/privacy-policy', [PrivacyPolicyController::class, 'show'])->name('policy.show');
+Route::view('/cookies', 'pages.cookies')->name('cookies');
 
 // Health check — no auth, used by load balancers and monitoring services
 // /health = liveness probe (full check: DB + cache + storage) — failure triggers pod restart
 // /ready  = readiness probe (DB only, lightweight) — failure stops traffic routing without restart
 Route::get('/health', HealthController::class)->name('health');
 Route::get('/ready', [HealthController::class, 'ready'])->name('health.ready');
+
+// Real-time infrastructure health check for uptime monitors/load balancers.
+Route::get('/up/realtime', [RealtimeHealthController::class, 'check'])
+    ->name('health.realtime');
 
 Route::get('/', function () {
     return view('welcome');
@@ -127,6 +135,9 @@ Route::middleware([
     Route::get('/mine-areas/{mineArea}', MineAreaDetail::class)
         ->name('mine-areas.show');
 
+    Route::get('/mine-areas/{mineArea}/assignments', MachineAssignmentManager::class)
+        ->name('mine-areas.assignments');
+
     // Reports
     Route::get('/reports', function () {
         return view('reports.index');
@@ -169,6 +180,9 @@ Route::middleware([
     // Production Dashboard
     Route::get('/production', ProductionDashboard::class)
         ->name('production');
+
+    Route::get('/operator-fatigue', OperatorFatigueTracker::class)
+        ->name('operator-fatigue');
 
     // Fuel Management
     Route::get('/fuel', FuelManagement::class)

@@ -1,31 +1,20 @@
 <div align="center">
 
-<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-  <defs>
-    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FBBF24"/>
-      <stop offset="100%" style="stop-color:#D97706"/>
-    </linearGradient>
-  </defs>
-  <rect width="80" height="80" rx="18" fill="url(#amberGrad)"/>
-  <path stroke="#111827" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5" fill="none"
-        d="M46 36V22L28 44h14v14l18-22H46z"/>
-</svg>
+<img src="public/images/logo.png" alt="Dot.Mines" width="200" />
 
-# Mines
+# Dot.Mines
 
 ### Mining Intelligence Platform
 
 **A comprehensive fleet management system for mining operations**
 
-![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white)
 ![Livewire](https://img.shields.io/badge/Livewire-3.x-FB70A9?logo=livewire&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-06B6D4?logo=tailwindcss&logoColor=white)
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/Version-3.3-6875F5)
-![Tests](https://img.shields.io/badge/Tests-377%20passing-brightgreen)
+![Version](https://img.shields.io/badge/Version-3.0-6875F5)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 
 </div>
@@ -46,7 +35,7 @@
   - [Route Planning](#route-planning)
   - [IoT Sensor Integration](#iot-sensor-integration)
   - [OEM Integrations](#oem-integrations)
-  - [Bell ISO15143-3 Fleet Integration](#bell-iso15143-3-fleet-integration)
+  - [Fleet Market](#fleet-market)
   - [Shift & Team Management](#shift--team-management)
   - [Compliance & Reporting](#compliance--reporting)
   - [Billing & Subscriptions](#billing--subscriptions)
@@ -71,370 +60,19 @@
 
 **Mines** is a modern, production-ready fleet management platform built specifically for mining operations. It combines real-time GPS tracking, AI-powered optimization, structured operational communications, and deep OEM integrations into a single unified platform — replacing fragmented tools like WhatsApp groups and disconnected spreadsheets.
 
-## 🆕 Latest Updates (June 2026)
-
-### Bell OEM Telemetry Intelligence Framework
-
-A full telemetry intelligence layer has been added on top of the Bell integrations, creating a closed-loop pipeline from raw OEM data to fleet health scoring, ESG metrics, and real-time safety events.
-
-**`bridgeToMachine()` — Equipment → Platform Linking**
-
-The Bell ISO15143-3 sync now automatically links each Bell equipment record to the corresponding `machines` table row using three-tier matching:
-
-1. **Serial number match** — `bell_equipment.serial_number` → `machines.serial_number`
-2. **External ID match** — `bell_equipment.equipment_key` → `machines.external_id`
-3. **Name-based fallback** — normalised name comparison (emits `Log::warning()` for audit)
-
-Once linked, GPS coordinates from each sync cycle are broadcast as a `MachineLocationUpdated` event, feeding the live map in real time.
-
-**5 Dedicated Telemetry Tables**
-
-| Table | Signal | Description |
-|---|---|---|
-| `bell_distance_travelled` | `Distance` | Cumulative odometer readings (km) |
-| `bell_payload_totals` | `CumulativePayloadTotals` | Cumulative payload moved (tonnes) |
-| `bell_def_levels` | `DEFRemaining` | Diesel exhaust fluid remaining (%) |
-| `bell_fuel_levels` | `FuelRemainingRatio` | Fuel tank remaining (%) |
-| `bell_regeneration_hours` | `CumulativeActiveRegenerationHours` | DPF active regeneration hours |
-
-All five tables use `equipment_key → bell_equipment (CASCADE)` foreign keys and a unique composite index on `(equipment_key, snapshot_time)` to prevent duplicate telemetry rows.
-
-**`BellMachineIntelligenceService` — Composite Health Scoring**
-
-A new read-only analytics service that computes a health score (0–100) per machine from five weighted dimensions:
-
-| Dimension | Weight | Source |
-|---|---|---|
-| Engine Condition | 30% | `EngineCondition` signal |
-| Caution Codes | 25% | Active fault code count |
-| Idle Hours ratio | 15% | Idle ÷ Operating hours |
-| Fuel Efficiency | 15% | `FuelRemainingRatio` trend |
-| Regen Hours ratio | 15% | `bell_regeneration_hours` |
-
-Additional capabilities: `computeFleetSnapshots()`, `computeEsgMetrics()` (CO₂/BCM, diesel L/h), `detectOfflineMachines()`, `checkAndFireHealthChange()`.
-
-**7 New Bell Domain Events**
-
-| Event | Fires When |
-|---|---|
-| `BellTelemetryReceived` | Full sync cycle completes for a machine |
-| `BellLocationUpdated` | New GPS location record inserted |
-| `BellFuelLowDetected` | Fuel remaining ≤ 20% |
-| `BellEngineWarningDetected` | Engine condition is non-normal |
-| `BellMachineOfflineDetected` | No telemetry for > 2 hours |
-| `BellPayloadThresholdExceeded` | Payload exceeds configured threshold |
-| `BellMachineHealthChanged` | Composite health score changes ≥ 10 points |
-
-**5 Per-Signal Sync Jobs**
-
-| Job | Schedule | Signals |
-|---|---|---|
-| `SyncBellLocationsJob` | Every 5 min | `Location` |
-| `SyncBellEngineConditionJob` | Every 5 min | `EngineCondition`, `DEFRemaining`, `CautionCodes` |
-| `SyncBellPayloadJob` | Every 15 min | `CumulativePayloadTotals`, `CumulativeLoadCount` |
-| `SyncBellFuelJob` | Hourly | `CumulativeFuelUsed`, `FuelUsed24h`, `FuelRemainingRatio` |
-| `SyncBellOperatingHoursJob` | Hourly | `OperatingHours`, `IdleHours`, `RegenHours`, `Distance` |
-
-All 5 jobs implement `ShouldBeUnique` (prevents queue pile-up if Bell API is slow), `ShouldQueue`, `$tries = 2`, and configurable `$backoff` + `$timeout`. They run on the `integrations` queue and are scheduled with `withoutOverlapping()->onOneServer()`.
-
-**New Bell OEM Skill** — `.agents/skills/bell-oem-integration-patterns/SKILL.md` documents all 13 Bell API endpoints, health score dimensions, ESG calculations, and troubleshooting patterns.
-
----
-
-### Fleet Management — Serial Number Searchable Dropdown
-
-The serial number field in the Fleet add/edit modal has been converted from a free-text input to a **searchable dropdown** backed by live database data:
-
-- **Source** — `machines.serial_number` filtered by current team, `DISTINCT`, ordered alphabetically
-- **Caching** — results cached at `equipment_available_serials_{teamId}` via `QueryCacheService::availableSerialNumbers()` with a 1-hour TTL
-- **Cache invalidation** — `MachineObserver` automatically invalidates the cache on machine `created`, `deleted`, and `updated` (only when `serial_number` changed)
-- **UI** — Alpine.js searchable dropdown with live client-side filtering, "— None —" clear option, and amber highlight on selected value; no external library required
-- **Livewire integration** — `#[Computed] availableSerialNumbers()` property in the `Fleet` component; bidirectional `@entangle` binding to `serialNumber`
-
----
-
-### Enterprise Readiness Audit (MEGA Score: 82/100 — GO)
-
-A full MEGA V2 enterprise readiness assessment was conducted. All P0 blockers were identified and resolved:
-
-| Item | Finding | Resolution |
-|---|---|---|
-| `ShouldBeUnique` on Bell sync jobs | ❌ Missing — queue pile-up risk | ✅ Added to all 5 jobs |
-| Unique DB indexes on telemetry tables | ❌ Missing — duplicate row risk | ✅ Migration `2026_06_09_123207` added `(equipment_key, snapshot_time)` unique indexes to all 5 tables |
-| `$fillable` on 5 new telemetry models | ✅ Already present | ✅ Confirmed |
-| Full test suite pass | ❌ OOM crash (`FileUploadServiceZipTest`) | ✅ Fixed: uses `setMaxPerFileSize(256 KB)` + 512 KB payload |
-| Test count | 377 tests / 821 assertions | ✅ 100% passing |
-
----
-
-## 🆕 Latest Updates (June 2026 — prior)
-
-### MEGA V2 — Autonomous Enterprise Readiness Framework
-
-A full three-tier governance scoring framework has been implemented, producing a verifiable **MEGA V2 Score** (0–100) and APPROVE / CONDITIONAL / BLOCK deployment verdict:
-
-**Tier 1 — Technical Domains (60 pts)**
-
-| Domain | Max | Description |
-|--------|-----|-------------|
-| Security | 12 | `SESSION_ENCRYPT`, `APP_DEBUG`, DB connectivity, Sentry configured |
-| Observability | 8 | Sentry DSN, logging channel, Horizon config |
-| Database | 8 | Migration health |
-| Queue | 8 | Failed-job count penalty |
-| Email | 8 | SMTP timeout, SES failover, `sent_emails` table, unsubscribe preferences |
-| API | 8 | Route auth coverage |
-| Testing | 8 | Test file count proxy (5 test files = 1 pt; 40 files = 8 pts) |
-
-**Tier 2 — Autonomous AI Domains (30 pts)**
-
-| Domain | Max | Infrastructure |
-|--------|-----|----------------|
-| AI Governance | 4 | `ai_prediction_outcomes` table + `ai_agents` populated |
-| AI Accuracy | 4 | Mean accuracy across `ai_prediction_outcomes.accuracy_score` |
-| AI Drift Control | 3 | `PredictionAccuracyService::reliabilityScore()` (0–10 index) |
-| Agent Reliability | 4 | `agent_performance_logs` + `AgentReliabilityService::agentScore()` |
-| Agent Collaboration | 3 | Distinct active agents in `agent_performance_logs` (last 30 days) |
-| Organisational Memory | 2 | Active entries in `knowledge_graph_entries` |
-| Reality Alignment | 3 | `DataTrustService::overallTrustScore()` from `data_quality_snapshots` |
-| Hallucination Resistance | 4 | High-confidence (≥80) knowledge graph entries |
-| Decision Intelligence | 3 | `ai_recommendation_actions` populated |
-
-**Tier 3 — Business Intelligence Domains (10 pts)**
-
-| Domain | Max | Description |
-|--------|-----|-------------|
-| Operational Efficiency | 3 | Fleet + fuel data populated |
-| Customer Success | 2 | Teams provisioned |
-| Financial Intelligence | 2 | Fuel budgets tracked |
-| Innovation Capacity | 3 | MEGA V2 infrastructure (agent logs + knowledge graph) |
-
-**New Artisan Command:**
-
-```bash
-# Print full scorecard with APPROVE / CONDITIONAL / BLOCK verdict
-php artisan platform:mega-score
-
-# Also run data quality snapshots before scoring
-php artisan platform:mega-score --snapshot
-
-# Output as JSON for CI/CD pipeline integration
-php artisan platform:mega-score --json
-```
-
-**New database tables:**
-
-| Table | Purpose |
-|-------|---------|
-| `ai_prediction_outcomes` | Prediction-vs-outcome pairs per AI agent for drift detection |
-| `data_quality_snapshots` | Periodic per-domain data quality scores (fleet, fuel, maintenance) |
-| `agent_performance_logs` | Every agent operation: status, confidence, false-positive tracking |
-| `knowledge_graph_entries` | Subject→predicate→object triples (organisational memory) |
-
-**New services:**
-
-| Service | Methods |
-|---------|---------|
-| `AI\PredictionAccuracyService` | `logPrediction()`, `accuracyReport()`, `driftReport()`, `reliabilityScore()` |
-| `DataTrustService` | `snapshotAll()`, `snapshotFleet/Fuel/Maintenance()`, `overallTrustScore()` |
-| `AgentReliabilityService` | `log()`, `agentScore()`, `platformReliabilityScore()`, `report()` |
-| `OrganisationalMemoryService` | `remember()`, `recall()`, `recallAll()`, `forget()`, `memoryHealthScore()` |
-
-### Email Ecosystem Production Hardening (100/100)
-
-A complete audit and hardening of the email subsystem achieving a 100/100 email production readiness score:
-
-- **SMTP failover** — `failover` mailer routes `smtp → ses`; timeout set via `MAIL_TIMEOUT` env key
-- **`sent_emails` table** — every outbound email is logged with mailable class, recipient, subject, and bounce tracking columns (`bounced_at`, `bounce_reason`, `delivered_at`, `provider_message_id`)
-- **`LogSentMailListener`** — handles `Illuminate\Mail\Events\MessageSent`; reads `X-Mines-Mailable` header; writes to `sent_emails`
-- **All 6 mailables on `notifications` queue** — `WelcomeMail`, `TeamInvitationMail`, `ReportReadyMail`, `ShiftDigestMail`, `FeedOnboardingInvite`, `NotificationAlertMail`
-- **All 6 mailables migrated** to `envelope()` / `content()` API (Laravel 10+ recommended pattern)
-- **`EmailUnsubscribeController`** — signed-URL unsubscribe flow: `GET /email/unsubscribe` (confirmation) + `POST /email/unsubscribe` (sets `email_enabled=false`); supports 6 preference types
-- **6 plain-text fallback views** created for all mailables (`resources/views/emails/text/`)
-- **Timezone-aware shift digest windows** — per-team timezone in `SendShiftDigest` artisan command
-- **Rate limiting** on team invitations and WhatsApp migration (10 / day and 3 / day respectively)
-- **Boot-time production guards** in `AppServiceProvider`:
-  - `SENTRY_DSN` empty → `Log::critical()`
-  - `SESSION_ENCRYPT=false` → `Log::critical()`
-  - SMTP password < 32 chars → `Log::critical()`
-
-### Security: `SESSION_ENCRYPT=true`
-
-Session data is now encrypted at rest in production. The `.env.example` documents this as mandatory for OWASP A02 / POPIA / ISO 27001 compliance.
-
-### Bell ISO15143-3 Fleet API Integration
-
-A new first-party integration with the **Bell ISO15143-3 (AEMP) telematics standard** has been added, enabling scheduled ingestion of Bell fleet XML data into the platform:
-
-- **`BellIso15143Service`** — full sync cycle: fetch XML → parse → validate → save raw JSON snapshot → upsert equipment master → merge current status → append history → calculate daily KPIs → write audit log; all wrapped in a single DB transaction with retry logic
-- **6 new database tables** created via a single migration:
-
-  | Table | Purpose |
-  |---|---|
-  | `bell_equipment` | Master equipment record per machine (one row per `EquipmentID`) |
-  | `bell_equipment_current_status` | Latest telemetry snapshot per machine (replaced on every sync) |
-  | `bell_equipment_telemetry_history` | Append-only full telemetry history per API call |
-  | `bell_fleet_snapshots` | Raw JSON payload + metadata per API call |
-  | `bell_integration_audit_logs` | Execution audit trail (success/failure, record counts, errors) |
-  | `bell_equipment_daily_kpis` | Derived daily KPIs (loads, payload, fuel, distance, utilization) |
-  | `bell_equipment_location_history` | GPS coordinates per machine per hourly sync |
-  | `bell_equipment_fuel_usage_history` | Historical fuel consumption per machine |
-  | `bell_equipment_operating_hours_history` | Historical operating hour accumulation |
-  | `bell_equipment_idle_hours_history` | Historical idle hour accumulation |
-  | `bell_equipment_load_count_history` | Historical load count per machine |
-  | `bell_equipment_health_history` | Historical engine condition and health scores |
-
-- **Data quality validation** — records failing any of these rules are skipped with a warning log:
-  - `EquipmentID` must not be null
-  - `SerialNumber` must not be null
-  - `Latitude` must be in range −90 to 90
-  - `Longitude` must be in range −180 to 180
-  - `FuelRemainingPercent` must be in range 0 to 100
-  - `EngineRunning` must be a boolean
-- **Two Power BI reporting views** created in the migration:
-  - `vw_bell_fleet_current_status` — equipment ID, model, engine status, fuel, odometer, hours, loads, payload, lat/lon
-  - `vw_bell_equipment_daily_kpis` — loads moved, payload moved, fuel used, utilization %, distance travelled
-- **`SyncBellFleetDataJob`** — queued job on the `integrations` queue; reads credentials from config and delegates to `BellIso15143Service`
-- **Scheduled every 15 minutes** (`:00`, `:15`, `:30`, `:45`) via `routes/console.php` using `everyFifteenMinutes()->withoutOverlapping()->onOneServer()`
-- **Config** — credentials driven by `.env` keys `BELL_ISO15143_API_URL`, `BELL_ISO15143_USERNAME`, `BELL_ISO15143_PASSWORD`; no secrets committed to source
-- **12 feature tests** covering happy path, repeat syncs, snapshot storage, telemetry values, KPI calculations, all 5 validation rules, HTTP errors, malformed XML, and empty fleet responses
-
-### Bell SSO OAuth2 Authentication
-
-Bell Equipment API endpoints are now secured via **OAuth2 Password Credentials** grant through the Bell SSO identity server. This affects both the ISO15143-3 fleet sync and the Historical Telemetry API:
-
-- A bearer token is fetched from the Bell SSO token endpoint at the start of each sync cycle using the Password Credentials grant
-- The token is cached in memory for the duration of the sync to avoid repeated round-trips
-- Client authentication uses **HTTP Basic Auth** (`client_id:client_secret`) on the Authorization header
-- Username and password are sent as form-body fields alongside the grant type and scope
-- All four SSO parameters are read exclusively from `.env` — no credentials are stored in source code
-- Both `SyncBellFleetDataJob` and `SyncBellHistoricalDataJob` pass the full set of SSO parameters when constructing the respective service classes
-
-### Bell Historical Telemetry API
-
-A second Bell integration has been added: a **Historical Telemetry API** that fetches signal time-series data per machine on an hourly schedule:
-
-- **`BellHistoricalTelemetryService`** — fetches 13 individual signal endpoints per machine and persists the results
-- Responses are accepted as **JSON or XML** — JSON is attempted first; on failure, the XML `SimpleXMLElement` parser is used
-- 13 signals fetched per machine per cycle:
-
-  | Signal | Description |
-  |---|---|
-  | `CumulativeOperatingHours` | Total engine-on hours |
-  | `CumulativeFuelUsed` | Total fuel consumed (litres) |
-  | `FuelUsed24h` | Fuel used in the last 24 hours |
-  | `CumulativeIdleHours` | Total idle hours |
-  | `FuelRemainingRatio` | Current fuel remaining (ratio 0–1) |
-  | `CumulativeLoadCount` | Total loads moved |
-  | `CumulativePayloadTotals` | Total payload moved (tonnes) |
-  | `Location` | GPS latitude/longitude with timestamp |
-  | `CautionCodes` | Active caution/fault codes |
-  | `DEFRemaining` | Diesel exhaust fluid remaining |
-  | `EngineCondition` | Engine fault state |
-  | `ActiveRegenerationHours` | DPF active regeneration hours |
-  | `Distance` | Cumulative odometer (km) |
-
-- **6 new history tables** populated by this service:
-
-  | Table | Contents |
-  |---|---|
-  | `bell_equipment_location_history` | GPS coordinates per machine per hour |
-  | `bell_equipment_fuel_usage_history` | Fuel consumption readings |
-  | `bell_equipment_operating_hours_history` | Operating hour accumulation |
-  | `bell_equipment_idle_hours_history` | Idle hour accumulation |
-  | `bell_equipment_load_count_history` | Load count accumulation |
-  | `bell_equipment_health_history` | Engine condition and health scoring |
-
-- **`SyncBellHistoricalDataJob`** — queued job on the `integrations` queue; reads all six config values (API URL, username, password, SSO token URL, client ID, client secret) and delegates to `BellHistoricalTelemetryService`
-- **Scheduled hourly** via `routes/console.php` using `hourly()->withoutOverlapping()->onOneServer()`
-
-### Static Analysis & Code Quality Overhaul
-
-A comprehensive pass over the entire codebase to bring it to full Laravel 12 / PHP 8.3 professional standards:
-
-- **Model `casts()` method** — Converted all 63 models from `protected $casts = [...]` property to the Laravel 11+ `protected function casts(): array` method
-- **Eloquent scope type hints** — Added `Builder $query` parameter types and `: Builder` return types to all 64 scope methods across 25 models
-- **Model relationship return types** — Added explicit return type declarations (`HasMany`, `BelongsTo`, `BelongsToMany`, `HasOne`) to all relationship and utility methods across all models
-- **Service layer type hints** — Added full parameter and return type declarations to `IoTSensorService`, `MineAreaService`, `ProductionService`, `RealTimeAlertService`; added missing `recordReading()` method to `IoTSensorService`
-- **Controller return types** — Added `JsonResponse`, `BinaryFileResponse`, `StreamedResponse`, and `RedirectResponse` return types to all web and API controllers
-- **Livewire component return types** — Added `\Illuminate\View\View` return types to all `render()` methods and `: void` to all lifecycle/action methods across 28 components
-- **`Auth` facade over `auth()` helper** — Replaced all bare `auth()->user()` and `auth()->id()` calls with `Auth::user()` / `Auth::id()` for proper static analysis support in controllers, models, and Livewire components
-- **Missing imports fixed** — Added `use Illuminate\Support\Facades\Auth`, `use Symfony\Component\HttpFoundation\Response`, and Eloquent relation imports wherever missing
-- **Duplicate import removed** — Resolved duplicate `HasMany` import in `Integration.php`
-- **Named routes** — Replaced hardcoded `href="/"`, `url('/dashboard')`, `url('/feed')`, etc. with `route()` calls in Blade templates; added `->name('home')` to root route
-- **`MinePlanDownloadController`** — Replaced undefined `App\Models\MinePlan` reference with existing `MinePlanUpload` model; extracted typed `FilesystemAdapter` variables to resolve IDE `mimeType()`/`temporaryUrl()`/`download()` errors
-
-## 🆕 Latest Updates (May 2026)
-
-### Haul Dispatch Tracking
-
-- Added a **Haul Dispatch Dashboard** widget to the main dashboard for live haul truck tracking
-- Tracks each truck from loading point through to dump point with real-time position, heading, and speed
-- Displays origin / destination pins, a dashed amber route line, and a GPS breadcrumb trail on an embedded Leaflet map
-- Animated SVG truck markers pulse when a truck is actively hauling
-- Truck cards show current tonnage and fuel level progress bars, ETA, and route summary
-- Fleet totals footer summarises active, idle, and completed dispatches
-- Real-time updates broadcast over WebSockets (`HaulDispatchUpdated` event on `team.{id}` private channel)
-
-### Live Map Heat Map Layer
-
-- Added a **Heat Map** toggle button on the Live Map toolbar
-- Machine density weighted by operational status: active (1.0), idle (0.4), maintenance (0.2), offline (0.1)
-- Geofence centres weighted by type: dump (0.9), loading (0.85), pit (0.7), haul road (0.5), others (0.3)
-- Gradient legend overlay (`low → medium → high`) displayed in the bottom-right corner
-- Powered by `Leaflet.heat 0.2.0`; toggles without a page reload
-
-### Map Events Layer
-
-- Added an **Events** toggle and real-time event layer to the Live Map
-- Events are recorded via `MapEventService::record()` from observers, jobs, or controllers
-- Supported event types: `loading`, `dumping`, `breakdown`, `idling`, `maintenance`, `fueling`, `geofence_entry`, `geofence_exit`, `speed_violation`, `status_change`, `other`
-- Each type has a distinct colour-coded animated SVG pin with an emoji icon
-- Clickable popups show event title, type badge, machine name, mine area, notes, and timestamp
-- Scrollable mini event feed below the toolbar with clickable rows to fly to the marker on the map
-- Type-pill filter bar to show only specific event categories
-- New events appear in real time via WebSockets (`MapEventRecorded` event) without a page refresh
-- Convenience helper `MapEventService::recordStatusChange($machine, $old, $new)` for status transitions
-
-### Report Generation Reliability
-
-- Fixed report lifecycle handling so status transitions are explicit: `pending` → `processing` → `completed` / `failed`
-- Added automatic report-list refresh while generation is in progress
-- Added retry action for failed report generation from the reports UI
-- Unified report queue dispatch through shared support utilities
-- Normalized API filter payload handling for array and JSON input formats
-
-### Export Integrity
-
-- Added true XLSX generation support (Excel-compatible binary output)
-- Preserved and validated PDF and CSV export flows
-- Standardized report storage disk configuration across generation and download paths
-
-### Report UI Improvements
-
-- Fixed Generate Report selection controls (`Select All` / `Clear All`) for machines and geofences
-- Improved loading behavior and button state handling during report generation
-- Added focused feature coverage for report exports, API generation, and component interactions
-
 ### Key Capabilities at a Glance
 
 | Capability | Description |
 |---|---|
 | 🗺️ **Live Fleet Tracking** | Real-time GPS machine positions on interactive maps |
-| 🚛 **Haul Dispatch** | Live haul truck routing from loading to dump with ETA and fuel tracking |
-| 🌡️ **Heat Map Layer** | Toggle machine density heat map weighted by operational status |
-| 📍 **Map Events Layer** | Real-time operational event pins (breakdowns, loading, fueling, etc.) on the live map |
 | 🤖 **AI Optimization** | Multi-agent AI with anomaly detection and predictive maintenance |
 | 📡 **Operations Feed** | Structured real-time comms to replace WhatsApp channels |
 | ⛽ **Fuel Management** | Tank management, allocation, forecasting, and budget tracking |
 | 🔧 **Maintenance** | Preventive and corrective booking with automated status sync |
 | 🏭 **Production Tracking** | Live load comparisons, shift targets, and trend analysis |
-| 🔌 **OEM Integrations** | Native APIs for 20+ manufacturers including CAT, Komatsu, Volvo, Bell (ISO15143-3) |
-| 🛰️ **Bell ISO15143-3** | Scheduled 15-min fleet sync with full telemetry history, daily KPIs, and Power BI views |
-| 📈 **Bell Historical API** | Hourly 13-signal time-series ingest (location, fuel, hours, loads, health) via SSO OAuth2 |
-| 🧠 **Bell Telemetry Intelligence** | Per-machine composite health scoring (5 dimensions), ESG metrics, 7 safety events, 5 per-signal sync jobs |
-| 🔍 **Serial Number Lookup** | Searchable equipment serial number dropdown backed by live DB with 1-hour team-scoped cache |
+| 🔌 **OEM Integrations** | Service layer + credential management for 25 manufacturers — no manufacturer connection has been verified against a real account yet (see [OEM Integrations](#oem-integrations)) |
 | 📊 **Reporting** | Compliance, maintenance, production, and incident export to PDF/CSV |
-| 💳 **Billing** | Paystack-powered subscriptions with fleet slot enforcement |
+| 💳 **Billing** | Stripe-powered subscriptions with fleet slot enforcement |
 | 🔒 **Multi-tenant** | Team-based isolation with granular role and policy access control |
 
 ---
@@ -450,7 +88,6 @@ A comprehensive pass over the entire codebase to bring it to full Laravel 12 / P
 - Automatic status update to **Maintenance** when a machine is booked for service
 - Subscription-enforced fleet slot limits — prevents over-provisioning
 - Machine assignment tracking per mine area
-- **Serial number searchable dropdown** — select from existing fleet serials with live client-side filtering and 1-hour team-scoped cache
 
 ### Live Map & Geofencing
 
@@ -460,8 +97,6 @@ A comprehensive pass over the entire codebase to bring it to full Laravel 12 / P
 - Toggle map layers: machines, geofences, route waypoints
 - Click machine markers to view detailed machine panels
 - Real-time machine position updates with auto-refresh
-- **Heat Map** — toggle a density heat map of fleet activity; machines weighted by status, geofences weighted by type; gradient legend displayed in-map
-- **Events Layer** — toggle operational event pins on the map with type-pill filters and a scrollable mini feed; events broadcast in real time via WebSockets
 - **Mine Area Management** — define operational boundaries with exactly 4 coordinate points
   - Visual drawing tool for placing boundary points
   - Real-time preview of boundary as it's drawn
@@ -563,96 +198,29 @@ A structured, real-time activity stream that replaces WhatsApp channels for mine
 
 ### OEM Integrations
 
-Native API integrations with **20+ OEM manufacturers** via their telemetry APIs:
+A service class exists per manufacturer (25 total) with a common `BaseManufacturerService` base, credential storage, and an Integration Manager UI — but **no manufacturer connection has ever been verified against a real account**. This section previously described these as "Native API integrations... via their telemetry APIs" with "webhook-based real-time telemetry ingestion"; neither claim was accurate. There is no telemetry webhook receiver in this codebase at all — the only webhook endpoint that exists handles inbound Stripe billing events. Every manufacturer sync is poll-based (a scheduled job calls the manufacturer's REST API on an interval), not push-based.
 
-| Manufacturer | Platform |
-|---|---|
-| Caterpillar | VisionLink |
-| Komatsu | KOMTRAX |
-| Volvo | CareTrack |
-| **Bell** | **ISO15143-3 (AEMP) + Historical Telemetry — scheduled sync, SSO OAuth2, full telemetry + KPI pipeline** |
-| Sandvik | — |
-| Epiroc | — |
-| Liebherr | — |
-| Hitachi | — |
-| Hyundai | — |
-| John Deere | — |
-| Doosan | — |
-| JCB | — |
-| Bobcat | — |
-| Kawasaki, Kobelco, Yanmar, Kubota, XCMG, CASE, New Holland, Atlas Copco, Sany, Takeuchi, Roundebult, CTrack | — |
+**Bell** is implemented against Bell Equipment's own published ISO 15143-3 (AEMP 2.0) API spec and Postman collection — real OAuth2 token exchange, real endpoint paths, XML parsing, and 12 unit/integration tests — but has not yet completed a live sync against a real account (see [wiki.md §5.1](wiki.md)).
 
-- Webhook-based real-time telemetry ingestion
+16 other manufacturers have a service class that attempts real HTTP calls to endpoints inferred from public docs, but **those endpoint shapes have not been confirmed against a real account** — treat them as unverified until a real credential set is tested end-to-end:
+
+Caterpillar, Komatsu, Volvo, Epiroc, Liebherr, Hitachi, Hyundai, Doosan, JCB, Sany, XCMG, Kobelco, Kubota, Roundebult, Kawasaki, CTrack
+
+8 are honestly marked "coming soon" in the app (their `testConnection()` reports unavailability rather than faking success):
+
+John Deere, CASE, New Holland, Takeuchi, Bobcat, Yanmar, Atlas Copco, Sandvik
+
+- Poll-based sync via scheduled jobs (`SyncIntegrationMachinesJob`, `SyncMachineMetricsJob`)
 - Credentials stored per-team, never exposed in API responses
 - Extensible base manufacturer service for adding new integrations
 - Integration Manager in application settings
 
-### Bell ISO15143-3 Fleet Integration
+### Fleet Market
 
-Bell Equipment machines are synced via the **ISO15143-3 (AEMP)** standard on a 15-minute schedule. A separate **Historical Telemetry API** runs hourly to fetch 13 individual signal time-series per machine. Both integrations authenticate via **Bell SSO OAuth2** (Password Credentials grant). A **Telemetry Intelligence layer** sits on top, producing health scores, ESG metrics, and real-time safety events.
-
-**Equipment Linking — `bridgeToMachine()`**
-
-Each Bell equipment record is automatically linked to the `machines` table using three-tier matching:
-
-1. Serial number match (`bell_equipment.serial_number` → `machines.serial_number`)
-2. External ID match (`bell_equipment.equipment_key` → `machines.external_id`)
-3. Name-based fallback (logged as `Log::warning()` for operator audit)
-
-**15-minute Fleet Snapshot (ISO15143-3):**
-
-- XML response is fetched, parsed, and converted to JSON per the spec
-- Each machine record is validated (null checks, coordinate ranges, fuel/engine value ranges) before persistence
-- **Equipment master** is upserted — new machines are inserted, existing machines are updated
-- **Current status** is replaced on every sync (delete + insert merge pattern)
-- **Telemetry history** is append-only — historical records are never modified
-- **Fleet snapshot** stores the full raw JSON payload and metadata per API call
-- **Daily KPIs** are calculated per machine per day:
-
-  | KPI | Calculation |
-  |---|---|
-  | Loads Moved | Current load count − previous load count |
-  | Payload Moved | Current cumulative payload − previous |
-  | Fuel Used | Current fuel consumed − previous |
-  | Distance Travelled | Current odometer − previous |
-  | Utilization % | Operating hours ÷ (Operating hours + Idle hours) × 100 |
-
-- **Two Power BI views** for direct reporting: `vw_bell_fleet_current_status` and `vw_bell_equipment_daily_kpis`
-- **Audit log** — every sync execution is recorded with success/failure, record counts, and any error message
-
-**Hourly Historical Telemetry:**
-
-- `BellHistoricalTelemetryService` fetches 13 signal endpoints per machine each hour
-- Accepts JSON or XML responses (JSON first, XML fallback via `SimpleXMLElement`)
-- Results are stored in dedicated telemetry tables including the 5 new intelligence tables
-
-**Telemetry Intelligence:**
-
-- `BellMachineIntelligenceService` computes a composite health score (0–100) per machine
-- Health score weighted across Engine Condition (30%), Caution Codes (25%), Idle Hours (15%), Fuel Efficiency (15%), Regen Hours (15%)
-- ESG metric computation: CO₂ per BCM, diesel litres per hour
-- 5 per-signal sync jobs (`SyncBellLocationsJob`, `SyncBellEngineConditionJob`, `SyncBellPayloadJob`, `SyncBellFuelJob`, `SyncBellOperatingHoursJob`) — all `ShouldBeUnique` to prevent queue pile-up
-- 7 domain events fire for real-time alerts: fuel low, engine warning, machine offline, payload threshold exceeded, health score changed
-
-**Configuration** (`.env`):
-
-```env
-# Bell ISO15143-3 Fleet API (15-minute sync)
-BELL_ISO15143_API_URL=
-BELL_ISO15143_USERNAME=
-BELL_ISO15143_PASSWORD=
-
-# Bell Historical Telemetry API (hourly sync)
-BELL_HISTORICAL_API_URL=
-BELL_HISTORICAL_USERNAME=
-BELL_HISTORICAL_PASSWORD=
-
-# Bell SSO OAuth2 (used by both sync jobs)
-BELL_SSO_TOKEN_URL=
-BELL_SSO_CLIENT_ID=
-BELL_SSO_CLIENT_SECRET=
-BELL_SSO_SCOPE=ISO_Exports
-```
+- Fleet brands can list equipment for sale to mines
+- Mines can browse and filter listings by type, manufacturer, and condition
+- Contact sellers directly through the platform
+- Subscription-gated listing creation
 
 ### Shift & Team Management
 
@@ -684,7 +252,7 @@ BELL_SSO_SCOPE=ISO_Exports
 
 ### Billing & Subscriptions
 
-- **Paystack-powered** subscription plans and invoicing (migrated from Stripe)
+- **Stripe-powered** subscription plans and invoicing
 - Fleet slot enforcement at machine addition — blocks over-limit additions
 - **Billing portal** for self-service subscription management
 - Invoice history and payment records
@@ -703,16 +271,16 @@ BELL_SSO_SCOPE=ISO_Exports
 
 | Layer | Technology |
 |---|---|
-| **Backend** | PHP 8.3+, Laravel 12.x |
+| **Backend** | PHP 8.2+, Laravel 12.x |
 | **Frontend** | Livewire 3.x, Alpine.js 3.x |
 | **Database** | PostgreSQL 16+ |
 | **Styling** | Tailwind CSS 3.x, DaisyUI 5.x |
 | **Charts** | ApexCharts 5.x, Chart.js 4.x |
-| **Maps** | Leaflet 1.9.x, Leaflet Draw, Leaflet.heat 0.2.x, Esri/OSM providers |
+| **Maps** | Leaflet 1.9.x, Leaflet Draw, Esri/OSM providers |
 | **Real-time** | Laravel Reverb (WebSockets), Laravel Echo, Pusher.js |
 | **Queue** | Laravel Queue (database driver) |
 | **Auth** | Laravel Jetstream + Sanctum |
-| **Payments** | Paystack (migrated from Stripe) |
+| **Payments** | Stripe (via Laravel Cashier) |
 | **File Storage** | AWS S3 (via Flysystem) |
 | **Search** | Laravel Scout |
 | **Error Monitoring** | Sentry |
@@ -733,7 +301,7 @@ BELL_SSO_SCOPE=ISO_Exports
 **Optional (for full feature set):**
 - Redis (for caching and queues in production)
 - AWS S3 bucket (for file/mine plan storage)
-- Paystack account (for billing and subscription features)
+- Stripe account (for billing features)
 - Sentry DSN (for error monitoring)
 
 ---
@@ -796,8 +364,7 @@ DB_USERNAME=your_username
 
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
-# Required in production — OWASP A02 / POPIA / ISO 27001 compliance
-SESSION_ENCRYPT=true
+SESSION_ENCRYPT=false
 
 CACHE_DRIVER=file
 QUEUE_CONNECTION=database
@@ -815,25 +382,9 @@ AWS_SECRET_ACCESS_KEY=
 AWS_DEFAULT_REGION=us-east-1
 AWS_BUCKET=
 
-# Paystack
-PAYSTACK_PUBLIC_KEY=
-PAYSTACK_SECRET_KEY=
-
-# Bell ISO15143-3 Fleet API (15-minute sync)
-BELL_ISO15143_API_URL=
-BELL_ISO15143_USERNAME=
-BELL_ISO15143_PASSWORD=
-
-# Bell Historical Telemetry API (hourly sync)
-BELL_HISTORICAL_API_URL=
-BELL_HISTORICAL_USERNAME=
-BELL_HISTORICAL_PASSWORD=
-
-# Bell SSO OAuth2 (used by both Bell sync jobs)
-BELL_SSO_TOKEN_URL=
-BELL_SSO_CLIENT_ID=
-BELL_SSO_CLIENT_SECRET=
-BELL_SSO_SCOPE=ISO_Exports
+# Stripe
+STRIPE_KEY=
+STRIPE_SECRET=
 
 # Sentry
 SENTRY_LARAVEL_DSN=
@@ -844,8 +395,82 @@ SENTRY_LARAVEL_DSN=
 ```bash
 php artisan key:generate
 ```
+- Fuel allocation, transactions, and consumption metrics
+- Monthly fuel budgets and alert thresholds
+- Fuel consumption forecasting via AI
 
----
+### OEM Integrations
+- Native API integrations for 20+ manufacturers: Caterpillar, Komatsu, Volvo, Sandvik, Epiroc, Liebherr, Hitachi, Hyundai, John Deere, Doosan, JCB, Bobcat, Kawasaki, Kobelco, Yanmar, Kubota, XCMG, CASE, New Holland, Atlas Copco, Bell, Sany, Takeuchi, Roundebult, and CTrack
+- Webhook-based real-time telemetry ingestion
+- Extensible base manufacturer service for adding new integrations
+
+### Fleet Market
+- Fleet brands can list equipment for sale to mines
+- Subscription-gated listing access
+
+### Shift & Team Management
+- Configurable shift templates per mine (A/B/C)
+- Operator fatigue tracking
+- Role-based access: operators, supervisors, safety officers, managers, admins
+
+### Billing
+- Stripe-powered subscription plans and invoicing
+- Fleet slot enforcement at machine addition
+- Billing portal for self-service subscription management
+
+```
+
+### 2. Install PHP Dependencies
+
+```bash
+composer install
+```
+
+### 3. Install Node Dependencies
+
+```bash
+npm install
+```
+
+### 4. Environment Configuration
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` file with your configuration:
+
+```env
+APP_NAME=Mines
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
+
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=mines
+DB_USERNAME=your_username
+# Do NOT store secrets in this file. Set the password via your environment or secrets manager.
+# Example: set `DB_PASSWORD` in your host/CI environment or use a secrets manager integration.
+# DB_PASSWORD will be read from the environment at runtime; do not commit real values.
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+
+CACHE_DRIVER=file
+QUEUE_CONNECTION=sync
+```
+
+### 5. Generate Application Key
+
+```bash
+php artisan key:generate
+```
+
+## 💾 Database Setup
 
 ### 1. Create PostgreSQL Database
 
@@ -919,8 +544,6 @@ Navigate to the **Live Map** to view real-time fleet locations:
 - **Route Waypoints**: Click the Routes button to display sequenced waypoints start to finish
 - **Traffic Management Plan**: Manage traffic plans directly from the map
 - **Auto-refresh**: Map updates automatically with latest data
-- **Heat Map**: Click the Heat Map button to overlay a machine density layer weighted by operational status. A gradient legend appears in the bottom-right corner. Click again to remove it.
-- **Events Layer**: Click Events to show real-time operational event markers (breakdowns, loading, fueling, etc.). Use the type-pill filter bar to narrow event types. Click any event in the mini feed to fly to it on the map. New events appear automatically without a page refresh.
 
 ### Mine Area Management
 
@@ -990,6 +613,13 @@ Navigate to the **Live Map** to view real-time fleet locations:
 3. Use interactive charts with tooltips, zoom, and filtering
 4. Filter by machine, section, shift, or date range
 5. Compare actuals against targets; track week-on-week and month-on-month trends
+
+### Fleet Market
+
+1. Navigate to **Fleet Market**
+2. Browse equipment listings from OEM brands and other mines
+3. Contact sellers directly through the platform
+4. List your own equipment (subject to subscription tier)
 
 ### Route Planning
 
@@ -1088,14 +718,14 @@ mines/
 │   ├── Http/
 │   │   ├── Controllers/      # API and web controllers
 │   │   └── Middleware/       # HTTP middleware
-│   ├── Jobs/                 # Queued jobs (SyncBellFleetDataJob, SyncBellHistoricalDataJob, SyncBellLocationsJob, SyncBellEngineConditionJob, SyncBellPayloadJob, SyncBellFuelJob, SyncBellOperatingHoursJob, MachineIdleMonitoringJob, etc.)
+│   ├── Jobs/                 # Queued jobs
 │   ├── Listeners/            # Event listeners
 │   ├── Livewire/             # Livewire full-page and inline components
-│   ├── Models/               # Eloquent models (70+ models, inc. BellEquipment*, BellDistanceTravelled, BellPayloadTotal, BellDefLevel, BellFuelLevel, BellRegenerationHour)
+│   ├── Models/               # Eloquent models (60+ models)
 │   ├── Policies/             # Authorization policies
 │   ├── Services/
 │   │   ├── AI/               # AI optimization agents
-│   │   └── Integration/      # OEM manufacturer API services (BellIso15143Service, BellHistoricalTelemetryService, BellMachineIntelligenceService, etc.)
+│   │   └── Integration/      # OEM manufacturer API services
 │   └── Traits/               # Shared model/controller traits
 ├── config/                   # App configuration (integrations, scanning, etc.)
 ├── database/
@@ -1132,28 +762,19 @@ Run the full test suite:
 ```bash
 composer run test
 # or
-php artisan test --compact
+php artisan test
 ```
-
-The platform ships **377 tests / 821 assertions** covering:
-
-- Bell ISO15143-3 fleet sync (18 tests including all `bridgeToMachine()` matching paths)
-- Bell OEM telemetry intelligence (health scoring, ESG metrics, offline detection)
-- Fleet management and mine area assignment
-- Team data isolation and RBAC
-- Alert generation and notification pipeline
-- Paystack webhook and billing flows
-- Reflected XSS and security controls
-- Report generation (PDF, CSV, XLSX)
-- File upload security (ZIP path traversal, oversized entries, MIME mismatch)
-- Email lifecycle (queuing, rendering, subject, tracking headers)
-- AI model scopes and drift detection
-- MEGA V2 infrastructure (agent logs, knowledge graph, data trust)
 
 Run a specific test file:
 
 ```bash
-php artisan test tests/Feature/BellIso15143ServiceTest.php
+php artisan test tests/Feature/MachineTest.php
+```
+
+Run with code coverage:
+
+```bash
+php artisan test --coverage
 ```
 
 Run static analysis:
@@ -1208,16 +829,16 @@ vendor/bin/psalm
    chown -R www-data:www-data storage bootstrap/cache
    ```
 
-7. **Restart queue workers** (required after deployment to load new job classes)
+7. **Start queue worker** (use `deploy/queue-worker.service` for systemd or `deploy/queue-worker.supervisord.conf` for Supervisor). Requires `QUEUE_CONNECTION=redis`, matching `.env.production.example`.
    ```bash
-   php artisan queue:restart
-   php artisan queue:work --queue=integrations,default,notifications --tries=3 --timeout=90
+   php artisan queue:work redis --tries=3 --timeout=90
    ```
 
-8. **Start WebSocket server**
+8. **Start the Reverb WebSocket server** (use `deploy/reverb.service` for systemd or `deploy/reverb.supervisord.conf` for Supervisor) -- never run this as a bare foreground command in production, it needs the same process supervision as the queue worker.
    ```bash
-   php artisan reverb:start --host=0.0.0.0 --port=8080
+   php artisan reverb:start
    ```
+   Binds to `REVERB_SERVER_HOST`/`REVERB_SERVER_PORT` (loopback-only by default in `.env.production.example`) -- it is not meant to be reachable directly from the internet. See "WebSocket Reverse Proxy" below for how browsers actually reach it over `wss://`.
 
 ### Web Server Configuration
 
@@ -1227,7 +848,17 @@ vendor/bin/psalm
 server {
     listen 80;
     server_name your-domain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name your-domain.com;
     root /var/www/mines/public;
+
+    ssl_certificate     /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
@@ -1253,20 +884,64 @@ server {
     location ~ /\.(?!well-known).* {
         deny all;
     }
+
+    # Only Reverb's client-facing path (/app/{key}, what Echo/pusher-js
+    # connects to) is proxied here. Its server-to-server publish API
+    # (/apps/{id}/events etc.) is deliberately NOT exposed publicly --
+    # config/broadcasting.php's reverb connection talks to it directly over
+    # the internal REVERB_SERVER_HOST/PORT instead, so it never needs to be
+    # reachable from outside this box.
+
+    # WebSocket Reverse Proxy -- proxies wss://your-domain.com/app/... to the
+    # internal reverb:start process (REVERB_SERVER_HOST/PORT, loopback-only
+    # by default). The Upgrade/Connection headers are what turn this from a
+    # plain HTTP proxy into a WebSocket one; without them the client's
+    # protocol upgrade handshake fails and Echo falls back to polling or
+    # errors outright. Long read_timeout because these are meant to be
+    # long-lived connections, not request/response.
+    location /app {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
 }
 ```
 
 #### Apache
 
+Requires `mod_proxy`, `mod_proxy_wstunnel`, and `mod_ssl` enabled (`a2enmod proxy proxy_wstunnel ssl`).
+
 ```apache
 <VirtualHost *:80>
     ServerName your-domain.com
+    Redirect permanent / https://your-domain.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName your-domain.com
     DocumentRoot /var/www/mines/public
+
+    SSLEngine on
+    SSLCertificateFile      /etc/letsencrypt/live/your-domain.com/fullchain.pem
+    SSLCertificateKeyFile   /etc/letsencrypt/live/your-domain.com/privkey.pem
 
     <Directory /var/www/mines/public>
         AllowOverride All
         Require all granted
     </Directory>
+
+    # WebSocket Reverse Proxy -- see the Nginx /app block above for what
+    # this achieves and why. ProxyPass's own ws:// scheme (rather than
+    # http://) is what makes mod_proxy_wstunnel handle the Upgrade
+    # handshake instead of treating this as a normal HTTP proxy.
+    ProxyPass        /app ws://127.0.0.1:8080/app
+    ProxyPassReverse /app ws://127.0.0.1:8080/app
 </VirtualHost>
 ```
 
@@ -1351,6 +1026,6 @@ This project is proprietary software. All rights reserved.
 
 Built for Mining Operations
 
-**Version 3.3** · June 2026 · 377 tests / 821 assertions · MEGA Score 82/100
+**Version 3.0** · April 2026
 
 </div>

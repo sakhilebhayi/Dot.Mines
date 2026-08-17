@@ -1,0 +1,103 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Team;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+/**
+ * The sidebar had zero responsive breakpoints at any viewport -- confirmed
+ * live at 375px: it ate the full screen width at its desktop size (w-64/
+ * w-20), leaving no room for page content, which wrapped one word per line.
+ * There was no way to reach any other page on a phone.
+ *
+ * This can't exercise the actual Alpine/CustomEvent interaction (that needs
+ * a real browser -- verified manually: hamburger opens the drawer, the X
+ * button/backdrop-click/Escape all close it, desktop is pixel-identical to
+ * before), but it locks in the structural markup the JS behavior depends on
+ * so a future edit can't silently drop it.
+ */
+class MobileNavigationTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function actingUser(): User
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        return $user;
+    }
+
+    public function test_sidebar_is_off_canvas_on_mobile_and_static_on_desktop(): void
+    {
+        $response = $this->actingAs($this->actingUser())->get('/dashboard');
+
+        $response->assertOk();
+        // Off-canvas by default (mobile), restored to normal flex flow and
+        // always visible from md: up (desktop) -- the two states that used
+        // to not exist at all.
+        $response->assertSee('id="mobile-sidebar"', false);
+        $response->assertSee('-translate-x-full', false);
+        $response->assertSee('md:relative', false);
+        $response->assertSee('md:translate-x-0', false);
+    }
+
+    public function test_navbar_has_a_mobile_only_hamburger_toggle(): void
+    {
+        $response = $this->actingAs($this->actingUser())->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertSee('aria-controls="mobile-sidebar"', false);
+        $response->assertSee('md:hidden', false);
+        $response->assertSee('window.mobileNav.toggle()', false);
+    }
+
+    /**
+     * This used to only assert the substring 'window.mobileNav.close()',
+     * which the sidebar's own mobile close button also emits -- so the test
+     * passed regardless of whether a backdrop element existed at all. It
+     * now asserts the backdrop's own distinguishing markup: the fixed
+     * full-screen overlay div, gated to mobile, wired to the same close
+     * call on click.
+     */
+    public function test_page_has_a_mobile_backdrop_that_closes_the_drawer(): void
+    {
+        $response = $this->actingAs($this->actingUser())->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertSee('fixed inset-0 bg-black/60 z-[45] md:hidden', false);
+        $response->assertSee('@click="window.mobileNav.close()"', false);
+    }
+
+    /**
+     * Correction: an earlier version of this test (and the comment above
+     * the backdrop block itself, and the commit that added it) claimed
+     * components/layouts/app.blade.php is "not reached by any route" and
+     * only asserted the string was present in the file. That was wrong.
+     * config('livewire.layout') = 'components.layouts.app' makes this file
+     * the default layout for every Livewire component bound directly as a
+     * route target with no #[Layout(...)] override -- including /alerts,
+     * used here. This now proves the backdrop actually reaches a real
+     * response on one of those routes, not just that the string exists
+     * somewhere in the file.
+     */
+    public function test_the_sibling_livewire_default_layout_also_has_the_backdrop(): void
+    {
+        $response = $this->actingAs($this->actingUser())->get('/alerts');
+
+        $response->assertOk();
+        $response->assertSee('fixed inset-0 bg-black/60 z-[45] md:hidden', false);
+    }
+
+    public function test_sidebar_has_a_mobile_only_close_button(): void
+    {
+        $response = $this->actingAs($this->actingUser())->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertSee('Close navigation menu', false);
+    }
+}

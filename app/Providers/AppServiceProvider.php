@@ -24,6 +24,7 @@ use App\Listeners\SendGeofenceBreachNotification;
 use App\Listeners\SendMachineOfflineNotification;
 use App\Listeners\SendMaintenanceAlertNotification;
 use App\Listeners\SendSensorAlertNotification;
+use App\Livewire\AINotifications;
 use App\Mail\WelcomeMail;
 use App\Models\AuditLog;
 use App\Models\FuelTransaction;
@@ -38,6 +39,7 @@ use App\Observers\MineAreaObserver;
 use App\Services\AuditService;
 use App\Services\ErrorLoggerService;
 use App\Services\RealtimeEventScheduler;
+use App\Services\TeamRoleProvisioner;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
@@ -55,6 +57,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Jetstream\Events\TeamMemberAdded;
+use Laravel\Jetstream\Events\TeamMemberUpdated;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -63,7 +68,27 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->guardAgainstDebugModeInProduction();
+    }
+
+    private function guardAgainstDebugModeInProduction(): void
+    {
+        if ($this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            return;
+        }
+
+        if (self::shouldRefuseBoot($this->app->environment('production'), config('app.debug') === true)) {
+            throw new \RuntimeException(
+                'Refusing to boot: APP_ENV=production with APP_DEBUG=true. This leaks stack traces, '.
+                'SQL queries, and other internals to any visitor who triggers an error page. '.
+                'Set APP_DEBUG=false in the production .env and redeploy.'
+            );
+        }
+    }
+
+    public static function shouldRefuseBoot(bool $isProductionEnvironment, bool $debugEnabled): bool
+    {
+        return $isProductionEnvironment && $debugEnabled;
     }
 
     /**
@@ -82,6 +107,10 @@ class AppServiceProvider extends ServiceProvider
                 ScanBladeUnescaped::class,
             ]);
         }
+
+        // AINotifications uses an acronym prefix that Livewire's kebab converter splits
+        // into 'a-i-notifications'; register the canonical 'ai-notifications' alias.
+        Livewire::component('ai-notifications', AINotifications::class);
 
         // Enforce enterprise password policy (min 12 chars, mixed case, numbers, symbols)
         $this->configurePasswordPolicy();
@@ -176,6 +205,26 @@ class AppServiceProvider extends ServiceProvider
 
         // Universal email delivery audit trail — logs every sent email to sent_emails table.
         Event::listen(MessageSent::class, LogSentMailListener::class);
+
+        // Sync Jetstream role pivot into the RBAC system on add/update so
+        // $user->hasRole() and policy checks work immediately after Jetstream's own events.
+        Event::listen([TeamMemberAdded::class, TeamMemberUpdated::class], function ($event) {
+            $pivotRole = $event->team->users()->find($event->user->id)?->membership?->role;
+
+            if (! $pivotRole) {
+                return;
+            }
+
+            try {
+                TeamRoleProvisioner::assignRole($event->user, $event->team, $pivotRole);
+            } catch (\Throwable $e) {
+                Log::error('Failed to sync Jetstream team role into RBAC system', [
+                    'team_id' => $event->team->id,
+                    'user_id' => $event->user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        });
 
         // Listen for failed queue jobs — notify monitoring and write to error logbook
         Event::listen(JobFailed::class, function ($event) {

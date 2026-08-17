@@ -30,9 +30,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchMachines(): array
     {
         try {
@@ -61,9 +58,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchLocation(string $machineId): array
     {
         try {
@@ -83,9 +77,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -93,7 +84,11 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
             $utilization = $this->makeRequest('GET', "/livelink/v1/machines/{$machineId}/utilization");
             $service = $this->makeRequest('GET', "/livelink/v1/machines/{$machineId}/service");
 
-            $metrics = array_merge(
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier ones, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($telemetry['data'] ?? []),
                 $this->parseMetrics($utilization['data'] ?? []),
                 $this->parseMetrics($service['data'] ?? [])
@@ -114,9 +109,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
         }
     }
 
-    /**
-     * @return array<mixed>
-     */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -151,8 +143,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine details from JCB API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -181,8 +171,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -197,8 +185,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -213,8 +199,6 @@ class JCBService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

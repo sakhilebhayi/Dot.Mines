@@ -3,10 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Models\Team;
-use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -26,8 +24,7 @@ class EnsureTeamContext
     public function handle(Request $request, Closure $next): Response
     {
         // Get authenticated user
-        /** @var User|null $user */
-        $user = Auth::user();
+        $user = auth()->user();
 
         if (! $user) {
             return $next($request);
@@ -36,13 +33,19 @@ class EnsureTeamContext
         // Get team_id from route or use user's current team
         $teamId = $request->route('team_id') ?? $user->current_team_id;
 
-        // If no team_id, set to user's default team
+        // If no team_id, set to user's default team. $user->teams() is only
+        // the team_user pivot (teams they were invited into) -- it misses a
+        // team they own, since CreateNewUser::createTeam() attaches
+        // ownership via teams.user_id and never inserts a pivot row. Every
+        // freshly registered user owns their personal team but isn't a
+        // "member" of it by this definition, so the old teams()-only lookup
+        // found nothing and bounced them to teams.create on their very
+        // first authenticated request. Prefer their personal team, then any
+        // other owned team, then any team they're a member of.
         if (! $teamId) {
-            $teamId = $user->teams()->first()?->id;
+            $teamId = ($user->personalTeam() ?? $user->ownedTeams()->first() ?? $user->teams()->first())?->id;
             if ($teamId) {
                 $user->update(['current_team_id' => $teamId]);
-                // Refresh the in-memory model so Auth::user()->currentTeam works downstream
-                Auth::setUser($user->refresh());
             }
         }
 
@@ -52,6 +55,22 @@ class EnsureTeamContext
             if (! $team || ! $user->belongsToTeam($team)) {
                 abort(403, 'Unauthorized to access this team.');
             }
+        } else {
+            // A user who belongs to no team at all (e.g. removed from their last
+            // team) reaches here with $teamId still null. Every team-scoped page
+            // and API endpoint downstream assumes Auth::user()->currentTeam is
+            // set (see e.g. Dashboard::mount() and ReportController::view2(),
+            // which each guard against this individually) -- rather than let
+            // every one of those crash with "Attempt to read property ... on
+            // null", stop it here once, centrally, for every route this
+            // middleware covers.
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'No team context available. Please create or join a team.',
+                ], 409);
+            }
+
+            return redirect()->route('teams.create');
         }
 
         // Store team context in request

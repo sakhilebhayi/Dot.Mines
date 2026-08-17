@@ -35,8 +35,6 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machines from Hitachi ConSite
-     *
-     * @return array<mixed>
      */
     public function fetchMachines(): array
     {
@@ -68,8 +66,6 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine location
-     *
-     * @return array<mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -92,8 +88,6 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMetrics(string $machineId): array
     {
@@ -103,7 +97,11 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
             $status = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/status");
             $diagnostics = $this->makeRequest('GET', "/api/v2/machines/{$machineId}/diagnostics");
 
-            $metrics = array_merge(
+            // array_merge() would let whichever source is listed last
+            // silently overwrite every field from the earlier ones, since
+            // parseMetrics() always returns the same set of keys -- see
+            // mergeMetricsPreferNonNull().
+            $metrics = $this->mergeMetricsPreferNonNull(
                 $this->parseMetrics($operatingHours['data'] ?? []),
                 $this->parseMetrics($status['data'] ?? []),
                 $this->parseMetrics($diagnostics['data'] ?? [])
@@ -126,8 +124,6 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchAlerts(string $machineId): array
     {
@@ -163,8 +159,6 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine details from Hitachi API
-     *
-     * @return array<mixed>
      */
     public function fetchMachineDetails(string $machineId): array
     {
@@ -193,8 +187,6 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine metrics
-     *
-     * @return array<mixed>
      */
     public function fetchMachineMetrics(string $machineId): array
     {
@@ -209,8 +201,6 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine alerts
-     *
-     * @return array<mixed>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -225,8 +215,6 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch comprehensive machine data
-     *
-     * @return array<mixed>
      */
     public function fetchMachineData(string $machineId): array
     {

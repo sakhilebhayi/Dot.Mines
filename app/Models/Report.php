@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Mail\ReportReadyMail;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
-use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,17 +24,22 @@ use Illuminate\Support\Facades\Mail;
  * @property string|null $file_path
  * @property int|null $file_size
  * @property string|null $format
- * @property array<string, mixed>|null $filters
+ * @property array|null $filters
  * @property int|string|null $generated_by
  * @property Carbon|null $generated_at
  * @property Carbon|null $expires_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Team|null $team
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|Report where(string $column, mixed $operator = null, mixed $value = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Report whereIn(string $column, array $values)
+ * @method static \Illuminate\Database\Eloquent\Builder|Report orderBy(string $column, string $direction = 'asc')
+ * @method static Report|null find(mixed $id, array $columns = ['*'])
+ * @method static Report findOrFail(mixed $id, array $columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class Report extends Model
 {
-    /** @use HasFactory<ReportFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [
@@ -43,6 +47,7 @@ class Report extends Model
         'title',
         'type', // truck_sensors, tire_condition, load_cycle, fuel, engine_parts, maintenance, custom
         'status', // pending, completed, failed
+        'error_message',
         'file_path',
         'file_size',
         'format', // pdf, csv, xlsx
@@ -52,24 +57,17 @@ class Report extends Model
         'expires_at',
     ];
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'filters' => 'json',
-            'generated_at' => 'datetime',
-            'expires_at' => 'datetime',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'filters' => 'json',
+        'generated_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     /**
      * Get the team this report belongs to
      */
-    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -78,8 +76,7 @@ class Report extends Model
     /**
      * Get the user who generated this report
      */
-    /** @return BelongsTo<User, $this> */
-    public function generatedBy(): BelongsTo
+    public function generatedBy()
     {
         return $this->belongsTo(User::class, 'generated_by');
     }
@@ -101,21 +98,9 @@ class Report extends Model
     }
 
     /**
-     * Mark report as processing
-     */
-    public function markProcessing(): static
-    {
-        $this->update([
-            'status' => 'processing',
-        ]);
-
-        return $this;
-    }
-
-    /**
      * Mark report as completed
      */
-    public function markCompleted(string $filePath, ?int $fileSize = null): static
+    public function markCompleted($filePath, $fileSize = null)
     {
         $this->update([
             'status' => 'completed',
@@ -124,10 +109,18 @@ class Report extends Model
             'generated_at' => now(),
         ]);
 
-        // Send report-ready emails to team users (fallback: all team users)
+        // Send report-ready emails to everyone on the team. team->users() is
+        // Jetstream's pivot-only relation, which excludes the owner unless
+        // they were separately attached as a member -- for a solo team (the
+        // common case for a brand-new team) that silently emailed nobody.
+        // allUsers() merges the pivot members with the owner.
         try {
             if ($this->team) {
-                $emails = $this->team->users()->pluck('email')->filter()->unique()->toArray();
+                // "Email Reports" was a real, saved preference that nothing
+                // ever read -- every team member got this regardless.
+                $emails = $this->team->allUsers()
+                    ->filter(fn ($user) => $user->wantsEmailReports())
+                    ->pluck('email')->filter()->unique()->toArray();
                 if (! empty($emails)) {
                     foreach (array_chunk($emails, 50) as $batch) {
                         Mail::to($batch)->queue(new ReportReadyMail($this));
@@ -144,17 +137,11 @@ class Report extends Model
     /**
      * Mark report as failed
      */
-    public function markFailed(?string $reason = null): bool
+    public function markFailed(?string $errorMessage = null)
     {
-        if ($reason) {
-            Log::warning('Report generation failed', [
-                'report_id' => $this->id,
-                'reason' => $reason,
-            ]);
-        }
-
         return $this->update([
             'status' => 'failed',
+            'error_message' => $errorMessage,
         ]);
     }
 }
