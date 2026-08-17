@@ -74,6 +74,8 @@ class IntegrationManager extends Component
                     'last_sync_status' => $integration->last_sync_status ?? 'pending',
                     'machines_count' => $integration->machines_count ?? 0,
                     'last_error' => $integration->last_error,
+                    'capabilities' => $integration->capabilities ?? [],
+                    'sync_streams' => $integration->sync_streams ?? [],
                 ];
             })
             ->toArray();

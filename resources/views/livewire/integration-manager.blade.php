@@ -106,6 +106,18 @@
                                             @endif
                                         </p>
                                         <p class="text-[var(--sand)] text-xs mt-0.5">{{ $integration['machines_count'] }} machine{{ $integration['machines_count'] === 1 ? '' : 's' }} synced</p>
+                                        @if(!empty($integration['sync_streams']))
+                                            <div class="flex flex-wrap gap-1.5 mt-2">
+                                                @foreach(['fleet', 'telemetry', 'production', 'location'] as $stream)
+                                                    @php($streamStatus = $integration['sync_streams'][$stream] ?? null)
+                                                    @if($streamStatus)
+                                                        <span class="text-xs px-2 py-0.5 rounded {{ $streamStatus['status'] === 'active' ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-[var(--sand)]' }}">
+                                                            {{ ucfirst($stream) }}: {{ ucfirst($streamStatus['status']) }}
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-[var(--sand)] text-sm">
@@ -113,7 +125,17 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button 
+                                        <button
+                                            wire:click="retestConnection({{ $integration['id'] }})"
+                                            class="px-3 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded text-sm transition"
+                                            title="Retest connection without re-entering credentials"
+                                            wire:loading.attr="disabled"
+                                            wire:target="retestConnection({{ $integration['id'] }})"
+                                        >
+                                            <span wire:loading.remove wire:target="retestConnection({{ $integration['id'] }})">Retest</span>
+                                            <span wire:loading wire:target="retestConnection({{ $integration['id'] }})">Retesting...</span>
+                                        </button>
+                                        <button
                                             wire:click="testConnection({{ $integration['id'] }})"
                                             class="px-3 py-2 bg-white/10 hover:bg-white/20 text-[var(--stone)] rounded text-sm transition flex items-center gap-1"
                                             title="Test connection"
@@ -297,34 +319,58 @@
                     >
                         Cancel
                     </button>
-                    <button 
-                        wire:click="createIntegration"
+                    <button
+                        wire:click="connectIntegration"
                         class="flex-1 px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded font-display font-semibold transition"
                     >
-                        Create Integration
+                        Connect
                     </button>
                 </div>
             </div>
         </div>
     @endif
 
-    <!-- Test Connection Modal -->
+    <!-- Connect Result Modal -->
     @if($showTestModal && $testResult)
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
             <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-xl max-w-md w-full mx-4">
                 <div class="p-6 text-center">
                     @if($testResult['success'])
                         <div class="text-5xl mb-4">✅</div>
-                        <h3 class="text-xl font-bold text-green-400 mb-2">Connection Successful</h3>
-                        <p class="text-[var(--sand)]">{{ $testResult['message'] }}</p>
+                        <h3 class="text-xl font-bold text-green-400 mb-2">Connected</h3>
                     @else
                         <div class="text-5xl mb-4">❌</div>
                         <h3 class="text-xl font-bold text-red-400 mb-2">Connection Failed</h3>
-                        <p class="text-[var(--sand)]">{{ $testResult['message'] }}</p>
                     @endif
+                    <p class="text-[var(--sand)]">{{ $testResult['message'] ?? '' }}</p>
                 </div>
+
+                @if(!empty($testResult['checks']))
+                    <div class="px-6 pb-4 text-sm text-left">
+                        @foreach($testResult['checks'] as $label => $passed)
+                            <div class="flex items-center gap-2 py-1">
+                                <span>{{ $passed ? '✓' : '✗' }}</span>
+                                <span class="text-[var(--stone)]">{{ ucfirst(str_replace('_', ' ', $label)) }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if(!empty($testResult['capabilities']))
+                    <div class="px-6 pb-4">
+                        <p class="text-xs text-[var(--sand)] uppercase tracking-wide mb-2">Data available from this connection</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($testResult['capabilities'] as $capability)
+                                <span class="text-xs px-2 py-1 rounded bg-[var(--gold)]/10 text-[var(--gold)]">
+                                    ✓ {{ ucfirst($capability) }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <div class="p-6 border-t border-[var(--line)]">
-                    <button 
+                    <button
                         wire:click="$set('showTestModal', false)"
                         class="w-full px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded font-display font-semibold transition"
                     >
