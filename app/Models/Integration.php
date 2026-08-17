@@ -53,6 +53,8 @@ class Integration extends Model
         'last_error_at',
         'machines_count',
         'config', // JSON for provider-specific configuration
+        'capabilities', // JSON list of data streams actually observed: fleet, telemetry, production, location
+        'sync_streams', // JSON per-stream status: {status, last_synced_at, records} per capability key
     ];
 
     protected $hidden = [
@@ -72,6 +74,8 @@ class Integration extends Model
         // migration for the column-type change and backfill this required.
         'credentials' => 'encrypted:json',
         'config' => 'json',
+        'capabilities' => 'json',
+        'sync_streams' => 'json',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -90,6 +94,24 @@ class Integration extends Model
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
+    }
+
+    /**
+     * True only if $key was actually derived from a real API response by
+     * IntegrationService::deriveCapabilities() -- never assume a provider
+     * supports a stream just because another provider does.
+     */
+    public function hasCapability(string $key): bool
+    {
+        return in_array($key, $this->capabilities ?? [], true);
+    }
+
+    /**
+     * @return array{status: string, last_synced_at: ?string, records: int}|null
+     */
+    public function streamStatus(string $key): ?array
+    {
+        return ($this->sync_streams ?? [])[$key] ?? null;
     }
 
     /**
