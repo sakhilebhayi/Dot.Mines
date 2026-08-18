@@ -168,4 +168,27 @@ class IntegrationServiceTest extends TestCase
         ]);
         $this->assertSame(1, Alert::where('machine_id', $machine->id)->count());
     }
+
+    public function test_synced_alerts_default_to_a_status_the_check_constraint_allows(): void
+    {
+        $team = Team::factory()->create();
+        $integration = Integration::factory()->forProvider('hitachi')->create(['team_id' => $team->id]);
+
+        // No 'status' key on the alert -- the sync path must default it.
+        $machine = app(IntegrationService::class)->syncMachine($integration, [
+            'external_id' => 'HIT-003',
+            'model' => 'ZX350',
+            'status' => 'active',
+            'alerts' => [
+                ['external_id' => 'fault-2', 'title' => 'Coolant temperature high', 'type' => 'sensor', 'priority' => 'high'],
+            ],
+        ]);
+
+        $alert = Alert::where('machine_id', $machine->id)->first();
+        $this->assertNotNull($alert);
+        // The legacy default 'new' violates chk_alert_status_values on
+        // Postgres (allowed: active, acknowledged, resolved, dismissed,
+        // dismissed_unresolved), so the whole insert used to fail there.
+        $this->assertSame('active', $alert->status);
+    }
 }
