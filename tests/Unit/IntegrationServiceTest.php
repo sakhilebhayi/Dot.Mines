@@ -191,4 +191,33 @@ class IntegrationServiceTest extends TestCase
         // dismissed_unresolved), so the whole insert used to fail there.
         $this->assertSame('active', $alert->status);
     }
+
+    /**
+     * Beyond the default: a provider explicitly sending a status outside
+     * Alert::STATUSES (e.g. the legacy 'new') must clamp to 'active',
+     * while constraint-valid statuses pass through. SQLite-backed tests
+     * don't enforce the DB check constraint, so the code path has to.
+     */
+    public function test_sync_machine_alerts_only_stores_constraint_valid_statuses(): void
+    {
+        $team = Team::factory()->create();
+        $integration = Integration::factory()->forProvider('hitachi')->create(['team_id' => $team->id]);
+
+        $machine = app(IntegrationService::class)->syncMachine($integration, [
+            'external_id' => 'HIT-004',
+            'model' => 'ZX350',
+            'status' => 'active',
+            'alerts' => [
+                ['external_id' => 'fault-a', 'title' => 'No status supplied'],
+                ['external_id' => 'fault-b', 'title' => 'Legacy status', 'status' => 'new'],
+                ['external_id' => 'fault-c', 'title' => 'Valid status', 'status' => 'acknowledged'],
+            ],
+        ]);
+
+        $statuses = Alert::where('machine_id', $machine->id)->pluck('status', 'title');
+
+        $this->assertSame('active', $statuses['No status supplied']);
+        $this->assertSame('active', $statuses['Legacy status']);
+        $this->assertSame('acknowledged', $statuses['Valid status']);
+    }
 }

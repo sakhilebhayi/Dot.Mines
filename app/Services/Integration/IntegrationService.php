@@ -543,6 +543,17 @@ class IntegrationService
                     ->first();
 
                 if (! $existing) {
+                    // Manufacturer feeds are untrusted: anything outside
+                    // Alert::STATUSES fails the alerts.status check
+                    // constraint on Postgres (SQLSTATE 23514) -- the old
+                    // 'new' default meant every synced alert insert failed
+                    // there while SQLite-backed tests stayed green.
+                    $status = $alertData['status'] ?? 'active';
+
+                    if (! in_array($status, Alert::STATUSES, true)) {
+                        $status = 'active';
+                    }
+
                     Alert::create([
                         'team_id' => $machine->team_id,
                         'machine_id' => $machine->id,
@@ -550,7 +561,7 @@ class IntegrationService
                         'description' => $alertData['description'] ?? '',
                         'type' => $alertData['type'] ?? 'sensor',
                         'priority' => $alertData['priority'] ?? 'medium',
-                        'status' => $alertData['status'] ?? 'active',
+                        'status' => $status,
                         'triggered_at' => now(),
                         'metadata' => ['external_id' => $externalId],
                     ]);

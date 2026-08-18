@@ -29,13 +29,13 @@ class AlertsAuthorizationTest extends TestCase
         $team->users()->attach($viewer->id);
         TeamRoleProvisioner::assignRole($viewer, $team, 'viewer');
 
-        $alert = Alert::factory()->create(['team_id' => $team->id, 'status' => 'new']);
+        $alert = Alert::factory()->create(['team_id' => $team->id, 'status' => 'active']);
 
         Livewire::actingAs($viewer)
             ->test(Alerts::class)
             ->call('acknowledgeAlert', $alert->id);
 
-        $this->assertSame('new', $alert->fresh()->status);
+        $this->assertSame('active', $alert->fresh()->status);
     }
 
     public function test_operator_role_can_acknowledge_but_not_resolve_an_alert(): void
@@ -46,7 +46,7 @@ class AlertsAuthorizationTest extends TestCase
         $team->users()->attach($operator->id);
         TeamRoleProvisioner::assignRole($operator, $team, 'operator');
 
-        $alert = Alert::factory()->create(['team_id' => $team->id, 'status' => 'new']);
+        $alert = Alert::factory()->create(['team_id' => $team->id, 'status' => 'active']);
 
         Livewire::actingAs($operator)
             ->test(Alerts::class)
@@ -68,7 +68,7 @@ class AlertsAuthorizationTest extends TestCase
         $owner->update(['current_team_id' => $team->id]);
         TeamRoleProvisioner::assignRole($owner, $team, 'admin');
 
-        $alert = Alert::factory()->create(['team_id' => $team->id, 'status' => 'new']);
+        $alert = Alert::factory()->create(['team_id' => $team->id, 'status' => 'active']);
 
         Livewire::actingAs($owner)
             ->test(Alerts::class)
