@@ -48,7 +48,7 @@ class AlertsListTest extends TestCase
             Alert::factory()->create(['team_id' => $team->id, 'priority' => $priority]);
         }
 
-        foreach (['new', 'acknowledged', 'resolved', 'attention', 'dismissed_unresolved', 'dismissed'] as $status) {
+        foreach (Alert::STATUSES as $status) {
             Alert::factory()->create(['team_id' => $team->id, 'status' => $status]);
         }
 
@@ -56,5 +56,25 @@ class AlertsListTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Alerts');
+        $response->assertSee('Active');
+        $response->assertSee('Acknowledged');
+        $response->assertSee('Resolved');
+        $response->assertSee('Dismissed - Unresolved');
+    }
+
+    public function test_open_alert_count_includes_active_and_acknowledged_alerts(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        Alert::factory()->count(3)->create(['team_id' => $team->id, 'status' => 'active', 'priority' => 'low']);
+        Alert::factory()->create(['team_id' => $team->id, 'status' => 'acknowledged', 'priority' => 'low']);
+        Alert::factory()->create(['team_id' => $team->id, 'status' => 'resolved', 'priority' => 'low']);
+
+        $response = $this->actingAs($user)->get('/alerts');
+
+        $response->assertOk();
+        $response->assertSeeInOrder(['Open Alerts', '4', 'Total Alerts', '5']);
     }
 }

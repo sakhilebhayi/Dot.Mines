@@ -44,6 +44,15 @@ class Alerts extends Component
         'low' => 'Low',
     ];
 
+    /** @var array<string, string> Labels for every status in Alert::STATUSES */
+    protected array $alertStatuses = [
+        'active' => 'Active',
+        'acknowledged' => 'Acknowledged',
+        'resolved' => 'Resolved',
+        'dismissed' => 'Dismissed',
+        'dismissed_unresolved' => 'Dismissed - Unresolved',
+    ];
+
     /** @var array<string, string> */
     protected array $alertTypes = [
         'temperature' => 'Temperature Warning',
@@ -292,6 +301,7 @@ class Alerts extends Component
         return view('livewire.alerts', [
             'alerts' => $this->getAlerts(),
             'alertPriorities' => $this->alertPriorities,
+            'alertStatuses' => $this->alertStatuses,
             'alertTypes' => $this->alertTypes,
             'selectedAlert' => $selected,
             'mineAreaManagers' => $this->getMineAreaManagersForAlert($selected),
