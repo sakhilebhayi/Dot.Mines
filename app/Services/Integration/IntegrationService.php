@@ -550,7 +550,7 @@ class IntegrationService
                         'description' => $alertData['description'] ?? '',
                         'type' => $alertData['type'] ?? 'sensor',
                         'priority' => $alertData['priority'] ?? 'medium',
-                        'status' => $alertData['status'] ?? 'new',
+                        'status' => $alertData['status'] ?? 'active',
                         'triggered_at' => now(),
                         'metadata' => ['external_id' => $externalId],
                     ]);

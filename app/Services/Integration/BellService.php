@@ -235,7 +235,7 @@ class BellService extends BaseManufacturerService
                 'description' => 'Caution code '.$reading['value'].' reported by Bell ISO 15143-3 telemetry.',
                 'type' => 'sensor',
                 'priority' => 'medium',
-                'status' => 'new',
+                'status' => 'active',
                 'timestamp' => $reading['timestamp'],
             ], $readings);
         } catch (Throwable $e) {

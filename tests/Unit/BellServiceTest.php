@@ -290,6 +290,8 @@ XML, 200),
         $this->assertStringContainsString('E204', $alerts[0]['title']);
         $this->assertSame('sensor', $alerts[0]['type']);
         $this->assertSame('medium', $alerts[0]['priority']);
+        // 'active', not the legacy 'new' -- the alerts table's
+        // chk_alert_status_values constraint rejects 'new' on Postgres.
         $this->assertSame('active', $alerts[0]['status']);
         $this->assertNotEmpty($alerts[0]['external_id']);
     }
@@ -372,6 +374,7 @@ XML, 200),
         $alert = Alert::where('machine_id', $machine->id)->first();
         $this->assertNotNull($alert, 'A real caution-code alert should have been synced into the alerts table.');
         $this->assertStringContainsString('E204', $alert->title);
+        $this->assertSame('active', $alert->status, "Synced alerts must use a status the chk_alert_status_values constraint allows, not the legacy 'new'.");
 
         // Syncing again must not duplicate the same caution code.
         app(IntegrationService::class)->syncMachines($integration->fresh());

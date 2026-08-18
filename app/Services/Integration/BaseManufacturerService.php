@@ -307,7 +307,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
                 'description' => $alert['description'] ?? '',
                 'type' => $this->mapAlertType($alert['type'] ?? 'sensor'),
                 'priority' => $this->mapAlertPriority($alert['severity'] ?? 'medium'),
-                'status' => $alert['status'] ?? 'new',
+                'status' => $alert['status'] ?? 'active',
                 'timestamp' => $alert['timestamp'] ?? now(),
             ];
         }, $alerts);
