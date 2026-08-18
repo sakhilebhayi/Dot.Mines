@@ -8,6 +8,10 @@ use App\Models\Alert;
 use App\Models\Integration;
 use App\Models\Machine;
 use App\Models\MachineMetric;
+use App\Models\MineArea;
+use App\Models\ProductionRecord;
+use App\Models\ProductionTarget;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -301,6 +305,13 @@ class IntegrationService
             // never reached the Alert table for any provider.
             if ($machine && $machine->manufacturer_id) {
                 $this->syncMachineAlertsFromService($service, $machine);
+
+                // Production used to stop dead here: Bell's cumulative
+                // load/payload counters were fetched into
+                // MachineMetric.raw_data and never turned into the
+                // ProductionRecord rows the Production page reads, so the
+                // page only ever showed manual entries.
+                $this->syncMachineProductionFromService($integration, $service, $machine);
             }
 
             $synced++;
@@ -433,6 +444,17 @@ class IntegrationService
             if (! $machine) {
                 $machine = Machine::create([
                     'team_id' => $integration->team_id,
+                    // machines.mine_area_id is NOT NULL on MySQL/Postgres
+                    // (2026_02_19_000010) and this create() never set it, so
+                    // on those drivers every machine insert from a sync died
+                    // on the constraint -- silently, because syncMachine()
+                    // catches and logs. Default to the team's first active
+                    // area, the exact same default that migration's own
+                    // backfill used; a dispatcher can reassign from Fleet.
+                    'mine_area_id' => MineArea::where('team_id', $integration->team_id)
+                        ->where('status', 'active')
+                        ->orderBy('id')
+                        ->value('id'),
                     'name' => $machineData['model'] ?? 'Unknown Machine',
                     // machine_type is NOT NULL with no default and this
                     // create() never set it at all; manufacturer telemetry
@@ -564,6 +586,347 @@ class IntegrationService
                 'manufacturer_id' => $machine->manufacturer_id,
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * Derive per-day production records for one machine from the
+     * provider's cumulative production counters (Bell: ISO 15143-3
+     * CumulativeLoadCount / CumulativePayloadTotals). Runs on the exact
+     * same sync path as machines/metrics/alerts -- connect() and every
+     * scheduled SyncIntegrationMachinesJob -- so production flows
+     * automatically once the integration is configured, with no second
+     * credential entry or manual step.
+     *
+     * Deltas between consecutive cumulative readings ARE the production
+     * for that interval; nothing is estimated. Each day's closing counter
+     * value is stored in the record's metadata so the next sync window can
+     * re-derive an identical baseline instead of double-counting or
+     * losing overnight production. Isolated in its own try/catch for the
+     * same reason as alerts: one machine's production fetch failing must
+     * never abort the rest of the sync.
+     */
+    private function syncMachineProductionFromService(Integration $integration, ManufacturerServiceInterface $service, Machine $machine): void
+    {
+        $manufacturerId = $machine->manufacturer_id;
+
+        if (! $manufacturerId) {
+            return;
+        }
+
+        try {
+            $timezone = $integration->team?->timezone ?: config('app.timezone', 'UTC');
+            $backfillDays = max(1, (int) config('integrations.production_backfill_days', 14));
+
+            $latest = ProductionRecord::where('team_id', $integration->team_id)
+                ->where('machine_id', $machine->id)
+                ->where('metadata->source', 'telemetry')
+                ->orderByDesc('record_date')
+                ->first();
+
+            $floor = Carbon::now($timezone)->subDays($backfillDays)->startOfDay();
+            $start = $latest
+                ? Carbon::parse($latest->record_date->toDateString(), $timezone)->startOfDay()->max($floor)
+                : $floor;
+            $end = Carbon::now($timezone);
+
+            $result = $service->fetchMachineProduction(
+                $manufacturerId,
+                $start->clone()->utc(),
+                $end->clone()->utc()
+            );
+
+            // success=false is the provider saying "no production data
+            // source" (BaseManufacturerService's default) -- nothing to
+            // derive, and nothing gets fabricated.
+            if (! ($result['success'] ?? false)) {
+                return;
+            }
+
+            $loadDays = $this->groupCumulativeReadingsByDay($result['load_count_readings'] ?? [], $timezone, $start, $end);
+            $payloadDays = $this->groupCumulativeReadingsByDay($result['payload_readings'] ?? [], $timezone, $start, $end);
+
+            if (empty($loadDays) && empty($payloadDays)) {
+                return;
+            }
+
+            $loadDeltas = $this->dailyDeltas(
+                $loadDays,
+                $this->storedCumulativeBaseline($machine, array_key_first($loadDays), 'cumulative_load_count_end')
+            );
+            $payloadDeltas = $this->dailyDeltas(
+                $payloadDays,
+                $this->storedCumulativeBaseline($machine, array_key_first($payloadDays), 'cumulative_payload_end')
+            );
+
+            $dates = array_unique(array_merge(array_keys($loadDeltas), array_keys($payloadDeltas)));
+            sort($dates);
+
+            foreach ($dates as $date) {
+                $this->upsertTelemetryProductionRecord(
+                    $integration,
+                    $machine,
+                    $date,
+                    $loadDeltas[$date] ?? null,
+                    $payloadDeltas[$date] ?? null
+                );
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to sync machine production', [
+                'integration_id' => $integration->id,
+                'machine_id' => $machine->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Bucket cumulative counter readings into local calendar days for the
+     * team's timezone, keeping each day's first/last reading. Readings
+     * outside the requested window are dropped defensively -- the day
+     * bucketing (and therefore the upsert) must only ever cover days this
+     * sync actually asked the provider about.
+     *
+     * @param  list<array{timestamp: string, value: float, units: ?string}>  $readings
+     * @return array<string, array{first_ts: string, last_ts: string, first_value: float, last_value: float, units: ?string}>
+     */
+    private function groupCumulativeReadingsByDay(array $readings, string $timezone, Carbon $start, Carbon $end): array
+    {
+        $days = [];
+
+        foreach ($readings as $reading) {
+            $rawTimestamp = $reading['timestamp'] ?? null;
+            $value = $reading['value'] ?? null;
+
+            if (! $rawTimestamp || ! is_numeric($value)) {
+                continue;
+            }
+
+            try {
+                $timestamp = Carbon::parse($rawTimestamp);
+            } catch (\Throwable) {
+                continue;
+            }
+
+            if ($timestamp->lt($start) || $timestamp->gt($end)) {
+                continue;
+            }
+
+            $date = $timestamp->clone()->setTimezone($timezone)->toDateString();
+            $value = (float) $value;
+
+            if (! isset($days[$date])) {
+                $days[$date] = [
+                    'first_ts' => $rawTimestamp,
+                    'last_ts' => $rawTimestamp,
+                    'first_value' => $value,
+                    'last_value' => $value,
+                    'units' => $reading['units'] ?? null,
+                ];
+            } else {
+                $days[$date]['last_ts'] = $rawTimestamp;
+                $days[$date]['last_value'] = $value;
+                $days[$date]['units'] = $days[$date]['units'] ?? ($reading['units'] ?? null);
+            }
+        }
+
+        ksort($days);
+
+        return $days;
+    }
+
+    /**
+     * Convert day buckets of a cumulative counter into per-day deltas.
+     * Each day's baseline is the previous day's closing value ($carried
+     * baseline for the window's first day, recovered from the last synced
+     * record so re-syncs stay consistent with what was already stored);
+     * a day with no earlier baseline at all falls back to its own first
+     * reading, which can only ever under-count -- never invent
+     * production. Negative deltas (counter reset after an ECU/machine
+     * swap) clamp to zero for the same reason.
+     *
+     * @param  array<string, array{first_ts: string, last_ts: string, first_value: float, last_value: float, units: ?string}>  $days
+     * @return array<string, array{delta: float, first_reading_utc: string, last_reading_utc: string, end_value: float, units: ?string}>
+     */
+    private function dailyDeltas(array $days, ?float $carriedBaseline): array
+    {
+        $deltas = [];
+        $previousEnd = $carriedBaseline;
+
+        foreach ($days as $date => $day) {
+            $baseline = $previousEnd ?? $day['first_value'];
+
+            $deltas[$date] = [
+                'delta' => max(0.0, $day['last_value'] - $baseline),
+                'first_reading_utc' => $day['first_ts'],
+                'last_reading_utc' => $day['last_ts'],
+                'end_value' => $day['last_value'],
+                'units' => $day['units'],
+            ];
+
+            $previousEnd = $day['last_value'];
+        }
+
+        return $deltas;
+    }
+
+    /**
+     * The closing cumulative counter value from the most recent synced
+     * record before $beforeDate -- the window's first day re-uses it as
+     * baseline so repeated syncs compute the same deltas the original
+     * backfill did. Trashed records still count: the user removed the row,
+     * not the fact that the counter had reached that value.
+     */
+    private function storedCumulativeBaseline(Machine $machine, ?string $beforeDate, string $metadataKey): ?float
+    {
+        if ($beforeDate === null) {
+            return null;
+        }
+
+        $record = ProductionRecord::withTrashed()
+            ->where('team_id', $machine->team_id)
+            ->where('machine_id', $machine->id)
+            ->where('metadata->source', 'telemetry')
+            ->whereDate('record_date', '<', $beforeDate)
+            ->orderByDesc('record_date')
+            ->first();
+
+        $value = data_get($record?->metadata, $metadataKey);
+
+        return is_numeric($value) ? (float) $value : null;
+    }
+
+    /**
+     * Create or update the single telemetry-derived production record for
+     * one machine-day. Dedup key is (team, machine, record_date,
+     * metadata.source=telemetry) -- the same metadata-discriminator
+     * pattern alert dedup uses -- so manual entries for the same
+     * machine/day are never touched, and repeated syncs update in place
+     * instead of duplicating. A record the user soft-deleted stays
+     * deleted.
+     *
+     * @param  array{delta: float, first_reading_utc: string, last_reading_utc: string, end_value: float, units: ?string}|null  $loadDay
+     * @param  array{delta: float, first_reading_utc: string, last_reading_utc: string, end_value: float, units: ?string}|null  $payloadDay
+     */
+    private function upsertTelemetryProductionRecord(Integration $integration, Machine $machine, string $date, ?array $loadDay, ?array $payloadDay): void
+    {
+        $loads = (int) round($loadDay['delta'] ?? 0);
+        $tonnes = $this->payloadToTonnes($payloadDay['delta'] ?? null, $payloadDay['units'] ?? null);
+
+        /** @var ProductionRecord|null $existing */
+        $existing = ProductionRecord::withTrashed()
+            ->where('team_id', $integration->team_id)
+            ->where('machine_id', $machine->id)
+            ->where('metadata->source', 'telemetry')
+            ->whereDate('record_date', $date)
+            ->first();
+
+        if ($existing && $existing->trashed()) {
+            return;
+        }
+
+        $metadata = array_merge($existing->metadata ?? [], [
+            'source' => 'telemetry',
+            'provider' => $integration->provider,
+            'integration_id' => $integration->id,
+            'loads' => $loads,
+            // Bell has no separate cycle counter; on an ADT every load
+            // event is one haul cycle, so this is the same real counter,
+            // not an estimate.
+            'cycles' => $loads,
+            'payload_delta' => $payloadDay['delta'] ?? null,
+            'payload_units' => $payloadDay['units'] ?? null,
+            'first_reading_utc' => $loadDay['first_reading_utc'] ?? $payloadDay['first_reading_utc'] ?? null,
+            'last_reading_utc' => $loadDay['last_reading_utc'] ?? $payloadDay['last_reading_utc'] ?? null,
+        ]);
+
+        if (isset($loadDay['end_value'])) {
+            $metadata['cumulative_load_count_end'] = $loadDay['end_value'];
+        }
+        if (isset($payloadDay['end_value'])) {
+            $metadata['cumulative_payload_end'] = $payloadDay['end_value'];
+        }
+
+        if ($existing) {
+            $existing->update([
+                'quantity_produced' => $tonnes,
+                'unit' => 'tonnes',
+                'status' => 'completed',
+                'target_quantity' => $existing->target_quantity
+                    ?? $this->dailyProductionTarget($integration->team_id, $existing->mine_area_id ?? $machine->mine_area_id, $date),
+                'metadata' => $metadata,
+            ]);
+
+            return;
+        }
+
+        if ($loads <= 0 && $tonnes <= 0.0) {
+            // A baseline-only day with nothing produced -- don't create
+            // empty rows the dashboard would count as activity.
+            return;
+        }
+
+        ProductionRecord::create([
+            'team_id' => $integration->team_id,
+            'mine_area_id' => $machine->mine_area_id,
+            'machine_id' => $machine->id,
+            'record_date' => $date,
+            // Cumulative telemetry counters span the whole calendar day,
+            // not a single operator shift.
+            'shift' => 'continuous',
+            'quantity_produced' => $tonnes,
+            'unit' => 'tonnes',
+            'target_quantity' => $this->dailyProductionTarget($integration->team_id, $machine->mine_area_id, $date),
+            'status' => 'completed',
+            'metadata' => $metadata,
+        ]);
+    }
+
+    /**
+     * Bell's ISO 15143-3 reference data reports payload in kilograms; the
+     * per-reading units attribute is honoured when the feed carries one.
+     */
+    private function payloadToTonnes(?float $value, ?string $units): float
+    {
+        if ($value === null) {
+            return 0.0;
+        }
+
+        $normalised = strtolower(trim($units ?? 'kilogram'));
+
+        return match (true) {
+            in_array($normalised, ['kilogram', 'kilograms', 'kg'], true) => $value / 1000,
+            in_array($normalised, ['tonne', 'tonnes', 't', 'metric ton', 'metricton'], true) => $value,
+            in_array($normalised, ['pound', 'pounds', 'lb', 'lbs'], true) => $value * 0.00045359237,
+            default => $value / 1000,
+        };
+    }
+
+    /**
+     * The applicable daily production target for a machine-day, preferring
+     * a mine-area-specific target over a team-wide one. Only ever fills a
+     * target the user hasn't already set on the record.
+     */
+    private function dailyProductionTarget(int $teamId, ?int $mineAreaId, string $date): ?float
+    {
+        try {
+            $target = ProductionTarget::forTeam($teamId)
+                ->active()
+                ->where('period_type', 'daily')
+                ->whereDate('start_date', '<=', $date)
+                ->whereDate('end_date', '>=', $date)
+                ->where(function ($query) use ($mineAreaId) {
+                    $query->whereNull('mine_area_id');
+                    if ($mineAreaId) {
+                        $query->orWhere('mine_area_id', $mineAreaId);
+                    }
+                })
+                ->orderByRaw('mine_area_id IS NULL')
+                ->first();
+
+            return $target?->target_quantity !== null ? (float) $target->target_quantity : null;
+        } catch (\Throwable) {
+            return null;
         }
     }
 

@@ -45,6 +45,39 @@ class ProductionDashboardPageTest extends TestCase
     }
 
     /**
+     * A telemetry-derived record (what the Bell integration sync writes)
+     * must surface its real load/cycle counts and tonnage on the page --
+     * the summary tiles used to count records, which would render one
+     * "load" for a whole synced day of hauling.
+     */
+    public function test_telemetry_production_records_render_with_real_load_and_cycle_counts(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        ProductionRecord::create([
+            'team_id' => $team->id,
+            'record_date' => Carbon::yesterday(),
+            'shift' => 'continuous',
+            'quantity_produced' => 750.25,
+            'unit' => 'tonnes',
+            'status' => 'completed',
+            'metadata' => ['source' => 'telemetry', 'provider' => 'bell', 'loads' => 150, 'cycles' => 150],
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(ProductionDashboard::class)
+            ->assertViewHas('summary', function (array $summary) {
+                return $summary['total_loads'] === 150
+                    && $summary['total_cycles'] === 150
+                    && abs($summary['total_tonnage'] - 750.25) < 0.01
+                    && abs($summary['total_bcm'] - 750.25) < 0.01;
+            })
+            ->assertSee('750');
+    }
+
+    /**
      * dateFilter defaults to the string 'month' and used to be passed
      * straight into where('record_date', $this->dateFilter) -- an equality
      * match against a preset keyword instead of a range. SQLite tolerates

@@ -2,73 +2,63 @@
 
 namespace App\Contracts;
 
+use Illuminate\Support\Carbon;
+
 interface ManufacturerServiceInterface
 {
     /**
      * Test the connection to the manufacturer API
-     *
-     * @return bool
      */
     public function testConnection(): bool;
 
     /**
      * Fetch all machines from the manufacturer API
-     *
-     * @return array
      */
     public function fetchMachines(): array;
 
     /**
      * Fetch machine details from the manufacturer API
-     *
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineDetails(string $machineId): array;
 
     /**
      * Fetch real-time location for a machine
-     *
-     * @param string $machineId
-     * @return array|null
      */
     public function fetchMachineLocation(string $machineId): ?array;
 
     /**
      * Fetch machine metrics/diagnostics (fuel, temperature, RPM, etc.)
-     *
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineMetrics(string $machineId): array;
 
     /**
      * Fetch machine alerts/faults
-     *
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineAlerts(string $machineId): array;
 
     /**
      * Fetch all data for a machine (comprehensive sync)
-     *
-     * @param string $machineId
-     * @return array
      */
     public function fetchMachineData(string $machineId): array;
 
     /**
-     * Get the manufacturer name
+     * Fetch cumulative production counter readings (load counts, payload
+     * totals) for a machine over a time window. Providers without a real
+     * production data source keep BaseManufacturerService's default, which
+     * reports success=false so no production records are ever derived from
+     * guessed data.
      *
-     * @return string
+     * @return array{success: bool, load_count_readings: list<array{timestamp: string, value: float, units: ?string}>, payload_readings: list<array{timestamp: string, value: float, units: ?string}>}
+     */
+    public function fetchMachineProduction(string $machineId, Carbon $start, Carbon $end): array;
+
+    /**
+     * Get the manufacturer name
      */
     public function getManufacturer(): string;
 
     /**
      * Get API error if any occurred
-     *
-     * @return string|null
      */
     public function getLastError(): ?string;
 }

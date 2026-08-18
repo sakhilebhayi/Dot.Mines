@@ -182,6 +182,48 @@ XML;
         $this->assertNotEmpty($result['error']);
     }
 
+    /**
+     * An empty self-closing root element (a fleet with zero equipment, a
+     * time series with no readings) is valid XML, but SimpleXMLElement
+     * casts it to boolean false -- it must be treated as a successful
+     * empty response, not reported as a parse failure.
+     */
+    public function test_test_connection_succeeds_when_the_fleet_has_zero_equipment(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response('<Fleet/>', 200)]);
+
+        $service = new BellService($this->credentials());
+
+        $this->assertTrue($service->testConnection());
+        $this->assertNull($service->getLastError());
+    }
+
+    public function test_fetch_machines_returns_success_with_zero_machines_for_an_empty_fleet(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response('<Fleet/>', 200)]);
+
+        $result = (new BellService($this->credentials()))->fetchMachines();
+
+        $this->assertTrue($result['success']);
+        $this->assertSame([], $result['machines']);
+        $this->assertSame(0, $result['count']);
+    }
+
+    public function test_fetch_machine_alerts_treats_an_empty_time_series_as_valid_not_an_error(): void
+    {
+        $this->fakeToken();
+        Http::fake([
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*/CautionCodes/*' => Http::response('<CautionCodesTimeSeries/>', 200),
+        ]);
+
+        $service = new BellService($this->credentials());
+
+        $this->assertSame([], $service->fetchMachineAlerts('ASA B50E#9086'));
+        $this->assertNull($service->getLastError());
+    }
+
     public function test_access_token_is_cached_and_reused_across_calls(): void
     {
         $this->fakeToken();
@@ -248,7 +290,7 @@ XML, 200),
         $this->assertStringContainsString('E204', $alerts[0]['title']);
         $this->assertSame('sensor', $alerts[0]['type']);
         $this->assertSame('medium', $alerts[0]['priority']);
-        $this->assertSame('new', $alerts[0]['status']);
+        $this->assertSame('active', $alerts[0]['status']);
         $this->assertNotEmpty($alerts[0]['external_id']);
     }
 
@@ -260,7 +302,14 @@ XML, 200),
     public function test_syncing_a_bell_integration_creates_a_real_machine_and_metric(): void
     {
         $this->fakeToken();
-        Http::fake([self::FLEET_URL => Http::response($this->fleetXml(), 200)]);
+        Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
+            // The full sync path also fetches caution codes and the two
+            // production time series per machine -- stub them empty so the
+            // test never attempts real network calls (each unfaked call
+            // burns the full retry cycle against Bell's real host).
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<TimeSeries/>', 200),
+        ]);
 
         $team = Team::factory()->create();
         $integration = Integration::factory()->forProvider('bell')->create([
@@ -304,6 +353,9 @@ XML, 200),
   <Reading ReadingUTC="2026-06-02T09:00:00Z" Value="E204"/>
 </CautionCodesTimeSeries>
 XML, 200),
+            // Production time series fetched by the same sync path -- stub
+            // empty so no real network calls are attempted.
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<TimeSeries/>', 200),
         ]);
 
         $team = Team::factory()->create();

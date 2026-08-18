@@ -2,6 +2,14 @@
 
 return [
     /**
+     * How far back a machine's first production sync reaches into the
+     * provider's historical cumulative-counter time series (days). Later
+     * syncs only re-fetch from the machine's most recent production
+     * record forward.
+     */
+    'production_backfill_days' => env('INTEGRATIONS_PRODUCTION_BACKFILL_DAYS', 14),
+
+    /**
      * Supported manufacturers and their configurations
      */
     'manufacturers' => [

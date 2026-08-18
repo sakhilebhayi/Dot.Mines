@@ -103,7 +103,7 @@ class BellService extends BaseManufacturerService
         try {
             $xml = $this->requestXml('/Fleet');
 
-            if (! $xml) {
+            if ($xml === null) {
                 return [
                     'success' => false,
                     'error' => $this->lastError ?? 'No response from Bell Fleet endpoint',
@@ -195,7 +195,7 @@ class BellService extends BaseManufacturerService
         try {
             $xml = $this->requestXml('/Fleet');
 
-            if (! $xml) {
+            if ($xml === null) {
                 return [];
             }
 
@@ -253,6 +253,65 @@ class BellService extends BaseManufacturerService
             'metrics' => $this->fetchMachineMetrics($machineId),
             'alerts' => $this->fetchMachineAlerts($machineId),
         ];
+    }
+
+    /**
+     * Production history from Bell's two cumulative production counters:
+     * CumulativeLoadCount (lifetime load count) and CumulativePayloadTotals
+     * (lifetime hauled mass, kilograms in Bell's own reference data). These
+     * are the same documented ISO 15143-3 time-series endpoints the
+     * locations/caution-codes fetches already use -- IntegrationService
+     * turns consecutive cumulative readings into per-day production deltas,
+     * so nothing here is estimated.
+     */
+    public function fetchMachineProduction(string $machineId, Carbon $start, Carbon $end): array
+    {
+        try {
+            return [
+                'success' => true,
+                'load_count_readings' => $this->toProductionReadings(
+                    $this->fetchTimeSeries($machineId, 'loadCount', $start, $end)
+                ),
+                'payload_readings' => $this->toProductionReadings(
+                    $this->fetchTimeSeries($machineId, 'payloadTotals', $start, $end)
+                ),
+            ];
+        } catch (Throwable $e) {
+            $this->logError('Failed to fetch Bell machine production', $e);
+
+            return [
+                'success' => false,
+                'load_count_readings' => [],
+                'payload_readings' => [],
+            ];
+        }
+    }
+
+    /**
+     * @param  list<array{timestamp: string, value: string, attributes: array<string, string>}>  $readings
+     * @return list<array{timestamp: string, value: float, units: ?string}>
+     */
+    private function toProductionReadings(array $readings): array
+    {
+        $parsed = [];
+
+        foreach ($readings as $reading) {
+            $value = $this->toFloatOrNull($reading['value'] ?? null);
+
+            if ($value === null) {
+                continue;
+            }
+
+            $parsed[] = [
+                'timestamp' => $reading['timestamp'],
+                'value' => $value,
+                'units' => $reading['attributes']['PayloadUnits']
+                    ?? $reading['attributes']['Units']
+                    ?? null,
+            ];
+        }
+
+        return $parsed;
     }
 
     /**
@@ -424,7 +483,7 @@ class BellService extends BaseManufacturerService
 
         $xml = $this->requestXml($path);
 
-        if (! $xml) {
+        if ($xml === null) {
             return [];
         }
 
@@ -482,7 +541,11 @@ class BellService extends BaseManufacturerService
                 if ($response->successful()) {
                     $xml = $this->parseXml($response->body());
 
-                    if ($xml) {
+                    // Truthiness would misclassify valid empty responses:
+                    // SimpleXMLElement casts an empty element like <Fleet/>
+                    // to boolean false. parseXml() returns null on a real
+                    // parse failure, so only null means unparseable.
+                    if ($xml !== null) {
                         return $xml;
                     }
 

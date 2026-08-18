@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property array|null $config
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read Team|null $team
  */
 class Integration extends Model
 {

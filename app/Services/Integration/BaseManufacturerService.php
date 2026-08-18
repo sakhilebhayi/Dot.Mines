@@ -468,6 +468,25 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     }
 
     /**
+     * Fetch cumulative production counter readings for a machine.
+     * success=false means "this provider has no production data source",
+     * so IntegrationService derives nothing rather than fabricating
+     * production out of fleet metadata. Providers with a real production
+     * endpoint (Bell's ISO 15143-3 CumulativeLoadCount /
+     * CumulativePayloadTotals time series) override this.
+     *
+     * @return array{success: bool, load_count_readings: list<array{timestamp: string, value: float, units: ?string}>, payload_readings: list<array{timestamp: string, value: float, units: ?string}>}
+     */
+    public function fetchMachineProduction(string $machineId, Carbon $start, Carbon $end): array
+    {
+        return [
+            'success' => false,
+            'load_count_readings' => [],
+            'payload_readings' => [],
+        ];
+    }
+
+    /**
      * Log integration activity
      */
     protected function logActivity(string $action, array $details = []): void

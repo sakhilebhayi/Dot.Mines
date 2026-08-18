@@ -154,8 +154,12 @@ class ProductionDashboard extends Component
         $activeAreas = MineArea::forTeam($this->teamId)->where('status', 'active')->count();
 
         return [
-            'total_loads' => $stats['total_records'] ?? 0,
-            'total_cycles' => $stats['completed_records'] ?? 0,
+            // Real load/cycle counts (telemetry records carry them in
+            // metadata; manual records still count as one each) -- the
+            // record-count proxy undercounted badly once integration
+            // records aggregating a whole day of loads existed.
+            'total_loads' => $stats['total_loads'] ?? $stats['total_records'] ?? 0,
+            'total_cycles' => $stats['total_cycles'] ?? $stats['completed_records'] ?? 0,
             'total_tonnage' => round($stats['total_produced'] ?? 0, 2),
             'total_bcm' => round($stats['total_produced'] ?? 0, 2),
             'active_areas' => $activeAreas,
@@ -183,7 +187,7 @@ class ProductionDashboard extends Component
             return [
                 'date' => $day['date'],
                 'tonnage' => $day['produced'] ?? 0,
-                'loads' => $day['count'] ?? 0,
+                'loads' => $day['loads'] ?? $day['count'] ?? 0,
             ];
         })->toArray();
     }
@@ -226,8 +230,8 @@ class ProductionDashboard extends Component
             return [
                 'area_name' => $area->name,
                 'area_type' => $area->status ?? 'active',
-                'loads' => $records->count(),
-                'cycles' => $records->count(),
+                'loads' => (int) $records->sum(fn ($record) => $this->productionService()->recordLoads($record)),
+                'cycles' => (int) $records->sum(fn ($record) => $this->productionService()->recordCycles($record)),
                 'tonnage' => $records->sum('quantity_produced') ?? 0,
                 'bcm' => $records->sum('quantity_produced') ?? 0, // Using quantity_produced as BCM proxy
             ];
