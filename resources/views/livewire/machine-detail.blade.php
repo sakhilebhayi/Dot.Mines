@@ -12,7 +12,7 @@
     </div>
 
     <!-- Machine Information Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <!-- Status Card -->
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6">
             <p class="text-[var(--sand)] text-sm">Status</p>
@@ -39,6 +39,14 @@
             <p class="text-xl font-semibold text-[var(--stone)] mt-2">{{ $machine->capacity ? number_format($machine->capacity) . ' tons' : 'N/A' }}</p>
         </div>
 
+        <!-- Engine Hours Card (latest cumulative reading from telemetry) -->
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6">
+            <p class="text-[var(--sand)] text-sm">Engine Hours</p>
+            <p class="text-xl font-semibold text-[var(--stone)] mt-2">
+                {{ $machine->latestEngineHoursMetric ? number_format($machine->latestEngineHoursMetric->operating_hours, 1) . ' hrs' : 'N/A' }}
+            </p>
+        </div>
+
         <!-- Last Updated Card -->
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6">
             <p class="text-[var(--sand)] text-sm">Last Updated</p>
@@ -46,22 +54,25 @@
         </div>
     </div>
 
-    <!-- Location Information -->
-    @if ($machine->latitude && $machine->longitude)
+    <!-- Location Information. The card used to read $machine->latitude /
+         ->longitude, columns that don't exist (the real ones are
+         last_location_latitude / last_location_longitude), so it never
+         rendered even for machines with live GPS. -->
+    @if ($machine->last_location_latitude && $machine->last_location_longitude)
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6 mb-6">
             <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Current Location</h3>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-[var(--sand)] text-sm">Latitude</p>
-                    <p class="text-[var(--stone)] font-mono">{{ $machine->latitude }}</p>
+                    <p class="text-[var(--stone)] font-mono">{{ $machine->last_location_latitude }}</p>
                 </div>
                 <div>
                     <p class="text-[var(--sand)] text-sm">Longitude</p>
-                    <p class="text-[var(--stone)] font-mono">{{ $machine->longitude }}</p>
+                    <p class="text-[var(--stone)] font-mono">{{ $machine->last_location_longitude }}</p>
                 </div>
             </div>
             <p class="text-sm text-[var(--sand)]/70 mt-4">
-                <a href="https://maps.google.com/?q={{ $machine->latitude }},{{ $machine->longitude }}" target="_blank" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">
+                <a href="https://maps.google.com/?q={{ $machine->last_location_latitude }},{{ $machine->last_location_longitude }}" target="_blank" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">
                     View on Google Maps →
                 </a>
             </p>
@@ -72,6 +83,14 @@
     @if ($metrics->count() > 0)
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6 mb-6">
             <h3 class="text-lg font-semibold text-[var(--stone)] mb-4">Recent Sensor Data</h3>
+            @php
+                // The table used to read $metric->rpm and $metric->payload_weight --
+                // columns that don't exist (the real ones are engine_rpm and
+                // load_weight) -- so every reading rendered N/A even when real
+                // telemetry was stored. A null here means the feed genuinely did
+                // not report that sensor, so render an explained dash instead.
+                $sensorCell = fn ($value, int $decimals = 1) => $value === null ? '—' : number_format((float) $value, $decimals);
+            @endphp
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="border-b border-[var(--line)]">
@@ -81,21 +100,46 @@
                             <th class="text-left px-4 py-2 text-[var(--sand)]">Temp (°C)</th>
                             <th class="text-left px-4 py-2 text-[var(--sand)]">Fuel (%)</th>
                             <th class="text-left px-4 py-2 text-[var(--sand)]">Load</th>
+                            <th class="text-left px-4 py-2 text-[var(--sand)]">Engine (hrs)</th>
+                            <th class="text-left px-4 py-2 text-[var(--sand)]">Idle (hrs)</th>
+                            <th class="text-left px-4 py-2 text-[var(--sand)]">DEF (%)</th>
+                            <th class="text-left px-4 py-2 text-[var(--sand)]">Odometer</th>
+                            <th class="text-left px-4 py-2 text-[var(--sand)]">Engine</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[var(--line)]">
                         @foreach ($metrics as $metric)
-                            <tr class="hover:bg-white/5">
-                                <td class="px-4 py-2 text-[var(--sand)]">{{ $metric->created_at->format('H:i:s') }}</td>
-                                <td class="px-4 py-2 text-[var(--sand)]">{{ $metric->rpm ?? 'N/A' }}</td>
-                                <td class="px-4 py-2 text-[var(--sand)]">{{ $metric->coolant_temperature ?? 'N/A' }}</td>
-                                <td class="px-4 py-2 text-[var(--sand)]">{{ $metric->fuel_level ?? 'N/A' }}</td>
-                                <td class="px-4 py-2 text-[var(--sand)]">{{ $metric->payload_weight ?? 'N/A' }}</td>
+                            @php
+                                $odometer = data_get($metric->raw_data, 'odometer');
+                                $odometerUnits = data_get($metric->raw_data, 'odometer_units');
+                                $odometerUnits = ['kilometre' => 'km', 'mile' => 'mi'][$odometerUnits] ?? $odometerUnits;
+                                $engineRunning = data_get($metric->raw_data, 'engine_running');
+                            @endphp
+                            <tr class="hover:bg-white/5" wire:key="metric-{{ $metric->id }}">
+                                {{-- recorded_at is the provider's own reading timestamp
+                                     (Bell: TelemetryDate); created_at is only when the
+                                     row was synced. --}}
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ ($metric->recorded_at ?? $metric->created_at)->format('H:i:s') }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $sensorCell($metric->engine_rpm, 0) }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $sensorCell($metric->engine_temperature ?? $metric->coolant_temperature) }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $sensorCell($metric->fuel_level, 0) }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $sensorCell($metric->load_weight) }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $sensorCell($metric->operating_hours) }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $sensorCell($metric->idle_hours) }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $sensorCell(data_get($metric->raw_data, 'def_percent'), 0) }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $odometer === null ? '—' : number_format((float) $odometer) . ($odometerUnits ? ' ' . $odometerUnits : '') }}</td>
+                                <td class="px-4 py-2 text-[var(--sand)]">{{ $engineRunning === null ? '—' : ($engineRunning ? 'On' : 'Off') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+            <p class="text-xs text-[var(--sand)]/70 mt-3">
+                — = not reported by this machine's telemetry feed.
+                @if (strtolower($machine->manufacturer ?? '') === 'bell')
+                    Bell's ISO 15143-3 fleet feed does not include engine RPM, engine temperature, or instantaneous load.
+                @endif
+            </p>
         </div>
     @endif
 
