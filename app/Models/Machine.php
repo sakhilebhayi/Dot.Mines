@@ -4,18 +4,17 @@ namespace App\Models;
 
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
-use Illuminate\Validation\ValidationException;
-use App\Models\MineArea;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Machine Model
- * 
+ *
  * Represents a mining machine (Volvo, CAT, Komatsu, Bell truck, etc.)
  * Tracks metadata, status, and integrations with manufacturer systems
  *
@@ -35,14 +34,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $status
  * @property float|null $last_location_latitude
  * @property float|null $last_location_longitude
- * @property \Carbon\Carbon|null $last_location_update
+ * @property Carbon|null $last_location_update
  * @property int|null $integration_id
  * @property int|null $mine_area_id
  * @property int|null $excavator_id
- * @property \Carbon\Carbon|null $assigned_to_excavator_at
+ * @property Carbon|null $assigned_to_excavator_at
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Machine where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Machine whereIn(string $column, array<string|int> $values)
@@ -222,10 +221,8 @@ class Machine extends Model
 
     /**
      * Get active alerts for this machine
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function activeAlerts(): \Illuminate\Database\Eloquent\Builder
+    public function activeAlerts(): Builder
     {
         return $this->alerts()->where('status', 'active');
     }
@@ -244,11 +241,27 @@ class Machine extends Model
 
     /**
      * Get latest metric
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function getLatestMetric(): ?\Illuminate\Database\Eloquent\Model
+    public function getLatestMetric(): ?Model
     {
         return $this->metrics()->latest('created_at')->first();
+    }
+
+    /**
+     * The newest telemetry reading that actually carries an engine-hours
+     * value. Cumulative operating hours arrive with every Bell /Fleet
+     * snapshot sync (BellService::buildCurrentMetric() maps OperatingHours
+     * to machine_metrics.operating_hours), but some rows are location- or
+     * fuel-only -- the fleet card wants the latest AVAILABLE reading, as
+     * an eager-loadable relationship so listing pages avoid an N+1.
+     *
+     * @return HasOne<MachineMetric, $this>
+     */
+    public function latestEngineHoursMetric(): HasOne
+    {
+        return $this->hasOne(MachineMetric::class)->ofMany(
+            ['created_at' => 'max', 'id' => 'max'],
+            fn ($query) => $query->whereNotNull('operating_hours')
+        );
     }
 }

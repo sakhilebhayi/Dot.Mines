@@ -456,7 +456,7 @@ class Fleet extends Component
         $team = Auth::user()->currentTeam;
 
         $machinesQuery = Machine::where('team_id', $team->id)
-            ->with('excavator')
+            ->with(['excavator', 'latestEngineHoursMetric'])
             ->when($this->search, function ($query) {
                 return $query->where('name', 'like', "%{$this->search}%")
                     ->orWhere('model', 'like', "%{$this->search}%")
