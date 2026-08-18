@@ -145,7 +145,10 @@ class MachinePerformanceService
      * needs at least two non-null readings; a negative delta (counter
      * reset) is not a real measurement, so it reports null rather than a
      * clamped guess -- unlike production backfill, there is no stored
-     * baseline to recover the true value from within a single day.
+     * baseline to recover the true value from within a single day. The
+     * hour-denominated counters additionally cannot accrue faster than
+     * wall-clock time between their readings; a larger jump is a sync
+     * backfill landing prior days' hours in one day's bucket.
      *
      * @param  Collection<int, MachineMetric>  $dayMetrics
      * @return array{operating_hours: ?float, idle_hours: ?float, fuel_consumed: ?float}
@@ -153,8 +156,8 @@ class MachinePerformanceService
     private function telemetryDay(Collection $dayMetrics): array
     {
         return [
-            'operating_hours' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => $m->operating_hours),
-            'idle_hours' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => $m->idle_hours),
+            'operating_hours' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => $m->operating_hours, boundedByElapsedTime: true),
+            'idle_hours' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => $m->idle_hours, boundedByElapsedTime: true),
             'fuel_consumed' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => data_get($m->raw_data, 'fuel_consumed_cumulative')),
         ];
     }
@@ -162,17 +165,36 @@ class MachinePerformanceService
     /**
      * @param  Collection<int, MachineMetric>  $dayMetrics
      */
-    private function dayDelta(Collection $dayMetrics, callable $extract): ?float
+    private function dayDelta(Collection $dayMetrics, callable $extract, bool $boundedByElapsedTime = false): ?float
     {
-        $values = $dayMetrics->map($extract)->filter(fn ($value) => is_numeric($value))->values();
+        $readings = $dayMetrics
+            ->filter(fn (MachineMetric $m) => is_numeric($extract($m)))
+            ->sortBy(fn (MachineMetric $m) => ($m->recorded_at ?? $m->created_at)->getTimestamp())
+            ->values();
 
-        if ($values->count() < 2) {
+        if ($readings->count() < 2) {
             return null;
         }
 
-        $delta = (float) $values->last() - (float) $values->first();
+        $delta = (float) $extract($readings->last()) - (float) $extract($readings->first());
 
-        return $delta >= 0 ? $delta : null;
+        if ($delta < 0) {
+            return null;
+        }
+
+        if ($boundedByElapsedTime) {
+            $first = $readings->first()->recorded_at ?? $readings->first()->created_at;
+            $last = $readings->last()->recorded_at ?? $readings->last()->created_at;
+            $elapsedHours = abs($last->getTimestamp() - $first->getTimestamp()) / 3600;
+
+            // The margin absorbs device-vs-server clock skew on otherwise
+            // plausible readings.
+            if ($delta > $elapsedHours * 1.1 + 0.1) {
+                return null;
+            }
+        }
+
+        return $delta;
     }
 
     /**

@@ -135,6 +135,32 @@ class MachinePerformanceServiceTest extends TestCase
         $this->assertNull($row['fuel_lph_today']);
     }
 
+    public function test_hour_counters_accruing_faster_than_wall_clock_are_not_real_measurements(): void
+    {
+        $team = Team::factory()->create();
+        $machine = Machine::factory()->create(['team_id' => $team->id]);
+
+        // A sync backfill lands a 36.4-hour counter jump inside a 25-minute
+        // window -- hours cannot accrue faster than wall-clock time, so the
+        // day's delta is an artifact, not a measurement.
+        $this->metric($team, $machine, [
+            'recorded_at' => now()->startOfDay()->addHours(20),
+            'operating_hours' => 8376.2,
+            'idle_hours' => 3808.96,
+        ]);
+        $this->metric($team, $machine, [
+            'recorded_at' => now()->startOfDay()->addHours(20)->addMinutes(25),
+            'operating_hours' => 8412.6,
+            'idle_hours' => 3808.96,
+        ]);
+
+        $row = app(MachinePerformanceService::class)->dailyPerformanceForTeam($team->id)[0];
+
+        $this->assertNull($row['operating_hours_today']);
+        $this->assertNull($row['utilisation_today']);
+        $this->assertNull($row['fuel_lph_today']);
+    }
+
     public function test_machines_without_any_window_data_are_excluded(): void
     {
         $team = Team::factory()->create();

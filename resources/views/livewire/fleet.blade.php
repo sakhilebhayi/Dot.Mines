@@ -328,8 +328,10 @@
                             @endif
 
                             <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-                                <span class="text-xs text-[var(--sand)]">AI Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
-                                <div class="flex items-center gap-2">
+                                @isset($recommendation['confidence_score'])
+                                    <span class="text-xs text-[var(--sand)]">AI Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
+                                @endisset
+                                <div class="ml-auto flex items-center gap-2">
                                     <button wire:click="implementRecommendation({{ $loop->index }})" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-[var(--stone)] rounded text-sm font-medium">Implement</button>
                                     <button wire:click="openRejectRecommendation({{ $loop->index }})" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-[var(--stone)] rounded text-sm font-medium">Reject</button>
                                 </div>

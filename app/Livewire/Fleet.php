@@ -467,7 +467,7 @@ class Fleet extends Component
             ->toArray();
 
         // AI Fleet Optimization Analysis
-        $aiAgent = new FleetOptimizerAgent;
+        $aiAgent = app(FleetOptimizerAgent::class);
         $aiAnalysis = $aiAgent->analyze($team);
         $aiRecommendations = collect($aiAnalysis['recommendations'])->take(5);
         $aiInsights = collect($aiAnalysis['insights'])->take(3);

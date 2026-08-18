@@ -80,7 +80,9 @@ class AIOptimizationService
                         'proposed_action' => $rec['proposed_action'] ?? $rec['description'],
                         'data' => $rec['data'] ?? [],
                         'impact_analysis' => $rec['impact_analysis'] ?? [],
-                        'confidence_score' => $rec['confidence_score'],
+                        // Agents that refuse to fabricate a confidence figure
+                        // omit the key; 0 is the schema's "not recorded" default.
+                        'confidence_score' => $rec['confidence_score'] ?? 0,
                         'estimated_savings' => $rec['estimated_savings'] ?? null,
                         'estimated_efficiency_gain' => $rec['estimated_efficiency_gain'] ?? null,
                         'related_machine_id' => $rec['related_machine_id'] ?? null,
@@ -150,7 +152,7 @@ class AIOptimizationService
                 'proposed_action' => $rec['proposed_action'] ?? $rec['description'],
                 'data' => $rec['data'] ?? [],
                 'impact_analysis' => $rec['impact_analysis'] ?? [],
-                'confidence_score' => $rec['confidence_score'],
+                'confidence_score' => $rec['confidence_score'] ?? 0,
                 'estimated_savings' => $rec['estimated_savings'] ?? null,
                 'estimated_efficiency_gain' => $rec['estimated_efficiency_gain'] ?? null,
             ]);
