@@ -56,6 +56,8 @@ class ProductionService
         return [
             'total_produced' => $totalProduced,
             'total_target' => $totalTarget,
+            'total_loads' => (int) $records->sum(fn (ProductionRecord $record) => $this->recordLoads($record)),
+            'total_cycles' => (int) $records->sum(fn (ProductionRecord $record) => $this->recordCycles($record)),
             'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100 : 0,
             'average_daily_production' => $avgProduction,
             'total_records' => $recordCount,
@@ -147,8 +149,36 @@ class ProductionService
                 'produced' => $dayRecords->sum('quantity_produced'),
                 'target' => $dayRecords->sum('target_quantity'),
                 'count' => $dayRecords->count(),
+                'loads' => (int) $dayRecords->sum(fn (ProductionRecord $record) => $this->recordLoads($record)),
             ];
         });
+    }
+
+    /**
+     * Real loads for a record: telemetry-derived records aggregate a whole
+     * day of loads into one row and carry the true count in metadata;
+     * a manual entry without one counts as the single load it always did.
+     */
+    public function recordLoads(ProductionRecord $record): int
+    {
+        $loads = data_get($record->metadata, 'loads');
+
+        return is_numeric($loads) ? (int) $loads : 1;
+    }
+
+    /**
+     * Real cycles for a record, falling back to the dashboard's historical
+     * proxy (one cycle per completed manual record).
+     */
+    public function recordCycles(ProductionRecord $record): int
+    {
+        $cycles = data_get($record->metadata, 'cycles');
+
+        if (is_numeric($cycles)) {
+            return (int) $cycles;
+        }
+
+        return $record->status === 'completed' ? 1 : 0;
     }
 
     /**

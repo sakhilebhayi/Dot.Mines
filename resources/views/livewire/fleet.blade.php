@@ -455,6 +455,19 @@
                                 <span class="ml-auto text-xs text-[var(--sand)]">{{ $machine->capacity ? number_format($machine->capacity) . ' tons' : 'N/A' }}</span>
                             </div>
                             <div class="flex items-center gap-2 text-sm text-[var(--sand)]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0"/>
+                                </svg>
+                                <span class="font-medium">Engine Hours:</span>
+                                <span class="ml-auto text-[var(--stone)] font-semibold">
+                                    @if ($machine->latestEngineHoursMetric)
+                                        {{ number_format($machine->latestEngineHoursMetric->operating_hours, 1) }} hrs
+                                    @else
+                                        N/A
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm text-[var(--sand)]">
                                 @if ($machine->excavator)
                                     <span class="font-medium">Excavator:</span> {{ $machine->excavator->name }}
                                     <button wire:click="unassignFromExcavator({{ $machine->id }})" 
