@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Alert Model
- * 
+ *
  * Represents system alerts triggered by rules
  * Can be about machines, maintenance, fuel, or custom conditions
  *
@@ -23,14 +24,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $description
  * @property string $priority
  * @property string $status
- * @property \Carbon\Carbon $triggered_at
- * @property \Carbon\Carbon|null $acknowledged_at
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon $triggered_at
+ * @property Carbon|null $acknowledged_at
+ * @property Carbon|null $resolved_at
  * @property int|null $acknowledged_by
  * @property int|null $resolved_by
  * @property array|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Alert where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Alert whereIn(string $column, array $values)
@@ -43,6 +44,19 @@ class Alert extends Model
 {
     use HasFactory, HasTeamFilters;
 
+    /**
+     * Canonical alert statuses, enforced by the chk_alert_status_values DB constraint.
+     *
+     * @var list<string>
+     */
+    public const STATUSES = [
+        'active',
+        'acknowledged',
+        'resolved',
+        'dismissed',
+        'dismissed_unresolved',
+    ];
+
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -51,7 +65,7 @@ class Alert extends Model
         'title',
         'description',
         'priority', // critical, high, medium, low
-        'status', // active, acknowledged, resolved
+        'status', // see self::STATUSES
         'triggered_at',
         'acknowledged_at',
         'resolved_at',

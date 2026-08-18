@@ -12,7 +12,7 @@
                 $allAlerts = $alerts;
                 $criticalCount = $allAlerts->where('priority', 'critical')->count() ?? 0;
                 $highCount = $allAlerts->where('priority', 'high')->count() ?? 0;
-                $openCount = $allAlerts->whereIn('status', ['new', 'acknowledged'])->count() ?? 0;
+                $openCount = $allAlerts->whereIn('status', ['active', 'acknowledged'])->count() ?? 0;
             @endphp
             
             <div class="bg-red-900/30 border border-red-700 rounded-lg p-4">
@@ -73,10 +73,9 @@
                         class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
                         <option value="all">All Statuses</option>
-                        <option value="new">New</option>
-                        <option value="acknowledged">Acknowledged</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="dismissed">Dismissed</option>
+                        @foreach ($alertStatuses as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -125,10 +124,9 @@
                 @foreach ($alerts as $alert)
                     @php
                         $priorityClasses = $alert->priority === 'critical' ? 'border-red-700 bg-red-900/10' : ($alert->priority === 'high' ? 'border-orange-700 bg-orange-900/10' : ($alert->priority === 'medium' ? 'border-yellow-700 bg-yellow-900/10' : 'border-[var(--line)]'));
-                        $attentionClass = $alert->status === 'attention' ? 'border-red-700 bg-red-900/10' : '';
                     @endphp
 
-                    <div class="bg-[var(--ink-soft)] rounded-lg border {{ $priorityClasses }} {{ $attentionClass }} p-4 hover:border-[var(--gold)]/50 transition">
+                    <div class="bg-[var(--ink-soft)] rounded-lg border {{ $priorityClasses }} p-4 hover:border-[var(--gold)]/50 transition">
                         <div class="flex items-start justify-between gap-4">
                             <!-- Alert Info -->
                             <div class="flex-1">
@@ -144,21 +142,12 @@
 
                                     <!-- Status Badge -->
                                                     @php
-                                                        $statusLabel = match($alert->status) {
-                                                            'new' => 'New',
-                                                            'acknowledged' => 'Acknowledged',
-                                                            'resolved' => 'Resolved',
-                                                            'attention' => 'Attention',
-                                                            'dismissed_unresolved' => 'Dismissed - Unresolved',
-                                                            'dismissed' => 'Dismissed',
-                                                            default => ucfirst($alert->status),
-                                                        };
+                                                        $statusLabel = $alertStatuses[$alert->status] ?? ucfirst($alert->status);
 
                                                         $statusClass = match($alert->status) {
-                                                            'new' => 'bg-green-900 text-green-300',
+                                                            'active' => 'bg-green-900 text-green-300',
                                                             'acknowledged' => 'bg-blue-900 text-blue-300',
                                                             'resolved' => 'bg-white/5 text-[var(--sand)]',
-                                                            'attention' => 'bg-red-900 text-red-300',
                                                             'dismissed_unresolved' => 'bg-red-900 text-red-300',
                                                             'dismissed' => 'bg-white/10 text-[var(--sand)]',
                                                             default => 'bg-white/10 text-[var(--sand)]',
@@ -197,7 +186,7 @@
                                     Details
                                 </button>
 
-                                @if($alert->status === 'new')
+                                @if($alert->status === 'active')
                                     <button 
                                         wire:click="acknowledgeAlert({{ $alert->id }})"
                                         class="px-3 py-1 text-sm bg-[var(--gold)] text-[var(--ink)] hover:bg-[var(--gold-soft)] rounded transition flex items-center gap-1 font-medium"
