@@ -7,9 +7,9 @@ use App\Models\AiRecommendationAction;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Services\AI\FleetOptimizerAgent;
+use App\Services\MachinePerformanceService;
 use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -391,64 +391,12 @@ class Fleet extends Component
         $this->closeMineAreaAssignModal();
     }
 
-    private function calculateMachinePerformance(int $teamId): array
-    {
-        $machines = Machine::where('team_id', $teamId)->get();
-        $performanceData = [];
-
-        foreach ($machines as $machine) {
-            // Get metrics from last 30 days
-            $metrics = DB::table('machine_metrics')
-                ->where('machine_id', $machine->id)
-                ->where('created_at', '>=', now()->subDays(30))
-                ->get();
-
-            if ($metrics->isEmpty()) {
-                continue;
-            }
-
-            $avgFuelConsumption = $metrics->avg('fuel_consumption_rate') ?? 0;
-            $avgTotalHours = $metrics->avg('total_hours') ?? 0;
-            $avgIdleHours = $metrics->avg('idle_hours') ?? 0;
-            $avgPayloadUsage = $metrics->avg('payload_capacity_used') ?? 0;
-            $avgSpeed = $metrics->avg('speed') ?? 0;
-
-            // Calculate utilization rate (0-100)
-            $utilizationRate = $avgTotalHours > 0
-                ? (($avgTotalHours - $avgIdleHours) / $avgTotalHours) * 100
-                : 0;
-
-            // Calculate efficiency score (lower fuel consumption per hour is better)
-            $fuelEfficiency = $avgTotalHours > 0 && $avgFuelConsumption > 0
-                ? (1 / ($avgFuelConsumption / $avgTotalHours)) * 10 // Normalized to 0-100 scale
-                : 50; // Default neutral score
-
-            // Calculate productivity score based on payload usage
-            $productivityScore = $avgPayloadUsage;
-
-            // Overall performance score (weighted average)
-            $performanceScore = (
-                ($utilizationRate * 0.4) +
-                ($fuelEfficiency * 0.3) +
-                ($productivityScore * 0.3)
-            );
-
-            $performanceData[] = [
-                'machine_id' => $machine->id,
-                'machine_name' => $machine->name,
-                'machine_type' => $machine->machine_type,
-                'manufacturer' => $machine->manufacturer,
-                'performance_score' => round($performanceScore, 1),
-                'utilization_rate' => round($utilizationRate, 1),
-                'fuel_efficiency' => round($fuelEfficiency, 1),
-                'productivity_score' => round($productivityScore, 1),
-                'avg_hours' => round($avgTotalHours, 1),
-                'status' => $machine->status,
-            ];
-        }
-
-        return $performanceData;
-    }
+    // calculateMachinePerformance() used to live here: it averaged columns
+    // no integration ever writes (total_hours, fuel_consumption_rate,
+    // payload_capacity_used) and fell back to a hardcoded neutral 50 for
+    // fuel efficiency, so every machine scored an identical, meaningless
+    // "15%". MachinePerformanceService now derives real daily metrics from
+    // the telemetry and production data the sync actually stores.
 
     public function render()
     {
@@ -494,10 +442,15 @@ class Fleet extends Component
             'maintenance' => Machine::where('team_id', $team->id)->where('status', 'maintenance')->count(),
         ];
 
-        // Calculate machine performance based on recent metrics (last 30 days)
-        $performanceData = $this->calculateMachinePerformance($team->id);
-        $topPerformers = collect($performanceData)->sortByDesc('performance_score')->take(5)->values();
-        $worstPerformers = collect($performanceData)->sortBy('performance_score')->take(5)->values();
+        // Real daily performance from stored telemetry + production data,
+        // ranked by today's utilisation. Machines whose telemetry can't
+        // support a utilisation figure yet are counted separately rather
+        // than ranked on invented numbers.
+        $performanceData = collect(app(MachinePerformanceService::class)->dailyPerformanceForTeam($team->id));
+        $rankable = $performanceData->filter(fn (array $machine) => $machine['utilisation_today'] !== null);
+        $topPerformers = $rankable->sortByDesc('utilisation_today')->take(5)->values();
+        $worstPerformers = $rankable->sortBy('utilisation_today')->take(5)->values();
+        $unrankedMachines = $performanceData->count() - $rankable->count();
 
         // Activity Feed
         $this->activityFeed = ActivityLog::where('team_id', $team->id)
@@ -532,6 +485,7 @@ class Fleet extends Component
             'statusStats' => $statusStats,
             'topPerformers' => $topPerformers,
             'worstPerformers' => $worstPerformers,
+            'unrankedMachines' => $unrankedMachines,
             'aiRecommendations' => $aiRecommendations,
             'aiInsights' => $aiInsights,
             'activityFeed' => $this->activityFeed,
