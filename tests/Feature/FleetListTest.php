@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Machine;
 use App\Models\MachineMetric;
+use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -112,6 +113,85 @@ class FleetListTest extends TestCase
         $response->assertOk();
         $response->assertSee('ADT 04 No Telemetry');
         $response->assertSee('3,200.0 hrs');
+    }
+
+    /**
+     * The Machine Performance section used to show an identical hardcoded
+     * "15% Score" for every machine (averages of columns no integration
+     * writes, plus a neutral-50 fuel fallback). It must now show real
+     * utilisation derived from today's telemetry deltas and real
+     * production counts, labelled with the period.
+     */
+    public function test_machine_performance_section_shows_real_utilisation_and_production()
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'name' => 'ADT 07']);
+
+        // Engine 100 -> 108 hrs, idle 20 -> 21.6 hrs today = 80% utilisation.
+        MachineMetric::create([
+            'team_id' => $team->id,
+            'machine_id' => $machine->id,
+            'recorded_at' => now()->startOfDay()->addHours(6),
+            'operating_hours' => 100.0,
+            'idle_hours' => 20.0,
+        ]);
+        MachineMetric::create([
+            'team_id' => $team->id,
+            'machine_id' => $machine->id,
+            'recorded_at' => now()->startOfDay()->addHours(16),
+            'operating_hours' => 108.0,
+            'idle_hours' => 21.6,
+        ]);
+
+        ProductionRecord::create([
+            'team_id' => $team->id,
+            'machine_id' => $machine->id,
+            'record_date' => now()->toDateString(),
+            'shift' => 'continuous',
+            'quantity_produced' => 750,
+            'unit' => 'tonnes',
+            'status' => 'completed',
+            'metadata' => ['source' => 'telemetry', 'loads' => 150, 'cycles' => 150],
+        ]);
+
+        $response = $this->actingAs($user)->get('/fleet');
+
+        $response->assertOk();
+        $response->assertSee('Machine Performance');
+        $response->assertSee('80%');
+        $response->assertSee('Utilisation');
+        $response->assertSee('150 loads');
+        $response->assertSee('750 t');
+        $response->assertSee('8.0 hrs run');
+        $response->assertDontSee('Score</div>', false);
+    }
+
+    /**
+     * A machine with telemetry that cannot support a utilisation figure
+     * must be reported as unranked, not scored with invented numbers.
+     */
+    public function test_machines_with_insufficient_telemetry_are_reported_not_ranked()
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        $machine = Machine::factory()->create(['team_id' => $team->id]);
+        MachineMetric::create([
+            'team_id' => $team->id,
+            'machine_id' => $machine->id,
+            'recorded_at' => now(),
+            'operating_hours' => 5210.75,
+        ]);
+
+        $response = $this->actingAs($user)->get('/fleet');
+
+        $response->assertOk();
+        $response->assertSee('1 machine not ranked');
+        $response->assertSee('insufficient telemetry today');
     }
 
     public function test_fleet_list_does_not_leak_another_teams_machines()

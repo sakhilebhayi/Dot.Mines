@@ -2,41 +2,68 @@
 
 namespace App\Services\AI;
 
-use App\Models\Team;
 use App\Models\Machine;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Models\Team;
+use App\Services\MachinePerformanceService;
 
 /**
  * Fleet Optimizer AI Agent
- * Analyzes fleet utilization and provides optimization recommendations
+ *
+ * Analyzes fleet utilisation from the real daily telemetry that
+ * MachinePerformanceService derives from machine_metrics and
+ * production_records. Machines whose telemetry cannot support a daily
+ * utilisation figure are skipped rather than scored on invented numbers
+ * (the old version averaged the cumulative lifetime engine-hours counter
+ * and divided by 24, reporting "34976% capacity" for every machine), and
+ * recommendations carry no fabricated savings or confidence figures.
  */
 class FleetOptimizerAgent
 {
+    /**
+     * Utilisation here is MachinePerformanceService's definition: the share
+     * of today's engine-on time spent working rather than idling. Below
+     * LOW_UTILISATION_PERCENT a machine is flagged; below the critical
+     * bound the flag is high priority.
+     */
+    private const LOW_UTILISATION_PERCENT = 50.0;
+
+    private const CRITICAL_UTILISATION_PERCENT = 30.0;
+
+    /**
+     * Minimum engine hours today before utilisation is judged at all -- a
+     * machine that barely ran says nothing about its allocation.
+     */
+    private const MIN_ENGINE_HOURS_TO_JUDGE = 2.0;
+
+    /**
+     * Engine hours in a single day that leave no realistic window for
+     * inspection or maintenance.
+     */
+    private const SUSTAINED_OPERATION_HOURS = 20.0;
+
+    /**
+     * Share of the fleet idle (by machine status) before it is flagged.
+     */
+    private const IDLE_FLEET_RATIO = 0.2;
+
+    public function __construct(private MachinePerformanceService $performanceService) {}
+
+    /**
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];
         $insights = [];
 
-        // Get all machines for the team
-        $machines = Machine::where('team_id', $team->id)
-            ->with(['healthStatus'])
-            ->get();
-
-        // Analyze machine utilization
-        $utilizationAnalysis = $this->analyzeUtilization($machines);
-        if ($utilizationAnalysis['recommendations']) {
-            $recommendations = array_merge($recommendations, $utilizationAnalysis['recommendations']);
-        }
-        if ($utilizationAnalysis['insights']) {
-            $insights = array_merge($insights, $utilizationAnalysis['insights']);
+        foreach ($this->performanceService->dailyPerformanceForTeam($team->id) as $performance) {
+            $machineAnalysis = $this->analyzeMachineDay($performance);
+            $recommendations = array_merge($recommendations, $machineAnalysis['recommendations']);
+            $insights = array_merge($insights, $machineAnalysis['insights']);
         }
 
-        // Analyze idle machines
-        $idleAnalysis = $this->analyzeIdleMachines($machines);
-        if ($idleAnalysis['recommendations']) {
-            $recommendations = array_merge($recommendations, $idleAnalysis['recommendations']);
-        }
+        $idleAnalysis = $this->analyzeIdleMachines($team);
+        $recommendations = array_merge($recommendations, $idleAnalysis['recommendations']);
 
         return [
             'recommendations' => $recommendations,
@@ -44,71 +71,93 @@ class FleetOptimizerAgent
         ];
     }
 
-    protected function analyzeUtilization($machines): array
+    /**
+     * Judge one machine's day from its derived telemetry. A machine whose
+     * telemetry cannot support today's utilisation figure (utilisation_today
+     * is null: fewer than two counter readings, or a counter reset) is
+     * skipped entirely -- insufficient data must not become a recommendation.
+     *
+     * @param  array<string, mixed>  $performance
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
+     */
+    protected function analyzeMachineDay(array $performance): array
     {
         $recommendations = [];
         $insights = [];
 
-        foreach ($machines as $machine) {
-            // Calculate utilization metrics
-            $hoursPerDay = $machine->metrics()
-                ->whereDate('recorded_at', '>=', now()->subDays(7))
-                ->avg('operating_hours') ?? 0;
+        $utilisation = $performance['utilisation_today'];
+        $operatingHours = $performance['operating_hours_today'];
+        $idleHours = $performance['idle_hours_today'];
 
-            $utilizationRate = ($hoursPerDay / 24) * 100;
+        if ($utilisation === null || $operatingHours === null || $idleHours === null) {
+            return ['recommendations' => [], 'insights' => []];
+        }
 
-            // Low utilization
-            if ($utilizationRate < 30 && $utilizationRate > 0) {
-                $recommendations[] = [
-                    'category' => 'fleet',
-                    'priority' => 'high',
-                    'title' => "Low Utilization: {$machine->name}",
-                    'description' => "Machine {$machine->name} is only utilized {$utilizationRate}% of the time. Consider reassigning to high-demand areas or scheduling maintenance during idle periods.",
-                    'confidence_score' => 0.85,
-                    'estimated_efficiency_gain' => 40,
-                    'related_machine_id' => $machine->id,
-                    'data' => [
-                        'current_utilization' => round($utilizationRate, 2),
-                        'daily_operating_hours' => round($hoursPerDay, 2),
-                        'wasted_hours_per_day' => round(24 - $hoursPerDay, 2),
-                    ],
-                    'impact_analysis' => [
-                        'potential_increase' => '40% utilization increase possible',
-                        'estimated_time_saved' => round((24 - $hoursPerDay) * 0.6, 2) . ' hours/day',
-                    ],
-                ];
-            }
+        $name = $performance['machine_name'];
 
-            // Overutilization
-            if ($utilizationRate > 95) {
-                $recommendations[] = [
-                    'category' => 'fleet',
-                    'priority' => 'critical',
-                    'title' => "Overutilization Risk: {$machine->name}",
-                    'description' => "Machine {$machine->name} is operating at {$utilizationRate}% capacity. High risk of breakdown and increased maintenance needs.",
-                    'confidence_score' => 0.90,
-                    'estimated_savings' => 50000, // Potential breakdown cost
-                    'related_machine_id' => $machine->id,
-                    'data' => [
-                        'current_utilization' => round($utilizationRate, 2),
-                        'recommended_max' => 85,
-                        'excess_hours' => round(($utilizationRate - 85) / 100 * 24, 2),
-                    ],
-                    'impact_analysis' => [
-                        'breakdown_risk' => 'High - 75% probability in next 30 days',
-                        'recommended_action' => 'Reduce load or add support machine',
-                    ],
-                ];
+        if ($operatingHours >= self::MIN_ENGINE_HOURS_TO_JUDGE && $utilisation < self::LOW_UTILISATION_PERCENT) {
+            $recommendations[] = [
+                'category' => 'fleet',
+                'priority' => $utilisation < self::CRITICAL_UTILISATION_PERCENT ? 'high' : 'medium',
+                'title' => "Low Utilization: {$name}",
+                'description' => "Machine {$name} spent only ".round($utilisation).'% of its '.round($operatingHours, 1).' engine hours working today ('.round($idleHours, 1).' hours idling). Consider reassigning it to a busier area or investigating queueing and dispatch delays.',
+                'related_machine_id' => $performance['machine_id'],
+                'data' => [
+                    'current_utilisation' => round($utilisation, 2),
+                    'operating_hours_today' => round($operatingHours, 2),
+                    'idle_hours_today' => round($idleHours, 2),
+                    'loads_today' => $performance['loads_today'],
+                    'tonnes_today' => $performance['tonnes_today'],
+                ],
+                'impact_analysis' => [
+                    'recommended_action' => 'Reassign to a high-demand area, or use the idle time for scheduled maintenance',
+                ],
+            ];
+        }
 
-                $insights[] = [
-                    'type' => 'trend',
-                    'category' => 'fleet',
-                    'severity' => 'warning',
-                    'title' => 'High Machine Stress Detected',
-                    'description' => "Machine {$machine->name} is operating near maximum capacity",
-                    'data' => ['machine_id' => $machine->id, 'utilization' => $utilizationRate],
-                ];
-            }
+        if ($operatingHours >= self::SUSTAINED_OPERATION_HOURS) {
+            $recommendations[] = [
+                'category' => 'fleet',
+                'priority' => 'high',
+                'title' => "Sustained Operation: {$name}",
+                'description' => "Machine {$name} has run ".round($operatingHours, 1).' engine hours today, leaving no realistic window for inspection or maintenance. Extended running without breaks increases wear and breakdown risk.',
+                'related_machine_id' => $performance['machine_id'],
+                'data' => [
+                    'operating_hours_today' => round($operatingHours, 2),
+                    'idle_hours_today' => round($idleHours, 2),
+                    'current_utilisation' => round($utilisation, 2),
+                ],
+                'impact_analysis' => [
+                    'recommended_action' => 'Rotate in a support machine or schedule a maintenance window',
+                ],
+            ];
+
+            $insights[] = [
+                'type' => 'trend',
+                'category' => 'fleet',
+                'severity' => 'warning',
+                'title' => 'High Machine Stress Detected',
+                'description' => "Machine {$name} has run ".round($operatingHours, 1).' engine hours today without a maintenance window',
+                'data' => [
+                    'machine_id' => $performance['machine_id'],
+                    'operating_hours_today' => round($operatingHours, 2),
+                    'utilisation' => round($utilisation, 2),
+                ],
+            ];
+        }
+
+        if ($performance['utilisation_trend'] === 'declining') {
+            $insights[] = [
+                'type' => 'trend',
+                'category' => 'fleet',
+                'severity' => 'warning',
+                'title' => "Utilisation Declining: {$name}",
+                'description' => "Machine {$name}'s working share of engine time (".round($utilisation).'% today) is well below its recent daily average',
+                'data' => [
+                    'machine_id' => $performance['machine_id'],
+                    'utilisation_today' => round($utilisation, 2),
+                ],
+            ];
         }
 
         return [
@@ -117,34 +166,44 @@ class FleetOptimizerAgent
         ];
     }
 
-    protected function analyzeIdleMachines($machines): array
+    /**
+     * Fleet-level idle share from machine status -- a real, operator-set
+     * field. The old version also priced each idle machine at an invented
+     * R5,000/day "savings"; the counts stand on their own.
+     *
+     * @return array{recommendations: list<array<string, mixed>>}
+     */
+    protected function analyzeIdleMachines(Team $team): array
     {
         $recommendations = [];
-        
-        $idleMachines = $machines->filter(function ($machine) {
-            return $machine->status === 'idle' || $machine->status === 'parked';
-        });
 
-        if ($idleMachines->count() > $machines->count() * 0.2) {
-            $idlePercentage = ($idleMachines->count() / $machines->count()) * 100;
-            
+        $statusCounts = Machine::where('team_id', $team->id)
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $totalMachines = (int) $statusCounts->sum();
+        $idleCount = (int) ($statusCounts['idle'] ?? 0);
+
+        if ($totalMachines > 0 && $idleCount > $totalMachines * self::IDLE_FLEET_RATIO) {
+            $idlePercentage = ($idleCount / $totalMachines) * 100;
+
             $recommendations[] = [
                 'category' => 'fleet',
                 'priority' => 'high',
                 'title' => 'High Idle Fleet Percentage',
-                'description' => "{$idleMachines->count()} machines ({$idlePercentage}%) are currently idle. This represents significant underutilization of assets.",
-                'confidence_score' => 0.92,
-                'estimated_savings' => $idleMachines->count() * 5000, // R5000 per idle machine per day
+                'description' => "{$idleCount} of {$totalMachines} machines (".round($idlePercentage).'%) are currently marked idle. This represents significant underutilization of assets.',
                 'data' => [
-                    'idle_machines' => $idleMachines->count(),
-                    'total_machines' => $machines->count(),
+                    'idle_machines' => $idleCount,
+                    'total_machines' => $totalMachines,
                     'idle_percentage' => round($idlePercentage, 2),
-                    'machine_ids' => $idleMachines->pluck('id')->toArray(),
+                    'machine_ids' => Machine::where('team_id', $team->id)
+                        ->where('status', 'idle')
+                        ->pluck('id')
+                        ->all(),
                 ],
                 'impact_analysis' => [
-                    'daily_cost' => 'R' . number_format($idleMachines->count() * 5000, 2),
-                    'monthly_cost' => 'R' . number_format($idleMachines->count() * 5000 * 30, 2),
-                    'recommended_action' => 'Reassign or consider selling/renting out',
+                    'recommended_action' => 'Reassign idle machines to active areas, or stand them down to cut standing costs',
                 ],
             ];
         }

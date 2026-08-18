@@ -62,12 +62,22 @@ class FleetRecommendationAuthorizationTest extends TestCase
         // computes a genuine "Low Utilization" recommendation at render time
         // -- Fleet::render() recomputes lastAiRecommendations on every
         // request, so a directly ->set() value would just be overwritten.
-        $machine = Machine::factory()->create(['team_id' => $team->id]);
+        // The agent judges the day's deltas of the cumulative counters, so
+        // two readings today: 8 engine hours, 6 of them idle (25% working).
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'status' => 'active']);
         MachineMetric::factory()->create([
             'team_id' => $team->id,
             'machine_id' => $machine->id,
-            'operating_hours' => 2,
-            'recorded_at' => now()->subDay(),
+            'operating_hours' => 100.0,
+            'idle_hours' => 20.0,
+            'recorded_at' => now()->startOfDay()->addHours(6),
+        ]);
+        MachineMetric::factory()->create([
+            'team_id' => $team->id,
+            'machine_id' => $machine->id,
+            'operating_hours' => 108.0,
+            'idle_hours' => 26.0,
+            'recorded_at' => now()->startOfDay()->addHours(16),
         ]);
 
         Livewire::actingAs($manager)

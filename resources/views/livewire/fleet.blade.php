@@ -119,15 +119,17 @@
         </div>
     </div>
 
-    <!-- Machine Performance Section -->
-    @if($topPerformers->count() > 0 || $worstPerformers->count() > 0)
+    <!-- Machine Performance Section: real daily metrics derived from
+         synced telemetry (cumulative-counter deltas) and production
+         records -- ranked by today's utilisation of engine time. -->
+    @if($topPerformers->count() > 0 || $worstPerformers->count() > 0 || $unrankedMachines > 0)
     <div class="mb-6">
         <div class="flex items-center gap-2 mb-4">
             <svg class="w-6 h-6 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
             <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Machine Performance</h2>
-            <span class="text-xs text-[var(--sand)]">(Last 30 Days)</span>
+            <span class="text-xs text-[var(--sand)]">(Today &middot; utilisation = working share of engine time)</span>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -152,11 +154,26 @@
                             <a href="{{ route('fleet.show', $machine['machine_id']) }}" class="font-semibold text-[var(--stone)] hover:text-[var(--gold)] truncate block">
                                 {{ $machine['machine_name'] }}
                             </a>
-                            <p class="text-xs text-[var(--sand)]">{{ ucfirst(str_replace('_', ' ', $machine['machine_type'])) }}</p>
+                            <p class="text-xs text-[var(--sand)]">
+                                {{ ucfirst(str_replace('_', ' ', $machine['machine_type'])) }}
+                                &middot; {{ $machine['loads_today'] }} loads
+                                &middot; {{ number_format($machine['tonnes_today'], 0) }} t
+                                @if($machine['operating_hours_today'] !== null)
+                                    &middot; {{ number_format($machine['operating_hours_today'], 1) }} hrs run
+                                @endif
+                                @if($machine['fuel_lph_today'] !== null)
+                                    &middot; {{ number_format($machine['fuel_lph_today'], 1) }} L/hr
+                                @endif
+                            </p>
+                            @if($machine['utilisation_trend'] === 'declining' || $machine['loads_trend'] === 'declining')
+                                <p class="text-xs text-red-400 mt-0.5">&darr; {{ $machine['utilisation_trend'] === 'declining' ? 'Utilisation' : 'Loads' }} down vs prior days</p>
+                            @elseif($machine['utilisation_trend'] === 'improving' || $machine['loads_trend'] === 'improving')
+                                <p class="text-xs text-green-400 mt-0.5">&uarr; {{ $machine['utilisation_trend'] === 'improving' ? 'Utilisation' : 'Loads' }} up vs prior days</p>
+                            @endif
                         </div>
                         <div class="text-right">
-                            <div class="text-lg font-bold text-green-400">{{ $machine['performance_score'] }}%</div>
-                            <div class="text-xs text-[var(--sand)]">Score</div>
+                            <div class="text-lg font-bold text-green-400">{{ number_format($machine['utilisation_today'], 0) }}%</div>
+                            <div class="text-xs text-[var(--sand)]">Utilisation &middot; Today</div>
                         </div>
                     </div>
                     @endforeach
@@ -185,11 +202,26 @@
                             <a href="{{ route('fleet.show', $machine['machine_id']) }}" class="font-semibold text-[var(--stone)] hover:text-[var(--gold)] truncate block">
                                 {{ $machine['machine_name'] }}
                             </a>
-                            <p class="text-xs text-[var(--sand)]">{{ ucfirst(str_replace('_', ' ', $machine['machine_type'])) }}</p>
+                            <p class="text-xs text-[var(--sand)]">
+                                {{ ucfirst(str_replace('_', ' ', $machine['machine_type'])) }}
+                                &middot; {{ $machine['loads_today'] }} loads
+                                &middot; {{ number_format($machine['tonnes_today'], 0) }} t
+                                @if($machine['operating_hours_today'] !== null)
+                                    &middot; {{ number_format($machine['operating_hours_today'], 1) }} hrs run
+                                @endif
+                                @if($machine['idle_hours_today'] !== null)
+                                    &middot; {{ number_format($machine['idle_hours_today'], 1) }} hrs idle
+                                @endif
+                            </p>
+                            @if($machine['utilisation_trend'] === 'declining' || $machine['loads_trend'] === 'declining')
+                                <p class="text-xs text-red-400 mt-0.5">&darr; {{ $machine['utilisation_trend'] === 'declining' ? 'Utilisation' : 'Loads' }} down vs prior days</p>
+                            @elseif($machine['utilisation_trend'] === 'improving' || $machine['loads_trend'] === 'improving')
+                                <p class="text-xs text-green-400 mt-0.5">&uarr; {{ $machine['utilisation_trend'] === 'improving' ? 'Utilisation' : 'Loads' }} up vs prior days</p>
+                            @endif
                         </div>
                         <div class="text-right">
-                            <div class="text-lg font-bold text-red-400">{{ $machine['performance_score'] }}%</div>
-                            <div class="text-xs text-[var(--sand)]">Score</div>
+                            <div class="text-lg font-bold text-red-400">{{ number_format($machine['utilisation_today'], 0) }}%</div>
+                            <div class="text-xs text-[var(--sand)]">Utilisation &middot; Today</div>
                         </div>
                     </div>
                     @endforeach
@@ -197,6 +229,11 @@
             </div>
             @endif
         </div>
+        @if($unrankedMachines > 0)
+            <p class="text-xs text-[var(--sand)]/70 mt-3">
+                {{ $unrankedMachines }} {{ Str::plural('machine', $unrankedMachines) }} not ranked &mdash; insufficient telemetry today to calculate utilisation (needs at least two engine-hour readings).
+            </p>
+        @endif
     </div>
     @endif
 
@@ -291,8 +328,10 @@
                             @endif
 
                             <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-                                <span class="text-xs text-[var(--sand)]">AI Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
-                                <div class="flex items-center gap-2">
+                                @isset($recommendation['confidence_score'])
+                                    <span class="text-xs text-[var(--sand)]">AI Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
+                                @endisset
+                                <div class="ml-auto flex items-center gap-2">
                                     <button wire:click="implementRecommendation({{ $loop->index }})" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-[var(--stone)] rounded text-sm font-medium">Implement</button>
                                     <button wire:click="openRejectRecommendation({{ $loop->index }})" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-[var(--stone)] rounded text-sm font-medium">Reject</button>
                                 </div>
