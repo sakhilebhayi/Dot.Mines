@@ -886,6 +886,24 @@
       <code><![CDATA[broadcastWith]]></code>
     </PossiblyUnusedMethod>
   </file>
+  <file src="app/Events/NotificationCreated.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[NotificationCreated]]></code>
+    </ClassMustBeFinal>
+    <DocblockTypeContradiction>
+      <code><![CDATA[$this->notification->created_at]]></code>
+    </DocblockTypeContradiction>
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function broadcastOn(): array]]></code>
+    </MissingOverrideAttribute>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[broadcastAs]]></code>
+      <code><![CDATA[broadcastWith]]></code>
+    </PossiblyUnusedMethod>
+    <RedundantConditionGivenDocblockType>
+      <code><![CDATA[$this->notification->created_at?->toIso8601String()]]></code>
+    </RedundantConditionGivenDocblockType>
+  </file>
   <file src="app/Events/SensorReadingRecorded.php">
     <ClassMustBeFinal>
       <code><![CDATA[SensorReadingRecorded]]></code>
@@ -2827,6 +2845,47 @@
       <code><![CDATA[$route->machine_id]]></code>
       <code><![CDATA[$route->speed_limit]]></code>
     </UndefinedMagicPropertyFetch>
+  </file>
+  <file src="app/Jobs/SendNotificationEmailJob.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[SendNotificationEmailJob]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$user]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$log]]></code>
+      <code><![CDATA[$user]]></code>
+      <code><![CDATA[$users]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[get]]></code>
+      <code><![CDATA[update]]></code>
+      <code><![CDATA[update]]></code>
+      <code><![CDATA[wantsEmailAlert]]></code>
+    </MixedMethodCall>
+    <MixedPropertyFetch>
+      <code><![CDATA[$user->email]]></code>
+      <code><![CDATA[$user->id]]></code>
+    </MixedPropertyFetch>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[failed]]></code>
+      <code><![CDATA[handle]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$backoff]]></code>
+      <code><![CDATA[$timeout]]></code>
+      <code><![CDATA[$tries]]></code>
+    </PossiblyUnusedProperty>
+    <UndefinedMagicMethod>
+      <code><![CDATA[NotificationDeliveryLog::create([
+                'notification_id' => $notification->id,
+                'user_id' => $user->id,
+                'channel' => 'email',
+                'status' => 'queued',
+            ])]]></code>
+      <code><![CDATA[User::whereIn('id', $this->userIds)]]></code>
+    </UndefinedMagicMethod>
   </file>
   <file src="app/Jobs/SyncIntegrationMachinesJob.php">
     <ClassMustBeFinal>
@@ -6840,6 +6899,31 @@
       <code><![CDATA[RedactSensitiveData]]></code>
     </UnusedClass>
   </file>
+  <file src="app/Mail/NotificationAlertMail.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[NotificationAlertMail]]></code>
+    </ClassMustBeFinal>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[content]]></code>
+      <code><![CDATA[envelope]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$recipient]]></code>
+    </PossiblyUnusedProperty>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[NotificationAlertMail]]></code>
+      <code><![CDATA[NotificationAlertMail]]></code>
+      <code><![CDATA[NotificationAlertMail]]></code>
+      <code><![CDATA[NotificationAlertMail]]></code>
+      <code><![CDATA[NotificationAlertMail]]></code>
+      <code><![CDATA[NotificationAlertMail]]></code>
+      <code><![CDATA[NotificationAlertMail]]></code>
+      <code><![CDATA[NotificationAlertMail]]></code>
+    </PropertyNotSetInConstructor>
+    <UndefinedClass>
+      <code><![CDATA[\URL]]></code>
+    </UndefinedClass>
+  </file>
   <file src="app/Mail/ReportReadyMail.php">
     <ClassMustBeFinal>
       <code><![CDATA[ReportReadyMail]]></code>
@@ -8415,6 +8499,26 @@
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
   </file>
+  <file src="app/Models/NotificationDeliveryLog.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[NotificationDeliveryLog]]></code>
+    </ClassMustBeFinal>
+    <InvalidDocblock>
+      <code><![CDATA[public function notification(): BelongsTo]]></code>
+      <code><![CDATA[public function user(): BelongsTo]]></code>
+    </InvalidDocblock>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function casts(): array]]></code>
+    </MissingOverrideAttribute>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->belongsTo(Notification::class)]]></code>
+      <code><![CDATA[$this->belongsTo(User::class)]]></code>
+    </MixedReturnStatement>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[notification]]></code>
+      <code><![CDATA[user]]></code>
+    </PossiblyUnusedMethod>
+  </file>
   <file src="app/Models/OperatorFatigue.php">
     <ClassMustBeFinal>
       <code><![CDATA[OperatorFatigue]]></code>
@@ -9344,11 +9448,13 @@
       <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
+      <code><![CDATA[$teamId]]></code>
     </MissingClosureParamType>
     <MissingParamType>
       <code><![CDATA[$value]]></code>
     </MissingParamType>
     <MixedArgument>
+      <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
@@ -12484,6 +12590,61 @@
       <code><![CDATA[MineArea::forTeam($teamId)]]></code>
     </UndefinedMagicMethod>
   </file>
+  <file src="app/Services/NotificationService.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[NotificationService]]></code>
+    </ClassMustBeFinal>
+    <MissingClosureParamType>
+      <code><![CDATA[$q]]></code>
+    </MissingClosureParamType>
+    <MixedArgument>
+      <code><![CDATA[$payload['notify_user_ids']]]></code>
+      <code><![CDATA[$roleUsers]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$notification]]></code>
+      <code><![CDATA[$roleUsers]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[pluck]]></code>
+      <code><![CDATA[toArray]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[whereIn]]></code>
+    </MixedMethodCall>
+    <MixedPropertyFetch>
+      <code><![CDATA[$notification->id]]></code>
+    </MixedPropertyFetch>
+    <MixedReturnStatement>
+      <code><![CDATA[$notification]]></code>
+    </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[array<int>]]></code>
+      <code><![CDATA[array_values(array_unique($userIds))]]></code>
+    </MixedReturnTypeCoercion>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[notifyRoles]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[?Notification]]></code>
+      <code><![CDATA[?Notification]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedMagicMethod>
+      <code><![CDATA[Notification::create([
+                'team_id' => $payload['team_id'],
+                'type' => $payload['type'],
+                'title' => $payload['title'],
+                'message' => $payload['message'],
+                'alert_level' => $payload['alert_level'] ?? self::LEVEL_INFO,
+                'data' => $payload['data'] ?? null,
+                'action_url' => $payload['action_url'] ?? null,
+                'is_read' => false,
+            ])]]></code>
+      <code><![CDATA[User::whereHas('roles', function ($q) use ($payload) {
+                $q->where('team_id', $payload['team_id'])
+                    ->whereIn('name', $payload['notify_roles']);
+            })]]></code>
+    </UndefinedMagicMethod>
+  </file>
   <file src="app/Services/OperatorFatigueService.php">
     <ClassMustBeFinal>
       <code><![CDATA[OperatorFatigueService]]></code>
@@ -13031,6 +13192,20 @@
             ->limit($limit)
             ->get()]]></code>
     </LessSpecificReturnStatement>
+    <MixedArgument>
+      <code><![CDATA[$description]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[[
+            'team_id' => $teamId,
+            'type' => 'sensor_reading',
+            'title' => "Sensor Reading: {$sensor->name}",
+            'message' => "New reading: {$reading['value']} {$reading['unit']}",
+            'alert_level' => $isAnomaly ? 'warning' : 'info',
+            'data' => array_merge($reading, ['sensor_id' => $sensor->id]),
+            'action_url' => "/iot/sensors/{$sensor->id}",
+        ]]]></code>
+    </MixedArgumentTypeCoercion>
     <MixedArrayOffset>
       <code><![CDATA[$severityMap[$severity]]]></code>
     </MixedArrayOffset>
@@ -13096,54 +13271,6 @@
                 'shift_date' => optional($fatigue->shift_date)->toDateString(),
                 'shift_type' => $fatigue->shift_type,
             ],
-        ])]]></code>
-      <code><![CDATA[Notification::create([
-            'team_id' => $teamId,
-            'type' => 'compliance_violation',
-            'title' => "Compliance Violation: {$violationType}",
-            'message' => $description,
-            'alert_level' => $severityMap[$severity] ?? 'warning',
-            'data' => [
-                'violation_id' => $violationId,
-                'severity' => $severity,
-                'deadline' => $deadline,
-            ],
-            'action_url' => $violationId ? "/compliance/violations/{$violationId}" : null,
-        ])]]></code>
-      <code><![CDATA[Notification::create([
-            'team_id' => $teamId,
-            'type' => 'maintenance_alert',
-            'title' => "Maintenance Alert: {$machine->name}",
-            'message' => 'Predicted maintenance needed on '.$predictedDate->format('M d, Y'),
-            'alert_level' => $severity,
-            'data' => [
-                'machine_id' => $machine->id,
-                'probability' => $probability,
-                'predicted_date' => $predictedDate,
-            ],
-            'action_url' => "/fleet/{$machine->id}/maintenance",
-        ])]]></code>
-      <code><![CDATA[Notification::create([
-            'team_id' => $teamId,
-            'type' => 'sensor_reading',
-            'title' => "Sensor Reading: {$sensor->name}",
-            'message' => "New reading: {$reading['value']} {$reading['unit']}",
-            'alert_level' => $isAnomaly ? 'warning' : 'info',
-            'data' => array_merge($reading, ['sensor_id' => $sensor->id]),
-            'action_url' => "/iot/sensors/{$sensor->id}",
-        ])]]></code>
-      <code><![CDATA[Notification::create([
-            'team_id' => $teamId,
-            'type' => 'sensor_status_changed',
-            'title' => "Sensor Status Change: {$sensor->name}",
-            'message' => 'Status changed from '.ucfirst($oldStatus).' to '.ucfirst($newStatus),
-            'alert_level' => $alertLevel,
-            'data' => [
-                'sensor_id' => $sensor->id,
-                'old_status' => $oldStatus,
-                'new_status' => $newStatus,
-            ],
-            'action_url' => "/iot/sensors/{$sensor->id}",
         ])]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[each]]></code>

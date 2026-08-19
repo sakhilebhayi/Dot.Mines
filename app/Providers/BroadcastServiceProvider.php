@@ -106,6 +106,19 @@ class BroadcastServiceProvider extends ServiceProvider
         });
 
         /**
+         * Team notification bell (App\Events\NotificationCreated). Membership
+         * only -- every team member has a bell, and the payload is the same
+         * in-app notification they can already read via the bell endpoint.
+         */
+        Broadcast::channel('team.{teamId}.notifications', function (User $user, $teamId) {
+            if (! static::belongsToTeamId($user, $teamId)) {
+                return false;
+            }
+
+            return ['id' => $user->id, 'name' => $user->name];
+        });
+
+        /**
          * Global team presence channel for dashboard updates. Membership
          * only -- who's currently online isn't sensitive operational data
          * the way machine/alert/geofence feeds are, so no extra permission
