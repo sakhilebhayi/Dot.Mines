@@ -9,7 +9,5 @@
 
 @section('actions')
     <a href="/" class="press" style="padding: 12px 24px; background: var(--accent); color: #211a14; font-family: var(--font-display); font-weight: 600; font-size: 15px; border-radius: 999px; text-decoration: none;">Go home</a>
-    @if (Route::has('contact'))
-    <a href="{{ route('contact') }}" class="press link-underline" style="padding: 12px 24px; color: var(--ink); font-size: 15px; text-decoration: none;">Contact support</a>
-    @endif
+    <a href="mailto:{{ config('mail.addresses.support') }}" class="press link-underline" style="padding: 12px 24px; color: var(--ink); font-size: 15px; text-decoration: none;">Contact support</a>
 @endsection
