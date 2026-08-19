@@ -200,6 +200,26 @@ class Machine extends Model
     }
 
     /**
+     * Get all production records for this machine
+     *
+     * @return HasMany<ProductionRecord, $this>
+     */
+    public function productionRecords(): HasMany
+    {
+        return $this->hasMany(ProductionRecord::class);
+    }
+
+    /**
+     * Get all production loss events for this machine
+     *
+     * @return HasMany<ProductionLossEvent, $this>
+     */
+    public function lossEvents(): HasMany
+    {
+        return $this->hasMany(ProductionLossEvent::class);
+    }
+
+    /**
      * Get the health status for this machine
      */
     public function healthStatus(): HasOne

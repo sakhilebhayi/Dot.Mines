@@ -79,6 +79,9 @@
         </div>
     @endif
 
+    <!-- Production Loss Accountability -->
+    @livewire('production-loss-panel', ['machine' => $machine], key('loss-panel-'.$machine->id))
+
     <!-- Recent Metrics -->
     @if ($metrics->count() > 0)
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6 mb-6">
