@@ -119,7 +119,10 @@
 
             <!-- User Profile -->
             <div class="relative">
-                <button wire:click="toggleProfileMenu" class="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors">
+                <button wire:click="toggleProfileMenu"
+                    class="flex items-center gap-2 p-2 hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[var(--gold)] rounded-lg transition-colors"
+                    aria-label="Open account menu"
+                    aria-haspopup="true">
                     <div class="w-8 h-8 bg-[var(--gold)] rounded-full flex items-center justify-center">
                         <span class="text-sm font-bold text-[var(--ink)]">{{ substr($user?->name ?? 'U', 0, 1) }}</span>
                     </div>
