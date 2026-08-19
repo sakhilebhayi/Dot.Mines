@@ -36,19 +36,28 @@ jobs:
           npm ci --silent
           npm run build
 
+      - name: Generate throwaway CI app key
+        run: echo "APP_KEY=base64:$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+
       - name: Run tests
         run: php artisan test --compact
         env:
           APP_ENV: testing
-          APP_KEY: base64:Ho/Tnr6L5ouHT0PfLQLCSbmEBtV1AOYF03E8Apa88ZU=
           DB_CONNECTION: sqlite
           DB_DATABASE: ":memory:"
           QUEUE_CONNECTION: sync
           CACHE_STORE: array
           SESSION_DRIVER: array
-          BROADCAST_DRIVER: log
+          # No BROADCAST_DRIVER here: real env vars override phpunit.xml's
+          # <env>, and phpunit.xml deliberately forces the null driver.
           MAIL_MAILER: array
           FILESYSTEM_DISK: local
+          # Dummy credentials so BroadcastChannelAuthorizationTest (which
+          # switches broadcasting.default to reverb to exercise real
+          # Pusher-protocol channel auth) can construct the broadcaster.
+          REVERB_APP_KEY: ci-dummy-key
+          REVERB_APP_SECRET: ci-dummy-secret
+          REVERB_APP_ID: ci-dummy-id
 
   validate-composer:
     name: Composer validate & lock sync
@@ -139,7 +148,6 @@ jobs:
         run: composer install --no-interaction --no-progress --prefer-dist
         env:
           APP_ENV: testing
-          APP_KEY: base64:Ho/Tnr6L5ouHT0PfLQLCSbmEBtV1AOYF03E8Apa88ZU=
           BROADCAST_DRIVER: log
 
       - name: Run PHPStan
