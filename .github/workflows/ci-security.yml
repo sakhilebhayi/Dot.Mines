@@ -138,6 +138,11 @@ jobs:
         with:
           config: 'p/ci'
 
+      - name: Semgrep PHP/Blade XSS rules
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: 'p/php'
+
   static-php:
     name: PHP static checks (phpstan/psalm)
     runs-on: ubuntu-latest
@@ -160,6 +165,12 @@ jobs:
 
       - name: Run Psalm
         run: vendor/bin/psalm --show-info=false --no-cache
+
+      - name: Scan Blade templates for unescaped output
+        run: php artisan scan:blade-unescaped
+        env:
+          APP_ENV: testing
+          BROADCAST_DRIVER: "null"
 
   code-style:
     name: Laravel Pint code style
