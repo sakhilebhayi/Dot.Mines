@@ -6087,8 +6087,6 @@
       <code><![CDATA[deleteRecord]]></code>
       <code><![CDATA[getAreaPerformanceProperty]]></code>
       <code><![CDATA[getDailyChartProperty]]></code>
-      <code><![CDATA[getFatigueDataProperty]]></code>
-      <code><![CDATA[getFatigueStatsProperty]]></code>
       <code><![CDATA[getForecastsProperty]]></code>
       <code><![CDATA[getMachinesProperty]]></code>
       <code><![CDATA[getMaterialBreakdownProperty]]></code>
@@ -6207,7 +6205,6 @@
       <code><![CDATA[deleteRecord]]></code>
       <code><![CDATA[getAreaPerformanceProperty]]></code>
       <code><![CDATA[getDailyChartProperty]]></code>
-      <code><![CDATA[getFatigueDataProperty]]></code>
       <code><![CDATA[getFatigueStatsProperty]]></code>
       <code><![CDATA[getForecastsProperty]]></code>
       <code><![CDATA[getMachinesProperty]]></code>
@@ -9090,18 +9087,9 @@
     <ClassMustBeFinal>
       <code><![CDATA[OperatorFatigueAlert]]></code>
     </ClassMustBeFinal>
-    <MixedAssignment>
-      <code><![CDATA[$operatorName]]></code>
-    </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[wantsEmailAlert]]></code>
     </MixedMethodCall>
-    <MixedOperand>
-      <code><![CDATA[$operatorName]]></code>
-    </MixedOperand>
-    <MixedPropertyFetch>
-      <code><![CDATA[$this->fatigue->user?->name]]></code>
-    </MixedPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[toMail]]></code>
       <code><![CDATA[via]]></code>
@@ -13043,9 +13031,6 @@
             ->limit($limit)
             ->get()]]></code>
     </LessSpecificReturnStatement>
-    <MixedArgument>
-      <code><![CDATA[$operatorName]]></code>
-    </MixedArgument>
     <MixedArrayOffset>
       <code><![CDATA[$severityMap[$severity]]]></code>
     </MixedArrayOffset>
@@ -13054,7 +13039,6 @@
       <code><![CDATA[$deadline]]></code>
       <code><![CDATA[$description]]></code>
       <code><![CDATA[$member]]></code>
-      <code><![CDATA[$operatorName]]></code>
       <code><![CDATA[$severity]]></code>
       <code><![CDATA[$violationId]]></code>
       <code><![CDATA[$violationType]]></code>
@@ -13063,9 +13047,6 @@
       <code><![CDATA[attach]]></code>
       <code><![CDATA[notify]]></code>
     </MixedMethodCall>
-    <MixedPropertyFetch>
-      <code><![CDATA[$fatigue->user?->name]]></code>
-    </MixedPropertyFetch>
     <MoreSpecificReturnType>
       <code><![CDATA[Collection<int,Notification>]]></code>
       <code><![CDATA[Collection<int,Notification>]]></code>
