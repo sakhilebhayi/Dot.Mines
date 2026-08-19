@@ -73,4 +73,22 @@ class AIAnalyticsPageTest extends TestCase
         $this->assertSame(1, (int) $rates->first()->implemented);
         $this->assertEqualsWithDelta(50.0, $rates->first()->rate, 0.01);
     }
+
+    /**
+     * The four KPI cards were saturated template gradients (blue/green/
+     * purple/orange-500) that clashed with the app's token-based design
+     * system; they now use the standard ink-soft card pattern.
+     */
+    public function test_kpi_cards_use_the_design_system_not_template_gradients(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        Livewire::actingAs($user)
+            ->test(AIAnalytics::class)
+            ->assertDontSeeHtml('from-blue-500 to-blue-600')
+            ->assertDontSeeHtml('from-orange-500 to-orange-600')
+            ->assertSeeHtml('bg-[var(--ink-soft)] rounded-xl shadow-lg p-6 border border-[var(--line)]');
+    }
 }
