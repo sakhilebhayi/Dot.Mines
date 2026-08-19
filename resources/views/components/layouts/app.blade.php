@@ -29,7 +29,7 @@
     </head>
     <body class="antialiased bg-[var(--ink)] text-[var(--stone)]" style="font-family: var(--font-body);">
         <!-- Toast Notifications -- listens for the 'notify' browser event that
-             every component's dispatchBrowserEvent('notify', ...) call fires.
+             every component's $this->dispatch('notify', ...) call fires.
              This layout had no listener for it at all until now, so every
              success/error confirmation across the app was invisible: the
              underlying action worked, but nothing ever told the user. -->

@@ -4,14 +4,12 @@ namespace App\Livewire;
 
 use App\Models\Geofence;
 use App\Models\MineArea;
-use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class GeofenceManager extends Component
 {
-    use BrowserEventBridge;
     use WithPagination;
 
     public string $search = '';
@@ -132,12 +130,12 @@ class GeofenceManager extends Component
             $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->editingGeofenceId);
             $this->authorize('update', $geofence);
             $geofence->update($data);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Geofence updated successfully', 'type' => 'success']);
+            $this->dispatch('notify', ['message' => 'Geofence updated successfully', 'type' => 'success']);
         } else {
             $this->authorize('create', Geofence::class);
             $data['team_id'] = $team->id;
             Geofence::create($data);
-            $this->dispatchBrowserEvent('notify', ['message' => 'Geofence created successfully', 'type' => 'success']);
+            $this->dispatch('notify', ['message' => 'Geofence created successfully', 'type' => 'success']);
         }
 
         $this->closeModal();
@@ -149,7 +147,7 @@ class GeofenceManager extends Component
 
         $geofenceName = $geofence->name;
         $geofence->delete();
-        $this->dispatchBrowserEvent('notify', ['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
+        $this->dispatch('notify', ['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
     }
 
     public function render()
