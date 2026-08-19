@@ -39,6 +39,8 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
+            // Use 'smtps' for port 465 (implicit TLS) -- Symfony Mailer does
+            // not accept 'ssl' as a scheme. Omit/null for port 587 (STARTTLS).
             'scheme' => env('MAIL_SCHEME'),
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
