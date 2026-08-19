@@ -256,13 +256,22 @@ class FuelManagementService
 
         $totalFuel = $transactions->sum('quantity_liters');
 
-        // Get machine metrics for operating hours (if available)
-        $metrics = $machine->metrics()
-            ->whereBetween('created_at', [$startOfDay, $endOfDay])
-            ->first();
+        // operating_hours / idle_hours on machine_metrics are cumulative
+        // meters (MachinePerformanceService::dayDelta() semantics): the
+        // day's hours are the counter DELTA across the day's readings.
+        // This used to store the day's first RAW meter reading -- a
+        // machine's lifetime hours -- as its daily operating hours, which
+        // poisoned fuel_efficiency_lph at the source. It also read
+        // $metrics->idle_time, a column that does not exist (idle_hours is
+        // the real one), so idle figures were always null. Readings are
+        // selected by recorded_at (telemetry time), not created_at (row
+        // insert time, which lags the sync).
+        $dayMetrics = $machine->metrics()
+            ->whereBetween('recorded_at', [$startOfDay, $endOfDay])
+            ->get();
 
-        $operatingHours = $metrics->operating_hours ?? null;
-        $idleTime = $metrics->idle_time ?? null;
+        $operatingHours = $this->counterDelta($dayMetrics, 'operating_hours');
+        $idleTime = $this->counterDelta($dayMetrics, 'idle_hours');
 
         $data = [
             'team_id' => $machine->team_id,
@@ -290,6 +299,23 @@ class FuelManagementService
             ],
             $data
         );
+    }
+
+    /**
+     * Delta of a cumulative meter column across a set of readings; null when
+     * fewer than two readings exist (one meter snapshot is not a duration).
+     *
+     * @param  \Illuminate\Support\Collection<int, mixed>  $metrics
+     */
+    private function counterDelta($metrics, string $column): ?float
+    {
+        $readings = $metrics->pluck($column)
+            ->filter(fn ($value) => $value !== null)
+            ->map(fn ($value) => (float) $value);
+
+        return $readings->count() >= 2
+            ? max(0.0, $readings->max() - $readings->min())
+            : null;
     }
 
     /**

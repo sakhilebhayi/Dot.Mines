@@ -178,10 +178,20 @@ class MaintenancePredictorAgent
     {
         $riskFactors = [];
 
-        // Factor 1: Operating hours (30% weight)
-        $operatingHours = $machine->metrics()
+        // Factor 1: Operating hours (30% weight). operating_hours is a
+        // cumulative meter -- hours worked in the window is the counter
+        // DELTA, not a sum of readings (summing pegged this factor at max
+        // for every machine with two or more readings).
+        $readings = $machine->metrics()
             ->whereDate('recorded_at', '>=', now()->subDays(30))
-            ->sum('operating_hours');
+            ->get()
+            ->pluck('operating_hours')
+            ->filter(fn ($value) => $value !== null)
+            ->map(fn ($value) => (float) $value);
+
+        $operatingHours = $readings->count() >= 2
+            ? max(0.0, $readings->max() - $readings->min())
+            : 0.0;
         $avgHoursPerDay = $operatingHours / 30;
         $riskFactors['hours'] = min(($avgHoursPerDay / 20) * 0.3, 0.3); // 20h/day is high
 
