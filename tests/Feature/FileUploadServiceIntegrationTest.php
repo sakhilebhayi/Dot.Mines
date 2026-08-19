@@ -16,7 +16,10 @@ class FileUploadServiceIntegrationTest extends TestCase
         $tmp = tmpfile();
         $meta = stream_get_meta_data($tmp);
         $path = $meta['uri'];
-        fwrite($tmp, 'hello world');
+        // Real PDF magic bytes: content-MIME verification rejects files whose
+        // bytes don't match the claimed extension ('hello world' as .pdf is
+        // exactly the spoof it exists to block).
+        fwrite($tmp, "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF");
 
         $uploaded = new UploadedFile($path, 'plan.pdf', null, null, true);
 
