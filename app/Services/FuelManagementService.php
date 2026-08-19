@@ -11,6 +11,7 @@ use App\Models\Machine;
 use App\Models\Team;
 use App\Support\Currency;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class FuelManagementService
@@ -305,7 +306,7 @@ class FuelManagementService
      * Delta of a cumulative meter column across a set of readings; null when
      * fewer than two readings exist (one meter snapshot is not a duration).
      *
-     * @param  \Illuminate\Support\Collection<int, mixed>  $metrics
+     * @param  Collection<int, mixed>  $metrics
      */
     private function counterDelta($metrics, string $column): ?float
     {
