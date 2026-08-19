@@ -38,4 +38,19 @@ class EcosystemErrorPagesTest extends TestCase
             return response()->view("errors.{$code}", [], $code);
         });
     }
+
+    /**
+     * The "Contact support" link was guarded by Route::has('contact') -- a
+     * route that has never existed, so error pages silently offered no
+     * support path at all. It now links the real support mailbox.
+     */
+    public function test_error_pages_offer_a_real_contact_path(): void
+    {
+        config(['mail.addresses.support' => 'support@example.test']);
+
+        $response = $this->get('/_test-only-error-render/500');
+
+        $response->assertSee('Contact support');
+        $response->assertSee('mailto:support@example.test', false);
+    }
 }
