@@ -181,12 +181,14 @@
                                     @endif
                                 </div>
                                 <div class="flex-1">
-                                    <p class="text-sm font-medium text-[var(--stone)]">{{ ucfirst(str_replace('_', ' ', $alert['type'])) }}</p>
-                                    <p class="text-xs text-[var(--sand)] mt-1">{{ $alert['message'] }}</p>
+                                    <p class="text-sm font-medium text-[var(--stone)]">{{ $alert['title'] }}</p>
+                                    <p class="text-xs text-[var(--sand)] mt-1">
+                                        {{ ucfirst(str_replace('_', ' ', $alert['type'])) }}@if ($alert['machine']) · {{ $alert['machine'] }}@endif
+                                    </p>
                                     <p class="text-xs text-[var(--sand)]/70 mt-1">{{ $alert['created_at'] }}</p>
                                 </div>
                             </div>
-                            @if ($alert['status'] === 'open')
+                            @if ($alert['status'] === 'active')
                                 <button wire:click="acknowledgeAlert({{ $alert['id'] }})"
                                     class="px-3 py-1 text-xs bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded transition-all duration-200 font-medium hover:scale-105 transform">
                                     Acknowledge
