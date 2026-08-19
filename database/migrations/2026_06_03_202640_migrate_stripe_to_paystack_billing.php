@@ -19,12 +19,16 @@ return new class extends Migration
         DB::statement('DROP INDEX IF EXISTS idx_alerts_severity');
         DB::statement('DROP INDEX IF EXISTS idx_reports_team_type');
         DB::statement('DROP INDEX IF EXISTS idx_maintenance_scheduled');
-        // Drop Stripe-column indexes so SQLite allows DROP COLUMN on those columns.
-        DB::statement('DROP INDEX IF EXISTS subscriptions_stripe_subscription_id_unique');
-        DB::statement('DROP INDEX IF EXISTS subscriptions_stripe_subscription_id_index');
-        DB::statement('DROP INDEX IF EXISTS payments_stripe_payment_intent_id_unique');
-        DB::statement('DROP INDEX IF EXISTS payments_stripe_payment_intent_id_index');
-        DB::statement('DROP INDEX IF EXISTS invoices_stripe_invoice_id_unique');
+        // Drop Stripe-column uniques/indexes so the columns can be dropped.
+        // On SQLite a ->unique() is a standalone index (DROP INDEX works);
+        // on Postgres it is a table CONSTRAINT whose backing index cannot be
+        // dropped directly (SQLSTATE 2BP01), so the constraint must be
+        // dropped instead. Handle both so this runs on production Postgres.
+        $this->dropUniqueOrIndex('subscriptions', 'subscriptions_stripe_subscription_id_unique');
+        $this->dropUniqueOrIndex('subscriptions', 'subscriptions_stripe_subscription_id_index');
+        $this->dropUniqueOrIndex('payments', 'payments_stripe_payment_intent_id_unique');
+        $this->dropUniqueOrIndex('payments', 'payments_stripe_payment_intent_id_index');
+        $this->dropUniqueOrIndex('invoices', 'invoices_stripe_invoice_id_unique');
 
         // ── subscription_plans ──────────────────────────────────────────────
         Schema::table('subscription_plans', function (Blueprint $table) {
@@ -100,6 +104,20 @@ return new class extends Migration
                 $table->dropColumn('stripe_invoice_id');
             });
         }
+    }
+
+    /**
+     * Drop a unique whether the driver stored it as a constraint (Postgres)
+     * or a standalone index (SQLite). Both statements are IF EXISTS, so a
+     * name that only exists in one form is dropped and the other is a no-op.
+     */
+    private function dropUniqueOrIndex(string $table, string $name): void
+    {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE {$table} DROP CONSTRAINT IF EXISTS {$name}");
+        }
+
+        DB::statement("DROP INDEX IF EXISTS {$name}");
     }
 
     public function down(): void
