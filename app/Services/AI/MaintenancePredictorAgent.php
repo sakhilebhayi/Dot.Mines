@@ -202,7 +202,9 @@ class MaintenancePredictorAgent
             ->first();
 
         if ($lastMaintenance) {
-            $daysSinceLastMaintenance = now()->diffInDays($lastMaintenance->completed_at);
+            // Carbon 3: now()->diffInDays($past) is negative, which made this
+            // factor SUBTRACT from the risk score instead of adding to it.
+            $daysSinceLastMaintenance = $lastMaintenance->completed_at->diffInDays(now());
             $riskFactors['maintenance'] = min(($daysSinceLastMaintenance / 180) * 0.25, 0.25);
         } else {
             $riskFactors['maintenance'] = 0.25; // No maintenance history = max risk
@@ -238,7 +240,7 @@ class MaintenancePredictorAgent
         }
 
         $lastMaintenance = $machine->maintenanceRecords()->latest('completed_at')->first();
-        if (! $lastMaintenance || now()->diffInDays($lastMaintenance->completed_at) > 90) {
+        if (! $lastMaintenance || $lastMaintenance->completed_at === null || $lastMaintenance->completed_at->diffInDays(now()) > 90) {
             $factors[] = 'Overdue maintenance';
         }
 

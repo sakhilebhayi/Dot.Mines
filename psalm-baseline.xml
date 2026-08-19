@@ -5602,9 +5602,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[MaintenanceDashboard]]></code>
     </ClassMustBeFinal>
-    <InvalidOperand>
-      <code><![CDATA[$delayHours - $estimatedHours]]></code>
-    </InvalidOperand>
     <MissingClosureParamType>
       <code><![CDATA[$q]]></code>
       <code><![CDATA[$query]]></code>
@@ -5639,10 +5636,6 @@
       <code><![CDATA[$aiAnalysis['recommendations'] ?? []]]></code>
       <code><![CDATA[$estimatedHours]]></code>
       <code><![CDATA[$healthStatuses->avg('overall_health_score')]]></code>
-      <code><![CDATA[$machine->updated_at]]></code>
-      <code><![CDATA[$machine->updated_at]]></code>
-      <code><![CDATA[$machine->updated_at]]></code>
-      <code><![CDATA[$overdueMaintenance->scheduled_date]]></code>
       <code><![CDATA[$startTime]]></code>
       <code><![CDATA[auth()->user()->currentTeam]]></code>
     </MixedArgument>
@@ -5707,6 +5700,10 @@
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[critical]]></code>
+      <code><![CDATA[diffInHours]]></code>
+      <code><![CDATA[diffInHours]]></code>
+      <code><![CDATA[diffInHours]]></code>
+      <code><![CDATA[diffInHours]]></code>
       <code><![CDATA[find]]></code>
       <code><![CDATA[find]]></code>
       <code><![CDATA[first]]></code>
@@ -7279,9 +7276,9 @@
     <MissingTemplateParam>
       <code><![CDATA[HasFactory]]></code>
     </MissingTemplateParam>
-    <MixedArgument>
-      <code><![CDATA[$this->started_at]]></code>
-    </MixedArgument>
+    <MixedMethodCall>
+      <code><![CDATA[diffInMilliseconds]]></code>
+    </MixedMethodCall>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(AIAgent::class)]]></code>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
@@ -10056,12 +10053,15 @@
       <code><![CDATA[AnomalyDetectorAgent]]></code>
     </ClassMustBeFinal>
     <MixedArgument>
-      <code><![CDATA[$lastUpdate]]></code>
-      <code><![CDATA[$lastUpdate]]></code>
+      <code><![CDATA[$lastUpdate->diffInHours(now())]]></code>
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$lastUpdate]]></code>
     </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[diffInHours]]></code>
+      <code><![CDATA[diffInHours]]></code>
+    </MixedMethodCall>
     <PossiblyUnusedMethod>
       <code><![CDATA[analyze]]></code>
     </PossiblyUnusedMethod>
@@ -10373,7 +10373,6 @@
     </ClassMustBeFinal>
     <InvalidOperand>
       <code><![CDATA[$baseDays * (1 - $riskScore)]]></code>
-      <code><![CDATA[$daysSinceLastMaintenance / 180]]></code>
       <code><![CDATA[$operatingHours / 30]]></code>
       <code><![CDATA[$riskScore * 100]]></code>
       <code><![CDATA[$riskScore * 100]]></code>
@@ -10389,8 +10388,6 @@
     </MissingClosureParamType>
     <MixedArgument>
       <code><![CDATA[$highUsage]]></code>
-      <code><![CDATA[$lastMaintenance->completed_at]]></code>
-      <code><![CDATA[$lastMaintenance->completed_at]]></code>
       <code><![CDATA[$optimalInterval - $scheduledInterval]]></code>
       <code><![CDATA[$optimalInterval - $scheduledInterval]]></code>
       <code><![CDATA[$predictionAnalysis['insights']]]></code>
@@ -10400,6 +10397,7 @@
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$avgHoursPerDay]]></code>
+      <code><![CDATA[$daysSinceLastMaintenance]]></code>
       <code><![CDATA[$healthScore]]></code>
       <code><![CDATA[$highUsage]]></code>
       <code><![CDATA[$lastMaintenance]]></code>
@@ -10408,6 +10406,7 @@
       <code><![CDATA[$recentHours]]></code>
       <code><![CDATA[$riskFactors['health']]]></code>
       <code><![CDATA[$riskFactors['hours']]]></code>
+      <code><![CDATA[$riskFactors['maintenance']]]></code>
       <code><![CDATA[$scheduledInterval]]></code>
     </MixedAssignment>
     <MixedMethodCall>
@@ -10415,6 +10414,8 @@
       <code><![CDATA[avg]]></code>
       <code><![CDATA[avg]]></code>
       <code><![CDATA[count]]></code>
+      <code><![CDATA[diffInDays]]></code>
+      <code><![CDATA[diffInDays]]></code>
       <code><![CDATA[filter]]></code>
       <code><![CDATA[first]]></code>
       <code><![CDATA[first]]></code>
@@ -10428,6 +10429,7 @@
     </MixedMethodCall>
     <MixedOperand>
       <code><![CDATA[$avgHoursPerDay]]></code>
+      <code><![CDATA[$daysSinceLastMaintenance]]></code>
       <code><![CDATA[$healthScore]]></code>
       <code><![CDATA[$machine->healthStatus->overall_health_score]]></code>
       <code><![CDATA[$operatingHours]]></code>
@@ -12509,7 +12511,6 @@
     </MissingParamType>
     <MixedArgument>
       <code><![CDATA[$days]]></code>
-      <code><![CDATA[$latestReading->timestamp]]></code>
       <code><![CDATA[$values]]></code>
       <code><![CDATA[$values]]></code>
       <code><![CDATA[$values]]></code>
@@ -12523,6 +12524,7 @@
       <code><![CDATA[$values]]></code>
     </MixedAssignment>
     <MixedMethodCall>
+      <code><![CDATA[diffInMinutes]]></code>
       <code><![CDATA[first]]></code>
       <code><![CDATA[first]]></code>
       <code><![CDATA[get]]></code>
@@ -12550,6 +12552,9 @@
     <PossiblyNullPropertyFetch>
       <code><![CDATA[$latestReading->timestamp]]></code>
     </PossiblyNullPropertyFetch>
+    <PossiblyNullReference>
+      <code><![CDATA[diffInMinutes]]></code>
+    </PossiblyNullReference>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[bool]]></code>
     </PossiblyUnusedReturnValue>

@@ -52,12 +52,15 @@ class AIAnalysisSession extends Model
 
     public function markAsCompleted(array $results, int $recommendationsGenerated): void
     {
+        // Carbon 3 diffs are signed floats: now()->diffInMilliseconds($past)
+        // is NEGATIVE, and processing_time_ms is an integer column, so the
+        // old expression made this update fail on Postgres (SQLSTATE 22P02).
         $this->update([
             'status' => 'completed',
             'results' => $results,
             'recommendations_generated' => $recommendationsGenerated,
             'completed_at' => now(),
-            'processing_time_ms' => $this->started_at ? now()->diffInMilliseconds($this->started_at) : null,
+            'processing_time_ms' => $this->started_at ? (int) $this->started_at->diffInMilliseconds(now()) : null,
         ]);
     }
 
