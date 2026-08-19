@@ -27,7 +27,7 @@
         @endif
     </div>
 
-    <!-- AI-Powered Mine Area Detection -->
+    <!-- Dispatch intelligence derived from geofence queue activity -->
     @if($aiRecommendations->count() > 0 || $aiInsights->count() > 0)
     <div class="mb-6">
         <div class="flex items-center gap-2 mb-4">
@@ -35,12 +35,12 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
-            <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">AI Mine Area Detection</h2>
+            <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Dispatch Intelligence</h2>
             <span class="badge badge-primary">AI-Powered</span>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- AI Area Detection Recommendations -->
+            <!-- Queue rebalancing recommendations -->
             @if($aiRecommendations->count() > 0)
             <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] text-[var(--stone)] border border-[var(--line)]">
                 <div class="card-body">
@@ -48,7 +48,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                         </svg>
-                        Auto-Detected Areas
+                        Dispatch &amp; Queue Recommendations
                     </h3>
                     <div class="space-y-3">
                         @foreach($aiRecommendations as $recommendation)
@@ -147,7 +147,7 @@
             </div>
             @endif
 
-            <!-- AI Coverage Insights -->
+            <!-- AI Geofence Activity Insights -->
             @if($aiInsights->count() > 0)
             <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] text-[var(--stone)] border border-[var(--line)]">
                 <div class="card-body">
@@ -155,7 +155,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                         </svg>
-                        Coverage Insights
+                        Geofence Activity Insights
                     </h3>
                     <div class="space-y-3">
                         @foreach($aiInsights as $insight)
@@ -168,7 +168,7 @@
                                     @elseif($insight['severity'] === 'success') badge-success
                                     @else badge-info
                                     @endif
-                                ">{{ ucfirst($insight['type']) }}</span>
+                                ">{{ ucfirst($insight['insight_type']) }}</span>
                             </div>
                             <p class="text-sm text-[var(--sand)]">{{ $insight['description'] }}</p>
                             
