@@ -32,7 +32,9 @@ class MachineAssignmentManagerTest extends TestCase
     {
         $owner = User::factory()->create();
         $team = Team::factory()->create(['user_id' => $owner->id]);
-        $owner->update(['current_team_id' => $team->id]);
+        // Admin-role users must have confirmed 2FA to pass the admin.2fa
+        // middleware on the authenticated route group.
+        $owner->forceFill(['current_team_id' => $team->id, 'two_factor_confirmed_at' => now()])->save();
         TeamRoleProvisioner::assignRole($owner, $team, 'admin');
 
         $area = MineArea::create(['team_id' => $team->id, 'name' => 'North Pit', 'status' => 'active']);
