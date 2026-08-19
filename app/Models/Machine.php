@@ -5,7 +5,9 @@ namespace App\Models;
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\MachineFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,6 +44,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read Team|null $team
+ * @property-read Integration|null $integration
+ * @property-read MineArea|null $mineArea
+ * @property-read Machine|null $excavator
+ * @property-read MachineHealthStatus|null $healthStatus
+ * @property-read Collection<int, Alert> $alerts
+ * @property-read Collection<int, MachineMetric> $metrics
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Machine where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Machine whereIn(string $column, array<string|int> $values)
@@ -55,6 +64,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Machine extends Model
 {
+    /** @use HasFactory<MachineFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $fillable = [
@@ -221,6 +231,8 @@ class Machine extends Model
 
     /**
      * Get active alerts for this machine
+     *
+     * @return Builder<Alert>
      */
     public function activeAlerts(): Builder
     {
