@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MinePlanDownloadController;
 use App\Http\Controllers\RealtimeHealthController;
 use App\Http\Controllers\ReportController;
@@ -205,6 +206,15 @@ Route::post('/webhooks/paystack', [WebhookController::class, 'handlePaystack'])
 // own /up (bootstrap/app.php), for uptime monitors/load balancers.
 Route::get('/up/realtime', [RealtimeHealthController::class, 'check'])
     ->name('health.realtime');
+
+// /health = liveness probe (full check: DB + cache + queue config + storage)
+//           -- a 503 tells the orchestrator to restart the pod.
+// /ready  = readiness probe (DB reachability only, lightweight) -- a 503
+//           stops traffic routing without triggering a restart. Deploy smoke
+//           tests target this, not the framework's /up (which only proves
+//           the app boots, not that it can serve real requests).
+Route::get('/health', HealthController::class)->name('health');
+Route::get('/ready', [HealthController::class, 'ready'])->name('health.ready');
 
 // Public marketing/outer pages
 Route::view('/features', 'pages.features')->name('features');
