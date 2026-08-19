@@ -67,7 +67,7 @@ class GeofenceExitDetected implements ShouldBroadcast
             'latitude' => $this->entry->latitude,
             'longitude' => $this->entry->longitude,
             'exited_at' => $this->entry->exited_at,
-            'duration_in_geofence' => $this->entry->exit_time ? $this->entry->exit_time->diffInSeconds($this->entry->entry_time) : null,
+            'duration_in_geofence' => $this->entry->exit_time ? (int) $this->entry->entry_time->diffInSeconds($this->entry->exit_time) : null,
             'team_id' => $geofence->team_id,
         ];
     }

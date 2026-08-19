@@ -276,7 +276,9 @@ class MaintenanceDashboard extends Component
                 $startTime = $activeMaintenance->started_at ?? $activeMaintenance->scheduled_date;
                 if ($startTime) {
                     $carbonStartTime = $startTime instanceof Carbon ? $startTime : Carbon::parse($startTime);
-                    $delayHours = now()->diffInHours($carbonStartTime);
+                    // Carbon 3: now()->diffInHours($past) is negative -- diff
+                    // from the past timestamp forward for a positive elapsed.
+                    $delayHours = (int) $carbonStartTime->diffInHours(now());
                     $estimatedHours = $activeMaintenance->labor_hours ?? 4;
                     // Consider delayed if beyond estimated duration
                     if ($delayHours > $estimatedHours) {
@@ -295,15 +297,15 @@ class MaintenanceDashboard extends Component
             }
         } elseif ($machine->status === 'idle') {
             // Check if idle for extended period
-            if ($machine->updated_at && now()->diffInHours($machine->updated_at) > 8) {
+            if ($machine->updated_at && $machine->updated_at->diffInHours(now()) > 8) {
                 $delayInfo['is_delayed'] = true;
-                $delayInfo['delay_hours'] = now()->diffInHours($machine->updated_at);
+                $delayInfo['delay_hours'] = (int) $machine->updated_at->diffInHours(now());
                 $delayInfo['reason'] = 'Idle - Not assigned to production';
             }
         } elseif ($machine->status === 'offline') {
             // Offline machines are definitely delayed
             $delayInfo['is_delayed'] = true;
-            $delayInfo['delay_hours'] = $machine->updated_at ? now()->diffInHours($machine->updated_at) : 48;
+            $delayInfo['delay_hours'] = $machine->updated_at ? (int) $machine->updated_at->diffInHours(now()) : 48;
             $delayInfo['reason'] = 'Offline - System unavailable';
         }
 
@@ -316,7 +318,7 @@ class MaintenanceDashboard extends Component
 
         if ($overdueMaintenance && ! $delayInfo['is_delayed']) {
             $delayInfo['is_delayed'] = true;
-            $delayInfo['delay_hours'] = now()->diffInHours($overdueMaintenance->scheduled_date);
+            $delayInfo['delay_hours'] = (int) $overdueMaintenance->scheduled_date->diffInHours(now());
             $delayInfo['reason'] = 'Waiting for scheduled maintenance: '.$overdueMaintenance->title;
             $delayInfo['maintenance_type'] = $overdueMaintenance->maintenance_type;
         }

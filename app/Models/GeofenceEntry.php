@@ -101,7 +101,8 @@ class GeofenceEntry extends Model
             return null;
         }
 
-        return $this->exit_time->diffInMinutes($this->entry_time);
+        // Carbon 3 diffs are signed: measure forward from entry to exit.
+        return (int) $this->entry_time->diffInMinutes($this->exit_time);
     }
 
     /**

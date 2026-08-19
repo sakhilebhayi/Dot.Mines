@@ -34,8 +34,10 @@ class AnomalyDetectorAgent
             }
 
             // Check for status anomalies
+            // Carbon 3: now()->diffInHours($past) is negative, so this
+            // "stale data" anomaly could never fire.
             $lastUpdate = $machine->updated_at;
-            if ($lastUpdate && now()->diffInHours($lastUpdate) > 24) {
+            if ($lastUpdate && $lastUpdate->diffInHours(now()) > 24) {
                 $insights[] = [
                     'type' => 'anomaly',
                     'category' => 'fleet',
@@ -44,7 +46,7 @@ class AnomalyDetectorAgent
                     'description' => "{$machine->name} hasn't reported data in 24+ hours",
                     'data' => [
                         'machine_id' => $machine->id,
-                        'hours_since_update' => now()->diffInHours($lastUpdate),
+                        'hours_since_update' => round($lastUpdate->diffInHours(now()), 1),
                     ],
                 ];
             }

@@ -53,7 +53,7 @@ class IoTSensorService
         $latestReading = $sensor->readings()->latest()->first();
 
         $lastReadingAge = $latestReading?->timestamp
-            ? now()->diffInMinutes($latestReading->timestamp)
+            ? (int) $latestReading->timestamp->diffInMinutes(now())
             : null;
 
         return [
