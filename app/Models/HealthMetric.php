@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 /**
  * HealthMetric Model
@@ -22,10 +23,10 @@ use App\Traits\HasTeamFilters;
  * @property bool $is_normal
  * @property string|null $severity
  * @property string|null $sensor_id
- * @property \Carbon\Carbon $recorded_at
+ * @property Carbon $recorded_at
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|HealthMetric where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|HealthMetric whereIn(string $column, array<string|int> $values)
@@ -108,11 +109,12 @@ class HealthMetric extends Model
      */
     public function getDeviationAttribute(): ?float
     {
-        if (!$this->normal_min || !$this->normal_max) {
+        if (! $this->normal_min || ! $this->normal_max) {
             return null;
         }
 
         $normalMid = ($this->normal_min + $this->normal_max) / 2;
+
         return $this->value - $normalMid;
     }
 
@@ -121,7 +123,7 @@ class HealthMetric extends Model
      */
     public function getDeviationPercentageAttribute(): ?float
     {
-        if (!$this->normal_min || !$this->normal_max) {
+        if (! $this->normal_min || ! $this->normal_max) {
             return null;
         }
 
@@ -131,6 +133,7 @@ class HealthMetric extends Model
         }
 
         $deviation = abs($this->deviation);
+
         return ($deviation / $normalRange) * 100;
     }
 }

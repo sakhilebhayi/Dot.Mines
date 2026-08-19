@@ -15,6 +15,7 @@ class RouteSpeedMonitoringJob implements ShouldQueue
     use Queueable;
 
     public int $tries = 2;
+
     public int $timeout = 120;
 
     /**
@@ -43,13 +44,14 @@ class RouteSpeedMonitoringJob implements ShouldQueue
 
             if ($routes->isEmpty()) {
                 Log::debug('No active routes with speed limits found');
+
                 return;
             }
 
             $violationsDetected = 0;
 
             foreach ($routes as $route) {
-                if (!$route->machine) {
+                if (! $route->machine) {
                     continue;
                 }
 

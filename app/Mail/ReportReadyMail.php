@@ -2,10 +2,10 @@
 
 namespace App\Mail;
 
+use App\Models\Report;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Report;
 
 class ReportReadyMail extends Mailable
 {
@@ -35,11 +35,11 @@ class ReportReadyMail extends Mailable
             $downloadUrl = '#';
         }
 
-        return $this->subject('Your report is ready — ' . $this->report->title)
-                    ->view('emails.report-ready')
-                    ->with([
-                        'report' => $this->report,
-                        'downloadUrl' => $downloadUrl,
-                    ]);
+        return $this->subject('Your report is ready — '.$this->report->title)
+            ->view('emails.report-ready')
+            ->with([
+                'report' => $this->report,
+                'downloadUrl' => $downloadUrl,
+            ]);
     }
 }

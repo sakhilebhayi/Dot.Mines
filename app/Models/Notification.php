@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -19,9 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property array|null $data
  * @property string|null $action_url
  * @property bool $is_read
- * @property \Carbon\Carbon|null $read_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon|null $read_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Notification where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Notification whereIn(string $column, array $values)

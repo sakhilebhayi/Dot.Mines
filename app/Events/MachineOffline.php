@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Models\Machine;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -17,22 +16,16 @@ class MachineOffline implements ShouldBroadcast
 
     /**
      * The machine instance.
-     *
-     * @var \App\Models\Machine
      */
     public Machine $machine;
 
     /**
      * The reason for going offline.
-     *
-     * @var string|null
      */
     public ?string $reason;
 
     /**
      * Last known location.
-     *
-     * @var array|null
      */
     public ?array $lastLocation;
 
@@ -49,23 +42,21 @@ class MachineOffline implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
         return [
             // Broadcast to the team channel
-            new PrivateChannel('team.' . $this->machine->team_id),
-            
+            new PrivateChannel('team.'.$this->machine->team_id),
+
             // Broadcast to the specific machine channel
-            new PrivateChannel('machine.' . $this->machine->id),
+            new PrivateChannel('machine.'.$this->machine->id),
         ];
     }
 
     /**
      * Get the data to broadcast.
-     *
-     * @return array
      */
     public function broadcastWith(): array
     {
@@ -83,8 +74,6 @@ class MachineOffline implements ShouldBroadcast
 
     /**
      * The event's broadcast name.
-     *
-     * @return string
      */
     public function broadcastAs(): string
     {

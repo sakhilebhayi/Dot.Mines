@@ -8,7 +8,7 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MachineMetric>
+ * @extends Factory<MachineMetric>
  */
 class MachineMetricFactory extends Factory
 {

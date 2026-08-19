@@ -60,6 +60,7 @@ class FuelConsumptionMetric extends Model
         if ($this->operating_hours == 0) {
             return null;
         }
+
         return round($this->fuel_consumed_liters / $this->operating_hours, 4);
     }
 
@@ -71,6 +72,7 @@ class FuelConsumptionMetric extends Model
         if ($this->distance_traveled_km == 0) {
             return null;
         }
+
         return round($this->fuel_consumed_liters / $this->distance_traveled_km, 4);
     }
 
@@ -79,9 +81,10 @@ class FuelConsumptionMetric extends Model
      */
     public function getIdleFuelPercentageAttribute(): ?float
     {
-        if ($this->fuel_consumed_liters == 0 || !$this->idle_fuel_consumed) {
+        if ($this->fuel_consumed_liters == 0 || ! $this->idle_fuel_consumed) {
             return null;
         }
+
         return round(($this->idle_fuel_consumed / $this->fuel_consumed_liters) * 100, 2);
     }
 }

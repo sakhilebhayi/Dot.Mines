@@ -1,9 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -12,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('machines', 'mine_area_id')) {
+        if (! Schema::hasColumn('machines', 'mine_area_id')) {
             // If column doesn't exist, nothing to do here.
             return;
         }
@@ -30,7 +29,7 @@ return new class extends Migration
                     ->where('team_id', $t->team_id)
                     ->whereNull('mine_area_id')
                     ->update(['mine_area_id' => $t->area_id]);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // ignore failures for specific teams
             }
         }
@@ -38,7 +37,7 @@ return new class extends Migration
         // Determine driver and attempt to alter column nullability where supported
         try {
             $driver = DB::getPdo()->getAttribute(PDO::ATTR_DRIVER_NAME);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $driver = null;
         }
 
@@ -56,7 +55,7 @@ return new class extends Migration
                 // Fallback: try a generic SQL ALTER (may work on some drivers)
                 DB::statement('ALTER TABLE machines ALTER COLUMN mine_area_id SET NOT NULL');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // If altering fails, don't break migrations; the model-level validation still protects new writes.
         }
     }
@@ -66,13 +65,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (!Schema::hasColumn('machines', 'mine_area_id')) {
+        if (! Schema::hasColumn('machines', 'mine_area_id')) {
             return;
         }
 
         try {
             $driver = DB::getPdo()->getAttribute(PDO::ATTR_DRIVER_NAME);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $driver = null;
         }
 
@@ -88,7 +87,7 @@ return new class extends Migration
             } else {
                 DB::statement('ALTER TABLE machines ALTER COLUMN mine_area_id DROP NOT NULL');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // ignore
         }
     }

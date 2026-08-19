@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 /**
  * MaintenanceAlert Model
@@ -19,14 +21,14 @@ use App\Traits\HasTeamFilters;
  * @property string $message
  * @property string $severity
  * @property string $status
- * @property \Carbon\Carbon $triggered_at
- * @property \Carbon\Carbon|null $acknowledged_at
+ * @property Carbon $triggered_at
+ * @property Carbon|null $acknowledged_at
  * @property int|null $acknowledged_by
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon|null $resolved_at
  * @property int|null $resolved_by
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceAlert where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceAlert whereIn(string $column, array<string|int> $values)
@@ -93,32 +95,32 @@ class MaintenanceAlert extends Model
     /**
      * Scopes
      */
-    public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
 
-    public function scopeCritical(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    public function scopeCritical(Builder $query): Builder
     {
         return $query->where('severity', 'critical');
     }
 
-    public function scopeUnacknowledged(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    public function scopeUnacknowledged(Builder $query): Builder
     {
         return $query->whereNull('acknowledged_at');
     }
 
-    public function scopeUnresolved(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    public function scopeUnresolved(Builder $query): Builder
     {
         return $query->whereNull('resolved_at');
     }
 
-    public function scopeAlertType(\Illuminate\Database\Eloquent\Builder $query, string $type): \Illuminate\Database\Eloquent\Builder
+    public function scopeAlertType(Builder $query, string $type): Builder
     {
         return $query->where('alert_type', $type);
     }
 
-    public function scopeSeverity(\Illuminate\Database\Eloquent\Builder $query, string $severity): \Illuminate\Database\Eloquent\Builder
+    public function scopeSeverity(Builder $query, string $severity): Builder
     {
         return $query->where('severity', $severity);
     }
@@ -160,7 +162,7 @@ class MaintenanceAlert extends Model
      */
     public function getIsStaleAttribute(): bool
     {
-        return !$this->acknowledged_at && $this->age_hours > 24;
+        return ! $this->acknowledged_at && $this->age_hours > 24;
     }
 
     /**
@@ -171,7 +173,7 @@ class MaintenanceAlert extends Model
         $score = 0;
 
         // Severity weight
-        $score += match($this->severity) {
+        $score += match ($this->severity) {
             'critical' => 100,
             'warning' => 50,
             'info' => 10,
@@ -182,7 +184,7 @@ class MaintenanceAlert extends Model
         $score += min($this->age_hours, 48);
 
         // Unacknowledged weight
-        if (!$this->acknowledged_at) {
+        if (! $this->acknowledged_at) {
             $score += 30;
         }
 

@@ -2,9 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Models\ActivityLog;
 use App\Models\Geofence;
-use Livewire\Component;
+use App\Models\Machine;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class GeofenceDetail extends Component
 {
@@ -39,29 +41,29 @@ class GeofenceDetail extends Component
         $machineIds = $this->geofence->entries()->distinct('machine_id')->pluck('machine_id')->toArray();
 
         $machineTypeCounts = [];
-        if (!empty($machineIds)) {
-            $machineTypeCounts = \App\Models\Machine::whereIn('id', $machineIds)
-                ->select('machine_type', DB::raw('count(*) as cnt'))
+        if (! empty($machineIds)) {
+            $machineTypeCounts = Machine::whereIn('id', $machineIds)
+                ->select(['machine_type', DB::raw('count(*) as cnt')])
                 ->groupBy('machine_type')
                 ->pluck('cnt', 'machine_type')
                 ->toArray();
         }
 
         // Team machine counts for tracked/untracked calculation
-        $teamMachineCount = \App\Models\Machine::where('team_id', $team->id)->count();
+        $teamMachineCount = Machine::where('team_id', $team->id)->count();
         $machinesTracked = $machineCount;
         $machinesUntracked = max(0, $teamMachineCount - $machinesTracked);
 
         // Loads: recent entries with tonnage and try to infer authorizer from ActivityLog
-        $loads = $this->geofence->entries()->with('machine')->latest('entry_time')->take(20)->get()->map(function($entry) use ($team) {
+        $loads = $this->geofence->entries()->with('machine')->latest('entry_time')->take(20)->get()->map(function ($entry) use ($team) {
             $author = null;
 
             // Attempt to find an activity log that references this machine and mentions authorization
-            $possible = \App\Models\ActivityLog::where('team_id', $team->id)
-                ->where(function($q) use ($entry) {
+            $possible = ActivityLog::where('team_id', $team->id)
+                ->where(function ($q) use ($entry) {
                     $q->where('description', 'like', "%{$entry->machine->name}%")
-                      ->orWhere('action', 'like', "%authoriz%")
-                      ->orWhere('description', 'like', '%authoriz%');
+                        ->orWhere('action', 'like', '%authoriz%')
+                        ->orWhere('description', 'like', '%authoriz%');
                 })
                 ->orderBy('created_at', 'desc')
                 ->first();

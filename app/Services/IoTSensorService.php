@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Models\IoTSensor;
-use App\Models\SensorReading;
-use Illuminate\Support\Collection;
 
 class IoTSensorService
 {
@@ -29,7 +27,7 @@ class IoTSensorService
         }
 
         $values = $readings->pluck('value')->toArray();
-        
+
         return [
             'count' => count($values),
             'average' => array_sum($values) / count($values),
@@ -38,7 +36,7 @@ class IoTSensorService
             'latest' => $readings->last()->value,
             'unit' => $readings->first()->unit,
             'trend' => $this->calculateTrend($values),
-            'readings' => $readings->map(fn($r) => [
+            'readings' => $readings->map(fn ($r) => [
                 'value' => $r->value,
                 'timestamp' => $r->timestamp,
                 'quality' => $r->quality_score,
@@ -53,8 +51,8 @@ class IoTSensorService
     {
         $isOnline = $sensor->isOnline();
         $latestReading = $sensor->readings()->latest()->first();
-        
-        $lastReadingAge = $latestReading?->timestamp 
+
+        $lastReadingAge = $latestReading?->timestamp
             ? now()->diffInMinutes($latestReading->timestamp)
             : null;
 
@@ -77,8 +75,8 @@ class IoTSensorService
             return 'insufficient_data';
         }
 
-        $firstHalf = array_slice($values, 0, (int)(count($values) / 2));
-        $secondHalf = array_slice($values, (int)(count($values) / 2));
+        $firstHalf = array_slice($values, 0, (int) (count($values) / 2));
+        $secondHalf = array_slice($values, (int) (count($values) / 2));
 
         $firstAvg = array_sum($firstHalf) / count($firstHalf);
         $secondAvg = array_sum($secondHalf) / count($secondHalf);
@@ -90,6 +88,7 @@ class IoTSensorService
         } elseif ($change < -5) {
             return 'decreasing';
         }
+
         return 'stable';
     }
 

@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $team_id
  * @property string $action
  * @property string|null $description
- * @property \Carbon\Carbon $created_at
+ * @property Carbon $created_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|ActivityLog whereIn(string $column, array $values)

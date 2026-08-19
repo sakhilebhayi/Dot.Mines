@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Payment Model
- * 
+ *
  * Represents a payment transaction
  * Tracks Stripe payment intents and status
  *
@@ -23,10 +24,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $payment_method
  * @property string|null $description
  * @property string|null $failure_reason
- * @property \Carbon\Carbon|null $paid_at
+ * @property Carbon|null $paid_at
  * @property array|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Payment where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Payment whereIn(string $column, array $values)
@@ -91,7 +92,7 @@ class Payment extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return 'R' . number_format($this->amount, 2);
+        return 'R'.number_format($this->amount, 2);
     }
 
     /**
@@ -99,7 +100,7 @@ class Payment extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'succeeded' => 'green',
             'pending' => 'yellow',
             'failed' => 'red',

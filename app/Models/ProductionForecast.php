@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,13 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $team_id
  * @property int $mine_area_id
- * @property string|\Carbon\Carbon $forecast_date
+ * @property string|Carbon $forecast_date
  * @property string|float $forecasted_quantity
  * @property string $unit
  * @property string|float $confidence_level
  * @property array|null $forecast_method
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|ProductionForecast where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|ProductionForecast whereIn(string $column, array $values)

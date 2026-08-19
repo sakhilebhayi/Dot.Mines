@@ -2,21 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\Shift;
 use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
 use App\Models\ProductionRecord;
+use App\Models\Shift;
 use Illuminate\Support\Facades\DB;
 
 class ShiftService
 {
     /**
      * Perform a shift change for a team.
-     *
-     * @param int $teamId
-     * @param string $shiftType
-     * @param int|null $defaultMineAreaId
-     * @return Shift
      */
     public function performShiftChange(int $teamId, string $shiftType = 'day', ?int $defaultMineAreaId = null): Shift
     {
@@ -54,7 +49,7 @@ class ShiftService
                 ->groupBy('mine_area_id')
                 ->get()
                 ->mapWithKeys(function ($r) {
-                    return [$r->mine_area_id => ['quantity' => (float)$r->qty, 'count' => $r->count]];
+                    return [$r->mine_area_id => ['quantity' => (float) $r->qty, 'count' => $r->count]];
                 })->toArray();
 
             $productivityMetrics['by_mine_area'] = $byArea;

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,10 +24,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $interval_days
  * @property int|null $last_service_hours
  * @property int|null $last_service_km
- * @property string|\Carbon\Carbon|null $last_service_date
+ * @property string|Carbon|null $last_service_date
  * @property int|null $next_service_hours
  * @property int|null $next_service_km
- * @property string|\Carbon\Carbon|null $next_service_date
+ * @property string|Carbon|null $next_service_date
  * @property string $priority
  * @property string $status
  * @property string|float|null $estimated_cost
@@ -34,8 +35,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property array|null $required_parts
  * @property array|null $required_tools
  * @property bool $auto_generate_work_order
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceSchedule where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceSchedule whereIn(string $column, array $values)
@@ -104,7 +105,7 @@ class MaintenanceSchedule extends Model
      */
     public function isDue(Machine $machine): bool
     {
-        return match($this->schedule_type) {
+        return match ($this->schedule_type) {
             'hours' => $machine->operating_hours >= $this->next_service_hours,
             'kilometers' => $machine->odometer >= $this->next_service_km,
             'calendar' => now()->gte($this->next_service_date),
@@ -117,7 +118,7 @@ class MaintenanceSchedule extends Model
      */
     public function isOverdue(Machine $machine): bool
     {
-        return match($this->schedule_type) {
+        return match ($this->schedule_type) {
             'hours' => $machine->operating_hours > ($this->next_service_hours + ($this->interval_hours * 0.1)),
             'kilometers' => $machine->odometer > ($this->next_service_km + ($this->interval_km * 0.1)),
             'calendar' => now()->gt($this->next_service_date->addDays(7)),

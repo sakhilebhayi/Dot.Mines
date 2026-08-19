@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Alert;
 use App\Models\Machine;
+use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -14,9 +15,11 @@ class MachineIdleMonitoringJob implements ShouldQueue
     use Queueable;
 
     public int $tries = 2;
+
     public int $timeout = 120;
 
     private const IDLE_THRESHOLD_MINUTES = 20;
+
     private const SPEED_THRESHOLD = 2; // km/h - considered stationary if below this
 
     /**
@@ -42,6 +45,7 @@ class MachineIdleMonitoringJob implements ShouldQueue
 
             if ($machines->isEmpty()) {
                 Log::debug('No active machines found for idle monitoring');
+
                 return;
             }
 
@@ -97,12 +101,12 @@ class MachineIdleMonitoringJob implements ShouldQueue
             $isStationary = false;
 
             // Check speed (if available)
-            if (!is_null($metric->speed) && $metric->speed < self::SPEED_THRESHOLD) {
+            if (! is_null($metric->speed) && $metric->speed < self::SPEED_THRESHOLD) {
                 $isStationary = true;
             }
 
             // Check location change (if available)
-            if (!is_null($metric->latitude) && !is_null($metric->longitude)) {
+            if (! is_null($metric->latitude) && ! is_null($metric->longitude)) {
                 if ($lastLocation) {
                     $distance = $this->calculateDistance(
                         $lastLocation['lat'],
@@ -121,7 +125,7 @@ class MachineIdleMonitoringJob implements ShouldQueue
             }
 
             if ($isStationary) {
-                if (!$currentStationaryStart) {
+                if (! $currentStationaryStart) {
                     $currentStationaryStart = $metric->created_at;
                 }
             } else {
@@ -150,9 +154,9 @@ class MachineIdleMonitoringJob implements ShouldQueue
         $longestIdleStart = null;
 
         foreach ($stationaryPeriods as $period) {
-            $start = is_string($period['start']) ? \Carbon\Carbon::parse($period['start']) : $period['start'];
-            $end = is_string($period['end']) ? \Carbon\Carbon::parse($period['end']) : $period['end'];
-            
+            $start = is_string($period['start']) ? Carbon::parse($period['start']) : $period['start'];
+            $end = is_string($period['end']) ? Carbon::parse($period['end']) : $period['end'];
+
             $duration = $start->diffInMinutes($end);
 
             if ($duration > $longestIdleDuration) {

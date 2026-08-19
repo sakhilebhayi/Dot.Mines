@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $team_id
  * @property int $mine_area_id
  * @property int $machine_id
- * @property string|\Carbon\Carbon $record_date
+ * @property string|Carbon $record_date
  * @property string $shift
  * @property string|float $quantity_produced
  * @property string $unit
@@ -24,9 +24,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property array|null $metadata
  * @property float $variance_percentage
  * @property bool $is_above_target
- * @property \Carbon\Carbon|null $deleted_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|ProductionRecord where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|ProductionRecord whereIn(string $column, array $values)
@@ -97,17 +97,19 @@ class ProductionRecord extends Model
 
     public function getVariancePercentageAttribute(): float
     {
-        if (!$this->target_quantity || $this->target_quantity == 0) {
+        if (! $this->target_quantity || $this->target_quantity == 0) {
             return 0;
         }
+
         return (($this->quantity_produced - $this->target_quantity) / $this->target_quantity) * 100;
     }
 
     public function getIsAboveTargetAttribute(): bool
     {
-        if (!$this->target_quantity) {
+        if (! $this->target_quantity) {
             return false;
         }
+
         return $this->quantity_produced >= $this->target_quantity;
     }
 }

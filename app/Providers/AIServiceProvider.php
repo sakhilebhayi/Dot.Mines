@@ -2,14 +2,14 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Services\AI\AIOptimizationService;
+use App\Services\AI\AnomalyDetectorAgent;
+use App\Services\AI\CostAnalyzerAgent;
 use App\Services\AI\FleetOptimizerAgent;
-use App\Services\AI\RouteAdvisorAgent;
 use App\Services\AI\FuelPredictorAgent;
 use App\Services\AI\MaintenancePredictorAgent;
-use App\Services\AI\CostAnalyzerAgent;
-use App\Services\AI\AnomalyDetectorAgent;
+use App\Services\AI\RouteAdvisorAgent;
+use Illuminate\Support\ServiceProvider;
 
 class AIServiceProvider extends ServiceProvider
 {

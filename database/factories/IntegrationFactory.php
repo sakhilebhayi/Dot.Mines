@@ -7,7 +7,7 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Integration>
+ * @extends Factory<Integration>
  */
 class IntegrationFactory extends Factory
 {
@@ -16,11 +16,11 @@ class IntegrationFactory extends Factory
     public function definition(): array
     {
         $provider = $this->faker->randomElement(['volvo', 'cat', 'komatsu', 'bell', 'c_track', 'roundebult', 'kawasaki']);
-        
+
         return [
             'team_id' => Team::factory(),
             'provider' => $provider,
-            'name' => ucfirst($provider) . ' Integration',
+            'name' => ucfirst($provider).' Integration',
             'api_key' => $this->faker->uuid(),
             'api_secret' => $this->faker->sha256(),
             'credentials' => [
@@ -85,7 +85,7 @@ class IntegrationFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'provider' => $provider,
-            'name' => ucfirst($provider) . ' Integration',
+            'name' => ucfirst($provider).' Integration',
         ]);
     }
 }

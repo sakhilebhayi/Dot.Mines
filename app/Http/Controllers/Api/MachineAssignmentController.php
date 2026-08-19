@@ -14,7 +14,7 @@ class MachineAssignmentController extends Controller
     public function available(Request $request)
     {
         $team = auth()->user()->currentTeam;
-        
+
         $machines = Machine::where('team_id', $team->id)
             ->whereDoesntHave('mineAreas')
             ->paginate($request->get('per_page', 15));

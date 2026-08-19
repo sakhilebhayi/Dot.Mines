@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use Illuminate\Queue\Events\JobFailed;
-use Psr\Log\LogLevel;
 
 class NotifyOnJobFailed
 {

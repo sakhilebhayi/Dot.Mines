@@ -8,11 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('mine_areas')) {
+        if (! Schema::hasTable('mine_areas')) {
             return;
         }
 
-        if (!Schema::hasColumn('mine_areas', 'location')) {
+        if (! Schema::hasColumn('mine_areas', 'location')) {
             Schema::table('mine_areas', function (Blueprint $table) {
                 $table->string('location')->nullable()->after('description');
             });
@@ -21,7 +21,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!Schema::hasTable('mine_areas')) {
+        if (! Schema::hasTable('mine_areas')) {
             return;
         }
         if (Schema::hasColumn('mine_areas', 'location')) {

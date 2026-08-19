@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\StripeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Stripe\Webhook;
 
 class WebhookController extends Controller
 {
@@ -15,13 +16,13 @@ class WebhookController extends Controller
     {
         $payload = $request->getContent();
         $signature = $request->header('Stripe-Signature');
-        
+
         // Verify webhook signature if secret is configured
         $webhookSecret = config('services.stripe.webhook_secret');
-        
+
         if ($webhookSecret) {
             try {
-                $event = \Stripe\Webhook::constructEvent(
+                $event = Webhook::constructEvent(
                     $payload,
                     $signature,
                     $webhookSecret
@@ -30,6 +31,7 @@ class WebhookController extends Controller
                 Log::error('Stripe webhook signature verification failed', [
                     'error' => $e->getMessage(),
                 ]);
+
                 return response()->json(['error' => 'Invalid signature'], 400);
             }
         } else {
@@ -40,7 +42,7 @@ class WebhookController extends Controller
             'type' => $event['type'] ?? 'unknown',
         ]);
 
-        $stripeService = new StripeService();
+        $stripeService = new StripeService;
 
         // Handle different event types
         try {
@@ -84,13 +86,13 @@ class WebhookController extends Controller
             }
 
             return response()->json(['status' => 'success']);
-            
+
         } catch (\Exception $e) {
             Log::error('Webhook processing failed', [
                 'type' => $event['type'] ?? 'unknown',
                 'error' => $e->getMessage(),
             ]);
-            
+
             return response()->json(['error' => 'Processing failed'], 500);
         }
     }

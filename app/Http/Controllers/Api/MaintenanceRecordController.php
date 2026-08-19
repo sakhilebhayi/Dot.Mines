@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\MaintenanceRecord;
 use App\Models\Machine;
+use App\Models\MaintenanceRecord;
 use App\Services\MaintenanceHealthService;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MaintenanceRecordController extends Controller
 {
@@ -210,14 +210,14 @@ class MaintenanceRecordController extends Controller
             ->with(['machine', 'assignedTo', 'completedBy'])
             ->whereBetween('completed_at', [
                 $validated['start_date'],
-                $validated['end_date']
+                $validated['end_date'],
             ])
             ->completed()
             ->get();
 
         if ($request->input('format', 'json') === 'csv') {
             $csv = "Work Order,Machine,Type,Status,Scheduled,Completed,Duration,Labor Cost,Parts Cost,Total Cost\n";
-            
+
             foreach ($records as $record) {
                 $csv .= implode(',', [
                     $record->work_order_number,
@@ -230,7 +230,7 @@ class MaintenanceRecordController extends Controller
                     $record->labor_cost,
                     $record->parts_cost,
                     $record->total_cost,
-                ]) . "\n";
+                ])."\n";
             }
 
             return response()->json([

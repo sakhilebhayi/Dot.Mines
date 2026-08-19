@@ -13,10 +13,18 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
-                manualChunks: {
-                    'vendor': ['alpinejs'],
-                    'charts': ['chart.js'],
-                    'maps': ['leaflet'],
+                // Function form: Vite 8's rolldown bundler does not accept
+                // the object form ("manualChunks is not a function").
+                manualChunks(id) {
+                    if (id.includes('node_modules/alpinejs/')) {
+                        return 'vendor';
+                    }
+                    if (id.includes('node_modules/chart.js/')) {
+                        return 'charts';
+                    }
+                    if (id.includes('node_modules/leaflet/')) {
+                        return 'maps';
+                    }
                 },
             },
         },

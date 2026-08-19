@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Subscription Plan Model
- * 
+ *
  * Represents available subscription tiers (Basic, Pro, Enterprise)
  * Defines features and limits for each plan
  *
@@ -30,8 +31,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $has_priority_support
  * @property bool $is_active
  * @property int $sort_order
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|SubscriptionPlan where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|SubscriptionPlan whereIn(string $column, array $values)
@@ -94,13 +95,13 @@ class SubscriptionPlan extends Model
      */
     public function getYearlySavingsPercentageAttribute(): int
     {
-        if (!$this->yearly_price || $this->price <= 0) {
+        if (! $this->yearly_price || $this->price <= 0) {
             return 0;
         }
 
         $monthlyTotal = $this->price * 12;
         $savings = $monthlyTotal - $this->yearly_price;
-        
+
         return (int) round(($savings / $monthlyTotal) * 100);
     }
 

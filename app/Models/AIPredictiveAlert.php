@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 class AIPredictiveAlert extends Model
 {
     use HasFactory, HasTeamFilters;
-    
+
     protected $table = 'ai_predictive_alerts';
+
     protected $fillable = [
         'team_id',
         'ai_agent_id',
@@ -55,7 +56,6 @@ class AIPredictiveAlert extends Model
     {
         return $this->belongsTo(Machine::class, 'related_machine_id');
     }
-
 
     public function acknowledger(): BelongsTo
     {

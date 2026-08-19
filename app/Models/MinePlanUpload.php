@@ -44,7 +44,6 @@ class MinePlanUpload extends Model
      * Build a temporary signed download URL for this mine plan.
      *
      * @param  \DateTimeInterface|int|null  $expires
-     * @return string
      */
     public function signedDownloadUrl($expires = null): string
     {
@@ -94,13 +93,14 @@ class MinePlanUpload extends Model
     {
         $bytes = $this->file_size;
         if ($bytes >= 1073741824) {
-            return number_format($bytes / 1073741824, 2) . ' GB';
+            return number_format($bytes / 1073741824, 2).' GB';
         } elseif ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
+            return number_format($bytes / 1048576, 2).' MB';
         } elseif ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
+            return number_format($bytes / 1024, 2).' KB';
         }
-        return $bytes . ' bytes';
+
+        return $bytes.' bytes';
     }
 
     /**
@@ -116,9 +116,16 @@ class MinePlanUpload extends Model
      */
     public function getIsEffectiveAttribute(): bool
     {
-        if ($this->status !== 'active') return false;
-        if ($this->effective_date && $this->effective_date->isFuture()) return false;
-        if ($this->expiry_date && $this->expiry_date->isPast()) return false;
+        if ($this->status !== 'active') {
+            return false;
+        }
+        if ($this->effective_date && $this->effective_date->isFuture()) {
+            return false;
+        }
+        if ($this->expiry_date && $this->expiry_date->isPast()) {
+            return false;
+        }
+
         return true;
     }
 }

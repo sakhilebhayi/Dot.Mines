@@ -1,24 +1,20 @@
 <?php
 
+use App\Http\Controllers\Api\AlertController;
+use App\Http\Controllers\Api\FuelTankController;
+use App\Http\Controllers\Api\FuelTransactionController;
+use App\Http\Controllers\Api\GeofenceController;
+use App\Http\Controllers\Api\IntegrationController;
+use App\Http\Controllers\Api\MachineAssignmentController;
+use App\Http\Controllers\Api\MachineController;
+use App\Http\Controllers\Api\MachineHealthController;
+use App\Http\Controllers\Api\MaintenanceRecordController;
+use App\Http\Controllers\Api\MaintenanceScheduleController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ReportController;
+use App\Models\Machine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\{
-    MachineController,
-    GeofenceController,
-    AlertController,
-    IntegrationController,
-    ReportController,
-    MachineAssignmentController,
-    IoTSensorController,
-    ForecastingController,
-    ComplianceController,
-    NotificationController,
-    FuelTankController,
-    FuelTransactionController,
-    MachineHealthController,
-    MaintenanceScheduleController,
-    MaintenanceRecordController,
-};
 
 /**
  * Public endpoints (no auth required)
@@ -30,7 +26,7 @@ use App\Http\Controllers\Api\{
  * Rate limiting: 60 requests per minute per user
  */
 Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(function () {
-    
+
     /**
      * User & Auth endpoints
      */
@@ -40,6 +36,7 @@ Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(functi
 
     Route::post('/user/team/{team_id}', function (Request $request, $team_id) {
         $request->user()->update(['current_team_id' => $team_id]);
+
         return response()->json(['message' => 'Team switched successfully']);
     });
 
@@ -214,9 +211,9 @@ Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(functi
      * Live Location endpoint (real-time)
      */
     Route::get('/live-locations', function (Request $request) {
-        $machines = \App\Models\Machine::select([
-            'id', 'name', 'machine_type', 'status', 
-            'last_location_latitude', 'last_location_longitude', 'last_location_update'
+        $machines = Machine::select([
+            'id', 'name', 'machine_type', 'status',
+            'last_location_latitude', 'last_location_longitude', 'last_location_update',
         ])
             ->whereNotNull('last_location_latitude')
             ->get();

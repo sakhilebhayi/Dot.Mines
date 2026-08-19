@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,12 +14,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $machine_id
  * @property int $mine_area_id
  * @property int|null $assigned_by
- * @property \Carbon\Carbon $assigned_at
- * @property \Carbon\Carbon|null $unassigned_at
+ * @property Carbon $assigned_at
+ * @property Carbon|null $unassigned_at
  * @property string|null $reason
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|MachineAreaAssignment where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|MachineAreaAssignment whereIn(string $column, array $values)

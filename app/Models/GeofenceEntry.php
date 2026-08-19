@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * GeofenceEntry Model
- * 
+ *
  * Records machine entry and exit times from geofenced areas
  * Tracks tonnage and material movement
  *
@@ -17,8 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $team_id
  * @property int $geofence_id
  * @property int $machine_id
- * @property \Carbon\Carbon $entry_time
- * @property \Carbon\Carbon|null $exit_time
+ * @property Carbon $entry_time
+ * @property Carbon|null $exit_time
  * @property float $entry_latitude
  * @property float $entry_longitude
  * @property float|null $exit_latitude
@@ -26,8 +27,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $tonnage_loaded
  * @property string|null $material_type
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|GeofenceEntry where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|GeofenceEntry whereIn(string $column, array $values)
@@ -96,7 +97,7 @@ class GeofenceEntry extends Model
      */
     public function getDurationMinutes()
     {
-        if (!$this->exit_time) {
+        if (! $this->exit_time) {
             return null;
         }
 
@@ -109,7 +110,7 @@ class GeofenceEntry extends Model
     public function getFormattedDuration()
     {
         $minutes = $this->getDurationMinutes();
-        if (!$minutes) {
+        if (! $minutes) {
             return 'Active';
         }
 

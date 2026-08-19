@@ -2,10 +2,10 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\User;
 
 class WelcomeMail extends Mailable
 {
@@ -26,8 +26,8 @@ class WelcomeMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Welcome to ' . config('app.name'))
-                    ->view('emails.welcome')
-                    ->with(['user' => $this->user]);
+        return $this->subject('Welcome to '.config('app.name'))
+            ->view('emails.welcome')
+            ->with(['user' => $this->user]);
     }
 }

@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         // Only create table if it doesn't already exist
-        if (!Schema::hasTable('production_records')) {
+        if (! Schema::hasTable('production_records')) {
             Schema::create('production_records', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('team_id')->constrained()->cascadeOnDelete();
@@ -34,7 +34,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('production_targets')) {
+        if (! Schema::hasTable('production_targets')) {
             Schema::create('production_targets', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('team_id')->constrained()->cascadeOnDelete();
@@ -55,7 +55,7 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('production_forecasts')) {
+        if (! Schema::hasTable('production_forecasts')) {
             Schema::create('production_forecasts', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('team_id')->constrained()->cascadeOnDelete();

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\IoTSensor;
-use App\Models\SensorReading;
 use App\Services\IoTSensorService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 class AIAnalysisSession extends Model
 {
     use HasFactory, HasTeamFilters;
-    
+
     protected $table = 'ai_analysis_sessions';
+
     protected $fillable = [
         'team_id',
         'ai_agent_id',

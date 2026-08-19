@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * HasTeamFilters Trait
- * 
+ *
  * Automatically scopes all queries to the current team/tenant
  * Prevents cross-tenant data leakage by applying team_id filter globally
  */
@@ -15,7 +15,7 @@ trait HasTeamFilters
 {
     /**
      * Boot the trait
-     * 
+     *
      * @return void
      */
     protected static function bootHasTeamFilters()
@@ -38,7 +38,7 @@ trait HasTeamFilters
     /**
      * Get all models without team filtering
      * Use with caution - only for admin operations
-     * 
+     *
      * @return Builder
      */
     public static function withoutTeamFilter()
@@ -48,7 +48,7 @@ trait HasTeamFilters
 
     /**
      * Get the team ID for this model
-     * 
+     *
      * @return int|null
      */
     public function getTeamId()
@@ -58,9 +58,8 @@ trait HasTeamFilters
 
     /**
      * Scope to a specific team
-     * 
-     * @param Builder $query
-     * @param int $teamId
+     *
+     * @param  int  $teamId
      * @return Builder
      */
     public function scopeForTeam(Builder $query, $teamId)

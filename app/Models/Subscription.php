@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Subscription Model
- * 
+ *
  * Represents a team's subscription to a plan
  * Tracks billing cycle, status, and Stripe integration
  *
@@ -21,14 +21,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $stripe_customer_id
  * @property string $status
  * @property string $billing_cycle
- * @property \Carbon\Carbon|null $trial_ends_at
- * @property \Carbon\Carbon|null $current_period_start
- * @property \Carbon\Carbon|null $current_period_end
- * @property \Carbon\Carbon|null $canceled_at
- * @property \Carbon\Carbon|null $ends_at
+ * @property Carbon|null $trial_ends_at
+ * @property Carbon|null $current_period_start
+ * @property Carbon|null $current_period_end
+ * @property Carbon|null $canceled_at
+ * @property Carbon|null $ends_at
  * @property array|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereIn(string $column, array $values)
@@ -104,8 +104,8 @@ class Subscription extends Model
      */
     public function onTrial(): bool
     {
-        return $this->status === 'trial' && 
-               $this->trial_ends_at && 
+        return $this->status === 'trial' &&
+               $this->trial_ends_at &&
                $this->trial_ends_at->isFuture();
     }
 
@@ -130,7 +130,7 @@ class Subscription extends Model
      */
     public function isExpired(): bool
     {
-        return $this->status === 'expired' || 
+        return $this->status === 'expired' ||
                ($this->ends_at && $this->ends_at->isPast());
     }
 
@@ -147,7 +147,7 @@ class Subscription extends Model
      */
     public function trialDaysRemaining(): int
     {
-        if (!$this->onTrial()) {
+        if (! $this->onTrial()) {
             return 0;
         }
 
@@ -159,7 +159,7 @@ class Subscription extends Model
      */
     public function daysRemainingInPeriod(): int
     {
-        if (!$this->current_period_end) {
+        if (! $this->current_period_end) {
             return 0;
         }
 
@@ -171,7 +171,7 @@ class Subscription extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'trial' => 'blue',
             'active' => 'green',
             'past_due' => 'yellow',
@@ -186,7 +186,7 @@ class Subscription extends Model
      */
     public function getStatusTextAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'trial' => 'Trial',
             'active' => 'Active',
             'past_due' => 'Past Due',
@@ -210,6 +210,6 @@ class Subscription extends Model
     public function scopeOnTrial($query)
     {
         return $query->where('status', 'trial')
-                    ->where('trial_ends_at', '>', now());
+            ->where('trial_ends_at', '>', now());
     }
 }

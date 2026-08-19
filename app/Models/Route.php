@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Route Model
- * 
+ *
  * Represents a planned route for a machine from point A to point B
  * Includes waypoints, distance, fuel consumption, and time estimates
  *
@@ -34,8 +36,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property array|null $route_geometry
  * @property float $fuel_savings
  * @property int $time_savings
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Route where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Route whereIn(string $column, array<string|int> $values)
@@ -130,7 +132,7 @@ class Route extends Model
 
         // Assume average fuel consumption of 0.4L/km
         $directFuel = $directDistance * 0.4;
-        
+
         return max(0, $directFuel - $this->estimated_fuel);
     }
 
@@ -149,8 +151,8 @@ class Route extends Model
 
         // Assume average speed of 40 km/h
         $directTime = ($directDistance / 40) * 60; // in minutes
-        
-        return max(0, (int)($directTime - $this->estimated_time));
+
+        return max(0, (int) ($directTime - $this->estimated_time));
     }
 
     /**
@@ -175,7 +177,7 @@ class Route extends Model
     /**
      * Scope query to active routes only
      */
-    public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
@@ -183,7 +185,7 @@ class Route extends Model
     /**
      * Scope query to draft routes only
      */
-    public function scopeDraft(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    public function scopeDraft(Builder $query): Builder
     {
         return $query->where('status', 'draft');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,15 +14,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $team_id
  * @property int $mine_area_id
  * @property string $period_type
- * @property string|\Carbon\Carbon $start_date
- * @property string|\Carbon\Carbon $end_date
+ * @property string|Carbon $start_date
+ * @property string|Carbon $end_date
  * @property string|float $target_quantity
  * @property string $unit
  * @property string|null $description
  * @property bool $is_active
- * @property \Carbon\Carbon|null $deleted_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|ProductionTarget where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|ProductionTarget whereIn(string $column, array $values)

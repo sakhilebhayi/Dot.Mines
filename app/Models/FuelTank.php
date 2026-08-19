@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,13 +25,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|float $minimum_level_liters
  * @property string|null $fuel_type
  * @property string $status
- * @property string|\Carbon\Carbon|null $last_inspection_date
- * @property string|\Carbon\Carbon|null $next_inspection_date
+ * @property string|Carbon|null $last_inspection_date
+ * @property string|Carbon|null $next_inspection_date
  * @property string|null $notes
  * @property float $fill_percentage
  * @property float $available_capacity
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|FuelTank where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|FuelTank whereIn(string $column, array $values)
@@ -104,6 +105,7 @@ class FuelTank extends Model
         if ($this->capacity_liters == 0) {
             return 0;
         }
+
         return round(($this->current_level_liters / $this->capacity_liters) * 100, 2);
     }
 

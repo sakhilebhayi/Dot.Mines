@@ -11,19 +11,19 @@ return new class extends Migration
     {
         // mine_area_id on alerts may already exist from a previous migration attempt
         // Only add if missing — use raw SQL to avoid SQLite table recreation issues
-        if (!Schema::hasColumn('alerts', 'mine_area_id')) {
+        if (! Schema::hasColumn('alerts', 'mine_area_id')) {
             DB::statement('ALTER TABLE alerts ADD COLUMN mine_area_id INTEGER NULL REFERENCES mine_areas(id) ON DELETE SET NULL');
-            
+
             // Add index separately
             try {
                 DB::statement('CREATE INDEX alerts_mine_area_id_index ON alerts (mine_area_id)');
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Index may already exist
             }
         }
 
         // Create mine plan uploads table
-        if (!Schema::hasTable('mine_plan_uploads')) {
+        if (! Schema::hasTable('mine_plan_uploads')) {
             Schema::create('mine_plan_uploads', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('team_id')->constrained()->cascadeOnDelete();
@@ -51,7 +51,7 @@ return new class extends Migration
         }
 
         // Create machine_mine_area_history for tracking assignment history
-        if (!Schema::hasTable('machine_mine_area_assignments')) {
+        if (! Schema::hasTable('machine_mine_area_assignments')) {
             Schema::create('machine_mine_area_assignments', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('team_id')->constrained()->cascadeOnDelete();

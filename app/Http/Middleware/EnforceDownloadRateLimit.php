@@ -23,7 +23,7 @@ class EnforceDownloadRateLimit
 
         // Apply only to endpoints that appear to be download endpoints
         if (Str::contains($path, 'download') || Str::contains($routeName, 'download')) {
-            $key = 'downloads|' . ($request->user()?->id ?: $request->ip());
+            $key = 'downloads|'.($request->user()?->id ?: $request->ip());
             $maxAttempts = 10; // keep in sync with AppServiceProvider::configureRateLimiting()
             $decaySeconds = 60;
 

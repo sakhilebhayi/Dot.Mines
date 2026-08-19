@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\MineArea;
 use App\Models\ComplianceReport;
+use App\Models\MineArea;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 class ComplianceReportController extends Controller
 {
@@ -44,8 +43,8 @@ class ComplianceReportController extends Controller
         $this->authorize('view', $mineArea);
 
         $reports = ComplianceReport::where('mine_area_id', $mineArea->id)
-            ->when($request->has('type'), fn($q) => $q->where('report_type', $request->type))
-            ->when($request->has('status'), fn($q) => $q->where('status', $request->status))
+            ->when($request->has('type'), fn ($q) => $q->where('report_type', $request->type))
+            ->when($request->has('status'), fn ($q) => $q->where('status', $request->status))
             ->orderBy('report_date', 'desc')
             ->paginate($request->get('per_page', 15));
 
@@ -103,18 +102,18 @@ class ComplianceReportController extends Controller
         $format = $request->get('format', 'pdf');
 
         if ($format === 'csv') {
-            $csv = "Compliance Report - " . $report->report_type . "\n";
-            $csv .= "Generated: " . $report->created_at->format('Y-m-d H:i:s') . "\n\n";
-            $csv .= "Report Date," . $report->report_date . "\n";
-            $csv .= "Area," . $report->mineArea->name . "\n";
-            $csv .= "Type," . $report->report_type . "\n";
-            $csv .= "Status," . $report->status . "\n";
-            $csv .= "Compliance Score," . $report->compliance_score . "\n\n";
+            $csv = 'Compliance Report - '.$report->report_type."\n";
+            $csv .= 'Generated: '.$report->created_at->format('Y-m-d H:i:s')."\n\n";
+            $csv .= 'Report Date,'.$report->report_date."\n";
+            $csv .= 'Area,'.$report->mineArea->name."\n";
+            $csv .= 'Type,'.$report->report_type."\n";
+            $csv .= 'Status,'.$report->status."\n";
+            $csv .= 'Compliance Score,'.$report->compliance_score."\n\n";
 
             if ($report->issues) {
                 $csv .= "Issues\n";
                 foreach ($report->issues as $issue) {
-                    $csv .= "- " . $issue . "\n";
+                    $csv .= '- '.$issue."\n";
                 }
             }
 

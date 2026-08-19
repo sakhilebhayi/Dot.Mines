@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Role Model
- * 
+ *
  * Represents user roles within a team (Admin, Fleet Manager, Operator, Viewer)
  * Used for role-based access control throughout the application
  *
@@ -17,8 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $name
  * @property string $display_name
  * @property string|null $description
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Role where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Role whereIn(string $column, array $values)

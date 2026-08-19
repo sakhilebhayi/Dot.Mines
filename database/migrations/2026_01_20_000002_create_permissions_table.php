@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('group')->default('general'); // machines, geofences, reports, etc.
             $table->timestamps();
-            
+
             $table->index('team_id');
             $table->index('group');
             $table->unique(['team_id', 'name']);

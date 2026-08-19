@@ -10,7 +10,7 @@ class Sidebar extends Component
 
     public function toggleSidebar(): void
     {
-        $this->sidebarOpen = !$this->sidebarOpen;
+        $this->sidebarOpen = ! $this->sidebarOpen;
     }
 
     public function render()

@@ -38,7 +38,7 @@ return [
     'stripe' => [
         'secret' => env('STRIPE_SECRET'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
-        
+
         // Stripe Price IDs for subscription plans
         'basic_monthly_price_id' => env('STRIPE_BASIC_MONTHLY_PRICE_ID'),
         'basic_yearly_price_id' => env('STRIPE_BASIC_YEARLY_PRICE_ID'),

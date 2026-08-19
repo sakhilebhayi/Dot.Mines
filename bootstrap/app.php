@@ -1,13 +1,13 @@
 <?php
 
+use App\Http\Middleware\CacheControlHeaders;
+use App\Http\Middleware\EnforceDownloadRateLimit;
+use App\Http\Middleware\EnsureTeamContext;
+use App\Http\Middleware\ForceHttps;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\EnsureTeamContext;
-use App\Http\Middleware\SecurityHeaders;
-use App\Http\Middleware\ForceHttps;
-use App\Http\Middleware\CacheControlHeaders;
-use App\Http\Middleware\EnforceDownloadRateLimit;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_team' => EnsureTeamContext::class,
             'cache.headers' => CacheControlHeaders::class,
         ]);
-        
+
         // Force HTTPS, CSP and add security headers to all web requests
         $middleware->web(append: [
             ForceHttps::class,

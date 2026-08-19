@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\MineArea;
-use Illuminate\Pagination\Paginator;
 
 class MineAreaService
 {
@@ -35,8 +34,8 @@ class MineAreaService
     {
         $data['team_id'] = $teamId;
         // Ensure legacy columns expected by current schema are populated when possible
-        if (!array_key_exists('coordinates', $data)) {
-            if (!empty($data['metadata']['boundary_coordinates'] ?? null)) {
+        if (! array_key_exists('coordinates', $data)) {
+            if (! empty($data['metadata']['boundary_coordinates'] ?? null)) {
                 $data['coordinates'] = json_encode($data['metadata']['boundary_coordinates']);
             } else {
                 $data['coordinates'] = json_encode([]);
@@ -44,7 +43,7 @@ class MineAreaService
         }
 
         // Try to ensure center_latitude/center_longitude are populated to avoid DB NOT NULL issues.
-        if (!array_key_exists('center_latitude', $data) || !array_key_exists('center_longitude', $data)) {
+        if (! array_key_exists('center_latitude', $data) || ! array_key_exists('center_longitude', $data)) {
             $centerLat = null;
             $centerLng = null;
 
@@ -84,10 +83,10 @@ class MineAreaService
             }
 
             // Final fallback to 0.0 to satisfy non-null DB columns
-            if (!array_key_exists('center_latitude', $data)) {
+            if (! array_key_exists('center_latitude', $data)) {
                 $data['center_latitude'] = $centerLat !== null ? $centerLat : 0.0;
             }
-            if (!array_key_exists('center_longitude', $data)) {
+            if (! array_key_exists('center_longitude', $data)) {
                 $data['center_longitude'] = $centerLng !== null ? $centerLng : 0.0;
             }
         }
@@ -101,6 +100,7 @@ class MineAreaService
     public function update(MineArea $mineArea, array $data): MineArea
     {
         $mineArea->update($data);
+
         return $mineArea->fresh();
     }
 

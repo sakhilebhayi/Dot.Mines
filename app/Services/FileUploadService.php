@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
 class FileUploadService
 {
     protected array $allowedExtensions = [
-        'pdf','dwg','dxf','kml','kmz','shp','zip','gz','tar',
-        'png','jpg','jpeg','gif','tif','tiff',
+        'pdf', 'dwg', 'dxf', 'kml', 'kmz', 'shp', 'zip', 'gz', 'tar',
+        'png', 'jpg', 'jpeg', 'gif', 'tif', 'tiff',
     ];
 
     public function sanitizeFilename(string $originalName): string
@@ -23,7 +23,8 @@ class FileUploadService
         $safe = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $name);
         $safe = Str::limit($safe, 120, '');
         $hash = Str::random(8);
-        return $safe . '_' . $hash . '.' . strtolower($ext);
+
+        return $safe.'_'.$hash.'.'.strtolower($ext);
     }
 
     /**
@@ -63,11 +64,11 @@ class FileUploadService
         }
 
         // For archive types, inspect zip contents for dangerous file types
-        $suspicious = ['php','phtml','exe','sh','bat','pl','py','jar','com'];
+        $suspicious = ['php', 'phtml', 'exe', 'sh', 'bat', 'pl', 'py', 'jar', 'com'];
         if ($ext === 'zip' && class_exists(\ZipArchive::class)) {
             $real = $file->getRealPath();
             if ($real && file_exists($real)) {
-                $zip = new \ZipArchive();
+                $zip = new \ZipArchive;
                 if ($zip->open($real) === true) {
                     $totalUncompressed = 0;
                     $maxUncompressed = $this->maxUncompressedSize; // configurable cap for uncompressed contents
@@ -127,7 +128,7 @@ class FileUploadService
                                 $finfo = new \finfo(FILEINFO_MIME_TYPE);
                                 $mime = $finfo->buffer($probe);
                                 // If the declared extension is an image but MIME is text or php-like, reject
-                                $imageExts = ['png','jpg','jpeg','gif','tif','tiff'];
+                                $imageExts = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'tiff'];
                                 if (in_array($entryExt, $imageExts, true) && str_starts_with($mime, 'text/')) {
                                     $zip->close();
                                     throw new \Exception('Archive contains files with mismatched MIME types.');
@@ -184,7 +185,7 @@ class FileUploadService
         // Try UNIX domain socket first
         if (! empty($socketPath) && file_exists($socketPath)) {
             try {
-                $fp = @stream_socket_client('unix://' . $socketPath, $errno, $errstr, 5);
+                $fp = @stream_socket_client('unix://'.$socketPath, $errno, $errstr, 5);
                 if ($fp) {
                     $this->sendClamdInstream($fp, $real);
                     fclose($fp);
@@ -235,9 +236,8 @@ class FileUploadService
     /**
      * Send file data over an open clamd socket using the INSTREAM command.
      *
-     * @param resource $fp
-     * @param string $filePath
-     * @return void
+     * @param  resource  $fp
+     *
      * @throws \Exception
      */
     protected function sendClamdInstream($fp, string $filePath): void
@@ -257,7 +257,7 @@ class FileUploadService
                     break;
                 }
                 $len = pack('N', strlen($chunk));
-                fwrite($fp, $len . $chunk);
+                fwrite($fp, $len.$chunk);
             }
             // Send zero-length chunk to indicate EOF
             fwrite($fp, pack('N', 0));
@@ -273,14 +273,14 @@ class FileUploadService
 
             // clamd responds with something like: stream: OK or stream: <virus> FOUND
             if (stripos($response, 'FOUND') !== false || stripos($response, 'ERR') !== false) {
-                throw new \Exception('Virus scan failed: ' . trim($response));
+                throw new \Exception('Virus scan failed: '.trim($response));
             }
         } finally {
             fclose($handle);
         }
     }
 
-    public function storeMinePlan(UploadedFile $file, int $teamId, int $mineAreaId, string $disk = null): array
+    public function storeMinePlan(UploadedFile $file, int $teamId, int $mineAreaId, ?string $disk = null): array
     {
         $this->validateFile($file);
 
@@ -344,7 +344,7 @@ class FileUploadService
     {
         $paths = explode(PATH_SEPARATOR, getenv('PATH') ?: '');
         foreach ($paths as $p) {
-            $candidate = $p . DIRECTORY_SEPARATOR . $cmd;
+            $candidate = $p.DIRECTORY_SEPARATOR.$cmd;
             if (is_executable($candidate)) {
                 return true;
             }
@@ -352,13 +352,13 @@ class FileUploadService
             if (DIRECTORY_SEPARATOR !== '/') {
                 $exts = array_filter(array_map('strtolower', preg_split('/;/', getenv('PATHEXT') ?: '.EXE')));
                 foreach ($exts as $ext) {
-                    if (is_executable($candidate . $ext)) {
+                    if (is_executable($candidate.$ext)) {
                         return true;
                     }
                 }
             }
         }
+
         return false;
     }
 }
-

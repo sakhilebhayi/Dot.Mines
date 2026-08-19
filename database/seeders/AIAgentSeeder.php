@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\AIAgent;
+use Illuminate\Database\Seeder;
 
 class AIAgentSeeder extends Seeder
 {

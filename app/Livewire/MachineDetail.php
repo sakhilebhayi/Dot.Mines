@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Machine;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class MachineDetail extends Component
 {

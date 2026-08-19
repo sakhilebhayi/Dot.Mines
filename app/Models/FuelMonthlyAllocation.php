@@ -86,6 +86,7 @@ class FuelMonthlyAllocation extends Model
         if ($this->allocated_liters == 0) {
             return 0;
         }
+
         return round(($this->consumed_liters / $this->allocated_liters) * 100, 2);
     }
 
@@ -97,6 +98,7 @@ class FuelMonthlyAllocation extends Model
         if ($this->total_budget_zar == 0) {
             return 0;
         }
+
         return round(($this->spent_zar / $this->total_budget_zar) * 100, 2);
     }
 
@@ -124,21 +126,21 @@ class FuelMonthlyAllocation extends Model
         $this->consumed_liters = $this->transactions()
             ->where('transaction_type', 'dispensing')
             ->sum('quantity_liters');
-        
+
         $this->spent_zar = $this->transactions()
             ->where('transaction_type', 'dispensing')
             ->sum('total_cost');
-        
+
         $this->remaining_liters = max(0, $this->allocated_liters - $this->consumed_liters);
         $this->remaining_budget_zar = max(0, $this->total_budget_zar - $this->spent_zar);
-        
+
         // Update status
         if ($this->consumed_liters > $this->allocated_liters) {
             $this->status = 'exceeded';
         } elseif ($this->consumed_liters >= $this->allocated_liters * 0.95) {
             $this->status = 'active';
         }
-        
+
         $this->save();
     }
 }

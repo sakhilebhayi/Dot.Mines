@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MinePlan;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Str;
 
 class MinePlanDownloadController extends Controller
@@ -41,8 +41,8 @@ class MinePlanDownloadController extends Controller
         }
 
         // Optional model-level authorization: if a MinePlan model exists, verify ownership
-        if (class_exists(\App\Models\MinePlan::class)) {
-            $minePlan = \App\Models\MinePlan::find($minePlanId);
+        if (class_exists(MinePlan::class)) {
+            $minePlan = MinePlan::find($minePlanId);
             if (! $minePlan || $minePlan->team_id !== auth()->user()->current_team_id) {
                 abort(403);
             }
@@ -64,12 +64,13 @@ class MinePlanDownloadController extends Controller
 
         if ($disk === 's3') {
             $url = Storage::disk('s3')->temporaryUrl($normalized, now()->addMinutes(15));
+
             return redirect()->away($url);
         }
 
         return Storage::disk($disk)->download($normalized, $filename, array_merge($securityHeaders, [
             'Content-Type' => $mime,
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]));
     }
 }

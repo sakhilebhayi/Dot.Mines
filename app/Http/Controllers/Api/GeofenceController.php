@@ -8,7 +8,7 @@ use Illuminate\Http\Response;
 
 /**
  * Geofence API Controller
- * 
+ *
  * Handles pit/stockpile area management
  * CRUD operations and statistics
  */
@@ -16,7 +16,7 @@ class GeofenceController extends Controller
 {
     /**
      * List all geofences for current team
-     * 
+     *
      * GET /api/geofences
      */
     public function index(Request $request)
@@ -56,7 +56,7 @@ class GeofenceController extends Controller
 
     /**
      * Get a single geofence
-     * 
+     *
      * GET /api/geofences/{id}
      */
     public function show(Geofence $geofence)
@@ -79,7 +79,7 @@ class GeofenceController extends Controller
 
     /**
      * Create a new geofence
-     * 
+     *
      * POST /api/geofences
      */
     public function store(Request $request)
@@ -111,7 +111,7 @@ class GeofenceController extends Controller
 
     /**
      * Update a geofence
-     * 
+     *
      * PUT /api/geofences/{id}
      */
     public function update(Request $request, Geofence $geofence)
@@ -143,7 +143,7 @@ class GeofenceController extends Controller
 
     /**
      * Delete a geofence
-     * 
+     *
      * DELETE /api/geofences/{id}
      */
     public function destroy(Geofence $geofence)
@@ -159,7 +159,7 @@ class GeofenceController extends Controller
 
     /**
      * Get entry/exit records for a geofence
-     * 
+     *
      * GET /api/geofences/{id}/entries
      */
     public function entries(Request $request, Geofence $geofence)
@@ -190,7 +190,7 @@ class GeofenceController extends Controller
 
     /**
      * Get tonnage statistics for date range
-     * 
+     *
      * GET /api/geofences/{id}/tonnage-stats
      */
     public function tonnageStats(Request $request, Geofence $geofence)
@@ -232,7 +232,7 @@ class GeofenceController extends Controller
 
     /**
      * Get machines currently in geofence
-     * 
+     *
      * GET /api/geofences/{id}/active-machines
      */
     public function activeMachines(Geofence $geofence)

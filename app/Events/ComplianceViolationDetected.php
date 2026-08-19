@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -14,6 +13,7 @@ class ComplianceViolationDetected implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $violation;
+
     public $teamId;
 
     public function __construct($violation, $teamId)

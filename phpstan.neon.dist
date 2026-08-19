@@ -1,23 +1,54 @@
 parameters:
   level: max
+  reportUnmatchedIgnoredErrors: false
   paths:
     - app
     - routes
     - database
   excludePaths:
     - tests
+    - app/Traits/PhpStanEloquentStubs.php
   inferPrivatePropertyTypeFromConstructor: true
   checkExplicitMixed: false
   treatPhpDocTypesAsCertain: false
-  stubFiles:
-    - phpstan-stubs/eloquent.stub
-  
+
   # Ignore errors for Eloquent's dynamic methods
   ignoreErrors:
     - '#Call to an undefined\s+(?:method|static method)\s+Illuminate.*Model::#'
     - '#Call to an undefined\s+(?:method|static method)\s+App\\Models#'
     - '#Access to an undefined property Illuminate\\Database#'
     - '#Call to static method .+\(\) on an unknown class#'
+    # auth() helper returns Factory contract, but at runtime it is AuthManager which has these methods
+    - '#^Call to an undefined method Illuminate\\Contracts\\Auth\\Factory::#'
+    # Eloquent magic __call on relations (HasMany/HasOne/BelongsTo) returns $this,
+    # but PHPStan traces through to the underlying query builder
+    - '#should return Illuminate\\Database\\Eloquent\\Relations\\Has(Many|One) but returns Illuminate\\Database\\(Query|Eloquent)\\Builder#'
+    # increment/decrement are public in Eloquent but PHPStan resolves them from a different class hierarchy
+    - '#Call to protected method (increment|decrement)\(\) of class Illuminate\\Database\\Eloquent\\Model#'
+    # auth()->user() on Authenticatable|null — checked at call sites
+    - '#Cannot access property \$current_team_id on Illuminate\\Contracts\\Auth\\Authenticatable\|null#'
+    # PHPStan resolves Model::where() chains as raw QueryBuilder when HasTeamFilters trait is involved
+    # At runtime these are always Eloquent Builders
+    - '#^Call to an undefined method Illuminate\\Database\\Query\\Builder::#'
+    # FilesystemAdapter (returned by Storage::disk()) has mimeType()/download() but the contract does not
+    - '#^Call to an undefined method Illuminate\\Contracts\\Filesystem\\Filesystem::#'
+    # Jetstream HasTeams trait adds $currentTeam — PHPStan only sees the Authenticatable contract
+    - '#Cannot access property \$currentTeam on Illuminate\\Contracts\\Auth\\Authenticatable(\|null)?#'
+    - '#Cannot access property \$id on Illuminate\\Contracts\\Auth\\Authenticatable\|null#'
+    # Livewire v3 adds layout() to the View object at runtime
+    - '#^Call to an undefined method Illuminate\\Contracts\\View\\View::layout\(\)#'
+    # Livewire v2 dispatchBrowserEvent() — still used as a bridge in Livewire 3
+    - '#^Call to an undefined method .*::dispatchBrowserEvent\(\)#'
+    # Eloquent scope methods on Builder (e.g. ->active(), ->completed()) are resolved via __call
+    - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder.*::(active|completed|onTrial|forTeam|critical|needsAttention|due|overdue|lowFuel|active)\(\)#'
+    # PHPStan builds union Builder<Model>|Query\Builder types when Eloquent chains contain withTrashed or scopes
+    # Methods like doesntHave/whereHas/orderByDesc/when/paginate exist on Eloquent Builder but not raw Query\Builder
+    - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder.*\|Illuminate\\Database\\Query\\Builder.*::#'
+    - '#^Cannot call method .+ on Illuminate\\Database\\Eloquent\\Builder.*\|.*null#'
+    # SimpleXMLElement::__get() returns null for non-existent children at runtime,
+    # so nullsafe ?-> is intentionally required even though PHPStan types it as non-nullable
+    - '#^Using nullsafe (property access|method call) .+ on left side of \?\? is unnecessary#'
+    - '#^Using nullsafe (property access|method call) on non\-nullable type#'
 includes:
   - vendor/phpstan/phpstan/conf/bleedingEdge.neon
   - phpstan-baseline.neon

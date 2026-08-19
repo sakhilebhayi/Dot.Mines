@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
 use Illuminate\Support\Collection;
 
 /**
  * AuthorizationService
- * 
+ *
  * Service for handling role and permission logic
  * Provides convenience methods for authorization checks
  */
@@ -19,13 +19,13 @@ class AuthorizationService
      */
     public static function can($user, $permission, $teamId = null): bool
     {
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         $teamId = $teamId ?? $user->current_team_id;
 
-        if (!$teamId) {
+        if (! $teamId) {
             return false;
         }
 
@@ -44,7 +44,7 @@ class AuthorizationService
     {
         if (is_string($role)) {
             $role = Role::where('name', $role)
-                ->when($teamId, fn($q) => $q->where('team_id', $teamId))
+                ->when($teamId, fn ($q) => $q->where('team_id', $teamId))
                 ->first();
         }
 
@@ -137,7 +137,7 @@ class AuthorizationService
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
@@ -157,7 +157,7 @@ class AuthorizationService
                 ->first();
         }
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 

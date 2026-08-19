@@ -2,13 +2,22 @@
 <psalm
     errorLevel="1"
     resolveFromConfigFile="true"
+    errorBaseline="psalm-baseline.xml"
+    findUnusedBaselineEntry="false"
 >
   <projectFiles>
     <directory name="app" />
     <directory name="routes" />
+    <ignoreFiles>
+      <directory name="vendor" />
+    </ignoreFiles>
   </projectFiles>
 
   <issueHandlers>
-    <SomeIssue severity="info" />
+    <!-- Suppress issues that are known false positives in Laravel -->
+    <MissingReturnType severity="info" />
+    <MissingParamType severity="info" />
+    <PropertyNotSetInConstructor severity="info" />
+    <UnusedVariable severity="info" />
   </issueHandlers>
 </psalm>

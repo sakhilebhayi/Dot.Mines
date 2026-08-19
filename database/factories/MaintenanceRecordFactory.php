@@ -4,13 +4,12 @@ namespace Database\Factories;
 
 use App\Models\Machine;
 use App\Models\MaintenanceRecord;
-use App\Models\MaintenanceSchedule;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MaintenanceRecord>
+ * @extends Factory<MaintenanceRecord>
  */
 class MaintenanceRecordFactory extends Factory
 {
@@ -20,7 +19,7 @@ class MaintenanceRecordFactory extends Factory
     {
         $scheduledDate = $this->faker->dateTimeBetween('-30 days', '+30 days');
         $status = $this->faker->randomElement(['scheduled', 'in_progress', 'completed', 'cancelled']);
-        
+
         return [
             'team_id' => Team::factory(),
             'machine_id' => Machine::factory(),
@@ -40,12 +39,12 @@ class MaintenanceRecordFactory extends Factory
             'labor_cost' => $status === 'completed' ? $this->faker->randomFloat(2, 500, 5000) : null,
             'parts_cost' => $status === 'completed' ? $this->faker->randomFloat(2, 0, 10000) : null,
             'total_cost' => function (array $attributes) {
-                return $attributes['status'] === 'completed' 
+                return $attributes['status'] === 'completed'
                     ? ($attributes['labor_cost'] ?? 0) + ($attributes['parts_cost'] ?? 0)
                     : null;
             },
             'parts_used' => $status === 'completed' ? [
-                ['part_number' => $this->faker->bothify('PART-####'), 'quantity' => $this->faker->numberBetween(1, 10), 'cost' => $this->faker->randomFloat(2, 50, 1000)]
+                ['part_number' => $this->faker->bothify('PART-####'), 'quantity' => $this->faker->numberBetween(1, 10), 'cost' => $this->faker->randomFloat(2, 50, 1000)],
             ] : null,
             'fault_codes_cleared' => $this->faker->optional()->randomElements(['P0301', 'P0420', 'P0171'], 2),
             'odometer_reading' => $this->faker->optional()->randomFloat(2, 10000, 100000),
@@ -61,7 +60,7 @@ class MaintenanceRecordFactory extends Factory
             $scheduledDate = $this->faker->dateTimeBetween('-30 days', '-1 day');
             $startedAt = $this->faker->dateTimeBetween($scheduledDate, 'now');
             $completedAt = $this->faker->dateTimeBetween($startedAt, 'now');
-            
+
             return [
                 'scheduled_date' => $scheduledDate,
                 'status' => 'completed',
