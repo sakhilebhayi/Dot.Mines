@@ -2,10 +2,14 @@
 <psalm
     errorLevel="1"
     resolveFromConfigFile="true"
+    errorBaseline="psalm-baseline.xml"
 >
   <projectFiles>
     <directory name="app" />
     <directory name="routes" />
+    <ignoreFiles>
+      <directory name="vendor" />
+    </ignoreFiles>
   </projectFiles>
 
   <issueHandlers>

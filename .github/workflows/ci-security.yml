@@ -1,0 +1,189 @@
+name: CI - Security & Static Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  tests:
+    name: PHPUnit test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, sqlite3, bcmath, gd, zip, mbstring, intl, pcntl
+          coverage: none
+
+      - name: Install composer deps
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Node dependencies & build assets
+        run: |
+          npm ci --silent
+          npm run build
+
+      - name: Run tests
+        run: php artisan test --compact
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          QUEUE_CONNECTION: sync
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          BROADCAST_DRIVER: log
+          MAIL_MAILER: array
+          FILESYSTEM_DISK: local
+
+  validate-composer:
+    name: Composer validate & lock sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - name: Composer validate
+        run: composer validate --no-interaction --strict
+
+      - name: Ensure composer.lock in sync
+        run: |
+          composer update --lock --no-interaction
+          if ! git diff --quiet composer.lock; then
+            echo "composer.lock is out of date with composer.json. Run 'composer update --lock' and commit the result." >&2
+            git --no-pager diff -- composer.lock || true
+            exit 1
+          fi
+
+  composer-audit:
+    name: Composer audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - name: Install composer deps
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run composer audit
+        run: composer audit --format=plain
+
+  npm-audit:
+    name: NPM audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run gitleaks
+        uses: zricethezav/gitleaks-action@v1
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  semgrep:
+    name: Semgrep security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: 'p/ci'
+
+  static-php:
+    name: PHP static checks (phpstan/psalm)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - name: Install composer deps
+        run: composer install --no-interaction --no-progress --prefer-dist
+        env:
+          APP_ENV: testing
+          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --no-progress --memory-limit=1G
+
+      - name: Run Psalm
+        run: vendor/bin/psalm --show-info=false --no-cache
+
+  code-style:
+    name: Laravel Pint code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, mbstring
+          coverage: none
+      - name: Install composer deps
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Run Pint (fail on style violations)
+        run: vendor/bin/pint --test
+
+  quality-gate:
+    name: Quality Gate (all checks must pass)
+    runs-on: ubuntu-latest
+    needs: [tests, validate-composer, composer-audit, npm-audit, static-php, code-style]
+    if: always()
+    steps:
+      - name: Evaluate quality gate
+        run: |
+          declare -A results
+          results[tests]="${{ needs.tests.result }}"
+          results[validate-composer]="${{ needs.validate-composer.result }}"
+          results[composer-audit]="${{ needs.composer-audit.result }}"
+          results[npm-audit]="${{ needs.npm-audit.result }}"
+          results[static-php]="${{ needs.static-php.result }}"
+          results[code-style]="${{ needs.code-style.result }}"
+          failed=0
+          for job in "${!results[@]}"; do
+            if [ "${results[$job]}" != "success" ]; then
+              echo "FAILED: $job → ${results[$job]}"
+              failed=1
+            else
+              echo "PASSED: $job"
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            echo ""
+            echo "Quality gate failed — one or more required checks did not pass."
+            exit 1
+          fi
+          echo ""
+          echo "All quality gates passed."
