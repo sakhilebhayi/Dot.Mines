@@ -15,10 +15,6 @@
         .leaflet-container {
             background: #1f2937 !important;
         }
-
-        .mine-area-search-input {
-            @apply w-full px-4 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] placeholder-[var(--sand)]/60 focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)] outline-none;
-        }
     </style>
 
     <!-- Header -->
@@ -99,13 +95,13 @@
                                     type="text"
                                     wire:model.live="search"
                                     placeholder="Search mine areas..."
-                                    class="mine-area-search-input"
+                                    class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] placeholder-[var(--sand)]/60 focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                                 >
                             </div>
                             <div>
                                 <select 
                                     wire:model.live="statusFilter"
-                                    class="mine-area-search-input animated input-animate"
+                                    class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                                 >
                                     <option value="">All Statuses</option>
                                     <option value="active">Active</option>

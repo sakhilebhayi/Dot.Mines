@@ -3367,15 +3367,12 @@
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
-      <code><![CDATA[$this->notifications]]></code>
-      <code><![CDATA[$this->unreadCount]]></code>
       <code><![CDATA[$user]]></code>
     </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[concat]]></code>
       <code><![CDATA[concat]]></code>
       <code><![CDATA[concat]]></code>
-      <code><![CDATA[count]]></code>
       <code><![CDATA[each]]></code>
       <code><![CDATA[filter]]></code>
       <code><![CDATA[filter]]></code>
@@ -3394,14 +3391,12 @@
       <code><![CDATA[map]]></code>
       <code><![CDATA[map]]></code>
       <code><![CDATA[sortByDesc]]></code>
-      <code><![CDATA[take]]></code>
       <code><![CDATA[toBase]]></code>
       <code><![CDATA[toBase]]></code>
       <code><![CDATA[toBase]]></code>
       <code><![CDATA[update]]></code>
       <code><![CDATA[update]]></code>
       <code><![CDATA[update]]></code>
-      <code><![CDATA[values]]></code>
       <code><![CDATA[wantsInAppAlert]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
@@ -3432,6 +3427,7 @@
       <code><![CDATA[togglePanel]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedProperty>
+      <code><![CDATA[$notifications]]></code>
       <code><![CDATA[$unreadCount]]></code>
     </PossiblyUnusedProperty>
     <RedundantConditionGivenDocblockType>
