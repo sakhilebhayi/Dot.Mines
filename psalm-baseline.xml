@@ -695,12 +695,6 @@
     <MissingOverrideAttribute>
       <code><![CDATA[public function broadcastOn(): array]]></code>
     </MissingOverrideAttribute>
-    <MixedAssignment>
-      <code><![CDATA[$machine]]></code>
-    </MixedAssignment>
-    <MixedPropertyFetch>
-      <code><![CDATA[$machine->name]]></code>
-    </MixedPropertyFetch>
     <PossiblyNullOperand>
       <code><![CDATA[$this->alert->machine_id]]></code>
     </PossiblyNullOperand>
@@ -709,7 +703,6 @@
       <code><![CDATA[broadcastWith]]></code>
     </PossiblyUnusedMethod>
     <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$this->alert->machine]]></code>
       <code><![CDATA[$this->alert->message]]></code>
     </UndefinedMagicPropertyFetch>
   </file>
@@ -2858,7 +2851,6 @@
     </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[first]]></code>
-      <code><![CDATA[integrations]]></code>
       <code><![CDATA[where]]></code>
     </MixedMethodCall>
     <MixedPropertyFetch>
@@ -2867,6 +2859,9 @@
     <PossiblyNullArgument>
       <code><![CDATA[$this->machine->manufacturer_id]]></code>
     </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code><![CDATA[integrations]]></code>
+    </PossiblyNullReference>
     <PossiblyUnusedMethod>
       <code><![CDATA[handle]]></code>
     </PossiblyUnusedMethod>
@@ -2875,9 +2870,6 @@
       <code><![CDATA[$timeout]]></code>
       <code><![CDATA[$tries]]></code>
     </PossiblyUnusedProperty>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$this->machine->team]]></code>
-    </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Listeners/NotifyOnJobFailed.php">
     <ClassMustBeFinal>
@@ -3132,8 +3124,6 @@
       <code><![CDATA[$a->fuelTank?->name]]></code>
       <code><![CDATA[$a->machine?->name]]></code>
       <code><![CDATA[$a->machine?->name]]></code>
-      <code><![CDATA[$a->machine?->name]]></code>
-      <code><![CDATA[$a->mineArea?->name]]></code>
       <code><![CDATA[$team->id]]></code>
       <code><![CDATA[$team->id]]></code>
       <code><![CDATA[$team->id]]></code>
@@ -3197,7 +3187,6 @@
       <code><![CDATA[$a->fuelTank]]></code>
       <code><![CDATA[$a->id]]></code>
       <code><![CDATA[$a->machine]]></code>
-      <code><![CDATA[$a->mineArea]]></code>
       <code><![CDATA[$a->severity]]></code>
       <code><![CDATA[$a->title]]></code>
     </UndefinedMagicPropertyFetch>
@@ -7154,9 +7143,6 @@
       <code><![CDATA[scopeActive]]></code>
       <code><![CDATA[scopeCritical]]></code>
     </MissingReturnType>
-    <MissingTemplateParam>
-      <code><![CDATA[HasFactory]]></code>
-    </MissingTemplateParam>
     <MixedMethodCall>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
@@ -7898,7 +7884,7 @@
       <code><![CDATA[$this->alerts()->where('status', 'active')]]></code>
     </InvalidReturnStatement>
     <InvalidReturnType>
-      <code><![CDATA[Builder]]></code>
+      <code><![CDATA[Builder<Alert>]]></code>
     </InvalidReturnType>
     <LessSpecificImplementedReturnType>
       <code><![CDATA[\Illuminate\Database\Eloquent\Collection<int,Machine>]]></code>
@@ -7912,9 +7898,6 @@
     <MissingOverrideAttribute>
       <code><![CDATA[protected static function booted(): void]]></code>
     </MissingOverrideAttribute>
-    <MissingTemplateParam>
-      <code><![CDATA[HasFactory]]></code>
-    </MissingTemplateParam>
     <MixedMethodCall>
       <code><![CDATA[ofMany]]></code>
       <code><![CDATA[whereNotNull]]></code>
@@ -8923,7 +8906,6 @@
     </MixedReturnStatement>
     <PossiblyUnusedMethod>
       <code><![CDATA[alerts]]></code>
-      <code><![CDATA[integrations]]></code>
       <code><![CDATA[permissions]]></code>
       <code><![CDATA[roles]]></code>
     </PossiblyUnusedMethod>
@@ -10006,9 +9988,6 @@
     </MixedOperand>
     <MixedPropertyFetch>
       <code><![CDATA[$lastMaintenance->completed_at]]></code>
-      <code><![CDATA[$machine->healthStatus->overall_health_score]]></code>
-      <code><![CDATA[$machine->healthStatus?->overall_health_score]]></code>
-      <code><![CDATA[$machine->healthStatus?->overall_health_score]]></code>
       <code><![CDATA[$machine->maintenanceRecords->sortByDesc('completed_at')->first()?->completed_at]]></code>
     </MixedPropertyFetch>
     <MixedReturnStatement>
@@ -10024,6 +10003,9 @@
       <code><![CDATA[now()->year]]></code>
       <code><![CDATA[now()->year]]></code>
     </NoInterfaceProperties>
+    <PossiblyNullPropertyFetch>
+      <code><![CDATA[$machine->healthStatus->overall_health_score]]></code>
+    </PossiblyNullPropertyFetch>
     <PossiblyUnusedParam>
       <code><![CDATA[$machine]]></code>
       <code><![CDATA[$machine]]></code>
@@ -10065,7 +10047,8 @@
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$agent->id]]></code>
       <code><![CDATA[$lastMaintenance->completed_at]]></code>
-      <code><![CDATA[$machine->healthStatus]]></code>
+      <code><![CDATA[$machine->healthStatus->overall_health_score]]></code>
+      <code><![CDATA[$machine->healthStatus?->overall_health_score]]></code>
       <code><![CDATA[$machine->id]]></code>
       <code><![CDATA[$machine->id]]></code>
       <code><![CDATA[$machine->id]]></code>
@@ -11384,10 +11367,6 @@
             ];
         })]]></code>
     </MixedReturnStatement>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[$locations]]></code>
-      <code><![CDATA[list<array<string, mixed>>]]></code>
-    </MixedReturnTypeCoercion>
     <PossiblyInvalidCast>
       <code><![CDATA[$timezone]]></code>
       <code><![CDATA[$timezone]]></code>

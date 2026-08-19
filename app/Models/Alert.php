@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\AlertFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,9 +30,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon|null $resolved_at
  * @property int|null $acknowledged_by
  * @property int|null $resolved_by
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read Machine|null $machine
+ * @property-read MineArea|null $mineArea
+ * @property-read Team|null $team
+ * @property-read User|null $acknowledgedBy
+ * @property-read User|null $resolvedBy
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Alert where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Alert whereIn(string $column, array $values)
@@ -42,6 +48,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Alert extends Model
 {
+    /** @use HasFactory<AlertFactory> */
     use HasFactory, HasTeamFilters;
 
     /**

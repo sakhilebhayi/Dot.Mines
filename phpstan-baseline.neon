@@ -156,41 +156,6 @@ parameters:
 			path: app/Console/Kernel.php
 
 		-
-			message: "#^Method App\\\\Contracts\\\\ManufacturerServiceInterface\\:\\:fetchMachineAlerts\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Contracts/ManufacturerServiceInterface.php
-
-		-
-			message: "#^Method App\\\\Contracts\\\\ManufacturerServiceInterface\\:\\:fetchMachineData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Contracts/ManufacturerServiceInterface.php
-
-		-
-			message: "#^Method App\\\\Contracts\\\\ManufacturerServiceInterface\\:\\:fetchMachineDetails\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Contracts/ManufacturerServiceInterface.php
-
-		-
-			message: "#^Method App\\\\Contracts\\\\ManufacturerServiceInterface\\:\\:fetchMachineLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Contracts/ManufacturerServiceInterface.php
-
-		-
-			message: "#^Method App\\\\Contracts\\\\ManufacturerServiceInterface\\:\\:fetchMachineMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Contracts/ManufacturerServiceInterface.php
-
-		-
-			message: "#^Method App\\\\Contracts\\\\ManufacturerServiceInterface\\:\\:fetchMachines\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Contracts/ManufacturerServiceInterface.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Alert\\:\\:\\$machine\\.$#"
-			count: 1
-			path: app/Events/AlertTriggered.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\Alert\\:\\:\\$message\\.$#"
 			count: 1
 			path: app/Events/AlertTriggered.php
@@ -1316,7 +1281,7 @@ parameters:
 			path: app/Jobs/SyncIntegrationMachinesJob.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Machine\\:\\:\\$team\\.$#"
+			message: "#^Cannot call method integrations\\(\\) on App\\\\Models\\\\Team\\|null\\.$#"
 			count: 1
 			path: app/Jobs/SyncMachineMetricsJob.php
 
@@ -1377,11 +1342,6 @@ parameters:
 
 		-
 			message: "#^Access to an undefined property App\\\\Models\\\\AIPredictiveAlert\\:\\:\\$title\\.$#"
-			count: 1
-			path: app/Livewire/AINotifications.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Alert\\:\\:\\$mineArea\\.$#"
 			count: 1
 			path: app/Livewire/AINotifications.php
 
@@ -4036,16 +3996,6 @@ parameters:
 			path: app/Models/Alert.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Alert has PHPDoc tag @property for property \\$metadata with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
-			message: "#^Class App\\\\Models\\\\Alert uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/Alert.php
-
-		-
 			message: "#^Method App\\\\Models\\\\Alert\\:\\:acknowledge\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Models/Alert.php
@@ -5381,12 +5331,7 @@ parameters:
 			path: app/Models/IoTSensor.php
 
 		-
-			message: "#^Class App\\\\Models\\\\Machine uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
-			count: 1
-			path: app/Models/Machine.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:activeAlerts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#"
+			message: "#^Method App\\\\Models\\\\Machine\\:\\:activeAlerts\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<App\\\\Models\\\\Alert\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\.$#"
 			count: 1
 			path: app/Models/Machine.php
 
@@ -7841,8 +7786,13 @@ parameters:
 			path: app/Services/AI/FuelPredictorAgent.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Machine\\:\\:\\$healthStatus\\.$#"
-			count: 2
+			message: "#^Access to an undefined property App\\\\Models\\\\MachineHealthStatus\\:\\:\\$overall_health_score\\.$#"
+			count: 1
+			path: app/Services/AI/MaintenancePredictorAgent.php
+
+		-
+			message: "#^Cannot access property \\$overall_health_score on App\\\\Models\\\\MachineHealthStatus\\|null\\.$#"
+			count: 1
 			path: app/Services/AI/MaintenancePredictorAgent.php
 
 		-
