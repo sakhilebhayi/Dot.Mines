@@ -113,16 +113,97 @@ class ProductionDashboardPageTest extends TestCase
 
         // productionRecords is a computed property, not rendered by the
         // Blade view -- assert against the component's data directly rather
-        // than the HTML output.
+        // than the HTML output. The table follows the same startDate/endDate
+        // range as the KPIs and charts (single source of truth).
         $ids = Livewire::actingAs($user)
             ->test(ProductionDashboard::class)
-            ->set('dateFilter', 'month')
+            ->set('startDate', Carbon::today()->subDays(15)->format('Y-m-d'))
+            ->set('endDate', Carbon::today()->format('Y-m-d'))
             ->instance()
             ->productionRecords
             ->pluck('id');
 
         $this->assertTrue($ids->contains($recent->id));
         $this->assertFalse($ids->contains($stale->id));
+    }
+
+    public function test_quick_period_toggles_sync_the_visible_date_pickers(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        $component = Livewire::actingAs($user)->test(ProductionDashboard::class);
+
+        $component->call('setPeriod', 'day')
+            ->assertSet('dateFilter', 'day')
+            ->assertSet('startDate', Carbon::today()->format('Y-m-d'))
+            ->assertSet('endDate', Carbon::today()->format('Y-m-d'));
+
+        $component->call('setPeriod', 'week')
+            ->assertSet('startDate', Carbon::today()->startOfWeek()->format('Y-m-d'))
+            ->assertSet('endDate', Carbon::today()->format('Y-m-d'));
+
+        $component->call('setPeriod', 'year')
+            ->assertSet('startDate', Carbon::today()->startOfYear()->format('Y-m-d'));
+    }
+
+    public function test_manual_picker_edit_switches_to_custom_and_clamps_inverted_ranges(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        $component = Livewire::actingAs($user)
+            ->test(ProductionDashboard::class)
+            ->call('setPeriod', 'month')
+            ->set('startDate', Carbon::today()->subDays(3)->format('Y-m-d'));
+
+        // Editing a picker leaves the quick period: the page is now Custom.
+        $component->assertSet('dateFilter', 'custom')
+            ->assertSee('Custom');
+
+        // An end date before the start date is clamped to keep the range valid.
+        $component->set('endDate', Carbon::today()->subDays(9)->format('Y-m-d'))
+            ->assertSet('endDate', Carbon::today()->subDays(3)->format('Y-m-d'));
+    }
+
+    public function test_kpis_and_chart_respect_the_selected_period(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        ProductionRecord::create([
+            'team_id' => $team->id,
+            'record_date' => Carbon::today(),
+            'shift' => 'day',
+            'quantity_produced' => 111,
+            'unit' => 'tonnes',
+            'status' => 'completed',
+        ]);
+        ProductionRecord::create([
+            'team_id' => $team->id,
+            'record_date' => Carbon::today()->subMonths(2),
+            'shift' => 'day',
+            'quantity_produced' => 999,
+            'unit' => 'tonnes',
+            'status' => 'completed',
+        ]);
+
+        // KPI tiles were previously pinned to a fixed last-30-days window;
+        // now Today shows only today's tonnage, and the daily chart carries
+        // only today's data point.
+        $component = Livewire::actingAs($user)
+            ->test(ProductionDashboard::class)
+            ->call('setPeriod', 'day');
+
+        $summary = $component->instance()->summary;
+        $this->assertEqualsWithDelta(111.0, $summary['total_tonnage'], 0.01);
+
+        $chart = array_values($component->instance()->dailyChart);
+        $this->assertCount(1, $chart);
+        $this->assertSame(Carbon::today()->format('Y-m-d'), $chart[0]['date']);
     }
 
     public function test_fatigue_section_shows_real_operator_fatigue_rows_bucketed_by_canonical_alert_level(): void

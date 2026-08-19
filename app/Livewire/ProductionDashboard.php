@@ -73,8 +73,60 @@ class ProductionDashboard extends Component
         $this->team = Auth::user()->currentTeam;
         $this->teamId = $this->team?->id ?? 0;
         $this->record_date = Carbon::today()->format('Y-m-d');
+        // Default period is "Month": start of the current calendar month
+        // through today, matching what the Month quick-toggle produces.
         $this->endDate = Carbon::today()->format('Y-m-d');
-        $this->startDate = Carbon::today()->subMonth()->format('Y-m-d');
+        $this->startDate = Carbon::today()->startOfMonth()->format('Y-m-d');
+    }
+
+    /**
+     * Quick period toggle. Sets BOTH the active period label and the visible
+     * date pickers, so the pickers always show the range actually queried:
+     * day = today only; week/month/year = start of the current calendar
+     * period (ISO week, Monday) through today.
+     */
+    public function setPeriod(string $period): void
+    {
+        if (! in_array($period, ['day', 'week', 'month', 'year'], true)) {
+            return;
+        }
+
+        $this->dateFilter = $period;
+        $this->endDate = Carbon::today()->format('Y-m-d');
+        $this->startDate = (match ($period) {
+            'day' => Carbon::today(),
+            'week' => Carbon::today()->startOfWeek(),
+            'month' => Carbon::today()->startOfMonth(),
+            'year' => Carbon::today()->startOfYear(),
+        })->format('Y-m-d');
+
+        $this->resetPage();
+    }
+
+    /**
+     * Manually editing either picker means the user is no longer on a quick
+     * period -- mark the range as Custom so the previous toggle does not
+     * stay highlighted for a range it no longer describes.
+     */
+    public function updatedStartDate(): void
+    {
+        $this->markCustomRange();
+    }
+
+    public function updatedEndDate(): void
+    {
+        $this->markCustomRange();
+    }
+
+    private function markCustomRange(): void
+    {
+        // Keep the range valid: an end before the start is clamped.
+        if ($this->startDate && $this->endDate && $this->startDate > $this->endDate) {
+            $this->endDate = $this->startDate;
+        }
+
+        $this->dateFilter = 'custom';
+        $this->resetPage();
     }
 
     /**
@@ -108,18 +160,13 @@ class ProductionDashboard extends Component
             $query->where('status', $this->statusFilter);
         }
 
-        if ($this->dateFilter) {
-            $start = match ($this->dateFilter) {
-                'day' => Carbon::today(),
-                'week' => Carbon::today()->subWeek(),
-                'month' => Carbon::today()->subMonth(),
-                'year' => Carbon::today()->subYear(),
-                default => null,
-            };
-
-            if ($start) {
-                $query->where('record_date', '>=', $start->format('Y-m-d'));
-            }
+        // Single source of truth: the records table follows the same
+        // startDate/endDate range as every KPI and chart on the page. The
+        // quick toggles used to drive a separate rolling-window filter here
+        // while the pickers drove the charts -- two different answers on
+        // one screen.
+        if ($this->startDate && $this->endDate) {
+            $query->betweenDates(Carbon::parse($this->startDate), Carbon::parse($this->endDate));
         }
 
         return $query->orderByDesc('record_date')->paginate(15);
@@ -127,16 +174,24 @@ class ProductionDashboard extends Component
 
     public function getStatisticsProperty()
     {
+        // KPI tiles used to be pinned to a fixed last-30-days window no
+        // matter what period the user selected.
         return $this->productionService()->getProductionStatistics(
             $this->teamId,
-            Carbon::now()->subDays(30),
-            Carbon::now()
+            Carbon::parse($this->startDate ?? Carbon::today()->startOfMonth()->format('Y-m-d')),
+            Carbon::parse($this->endDate ?? Carbon::today()->format('Y-m-d'))->endOfDay()
         );
     }
 
     public function getTrendProperty()
     {
-        return $this->productionService()->getProductionTrend($this->teamId, 30);
+        // The daily chart follows the selected range too (was fixed 30 days).
+        return $this->productionService()->getProductionTrend(
+            $this->teamId,
+            30,
+            $this->startDate ? Carbon::parse($this->startDate) : null,
+            $this->endDate ? Carbon::parse($this->endDate) : null,
+        );
     }
 
     public function getTargetsProperty()

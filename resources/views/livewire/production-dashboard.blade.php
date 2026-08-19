@@ -15,23 +15,29 @@
 
             <!-- Date Filters -->
             <div class="flex flex-wrap gap-2 items-end">
-                <div class="flex gap-2">
-                    <button wire:click="$set('dateFilter', 'day')" 
+                <div class="flex gap-2 items-center">
+                    <button wire:click="setPeriod('day')"
                         class="px-4 py-2 rounded-lg transition-all {{ $dateFilter === 'day' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-[var(--ink-soft)] text-[var(--sand)] hover:bg-white/10' }}">
                         Today
                     </button>
-                    <button wire:click="$set('dateFilter', 'week')" 
+                    <button wire:click="setPeriod('week')"
                         class="px-4 py-2 rounded-lg transition-all {{ $dateFilter === 'week' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-[var(--ink-soft)] text-[var(--sand)] hover:bg-white/10' }}">
                         Week
                     </button>
-                    <button wire:click="$set('dateFilter', 'month')" 
+                    <button wire:click="setPeriod('month')"
                         class="px-4 py-2 rounded-lg transition-all {{ $dateFilter === 'month' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-[var(--ink-soft)] text-[var(--sand)] hover:bg-white/10' }}">
                         Month
                     </button>
-                    <button wire:click="$set('dateFilter', 'year')" 
+                    <button wire:click="setPeriod('year')"
                         class="px-4 py-2 rounded-lg transition-all {{ $dateFilter === 'year' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-[var(--ink-soft)] text-[var(--sand)] hover:bg-white/10' }}">
                         Year
                     </button>
+                    @if ($dateFilter === 'custom')
+                        {{-- Manual picker edits put the page on a user-chosen
+                             range; make that explicit instead of leaving a
+                             stale quick-toggle highlighted. --}}
+                        <span class="px-4 py-2 rounded-lg bg-[var(--gold)] text-[var(--ink)] font-medium">Custom</span>
+                    @endif
                 </div>
 
                 <!-- Custom Date Range Picker -->
