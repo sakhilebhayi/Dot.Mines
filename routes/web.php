@@ -233,6 +233,32 @@ Route::get('/up/realtime', [RealtimeHealthController::class, 'check'])
 Route::get('/health', HealthController::class)->name('health');
 Route::get('/ready', [HealthController::class, 'ready'])->name('health.ready');
 
+// XML sitemap: public marketing/legal pages ONLY -- authenticated app
+// routes must never appear here (they are noindex'd and robots-blocked).
+Route::get('/sitemap.xml', function () {
+    $publicRoutes = [
+        ['loc' => route('welcome'), 'priority' => '1.0'],
+        ['loc' => route('features'), 'priority' => '0.8'],
+        ['loc' => route('capabilities'), 'priority' => '0.8'],
+        ['loc' => route('pricing'), 'priority' => '0.8'],
+        ['loc' => route('core-features.fleet-tracking'), 'priority' => '0.6'],
+        ['loc' => route('core-features.maintenance'), 'priority' => '0.6'],
+        ['loc' => route('core-features.fuel'), 'priority' => '0.6'],
+        ['loc' => route('terms.show'), 'priority' => '0.3'],
+        ['loc' => route('policy.show'), 'priority' => '0.3'],
+        ['loc' => route('cookies'), 'priority' => '0.3'],
+    ];
+
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
+    foreach ($publicRoutes as $entry) {
+        $xml .= '  <url><loc>'.e($entry['loc']).'</loc><priority>'.$entry['priority'].'</priority></url>'."\n";
+    }
+    $xml .= '</urlset>';
+
+    return response($xml, 200, ['Content-Type' => 'application/xml']);
+})->name('sitemap');
+
 // Public marketing/outer pages
 Route::view('/features', 'pages.features')->name('features');
 Route::view('/capabilities', 'pages.capabilities')->name('capabilities');

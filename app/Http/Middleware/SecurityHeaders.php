@@ -76,6 +76,13 @@ class SecurityHeaders
         // Referrer Policy - Control how much referrer information is shared
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
+        // Authenticated (operational) pages must never be indexed by search
+        // engines -- robots.txt is advisory only, this header is binding.
+        // Public marketing/legal pages stay indexable.
+        if ($request->user() !== null) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+
         // Force HTTPS in production
         if (app()->environment('production')) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
