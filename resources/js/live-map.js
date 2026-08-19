@@ -45,6 +45,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    /**
+     * Human description of how old a machine's reported position is, plus a
+     * staleness flag. Integrations sync every 5-15 minutes, so anything
+     * older than 2 hours means the telemetry feed has gone quiet and the
+     * marker no longer reflects a live position.
+     */
+    function describePositionAge(lastUpdate) {
+        if (!lastUpdate) {
+            return { label: 'no timestamp available', stale: true };
+        }
+
+        const reported = new Date(lastUpdate);
+        if (Number.isNaN(reported.getTime())) {
+            return { label: 'no timestamp available', stale: true };
+        }
+
+        const minutes = Math.max(0, Math.round((Date.now() - reported.getTime()) / 60000));
+        const stale = minutes > 120;
+
+        if (minutes < 1) {
+            return { label: 'just now', stale: false };
+        }
+        if (minutes < 60) {
+            return { label: `${minutes} min ago`, stale };
+        }
+        if (minutes < 60 * 48) {
+            return { label: `${Math.round(minutes / 60)} h ago`, stale };
+        }
+
+        return { label: `${Math.round(minutes / (60 * 24))} days ago`, stale };
+    }
+
     function initMap() {
         try {
             debugLog('initMap called');
@@ -243,6 +275,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     'maintenance': '#ef4444'
                 }[machine.status] || '#6b7280';
 
+                // Position freshness: a machine whose telemetry stopped days
+                // ago must not look identical to one reporting live.
+                const positionAge = describePositionAge(machine.last_location_update);
+
                 const emojiImageUrl = getMachineEmojiImage(machine.machine_type);
 
                 const statusIcon = L.divIcon({
@@ -273,6 +309,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             </p>
                             <p class="text-xs text-gray-600">
                                 Capacity: ${machine.capacity ? machine.capacity + ' tons' : 'N/A'}
+                            </p>
+                            <p class="text-xs mt-1 ${positionAge.stale ? 'text-amber-600 font-semibold' : 'text-gray-600'}">
+                                Position reported: ${positionAge.label}${positionAge.stale ? ' — telemetry may be stale' : ''}
                             </p>
                             <a href="/fleet/${machine.id}" class="text-blue-600 hover:underline text-xs mt-2 inline-block">
                                 View Details →
