@@ -212,4 +212,36 @@ class ProductionDashboardPageTest extends TestCase
         $this->assertSame(15, $fatigueData[0]['fatigue_score']);
         $this->assertSame(['well_rested' => 1, 'needs_monitoring' => 0, 'high_fatigue' => 0, 'needs_rest' => 0], $component->get('fatigueStats'));
     }
+
+    /**
+     * The daily trend bars set a percentage height, which only renders when
+     * the track has a definite height: the old markup nested height:% inside
+     * an auto-height flex column, so the chart drew labels but zero-height
+     * bars. Pin the fixed-track markup (and that a day with data always gets
+     * a visible bar via min-height).
+     */
+    public function test_daily_trend_bars_render_inside_a_definite_height_track(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        ProductionRecord::create([
+            'team_id' => $team->id,
+            'record_date' => Carbon::yesterday(),
+            'shift' => 'continuous',
+            'quantity_produced' => 640.0,
+            'unit' => 'tonnes',
+            'status' => 'completed',
+            'metadata' => ['source' => 'telemetry', 'provider' => 'bell', 'loads' => 40, 'cycles' => 40],
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(ProductionDashboard::class)
+            ->assertSeeHtml('h-28 flex items-end')
+            ->assertSeeHtml('min-height: 3px')
+            // The saturated template-gradient KPI cards were replaced with
+            // the design-system card pattern.
+            ->assertDontSeeHtml('from-blue-500 to-blue-600');
+    }
 }

@@ -48,68 +48,68 @@
         <!-- Production Summary Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
             <!-- Total Loads -->
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow p-3 text-[var(--stone)]">
-                <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow p-4 border border-[var(--line)]">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-blue-500/15 rounded-lg">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                         </svg>
                     </div>
                 </div>
-                <h3 class="text-xl font-bold mb-0">{{ number_format($summary['total_loads']) }}</h3>
-                <p class="text-[10px] opacity-90">Total Loads</p>
+                <h3 class="text-xl font-bold text-[var(--stone)] mb-0">{{ number_format($summary['total_loads']) }}</h3>
+                <p class="text-xs text-[var(--sand)]">Total Loads</p>
             </div>
 
             <!-- Total Cycles -->
-            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow p-3 text-[var(--stone)]">
-                <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow p-4 border border-[var(--line)]">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-purple-500/15 rounded-lg">
+                        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
                     </div>
                 </div>
-                <h3 class="text-xl font-bold mb-0">{{ number_format($summary['total_cycles']) }}</h3>
-                <p class="text-[10px] opacity-90">Total Cycles</p>
+                <h3 class="text-xl font-bold text-[var(--stone)] mb-0">{{ number_format($summary['total_cycles']) }}</h3>
+                <p class="text-xs text-[var(--sand)]">Total Cycles</p>
             </div>
 
             <!-- Total Tonnage -->
-            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow p-3 text-[var(--stone)]">
-                <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow p-4 border border-[var(--line)]">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-green-500/15 rounded-lg">
+                        <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
                         </svg>
                     </div>
                 </div>
-                <h3 class="text-xl font-bold mb-0">{{ number_format($summary['total_tonnage'], 2) }}</h3>
-                <p class="text-[10px] opacity-90">Tonnage (T)</p>
+                <h3 class="text-xl font-bold text-[var(--stone)] mb-0">{{ number_format($summary['total_tonnage'], 2) }}</h3>
+                <p class="text-xs text-[var(--sand)]">Tonnage (T)</p>
             </div>
 
             <!-- Total BCM -->
-            <div class="bg-gradient-to-br from-[var(--gold)] to-[var(--gold-soft)] rounded-lg shadow p-3 text-[var(--ink)]">
-                <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow p-4 border border-[var(--line)]">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-[var(--gold)]/15 rounded-lg">
+                        <svg class="w-4 h-4 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                         </svg>
                     </div>
                 </div>
-                <h3 class="text-xl font-bold mb-0">{{ number_format($summary['total_bcm'], 2) }}</h3>
-                <p class="text-[10px] opacity-90">BCM (m³)</p>
+                <h3 class="text-xl font-bold text-[var(--stone)] mb-0">{{ number_format($summary['total_bcm'], 2) }}</h3>
+                <p class="text-xs text-[var(--sand)]">BCM (m³)</p>
             </div>
 
             <!-- Active Areas -->
-            <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow p-3 text-[var(--stone)]">
-                <div class="flex items-center justify-between mb-1.5">
-                    <div class="p-1.5 bg-white/20 rounded backdrop-blur-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow p-4 border border-[var(--line)]">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-indigo-500/15 rounded-lg">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6 3m-6-3v-13m6 3l5.553-2.776A1 1 0 0121 5.618v10.764a1 1 0 01-1.447.894L15 20m0-13v13"></path>
                         </svg>
                     </div>
                 </div>
-                <h3 class="text-xl font-bold mb-0">{{ number_format($summary['active_areas']) }}</h3>
-                <p class="text-[10px] opacity-90">Active Areas</p>
+                <h3 class="text-xl font-bold text-[var(--stone)] mb-0">{{ number_format($summary['active_areas']) }}</h3>
+                <p class="text-xs text-[var(--sand)]">Active Areas</p>
             </div>
         </div>
 
@@ -131,18 +131,24 @@
                             $maxLoads = collect($dailyChart)->max('loads') ?: 1;
                         @endphp
 
+                        {{-- Percentage bar heights need a DEFINITE-height track:
+                             the old markup put height:% on a child of an
+                             auto-height flex column, which resolves to 0, so
+                             the chart rendered labels but no bars at all. --}}
                         <!-- Tonnage Chart -->
                         <div>
                             <h3 class="text-sm font-medium text-[var(--sand)] mb-3">Tonnage (T)</h3>
-                            <div class="flex items-end gap-1 h-32">
+                            <div class="flex items-end gap-1">
                                 @foreach($dailyChart as $day)
-                                    <div class="flex-1 flex flex-col items-center gap-1 group">
-                                        <div class="w-full bg-green-500 hover:bg-green-600 rounded-t transition-all relative" 
-                                             style="height: {{ $maxTonnage > 0 ? ($day['tonnage'] / $maxTonnage * 100) : 0 }}%"
-                                             title="{{ $day['date'] }}: {{ number_format($day['tonnage'], 2) }}T">
-                                            <span class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-[var(--ink)] text-[var(--stone)] text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                                                {{ number_format($day['tonnage'], 2) }}T
-                                            </span>
+                                    <div class="flex-1 flex flex-col items-center group">
+                                        <div class="w-full h-28 flex items-end">
+                                            <div class="w-full bg-green-500 hover:bg-green-600 rounded-t transition-all relative"
+                                                 style="height: {{ $maxTonnage > 0 ? ($day['tonnage'] / $maxTonnage * 100) : 0 }}%; {{ $day['tonnage'] > 0 ? 'min-height: 3px;' : '' }}"
+                                                 title="{{ $day['date'] }}: {{ number_format($day['tonnage'], 2) }}T">
+                                                <span class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-[var(--ink)] text-[var(--stone)] text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                                                    {{ number_format($day['tonnage'], 2) }}T
+                                                </span>
+                                            </div>
                                         </div>
                                         <span class="text-xs text-[var(--sand)] rotate-45 origin-left mt-2">{{ $day['date'] }}</span>
                                     </div>
@@ -153,15 +159,17 @@
                         <!-- Loads Chart -->
                         <div>
                             <h3 class="text-sm font-medium text-[var(--sand)] mb-3">Loads</h3>
-                            <div class="flex items-end gap-1 h-32">
+                            <div class="flex items-end gap-1">
                                 @foreach($dailyChart as $day)
-                                    <div class="flex-1 flex flex-col items-center gap-1 group">
-                                        <div class="w-full bg-blue-500 hover:bg-blue-600 rounded-t transition-all relative" 
-                                             style="height: {{ $maxLoads > 0 ? ($day['loads'] / $maxLoads * 100) : 0 }}%"
-                                             title="{{ $day['date'] }}: {{ number_format($day['loads']) }} loads">
-                                            <span class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-[var(--ink)] text-[var(--stone)] text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                                                {{ number_format($day['loads']) }} loads
-                                            </span>
+                                    <div class="flex-1 flex flex-col items-center group">
+                                        <div class="w-full h-28 flex items-end">
+                                            <div class="w-full bg-blue-500 hover:bg-blue-600 rounded-t transition-all relative"
+                                                 style="height: {{ $maxLoads > 0 ? ($day['loads'] / $maxLoads * 100) : 0 }}%; {{ $day['loads'] > 0 ? 'min-height: 3px;' : '' }}"
+                                                 title="{{ $day['date'] }}: {{ number_format($day['loads']) }} loads">
+                                                <span class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-[var(--ink)] text-[var(--stone)] text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                                                    {{ number_format($day['loads']) }} loads
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach
