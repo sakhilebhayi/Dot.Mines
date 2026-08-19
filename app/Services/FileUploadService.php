@@ -95,8 +95,9 @@ class FileUploadService
         // allowed to contain, so a PHP payload named report.pdf is rejected
         // even though "pdf" passes the extension allowlist.
         $real = $file->getRealPath();
-        if ($real && file_exists($real)) {
-            $sniffed = (new \finfo(FILEINFO_MIME_TYPE))->file($real) ?: 'application/octet-stream';
+        if ($real !== false && file_exists($real)) {
+            $detected = (new \finfo(FILEINFO_MIME_TYPE))->file($real);
+            $sniffed = $detected === false || $detected === '' ? 'application/octet-stream' : $detected;
             $allowedMimes = $this->allowedMimesByExtension[$ext] ?? [];
 
             if (! in_array($sniffed, $allowedMimes, true)) {
