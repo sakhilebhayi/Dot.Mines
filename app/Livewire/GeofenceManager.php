@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\AIInsight;
+use App\Models\AIRecommendation;
 use App\Models\Geofence;
 use App\Models\MineArea;
 use Illuminate\Support\Facades\Auth;
@@ -180,9 +182,27 @@ class GeofenceManager extends Component
             ->orderBy('name')
             ->get();
 
-        // AI-powered recommendations (placeholder for future AI integration)
-        $aiRecommendations = collect([]);
-        $aiInsights = collect([]);
+        // Real dispatch intelligence for this page: DispatchAdvisorAgent
+        // analyses GeofenceEntry queues (machines inside a geofence with no
+        // exit recorded) and AIOptimizationService persists its output as
+        // category-'dispatch' recommendations/insights. Pending ones are
+        // surfaced here because geofence queues are what they are about;
+        // the blade section stays hidden when there are none.
+        $aiRecommendations = AIRecommendation::where('team_id', $team->id)
+            ->where('category', 'dispatch')
+            ->pending()
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $aiInsights = AIInsight::where('team_id', $team->id)
+            ->where('category', 'dispatch')
+            ->where(function ($query) {
+                $query->whereNull('valid_until')->orWhere('valid_until', '>', now());
+            })
+            ->latest()
+            ->limit(5)
+            ->get();
 
         return view('livewire.geofence-manager', [
             'geofences' => $geofencesQuery,

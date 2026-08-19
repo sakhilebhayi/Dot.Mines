@@ -540,29 +540,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[ScanBladeUnescaped]]></code>
     </ClassMustBeFinal>
-    <MixedArgument>
-      <code><![CDATA[$file->getRealPath()]]></code>
-      <code><![CDATA[$m]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$file]]></code>
-      <code><![CDATA[$m]]></code>
-      <code><![CDATA[$matches[]]]></code>
-    </MixedAssignment>
-    <MixedMethodCall>
-      <code><![CDATA[getExtension]]></code>
-      <code><![CDATA[getExtension]]></code>
-      <code><![CDATA[getRealPath]]></code>
-      <code><![CDATA[getRealPath]]></code>
-      <code><![CDATA[isFile]]></code>
-    </MixedMethodCall>
-    <PossiblyFalseArgument>
-      <code><![CDATA[$contents]]></code>
-      <code><![CDATA[$contents]]></code>
-    </PossiblyFalseArgument>
-    <PossiblyInvalidOperand>
-      <code><![CDATA[str_replace(base_path().'/', '', $m)]]></code>
-    </PossiblyInvalidOperand>
     <PossiblyUnusedMethod>
       <code><![CDATA[handle]]></code>
     </PossiblyUnusedMethod>
@@ -5034,6 +5011,7 @@
     </DocblockTypeContradiction>
     <MissingClosureParamType>
       <code><![CDATA[$query]]></code>
+      <code><![CDATA[$query]]></code>
     </MissingClosureParamType>
     <MissingClosureReturnType>
       <code><![CDATA[function ($query) {]]></code>
@@ -5045,6 +5023,8 @@
       <code><![CDATA[$geofenceStats[$geofence->id]]]></code>
     </MixedArrayOffset>
     <MixedAssignment>
+      <code><![CDATA[$aiInsights]]></code>
+      <code><![CDATA[$aiRecommendations]]></code>
       <code><![CDATA[$data['team_id']]]></code>
       <code><![CDATA[$geofence]]></code>
       <code><![CDATA[$geofencesQuery]]></code>
@@ -5061,11 +5041,23 @@
       <code><![CDATA[distinct]]></code>
       <code><![CDATA[entries]]></code>
       <code><![CDATA[entries]]></code>
+      <code><![CDATA[get]]></code>
+      <code><![CDATA[get]]></code>
+      <code><![CDATA[latest]]></code>
+      <code><![CDATA[latest]]></code>
+      <code><![CDATA[limit]]></code>
+      <code><![CDATA[limit]]></code>
+      <code><![CDATA[orWhere]]></code>
       <code><![CDATA[orWhere]]></code>
       <code><![CDATA[orderBy]]></code>
       <code><![CDATA[paginate]]></code>
+      <code><![CDATA[pending]]></code>
       <code><![CDATA[select]]></code>
       <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[whereNull]]></code>
     </MixedMethodCall>
     <MixedPropertyFetch>
       <code><![CDATA[$geofence->id]]></code>
@@ -5108,6 +5100,8 @@
       <code><![CDATA[user]]></code>
     </UndefinedInterfaceMethod>
     <UndefinedMagicMethod>
+      <code><![CDATA[AIInsight::where('team_id', $team->id)]]></code>
+      <code><![CDATA[AIRecommendation::where('team_id', $team->id)]]></code>
       <code><![CDATA[Geofence::create($data)]]></code>
       <code><![CDATA[findOrFail]]></code>
       <code><![CDATA[when]]></code>
