@@ -6,15 +6,12 @@ use App\Models\OperatorFatigue;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\OperatorFatigueService;
-use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class OperatorFatigueTracker extends Component
 {
-    use BrowserEventBridge;
-
     public int $operatorId;
 
     public string $shiftDate;
@@ -126,7 +123,7 @@ class OperatorFatigueTracker extends Component
             'notes' => $validated['notes'],
         ]);
 
-        $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => "Fatigue score recorded: {$fatigue->fatigue_score}/100 ({$fatigue->alert_level})."]);
+        $this->dispatch('notify', ['type' => 'success', 'message' => "Fatigue score recorded: {$fatigue->fatigue_score}/100 ({$fatigue->alert_level})."]);
 
         $this->reset(['incidentsCount', 'notes']);
         $this->breakTimeMinutes = 60;

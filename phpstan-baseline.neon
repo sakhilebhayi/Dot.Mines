@@ -1381,16 +1381,6 @@ parameters:
 			path: app/Livewire/AIOptimizationDashboard.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/AIOptimizationDashboard.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\AIOptimizationDashboard\\:\\:implementRecommendation\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/AIOptimizationDashboard.php
@@ -1512,16 +1502,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dismissAlert\\(\\) has parameter \\$alertId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Alerts.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Alerts\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/Alerts.php
 
@@ -1767,16 +1747,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Fleet\\:\\:confirmRejectRecommendation\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Fleet.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Fleet\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Fleet.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Fleet\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/Fleet.php
 
@@ -2076,16 +2046,6 @@ parameters:
 			path: app/Livewire/FuelManagement.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\FuelManagement\\:\\:getDateRange\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/FuelManagement.php
@@ -2186,16 +2146,6 @@ parameters:
 			path: app/Livewire/GeofenceDetail.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\GeofenceManager\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/GeofenceManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\GeofenceManager\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/GeofenceManager.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\GeofenceManager\\:\\:render\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/GeofenceManager.php
@@ -2227,16 +2177,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:deleteIntegration\\(\\) has parameter \\$integrationId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/IntegrationManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\IntegrationManager\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/IntegrationManager.php
 
@@ -2381,16 +2321,6 @@ parameters:
 			path: app/Livewire/MachineAssignmentManager.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\MachineAssignmentManager\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/MachineAssignmentManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MachineAssignmentManager\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/MachineAssignmentManager.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\MachineAssignmentManager\\:\\:exportAssignmentReport\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/MachineAssignmentManager.php
@@ -2467,16 +2397,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:completeScheduledMaintenance\\(\\) has parameter \\$recordId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/MaintenanceDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MaintenanceDashboard\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/MaintenanceDashboard.php
 
@@ -2606,16 +2526,6 @@ parameters:
 			path: app/Livewire/MineAreaDetail.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\MineAreaDetail\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/MineAreaDetail.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MineAreaDetail\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/MineAreaDetail.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\MineAreaDetail\\:\\:getProductionSummary\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/MineAreaDetail.php
@@ -2736,16 +2646,6 @@ parameters:
 			path: app/Livewire/MineAreaManager.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\MineAreaManager\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/MineAreaManager.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\MineAreaManager\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/MineAreaManager.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\MineAreaManager\\:\\:mount\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/MineAreaManager.php
@@ -2842,16 +2742,6 @@ parameters:
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$currentTeam\\.$#"
-			count: 1
-			path: app/Livewire/OperatorFatigueTracker.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\OperatorFatigueTracker\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/OperatorFatigueTracker.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\OperatorFatigueTracker\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/OperatorFatigueTracker.php
 
@@ -3081,16 +2971,6 @@ parameters:
 			path: app/Livewire/ReportGenerator.php
 
 		-
-			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/ReportGenerator.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\ReportGenerator\\:\\:generateReport\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/ReportGenerator.php
@@ -3172,16 +3052,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:deleteReport\\(\\) has parameter \\$reportId with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/Livewire/Reports.php
 
@@ -3339,16 +3209,6 @@ parameters:
 			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
 			count: 1
 			path: app/Livewire/RoutePlanning.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:dispatchBrowserEvent\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Livewire/Settings.php
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Settings\\:\\:getCurrencies\\(\\) return type has no value type specified in iterable type array\\.$#"

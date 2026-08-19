@@ -13828,11 +13828,6 @@
       <code><![CDATA[Currency]]></code>
     </ClassMustBeFinal>
   </file>
-  <file src="app/Traits/BrowserEventBridge.php">
-    <MissingReturnType>
-      <code><![CDATA[dispatchBrowserEvent]]></code>
-    </MissingReturnType>
-  </file>
   <file src="app/Traits/HasTeamFilters.php">
     <InvalidArgument>
       <code><![CDATA[function (Builder $builder) {
