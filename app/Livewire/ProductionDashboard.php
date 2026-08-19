@@ -208,32 +208,33 @@ class ProductionDashboard extends Component
      * as OperatorFatigueTracker -- that model's fatigue_score/alert_level
      * is the single source of truth; nothing is reclassified here.
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array{operator_name: string, machine_name: string|null, shift_type: string, hours_worked: float, consecutive_days: float, fatigue_score: int, alert_level: string}>
      */
-    public function getFatigueDataProperty()
+    public function getFatigueDataProperty(): array
     {
         if (! $this->teamId) {
             return [];
         }
 
-        return OperatorFatigue::where('team_id', $this->teamId)
-            ->whereDate('shift_date', '>=', Carbon::today()->subDays(7))
+        return OperatorFatigue::query()
+            ->where('team_id', $this->teamId)
+            ->where('shift_date', '>=', Carbon::today()->subDays(7)->startOfDay())
             ->with(['user', 'machine'])
-            ->orderByDesc('shift_date')
-            ->orderByDesc('fatigue_score')
             ->get()
+            ->sortBy([['shift_date', 'desc'], ['fatigue_score', 'desc']])
             ->unique('user_id')
-            ->values()
-            ->map(fn (OperatorFatigue $fatigue) => [
+            ->toBase()
+            ->map(fn (OperatorFatigue $fatigue): array => [
                 'operator_name' => $fatigue->user?->name ?? 'Unknown operator',
                 'machine_name' => $fatigue->machine?->name,
-                'shift_type' => $fatigue->shift_type ?? 'unspecified',
-                'hours_worked' => (float) $fatigue->hours_worked,
-                'consecutive_days' => (float) $fatigue->consecutive_days,
-                'fatigue_score' => (int) $fatigue->fatigue_score,
+                'shift_type' => $fatigue->shift_type,
+                'hours_worked' => $fatigue->hours_worked,
+                'consecutive_days' => $fatigue->consecutive_days,
+                'fatigue_score' => $fatigue->fatigue_score,
                 'alert_level' => $fatigue->alert_level,
             ])
-            ->toArray();
+            ->values()
+            ->all();
     }
 
     /**
@@ -247,13 +248,13 @@ class ProductionDashboard extends Component
      */
     public function getFatigueStatsProperty()
     {
-        $levels = collect($this->fatigueData)->countBy('alert_level');
+        $levels = array_count_values(array_column($this->getFatigueDataProperty(), 'alert_level'));
 
         return [
-            'well_rested' => $levels->get('none', 0) + $levels->get('low', 0),
-            'needs_monitoring' => $levels->get('medium', 0),
-            'high_fatigue' => $levels->get('high', 0),
-            'needs_rest' => $levels->get('critical', 0),
+            'well_rested' => ($levels['none'] ?? 0) + ($levels['low'] ?? 0),
+            'needs_monitoring' => $levels['medium'] ?? 0,
+            'high_fatigue' => $levels['high'] ?? 0,
+            'needs_rest' => $levels['critical'] ?? 0,
         ];
     }
 

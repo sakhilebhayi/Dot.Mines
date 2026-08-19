@@ -32,6 +32,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array|null $metadata
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read User|null $user
+ * @property-read Machine|null $machine
+ * @property-read Team|null $team
  *
  * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue whereIn(string $column, array $values)
