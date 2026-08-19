@@ -3971,7 +3971,11 @@
                 'id' => $alert->id,
                 'type' => $alert->type,
                 'priority' => $alert->priority,
-                'message' => $alert->message,
+                // 'title' is the alert's real headline; the old 'message'
+                // key read a column that does not exist on alerts, so every
+                // card rendered an empty description line.
+                'title' => $alert->title,
+                'machine' => $alert->machine?->name,
                 'created_at' => $alert->created_at->diffForHumans(),
                 'status' => $alert->status,
             ])]]></code>
@@ -3984,7 +3988,11 @@
                 'id' => $alert->id,
                 'type' => $alert->type,
                 'priority' => $alert->priority,
-                'message' => $alert->message,
+                // 'title' is the alert's real headline; the old 'message'
+                // key read a column that does not exist on alerts, so every
+                // card rendered an empty description line.
+                'title' => $alert->title,
+                'machine' => $alert->machine?->name,
                 'created_at' => $alert->created_at->diffForHumans(),
                 'status' => $alert->status,
             ])]]></code>
@@ -4005,6 +4013,7 @@
       <code><![CDATA[diffForHumans]]></code>
     </MixedMethodCall>
     <MixedPropertyFetch>
+      <code><![CDATA[$alert->machine?->name]]></code>
       <code><![CDATA[$log->user->name]]></code>
     </MixedPropertyFetch>
     <MixedReturnStatement>
@@ -4026,10 +4035,10 @@
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$alert->created_at]]></code>
       <code><![CDATA[$alert->id]]></code>
-      <code><![CDATA[$alert->message]]></code>
-      <code><![CDATA[$alert->message]]></code>
+      <code><![CDATA[$alert->machine]]></code>
       <code><![CDATA[$alert->priority]]></code>
       <code><![CDATA[$alert->status]]></code>
+      <code><![CDATA[$alert->title]]></code>
       <code><![CDATA[$alert->type]]></code>
       <code><![CDATA[$log->action]]></code>
       <code><![CDATA[$log->created_at]]></code>
@@ -7231,7 +7240,6 @@
       <code><![CDATA[recommendations]]></code>
       <code><![CDATA[scopeActive]]></code>
       <code><![CDATA[scopeByType]]></code>
-      <code><![CDATA[updateAccuracy]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="app/Models/AIAnalysisSession.php">

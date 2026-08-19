@@ -104,7 +104,11 @@ class Dashboard extends Component
                 'id' => $alert->id,
                 'type' => $alert->type,
                 'priority' => $alert->priority,
-                'message' => $alert->message,
+                // 'title' is the alert's real headline; the old 'message'
+                // key read a column that does not exist on alerts, so every
+                // card rendered an empty description line.
+                'title' => $alert->title,
+                'machine' => $alert->machine?->name,
                 'created_at' => $alert->created_at->diffForHumans(),
                 'status' => $alert->status,
             ])
