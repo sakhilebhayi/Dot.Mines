@@ -215,7 +215,7 @@ class Reports extends Component
 
         $mineAreas = $team ? MineArea::where('team_id', $team->id)->get() : collect();
         $geofences = $team ? Geofence::where('team_id', $team->id)->get() : collect();
-        $this->machinesList = $team ? Machine::where('team_id', $team->id)->select('id', 'name')->get() : collect();
+        $this->machinesList = $team ? Machine::where('team_id', $team->id)->select(['id', 'name'])->get() : collect();
 
         return view('livewire.reports', [
             'reports' => $this->getReports(),

@@ -43,7 +43,7 @@ class GeofenceDetail extends Component
         $machineTypeCounts = [];
         if (! empty($machineIds)) {
             $machineTypeCounts = Machine::whereIn('id', $machineIds)
-                ->select('machine_type', DB::raw('count(*) as cnt'))
+                ->select(['machine_type', DB::raw('count(*) as cnt')])
                 ->groupBy('machine_type')
                 ->pluck('cnt', 'machine_type')
                 ->toArray();

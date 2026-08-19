@@ -2226,11 +2226,6 @@ parameters:
 			path: app/Livewire/GeofenceDetail.php
 
 		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:select\\(\\) invoked with 2 parameters, 0\\-1 required\\.$#"
-			count: 1
-			path: app/Livewire/GeofenceDetail.php
-
-		-
 			message: "#^Method App\\\\Livewire\\\\GeofenceManager\\:\\:dispatchBrowserEvent\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/GeofenceManager.php
@@ -3262,11 +3257,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\Reports\\:\\:setSortBy\\(\\) has parameter \\$column with no type specified\\.$#"
-			count: 1
-			path: app/Livewire/Reports.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Machine\\:\\:select\\(\\) invoked with 2 parameters, 0\\-1 required\\.$#"
 			count: 1
 			path: app/Livewire/Reports.php
 

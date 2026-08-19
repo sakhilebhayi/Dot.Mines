@@ -4675,7 +4675,6 @@
       <code><![CDATA[$author]]></code>
       <code><![CDATA[$machineCount]]></code>
       <code><![CDATA[$machineIds]]></code>
-      <code><![CDATA[$machineTypeCounts]]></code>
       <code><![CDATA[$machinesTracked]]></code>
       <code><![CDATA[$machinesUntracked]]></code>
       <code><![CDATA[$team]]></code>
@@ -4684,12 +4683,9 @@
     <MixedMethodCall>
       <code><![CDATA[count]]></code>
       <code><![CDATA[distinct]]></code>
-      <code><![CDATA[groupBy]]></code>
       <code><![CDATA[orWhere]]></code>
       <code><![CDATA[orWhere]]></code>
       <code><![CDATA[pluck]]></code>
-      <code><![CDATA[pluck]]></code>
-      <code><![CDATA[toArray]]></code>
       <code><![CDATA[toArray]]></code>
     </MixedMethodCall>
     <MixedOperand>
@@ -6440,9 +6436,6 @@
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
     </PossiblyNullPropertyFetch>
-    <TooManyArguments>
-      <code><![CDATA[select]]></code>
-    </TooManyArguments>
     <UndefinedMagicMethod>
       <code><![CDATA[find]]></code>
       <code><![CDATA[find]]></code>
