@@ -45,6 +45,10 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
     'ensure_team',
+    // Admin-role accounts must have confirmed 2FA before using the app.
+    // Non-admins pass through; the redirect target (Jetstream's
+    // profile.show, where 2FA is enabled) lives outside this group.
+    'admin.2fa',
 ])->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {

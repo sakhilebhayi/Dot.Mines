@@ -2,6 +2,8 @@
 
 use App\Http\Middleware\CacheControlHeaders;
 use App\Http\Middleware\EnforceDownloadRateLimit;
+use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\EnsureAdminHasTwoFactor;
 use App\Http\Middleware\EnsureTeamContext;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\SecurityHeaders;
@@ -21,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'ensure_team' => EnsureTeamContext::class,
             'cache.headers' => CacheControlHeaders::class,
+            'admin' => EnsureAdmin::class,
+            'admin.2fa' => EnsureAdminHasTwoFactor::class,
         ]);
 
         // Force HTTPS, CSP and add security headers to all web requests

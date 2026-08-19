@@ -33,6 +33,7 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property string|null $two_factor_recovery_codes
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Carbon|null $two_factor_confirmed_at
  * @property-read Collection<int, PersonalAccessToken> $tokens
  * @property-read Collection<int, Team> $ownedTeams
  */
