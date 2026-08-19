@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GdprController;
 use App\Http\Controllers\MinePlanDownloadController;
 use App\Http\Controllers\RealtimeHealthController;
 use App\Http\Controllers\ReportController;
@@ -194,6 +195,22 @@ Route::middleware([
     Route::get('/team/settings', function () {
         return redirect()->route('teams.show', Auth::user()->currentTeam);
     })->name('team.settings');
+});
+
+// ── GDPR / Data Subject Rights ─────────────────────────────────────────────
+// Outside the main group on purpose: no ensure_team (a user leaving the
+// platform may have no current team) -- auth + verified only.
+Route::middleware(['auth', 'verified'])->prefix('gdpr')->name('gdpr.')->group(function () {
+    Route::get('/', [GdprController::class, 'index'])
+        ->name('index');
+    Route::post('/export', [GdprController::class, 'requestExport'])
+        ->middleware('throttle:3,60')
+        ->name('export');
+    Route::get('/download/{token}', [GdprController::class, 'downloadExport'])
+        ->name('download');
+    Route::post('/delete', [GdprController::class, 'requestDeletion'])
+        ->middleware('throttle:2,60')
+        ->name('delete');
 });
 
 // Paystack webhooks (no auth -- authenticated by HMAC signature instead)

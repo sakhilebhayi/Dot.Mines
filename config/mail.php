@@ -117,4 +117,20 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Purpose-Specific Sender Addresses
+    |--------------------------------------------------------------------------
+    |
+    | Senders for specific mail categories (privacy/GDPR correspondence,
+    | support, billing). Each falls back to the global from-address.
+    |
+    */
+
+    'addresses' => [
+        'support' => env('MAIL_FROM_ADDRESS_SUPPORT', env('MAIL_FROM_ADDRESS', 'hello@example.com')),
+        'billing' => env('MAIL_FROM_ADDRESS_BILLING', env('MAIL_FROM_ADDRESS', 'hello@example.com')),
+        'privacy' => env('MAIL_FROM_ADDRESS_PRIVACY', env('MAIL_FROM_ADDRESS', 'hello@example.com')),
+    ],
+
 ];
