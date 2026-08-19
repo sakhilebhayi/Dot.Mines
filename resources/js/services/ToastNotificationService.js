@@ -51,10 +51,16 @@ class ToastNotificationService {
     }
 
     /**
-     * Load sound file
+     * Load sound file. Idempotent: init() can run more than once per page
+     * (each realtime:init dispatch re-enters it), and re-creating the Audio
+     * element re-downloaded the sound file on every call.
      * @private
      */
     loadSound(type, path) {
+        if (this.sounds[type]) {
+            return;
+        }
+
         const audio = new Audio(path);
         audio.preload = 'auto';
         this.sounds[type] = audio;
