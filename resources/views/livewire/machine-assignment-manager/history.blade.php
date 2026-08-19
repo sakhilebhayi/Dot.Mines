@@ -32,8 +32,8 @@
                                     @if($record->unassigned_at)
                                         @php
                                             $duration = $record->assigned_at->diff($record->unassigned_at);
-                                            echo $duration->d > 0 ? "{$duration->d}d {$duration->h}h" : "{$duration->h}h {$duration->i}m";
                                         @endphp
+                                        {{ $duration->d > 0 ? "{$duration->d}d {$duration->h}h" : "{$duration->h}h {$duration->i}m" }}
                                     @else
                                         —
                                     @endif
