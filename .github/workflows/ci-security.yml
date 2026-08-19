@@ -20,6 +20,11 @@ jobs:
 
       - name: Install composer deps
         run: composer install --no-interaction --no-progress --prefer-dist
+        env:
+          # config/broadcasting.php defaults BROADCAST_DRIVER to 'pusher';
+          # with no .env on the runner, package:discover (post-autoload-dump)
+          # would boot the app and crash constructing the pusher broadcaster.
+          BROADCAST_DRIVER: log
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -61,7 +66,7 @@ jobs:
 
       - name: Ensure composer.lock in sync
         run: |
-          composer update --lock --no-interaction
+          composer update --lock --no-interaction --no-scripts
           if ! git diff --quiet composer.lock; then
             echo "composer.lock is out of date with composer.json. Run 'composer update --lock' and commit the result." >&2
             git --no-pager diff -- composer.lock || true
@@ -81,6 +86,8 @@ jobs:
 
       - name: Install composer deps
         run: composer install --no-interaction --no-progress --prefer-dist
+        env:
+          BROADCAST_DRIVER: log
 
       - name: Run composer audit
         run: composer audit --format=plain
@@ -133,6 +140,7 @@ jobs:
         env:
           APP_ENV: testing
           APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          BROADCAST_DRIVER: log
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --no-progress --memory-limit=1G
@@ -153,6 +161,8 @@ jobs:
           coverage: none
       - name: Install composer deps
         run: composer install --no-interaction --no-progress --prefer-dist
+        env:
+          BROADCAST_DRIVER: log
       - name: Run Pint (fail on style violations)
         run: vendor/bin/pint --test
 
