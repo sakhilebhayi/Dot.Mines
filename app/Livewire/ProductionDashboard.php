@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Machine;
 use App\Models\MineArea;
+use App\Models\OperatorFatigue;
 use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Services\ProductionService;
@@ -194,23 +195,65 @@ class ProductionDashboard extends Component
 
     public function getMaterialBreakdownProperty()
     {
-        // Placeholder implementation - can be enhanced with actual material tracking
+        // Production records carry no material dimension on this schema, so
+        // there is nothing real to aggregate -- the blade renders its
+        // "No material data available" empty state instead of a fabricated
+        // breakdown.
         return [];
     }
 
+    /**
+     * Most recent fatigue entry per operator over the last 7 days, in the
+     * shape the fatigue table renders. Reads the same OperatorFatigue rows
+     * as OperatorFatigueTracker -- that model's fatigue_score/alert_level
+     * is the single source of truth; nothing is reclassified here.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public function getFatigueDataProperty()
     {
-        // Placeholder implementation - can be enhanced with operator fatigue tracking
-        return [];
+        if (! $this->teamId) {
+            return [];
+        }
+
+        return OperatorFatigue::where('team_id', $this->teamId)
+            ->whereDate('shift_date', '>=', Carbon::today()->subDays(7))
+            ->with(['user', 'machine'])
+            ->orderByDesc('shift_date')
+            ->orderByDesc('fatigue_score')
+            ->get()
+            ->unique('user_id')
+            ->values()
+            ->map(fn (OperatorFatigue $fatigue) => [
+                'operator_name' => $fatigue->user?->name ?? 'Unknown operator',
+                'machine_name' => $fatigue->machine?->name,
+                'shift_type' => $fatigue->shift_type ?? 'unspecified',
+                'hours_worked' => (float) $fatigue->hours_worked,
+                'consecutive_days' => (float) $fatigue->consecutive_days,
+                'fatigue_score' => (int) $fatigue->fatigue_score,
+                'alert_level' => $fatigue->alert_level,
+            ])
+            ->toArray();
     }
 
+    /**
+     * Summary-card counts derived from the SAME rows the fatigue table
+     * shows, bucketed by OperatorFatigue's canonical alert levels:
+     * none/low -> well rested, medium -> needs monitoring,
+     * high -> high fatigue, critical -> needs rest. Buckets are disjoint,
+     * so the four cards always sum to the number of operators listed.
+     *
+     * @return array<string, int>
+     */
     public function getFatigueStatsProperty()
     {
+        $levels = collect($this->fatigueData)->countBy('alert_level');
+
         return [
-            'well_rested' => 0,
-            'needs_monitoring' => 0,
-            'high_fatigue' => 0,
-            'needs_rest' => 0,
+            'well_rested' => $levels->get('none', 0) + $levels->get('low', 0),
+            'needs_monitoring' => $levels->get('medium', 0),
+            'high_fatigue' => $levels->get('high', 0),
+            'needs_rest' => $levels->get('critical', 0),
         ];
     }
 
