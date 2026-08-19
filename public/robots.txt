@@ -1,2 +1,28 @@
 User-agent: *
-Disallow:
+# Operational application areas -- never index.
+Disallow: /dashboard
+Disallow: /fleet
+Disallow: /map
+Disallow: /geofences
+Disallow: /mine-areas
+Disallow: /reports
+Disallow: /alerts
+Disallow: /production
+Disallow: /fuel
+Disallow: /maintenance
+Disallow: /ai-optimization
+Disallow: /ai-analytics
+Disallow: /operator-fatigue
+Disallow: /integrations
+Disallow: /billing
+Disallow: /settings
+Disallow: /documentation
+Disallow: /gdpr
+Disallow: /teams
+Disallow: /user
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /two-factor-challenge
+
+Sitemap: https://mines.infodot.co.za/sitemap.xml
