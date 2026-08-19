@@ -11,13 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Payment Model
  *
  * Represents a payment transaction
- * Tracks Stripe payment intents and status
+ * Tracks Paystack payment references and status
  *
  * @property int $id
  * @property int $team_id
  * @property int|null $subscription_id
- * @property string|null $stripe_payment_intent_id
- * @property string|null $stripe_invoice_id
+ * @property string|null $paystack_reference
+ * @property string|null $paystack_invoice_id
  * @property float $amount
  * @property string $currency
  * @property string $status
@@ -43,8 +43,8 @@ class Payment extends Model
     protected $fillable = [
         'team_id',
         'subscription_id',
-        'stripe_payment_intent_id',
-        'stripe_invoice_id',
+        'paystack_reference',
+        'paystack_invoice_id',
         'amount',
         'currency',
         'status',

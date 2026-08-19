@@ -6,7 +6,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
-use App\Services\StripeService;
+use App\Services\PaystackService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -196,9 +196,29 @@ class BillingPortal extends Component
             session()->put('subscription.selectedBigMachineCount', $this->selectedBigMachineCount);
             session()->put('subscription.selectedBillingCycle', $this->selectedBillingCycle);
 
-            // ...existing Stripe checkout logic...
+            $plan = $this->selectedPlanId
+                ? SubscriptionPlan::find($this->selectedPlanId)
+                : SubscriptionPlan::active()->first();
+
+            if (! $plan) {
+                $this->showConfirmModal = false;
+                session()->flash('error', 'No subscription plan is configured. Please contact support.');
+
+                return;
+            }
+
+            $checkout = (new PaystackService)->initializeTransaction($team, $plan, $this->selectedBillingCycle);
+
+            if (! $checkout) {
+                $this->showConfirmModal = false;
+                session()->flash('error', "We couldn't start checkout. Please try again, or contact support if this keeps happening.");
+
+                return;
+            }
+
             $this->showConfirmModal = false;
-            session()->flash('success', 'Subscription initiated! You will be redirected to payment.');
+
+            return redirect()->to($checkout['authorization_url']);
         } catch (\Throwable $e) {
             $this->showConfirmModal = false;
             Log::error('Failed to start subscription checkout', ['team_id' => $team->id, 'error' => $e->getMessage()]);
@@ -213,8 +233,15 @@ class BillingPortal extends Component
         try {
             $this->authorize('update', $team);
 
-            $stripeService = new StripeService;
-            $portalUrl = $stripeService->createBillingPortalSession($team);
+            if (! $this->currentSubscription) {
+                session()->flash('error', 'No active subscription to manage. Subscribe first.');
+
+                return;
+            }
+
+            // Paystack's hosted subscription-management page (card updates,
+            // cancellation) -- its equivalent of a billing portal.
+            $portalUrl = (new PaystackService)->generateManageLink($this->currentSubscription);
 
             if (! $portalUrl) {
                 session()->flash('error', 'Unable to access billing portal.');
@@ -241,8 +268,7 @@ class BillingPortal extends Component
         try {
             $this->authorize('update', Auth::user()->currentTeam);
 
-            $stripeService = new StripeService;
-            $success = $stripeService->cancelSubscription($this->currentSubscription, false);
+            $success = (new PaystackService)->cancelSubscription($this->currentSubscription, false);
 
             if ($success) {
                 session()->flash('success', 'Your subscription will be canceled at the end of the billing period.');
@@ -268,8 +294,7 @@ class BillingPortal extends Component
         try {
             $this->authorize('update', Auth::user()->currentTeam);
 
-            $stripeService = new StripeService;
-            $success = $stripeService->resumeSubscription($this->currentSubscription);
+            $success = (new PaystackService)->resumeSubscription($this->currentSubscription);
 
             if ($success) {
                 session()->flash('success', 'Your subscription has been resumed.');

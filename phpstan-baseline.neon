@@ -1121,11 +1121,6 @@ parameters:
 			path: app/Http/Controllers/ReportDownloadController.php
 
 		-
-			message: "#^Method App\\\\Http\\\\Controllers\\\\WebhookController\\:\\:handleStripe\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Http/Controllers/WebhookController.php
-
-		-
 			message: "#^Access to undefined constant Illuminate\\\\Http\\\\Request\\:\\:HEADER_X_FORWARDED_ALL\\.$#"
 			count: 1
 			path: app/Http/Middleware/TrustProxies.php
@@ -2857,16 +2852,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:getDailyChartProperty\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:getFatigueDataProperty\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/Livewire/ProductionDashboard.php
-
-		-
-			message: "#^Method App\\\\Livewire\\\\ProductionDashboard\\:\\:getFatigueStatsProperty\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/Livewire/ProductionDashboard.php
 
@@ -9239,71 +9224,6 @@ parameters:
 			message: "#^Return type of call to method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) contains unresolvable type\\.$#"
 			count: 1
 			path: app/Services/ShiftService.php
-
-		-
-			message: "#^Access to property \\$billingPortal on an unknown class Stripe\\\\StripeClient\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Access to property \\$checkout on an unknown class Stripe\\\\StripeClient\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Access to property \\$customers on an unknown class Stripe\\\\StripeClient\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Access to property \\$subscriptions on an unknown class Stripe\\\\StripeClient\\.$#"
-			count: 3
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Call to method getMessage\\(\\) on an unknown class Stripe\\\\Exception\\\\ApiErrorException\\.$#"
-			count: 5
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Caught class Stripe\\\\Exception\\\\ApiErrorException not found\\.$#"
-			count: 5
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Instantiated class Stripe\\\\StripeClient not found\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:createCheckoutSession\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:handleInvoicePaid\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:handlePaymentSucceeded\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:handleSubscriptionCreated\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Method App\\\\Services\\\\StripeService\\:\\:handleSubscriptionUpdated\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
-
-		-
-			message: "#^Property App\\\\Services\\\\StripeService\\:\\:\\$stripe has unknown class Stripe\\\\StripeClient as its type\\.$#"
-			count: 1
-			path: app/Services/StripeService.php
 
 		-
 			message: "#^Method App\\\\View\\\\Components\\\\AppLayout\\:\\:render\\(\\) should return Illuminate\\\\View\\\\View but returns Illuminate\\\\Contracts\\\\View\\\\View\\.$#"
