@@ -48,8 +48,13 @@ jobs:
           QUEUE_CONNECTION: sync
           CACHE_STORE: array
           SESSION_DRIVER: array
-          # No BROADCAST_DRIVER here: real env vars override phpunit.xml's
-          # <env>, and phpunit.xml deliberately forces the null driver.
+          # The literal string "null" selects the inert null broadcaster --
+          # same driver phpunit.xml forces -- but it must ALSO be present as
+          # a real env var: `php artisan test` boots a console app before
+          # phpunit.xml's <env> exists, and with nothing set,
+          # config/broadcasting.php falls back to 'pusher' and crashes
+          # constructing a broadcaster with no credentials.
+          BROADCAST_DRIVER: "null"
           MAIL_MAILER: array
           FILESYSTEM_DISK: local
           # Dummy credentials so BroadcastChannelAuthorizationTest (which
