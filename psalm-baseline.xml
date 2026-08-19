@@ -215,6 +215,21 @@
       <code><![CDATA[DataQualityCheck]]></code>
     </UnusedClass>
   </file>
+  <file src="app/Console/Commands/DetectProductionLosses.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[DetectProductionLosses]]></code>
+    </ClassMustBeFinal>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[DetectProductionLosses]]></code>
+      <code><![CDATA[DetectProductionLosses]]></code>
+      <code><![CDATA[DetectProductionLosses]]></code>
+      <code><![CDATA[DetectProductionLosses]]></code>
+      <code><![CDATA[DetectProductionLosses]]></code>
+    </PropertyNotSetInConstructor>
+    <UnusedClass>
+      <code><![CDATA[DetectProductionLosses]]></code>
+    </UnusedClass>
+  </file>
   <file src="app/Console/Commands/GenerateRoadsPathCoordinates.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$machine]]></code>
@@ -6573,6 +6588,21 @@
       <code><![CDATA[$this->trend]]></code>
     </UndefinedThisPropertyFetch>
   </file>
+  <file src="app/Livewire/ProductionLossPanel.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ProductionLossPanel]]></code>
+    </ClassMustBeFinal>
+    <MissingConstructor>
+      <code><![CDATA[$machine]]></code>
+    </MissingConstructor>
+    <MixedAssignment>
+      <code><![CDATA[$message]]></code>
+      <code><![CDATA[$message]]></code>
+    </MixedAssignment>
+    <UnusedClass>
+      <code><![CDATA[ProductionLossPanel]]></code>
+    </UnusedClass>
+  </file>
   <file src="app/Livewire/ReportGenerator.php">
     <ClassMustBeFinal>
       <code><![CDATA[ReportGenerator]]></code>
@@ -8229,6 +8259,8 @@
     </ClassMustBeFinal>
     <InvalidDocblock>
       <code><![CDATA[public function latestEngineHoursMetric(): HasOne]]></code>
+      <code><![CDATA[public function lossEvents(): HasMany]]></code>
+      <code><![CDATA[public function productionRecords(): HasMany]]></code>
     </InvalidDocblock>
     <InvalidReturnStatement>
       <code><![CDATA[$this->alerts()->where('status', 'active')]]></code>
@@ -8263,6 +8295,8 @@
       <code><![CDATA[$this->hasMany(MachineAreaAssignment::class)]]></code>
       <code><![CDATA[$this->hasMany(MachineMetric::class)]]></code>
       <code><![CDATA[$this->hasMany(MaintenanceRecord::class)]]></code>
+      <code><![CDATA[$this->hasMany(ProductionLossEvent::class)]]></code>
+      <code><![CDATA[$this->hasMany(ProductionRecord::class)]]></code>
       <code><![CDATA[$this->hasOne(MachineHealthStatus::class)]]></code>
       <code><![CDATA[$this->hasOne(MachineMetric::class)->ofMany(
             ['created_at' => 'max', 'id' => 'max'],
@@ -8282,6 +8316,7 @@
       <code><![CDATA[healthStatus]]></code>
       <code><![CDATA[integration]]></code>
       <code><![CDATA[latestEngineHoursMetric]]></code>
+      <code><![CDATA[lossEvents]]></code>
       <code><![CDATA[mineArea]]></code>
       <code><![CDATA[team]]></code>
       <code><![CDATA[unassignFromExcavator]]></code>
@@ -8894,6 +8929,46 @@
       <code><![CDATA[scopeForDate]]></code>
       <code><![CDATA[scopeForTeam]]></code>
       <code><![CDATA[scopeHighConfidence]]></code>
+      <code><![CDATA[team]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="app/Models/ProductionLossEvent.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ProductionLossEvent]]></code>
+    </ClassMustBeFinal>
+    <InvalidDocblock>
+      <code><![CDATA[public function classifier(): BelongsTo]]></code>
+      <code><![CDATA[public function creator(): BelongsTo]]></code>
+      <code><![CDATA[public function machine(): BelongsTo]]></code>
+      <code><![CDATA[public function team(): BelongsTo]]></code>
+    </InvalidDocblock>
+    <InvalidReturnStatement>
+      <code><![CDATA[ProductionLossEvent::query()->where('source', self::SOURCE_SYSTEM)
+            ->where('status', self::STATUS_PENDING)]]></code>
+      <code><![CDATA[ProductionLossEvent::query()->where(function (Builder $inner) {
+            $inner->where('source', self::SOURCE_USER)
+                ->orWhere('status', self::STATUS_CONFIRMED)
+                ->orWhere('status', self::STATUS_RESOLVED);
+        })]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[Builder<ProductionLossEvent>]]></code>
+      <code><![CDATA[Builder<ProductionLossEvent>]]></code>
+    </InvalidReturnType>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function casts(): array]]></code>
+    </MissingOverrideAttribute>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->belongsTo(Machine::class)]]></code>
+      <code><![CDATA[$this->belongsTo(Team::class)]]></code>
+      <code><![CDATA[$this->belongsTo(User::class, 'classified_by')]]></code>
+      <code><![CDATA[$this->belongsTo(User::class, 'created_by')]]></code>
+    </MixedReturnStatement>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[classifier]]></code>
+      <code><![CDATA[creator]]></code>
+      <code><![CDATA[machine]]></code>
+      <code><![CDATA[overlaps]]></code>
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
   </file>
@@ -13141,6 +13216,74 @@
       <code><![CDATA[$subscription?->id]]></code>
       <code><![CDATA[$subscription?->paystack_customer_code]]></code>
     </UndefinedMagicPropertyFetch>
+  </file>
+  <file src="app/Services/ProductionLossService.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ProductionLossService]]></code>
+    </ClassMustBeFinal>
+    <DocblockTypeContradiction>
+      <code><![CDATA[$first->created_at]]></code>
+      <code><![CDATA[$last->created_at]]></code>
+    </DocblockTypeContradiction>
+    <InvalidOperand>
+      <code><![CDATA[$start->diffInMinutes($end) / 60]]></code>
+      <code><![CDATA[$windowStart->diffInMinutes($windowEnd) / 60]]></code>
+    </InvalidOperand>
+    <InvalidTemplateParam>
+      <code><![CDATA[$counted->whereNotNull('reason')
+            ->groupBy('reason')]]></code>
+    </InvalidTemplateParam>
+    <MissingClosureReturnType>
+      <code><![CDATA[fn (Collection $group) => $group->sum('lost_hours')]]></code>
+    </MissingClosureReturnType>
+    <MixedArgument>
+      <code><![CDATA[$counted->filter(fn ($e) => $e->started_at->greaterThanOrEqualTo(now()->startOfMonth()))->sum('lost_hours')]]></code>
+      <code><![CDATA[$counted->filter(fn ($e) => $e->started_at->greaterThanOrEqualTo(now()->startOfWeek()))->sum('lost_hours')]]></code>
+      <code><![CDATA[$counted->filter(fn ($e) => $e->started_at->isToday())->sum('lost_hours')]]></code>
+      <code><![CDATA[$counted->sum('lost_hours')]]></code>
+      <code><![CDATA[$operatingDelta]]></code>
+      <code><![CDATA[$rate]]></code>
+      <code><![CDATA[$rate * $lostHours]]></code>
+      <code><![CDATA[$windowHours - $operatingDelta]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$hoursWorked]]></code>
+      <code><![CDATA[$operatingDelta]]></code>
+      <code><![CDATA[$rate]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$hoursWorked]]></code>
+      <code><![CDATA[$meter->max()]]></code>
+      <code><![CDATA[$meter->max()]]></code>
+      <code><![CDATA[$operatingDelta]]></code>
+      <code><![CDATA[$rate]]></code>
+    </MixedOperand>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[[
+            'total_hours' => round($counted->sum('lost_hours'), 2),
+            'today_hours' => round($counted->filter(fn ($e) => $e->started_at->isToday())->sum('lost_hours'), 2),
+            'week_hours' => round($counted->filter(fn ($e) => $e->started_at->greaterThanOrEqualTo(now()->startOfWeek()))->sum('lost_hours'), 2),
+            'month_hours' => round($counted->filter(fn ($e) => $e->started_at->greaterThanOrEqualTo(now()->startOfMonth()))->sum('lost_hours'), 2),
+            'event_count' => $counted->count(),
+            'primary_reason' => $primary !== null ? ucfirst(str_replace('_', ' ', (string) $primary)) : null,
+            'latest_event_at' => $counted->max('started_at'),
+            'pending_review' => ProductionLossEvent::pendingReview()->where('machine_id', $machine->id)->count(),
+        ]]]></code>
+      <code><![CDATA[array{total_hours: float, today_hours: float, week_hours: float, month_hours: float, event_count: int, primary_reason: string|null, latest_event_at: Carbon|null, pending_review: int}]]></code>
+    </MixedReturnTypeCoercion>
+    <RedundantConditionGivenDocblockType>
+      <code><![CDATA[$first->recorded_at]]></code>
+      <code><![CDATA[$last->recorded_at]]></code>
+    </RedundantConditionGivenDocblockType>
+    <UndefinedMagicMethod>
+      <code><![CDATA[ActivityLog::create([
+            'team_id' => $machine->team_id,
+            'user_id' => $user->id,
+            'action' => $action,
+            'description' => $description,
+        ])]]></code>
+      <code><![CDATA[sum]]></code>
+    </UndefinedMagicMethod>
   </file>
   <file src="app/Services/ProductionService.php">
     <ClassMustBeFinal>

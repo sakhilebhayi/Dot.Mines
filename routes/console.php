@@ -34,6 +34,15 @@ Schedule::command('integrations:sync-due')
     ->withoutOverlapping()
     ->onOneServer();
 
+// Daily, after the previous day's telemetry is fully synced: raise
+// potential production-loss events (machine reporting but engine-hours
+// meter not moving) as pending_classification for human review on the
+// Machine Details page. Detection never auto-confirms a loss.
+Schedule::command('production:detect-losses')
+    ->dailyAt('01:30')
+    ->withoutOverlapping()
+    ->onOneServer();
+
 // Nightly: move machine_metrics rows older than the retention window
 // (METRICS_RETENTION_DAYS, default 90) into machine_metrics_archive so the
 // hot table -- the one every dashboard and analytics query hits -- stays
