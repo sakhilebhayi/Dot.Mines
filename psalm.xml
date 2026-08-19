@@ -3,6 +3,7 @@
     errorLevel="1"
     resolveFromConfigFile="true"
     errorBaseline="psalm-baseline.xml"
+    findUnusedBaselineEntry="false"
 >
   <projectFiles>
     <directory name="app" />

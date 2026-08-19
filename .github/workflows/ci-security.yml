@@ -40,7 +40,7 @@ jobs:
         run: php artisan test --compact
         env:
           APP_ENV: testing
-          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          APP_KEY: base64:Ho/Tnr6L5ouHT0PfLQLCSbmEBtV1AOYF03E8Apa88ZU=
           DB_CONNECTION: sqlite
           DB_DATABASE: ":memory:"
           QUEUE_CONNECTION: sync
@@ -139,7 +139,7 @@ jobs:
         run: composer install --no-interaction --no-progress --prefer-dist
         env:
           APP_ENV: testing
-          APP_KEY: base64:TestKeyForCIOnly00000000000000000000000=
+          APP_KEY: base64:Ho/Tnr6L5ouHT0PfLQLCSbmEBtV1AOYF03E8Apa88ZU=
           BROADCAST_DRIVER: log
 
       - name: Run PHPStan
