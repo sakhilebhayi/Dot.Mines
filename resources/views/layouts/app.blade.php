@@ -61,6 +61,11 @@
         </style>
     </head>
     <body class="antialiased bg-[var(--ink)] text-[var(--stone)]" style="font-family: var(--font-body);">
+        <!-- Keyboard users skip the sidebar/navbar on every page load -->
+        <a href="#main-content"
+           class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-[var(--gold)] focus:text-[var(--ink)] focus:rounded-lg">
+            Skip to main content
+        </a>
         <x-banner />
         
         <!-- Notification System -->
@@ -249,7 +254,7 @@
                 @livewire('navbar')
 
                 <!-- Page Content -->
-                <main class="flex-1 overflow-auto bg-[var(--ink)]">
+                <main id="main-content" class="flex-1 overflow-auto bg-[var(--ink)]">
                     <div class="p-6 page-transition">
                         @yield('content')
                         @isset($slot)
