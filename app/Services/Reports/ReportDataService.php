@@ -46,8 +46,13 @@ class ReportDataService
 
     private function production(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
+        // whereDate bounds, not whereBetween on date strings: the model's
+        // 'date' cast stores record_date with a time component, so a string
+        // BETWEEN comparison silently excluded every record on the report's
+        // end date ('Y-m-d H:i:s' sorts after 'Y-m-d').
         $query = ProductionRecord::where('team_id', $teamId)
-            ->whereBetween('record_date', [$start->toDateString(), $end->toDateString()])
+            ->whereDate('record_date', '>=', $start)
+            ->whereDate('record_date', '<=', $end)
             ->with(['machine', 'mineArea']);
 
         if (! empty($machineIds)) {

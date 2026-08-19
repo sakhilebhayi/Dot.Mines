@@ -10299,6 +10299,7 @@
     <InvalidOperand>
       <code><![CDATA[$baseDays * (1 - $riskScore)]]></code>
       <code><![CDATA[$daysSinceLastMaintenance / 180]]></code>
+      <code><![CDATA[$operatingHours / 30]]></code>
       <code><![CDATA[$riskScore * 100]]></code>
       <code><![CDATA[$riskScore * 100]]></code>
       <code><![CDATA[($machineAge / 20) * 0.2]]></code>
@@ -10307,6 +10308,10 @@
       <code><![CDATA[round($highUsage, 1)]]></code>
       <code><![CDATA[round($riskScore * 100)]]></code>
     </InvalidOperand>
+    <MissingClosureParamType>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+    </MissingClosureParamType>
     <MixedArgument>
       <code><![CDATA[$highUsage]]></code>
       <code><![CDATA[$lastMaintenance->completed_at]]></code>
@@ -10324,6 +10329,7 @@
       <code><![CDATA[$highUsage]]></code>
       <code><![CDATA[$lastMaintenance]]></code>
       <code><![CDATA[$operatingHours]]></code>
+      <code><![CDATA[$readings]]></code>
       <code><![CDATA[$recentHours]]></code>
       <code><![CDATA[$riskFactors['health']]]></code>
       <code><![CDATA[$riskFactors['hours']]]></code>
@@ -10333,17 +10339,24 @@
       <code><![CDATA[avg]]></code>
       <code><![CDATA[avg]]></code>
       <code><![CDATA[avg]]></code>
+      <code><![CDATA[count]]></code>
+      <code><![CDATA[filter]]></code>
       <code><![CDATA[first]]></code>
       <code><![CDATA[first]]></code>
       <code><![CDATA[format]]></code>
+      <code><![CDATA[get]]></code>
+      <code><![CDATA[map]]></code>
+      <code><![CDATA[max]]></code>
+      <code><![CDATA[min]]></code>
+      <code><![CDATA[pluck]]></code>
       <code><![CDATA[sortByDesc]]></code>
-      <code><![CDATA[sum]]></code>
     </MixedMethodCall>
     <MixedOperand>
       <code><![CDATA[$avgHoursPerDay]]></code>
       <code><![CDATA[$healthScore]]></code>
       <code><![CDATA[$machine->healthStatus->overall_health_score]]></code>
       <code><![CDATA[$operatingHours]]></code>
+      <code><![CDATA[$readings->max()]]></code>
       <code><![CDATA[$scheduledInterval]]></code>
       <code><![CDATA[$scheduledInterval]]></code>
       <code><![CDATA[(100 - $healthScore) / 100]]></code>
@@ -10729,6 +10742,8 @@
       <code><![CDATA[$tank]]></code>
     </MissingClosureParamType>
     <MixedArgument>
+      <code><![CDATA[$dayMetrics]]></code>
+      <code><![CDATA[$dayMetrics]]></code>
       <code><![CDATA[$dispensedTotal]]></code>
       <code><![CDATA[$item->total_fuel]]></code>
       <code><![CDATA[$metrics->sum('idle_fuel_consumed')]]></code>
@@ -10754,14 +10769,12 @@
       <code><![CDATA[$currentBudget]]></code>
       <code><![CDATA[$dailyTrend]]></code>
       <code><![CDATA[$data['currency']]]></code>
+      <code><![CDATA[$dayMetrics]]></code>
       <code><![CDATA[$dispensedTotal]]></code>
-      <code><![CDATA[$idleTime]]></code>
       <code><![CDATA[$location]]></code>
       <code><![CDATA[$lossByType]]></code>
       <code><![CDATA[$machine]]></code>
       <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$operatingHours]]></code>
       <code><![CDATA[$tank]]></code>
       <code><![CDATA[$tank]]></code>
       <code><![CDATA[$tankStatus]]></code>
@@ -10782,7 +10795,7 @@
       <code><![CDATA[decrement]]></code>
       <code><![CDATA[first]]></code>
       <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
+      <code><![CDATA[get]]></code>
       <code><![CDATA[get]]></code>
       <code><![CDATA[get]]></code>
       <code><![CDATA[get]]></code>
@@ -10842,6 +10855,7 @@
     </MixedMethodCall>
     <MixedOperand>
       <code><![CDATA[$avgConsumption]]></code>
+      <code><![CDATA[$readings->max()]]></code>
       <code><![CDATA[$totalConsumed]]></code>
       <code><![CDATA[$totalCost]]></code>
       <code><![CDATA[$totalFuel]]></code>
@@ -10876,8 +10890,6 @@
       <code><![CDATA[$metric->fuel_consumed_liters]]></code>
       <code><![CDATA[$metric->fuel_efficiency_lph]]></code>
       <code><![CDATA[$metric->operating_hours]]></code>
-      <code><![CDATA[$metrics->idle_time]]></code>
-      <code><![CDATA[$metrics->operating_hours]]></code>
       <code><![CDATA[$tank->capacity_liters]]></code>
       <code><![CDATA[$tank->current_level_liters]]></code>
       <code><![CDATA[$tank->current_level_liters]]></code>
@@ -10896,6 +10908,12 @@
       <code><![CDATA[$transaction->machine?->name]]></code>
     </MixedPropertyFetch>
     <MixedReturnStatement>
+      <code><![CDATA[$readings->count() >= 2
+            ? max(0.0, $readings->max() - $readings->min())
+            : null]]></code>
+      <code><![CDATA[$readings->count() >= 2
+            ? max(0.0, $readings->max() - $readings->min())
+            : null]]></code>
       <code><![CDATA[DB::transaction(function () use ($data) {
             // currency wasn't in $fillable until it was wired up to
             // Team::currency (see Team::$fillable) -- default new
@@ -13832,7 +13850,7 @@
       <code><![CDATA[metrics]]></code>
       <code><![CDATA[whereBetween]]></code>
       <code><![CDATA[whereBetween]]></code>
-      <code><![CDATA[whereBetween]]></code>
+      <code><![CDATA[whereDate]]></code>
       <code><![CDATA[whereIn]]></code>
     </UndefinedMagicMethod>
     <UndefinedMagicPropertyFetch>
