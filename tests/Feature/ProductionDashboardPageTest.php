@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Livewire\ProductionDashboard;
+use App\Models\OperatorFatigue;
 use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Models\User;
@@ -122,5 +123,93 @@ class ProductionDashboardPageTest extends TestCase
 
         $this->assertTrue($ids->contains($recent->id));
         $this->assertFalse($ids->contains($stale->id));
+    }
+
+    public function test_fatigue_section_shows_real_operator_fatigue_rows_bucketed_by_canonical_alert_level(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        $makeShift = function (Team $forTeam, string $level, int $score) {
+            $operator = User::factory()->create();
+
+            return OperatorFatigue::create([
+                'user_id' => $operator->id,
+                'team_id' => $forTeam->id,
+                'shift_date' => now()->toDateString(),
+                'shift_type' => 'morning',
+                'shift_start' => '06:00',
+                'shift_end' => '15:00',
+                'hours_worked' => 9,
+                'consecutive_days' => 3,
+                'fatigue_score' => $score,
+                'alert_level' => $level,
+            ]);
+        };
+
+        $makeShift($team, 'low', 25);
+        $makeShift($team, 'medium', 45);
+        $makeShift($team, 'critical', 85);
+
+        // Another tenant's shift must never leak into this dashboard.
+        $otherTeam = Team::factory()->create();
+        $makeShift($otherTeam, 'critical', 95);
+
+        $component = Livewire::actingAs($user)->test(ProductionDashboard::class);
+
+        $fatigueData = $component->get('fatigueData');
+        $this->assertCount(3, $fatigueData);
+        // Ordered by fatigue score within the same shift date, worst first.
+        $this->assertSame(85, $fatigueData[0]['fatigue_score']);
+        $this->assertSame('critical', $fatigueData[0]['alert_level']);
+
+        $stats = $component->get('fatigueStats');
+        $this->assertSame(1, $stats['well_rested']);
+        $this->assertSame(1, $stats['needs_monitoring']);
+        $this->assertSame(0, $stats['high_fatigue']);
+        $this->assertSame(1, $stats['needs_rest']);
+        // The four buckets are disjoint and cover every listed operator.
+        $this->assertSame(count($fatigueData), array_sum($stats));
+    }
+
+    public function test_fatigue_section_lists_only_the_latest_shift_per_operator(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        $operator = User::factory()->create();
+        OperatorFatigue::create([
+            'user_id' => $operator->id,
+            'team_id' => $team->id,
+            'shift_date' => now()->subDays(2)->toDateString(),
+            'shift_type' => 'night',
+            'shift_start' => '18:00',
+            'shift_end' => '06:00',
+            'hours_worked' => 12,
+            'consecutive_days' => 5,
+            'fatigue_score' => 70,
+            'alert_level' => 'high',
+        ]);
+        OperatorFatigue::create([
+            'user_id' => $operator->id,
+            'team_id' => $team->id,
+            'shift_date' => now()->toDateString(),
+            'shift_type' => 'morning',
+            'shift_start' => '06:00',
+            'shift_end' => '14:00',
+            'hours_worked' => 8,
+            'consecutive_days' => 1,
+            'fatigue_score' => 15,
+            'alert_level' => 'none',
+        ]);
+
+        $component = Livewire::actingAs($user)->test(ProductionDashboard::class);
+
+        $fatigueData = $component->get('fatigueData');
+        $this->assertCount(1, $fatigueData, 'Only the most recent shift per operator should be listed.');
+        $this->assertSame(15, $fatigueData[0]['fatigue_score']);
+        $this->assertSame(['well_rested' => 1, 'needs_monitoring' => 0, 'high_fatigue' => 0, 'needs_rest' => 0], $component->get('fatigueStats'));
     }
 }
