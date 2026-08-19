@@ -2174,6 +2174,27 @@
       <code><![CDATA[GdprRequest::where('user_id', Auth::id())]]></code>
     </UndefinedMagicMethod>
   </file>
+  <file src="app/Http/Controllers/HealthController.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[HealthController]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$disk]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$connection]]></code>
+      <code><![CDATA[$disk]]></code>
+    </MixedAssignment>
+    <NoInterfaceProperties>
+      <code><![CDATA[now()->timestamp]]></code>
+    </NoInterfaceProperties>
+    <PossiblyInvalidOperand>
+      <code><![CDATA[now()->timestamp]]></code>
+    </PossiblyInvalidOperand>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[ready]]></code>
+    </PossiblyUnusedMethod>
+  </file>
   <file src="app/Http/Controllers/MinePlanDownloadController.php">
     <ClassMustBeFinal>
       <code><![CDATA[MinePlanDownloadController]]></code>
@@ -2536,6 +2557,19 @@
       <code><![CDATA[$metrics->engine_temperature]]></code>
       <code><![CDATA[$metrics->fuel_level]]></code>
     </UndefinedMagicPropertyFetch>
+  </file>
+  <file src="app/Jobs/ArchiveOldMetricsJob.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ArchiveOldMetricsJob]]></code>
+    </ClassMustBeFinal>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[failed]]></code>
+      <code><![CDATA[handle]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$timeout]]></code>
+      <code><![CDATA[$tries]]></code>
+    </PossiblyUnusedProperty>
   </file>
   <file src="app/Jobs/DeleteUserDataJob.php">
     <ClassMustBeFinal>
@@ -2933,6 +2967,24 @@
       <code><![CDATA[$machine->last_location_update]]></code>
       <code><![CDATA[$machine->status]]></code>
     </UndefinedMagicPropertyFetch>
+  </file>
+  <file src="app/Jobs/PurgeExpiredSoftDeletesJob.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[PurgeExpiredSoftDeletesJob]]></code>
+    </ClassMustBeFinal>
+    <MixedAssignment>
+      <code><![CDATA[$count]]></code>
+      <code><![CDATA[$totals[class_basename($model)]]]></code>
+    </MixedAssignment>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[failed]]></code>
+      <code><![CDATA[handle]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$backoff]]></code>
+      <code><![CDATA[$timeout]]></code>
+      <code><![CDATA[$tries]]></code>
+    </PossiblyUnusedProperty>
   </file>
   <file src="app/Jobs/RouteSpeedMonitoringJob.php">
     <ArgumentTypeCoercion>
