@@ -2111,6 +2111,69 @@
       <code><![CDATA[$validated]]></code>
     </UnusedVariable>
   </file>
+  <file src="app/Http/Controllers/GdprController.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[GdprController]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$gdprRequest->file_path]]></code>
+      <code><![CDATA[$gdprRequest->file_path]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$existing]]></code>
+      <code><![CDATA[$existing]]></code>
+      <code><![CDATA[$gdprRequest]]></code>
+      <code><![CDATA[$gdprRequest]]></code>
+      <code><![CDATA[$gdprRequest]]></code>
+      <code><![CDATA[$requests]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[exists]]></code>
+      <code><![CDATA[exists]]></code>
+      <code><![CDATA[firstOrFail]]></code>
+      <code><![CDATA[get]]></code>
+      <code><![CDATA[isExpired]]></code>
+      <code><![CDATA[orderByDesc]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[whereIn]]></code>
+      <code><![CDATA[whereIn]]></code>
+    </MixedMethodCall>
+    <MixedPropertyFetch>
+      <code><![CDATA[$gdprRequest->file_path]]></code>
+    </MixedPropertyFetch>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[downloadExport]]></code>
+      <code><![CDATA[index]]></code>
+      <code><![CDATA[requestDeletion]]></code>
+      <code><![CDATA[requestExport]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$request]]></code>
+      <code><![CDATA[$request]]></code>
+    </PossiblyUnusedParam>
+    <UndefinedMagicMethod>
+      <code><![CDATA[GdprRequest::create([
+            'user_id' => $user->id,
+            'type' => GdprRequest::TYPE_DELETE,
+            'status' => GdprRequest::STATUS_PENDING,
+            'email' => $user->email,
+            'reason' => $request->input('reason'),
+        ])]]></code>
+      <code><![CDATA[GdprRequest::create([
+            'user_id' => $user->id,
+            'type' => GdprRequest::TYPE_EXPORT,
+            'status' => GdprRequest::STATUS_PENDING,
+            'email' => $user->email,
+        ])]]></code>
+      <code><![CDATA[GdprRequest::where('download_token', $token)]]></code>
+      <code><![CDATA[GdprRequest::where('user_id', $user->id)]]></code>
+      <code><![CDATA[GdprRequest::where('user_id', $user->id)]]></code>
+      <code><![CDATA[GdprRequest::where('user_id', Auth::id())]]></code>
+    </UndefinedMagicMethod>
+  </file>
   <file src="app/Http/Controllers/HealthController.php">
     <ClassMustBeFinal>
       <code><![CDATA[HealthController]]></code>
@@ -2507,6 +2570,115 @@
       <code><![CDATA[$timeout]]></code>
       <code><![CDATA[$tries]]></code>
     </PossiblyUnusedProperty>
+  </file>
+  <file src="app/Jobs/DeleteUserDataJob.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[DeleteUserDataJob]]></code>
+    </ClassMustBeFinal>
+    <MissingClosureParamType>
+      <code><![CDATA[$m]]></code>
+    </MissingClosureParamType>
+    <MissingClosureReturnType>
+      <code><![CDATA[fn ($m) => $m->to($email)]]></code>
+    </MissingClosureReturnType>
+    <MixedArgument>
+      <code><![CDATA[$user]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$email]]></code>
+      <code><![CDATA[$user]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[from]]></code>
+      <code><![CDATA[subject]]></code>
+      <code><![CDATA[to]]></code>
+    </MixedMethodCall>
+    <MixedOperand>
+      <code><![CDATA[config('app.name')]]></code>
+      <code><![CDATA[config('app.name')]]></code>
+    </MixedOperand>
+    <MixedPropertyFetch>
+      <code><![CDATA[$user->email]]></code>
+      <code><![CDATA[$user->id]]></code>
+    </MixedPropertyFetch>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[handle]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$timeout]]></code>
+      <code><![CDATA[$tries]]></code>
+    </PossiblyUnusedProperty>
+    <UndefinedMagicMethod>
+      <code><![CDATA[User::findOrFail($this->gdprRequest->user_id)]]></code>
+    </UndefinedMagicMethod>
+  </file>
+  <file src="app/Jobs/ExportUserDataJob.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ExportUserDataJob]]></code>
+    </ClassMustBeFinal>
+    <DocblockTypeContradiction>
+      <code><![CDATA[$fatigue->shift_date]]></code>
+    </DocblockTypeContradiction>
+    <InvalidTemplateParam>
+      <code><![CDATA[OperatorFatigue::query()
+                    ->where('user_id', $user->id)
+                    ->get()
+                    ->map(fn (OperatorFatigue $fatigue) => [
+                        'shift_date' => $fatigue->shift_date?->toDateString(),
+                        'shift_type' => $fatigue->shift_type,
+                        'hours_worked' => $fatigue->hours_worked,
+                        'consecutive_days' => $fatigue->consecutive_days,
+                        'fatigue_score' => $fatigue->fatigue_score,
+                        'alert_level' => $fatigue->alert_level,
+                    ])]]></code>
+    </InvalidTemplateParam>
+    <MissingClosureParamType>
+      <code><![CDATA[$m]]></code>
+      <code><![CDATA[$team]]></code>
+    </MissingClosureParamType>
+    <MissingClosureReturnType>
+      <code><![CDATA[fn ($m) => $m->to($user->email)]]></code>
+    </MissingClosureReturnType>
+    <MixedAssignment>
+      <code><![CDATA[$user]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[allTeams]]></code>
+      <code><![CDATA[from]]></code>
+      <code><![CDATA[map]]></code>
+      <code><![CDATA[subject]]></code>
+      <code><![CDATA[teamRole]]></code>
+      <code><![CDATA[to]]></code>
+      <code><![CDATA[toArray]]></code>
+      <code><![CDATA[toIso8601String]]></code>
+    </MixedMethodCall>
+    <MixedOperand>
+      <code><![CDATA[$user->id]]></code>
+      <code><![CDATA[config('app.name')]]></code>
+    </MixedOperand>
+    <MixedPropertyFetch>
+      <code><![CDATA[$team->id]]></code>
+      <code><![CDATA[$team->name]]></code>
+      <code><![CDATA[$user->created_at]]></code>
+      <code><![CDATA[$user->email]]></code>
+      <code><![CDATA[$user->email]]></code>
+      <code><![CDATA[$user->id]]></code>
+      <code><![CDATA[$user->name]]></code>
+      <code><![CDATA[$user->teamRole($team)?->key]]></code>
+    </MixedPropertyFetch>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[handle]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$timeout]]></code>
+      <code><![CDATA[$tries]]></code>
+    </PossiblyUnusedProperty>
+    <RedundantConditionGivenDocblockType>
+      <code><![CDATA[$fatigue->shift_date?->toDateString()]]></code>
+    </RedundantConditionGivenDocblockType>
+    <UndefinedMagicMethod>
+      <code><![CDATA[User::findOrFail($this->gdprRequest->user_id)]]></code>
+    </UndefinedMagicMethod>
   </file>
   <file src="app/Jobs/GenerateReportJob.php">
     <ClassMustBeFinal>
@@ -7772,6 +7944,27 @@
       <code><![CDATA[$this->quantity_liters]]></code>
       <code><![CDATA[$this->total_cost]]></code>
     </UndefinedThisPropertyFetch>
+  </file>
+  <file src="app/Models/GdprRequest.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[GdprRequest]]></code>
+    </ClassMustBeFinal>
+    <InvalidDocblock>
+      <code><![CDATA[public function user(): BelongsTo]]></code>
+    </InvalidDocblock>
+    <LessSpecificImplementedReturnType>
+      <code><![CDATA[array<mixed>]]></code>
+    </LessSpecificImplementedReturnType>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function casts(): array]]></code>
+    </MissingOverrideAttribute>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->belongsTo(User::class)]]></code>
+    </MixedReturnStatement>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[isExpired]]></code>
+      <code><![CDATA[user]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="app/Models/Geofence.php">
     <ClassMustBeFinal>
@@ -14534,6 +14727,8 @@
   </file>
   <file src="routes/web.php">
     <MixedMethodCall>
+      <code><![CDATA[name]]></code>
+      <code><![CDATA[name]]></code>
       <code><![CDATA[name]]></code>
       <code><![CDATA[name]]></code>
       <code><![CDATA[name]]></code>
