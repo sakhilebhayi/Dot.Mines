@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\VerifyEmailNotification;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
@@ -37,7 +40,7 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property-read Collection<int, PersonalAccessToken> $tokens
  * @property-read Collection<int, Team> $ownedTeams
  */
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
 
@@ -321,5 +324,28 @@ class User extends Authenticatable
         }
 
         return $this->belongsTo(Team::class, 'current_team_id');
+    }
+
+    /**
+     * Send the email verification notification via the queue, falling back
+     * to synchronous delivery when queueing fails -- registration must
+     * never 500 because the queue backend is down (happened in production:
+     * RedisException "Connection refused" at POST /register; Predis and
+     * other drivers throw their own connection exception classes, hence
+     * the broad catch on the queue push specifically).
+     */
+    #[\Override]
+    public function sendEmailVerificationNotification(): void
+    {
+        try {
+            $this->notify(new VerifyEmailNotification);
+        } catch (\Throwable $e) {
+            Log::warning('Queueing verification email failed; sending synchronously', [
+                'user_id' => $this->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            Notification::sendNow($this, new VerifyEmailNotification);
+        }
     }
 }
