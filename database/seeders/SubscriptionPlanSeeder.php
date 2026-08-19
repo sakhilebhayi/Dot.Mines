@@ -19,8 +19,8 @@ class SubscriptionPlanSeeder extends Seeder
                 'description' => 'Perfect for small operations getting started with fleet management',
                 'price' => 1782.00,
                 'yearly_price' => 17982.00, // ~17% discount
-                'stripe_price_id' => env('STRIPE_BASIC_MONTHLY_PRICE_ID'),
-                'stripe_yearly_price_id' => env('STRIPE_BASIC_YEARLY_PRICE_ID'),
+                'paystack_plan_code' => env('PAYSTACK_BASIC_MONTHLY_PLAN_CODE'),
+                'paystack_yearly_plan_code' => env('PAYSTACK_BASIC_YEARLY_PLAN_CODE'),
                 'features' => [
                     'Real-time fleet tracking',
                     'Basic geofencing',
@@ -44,8 +44,8 @@ class SubscriptionPlanSeeder extends Seeder
                 'description' => 'Advanced features for growing mining operations',
                 'price' => 4482.00,
                 'yearly_price' => 44982.00, // ~17% discount
-                'stripe_price_id' => env('STRIPE_PRO_MONTHLY_PRICE_ID'),
-                'stripe_yearly_price_id' => env('STRIPE_PRO_YEARLY_PRICE_ID'),
+                'paystack_plan_code' => env('PAYSTACK_PRO_MONTHLY_PLAN_CODE'),
+                'paystack_yearly_plan_code' => env('PAYSTACK_PRO_YEARLY_PLAN_CODE'),
                 'features' => [
                     'Everything in Basic',
                     'Advanced analytics',
@@ -71,8 +71,8 @@ class SubscriptionPlanSeeder extends Seeder
                 'description' => 'Complete solution for large-scale mining operations',
                 'price' => 8982.00,
                 'yearly_price' => 89982.00, // ~17% discount
-                'stripe_price_id' => env('STRIPE_ENTERPRISE_MONTHLY_PRICE_ID'),
-                'stripe_yearly_price_id' => env('STRIPE_ENTERPRISE_YEARLY_PRICE_ID'),
+                'paystack_plan_code' => env('PAYSTACK_ENTERPRISE_MONTHLY_PLAN_CODE'),
+                'paystack_yearly_plan_code' => env('PAYSTACK_ENTERPRISE_YEARLY_PLAN_CODE'),
                 'features' => [
                     'Everything in Professional',
                     'Unlimited machines',

@@ -21,6 +21,7 @@ use App\Livewire\RoutePlanning;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\Report;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -165,7 +166,15 @@ Route::middleware([
     Route::get('/billing', BillingPortal::class)
         ->name('billing.index');
 
-    Route::get('/billing/success', function () {
+    Route::get('/billing/success', function (Request $request) {
+        // Paystack redirects here with a ?reference (or legacy ?trxref) after
+        // checkout. The subscription itself is activated by the webhook; this
+        // route only acknowledges the redirect.
+        if ($request->query('reference') ?? $request->query('trxref')) {
+            return redirect()->route('billing.index')
+                ->with('success', 'Payment received! Your subscription will be activated shortly.');
+        }
+
         return redirect()->route('billing.index')->with('success', 'Subscription activated successfully!');
     })->name('billing.success');
 
@@ -183,9 +192,10 @@ Route::middleware([
     })->name('team.settings');
 });
 
-// Stripe Webhooks (no auth required)
-Route::post('/webhooks/stripe', [WebhookController::class, 'handleStripe'])
-    ->name('webhooks.stripe');
+// Paystack webhooks (no auth -- authenticated by HMAC signature instead)
+Route::post('/webhooks/paystack', [WebhookController::class, 'handlePaystack'])
+    ->middleware('throttle:webhooks')
+    ->name('webhooks.paystack');
 
 // Real-time infrastructure health check -- unauthenticated like Laravel's
 // own /up (bootstrap/app.php), for uptime monitors/load balancers.

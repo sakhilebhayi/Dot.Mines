@@ -2,94 +2,100 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\StripeService;
+use App\Services\PaystackService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Stripe\Webhook;
 
 class WebhookController extends Controller
 {
     /**
-     * Handle Stripe webhook
+     * Handle Paystack webhook
      */
-    public function handleStripe(Request $request)
+    public function handlePaystack(Request $request): JsonResponse
     {
         $payload = $request->getContent();
-        $signature = $request->header('Stripe-Signature');
+        $signature = $request->header('X-Paystack-Signature', '');
 
-        // Verify webhook signature if secret is configured
-        $webhookSecret = config('services.stripe.webhook_secret');
+        $secret = config('services.paystack.secret');
 
-        if ($webhookSecret) {
-            try {
-                $event = Webhook::constructEvent(
-                    $payload,
-                    $signature,
-                    $webhookSecret
-                );
-            } catch (\Exception $e) {
-                Log::error('Stripe webhook signature verification failed', [
-                    'error' => $e->getMessage(),
-                ]);
+        if (empty($secret)) {
+            Log::critical('Paystack secret is not configured. Set PAYSTACK_SECRET_KEY in the environment.');
 
-                return response()->json(['error' => 'Invalid signature'], 400);
-            }
-        } else {
-            $event = json_decode($payload, true);
+            return response()->json(['error' => 'Webhook endpoint misconfigured'], 500);
         }
 
-        Log::info('Stripe webhook received', [
-            'type' => $event['type'] ?? 'unknown',
-        ]);
+        $expected = hash_hmac('sha512', $payload, $secret);
 
-        $stripeService = new StripeService;
+        if (! hash_equals($expected, is_string($signature) ? $signature : '')) {
+            Log::error('Paystack webhook signature verification failed');
 
-        // Handle different event types
+            return response()->json(['error' => 'Invalid signature'], 400);
+        }
+
+        $event = json_decode($payload, true);
+
+        if (! is_array($event) || empty($event['event'])) {
+            return response()->json(['error' => 'Invalid payload'], 400);
+        }
+
+        // Replay protection: reject events older than 5 minutes
+        $eventTime = $event['data']['createdAt'] ?? ($event['data']['created_at'] ?? null);
+        if ($eventTime !== null) {
+            $parsedTime = strtotime((string) $eventTime);
+            if ($parsedTime !== false && (time() - $parsedTime) > 300) {
+                Log::warning('Paystack webhook replay attempt detected', [
+                    'event' => $event['event'],
+                    'event_time' => $eventTime,
+                ]);
+
+                return response()->json(['error' => 'Stale webhook event'], 400);
+            }
+        }
+
+        Log::info('Paystack webhook received', ['event' => $event['event']]);
+
+        $paystackService = new PaystackService;
+
         try {
-            switch ($event['type']) {
-                case 'customer.subscription.created':
-                    $stripeService->handleSubscriptionCreated($event);
+            $data = $event['data'] ?? [];
+            $subscriptionCode = $data['subscription_code'] ?? ($data['subscription']['subscription_code'] ?? null);
+            $reference = $data['reference'] ?? null;
+
+            switch ($event['event']) {
+                case 'subscription.create':
+                    $paystackService->handleSubscriptionCreated($event);
+                    Log::info('Paystack subscription created', ['subscription_code' => $subscriptionCode ?? 'unknown']);
                     break;
 
-                case 'customer.subscription.updated':
-                    $stripeService->handleSubscriptionUpdated($event);
+                case 'subscription.disable':
+                case 'subscription.not_renew':
+                    $paystackService->handleSubscriptionDisabled($event);
+                    Log::info('Paystack subscription disabled', ['subscription_code' => $subscriptionCode ?? 'unknown']);
                     break;
 
-                case 'customer.subscription.deleted':
-                    $stripeService->handleSubscriptionUpdated($event);
+                case 'charge.success':
+                    $paystackService->handleChargeSuccess($event);
                     break;
 
-                case 'payment_intent.succeeded':
-                    $stripeService->handlePaymentSucceeded($event);
-                    break;
-
-                case 'payment_intent.payment_failed':
-                    Log::warning('Payment failed', [
-                        'payment_intent' => $event['data']['object']['id'] ?? 'unknown',
-                    ]);
-                    break;
-
-                case 'invoice.paid':
-                    $stripeService->handleInvoicePaid($event);
+                case 'invoice.update':
+                    $paystackService->handleInvoiceUpdate($event);
                     break;
 
                 case 'invoice.payment_failed':
-                    Log::warning('Invoice payment failed', [
-                        'invoice' => $event['data']['object']['id'] ?? 'unknown',
+                    Log::warning('Paystack invoice payment failed', [
+                        'reference' => $reference ?? 'unknown',
                     ]);
                     break;
 
                 default:
-                    Log::info('Unhandled webhook event', [
-                        'type' => $event['type'],
-                    ]);
+                    Log::info('Unhandled Paystack webhook event', ['event' => $event['event']]);
             }
 
             return response()->json(['status' => 'success']);
-
         } catch (\Exception $e) {
-            Log::error('Webhook processing failed', [
-                'type' => $event['type'] ?? 'unknown',
+            Log::error('Paystack webhook processing failed', [
+                'event' => $event['event'] ?? 'unknown',
                 'error' => $e->getMessage(),
             ]);
 

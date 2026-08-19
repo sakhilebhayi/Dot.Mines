@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $subscription_id
  * @property int|null $payment_id
  * @property string $invoice_number
- * @property string|null $stripe_invoice_id
+ * @property string|null $paystack_invoice_code
  * @property float $subtotal
  * @property float $tax
  * @property float $total
@@ -48,7 +48,7 @@ class Invoice extends Model
         'subscription_id',
         'payment_id',
         'invoice_number',
-        'stripe_invoice_id',
+        'paystack_invoice_code',
         'subtotal',
         'tax',
         'total',

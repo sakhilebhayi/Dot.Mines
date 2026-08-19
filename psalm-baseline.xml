@@ -2219,18 +2219,32 @@
     <ClassMustBeFinal>
       <code><![CDATA[WebhookController]]></code>
     </ClassMustBeFinal>
-    <MissingReturnType>
-      <code><![CDATA[handleStripe]]></code>
-    </MissingReturnType>
+    <MixedArgument>
+      <code><![CDATA[$secret]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$event]]></code>
+      <code><![CDATA[$event]]></code>
+      <code><![CDATA[$event]]></code>
+      <code><![CDATA[$event]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$data['reference']]]></code>
+      <code><![CDATA[$data['subscription']]]></code>
+      <code><![CDATA[$data['subscription']['subscription_code']]]></code>
+      <code><![CDATA[$data['subscription_code']]]></code>
+      <code><![CDATA[$event['data']['created_at']]]></code>
+    </MixedArrayAccess>
     <MixedAssignment>
-      <code><![CDATA[$webhookSecret]]></code>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$eventTime]]></code>
+      <code><![CDATA[$reference]]></code>
+      <code><![CDATA[$secret]]></code>
+      <code><![CDATA[$subscriptionCode]]></code>
     </MixedAssignment>
     <PossiblyUnusedMethod>
-      <code><![CDATA[handleStripe]]></code>
+      <code><![CDATA[handlePaystack]]></code>
     </PossiblyUnusedMethod>
-    <UndefinedClass>
-      <code><![CDATA[Webhook]]></code>
-    </UndefinedClass>
   </file>
   <file src="app/Http/Middleware/CacheControlHeaders.php">
     <ClassMustBeFinal>
@@ -3527,12 +3541,16 @@
       <code><![CDATA[updatedSelectedBigMachineCount]]></code>
     </MissingReturnType>
     <MixedArgument>
+      <code><![CDATA[$checkout['authorization_url']]]></code>
       <code><![CDATA[$invoice->pdf_url]]></code>
+      <code><![CDATA[$plan]]></code>
       <code><![CDATA[$team]]></code>
+      <code><![CDATA[$this->currentSubscription]]></code>
       <code><![CDATA[$this->currentSubscription]]></code>
       <code><![CDATA[$this->currentSubscription]]></code>
     </MixedArgument>
     <MixedAssignment>
+      <code><![CDATA[$plan]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
@@ -3553,6 +3571,7 @@
     <MixedMethodCall>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
+      <code><![CDATA[first]]></code>
       <code><![CDATA[get]]></code>
       <code><![CDATA[machines]]></code>
       <code><![CDATA[machines]]></code>
@@ -3618,7 +3637,6 @@
       <code><![CDATA[$nextBillingDate]]></code>
       <code><![CDATA[$recentInvoices]]></code>
       <code><![CDATA[$recentPayments]]></code>
-      <code><![CDATA[$selectedPlanId]]></code>
       <code><![CDATA[$showConfirmModal]]></code>
       <code><![CDATA[$totalPaid]]></code>
       <code><![CDATA[$totalPaidCurrency]]></code>
@@ -3626,9 +3644,13 @@
       <code><![CDATA[$yearlyPrice]]></code>
     </PossiblyUnusedProperty>
     <RiskyTruthyFalsyComparison>
+      <code><![CDATA[! $checkout]]></code>
+      <code><![CDATA[! $plan]]></code>
       <code><![CDATA[! $portalUrl]]></code>
+      <code><![CDATA[$this->selectedPlanId]]></code>
     </RiskyTruthyFalsyComparison>
     <UndefinedMagicMethod>
+      <code><![CDATA[SubscriptionPlan::active()]]></code>
       <code><![CDATA[SubscriptionPlan::active()]]></code>
       <code><![CDATA[latest]]></code>
       <code><![CDATA[trialDaysRemaining]]></code>
@@ -12526,6 +12548,186 @@
         )]]></code>
     </UndefinedMagicMethod>
   </file>
+  <file src="app/Services/PaystackService.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[PaystackService]]></code>
+    </ClassMustBeFinal>
+    <InvalidOperand>
+      <code><![CDATA[($billingCycle === 'yearly' ? $plan->yearly_price : $plan->price) * 100]]></code>
+    </InvalidOperand>
+    <MixedArgument>
+      <code><![CDATA[$charge['currency'] ?? 'ZAR']]></code>
+      <code><![CDATA[$invoiceData['currency'] ?? 'ZAR']]></code>
+      <code><![CDATA[$subscriptionData['status'] ?? 'active']]></code>
+      <code><![CDATA[config('services.paystack.secret', '')]]></code>
+    </MixedArgument>
+    <MixedArrayAccess>
+      <code><![CDATA[$charge['amount']]]></code>
+      <code><![CDATA[$charge['channel']]]></code>
+      <code><![CDATA[$charge['currency']]]></code>
+      <code><![CDATA[$charge['metadata']]]></code>
+      <code><![CDATA[$charge['reference']]]></code>
+      <code><![CDATA[$invoiceData['amount']]]></code>
+      <code><![CDATA[$invoiceData['amount']]]></code>
+      <code><![CDATA[$invoiceData['created_at']]]></code>
+      <code><![CDATA[$invoiceData['currency']]]></code>
+      <code><![CDATA[$invoiceData['invoice_code']]]></code>
+      <code><![CDATA[$invoiceData['invoice_code']]]></code>
+      <code><![CDATA[$invoiceData['paid']]]></code>
+      <code><![CDATA[$invoiceData['paid']]]></code>
+      <code><![CDATA[$invoiceData['subscription']]]></code>
+      <code><![CDATA[$invoiceData['subscription']['subscription_code']]]></code>
+      <code><![CDATA[$invoiceData['transaction']]]></code>
+      <code><![CDATA[$invoiceData['transaction']['reference']]]></code>
+      <code><![CDATA[$metadata['plan_id']]]></code>
+      <code><![CDATA[$metadata['team_id']]]></code>
+      <code><![CDATA[$metadata['team_id']]]></code>
+      <code><![CDATA[$response['data']['authorization_url']]]></code>
+      <code><![CDATA[$response['data']['reference']]]></code>
+      <code><![CDATA[$subscriptionData['customer']]]></code>
+      <code><![CDATA[$subscriptionData['customer']['customer_code']]]></code>
+      <code><![CDATA[$subscriptionData['email_token']]]></code>
+      <code><![CDATA[$subscriptionData['metadata']]]></code>
+      <code><![CDATA[$subscriptionData['next_payment_date']]]></code>
+      <code><![CDATA[$subscriptionData['plan']]]></code>
+      <code><![CDATA[$subscriptionData['plan']['plan_code']]]></code>
+      <code><![CDATA[$subscriptionData['status']]]></code>
+      <code><![CDATA[$subscriptionData['subscription_code']]]></code>
+      <code><![CDATA[$subscriptionData['subscription_code']]]></code>
+      <code><![CDATA[$subscriptionData['subscription_code']]]></code>
+      <code><![CDATA[$subscriptionData['subscription_code']]]></code>
+    </MixedArrayAccess>
+    <MixedAssignment>
+      <code><![CDATA[$charge]]></code>
+      <code><![CDATA[$invoiceData]]></code>
+      <code><![CDATA[$metadata]]></code>
+      <code><![CDATA[$metadata]]></code>
+      <code><![CDATA[$planCode]]></code>
+      <code><![CDATA[$planId]]></code>
+      <code><![CDATA[$planId]]></code>
+      <code><![CDATA[$subscriptionCode]]></code>
+      <code><![CDATA[$subscriptionData]]></code>
+      <code><![CDATA[$subscriptionData]]></code>
+      <code><![CDATA[$teamId]]></code>
+      <code><![CDATA[$teamId]]></code>
+      <code><![CDATA[$this->secretKey]]></code>
+      <code><![CDATA[$txReference]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$charge['amount'] ?? 0]]></code>
+      <code><![CDATA[$invoiceData['amount'] ?? 0]]></code>
+      <code><![CDATA[$invoiceData['amount'] ?? 0]]></code>
+    </MixedOperand>
+    <MixedReturnStatement>
+      <code><![CDATA[$response->json() ?? []]]></code>
+      <code><![CDATA[$response->json() ?? []]]></code>
+      <code><![CDATA[$response->json() ?? []]]></code>
+      <code><![CDATA[$response->json() ?? []]]></code>
+      <code><![CDATA[$response['data'] ?? null]]></code>
+      <code><![CDATA[$response['data'] ?? null]]></code>
+      <code><![CDATA[$response['data']['customer_code'] ?? null]]></code>
+      <code><![CDATA[$response['data']['customer_code'] ?? null]]></code>
+      <code><![CDATA[$response['data']['link']]]></code>
+      <code><![CDATA[$subscription->paystack_customer_code]]></code>
+      <code><![CDATA[$subscription->paystack_customer_code]]></code>
+    </MixedReturnStatement>
+    <PossiblyNullOperand>
+      <code><![CDATA[$billingCycle === 'yearly' ? $plan->yearly_price : $plan->price]]></code>
+    </PossiblyNullOperand>
+    <PossiblyNullPropertyFetch>
+      <code><![CDATA[$subscription->paystack_customer_code]]></code>
+    </PossiblyNullPropertyFetch>
+    <PossiblyUndefinedMethod>
+      <code><![CDATA[failed]]></code>
+      <code><![CDATA[failed]]></code>
+      <code><![CDATA[json]]></code>
+      <code><![CDATA[json]]></code>
+      <code><![CDATA[status]]></code>
+      <code><![CDATA[status]]></code>
+    </PossiblyUndefinedMethod>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[verifyTransaction]]></code>
+      <code><![CDATA[verifyWebhookSignature]]></code>
+    </PossiblyUnusedMethod>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[! $customerCode]]></code>
+      <code><![CDATA[! $planCode]]></code>
+      <code><![CDATA[! $planId]]></code>
+      <code><![CDATA[! $subscription->paystack_email_token]]></code>
+      <code><![CDATA[! $subscription->paystack_email_token]]></code>
+      <code><![CDATA[! $subscription->paystack_subscription_code]]></code>
+      <code><![CDATA[! $subscription->paystack_subscription_code]]></code>
+      <code><![CDATA[! $subscription->paystack_subscription_code]]></code>
+      <code><![CDATA[! $teamId]]></code>
+      <code><![CDATA[! $teamId]]></code>
+      <code><![CDATA[$invoiceData['paid'] ?? false]]></code>
+      <code><![CDATA[$invoiceData['paid'] ?? false]]></code>
+      <code><![CDATA[$planCode]]></code>
+      <code><![CDATA[$subscription?->paystack_customer_code]]></code>
+      <code><![CDATA[$txReference]]></code>
+    </RiskyTruthyFalsyComparison>
+    <UndefinedMagicMethod>
+      <code><![CDATA[Invoice::updateOrCreate(
+                ['paystack_invoice_code' => $invoiceData['invoice_code']],
+                [
+                    'team_id' => $subscription->team_id,
+                    'subscription_id' => $subscription->id,
+                    'payment_id' => $payment?->id,
+                    'invoice_number' => $invoiceData['invoice_code'],
+                    'subtotal' => ($invoiceData['amount'] ?? 0) / 100,
+                    'tax' => 0,
+                    'total' => ($invoiceData['amount'] ?? 0) / 100,
+                    'currency' => strtoupper($invoiceData['currency'] ?? 'ZAR'),
+                    'status' => ($invoiceData['paid'] ?? false) ? 'paid' : 'open',
+                    'issued_at' => isset($invoiceData['created_at'])
+                        ? date('Y-m-d H:i:s', (int) strtotime((string) $invoiceData['created_at']))
+                        : now()->toDateTimeString(),
+                    'paid_at' => ($invoiceData['paid'] ?? false) ? now()->toDateTimeString() : null,
+                    'pdf_url' => null,
+                    'line_items' => [$invoiceData],
+                ]
+            )]]></code>
+      <code><![CDATA[Payment::create([
+                'team_id' => $teamId,
+                'subscription_id' => $subscription?->id,
+                'paystack_reference' => $charge['reference'],
+                'paystack_invoice_id' => null,
+                'amount' => ($charge['amount'] ?? 0) / 100,
+                'currency' => strtoupper($charge['currency'] ?? 'ZAR'),
+                'status' => 'succeeded',
+                'payment_method' => $charge['channel'] ?? 'card',
+                'paid_at' => now(),
+                'metadata' => $metadata,
+            ])]]></code>
+      <code><![CDATA[Subscription::updateOrCreate(
+                ['paystack_subscription_code' => $subscriptionData['subscription_code']],
+                [
+                    'team_id' => $teamId,
+                    'subscription_plan_id' => $planId,
+                    'paystack_customer_code' => $subscriptionData['customer']['customer_code'] ?? null,
+                    'paystack_email_token' => $subscriptionData['email_token'] ?? null,
+                    'status' => $this->mapPaystackStatus($subscriptionData['status'] ?? 'active'),
+                    'current_period_start' => now()->toDateTimeString(),
+                    'current_period_end' => $nextPaymentDate,
+                ]
+            )]]></code>
+      <code><![CDATA[first]]></code>
+      <code><![CDATA[first]]></code>
+      <code><![CDATA[first]]></code>
+      <code><![CDATA[first]]></code>
+      <code><![CDATA[first]]></code>
+      <code><![CDATA[orWhere]]></code>
+    </UndefinedMagicMethod>
+    <UndefinedMagicPropertyFetch>
+      <code><![CDATA[$payment?->id]]></code>
+      <code><![CDATA[$subscription->current_period_end]]></code>
+      <code><![CDATA[$subscription->id]]></code>
+      <code><![CDATA[$subscription->paystack_customer_code]]></code>
+      <code><![CDATA[$subscription->team_id]]></code>
+      <code><![CDATA[$subscription?->id]]></code>
+      <code><![CDATA[$subscription?->paystack_customer_code]]></code>
+    </UndefinedMagicPropertyFetch>
+  </file>
   <file src="app/Services/ProductionService.php">
     <ClassMustBeFinal>
       <code><![CDATA[ProductionService]]></code>
@@ -13584,205 +13786,6 @@
       <code><![CDATA[$r->qty]]></code>
     </UndefinedMagicPropertyFetch>
   </file>
-  <file src="app/Services/StripeService.php">
-    <ClassMustBeFinal>
-      <code><![CDATA[StripeService]]></code>
-    </ClassMustBeFinal>
-    <MixedArgument>
-      <code><![CDATA[$invoice['created']]]></code>
-      <code><![CDATA[$invoice['currency']]]></code>
-      <code><![CDATA[$paymentIntent['currency']]]></code>
-      <code><![CDATA[$stripeSubscription['canceled_at']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_end']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_end']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_start']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_start']]]></code>
-      <code><![CDATA[$stripeSubscription['status']]]></code>
-      <code><![CDATA[$stripeSubscription['status']]]></code>
-    </MixedArgument>
-    <MixedArrayAccess>
-      <code><![CDATA[$data['data']['object']]]></code>
-      <code><![CDATA[$data['data']['object']]]></code>
-      <code><![CDATA[$data['data']['object']]]></code>
-      <code><![CDATA[$data['data']['object']]]></code>
-      <code><![CDATA[$invoice['created']]]></code>
-      <code><![CDATA[$invoice['created']]]></code>
-      <code><![CDATA[$invoice['currency']]]></code>
-      <code><![CDATA[$invoice['id']]]></code>
-      <code><![CDATA[$invoice['invoice_pdf']]]></code>
-      <code><![CDATA[$invoice['lines']]]></code>
-      <code><![CDATA[$invoice['lines']['data']]]></code>
-      <code><![CDATA[$invoice['number']]]></code>
-      <code><![CDATA[$invoice['payment_intent']]]></code>
-      <code><![CDATA[$invoice['subscription']]]></code>
-      <code><![CDATA[$invoice['subtotal']]]></code>
-      <code><![CDATA[$invoice['tax']]]></code>
-      <code><![CDATA[$invoice['total']]]></code>
-      <code><![CDATA[$paymentIntent['amount']]]></code>
-      <code><![CDATA[$paymentIntent['currency']]]></code>
-      <code><![CDATA[$paymentIntent['customer']]]></code>
-      <code><![CDATA[$paymentIntent['customer']]]></code>
-      <code><![CDATA[$paymentIntent['id']]]></code>
-      <code><![CDATA[$paymentIntent['metadata']]]></code>
-      <code><![CDATA[$paymentIntent['payment_method_types']]]></code>
-      <code><![CDATA[$paymentIntent['payment_method_types'][0]]]></code>
-      <code><![CDATA[$stripeSubscription['canceled_at']]]></code>
-      <code><![CDATA[$stripeSubscription['canceled_at']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_end']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_end']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_end']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_end']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_start']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_start']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_start']]]></code>
-      <code><![CDATA[$stripeSubscription['current_period_start']]]></code>
-      <code><![CDATA[$stripeSubscription['customer']]]></code>
-      <code><![CDATA[$stripeSubscription['id']]]></code>
-      <code><![CDATA[$stripeSubscription['id']]]></code>
-      <code><![CDATA[$stripeSubscription['id']]]></code>
-      <code><![CDATA[$stripeSubscription['metadata']]]></code>
-      <code><![CDATA[$stripeSubscription['metadata']]]></code>
-      <code><![CDATA[$stripeSubscription['metadata']['plan_id']]]></code>
-      <code><![CDATA[$stripeSubscription['metadata']['team_id']]]></code>
-      <code><![CDATA[$stripeSubscription['status']]]></code>
-      <code><![CDATA[$stripeSubscription['status']]]></code>
-    </MixedArrayAccess>
-    <MixedAssignment>
-      <code><![CDATA[$customer]]></code>
-      <code><![CDATA[$invoice]]></code>
-      <code><![CDATA[$paymentIntent]]></code>
-      <code><![CDATA[$planId]]></code>
-      <code><![CDATA[$session]]></code>
-      <code><![CDATA[$session]]></code>
-      <code><![CDATA[$stripeSubscription]]></code>
-      <code><![CDATA[$stripeSubscription]]></code>
-      <code><![CDATA[$teamId]]></code>
-      <code><![CDATA[$this->stripe]]></code>
-    </MixedAssignment>
-    <MixedMethodCall>
-      <code><![CDATA[cancel]]></code>
-      <code><![CDATA[create]]></code>
-      <code><![CDATA[create]]></code>
-      <code><![CDATA[create]]></code>
-      <code><![CDATA[update]]></code>
-      <code><![CDATA[update]]></code>
-    </MixedMethodCall>
-    <MixedOperand>
-      <code><![CDATA[$invoice['subtotal']]]></code>
-      <code><![CDATA[$invoice['tax']]]></code>
-      <code><![CDATA[$invoice['total']]]></code>
-      <code><![CDATA[$paymentIntent['amount']]]></code>
-    </MixedOperand>
-    <MixedPropertyFetch>
-      <code><![CDATA[$customer->id]]></code>
-      <code><![CDATA[$session->id]]></code>
-      <code><![CDATA[$session->url]]></code>
-      <code><![CDATA[$session->url]]></code>
-      <code><![CDATA[$this->stripe->billingPortal->sessions]]></code>
-      <code><![CDATA[$this->stripe->checkout->sessions]]></code>
-    </MixedPropertyFetch>
-    <MixedReturnStatement>
-      <code><![CDATA[$customer->id]]></code>
-      <code><![CDATA[$session->url]]></code>
-      <code><![CDATA[$subscription->stripe_customer_id]]></code>
-    </MixedReturnStatement>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[createCheckoutSession]]></code>
-      <code><![CDATA[handleInvoicePaid]]></code>
-      <code><![CDATA[handlePaymentSucceeded]]></code>
-      <code><![CDATA[handleSubscriptionCreated]]></code>
-      <code><![CDATA[handleSubscriptionUpdated]]></code>
-    </PossiblyUnusedMethod>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[! $customerId]]></code>
-      <code><![CDATA[! $planId]]></code>
-      <code><![CDATA[! $priceId]]></code>
-      <code><![CDATA[! $subscription->stripe_subscription_id]]></code>
-      <code><![CDATA[! $subscription->stripe_subscription_id]]></code>
-      <code><![CDATA[! $teamId]]></code>
-    </RiskyTruthyFalsyComparison>
-    <UndefinedClass>
-      <code><![CDATA[$e]]></code>
-      <code><![CDATA[$e]]></code>
-      <code><![CDATA[$e]]></code>
-      <code><![CDATA[$e]]></code>
-      <code><![CDATA[$e]]></code>
-      <code><![CDATA[$this->stripe->billingPortal]]></code>
-      <code><![CDATA[$this->stripe->checkout]]></code>
-      <code><![CDATA[$this->stripe->customers]]></code>
-      <code><![CDATA[$this->stripe->subscriptions]]></code>
-      <code><![CDATA[$this->stripe->subscriptions]]></code>
-      <code><![CDATA[$this->stripe->subscriptions]]></code>
-      <code><![CDATA[ApiErrorException]]></code>
-      <code><![CDATA[ApiErrorException]]></code>
-      <code><![CDATA[ApiErrorException]]></code>
-      <code><![CDATA[ApiErrorException]]></code>
-      <code><![CDATA[ApiErrorException]]></code>
-      <code><![CDATA[StripeClient]]></code>
-      <code><![CDATA[StripeClient]]></code>
-    </UndefinedClass>
-    <UndefinedMagicMethod>
-      <code><![CDATA[Invoice::updateOrCreate(
-                ['stripe_invoice_id' => $invoice['id']],
-                [
-                    'team_id' => $subscription->team_id,
-                    'subscription_id' => $subscription->id,
-                    'payment_id' => $payment?->id,
-                    'invoice_number' => $invoice['number'],
-                    'subtotal' => $invoice['subtotal'] / 100,
-                    'tax' => $invoice['tax'] / 100,
-                    'total' => $invoice['total'] / 100,
-                    'currency' => strtoupper($invoice['currency']),
-                    'status' => 'paid',
-                    'issued_at' => $invoice['created'] ? date('Y-m-d H:i:s', $invoice['created']) : null,
-                    'paid_at' => now(),
-                    'pdf_url' => $invoice['invoice_pdf'],
-                    'line_items' => $invoice['lines']['data'] ?? [],
-                ]
-            )]]></code>
-      <code><![CDATA[Payment::create([
-                'team_id' => $subscription->team_id,
-                'subscription_id' => $subscription->id,
-                'stripe_payment_intent_id' => $paymentIntent['id'],
-                'amount' => $paymentIntent['amount'] / 100, // Convert from cents
-                'currency' => strtoupper($paymentIntent['currency']),
-                'status' => 'succeeded',
-                'payment_method' => $paymentIntent['payment_method_types'][0] ?? 'card',
-                'paid_at' => now(),
-                'metadata' => $paymentIntent['metadata'] ?? [],
-            ])]]></code>
-      <code><![CDATA[Subscription::updateOrCreate(
-                ['stripe_subscription_id' => $stripeSubscription['id']],
-                [
-                    'team_id' => $teamId,
-                    'subscription_plan_id' => $planId,
-                    'stripe_customer_id' => $stripeSubscription['customer'],
-                    'status' => $this->mapStripeStatus($stripeSubscription['status']),
-                    'current_period_start' => $stripeSubscription['current_period_start']
-                        ? date('Y-m-d H:i:s', $stripeSubscription['current_period_start'])
-                        : null,
-                    'current_period_end' => $stripeSubscription['current_period_end']
-                        ? date('Y-m-d H:i:s', $stripeSubscription['current_period_end'])
-                        : null,
-                ]
-            )]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-    </UndefinedMagicMethod>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$payment?->id]]></code>
-      <code><![CDATA[$subscription->id]]></code>
-      <code><![CDATA[$subscription->id]]></code>
-      <code><![CDATA[$subscription->stripe_customer_id]]></code>
-      <code><![CDATA[$subscription->stripe_customer_id]]></code>
-      <code><![CDATA[$subscription->team_id]]></code>
-      <code><![CDATA[$subscription->team_id]]></code>
-    </UndefinedMagicPropertyFetch>
-  </file>
   <file src="app/Services/TeamRoleProvisioner.php">
     <ClassMustBeFinal>
       <code><![CDATA[TeamRoleProvisioner]]></code>
@@ -14379,6 +14382,7 @@
       <code><![CDATA[name]]></code>
       <code><![CDATA[name]]></code>
       <code><![CDATA[name]]></code>
+      <code><![CDATA[name]]></code>
     </MixedMethodCall>
     <NoInterfaceProperties>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
@@ -14392,5 +14396,8 @@
     <PossiblyNullPropertyFetch>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
     </PossiblyNullPropertyFetch>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[$request->query('reference') ?? $request->query('trxref')]]></code>
+    </RiskyTruthyFalsyComparison>
   </file>
 </files>

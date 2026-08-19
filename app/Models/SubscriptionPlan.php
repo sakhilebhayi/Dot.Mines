@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $description
  * @property float $price
  * @property float|null $yearly_price
- * @property string|null $stripe_price_id
- * @property string|null $stripe_yearly_price_id
+ * @property string|null $paystack_plan_code
+ * @property string|null $paystack_yearly_plan_code
  * @property array|null $features
  * @property int|null $max_machines
  * @property int|null $max_users
@@ -51,8 +51,8 @@ class SubscriptionPlan extends Model
         'description',
         'price',
         'yearly_price',
-        'stripe_price_id',
-        'stripe_yearly_price_id',
+        'paystack_plan_code',
+        'paystack_yearly_plan_code',
         'features',
         'max_machines',
         'max_users',

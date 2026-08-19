@@ -12,13 +12,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Subscription Model
  *
  * Represents a team's subscription to a plan
- * Tracks billing cycle, status, and Stripe integration
+ * Tracks billing cycle, status, and Paystack integration
  *
  * @property int $id
  * @property int $team_id
  * @property int $subscription_plan_id
- * @property string|null $stripe_subscription_id
- * @property string|null $stripe_customer_id
+ * @property string|null $paystack_subscription_code
+ * @property string|null $paystack_customer_code
+ * @property string|null $paystack_email_token
  * @property string $status
  * @property string $billing_cycle
  * @property Carbon|null $trial_ends_at
@@ -44,8 +45,9 @@ class Subscription extends Model
     protected $fillable = [
         'team_id',
         'subscription_plan_id',
-        'stripe_subscription_id',
-        'stripe_customer_id',
+        'paystack_subscription_code',
+        'paystack_customer_code',
+        'paystack_email_token',
         'status',
         'billing_cycle',
         'trial_ends_at',
