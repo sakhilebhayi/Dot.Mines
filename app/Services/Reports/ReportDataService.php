@@ -90,24 +90,43 @@ class ReportDataService
         $machines = $query->get();
 
         $rows = [];
-        $totalHours = 0;
+        $totalHours = 0.0;
         foreach ($machines as $machine) {
             $metrics = $machine->metrics()
                 ->whereBetween('recorded_at', [$start, $end])
                 ->get();
 
-            $totalOperatingHours = (float) $metrics->sum('operating_hours');
-            $daysInRange = max(1, $start->diffInDays($end) + 1);
-            $utilizationPercent = round(($totalOperatingHours / ($daysInRange * 24)) * 100, 1);
-            $totalHours += $totalOperatingHours;
+            // operating_hours is a cumulative engine-hours counter (the same
+            // semantics MachinePerformanceService::dayDelta() and the Bell
+            // production derivation rely on). Hours worked in the range is
+            // therefore the counter's DELTA across the window -- summing
+            // meter readings multiplied the machine's lifetime hours by the
+            // number of readings and produced utilization percentages in the
+            // thousands.
+            $readings = $metrics->pluck('operating_hours')
+                ->filter(fn ($value) => $value !== null)
+                ->map(fn ($value) => (float) $value);
+
+            $hoursInRange = $readings->count() >= 2
+                ? max(0.0, $readings->max() - $readings->min())
+                : null;
+
+            // Whole inclusive calendar days: Carbon 3's diffInDays returns a
+            // float (0.999... for a same-day 00:00->23:59 range), so cast
+            // before the +1 or the availability denominator doubles.
+            $daysInRange = max(1, (int) $start->diffInDays($end) + 1);
+            $utilizationPercent = $hoursInRange !== null
+                ? round(($hoursInRange / ($daysInRange * 24)) * 100, 1)
+                : null;
+            $totalHours += $hoursInRange ?? 0.0;
 
             $rows[] = [
                 $machine->name,
                 $machine->machine_type,
                 ucfirst($machine->status ?? '—'),
-                round($totalOperatingHours, 2),
+                $hoursInRange !== null ? round($hoursInRange, 2) : 'Insufficient data',
                 $metrics->count(),
-                $utilizationPercent.'%',
+                $utilizationPercent !== null ? $utilizationPercent.'%' : '—',
             ];
         }
 
