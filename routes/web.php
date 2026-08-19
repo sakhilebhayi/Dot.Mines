@@ -4,7 +4,6 @@ use App\Http\Controllers\GdprController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MinePlanDownloadController;
 use App\Http\Controllers\RealtimeHealthController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportDownloadController;
 use App\Http\Controllers\WebhookController;
 use App\Livewire\AIAnalytics;
@@ -110,24 +109,23 @@ Route::middleware([
         return view('reports.generate');
     })->name('report-generator');
 
-    // Signed report download route (uses signed URLs created in emails)
+    // Signed report download route (uses signed URLs created in emails).
+    // whereNumber: a non-numeric id would otherwise reach Postgres as
+    // `where id = 'view-2'` and 500 with SQLSTATE 22P02 instead of 404ing.
     Route::get('/reports/{report}/download', [ReportDownloadController::class, 'download'])
         ->middleware(['auth', 'throttle:downloads'])
+        ->whereNumber('report')
         ->name('reports.signed-download');
 
     // Signed mine plan download route (mirror reports signed-download)
     Route::get('/mine-plans/{minePlan}/download', [MinePlanDownloadController::class, '__invoke'])
         ->middleware(['auth', 'throttle:downloads'])
+        ->whereNumber('minePlan')
         ->name('mineplans.signed-download');
 
     Route::get('/reports/{report}', function (Report $report) {
         return view('reports.show', ['report' => $report]);
-    })->name('reports.show');
-
-    // Reports view 2 (scope selectors)
-    Route::get('/reports/view-2', [ReportController::class, 'view2'])->name('reports.view2');
-    // Simple generate endpoint (GET form) — moved to avoid path conflict with Livewire generator
-    Route::get('/reports/generate/simple', [ReportController::class, 'generate'])->name('reports.generate');
+    })->whereNumber('report')->name('reports.show');
 
     // Alerts
     Route::get('/alerts', Alerts::class)

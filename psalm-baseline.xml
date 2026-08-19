@@ -2255,40 +2255,6 @@
       <code><![CDATA[ping]]></code>
     </UndefinedMagicMethod>
   </file>
-  <file src="app/Http/Controllers/ReportController.php">
-    <ClassMustBeFinal>
-      <code><![CDATA[ReportController]]></code>
-    </ClassMustBeFinal>
-    <InvalidArgument>
-      <code><![CDATA[$mineAreas->pluck('id')]]></code>
-    </InvalidArgument>
-    <MissingReturnType>
-      <code><![CDATA[generate]]></code>
-      <code><![CDATA[view2]]></code>
-    </MissingReturnType>
-    <MixedAssignment>
-      <code><![CDATA[$teamId]]></code>
-    </MixedAssignment>
-    <MixedPropertyFetch>
-      <code><![CDATA[$user->currentTeam->id]]></code>
-      <code><![CDATA[$user->currentTeam->id]]></code>
-    </MixedPropertyFetch>
-    <NoInterfaceProperties>
-      <code><![CDATA[$user->currentTeam]]></code>
-    </NoInterfaceProperties>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[generate]]></code>
-      <code><![CDATA[view2]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$request]]></code>
-    </PossiblyUnusedParam>
-    <UndefinedMagicMethod>
-      <code><![CDATA[get]]></code>
-      <code><![CDATA[get]]></code>
-      <code><![CDATA[get]]></code>
-    </UndefinedMagicMethod>
-  </file>
   <file src="app/Http/Controllers/ReportDownloadController.php">
     <ClassMustBeFinal>
       <code><![CDATA[ReportDownloadController]]></code>
@@ -14909,6 +14875,8 @@
       <code><![CDATA[name]]></code>
       <code><![CDATA[name]]></code>
       <code><![CDATA[name]]></code>
+      <code><![CDATA[whereNumber]]></code>
+      <code><![CDATA[whereNumber]]></code>
     </MixedMethodCall>
     <NoInterfaceProperties>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
