@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\ActivityLog;
+use App\Models\AIAgent;
 use App\Models\AiRecommendationAction;
 use App\Models\Machine;
 use App\Models\MineArea;
@@ -535,8 +536,27 @@ class Fleet extends Component
             ]);
         }
 
-        // Dispatch a success notification and record that performance tracking should occur (placeholder)
-        $this->dispatch('notify', ['message' => 'Recommendation implemented. Performance will be tracked.', 'type' => 'success']);
+        $this->recordRecommendationOutcome(true);
+
+        $this->dispatch('notify', ['message' => 'Recommendation implemented — Fleet Optimizer accuracy updated.', 'type' => 'success']);
+    }
+
+    /**
+     * Implementing or rejecting a recommendation is the human verdict on
+     * the Fleet Optimizer's prediction -- the only outcome signal the
+     * platform has. It feeds the accuracy_score / predictions_made that
+     * the AI Analytics page displays; AIAgent::updateAccuracy() had no
+     * caller at all before this, so those metrics could never move.
+     */
+    private function recordRecommendationOutcome(bool $wasSuccessful): void
+    {
+        $agent = AIAgent::query()
+            ->where('type', AIAgent::TYPE_FLEET_OPTIMIZER)
+            ->first();
+
+        if ($agent instanceof AIAgent) {
+            $agent->updateAccuracy($wasSuccessful);
+        }
     }
 
     public function openRejectRecommendation(int $index)
@@ -576,6 +596,8 @@ class Fleet extends Component
             'actioned_at' => now(),
             'reject_reason' => $this->rejectReason,
         ]);
+
+        $this->recordRecommendationOutcome(false);
 
         ActivityLog::create([
             'team_id' => $team->id,
