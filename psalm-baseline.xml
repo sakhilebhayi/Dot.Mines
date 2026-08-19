@@ -13597,12 +13597,8 @@
       <code><![CDATA[$v->remediation_deadline]]></code>
     </DocblockTypeContradiction>
     <InvalidOperand>
-      <code><![CDATA[$daysInRange * 24]]></code>
-      <code><![CDATA[$start->diffInDays($end) + 1]]></code>
-      <code><![CDATA[$totalHours += $totalOperatingHours]]></code>
-      <code><![CDATA[$totalOperatingHours / ($daysInRange * 24)]]></code>
+      <code><![CDATA[$hoursInRange / ($daysInRange * 24)]]></code>
       <code><![CDATA[$utilizationPercent]]></code>
-      <code><![CDATA[($totalOperatingHours / ($daysInRange * 24)) * 100]]></code>
       <code><![CDATA[round(($totalProduced / $totalTarget) * 100, 1)]]></code>
     </InvalidOperand>
     <InvalidTemplateParam>
@@ -13640,6 +13636,8 @@
       <code><![CDATA[$r]]></code>
       <code><![CDATA[$r]]></code>
       <code><![CDATA[$t]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
     </MissingClosureParamType>
     <MissingClosureReturnType>
       <code><![CDATA[fn ($r) => $r->started_at->diffInMinutes($r->completed_at) / 60]]></code>
@@ -13650,6 +13648,7 @@
       <code><![CDATA[$filters['end_date'] ?? now()]]></code>
       <code><![CDATA[$filters['start_date'] ?? now()->subDays(30)]]></code>
       <code><![CDATA[$geofenceIds]]></code>
+      <code><![CDATA[$hoursInRange]]></code>
       <code><![CDATA[$machine->status ?? '—']]></code>
       <code><![CDATA[$machineIds]]></code>
       <code><![CDATA[$machineIds]]></code>
@@ -13671,19 +13670,23 @@
       <code><![CDATA[$team->id]]></code>
       <code><![CDATA[$team->id]]></code>
       <code><![CDATA[$totalDowntimeHours]]></code>
+      <code><![CDATA[$totalHours]]></code>
       <code><![CDATA[$totalProduced]]></code>
       <code><![CDATA[$totalTarget]]></code>
       <code><![CDATA[$transactions->sum('total_cost')]]></code>
+      <code><![CDATA[($hoursInRange / ($daysInRange * 24)) * 100]]></code>
       <code><![CDATA[($totalProduced / $totalTarget) * 100]]></code>
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$dispensing]]></code>
       <code><![CDATA[$geofenceIds]]></code>
+      <code><![CDATA[$hoursInRange]]></code>
       <code><![CDATA[$machineIds]]></code>
       <code><![CDATA[$metrics]]></code>
       <code><![CDATA[$query]]></code>
       <code><![CDATA[$query]]></code>
       <code><![CDATA[$query]]></code>
+      <code><![CDATA[$readings]]></code>
       <code><![CDATA[$records]]></code>
       <code><![CDATA[$records]]></code>
       <code><![CDATA[$rows]]></code>
@@ -13691,6 +13694,7 @@
       <code><![CDATA[$rows]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$totalDowntimeHours]]></code>
+      <code><![CDATA[$totalHours]]></code>
       <code><![CDATA[$totalProduced]]></code>
       <code><![CDATA[$totalTarget]]></code>
       <code><![CDATA[$transactions]]></code>
@@ -13705,8 +13709,10 @@
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
+      <code><![CDATA[count]]></code>
       <code><![CDATA[diffInMinutes]]></code>
       <code><![CDATA[diffInMinutes]]></code>
+      <code><![CDATA[filter]]></code>
       <code><![CDATA[format]]></code>
       <code><![CDATA[format]]></code>
       <code><![CDATA[format]]></code>
@@ -13722,11 +13728,14 @@
       <code><![CDATA[map]]></code>
       <code><![CDATA[map]]></code>
       <code><![CDATA[map]]></code>
+      <code><![CDATA[map]]></code>
+      <code><![CDATA[max]]></code>
+      <code><![CDATA[min]]></code>
       <code><![CDATA[orWhereBetween]]></code>
       <code><![CDATA[orderBy]]></code>
       <code><![CDATA[orderBy]]></code>
       <code><![CDATA[orderBy]]></code>
-      <code><![CDATA[sum]]></code>
+      <code><![CDATA[pluck]]></code>
       <code><![CDATA[sum]]></code>
       <code><![CDATA[sum]]></code>
       <code><![CDATA[sum]]></code>
@@ -13750,8 +13759,11 @@
       <code><![CDATA[with]]></code>
     </MixedMethodCall>
     <MixedOperand>
+      <code><![CDATA[$hoursInRange]]></code>
+      <code><![CDATA[$hoursInRange ?? 0.0]]></code>
       <code><![CDATA[$r->started_at->diffInMinutes($r->completed_at)]]></code>
       <code><![CDATA[$r->started_at->diffInMinutes($r->completed_at)]]></code>
+      <code><![CDATA[$readings->max()]]></code>
       <code><![CDATA[$totalProduced]]></code>
     </MixedOperand>
     <MixedPropertyFetch>

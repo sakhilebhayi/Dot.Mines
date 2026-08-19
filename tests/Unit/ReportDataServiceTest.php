@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\ComplianceViolation;
 use App\Models\FuelTransaction;
 use App\Models\Machine;
+use App\Models\MachineMetric;
 use App\Models\ProductionRecord;
 use App\Models\Report;
 use App\Models\Team;
@@ -188,5 +189,70 @@ class ReportDataServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
 
         app(ReportDataService::class)->build($report);
+    }
+
+    /**
+     * operating_hours on machine_metrics is a cumulative engine-hours meter
+     * (same semantics as MachinePerformanceService::dayDelta() and the Bell
+     * production derivation). The utilization report used to SUM the meter
+     * readings -- multiplying lifetime hours by the reading count and
+     * producing utilization percentages in the thousands.
+     */
+    public function test_fleet_utilization_uses_the_counter_delta_not_a_sum_of_meter_readings(): void
+    {
+        $team = Team::factory()->create();
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'name' => 'ADT-01', 'status' => 'active']);
+
+        // Two cumulative readings inside a 1-day window: 8 real hours worked.
+        MachineMetric::factory()->create([
+            'team_id' => $team->id,
+            'machine_id' => $machine->id,
+            'operating_hours' => 100.0,
+            'recorded_at' => now()->startOfDay()->addHours(6),
+        ]);
+        MachineMetric::factory()->create([
+            'team_id' => $team->id,
+            'machine_id' => $machine->id,
+            'operating_hours' => 108.0,
+            'recorded_at' => now()->startOfDay()->addHours(16),
+        ]);
+
+        $report = $this->reportFor($team, 'fleet_utilization', [
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->toDateString(),
+        ]);
+
+        $data = app(ReportDataService::class)->build($report);
+
+        $row = collect($data['rows'])->firstWhere(0, 'ADT-01');
+        $this->assertNotNull($row);
+        $this->assertEqualsWithDelta(8.0, $row[3], 0.01, 'Hours must be the counter delta (108 - 100), not the 208 the old sum produced.');
+        $this->assertSame('33.3%', $row[5]);
+        $this->assertEqualsWithDelta(8.0, $data['summary']['Total Operating Hours'], 0.01);
+    }
+
+    public function test_fleet_utilization_reports_insufficient_data_for_a_single_reading(): void
+    {
+        $team = Team::factory()->create();
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'name' => 'ADT-02']);
+
+        MachineMetric::factory()->create([
+            'team_id' => $team->id,
+            'machine_id' => $machine->id,
+            'operating_hours' => 5000.0,
+            'recorded_at' => now()->startOfDay()->addHours(8),
+        ]);
+
+        $report = $this->reportFor($team, 'fleet_utilization', [
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->toDateString(),
+        ]);
+
+        $data = app(ReportDataService::class)->build($report);
+
+        $row = collect($data['rows'])->firstWhere(0, 'ADT-02');
+        $this->assertNotNull($row);
+        $this->assertSame('Insufficient data', $row[3], 'One meter reading cannot yield a duration; do not fabricate one.');
+        $this->assertSame('—', $row[5]);
     }
 }
