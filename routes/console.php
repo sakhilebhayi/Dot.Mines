@@ -1,6 +1,8 @@
 <?php
 
+use App\Jobs\ArchiveOldMetricsJob;
 use App\Jobs\MachineIdleMonitoringJob;
+use App\Jobs\PurgeExpiredSoftDeletesJob;
 use App\Jobs\RouteSpeedMonitoringJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -29,5 +31,23 @@ Schedule::job(new MachineIdleMonitoringJob)
 // "Sync Now" click or a direct API call.
 Schedule::command('integrations:sync-due')
     ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Nightly: move machine_metrics rows older than the retention window
+// (METRICS_RETENTION_DAYS, default 90) into machine_metrics_archive so the
+// hot table -- the one every dashboard and analytics query hits -- stays
+// lean. Archived telemetry remains queryable for historical reporting.
+Schedule::job(new ArchiveOldMetricsJob)
+    ->dailyAt('02:00')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Weekly: permanently purge soft-deleted operational records once they are
+// past the recovery grace period (SOFT_DELETE_RETENTION_DAYS, default 30).
+Schedule::job(new PurgeExpiredSoftDeletesJob)
+    ->weekly()
+    ->sundays()
+    ->at('03:00')
     ->withoutOverlapping()
     ->onOneServer();
