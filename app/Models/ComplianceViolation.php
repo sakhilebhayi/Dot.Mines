@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,14 +15,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $violation_type
  * @property string $description
  * @property string $severity
- * @property \Carbon\Carbon $detected_at
- * @property \Carbon\Carbon $remediation_deadline
- * @property \Carbon\Carbon|null $resolved_at
+ * @property Carbon $detected_at
+ * @property Carbon $remediation_deadline
+ * @property Carbon|null $resolved_at
  * @property int|null $resolved_by
  * @property string|null $resolution_notes
  * @property array|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|ComplianceViolation where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|ComplianceViolation whereIn(string $column, array<string|int> $values)
@@ -76,7 +77,7 @@ class ComplianceViolation extends Model
      */
     public function isResolved(): bool
     {
-        return !is_null($this->resolved_at);
+        return ! is_null($this->resolved_at);
     }
 
     /**
@@ -84,8 +85,8 @@ class ComplianceViolation extends Model
      */
     public function isOverdue(): bool
     {
-        return !$this->isResolved() 
-            && $this->remediation_deadline 
+        return ! $this->isResolved()
+            && $this->remediation_deadline
             && $this->remediation_deadline->isPast();
     }
 }

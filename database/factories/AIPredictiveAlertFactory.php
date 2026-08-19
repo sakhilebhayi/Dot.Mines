@@ -2,10 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\AIAgent;
 use App\Models\AIPredictiveAlert;
 use App\Models\Team;
-use App\Models\AIAgent;
-use App\Models\Machine;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AIPredictiveAlertFactory extends Factory

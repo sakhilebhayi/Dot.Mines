@@ -7,7 +7,7 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Machine>
+ * @extends Factory<Machine>
  */
 class MachineFactory extends Factory
 {

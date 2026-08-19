@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('status')->default('active');
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index('team_id');
             $table->index('mine_area_id');
             $table->index('type');

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 /**
  * Base API Controller
- * 
+ *
  * All API controllers extend this for common functionality
  */
 class Controller extends BaseController

@@ -13,7 +13,7 @@ class IntegrationServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(IntegrationService::class, function ($app) {
-            return new IntegrationService();
+            return new IntegrationService;
         });
     }
 

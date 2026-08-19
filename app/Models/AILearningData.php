@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 class AILearningData extends Model
 {
     use HasFactory, HasTeamFilters;
-    
+
     protected $table = 'ai_learning_data';
+
     protected $fillable = [
         'ai_agent_id',
         'team_id',

@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Waypoint Model
- * 
+ *
  * Represents a point along a route
  * Waypoints are ordered and define the path a machine should follow
  *
@@ -24,8 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $distance_from_previous
  * @property string $icon
  * @property string $color
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Waypoint where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Waypoint whereIn(string $column, array $values)
@@ -73,7 +74,7 @@ class Waypoint extends Model
      */
     public function getIconAttribute(): string
     {
-        return match($this->waypoint_type) {
+        return match ($this->waypoint_type) {
             'fuel_station' => '⛽',
             'loading_point' => '📦',
             'dump_point' => '🚮',
@@ -87,7 +88,7 @@ class Waypoint extends Model
      */
     public function getColorAttribute(): string
     {
-        return match($this->waypoint_type) {
+        return match ($this->waypoint_type) {
             'fuel_station' => 'yellow',
             'loading_point' => 'blue',
             'dump_point' => 'red',

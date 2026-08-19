@@ -1,9 +1,11 @@
 <?php
 
+use App\Logging\RedactSensitiveData;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
+use Sentry\Monolog\Handler\SentryHandler;
 
 return [
 
@@ -56,7 +58,7 @@ return [
             'driver' => 'stack',
             'channels' => explode(',', (string) env('LOG_STACK', 'single')),
             'ignore_exceptions' => false,
-            'tap' => [App\Logging\RedactSensitiveData::class],
+            'tap' => [RedactSensitiveData::class],
         ],
 
         'single' => [
@@ -98,7 +100,7 @@ return [
         'sentry' => [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'error'),
-            'handler' => Sentry\Monolog\Handler\SentryHandler::class,
+            'handler' => SentryHandler::class,
             'handler_with' => [],
             'processors' => [PsrLogMessageProcessor::class],
         ],

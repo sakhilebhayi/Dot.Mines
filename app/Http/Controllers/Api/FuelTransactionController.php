@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\FuelTransaction;
 use App\Services\FuelManagementService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class FuelTransactionController extends Controller
 {
@@ -21,7 +21,7 @@ class FuelTransactionController extends Controller
     public function index(Request $request)
     {
         $teamId = $request->user()->currentTeam->id;
-        
+
         $query = FuelTransaction::where('team_id', $teamId)
             ->with(['fuelTank:id,name', 'machine:id,name', 'user:id,name']);
 
@@ -45,7 +45,7 @@ class FuelTransactionController extends Controller
         if ($request->has('start_date') && $request->has('end_date')) {
             $query->whereBetween('transaction_date', [
                 $request->start_date,
-                $request->end_date
+                $request->end_date,
             ]);
         }
 
@@ -92,7 +92,7 @@ class FuelTransactionController extends Controller
         $data['transaction_date'] = $data['transaction_date'] ?? now();
 
         // Calculate total cost if not provided
-        if (!isset($data['total_cost']) && isset($data['unit_price'])) {
+        if (! isset($data['total_cost']) && isset($data['unit_price'])) {
             $data['total_cost'] = $data['quantity_liters'] * $data['unit_price'];
         }
 
@@ -165,7 +165,7 @@ class FuelTransactionController extends Controller
 
         // Note: Deleting might affect tank levels - consider reverting the transaction
         // For now, we'll just delete the record
-        
+
         if ($fuelTransaction->receipt_file_path) {
             Storage::disk('public')->delete($fuelTransaction->receipt_file_path);
         }
@@ -195,21 +195,21 @@ class FuelTransactionController extends Controller
     public function export(Request $request)
     {
         $teamId = $request->user()->currentTeam->id;
-        
+
         $query = FuelTransaction::where('team_id', $teamId)
             ->with(['fuelTank:id,name', 'machine:id,name', 'user:id,name']);
 
         if ($request->has('start_date') && $request->has('end_date')) {
             $query->whereBetween('transaction_date', [
                 $request->start_date,
-                $request->end_date
+                $request->end_date,
             ]);
         }
 
         $transactions = $query->latest('transaction_date')->get();
 
-        $filename = 'fuel-transactions-' . now()->format('Y-m-d') . '.csv';
-        
+        $filename = 'fuel-transactions-'.now()->format('Y-m-d').'.csv';
+
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
@@ -217,11 +217,11 @@ class FuelTransactionController extends Controller
 
         $callback = function () use ($transactions) {
             $file = fopen('php://output', 'w');
-            
+
             // Headers
             fputcsv($file, [
-                'Date', 'Type', 'Tank', 'Machine', 'Fuel Type', 'Quantity (L)', 
-                'Unit Price', 'Total Cost', 'Supplier', 'Invoice', 'User', 'Notes'
+                'Date', 'Type', 'Tank', 'Machine', 'Fuel Type', 'Quantity (L)',
+                'Unit Price', 'Total Cost', 'Supplier', 'Invoice', 'User', 'Notes',
             ]);
 
             // Data

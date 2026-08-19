@@ -2,40 +2,58 @@
 
 namespace App\Livewire;
 
+use App\Models\ActivityLog;
+use App\Models\Geofence;
 use App\Models\Machine;
-use App\Models\MachineLocationHistory;
+use App\Services\RoutePlanningService;
 use Carbon\Carbon;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 
 class FleetMovementReplay extends Component
 {
-    public ?\App\Models\Machine $selectedMachine = null;
+    public ?Machine $selectedMachine = null;
+
     public array $activityFeed = [];
+
     public array $machineActivities = [];
+
     public bool $showActivities = false;
+
     public bool $isLoading = false;
+
     public string $startDate = '';
+
     public string $endDate = '';
+
     public string $startTime = '00:00';
+
     public string $endTime = '23:59';
-    
+
     // Playback controls
     public bool $isPlaying = false;
+
     public float $playbackSpeed = 1.0;
+
     public int $currentPosition = 0;
+
     public int $totalPositions = 0;
+
     public bool $autoReplay = false;
+
     public bool $showTrail = true;
+
     public bool $smoothPan = true;
-    
+
     // Map settings
     public float $centerLat = -26.2041;
+
     public float $centerLng = 28.0473;
+
     public int $zoomLevel = 10;
-    
+
     /** @var array<string, string> */
     protected $listeners = [
         'playback-stopped' => 'handlePlaybackStopped',
@@ -43,7 +61,7 @@ class FleetMovementReplay extends Component
         // Allow client to emit a loadReplay event to trigger the existing method
         'loadReplay' => 'loadReplay',
     ];
-    
+
     public function mount()
     {
         $this->isLoading = true;
@@ -56,7 +74,7 @@ class FleetMovementReplay extends Component
     public function loadActivityFeed()
     {
         $team = Auth::user()->currentTeam;
-        $this->activityFeed = \App\Models\ActivityLog::where('team_id', $team->id)
+        $this->activityFeed = ActivityLog::where('team_id', $team->id)
             ->latest('created_at')
             ->take(10)
             ->get()
@@ -74,7 +92,7 @@ class FleetMovementReplay extends Component
         $team = Auth::user()->currentTeam;
 
         // If a machine is selected, filter activities for that machine and date range
-        $query = \App\Models\ActivityLog::where('team_id', $team->id)->latest('created_at');
+        $query = ActivityLog::where('team_id', $team->id)->latest('created_at');
 
         if ($this->selectedMachine) {
             $query->where('machine_id', $this->selectedMachine);
@@ -82,16 +100,16 @@ class FleetMovementReplay extends Component
 
         // Apply date range if provided
         try {
-            if (!empty($this->startDate) && !empty($this->endDate)) {
-                $start = Carbon::parse($this->startDate . ' ' . $this->startTime);
-                $end = Carbon::parse($this->endDate . ' ' . $this->endTime);
+            if (! empty($this->startDate) && ! empty($this->endDate)) {
+                $start = Carbon::parse($this->startDate.' '.$this->startTime);
+                $end = Carbon::parse($this->endDate.' '.$this->endTime);
                 $query->whereBetween('created_at', [$start, $end]);
             }
         } catch (\Exception $e) {
             // ignore invalid dates
         }
 
-        $this->machineActivities = $query->take(50)->get()->map(fn($log) => [
+        $this->machineActivities = $query->take(50)->get()->map(fn ($log) => [
             'user' => $log->user?->name ?? 'System',
             'action' => $log->action,
             'description' => $log->description,
@@ -121,18 +139,18 @@ class FleetMovementReplay extends Component
             ->orderBy('name')
             ->get()
             ->groupBy('machine_type');
-        
+
         $locationHistory = [];
         $pathCoordinates = [];
         $geofences = [];
         $routes = [];
         $selectedMachineDetails = null;
-        
+
         if ($this->selectedMachine) {
             $selectedMachineDetails = Machine::where('team_id', $team->id)->find($this->selectedMachine);
-            $start = Carbon::parse($this->startDate . ' ' . $this->startTime);
-            $end = Carbon::parse($this->endDate . ' ' . $this->endTime);
-            
+            $start = Carbon::parse($this->startDate.' '.$this->startTime);
+            $end = Carbon::parse($this->endDate.' '.$this->endTime);
+
             // Get location history from machine_metrics table (simulating historical data)
             $locationHistory = DB::table('machine_metrics')
                 ->where('machine_id', $this->selectedMachine)
@@ -141,11 +159,11 @@ class FleetMovementReplay extends Component
                 ->whereNotNull('longitude')
                 ->orderBy('created_at')
                 ->get();
-            
+
             $this->totalPositions = $locationHistory->count();
-            
+
             // Build path coordinates
-            $pathCoordinates = $locationHistory->map(function($location) {
+            $pathCoordinates = $locationHistory->map(function ($location) {
                 return [
                     'lat' => $location->latitude,
                     'lng' => $location->longitude,
@@ -154,12 +172,13 @@ class FleetMovementReplay extends Component
                     'heading' => $location->heading ?? 0,
                 ];
             })->toArray();
-            
+
             // Get geofences for the team
-            $geofences = \App\Models\Geofence::where('team_id', $team->id)
+            $geofences = Geofence::where('team_id', $team->id)
                 ->get()
-                ->map(function($geofence) {
+                ->map(function ($geofence) {
                     $coordinates = $geofence->coordinates ?? [];
+
                     return [
                         'id' => $geofence->id,
                         'name' => $geofence->name,
@@ -169,19 +188,19 @@ class FleetMovementReplay extends Component
                     ];
                 })
                 ->toArray();
-            
+
             // Get routes with their waypoints - prioritize machine-specific routes, then team routes
             $machineRoutes = DB::table('routes')
                 ->leftJoin('waypoints', 'routes.id', '=', 'waypoints.route_id')
                 ->where('routes.team_id', $team->id)
                 ->where('routes.status', 'active')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('routes.machine_id', $this->selectedMachine)
-                          ->orWhereNull('routes.machine_id');
+                        ->orWhereNull('routes.machine_id');
                 })
-                ->select('routes.id', 'routes.name', 'routes.start_latitude', 'routes.start_longitude', 
-                         'routes.end_latitude', 'routes.end_longitude', 'routes.total_distance',
-                         'waypoints.latitude', 'waypoints.longitude', 'waypoints.sequence_order')
+                ->select('routes.id', 'routes.name', 'routes.start_latitude', 'routes.start_longitude',
+                    'routes.end_latitude', 'routes.end_longitude', 'routes.total_distance',
+                    'waypoints.latitude', 'waypoints.longitude', 'waypoints.sequence_order')
                 ->orderBy('routes.id')
                 ->orderBy('waypoints.sequence_order')
                 ->get();
@@ -189,32 +208,32 @@ class FleetMovementReplay extends Component
             // Group waypoints by route
             $routesMap = [];
             foreach ($machineRoutes as $row) {
-                if (!isset($routesMap[$row->id])) {
+                if (! isset($routesMap[$row->id])) {
                     $routesMap[$row->id] = [
                         'id' => $row->id,
                         'name' => $row->name,
                         'waypoints' => [],
                         'color' => '#f59e0b',
-                        'start_location' => $row->start_latitude . ', ' . $row->start_longitude,
-                        'end_location' => $row->end_latitude . ', ' . $row->end_longitude,
+                        'start_location' => $row->start_latitude.', '.$row->start_longitude,
+                        'end_location' => $row->end_latitude.', '.$row->end_longitude,
                     ];
                 }
-                if (!is_null($row->latitude) && !is_null($row->longitude)) {
+                if (! is_null($row->latitude) && ! is_null($row->longitude)) {
                     $routesMap[$row->id]['waypoints'][] = [$row->latitude, $row->longitude];
                 }
             }
-            
+
             $routes = array_values($routesMap);
-            
+
             // Auto-calculate route between start and end points if no routes exist
             // This ensures machine movement follows roads on the map
-            if (empty($routes) && !empty($pathCoordinates) && count($pathCoordinates) >= 2) {
+            if (empty($routes) && ! empty($pathCoordinates) && count($pathCoordinates) >= 2) {
                 $start_point = reset($pathCoordinates);
                 $end_point = end($pathCoordinates);
-                
+
                 if ($start_point && $end_point) {
                     try {
-                        $routePlanningService = new \App\Services\RoutePlanningService();
+                        $routePlanningService = new RoutePlanningService;
                         $calculatedRoute = $routePlanningService->calculateOptimalRoute(
                             $start_point['lat'],
                             $start_point['lng'],
@@ -223,16 +242,16 @@ class FleetMovementReplay extends Component
                             $this->selectedMachine,
                             $team->id
                         );
-                        
-                        if ($calculatedRoute && !empty($calculatedRoute['waypoints'])) {
+
+                        if ($calculatedRoute && ! empty($calculatedRoute['waypoints'])) {
                             // Add the calculated route to the routes array
                             $routes[] = [
-                                'id' => 'auto-' . time(),
+                                'id' => 'auto-'.time(),
                                 'name' => 'Auto-calculated Route',
                                 'waypoints' => $calculatedRoute['waypoints'],
                                 'color' => '#f59e0b',
-                                'start_location' => $start_point['lat'] . ', ' . $start_point['lng'],
-                                'end_location' => $end_point['lat'] . ', ' . $end_point['lng'],
+                                'start_location' => $start_point['lat'].', '.$start_point['lng'],
+                                'end_location' => $end_point['lat'].', '.$end_point['lng'],
                             ];
                         }
                     } catch (\Exception $e) {
@@ -243,7 +262,7 @@ class FleetMovementReplay extends Component
                     }
                 }
             }
-            
+
             // Set map center to first position if available
             if ($locationHistory->isNotEmpty()) {
                 $first = $locationHistory->first();
@@ -296,7 +315,7 @@ class FleetMovementReplay extends Component
         $this->currentPosition = 0;
         $this->dispatch('replay-stop');
     }
-    
+
     public function updated($propertyName)
     {
         // When currentPosition is updated via wire:model, dispatch seek event
@@ -322,17 +341,17 @@ class FleetMovementReplay extends Component
         $this->currentPosition = $position;
         $this->dispatch('replay-seek', position: $position);
     }
-    
+
     public function handlePlaybackStopped()
     {
         $this->isPlaying = false;
     }
-    
+
     public function handlePositionUpdated($data)
     {
         $this->currentPosition = $data['position'] ?? 0;
     }
-    
+
     public function nextFrame()
     {
         if ($this->currentPosition < $this->totalPositions - 1) {
@@ -340,7 +359,7 @@ class FleetMovementReplay extends Component
             $this->dispatch('replay-seek', position: $this->currentPosition);
         }
     }
-    
+
     public function previousFrame()
     {
         if ($this->currentPosition > 0) {
@@ -348,7 +367,7 @@ class FleetMovementReplay extends Component
             $this->dispatch('replay-seek', position: $this->currentPosition);
         }
     }
-    
+
     public function loadRecentReplay()
     {
         // Load the most recent replay data automatically
@@ -356,7 +375,7 @@ class FleetMovementReplay extends Component
         $machine = Machine::where('team_id', $team->id)
             ->orderBy('updated_at', 'desc')
             ->first();
-            
+
         if ($machine) {
             $this->selectedMachine = $machine->id;
             $this->startDate = now()->subHours(2)->format('Y-m-d');
@@ -364,31 +383,33 @@ class FleetMovementReplay extends Component
             $this->startTime = now()->subHours(2)->format('H:i');
             $this->endTime = now()->format('H:i');
             $this->loadReplay();
-            
-            session()->flash('message', 'Loaded recent replay for ' . $machine->name);
+
+            session()->flash('message', 'Loaded recent replay for '.$machine->name);
         } else {
             session()->flash('error', 'No machines available');
         }
     }
-    
+
     public function exportReplayData()
     {
-        if (!$this->selectedMachine) {
+        if (! $this->selectedMachine) {
             session()->flash('error', 'Please select a machine to export.');
+
             return;
         }
-        
+
         $team = Auth::user()->currentTeam;
         $machine = Machine::where('team_id', $team->id)->find($this->selectedMachine);
-        
-        if (!$machine) {
+
+        if (! $machine) {
             session()->flash('error', 'Machine not found');
+
             return;
         }
-        
-        $start = Carbon::parse($this->startDate . ' ' . $this->startTime);
-        $end = Carbon::parse($this->endDate . ' ' . $this->endTime);
-        
+
+        $start = Carbon::parse($this->startDate.' '.$this->startTime);
+        $end = Carbon::parse($this->endDate.' '.$this->endTime);
+
         $locationHistory = DB::table('machine_metrics')
             ->where('machine_id', $this->selectedMachine)
             ->whereBetween('created_at', [$start, $end])
@@ -399,6 +420,7 @@ class FleetMovementReplay extends Component
 
         if ($locationHistory->isEmpty()) {
             session()->flash('error', 'No movement data found for the selected machine and date range.');
+
             return;
         }
 
@@ -411,11 +433,11 @@ class FleetMovementReplay extends Component
                 $location->latitude,
                 $location->longitude,
                 $location->speed ?? 0,
-                $location->heading ?? 0
+                $location->heading ?? 0,
             ];
         }
 
-        $filename = 'replay_' . $machine->name . '_' . now()->format('Y-m-d_His') . '.csv';
+        $filename = 'replay_'.$machine->name.'_'.now()->format('Y-m-d_His').'.csv';
         $handle = fopen('php://temp', 'r+');
 
         foreach ($csvData as $row) {
@@ -426,11 +448,11 @@ class FleetMovementReplay extends Component
         $csv = stream_get_contents($handle);
         fclose($handle);
 
-        return response()->streamDownload(function() use ($csv) {
+        return response()->streamDownload(function () use ($csv) {
             echo $csv;
         }, $filename, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 }

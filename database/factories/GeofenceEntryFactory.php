@@ -9,7 +9,7 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\GeofenceEntry>
+ * @extends Factory<GeofenceEntry>
  */
 class GeofenceEntryFactory extends Factory
 {
@@ -56,7 +56,7 @@ class GeofenceEntryFactory extends Factory
         return $this->state(function (array $attributes) {
             $entryTime = $attributes['entry_time'] ?? now()->subHours(2);
             $exitTime = $this->faker->dateTimeBetween($entryTime, 'now');
-            
+
             return [
                 'exit_time' => $exitTime,
                 'exit_latitude' => $this->faker->latitude(-30, -25),

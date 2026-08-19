@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * MachineMetric Model
- * 
+ *
  * Stores real-time metrics from machines
  * Includes engine data, fuel, temperature, and other sensor readings
  *
@@ -39,9 +40,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $tire_pressure_rear_left
  * @property float|null $tire_pressure_rear_right
  * @property array|null $raw_data
- * @property \Carbon\Carbon $recorded_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $recorded_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|MachineMetric where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|MachineMetric whereIn(string $column, array $values)

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('display_name'); // Display name for UI
             $table->text('description')->nullable();
             $table->timestamps();
-            
+
             $table->index('team_id');
             $table->index('name');
         });

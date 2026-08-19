@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\MineArea;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Models\MineArea;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
@@ -21,7 +21,7 @@ class ReportController extends Controller
         // null when this action runs. Falling through to `Model::all()` in
         // that case would leak every team's mine areas/geofences/machines,
         // so we abort instead of guessing a scope.
-        if (!$user || !isset($user->currentTeam->id)) {
+        if (! $user || ! isset($user->currentTeam->id)) {
             abort(403, 'No active team selected.');
         }
 
@@ -30,7 +30,7 @@ class ReportController extends Controller
         $geofences = Geofence::whereIn('mine_area_id', $mineAreas->pluck('id'))->get();
         $machines = Machine::where('team_id', $teamId)->get();
 
-        return view('reports.view-2', compact('mineAreas','geofences','machines'));
+        return view('reports.view-2', compact('mineAreas', 'geofences', 'machines'));
     }
 
     public function generate(Request $request)
@@ -38,7 +38,7 @@ class ReportController extends Controller
         $data = $request->validate([
             'mine_area_id' => 'nullable|exists:mine_areas,id',
             'geofence_id' => 'nullable|exists:geofences,id',
-            'machine_id' => 'nullable|exists:machines,id'
+            'machine_id' => 'nullable|exists:machines,id',
         ]);
 
         // Placeholder: implement actual report generation logic here.

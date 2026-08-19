@@ -20,7 +20,7 @@ class FuelTankController extends Controller
     public function index(Request $request)
     {
         $teamId = $request->user()->currentTeam->id;
-        
+
         $query = FuelTank::where('team_id', $teamId)
             ->with(['mineArea:id,name']);
 
@@ -53,6 +53,7 @@ class FuelTankController extends Controller
             $tank->available_capacity = $tank->available_capacity;
             $tank->is_critical = $tank->isCritical();
             $tank->is_below_minimum = $tank->isBelowMinimum();
+
             return $tank;
         });
 

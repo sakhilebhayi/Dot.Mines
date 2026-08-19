@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\AIAgent;
 use App\Models\AIRecommendation;
 use App\Models\Team;
-use App\Models\AIAgent;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

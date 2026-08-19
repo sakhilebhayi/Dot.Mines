@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Services\FileUploadService;
 use Illuminate\Http\UploadedFile;
+use PHPUnit\Framework\TestCase;
 
 class FileUploadServiceTest extends TestCase
 {
@@ -13,14 +13,14 @@ class FileUploadServiceTest extends TestCase
         $tmp = sys_get_temp_dir();
         $zipPath = tempnam($tmp, 'testzip');
         // Create zip with a path traversal entry
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($zipPath, \ZipArchive::OVERWRITE);
         $zip->addFromString('../evil.php', "<?php echo 'pwned'; ?>");
         $zip->close();
 
         $uploaded = new UploadedFile($zipPath, 'test.zip', null, null, true);
 
-        $svc = new FileUploadService();
+        $svc = new FileUploadService;
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('unsafe file paths');

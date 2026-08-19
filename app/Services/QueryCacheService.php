@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Query Cache Service
- * 
+ *
  * Centralized service for caching database query results
  * with intelligent cache key generation and TTL management
  */
@@ -35,6 +35,7 @@ class QueryCacheService
     public static function machineList(int $teamId, array $filters, callable $callback)
     {
         $filterKey = md5(json_encode($filters));
+
         return Cache::remember(
             "machines_list_{$teamId}_{$filterKey}",
             60, // 1 minute for list views
@@ -96,7 +97,7 @@ class QueryCacheService
     public static function reportTemplates(callable $callback): array
     {
         return Cache::remember(
-            "report_templates",
+            'report_templates',
             86400, // 24 hours - templates rarely change
             $callback
         );

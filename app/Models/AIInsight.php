@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 class AIInsight extends Model
 {
     use HasFactory, HasTeamFilters;
-    
+
     protected $table = 'ai_insights';
+
     protected $fillable = [
         'team_id',
         'insight_type',
@@ -44,9 +45,9 @@ class AIInsight extends Model
 
     public function scopeValid($query)
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $q->whereNull('valid_until')
-              ->orWhere('valid_until', '>', now());
+                ->orWhere('valid_until', '>', now());
         });
     }
 

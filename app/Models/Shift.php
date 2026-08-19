@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -11,15 +12,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property int $team_id
  * @property string $shift_type
- * @property \Carbon\Carbon $started_at
- * @property \Carbon\Carbon|null $ended_at
+ * @property Carbon $started_at
+ * @property Carbon|null $ended_at
  * @property array|null $previous_assignments
  * @property array|null $productivity_metrics
  * @property array|null $performance_summary
  * @property array|null $metadata
- * @property \Carbon\Carbon|null $deleted_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Shift where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Shift whereIn(string $column, array $values)

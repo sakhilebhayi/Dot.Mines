@@ -15,10 +15,6 @@ class ForceHttps
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -26,7 +22,8 @@ class ForceHttps
         if (app()->environment('production')) {
             // If the request is not secure, redirect to HTTPS
             if (! $request->isSecure()) {
-                $secureUrl = 'https://' . $request->getHttpHost() . $request->getRequestUri();
+                $secureUrl = 'https://'.$request->getHttpHost().$request->getRequestUri();
+
                 return redirect()->secure($request->getRequestUri(), 301);
             }
         }

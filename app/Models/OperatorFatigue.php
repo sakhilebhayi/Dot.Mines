@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * OperatorFatigue Model
- * 
+ *
  * Tracks machine operator fatigue levels and work hours to ensure safety
  * and compliance with rest requirements.
  *
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property int $team_id
  * @property int|null $machine_id
- * @property \Carbon\Carbon $shift_date
+ * @property Carbon $shift_date
  * @property string $shift_type
  * @property string $shift_start
  * @property string $shift_end
@@ -29,8 +30,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $is_rested
  * @property string|null $notes
  * @property array|null $metadata
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue whereIn(string $column, array $values)
@@ -171,8 +172,8 @@ class OperatorFatigue extends Model
      */
     public function needsRest(): bool
     {
-        return $this->fatigue_score >= 60 || 
-               $this->consecutive_days >= 6 || 
+        return $this->fatigue_score >= 60 ||
+               $this->consecutive_days >= 6 ||
                $this->hours_worked >= 12;
     }
 }

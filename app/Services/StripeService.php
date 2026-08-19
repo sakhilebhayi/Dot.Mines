@@ -8,19 +8,19 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Team;
 use Illuminate\Support\Facades\Log;
-use Stripe\StripeClient;
 use Stripe\Exception\ApiErrorException;
+use Stripe\StripeClient;
 
 /**
  * Stripe Integration Service
- * 
+ *
  * Handles all Stripe API interactions for subscriptions and payments
  * Note: Requires STRIPE_SECRET environment variable
  */
 class StripeService
 {
     protected StripeClient $stripe;
-    
+
     public function __construct()
     {
         $this->stripe = new StripeClient(config('services.stripe.secret'));
@@ -34,7 +34,7 @@ class StripeService
         try {
             // Check if team already has a Stripe customer ID
             $subscription = Subscription::where('team_id', $team->id)->first();
-            
+
             if ($subscription && $subscription->stripe_customer_id) {
                 return $subscription->stripe_customer_id;
             }
@@ -49,12 +49,13 @@ class StripeService
             ]);
 
             return $customer->id;
-            
+
         } catch (ApiErrorException $e) {
             Log::error('Stripe customer creation failed', [
                 'team_id' => $team->id,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -69,20 +70,21 @@ class StripeService
     ): ?array {
         try {
             $customerId = $this->createOrGetCustomer($team);
-            
-            if (!$customerId) {
+
+            if (! $customerId) {
                 return null;
             }
 
-            $priceId = $billingCycle === 'yearly' 
-                ? $plan->stripe_yearly_price_id 
+            $priceId = $billingCycle === 'yearly'
+                ? $plan->stripe_yearly_price_id
                 : $plan->stripe_price_id;
 
-            if (!$priceId) {
+            if (! $priceId) {
                 Log::warning('No Stripe price ID configured for plan', [
                     'plan_id' => $plan->id,
                     'billing_cycle' => $billingCycle,
                 ]);
+
                 return null;
             }
 
@@ -94,7 +96,7 @@ class StripeService
                     'quantity' => 1,
                 ]],
                 'mode' => 'subscription',
-                'success_url' => route('billing.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'success_url' => route('billing.success').'?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('billing.index'),
                 'metadata' => [
                     'team_id' => $team->id,
@@ -107,13 +109,14 @@ class StripeService
                 'id' => $session->id,
                 'url' => $session->url,
             ];
-            
+
         } catch (ApiErrorException $e) {
             Log::error('Stripe checkout session creation failed', [
                 'team_id' => $team->id,
                 'plan_id' => $plan->id,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -125,8 +128,8 @@ class StripeService
     {
         try {
             $subscription = Subscription::where('team_id', $team->id)->first();
-            
-            if (!$subscription || !$subscription->stripe_customer_id) {
+
+            if (! $subscription || ! $subscription->stripe_customer_id) {
                 return null;
             }
 
@@ -136,12 +139,13 @@ class StripeService
             ]);
 
             return $session->url;
-            
+
         } catch (ApiErrorException $e) {
             Log::error('Stripe billing portal session creation failed', [
                 'team_id' => $team->id,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -156,8 +160,9 @@ class StripeService
             $teamId = $stripeSubscription['metadata']['team_id'] ?? null;
             $planId = $stripeSubscription['metadata']['plan_id'] ?? null;
 
-            if (!$teamId || !$planId) {
+            if (! $teamId || ! $planId) {
                 Log::warning('Missing metadata in subscription webhook', $data);
+
                 return;
             }
 
@@ -168,15 +173,15 @@ class StripeService
                     'subscription_plan_id' => $planId,
                     'stripe_customer_id' => $stripeSubscription['customer'],
                     'status' => $this->mapStripeStatus($stripeSubscription['status']),
-                    'current_period_start' => $stripeSubscription['current_period_start'] 
-                        ? date('Y-m-d H:i:s', $stripeSubscription['current_period_start']) 
+                    'current_period_start' => $stripeSubscription['current_period_start']
+                        ? date('Y-m-d H:i:s', $stripeSubscription['current_period_start'])
                         : null,
                     'current_period_end' => $stripeSubscription['current_period_end']
                         ? date('Y-m-d H:i:s', $stripeSubscription['current_period_end'])
                         : null,
                 ]
             );
-            
+
         } catch (\Exception $e) {
             Log::error('Failed to handle subscription created webhook', [
                 'error' => $e->getMessage(),
@@ -192,13 +197,14 @@ class StripeService
     {
         try {
             $stripeSubscription = $data['data']['object'];
-            
+
             $subscription = Subscription::where('stripe_subscription_id', $stripeSubscription['id'])->first();
-            
-            if (!$subscription) {
+
+            if (! $subscription) {
                 Log::warning('Subscription not found for update', [
                     'stripe_subscription_id' => $stripeSubscription['id'],
                 ]);
+
                 return;
             }
 
@@ -214,7 +220,7 @@ class StripeService
                     ? date('Y-m-d H:i:s', $stripeSubscription['canceled_at'])
                     : null,
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Failed to handle subscription updated webhook', [
                 'error' => $e->getMessage(),
@@ -230,13 +236,14 @@ class StripeService
     {
         try {
             $paymentIntent = $data['data']['object'];
-            
+
             $subscription = Subscription::where('stripe_customer_id', $paymentIntent['customer'])->first();
-            
-            if (!$subscription) {
+
+            if (! $subscription) {
                 Log::warning('Subscription not found for payment', [
                     'customer_id' => $paymentIntent['customer'],
                 ]);
+
                 return;
             }
 
@@ -251,7 +258,7 @@ class StripeService
                 'paid_at' => now(),
                 'metadata' => $paymentIntent['metadata'] ?? [],
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Failed to handle payment succeeded webhook', [
                 'error' => $e->getMessage(),
@@ -267,10 +274,10 @@ class StripeService
     {
         try {
             $invoice = $data['data']['object'];
-            
+
             $subscription = Subscription::where('stripe_subscription_id', $invoice['subscription'])->first();
-            
-            if (!$subscription) {
+
+            if (! $subscription) {
                 return;
             }
 
@@ -294,7 +301,7 @@ class StripeService
                     'line_items' => $invoice['lines']['data'] ?? [],
                 ]
             );
-            
+
         } catch (\Exception $e) {
             Log::error('Failed to handle invoice paid webhook', [
                 'error' => $e->getMessage(),
@@ -309,7 +316,7 @@ class StripeService
     public function cancelSubscription(Subscription $subscription, bool $immediately = false): bool
     {
         try {
-            if (!$subscription->stripe_subscription_id) {
+            if (! $subscription->stripe_subscription_id) {
                 return false;
             }
 
@@ -332,12 +339,13 @@ class StripeService
             }
 
             return true;
-            
+
         } catch (ApiErrorException $e) {
             Log::error('Stripe subscription cancellation failed', [
                 'subscription_id' => $subscription->id,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -348,7 +356,7 @@ class StripeService
     public function resumeSubscription(Subscription $subscription): bool
     {
         try {
-            if (!$subscription->stripe_subscription_id) {
+            if (! $subscription->stripe_subscription_id) {
                 return false;
             }
 
@@ -364,12 +372,13 @@ class StripeService
             ]);
 
             return true;
-            
+
         } catch (ApiErrorException $e) {
             Log::error('Stripe subscription resume failed', [
                 'subscription_id' => $subscription->id,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -379,7 +388,7 @@ class StripeService
      */
     protected function mapStripeStatus(string $stripeStatus): string
     {
-        return match($stripeStatus) {
+        return match ($stripeStatus) {
             'trialing' => 'trial',
             'active' => 'active',
             'past_due' => 'past_due',

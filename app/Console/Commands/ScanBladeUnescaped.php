@@ -33,13 +33,15 @@ class ScanBladeUnescaped extends Command
         if (count($matches) > 0) {
             $this->error('Found unescaped Blade/PHP output in templates:');
             foreach ($matches as $m) {
-                $this->line(' - ' . str_replace(base_path() . '/', '', $m));
+                $this->line(' - '.str_replace(base_path().'/', '', $m));
             }
             $this->error('Please replace raw outputs with escaped output using {{ }} or e()');
+
             return 2;
         }
 
         $this->info('No unescaped outputs found in Blade templates.');
+
         return 0;
     }
 }

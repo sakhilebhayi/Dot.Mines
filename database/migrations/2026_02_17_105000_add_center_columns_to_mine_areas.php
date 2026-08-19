@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('mine_areas')) {
+        if (! Schema::hasTable('mine_areas')) {
             return;
         }
 
         Schema::table('mine_areas', function (Blueprint $table) {
-            if (!Schema::hasColumn('mine_areas', 'center_latitude')) {
+            if (! Schema::hasColumn('mine_areas', 'center_latitude')) {
                 $table->decimal('center_latitude', 10, 8)->nullable()->after('latitude');
             }
-            if (!Schema::hasColumn('mine_areas', 'center_longitude')) {
+            if (! Schema::hasColumn('mine_areas', 'center_longitude')) {
                 $table->decimal('center_longitude', 11, 8)->nullable()->after('center_latitude');
             }
         });
@@ -24,7 +24,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (!Schema::hasTable('mine_areas')) {
+        if (! Schema::hasTable('mine_areas')) {
             return;
         }
 

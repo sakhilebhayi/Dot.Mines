@@ -4,18 +4,19 @@ namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * Trait PhpStanEloquentStubs
- * 
+ *
  * Provides PHPStan with method stubs for common Eloquent builder methods.
  * This helps static analysis tools understand Eloquent's dynamic query building methods.
- * 
+ *
  * All actual functionality is provided by Illuminate\Database\Eloquent\Model
  * This trait is purely for PHPStan type hinting.
- * 
+ *
  * Usage: Add this trait to any Eloquent Model class
- * 
+ *
  * @example
  *     class User extends Model {
  *         use PhpStanEloquentStubs;
@@ -177,7 +178,7 @@ trait PhpStanEloquentStubs
      * @param  array  $columns
      * @param  string  $pageName
      * @param  int|null  $page
-     * @return \Illuminate\Pagination\LengthAwarePaginator
+     * @return LengthAwarePaginator
      */
     public static function paginate($perPage = 15, $columns = ['*'], $pageName = 'page', $page = null) {}
 

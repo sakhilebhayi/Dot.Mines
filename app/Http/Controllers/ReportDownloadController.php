@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ReportDownloadController
 {
@@ -34,6 +34,6 @@ class ReportDownloadController
             abort(404);
         }
 
-        return Storage::download($report->file_path, $report->title . '.' . $report->format);
+        return Storage::download($report->file_path, $report->title.'.'.$report->format);
     }
 }

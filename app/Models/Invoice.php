@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Invoice Model
- * 
+ *
  * Represents a billing invoice
  * Tracks line items and payment status
  *
@@ -23,13 +24,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $total
  * @property string $currency
  * @property string $status
- * @property \Carbon\Carbon $issued_at
- * @property \Carbon\Carbon|null $due_at
- * @property \Carbon\Carbon|null $paid_at
+ * @property Carbon $issued_at
+ * @property Carbon|null $due_at
+ * @property Carbon|null $paid_at
  * @property string|null $pdf_url
  * @property array|null $line_items
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice whereIn(string $column, array $values)
@@ -101,7 +102,7 @@ class Invoice extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return 'R' . number_format($this->total, 2);
+        return 'R'.number_format($this->total, 2);
     }
 
     /**
@@ -109,7 +110,7 @@ class Invoice extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'paid' => 'green',
             'open' => 'yellow',
             'draft' => 'blue',
@@ -124,8 +125,8 @@ class Invoice extends Model
      */
     public function isOverdue(): bool
     {
-        return $this->status === 'open' && 
-               $this->due_at && 
+        return $this->status === 'open' &&
+               $this->due_at &&
                $this->due_at->isPast();
     }
 

@@ -8,14 +8,14 @@ use Illuminate\Http\Response;
 
 /**
  * Alert API Controller
- * 
+ *
  * Handles alert management and actions
  */
 class AlertController extends Controller
 {
     /**
      * List all alerts for current team
-     * 
+     *
      * GET /api/alerts
      */
     public function index(Request $request)
@@ -65,7 +65,7 @@ class AlertController extends Controller
 
     /**
      * Get a single alert
-     * 
+     *
      * GET /api/alerts/{id}
      */
     public function show(Alert $alert)
@@ -77,7 +77,7 @@ class AlertController extends Controller
 
     /**
      * Create a new alert (usually triggered by system)
-     * 
+     *
      * POST /api/alerts
      */
     public function store(Request $request)
@@ -106,13 +106,13 @@ class AlertController extends Controller
 
     /**
      * Acknowledge an alert
-     * 
+     *
      * POST /api/alerts/{id}/acknowledge
      */
     public function acknowledge(Alert $alert)
     {
         $this->authorize('acknowledge', $alert);
-        
+
         $alert->acknowledge(auth()->id());
 
         return response()->json([
@@ -123,13 +123,13 @@ class AlertController extends Controller
 
     /**
      * Resolve an alert
-     * 
+     *
      * POST /api/alerts/{id}/resolve
      */
     public function resolve(Alert $alert)
     {
         $this->authorize('resolve', $alert);
-        
+
         $alert->resolve(auth()->id());
 
         return response()->json([
@@ -140,7 +140,7 @@ class AlertController extends Controller
 
     /**
      * Get active alerts count
-     * 
+     *
      * GET /api/alerts/stats/active
      */
     public function activeCount()
@@ -169,7 +169,7 @@ class AlertController extends Controller
 
     /**
      * Get alerts for machine
-     * 
+     *
      * GET /api/alerts/machine/{machineId}
      */
     public function machineAlerts(Request $request, $machineId)

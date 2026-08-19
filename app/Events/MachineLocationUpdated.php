@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Models\Machine;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -17,15 +16,11 @@ class MachineLocationUpdated implements ShouldBroadcast
 
     /**
      * The machine instance.
-     *
-     * @var \App\Models\Machine
      */
     public Machine $machine;
 
     /**
      * The location data (latitude, longitude, accuracy, etc.)
-     *
-     * @var array
      */
     public array $location;
 
@@ -49,23 +44,21 @@ class MachineLocationUpdated implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
         return [
             // Broadcast to the team channel
-            new PrivateChannel('team.' . $this->machine->team_id),
-            
+            new PrivateChannel('team.'.$this->machine->team_id),
+
             // Broadcast to the specific machine channel
-            new PrivateChannel('machine.' . $this->machine->id),
+            new PrivateChannel('machine.'.$this->machine->id),
         ];
     }
 
     /**
      * Get the data to broadcast.
-     *
-     * @return array
      */
     public function broadcastWith(): array
     {
@@ -85,8 +78,6 @@ class MachineLocationUpdated implements ShouldBroadcast
 
     /**
      * The event's broadcast name.
-     *
-     * @return string
      */
     public function broadcastAs(): string
     {

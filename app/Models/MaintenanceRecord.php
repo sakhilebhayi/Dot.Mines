@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,9 +26,9 @@ class MaintenanceRecord extends Model
      * @property string|null $work_performed
      * @property string $status
      * @property string $priority
-     * @property \Carbon\Carbon $scheduled_date
-     * @property \Carbon\Carbon|null $started_at
-     * @property \Carbon\Carbon|null $completed_at
+     * @property Carbon $scheduled_date
+     * @property Carbon|null $started_at
+     * @property Carbon|null $completed_at
      * @property int|null $assigned_to
      * @property int|null $completed_by
      * @property string|float $labor_hours
@@ -42,8 +43,8 @@ class MaintenanceRecord extends Model
      * @property array|null $attachments
      * @property bool $machine_operational
      * @property float|null $duration
-     * @property \Carbon\Carbon $created_at
-     * @property \Carbon\Carbon $updated_at
+     * @property Carbon $created_at
+     * @property Carbon $updated_at
      *
      * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceRecord where(string $column, mixed $operator = null, mixed $value = null)
      * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceRecord whereIn(string $column, array $values)
@@ -52,7 +53,6 @@ class MaintenanceRecord extends Model
      * @method static MaintenanceRecord findOrFail(mixed $id, array $columns = ['*'])
      * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
      */
-
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -103,8 +103,8 @@ class MaintenanceRecord extends Model
         parent::boot();
 
         static::creating(function ($record) {
-            if (!$record->work_order_number) {
-                $record->work_order_number = 'WO-' . strtoupper(uniqid());
+            if (! $record->work_order_number) {
+                $record->work_order_number = 'WO-'.strtoupper(uniqid());
             }
         });
     }
@@ -139,9 +139,10 @@ class MaintenanceRecord extends Model
      */
     public function getDurationAttribute(): ?float
     {
-        if (!$this->started_at || !$this->completed_at) {
+        if (! $this->started_at || ! $this->completed_at) {
             return null;
         }
+
         return $this->started_at->diffInHours($this->completed_at, true);
     }
 

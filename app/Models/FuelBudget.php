@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,16 +15,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $team_id
  * @property int|null $mine_area_id
  * @property string $period_type
- * @property \Carbon\Carbon $start_date
- * @property \Carbon\Carbon $end_date
+ * @property Carbon $start_date
+ * @property Carbon $end_date
  * @property float $budgeted_amount
  * @property float $budgeted_liters
  * @property float|null $actual_spent
  * @property float|null $actual_liters
  * @property string $status
  * @property string|null $notes
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|FuelBudget where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|FuelBudget whereIn(string $column, array<string|int> $values)
@@ -73,6 +74,7 @@ class FuelBudget extends Model
         if ($this->budgeted_amount == 0) {
             return 0;
         }
+
         return round(($this->actual_spent / $this->budgeted_amount) * 100, 2);
     }
 
@@ -89,9 +91,10 @@ class FuelBudget extends Model
      */
     public function getVolumeUtilizationAttribute(): ?float
     {
-        if (!$this->budgeted_liters || $this->budgeted_liters == 0) {
+        if (! $this->budgeted_liters || $this->budgeted_liters == 0) {
             return null;
         }
+
         return round(($this->actual_liters / $this->budgeted_liters) * 100, 2);
     }
 
@@ -133,6 +136,7 @@ class FuelBudget extends Model
     public function scopeCurrent($query)
     {
         $now = now();
+
         return $query->where('start_date', '<=', $now)
             ->where('end_date', '>=', $now);
     }

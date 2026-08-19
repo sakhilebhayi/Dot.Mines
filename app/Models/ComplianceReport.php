@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ComplianceReport extends Model
 {
@@ -25,7 +24,6 @@ class ComplianceReport extends Model
         'report_date' => 'date',
         'compliance_score' => 'float',
     ];
-
 
     public function generator()
     {

@@ -2,9 +2,8 @@
 
 namespace App\Services\AI;
 
-use App\Models\Team;
 use App\Models\Machine;
-use App\Models\AIInsight;
+use App\Models\Team;
 
 /**
  * Anomaly Detector AI Agent

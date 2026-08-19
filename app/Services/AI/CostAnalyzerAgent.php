@@ -2,10 +2,9 @@
 
 namespace App\Services\AI;
 
-use App\Models\Team;
 use App\Models\FuelTransaction;
 use App\Models\MaintenanceRecord;
-use Illuminate\Support\Facades\DB;
+use App\Models\Team;
 
 /**
  * Cost Analyzer AI Agent
@@ -35,7 +34,7 @@ class CostAnalyzerAgent
                 'category' => 'cost',
                 'priority' => 'high',
                 'title' => 'High Operational Costs',
-                'description' => "Daily operational costs averaging R" . number_format($avgDailyCost, 2) . ". Review efficiency measures.",
+                'description' => 'Daily operational costs averaging R'.number_format($avgDailyCost, 2).'. Review efficiency measures.',
                 'confidence_score' => 0.85,
                 'estimated_savings' => $avgDailyCost * 0.15 * 30,
                 'data' => [

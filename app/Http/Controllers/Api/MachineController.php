@@ -8,7 +8,7 @@ use Illuminate\Http\Response;
 
 /**
  * Machine API Controller
- * 
+ *
  * Handles all machine-related API endpoints
  * GET, POST, PUT, DELETE operations
  */
@@ -16,7 +16,7 @@ class MachineController extends Controller
 {
     /**
      * List all machines for current team
-     * 
+     *
      * GET /api/machines
      * Query params: page, per_page, sort, filter
      */
@@ -77,7 +77,7 @@ class MachineController extends Controller
 
     /**
      * Get a single machine by ID
-     * 
+     *
      * GET /api/machines/{id}
      */
     public function show(Machine $machine)
@@ -89,7 +89,7 @@ class MachineController extends Controller
 
     /**
      * Create a new machine
-     * 
+     *
      * POST /api/machines
      */
     public function store(Request $request)
@@ -121,7 +121,7 @@ class MachineController extends Controller
 
     /**
      * Update a machine
-     * 
+     *
      * PUT /api/machines/{id}
      */
     public function update(Request $request, Machine $machine)
@@ -147,7 +147,7 @@ class MachineController extends Controller
 
     /**
      * Delete a machine
-     * 
+     *
      * DELETE /api/machines/{id}
      */
     public function destroy(Machine $machine)
@@ -163,7 +163,7 @@ class MachineController extends Controller
 
     /**
      * Get latest metrics for a machine
-     * 
+     *
      * GET /api/machines/{id}/metrics
      */
     public function metrics(Request $request, Machine $machine)
@@ -191,7 +191,7 @@ class MachineController extends Controller
 
     /**
      * Update machine location
-     * 
+     *
      * POST /api/machines/{id}/location
      */
     public function updateLocation(Request $request, Machine $machine)
@@ -211,7 +211,7 @@ class MachineController extends Controller
 
     /**
      * Get active alerts for a machine
-     * 
+     *
      * GET /api/machines/{id}/alerts
      */
     public function alerts(Machine $machine)

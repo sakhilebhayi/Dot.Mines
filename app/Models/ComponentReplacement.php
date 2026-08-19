@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeamFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\HasTeamFilters;
 
 class ComponentReplacement extends Model
 {
@@ -82,7 +82,7 @@ class ComponentReplacement extends Model
      */
     public function getExpectedReplacementHoursAttribute(): ?int
     {
-        if (!$this->expected_lifespan_hours) {
+        if (! $this->expected_lifespan_hours) {
             return null;
         }
 
@@ -94,7 +94,7 @@ class ComponentReplacement extends Model
      */
     public function getExpectedReplacementKmAttribute(): ?int
     {
-        if (!$this->expected_lifespan_km) {
+        if (! $this->expected_lifespan_km) {
             return null;
         }
 
@@ -106,11 +106,12 @@ class ComponentReplacement extends Model
      */
     public function isDueByHours(Machine $machine): bool
     {
-        if (!$this->expected_lifespan_hours || !$machine->operating_hours) {
+        if (! $this->expected_lifespan_hours || ! $machine->operating_hours) {
             return false;
         }
 
         $hoursOnComponent = $machine->operating_hours - $this->hours_at_replacement;
+
         return $hoursOnComponent >= $this->expected_lifespan_hours;
     }
 
@@ -119,11 +120,12 @@ class ComponentReplacement extends Model
      */
     public function isDueByKm(Machine $machine): bool
     {
-        if (!$this->expected_lifespan_km || !$machine->total_distance_km) {
+        if (! $this->expected_lifespan_km || ! $machine->total_distance_km) {
             return false;
         }
 
         $kmOnComponent = $machine->total_distance_km - $this->km_at_replacement;
+
         return $kmOnComponent >= $this->expected_lifespan_km;
     }
 
@@ -135,12 +137,14 @@ class ComponentReplacement extends Model
         if ($this->expected_lifespan_hours && $machine->operating_hours) {
             $hoursUsed = $machine->operating_hours - $this->hours_at_replacement;
             $percentage = (($this->expected_lifespan_hours - $hoursUsed) / $this->expected_lifespan_hours) * 100;
+
             return max(0, min(100, $percentage));
         }
 
         if ($this->expected_lifespan_km && $machine->total_distance_km) {
             $kmUsed = $machine->total_distance_km - $this->km_at_replacement;
             $percentage = (($this->expected_lifespan_km - $kmUsed) / $this->expected_lifespan_km) * 100;
+
             return max(0, min(100, $percentage));
         }
 

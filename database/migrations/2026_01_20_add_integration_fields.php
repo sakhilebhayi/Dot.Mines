@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::table('integrations', function (Blueprint $table) {
             // Add credentials column if it doesn't exist
-            if (!Schema::hasColumn('integrations', 'credentials')) {
+            if (! Schema::hasColumn('integrations', 'credentials')) {
                 $table->json('credentials')->nullable()->after('api_secret');
             }
 
             // Add last_sync_status column if it doesn't exist
-            if (!Schema::hasColumn('integrations', 'last_sync_status')) {
+            if (! Schema::hasColumn('integrations', 'last_sync_status')) {
                 $table->string('last_sync_status')->nullable()->default('pending')->after('last_sync_at');
             }
 

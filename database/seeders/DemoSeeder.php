@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Team;
-use App\Models\User;
-use App\Models\Machine;
+use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\Integration;
-use App\Models\Alert;
+use App\Models\Machine;
+use App\Models\Team;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class DemoSeeder extends Seeder
 {
@@ -212,20 +212,20 @@ class DemoSeeder extends Seeder
             [
                 'name' => 'Volvo Integration',
                 'provider' => 'volvo',
-                'api_key' => 'demo_volvo_key_' . time(),
-                'api_secret' => 'demo_volvo_secret_' . time(),
-                'webhook_url' => env('APP_URL') . '/webhooks/volvo',
-                'webhook_secret' => 'demo_volvo_webhook_' . time(),
+                'api_key' => 'demo_volvo_key_'.time(),
+                'api_secret' => 'demo_volvo_secret_'.time(),
+                'webhook_url' => env('APP_URL').'/webhooks/volvo',
+                'webhook_secret' => 'demo_volvo_webhook_'.time(),
                 'status' => 'active',
                 'last_sync_at' => now()->subHours(2),
             ],
             [
                 'name' => 'CAT Integration',
                 'provider' => 'cat',
-                'api_key' => 'demo_cat_key_' . time(),
-                'api_secret' => 'demo_cat_secret_' . time(),
-                'webhook_url' => env('APP_URL') . '/webhooks/cat',
-                'webhook_secret' => 'demo_cat_webhook_' . time(),
+                'api_key' => 'demo_cat_key_'.time(),
+                'api_secret' => 'demo_cat_secret_'.time(),
+                'webhook_url' => env('APP_URL').'/webhooks/cat',
+                'webhook_secret' => 'demo_cat_webhook_'.time(),
                 'status' => 'active',
                 'last_sync_at' => now()->subHours(1),
             ],

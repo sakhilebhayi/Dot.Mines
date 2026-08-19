@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('machines', function (Blueprint $table) {
             // Add manufacturer column
             $table->string('manufacturer')->nullable()->after('machine_type');
-            
+
             // Make registration_number and serial_number nullable and not unique
             $table->dropUnique(['registration_number']);
             $table->dropUnique(['serial_number']);
@@ -31,7 +31,7 @@ return new class extends Migration
         Schema::table('machines', function (Blueprint $table) {
             // Remove manufacturer column
             $table->dropColumn('manufacturer');
-            
+
             // Restore registration_number and serial_number as unique and not nullable
             $table->string('registration_number')->nullable(false)->change();
             $table->string('serial_number')->nullable(false)->change();
