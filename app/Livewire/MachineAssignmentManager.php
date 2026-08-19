@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
 use App\Models\MineArea;
-use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -27,7 +26,7 @@ use Livewire\WithPagination;
  */
 class MachineAssignmentManager extends Component
 {
-    use BrowserEventBridge, WithPagination;
+    use WithPagination;
 
     public MineArea $mineArea;
 
@@ -149,7 +148,7 @@ class MachineAssignmentManager extends Component
 
         $count = $machines->count();
         $this->resetSelection();
-        $this->dispatchBrowserEvent('notify', ['message' => "{$count} machine(s) assigned to {$this->mineArea->name}", 'type' => 'success']);
+        $this->dispatch('notify', ['message' => "{$count} machine(s) assigned to {$this->mineArea->name}", 'type' => 'success']);
     }
 
     private function assign(Machine $machine, ?string $notes): void
@@ -181,7 +180,7 @@ class MachineAssignmentManager extends Component
         $this->authorize('update', $machine);
 
         if (! $this->moveToAnotherArea($machine, $team->id)) {
-            $this->dispatchBrowserEvent('notify', [
+            $this->dispatch('notify', [
                 'message' => "Cannot unassign {$machine->name}; at least one active mine area must be set. Create another mine area first.",
                 'type' => 'error',
             ]);
@@ -189,7 +188,7 @@ class MachineAssignmentManager extends Component
             return;
         }
 
-        $this->dispatchBrowserEvent('notify', ['message' => "{$machine->name} removed from {$this->mineArea->name}", 'type' => 'success']);
+        $this->dispatch('notify', ['message' => "{$machine->name} removed from {$this->mineArea->name}", 'type' => 'success']);
     }
 
     public function unassignMultipleMachines(): void
@@ -211,12 +210,12 @@ class MachineAssignmentManager extends Component
         $this->resetSelection();
 
         if ($moved === 0) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Cannot unassign; at least one active mine area must be set.', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Cannot unassign; at least one active mine area must be set.', 'type' => 'error']);
 
             return;
         }
 
-        $this->dispatchBrowserEvent('notify', ['message' => "{$moved} machine(s) removed from {$this->mineArea->name}", 'type' => 'success']);
+        $this->dispatch('notify', ['message' => "{$moved} machine(s) removed from {$this->mineArea->name}", 'type' => 'success']);
     }
 
     /**

@@ -8,15 +8,12 @@ use App\Models\MaintenanceAlert;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use App\Services\AI\MaintenancePredictorAgent;
-use App\Traits\BrowserEventBridge;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class MaintenanceDashboard extends Component
 {
-    use BrowserEventBridge;
-
     public string $selectedPeriod = 'month';
 
     public bool $showCriticalOnly = false;
@@ -98,7 +95,7 @@ class MaintenanceDashboard extends Component
             ->first();
 
         if (! $machine) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Invalid machine selected', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Invalid machine selected', 'type' => 'error']);
 
             return;
         }
@@ -127,7 +124,7 @@ class MaintenanceDashboard extends Component
                 'type' => $this->maintenance_type,
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['message' => 'Maintenance scheduled successfully', 'type' => 'success']);
+            $this->dispatch('notify', ['message' => 'Maintenance scheduled successfully', 'type' => 'success']);
             $this->closeBookingModal();
 
         } catch (\Exception $e) {
@@ -136,14 +133,14 @@ class MaintenanceDashboard extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to schedule maintenance', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Failed to schedule maintenance', 'type' => 'error']);
         }
     }
 
     public function completeScheduledMaintenance($recordId)
     {
         if (! is_numeric($recordId)) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
 
             return;
         }
@@ -152,7 +149,7 @@ class MaintenanceDashboard extends Component
             ->find($recordId);
 
         if (! $record) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Record not found or access denied', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Record not found or access denied', 'type' => 'error']);
 
             return;
         }
@@ -169,21 +166,21 @@ class MaintenanceDashboard extends Component
                 'record_id' => $recordId,
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['message' => 'Maintenance marked as completed', 'type' => 'success']);
+            $this->dispatch('notify', ['message' => 'Maintenance marked as completed', 'type' => 'success']);
         } catch (\Exception $e) {
             Log::error('Failed to complete maintenance', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to update maintenance status', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Failed to update maintenance status', 'type' => 'error']);
         }
     }
 
     public function cancelScheduledMaintenance($recordId)
     {
         if (! is_numeric($recordId)) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
 
             return;
         }
@@ -192,7 +189,7 @@ class MaintenanceDashboard extends Component
             ->find($recordId);
 
         if (! $record) {
-            $this->dispatchBrowserEvent('notify', ['message' => 'Record not found or access denied', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Record not found or access denied', 'type' => 'error']);
 
             return;
         }
@@ -205,14 +202,14 @@ class MaintenanceDashboard extends Component
                 'record_id' => $recordId,
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['message' => 'Maintenance cancelled', 'type' => 'info']);
+            $this->dispatch('notify', ['message' => 'Maintenance cancelled', 'type' => 'info']);
         } catch (\Exception $e) {
             Log::error('Failed to cancel maintenance', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['message' => 'Failed to cancel maintenance', 'type' => 'error']);
+            $this->dispatch('notify', ['message' => 'Failed to cancel maintenance', 'type' => 'error']);
         }
     }
 

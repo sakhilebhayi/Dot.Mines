@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Jobs\GenerateReportJob;
 use App\Models\Machine;
 use App\Models\Report;
-use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,8 +12,6 @@ use Livewire\Component;
 
 class ReportGenerator extends Component
 {
-    use BrowserEventBridge;
-
     public int $step = 1;
 
     public string $reportName = '';
@@ -155,7 +152,7 @@ class ReportGenerator extends Component
         $team = $user->currentTeam;
 
         if (! $team) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'No team selected']);
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'No team selected']);
 
             return;
         }
@@ -228,7 +225,7 @@ class ReportGenerator extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to generate report']);
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to generate report']);
         }
     }
 

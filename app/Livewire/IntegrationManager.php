@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
-use App\Traits\BrowserEventBridge;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -12,8 +11,6 @@ use Livewire\Component;
 
 class IntegrationManager extends Component
 {
-    use BrowserEventBridge;
-
     public mixed $team = null;
 
     public array $integrations = [];
@@ -184,7 +181,7 @@ class IntegrationManager extends Component
                 ],
             ]);
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Integration created successfully!']);
+            $this->dispatch('notify', ['type' => 'success', 'message' => 'Integration created successfully!']);
             $this->closeAddModal();
             $this->loadIntegrations();
         } catch (\Throwable $e) {
@@ -342,7 +339,7 @@ class IntegrationManager extends Component
     public function syncMachines($integrationId)
     {
         if (! $this->team) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'No team context available']);
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'No team context available']);
 
             return;
         }
@@ -360,23 +357,23 @@ class IntegrationManager extends Component
                     'last_sync_at' => now(),
                     'last_sync_status' => 'success',
                 ]);
-                $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Sync started successfully!']);
+                $this->dispatch('notify', ['type' => 'success', 'message' => 'Sync started successfully!']);
             } else {
                 $integration->update(['last_sync_status' => 'failed']);
-                $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Sync failed: '.$result['error']]);
+                $this->dispatch('notify', ['type' => 'error', 'message' => 'Sync failed: '.$result['error']]);
             }
 
             $this->loadIntegrations();
         } catch (\Throwable $e) {
             Log::error('Sync machines failed', ['error' => $e->getMessage()]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Error starting sync']);
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Error starting sync']);
         }
     }
 
     public function deleteIntegration($integrationId)
     {
         if (! $this->team) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'No team context available']);
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'No team context available']);
 
             return;
         }
@@ -387,11 +384,11 @@ class IntegrationManager extends Component
             $this->authorize('delete', $integration);
             $integration->delete();
 
-            $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Integration deleted successfully!']);
+            $this->dispatch('notify', ['type' => 'success', 'message' => 'Integration deleted successfully!']);
             $this->loadIntegrations();
         } catch (\Throwable $e) {
             Log::error('Delete integration failed', ['error' => $e->getMessage()]);
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Error deleting integration']);
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Error deleting integration']);
         }
     }
 
