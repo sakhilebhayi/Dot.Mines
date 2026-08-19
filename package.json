@@ -14,7 +14,7 @@
         "@tailwindcss/vite": "^4.3.3",
         "autoprefixer": "^10.4.27",
         "axios": "^1.13.2",
-        "concurrently": "^9.0.1",
+        "concurrently": "^10.0.5",
         "daisyui": "^5.5.19",
         "laravel-echo": "^2.4.0",
         "laravel-vite-plugin": "^3.2.0",
