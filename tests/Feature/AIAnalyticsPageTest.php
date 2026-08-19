@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\AIAnalytics;
+use App\Models\AIRecommendation;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -36,5 +39,38 @@ class AIAnalyticsPageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('AI Analytics');
+    }
+
+    /**
+     * The implementation-rate aggregation used double quotes around the
+     * 'implemented' string literal in raw SQL -- SQLite tolerates that, but
+     * Postgres reads double quotes as an identifier and 500s the page.
+     * This pins the widget computing correctly with real rows present.
+     */
+    public function test_implementation_rate_computes_from_real_recommendation_statuses(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        AIRecommendation::factory()->create([
+            'team_id' => $team->id,
+            'status' => 'implemented',
+            'created_at' => now()->subDay(),
+        ]);
+        AIRecommendation::factory()->create([
+            'team_id' => $team->id,
+            'status' => 'pending',
+            'created_at' => now()->subDay(),
+        ]);
+
+        $rates = Livewire::actingAs($user)
+            ->test(AIAnalytics::class)
+            ->viewData('implementationRate');
+
+        $this->assertCount(1, $rates);
+        $this->assertSame(2, (int) $rates->first()->total);
+        $this->assertSame(1, (int) $rates->first()->implemented);
+        $this->assertEqualsWithDelta(50.0, $rates->first()->rate, 0.01);
     }
 }

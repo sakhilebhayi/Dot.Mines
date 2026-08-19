@@ -86,9 +86,9 @@ class AIAnalytics extends Component
         // Implementation rate over time
         $implementationRate = AIRecommendation::where('team_id', $team->id)
             ->where('created_at', '>=', $startDate)
-            ->selectRaw('DATE(created_at) as date, 
+            ->selectRaw("DATE(created_at) as date,
                         COUNT(*) as total,
-                        SUM(CASE WHEN status = "implemented" THEN 1 ELSE 0 END) as implemented')
+                        SUM(CASE WHEN status = 'implemented' THEN 1 ELSE 0 END) as implemented")
             ->groupBy('date')
             ->orderBy('date')
             ->get()
