@@ -51,6 +51,33 @@ class FileUploadService
         $this->maxPerFileSize = $bytes;
     }
 
+    /**
+     * Content (magic-byte) MIME types accepted per extension. The browser's
+     * claimed extension and MIME are attacker-controlled; only the sniffed
+     * content counts. Formats without a reliable magic signature (plain-text
+     * CAD/GIS interchange like DXF or SHP sidecars) legitimately sniff as
+     * text/plain or octet-stream.
+     *
+     * @var array<string, list<string>>
+     */
+    protected array $allowedMimesByExtension = [
+        'pdf' => ['application/pdf'],
+        'png' => ['image/png'],
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'gif' => ['image/gif'],
+        'tif' => ['image/tiff'],
+        'tiff' => ['image/tiff'],
+        'zip' => ['application/zip', 'application/x-zip-compressed'],
+        'kmz' => ['application/zip', 'application/x-zip-compressed', 'application/vnd.google-earth.kmz'],
+        'gz' => ['application/gzip', 'application/x-gzip'],
+        'tar' => ['application/x-tar'],
+        'kml' => ['application/xml', 'text/xml', 'text/plain', 'application/vnd.google-earth.kml+xml'],
+        'dwg' => ['application/octet-stream', 'image/vnd.dwg', 'application/acad'],
+        'dxf' => ['application/octet-stream', 'text/plain', 'image/vnd.dxf'],
+        'shp' => ['application/octet-stream'],
+    ];
+
     public function validateFile(UploadedFile $file): void
     {
         $ext = strtolower($file->getClientOriginalExtension());
@@ -61,6 +88,21 @@ class FileUploadService
         // Size check already handled by validation rules, but double-check (max 50MB)
         if ($file->getSize() > 51200 * 1024) {
             throw new \Exception('File too large.');
+        }
+
+        // The extension alone is attacker-chosen: verify the file's actual
+        // content type (finfo magic bytes) matches what that extension is
+        // allowed to contain, so a PHP payload named report.pdf is rejected
+        // even though "pdf" passes the extension allowlist.
+        $real = $file->getRealPath();
+        if ($real !== false && file_exists($real)) {
+            $detected = (new \finfo(FILEINFO_MIME_TYPE))->file($real);
+            $sniffed = $detected === false || $detected === '' ? 'application/octet-stream' : $detected;
+            $allowedMimes = $this->allowedMimesByExtension[$ext] ?? [];
+
+            if (! in_array($sniffed, $allowedMimes, true)) {
+                throw new \Exception('File content does not match its extension.');
+            }
         }
 
         // For archive types, inspect zip contents for dangerous file types
