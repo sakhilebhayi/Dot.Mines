@@ -24,8 +24,9 @@ class RealTimeAlertService
      */
     public function dispatchSensorAlert(IoTSensor $sensor, array $reading, int $teamId, bool $isAnomaly = false): void
     {
-        // Create notification record
-        Notification::create([
+        // In-app + bell broadcast only (no notify_roles => no emails --
+        // emailing every sensor reading would be noise).
+        NotificationService::dispatch([
             'team_id' => $teamId,
             'type' => 'sensor_reading',
             'title' => "Sensor Reading: {$sensor->name}",
@@ -50,20 +51,21 @@ class RealTimeAlertService
             default => 'medium',
         };
 
-        // Create notification
-        Notification::create([
-            'team_id' => $teamId,
-            'type' => 'maintenance_alert',
-            'title' => "Maintenance Alert: {$machine->name}",
-            'message' => 'Predicted maintenance needed on '.$predictedDate->format('M d, Y'),
-            'alert_level' => $severity,
-            'data' => [
+        // Managers get emailed (gated by their notification preferences);
+        // everyone on the team sees it in the bell.
+        NotificationService::notifyManagers(
+            $teamId,
+            'maintenance_alert',
+            "Maintenance Alert: {$machine->name}",
+            'Predicted maintenance needed on '.$predictedDate->format('M d, Y'),
+            $severity,
+            [
                 'machine_id' => $machine->id,
                 'probability' => $probability,
                 'predicted_date' => $predictedDate,
             ],
-            'action_url' => "/fleet/{$machine->id}/maintenance",
-        ]);
+            "/fleet/{$machine->id}/maintenance",
+        );
 
         // Broadcast via WebSocket
         MaintenanceAlertTriggered::dispatch($machine, $probability, $predictedDate, $teamId);
@@ -91,20 +93,21 @@ class RealTimeAlertService
         $deadline = $isArray ? ($violation['deadline'] ?? null) : $violation->remediation_deadline;
         $violationId = $isArray ? ($violation['id'] ?? null) : $violation->id;
 
-        // Create notification
-        Notification::create([
-            'team_id' => $teamId,
-            'type' => 'compliance_violation',
-            'title' => "Compliance Violation: {$violationType}",
-            'message' => $description,
-            'alert_level' => $severityMap[$severity] ?? 'warning',
-            'data' => [
+        // Compliance is an admin concern -- admins get emailed (preference
+        // gated), the team sees it in the bell.
+        NotificationService::notifyAdmins(
+            $teamId,
+            'compliance_violation',
+            "Compliance Violation: {$violationType}",
+            $description,
+            $severityMap[$severity] ?? 'warning',
+            [
                 'violation_id' => $violationId,
                 'severity' => $severity,
                 'deadline' => $deadline,
             ],
-            'action_url' => $violationId ? "/compliance/violations/{$violationId}" : null,
-        ]);
+            $violationId ? "/compliance/violations/{$violationId}" : null,
+        );
 
         // Broadcast via WebSocket only if we have a violation object
         if (! $isArray) {
@@ -167,8 +170,8 @@ class RealTimeAlertService
     {
         $alertLevel = $newStatus === 'inactive' ? 'warning' : 'info';
 
-        // Create notification
-        Notification::create([
+        // In-app + bell broadcast only, same policy as sensor readings.
+        NotificationService::dispatch([
             'team_id' => $teamId,
             'type' => 'sensor_status_changed',
             'title' => "Sensor Status Change: {$sensor->name}",
