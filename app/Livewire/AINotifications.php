@@ -59,7 +59,7 @@ class AINotifications extends Component
             ->where('is_acknowledged', false)
             ->with('machine')
             ->latest('created_at')
-            ->limit(10)
+            ->limit(100)
             ->get()
             ->toBase()
             ->map(fn (AIPredictiveAlert $a) => [
@@ -76,7 +76,7 @@ class AINotifications extends Component
             ->active()
             ->with('machine', 'mineArea')
             ->latest('triggered_at')
-            ->limit(10)
+            ->limit(100)
             ->get()
             ->toBase()
             ->map(fn (Alert $a) => [
@@ -93,7 +93,7 @@ class AINotifications extends Component
             ->active()
             ->with('machine', 'fuelTank')
             ->latest('triggered_at')
-            ->limit(10)
+            ->limit(100)
             ->get()
             ->toBase()
             ->map(fn (FuelAlert $a) => [
@@ -109,7 +109,7 @@ class AINotifications extends Component
         $notificationAlerts = Notification::where('team_id', $team->id)
             ->whereDoesntHave('readBy', fn ($q) => $q->where('user_id', auth()->id()))
             ->latest('created_at')
-            ->limit(10)
+            ->limit(100)
             ->get()
             ->toBase()
             ->map(fn (Notification $n) => [
@@ -125,7 +125,8 @@ class AINotifications extends Component
         $user = auth()->user();
         $minSeverity = $user->notification_preferences['min_severity'] ?? 'low';
 
-        $this->notifications = $aiAlerts
+        /** @var Collection<int, array<string, mixed>> $visible */
+        $visible = $aiAlerts
             ->concat($operationalAlerts)
             ->concat($fuelAlerts)
             ->concat($notificationAlerts)
@@ -134,11 +135,13 @@ class AINotifications extends Component
             // that nothing ever read -- toggling either off in Settings had
             // no effect on what the bell showed.
             ->filter(fn (array $n) => $user->wantsInAppAlert($n['severity']))
-            ->sortByDesc(fn (array $n) => $n['created_at'])
-            ->take(10)
-            ->values();
+            ->sortByDesc(fn (array $n) => $n['created_at']);
 
-        $this->unreadCount = $this->notifications->count();
+        // Badge = everything unread that passed the filters, not just the 10
+        // rows the panel shows -- the count used to silently max out at 10.
+        $this->unreadCount = $visible->count();
+
+        $this->notifications = $visible->take(10)->values();
     }
 
     /**
