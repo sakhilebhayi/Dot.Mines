@@ -3997,8 +3997,12 @@
       <code><![CDATA[Auth::user()?->currentTeam]]></code>
     </MixedReturnStatement>
     <NoInterfaceProperties>
+      <code><![CDATA[Auth::user()->current_team_id]]></code>
       <code><![CDATA[Auth::user()?->currentTeam]]></code>
     </NoInterfaceProperties>
+    <TypeDoesNotContainType>
+      <code><![CDATA[Auth::user()->current_team_id]]></code>
+    </TypeDoesNotContainType>
     <UndefinedMagicMethod>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
@@ -10753,6 +10757,28 @@
     <UndefinedMethod>
       <code><![CDATA[whereNull]]></code>
     </UndefinedMethod>
+  </file>
+  <file src="app/Services/DispatchService.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[DispatchService]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$zone?->type]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$engineRunning]]></code>
+      <code><![CDATA[$zone]]></code>
+    </MixedAssignment>
+    <MixedPropertyFetch>
+      <code><![CDATA[$zone?->name]]></code>
+      <code><![CDATA[$zone?->type]]></code>
+    </MixedPropertyFetch>
+    <UndefinedMagicPropertyFetch>
+      <code><![CDATA[$entry?->geofence]]></code>
+    </UndefinedMagicPropertyFetch>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[MachineMetric|null]]></code>
+    </UnnecessaryVarAnnotation>
   </file>
   <file src="app/Services/FileUploadService.php">
     <ClassMustBeFinal>
