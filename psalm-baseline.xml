@@ -5597,7 +5597,7 @@
       <code><![CDATA[$aiAnalysis['insights'] ?? []]]></code>
       <code><![CDATA[$aiAnalysis['recommendations'] ?? []]]></code>
       <code><![CDATA[$estimatedHours]]></code>
-      <code><![CDATA[$healthStatuses->avg('overall_health_score')]]></code>
+      <code><![CDATA[$healthStatuses->avg('overall_health_score') ?? 0]]></code>
       <code><![CDATA[$startTime]]></code>
       <code><![CDATA[auth()->user()->currentTeam]]></code>
     </MixedArgument>
@@ -5651,6 +5651,7 @@
       <code><![CDATA[avg]]></code>
       <code><![CDATA[completed]]></code>
       <code><![CDATA[completed]]></code>
+      <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>

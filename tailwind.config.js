@@ -2,7 +2,6 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
 import aspectRatio from '@tailwindcss/aspect-ratio';
-import daisyui from 'daisyui';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -132,34 +131,5 @@ export default {
         },
     },
 
-    plugins: [forms, typography, aspectRatio, daisyui],
-    
-    daisyui: {
-        themes: [
-            {
-                // Matches the brand tokens in resources/css/app.css (--ink, --gold, etc.)
-                // used across the guest/marketing pages and the dashboard shell, so
-                // daisyui components (card, stat, badge, alert, btn) read as the same
-                // product instead of a generic slate-blue admin theme.
-                mines: {
-                    "primary": "#d99e2b",
-                    "primary-content": "#211a14",
-                    "secondary": "#6b4226",
-                    "secondary-content": "#f4efe4",
-                    "accent": "#f0c669",
-                    "accent-content": "#211a14",
-                    "neutral": "#211a14",
-                    "neutral-content": "#f4efe4",
-                    "base-100": "#211a14",
-                    "base-200": "#2c2319",
-                    "base-300": "#3a2f22",
-                    "base-content": "#f4efe4",
-                    "info": "#3b82f6",
-                    "success": "#10b981",
-                    "warning": "#f59e0b",
-                    "error": "#ef4444",
-                },
-            },
-        ],
-    },
+    plugins: [forms, typography, aspectRatio],
 };

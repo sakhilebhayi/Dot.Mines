@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Machine;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,5 +37,23 @@ class MaintenanceDashboardPageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Book Maintenance');
+    }
+
+    /**
+     * With machines but no health assessments, the page must say so instead
+     * of rendering a fabricated "0%" fleet-average health score.
+     */
+    public function test_health_score_shows_honest_empty_state_when_nothing_is_assessed(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+        Machine::factory()->count(2)->create(['team_id' => $team->id]);
+
+        $response = $this->actingAs($user)->get('/maintenance');
+
+        $response->assertOk();
+        $response->assertSee('No health assessments yet');
+        $response->assertDontSee('0%');
     }
 }

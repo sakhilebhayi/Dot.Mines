@@ -43,8 +43,15 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="stat bg-base-200 rounded-lg">
             <div class="stat-title">Average Health Score</div>
-            <div class="stat-value text-primary">{{ $healthStats['avg_health_score'] }}%</div>
-            <div class="stat-desc">{{ $healthStats['total_machines'] }} machines</div>
+            {{-- 0% with no health rows reads as "the whole fleet is dying";
+                 say honestly that nothing has been assessed yet. --}}
+            @if (($healthStats['assessed_machines'] ?? 0) > 0)
+                <div class="stat-value text-primary">{{ $healthStats['avg_health_score'] }}%</div>
+                <div class="stat-desc">{{ $healthStats['assessed_machines'] }} of {{ $healthStats['total_machines'] }} machines assessed</div>
+            @else
+                <div class="stat-value text-primary">&mdash;</div>
+                <div class="stat-desc">No health assessments yet ({{ $healthStats['total_machines'] }} machines)</div>
+            @endif
         </div>
         
         <div class="stat bg-base-200 rounded-lg">
@@ -234,14 +241,6 @@
             @endif
         </div>
     </div>
-            <div class="stat-value text-sm">R{{ number_format($maintenanceStats['total_cost'], 2) }}</div>
-        </div>
-        
-        <div class="stat bg-base-200 rounded-lg">
-            <div class="stat-title">Avg Repair Time</div>
-            <div class="stat-value text-sm">{{ number_format($maintenanceStats['avg_repair_time'], 1) }}h</div>
-        </div>
-    </div>
 
     <!-- AI-Powered Predictive Maintenance -->
     @if($aiRecommendations->count() > 0 || $aiInsights->count() > 0)
@@ -257,7 +256,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- AI Breakdown Predictions & Recommendations -->
             @if($aiRecommendations->count() > 0)
-            <div class="card bg-gradient-to-br from-red-900 to-orange-900 text-[var(--stone)] border border-red-700">
+            <div class="card bg-base-200 border border-red-500/30">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,7 +353,7 @@
 
             <!-- AI Insights & Patterns -->
             @if($aiInsights->count() > 0)
-            <div class="card bg-gradient-to-br from-blue-900 to-indigo-900 text-[var(--stone)] border border-blue-700">
+            <div class="card bg-base-200 border border-blue-500/30">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -988,7 +987,7 @@
                 <div class="flex gap-3 pt-4">
                     <button 
                         type="submit" 
-                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--stone)] rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                        class="flex-1 px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
                         wire:loading.attr="disabled"
                         wire:target="bookMaintenance"
                     >

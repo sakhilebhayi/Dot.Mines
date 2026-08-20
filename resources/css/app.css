@@ -1,6 +1,50 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
+/* daisyUI 5 is configured HERE, not in tailwind.config.js: the old v4-style
+   JS config block was silently ignored, so every daisyui component (stat,
+   btn, card, alert, select) shipped with the default LIGHT theme -- the
+   off-brand white/navy look on Maintenance, Fuel, Documentation, Operator
+   Fatigue and Geofence pages. One brand theme, always on. */
+@plugin "daisyui" {
+    themes: mines --default;
+}
+
+@plugin "daisyui/theme" {
+    name: "mines";
+    default: true;
+    prefersdark: true;
+    color-scheme: dark;
+    --color-base-100: #211a14;
+    --color-base-200: #2c2319;
+    --color-base-300: #3a2f22;
+    --color-base-content: #f4efe4;
+    --color-primary: #d99e2b;
+    --color-primary-content: #211a14;
+    --color-secondary: #6b4226;
+    --color-secondary-content: #f4efe4;
+    --color-accent: #f0c669;
+    --color-accent-content: #211a14;
+    --color-neutral: #2c2319;
+    --color-neutral-content: #f4efe4;
+    --color-info: #3b82f6;
+    --color-info-content: #f4efe4;
+    --color-success: #10b981;
+    --color-success-content: #211a14;
+    --color-warning: #f59e0b;
+    --color-warning-content: #211a14;
+    --color-error: #ef4444;
+    --color-error-content: #f4efe4;
+    --radius-selector: 0.5rem;
+    --radius-field: 0.5rem;
+    --radius-box: 0.75rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+}
+
 /* Dot.Mines brand tokens — shared with the guest/marketing pages (welcome.blade.php,
    layouts/guest.blade.php) so the authenticated dashboard reads as the same product. */
 :root {

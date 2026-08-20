@@ -374,12 +374,16 @@ class MaintenanceDashboard extends Component
 
         $healthStats = [
             'total_machines' => Machine::where('team_id', $teamId)->count(),
+            // Machines that actually have a health assessment -- the blade
+            // shows an honest "no assessments yet" state instead of a
+            // fabricated 0% average when this is zero.
+            'assessed_machines' => $healthStatuses->count(),
             'excellent' => $healthStatuses->where('health_status', 'excellent')->count(),
             'good' => $healthStatuses->where('health_status', 'good')->count(),
             'fair' => $healthStatuses->where('health_status', 'fair')->count(),
             'poor' => $healthStatuses->where('health_status', 'poor')->count(),
             'critical' => $healthStatuses->where('health_status', 'critical')->count(),
-            'avg_health_score' => round($healthStatuses->avg('overall_health_score'), 1),
+            'avg_health_score' => round($healthStatuses->avg('overall_health_score') ?? 0, 1),
         ];
 
         // Maintenance schedules
