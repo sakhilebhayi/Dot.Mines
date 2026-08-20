@@ -5818,6 +5818,7 @@
       <code><![CDATA[user]]></code>
       <code><![CDATA[user]]></code>
       <code><![CDATA[user]]></code>
+      <code><![CDATA[user]]></code>
     </UndefinedInterfaceMethod>
     <UndefinedMagicMethod>
       <code><![CDATA[MachineHealthStatus::where('team_id', $teamId)]]></code>

@@ -1,4 +1,7 @@
-<div class="h-screen flex flex-col bg-[var(--ink)] animate-fade-in">
+{{-- relative: the map-instruction overlays are absolute descendants with no
+     other positioned ancestor; without this they anchored to the viewport
+     and floated over the app topbar. --}}
+<div class="h-screen flex flex-col relative bg-[var(--ink)] animate-fade-in">
     <!-- Leaflet CSS - loaded directly in component -->
     
     <style nonce="{{ request()->attributes->get('csp_nonce') }}">
@@ -639,24 +642,29 @@
             });
         }
 
-        // Initialize map - Leaflet is loaded inline above, so it should be available
-        if (typeof L !== 'undefined') {
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initializeRoutePlanningMap);
-            } else {
-                initializeRoutePlanningMap();
-            }
-        } else {
-            console.error('Leaflet not loaded despite inline script tags');
-            // Fallback: try waiting a bit
-            setTimeout(function() {
-                if (typeof L !== 'undefined') {
-                    initializeRoutePlanningMap();
+        // Leaflet ships in the app's module bundle (window.L), and module
+        // scripts execute AFTER this inline script parses -- so waiting is
+        // the normal path, not an error. Poll briefly; only report a real
+        // failure if the bundle never arrives.
+        (function waitForLeaflet(attempt) {
+            if (typeof L !== 'undefined') {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initializeRoutePlanningMap);
                 } else {
-                    console.error('Leaflet still not available after delay');
+                    initializeRoutePlanningMap();
                 }
-            }, 1000);
-        }
+
+                return;
+            }
+
+            if (attempt >= 100) {
+                console.error('Leaflet bundle never became available; map cannot initialize.');
+
+                return;
+            }
+
+            setTimeout(function () { waitForLeaflet(attempt + 1); }, 100);
+        })(0);
 
         function renderGeofences() {
             if (!geofenceLayerGroup) return;
