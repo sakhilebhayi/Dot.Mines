@@ -75,7 +75,17 @@ jobs:
           COMPOSER="${DEPLOY_COMPOSER:-composer}"
 
           echo "== PHP: $($PHP -v | head -1)"
-          echo "== Current release: $(git rev-parse --short HEAD)"
+          echo "== Current release: $(git rev-parse --short HEAD 2>/dev/null || echo 'none (first git deploy)')"
+
+          # Preflight: refuse to deploy while any env file carries template
+          # placeholders. A stray .env.production copied from the example
+          # once poisoned config:cache with 'your_database_user' and took
+          # the site down -- catch that class before touching anything.
+          if grep -l "your_database_\|your_app_key\|CHANGE_ME" .env .env.* 2>/dev/null | grep -v ".example" | grep -v ".disabled"; then
+            echo "::error::An env file above contains unfilled template placeholders (e.g. your_database_user). Fill it in or remove it, then re-run."
+            exit 1
+          fi
+
           git fetch origin main
 
           # Maintenance mode only for the risky window (migrations).
