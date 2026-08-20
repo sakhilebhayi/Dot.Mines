@@ -78,9 +78,14 @@
         </div>
     </div>
     @else
-    <div class="alert alert-info mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span>No monthly fuel allocation set for {{ now()->format('F Y') }}. Click "Set Monthly Allocation" to configure.</span>
+    <div class="flex items-center justify-between gap-4 p-4 mb-6 rounded-lg bg-[var(--gold)]/10 border border-[var(--gold)]/30">
+        <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-[var(--gold)] shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-[var(--sand)]">No monthly fuel allocation set for {{ now()->format('F Y') }} — dispensing is blocked until one exists.</span>
+        </div>
+        <button wire:click="openManageModal('allocation')" class="px-3 py-1.5 rounded-lg bg-[var(--gold)] text-[var(--ink)] text-sm font-medium hover:bg-[var(--gold-soft)] whitespace-nowrap">
+            Set allocation
+        </button>
     </div>
     @endif
 
@@ -436,10 +441,78 @@
         </div>
     </div>
 
+    <!-- Machine Fuel Activity: which truck got fuel, how much, when, from
+         which tank. Manual dispensing records and the machine's own
+         telemetry fuel level are shown side by side but clearly labelled --
+         they are different kinds of data and are never blended. -->
+    <div class="card bg-base-200 mb-6">
+        <div class="card-body">
+            <h2 class="card-title flex items-center gap-2">
+                Machine Fuel Activity
+                <span class="text-xs font-normal text-[var(--sand)]">({{ ucfirst($selectedPeriod) }})</span>
+            </h2>
+            @if($machineFuelActivity->isEmpty())
+                <p class="text-[var(--sand)] py-4">No fuel has been dispensed to machines yet, and no machine is reporting a fuel level. Dispensing records will appear here.</p>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Machine</th>
+                                <th>Dispensed ({{ ucfirst($selectedPeriod) }})</th>
+                                <th>Events</th>
+                                <th>This Month</th>
+                                <th>Last Dispense</th>
+                                <th>Tank Fuel Level <span class="text-[10px] font-normal text-[var(--sand)]">(telemetry)</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($machineFuelActivity as $row)
+                                <tr class="hover:bg-base-300" wire:key="fuel-activity-{{ $row['machine']->id }}">
+                                    <td>
+                                        <a href="{{ route('fleet.show', $row['machine']) }}" class="text-[var(--gold)] hover:underline">{{ $row['machine']->name }}</a>
+                                        <div class="text-xs text-[var(--sand)]">{{ $row['machine']->registration_number ?? $row['machine']->model }}</div>
+                                    </td>
+                                    <td>
+                                        @if($row['period_dispensed'] > 0)
+                                            {{ number_format($row['period_dispensed'], 1) }}L
+                                            <span class="text-[10px] text-[var(--sand)] block">manual records</span>
+                                        @else
+                                            <span class="text-[var(--sand)]">—</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $row['event_count'] ?: '—' }}</td>
+                                    <td>{{ $row['month_dispensed'] > 0 ? number_format($row['month_dispensed'], 1).'L' : '—' }}</td>
+                                    <td class="text-sm">
+                                        @if($row['last_dispense'])
+                                            {{ $row['last_dispense']->transaction_date?->format('d M H:i') }}
+                                            <div class="text-xs text-[var(--sand)]">from {{ $row['last_dispense']->fuelTank?->name ?? 'unknown tank' }}</div>
+                                        @else
+                                            <span class="text-[var(--sand)]">—</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($row['telemetry_fuel_level'] !== null)
+                                            <span class="{{ $row['telemetry_fuel_level'] < 20 ? 'text-red-400' : 'text-[var(--stone)]' }}">{{ number_format($row['telemetry_fuel_level']) }}%</span>
+                                            <div class="text-xs text-[var(--sand)]">{{ $row['telemetry_recorded_at']?->diffForHumans(short: true) }}</div>
+                                        @else
+                                            <span class="text-[var(--sand)]" title="This machine's telemetry feed has not reported a fuel level">—</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+
     <!-- Recent Transactions -->
     <div class="card bg-base-200">
         <div class="card-body">
             <h2 class="card-title">Recent Transactions</h2>
+            <p class="text-xs text-[var(--sand)] -mt-1 mb-2">All rows are manually recorded entries (see the User column). Telemetry fuel readings are shown separately under Machine Fuel Activity.</p>
             <div class="overflow-x-auto">
                 <table class="table">
                     <thead>
@@ -501,29 +574,39 @@
             @endif
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Manage Fuel</h2>
-                <button wire:click="closeManageModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                <button wire:click="closeManageModal" class="text-[var(--sand)] hover:text-[var(--stone)]" aria-label="Close">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <!-- Tabbed interface for actions -->
-            <div class="mb-4 flex gap-2">
-                <button type="button" wire:click="setManageTab('dispense')"
-                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'dispense' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}">
-                    Dispense Fuel
-                </button>
-                <button type="button" wire:click="setManageTab('allocation')"
-                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'allocation' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}">
-                    Set Monthly Allocation
-                </button>
-                <button type="button" wire:click="setManageTab('tank')"
-                    class="px-3 py-2 rounded-lg font-medium transition-colors {{ $manageTab === 'tank' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:bg-white/10' }}">
-                    Add Fuel Tank
-                </button>
+
+            {{-- Guided workflow: 1 Tank -> 2 Allocation -> 3 Dispensing -> 4 Review.
+                 Same stepper pattern as the report generator, so users never
+                 have to guess the order of operations from a wall of tabs. --}}
+            <div class="flex items-center gap-1 mb-6 overflow-x-auto pb-1" role="tablist" aria-label="Fuel workflow steps">
+                @foreach ([1 => 'Tank', 2 => 'Allocation', 3 => 'Dispensing', 4 => 'Review'] as $step => $label)
+                    <button type="button" wire:click="goToStep({{ $step }})"
+                        role="tab" aria-selected="{{ $manageStep === $step ? 'true' : 'false' }}"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors
+                            {{ $manageStep === $step ? 'bg-[var(--gold)] text-[var(--ink)]' : ($manageStep > $step ? 'text-[var(--gold)] hover:bg-white/10' : 'text-[var(--sand)] hover:bg-white/10') }}">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold
+                            {{ $manageStep === $step ? 'bg-[var(--ink)]/20' : ($manageStep > $step ? 'bg-[var(--gold)]/20' : 'bg-white/10') }}">
+                            @if ($manageStep > $step)
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            @else
+                                {{ $step }}
+                            @endif
+                        </span>
+                        {{ $label }}
+                    </button>
+                    @if ($step < 4)
+                        <svg class="w-4 h-4 text-[var(--sand)]/40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    @endif
+                @endforeach
             </div>
             <div>
-                @if($manageTab === 'dispense')
+                @if($manageStep === 3)
                     <!-- Dispense Fuel Form -->
                     <form wire:submit.prevent="recordDispensingTransaction" class="space-y-4">
                         <div>
@@ -548,13 +631,13 @@
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Machine</label>
-                            <select wire:model.live="transactionMineAreaId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
+                            <select wire:model.live="transactionMachineId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Machine</option>
                                 @foreach($machines as $machine)
                                     <option value="{{ $machine->id }}">{{ $machine->name }} ({{ $machine->machine_type }})</option>
                                 @endforeach
                             </select>
-                            @error('transactionMineAreaId') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                            @error('transactionMachineId') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Quantity (Liters)</label>
@@ -564,12 +647,15 @@
                         @if($transactionError)
                             <div class="text-sm text-red-400">{{ $transactionError }}</div>
                         @endif
-                        <div class="flex justify-end gap-2">
-                            <button type="button" wire:click="closeManageModal" class="btn btn-ghost">Cancel</button>
-                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="recordDispensingTransaction">Dispense</button>
+                        <div class="flex justify-between gap-2">
+                            <button type="button" wire:click="goToStep(2)" class="btn btn-ghost">← Allocation</button>
+                            <div class="flex gap-2">
+                                <button type="button" wire:click="closeManageModal" class="btn btn-ghost">Cancel</button>
+                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="recordDispensingTransaction">Dispense Fuel</button>
+                            </div>
                         </div>
                     </form>
-                @elseif($manageTab === 'allocation')
+                @elseif($manageStep === 2)
                     <!-- Set Monthly Allocation Form -->
                     <form wire:submit.prevent="saveAllocation" class="space-y-4">
                         <div>
@@ -607,12 +693,18 @@
                             <input type="text" wire:model.live="allocationNotes" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocationNotes') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
-                        <div class="flex justify-end gap-2">
-                            <button type="button" wire:click="closeManageModal" class="btn btn-ghost">Cancel</button>
-                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="saveAllocation">Save Allocation</button>
+                        <div class="flex justify-between gap-2">
+                            <button type="button" wire:click="goToStep(1)" class="btn btn-ghost">← Tank</button>
+                            <div class="flex gap-2">
+                                <button type="button" wire:click="closeManageModal" class="btn btn-ghost">Cancel</button>
+                                @if($currentAllocation)
+                                    <button type="button" wire:click="goToStep(3)" class="btn btn-ghost">Skip — allocation exists</button>
+                                @endif
+                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="saveAllocation">Save &amp; Continue</button>
+                            </div>
                         </div>
                     </form>
-                @elseif($manageTab === 'tank')
+                @elseif($manageStep === 1)
                     <!-- Add/Edit Fuel Tank Form -->
                     <form wire:submit.prevent="saveTank" class="space-y-4">
                         <!-- Removed existing-tank select to only allow creating a new tank -->
@@ -648,9 +740,59 @@
                         </div>
                         <div class="flex justify-end gap-2">
                             <button type="button" wire:click="closeManageModal" class="btn btn-ghost">Cancel</button>
-                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="saveTank">Add Tank</button>
+                            @if($tanks->isNotEmpty())
+                                <button type="button" wire:click="goToStep(2)" class="btn btn-ghost">Skip — tanks exist</button>
+                            @endif
+                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="saveTank">Add Tank &amp; Continue</button>
                         </div>
                     </form>
+                @elseif($manageStep === 4)
+                    <!-- Review: the state of the fuel system after this session's work -->
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-white/5 rounded-lg p-4 border border-[var(--line)]">
+                                <h4 class="text-sm font-medium text-[var(--sand)] mb-2">Tanks</h4>
+                                @forelse($tanks as $tank)
+                                    <div class="flex items-center justify-between py-1 text-sm">
+                                        <span class="text-[var(--stone)]">{{ $tank->name }}</span>
+                                        <span class="text-[var(--sand)]">{{ number_format($tank->current_level_liters) }}L / {{ number_format($tank->capacity_liters) }}L</span>
+                                    </div>
+                                @empty
+                                    <p class="text-sm text-[var(--sand)]">No tanks configured.</p>
+                                @endforelse
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4 border border-[var(--line)]">
+                                <h4 class="text-sm font-medium text-[var(--sand)] mb-2">{{ now()->format('F Y') }} Allocation</h4>
+                                @if($currentAllocation)
+                                    <div class="space-y-1 text-sm">
+                                        <div class="flex justify-between"><span class="text-[var(--sand)]">Allocated</span><span class="text-[var(--stone)]">{{ number_format($currentAllocation->allocated_liters) }}L</span></div>
+                                        <div class="flex justify-between"><span class="text-[var(--sand)]">Used</span><span class="text-[var(--stone)]">{{ number_format($currentAllocation->consumed_liters) }}L</span></div>
+                                        <div class="flex justify-between"><span class="text-[var(--sand)]">Remaining</span><span class="{{ $currentAllocation->isNearingLimit() ? 'text-yellow-400' : 'text-green-400' }}">{{ number_format($currentAllocation->remaining_liters) }}L ({{ number_format(100 - $currentAllocation->consumption_percentage, 1) }}%)</span></div>
+                                    </div>
+                                @else
+                                    <p class="text-sm text-[var(--sand)]">No allocation set for this month.</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="bg-white/5 rounded-lg p-4 border border-[var(--line)]">
+                            <h4 class="text-sm font-medium text-[var(--sand)] mb-2">Recent dispensing</h4>
+                            @php $recentDispenses = $recentTransactions->where('transaction_type', 'dispensing')->take(5); @endphp
+                            @forelse($recentDispenses as $tx)
+                                <div class="flex items-center justify-between py-1 text-sm">
+                                    <span class="text-[var(--stone)]">{{ $tx->machine?->name ?? 'No machine' }} ← {{ $tx->fuelTank?->name }}</span>
+                                    <span class="text-[var(--sand)]">{{ number_format($tx->quantity_liters, 1) }}L · {{ $tx->transaction_date?->format('d M H:i') }}</span>
+                                </div>
+                            @empty
+                                <p class="text-sm text-[var(--sand)]">No fuel dispensed in this period.</p>
+                            @endforelse
+                        </div>
+
+                        <div class="flex justify-between gap-2">
+                            <button type="button" wire:click="goToStep(3)" class="btn btn-ghost">← Dispense more</button>
+                            <button type="button" wire:click="closeManageModal" class="btn btn-primary">Done</button>
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>

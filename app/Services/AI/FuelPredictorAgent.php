@@ -163,7 +163,15 @@ class FuelPredictorAgent
         $currentInventory = FuelTank::where('team_id', $team->id)
             ->sum('current_level_liters');
 
-        $daysOfSupply = $avgDailyConsumption > 0 ? $currentInventory / $avgDailyConsumption : 0;
+        // No consumption history means there is no basis for a supply
+        // prediction at all. Defaulting daysOfSupply to 0 here used to emit
+        // a fabricated "CRITICAL: inventory lasts 0 days" recommendation for
+        // teams with full tanks and simply no dispensing records yet.
+        if ($avgDailyConsumption <= 0) {
+            return ['recommendations' => $recommendations];
+        }
+
+        $daysOfSupply = $currentInventory / $avgDailyConsumption;
 
         // Low inventory warning
         if ($daysOfSupply < 7) {

@@ -4315,9 +4315,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[FleetMovementReplay]]></code>
     </ClassMustBeFinal>
-    <InvalidArgument>
-      <code><![CDATA[$this->selectedMachine]]></code>
-    </InvalidArgument>
     <InvalidTemplateParam>
       <code><![CDATA[$query->take(50)->get()->map(fn ($log) => [
             'user' => $log->user?->name ?? 'System',
@@ -4387,27 +4384,13 @@
       <code><![CDATA[updated]]></code>
     </MissingReturnType>
     <MixedArgument>
-      <code><![CDATA[$end_point['lat']]]></code>
-      <code><![CDATA[$end_point['lng']]]></code>
       <code><![CDATA[$location->created_at]]></code>
-      <code><![CDATA[$location->created_at]]></code>
-      <code><![CDATA[$start_point['lat']]]></code>
-      <code><![CDATA[$start_point['lng']]]></code>
-      <code><![CDATA[$team->id]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$row]]></code>
     </MixedArgumentTypeCoercion>
     <MixedArrayAccess>
       <code><![CDATA[$data['position']]]></code>
-      <code><![CDATA[$end_point['lat']]]></code>
-      <code><![CDATA[$end_point['lat']]]></code>
-      <code><![CDATA[$end_point['lng']]]></code>
-      <code><![CDATA[$end_point['lng']]]></code>
-      <code><![CDATA[$start_point['lat']]]></code>
-      <code><![CDATA[$start_point['lat']]]></code>
-      <code><![CDATA[$start_point['lng']]]></code>
-      <code><![CDATA[$start_point['lng']]]></code>
     </MixedArrayAccess>
     <MixedArrayOffset>
       <code><![CDATA[$routesMap[$row->id]]]></code>
@@ -4416,8 +4399,6 @@
     </MixedArrayOffset>
     <MixedAssignment>
       <code><![CDATA[$coordinates]]></code>
-      <code><![CDATA[$end_point]]></code>
-      <code><![CDATA[$start_point]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
@@ -4438,16 +4419,12 @@
       <code><![CDATA[where]]></code>
     </MixedMethodCall>
     <MixedOperand>
-      <code><![CDATA[$end_point['lat']]]></code>
-      <code><![CDATA[$end_point['lng']]]></code>
       <code><![CDATA[$machine->name]]></code>
       <code><![CDATA[$machine->name]]></code>
       <code><![CDATA[$row->end_latitude]]></code>
       <code><![CDATA[$row->end_longitude]]></code>
       <code><![CDATA[$row->start_latitude]]></code>
       <code><![CDATA[$row->start_longitude]]></code>
-      <code><![CDATA[$start_point['lat']]]></code>
-      <code><![CDATA[$start_point['lng']]]></code>
     </MixedOperand>
     <MixedPropertyFetch>
       <code><![CDATA[$log->user->name]]></code>
@@ -4518,10 +4495,6 @@
     <TooManyArguments>
       <code><![CDATA[select]]></code>
     </TooManyArguments>
-    <TypeDoesNotContainType>
-      <code><![CDATA[! $machine]]></code>
-      <code><![CDATA[$machine]]></code>
-    </TypeDoesNotContainType>
     <UndefinedMagicMethod>
       <code><![CDATA[find]]></code>
       <code><![CDATA[find]]></code>
@@ -4570,6 +4543,38 @@
     <InvalidOperand>
       <code><![CDATA[$unitPrice * $quantity]]></code>
     </InvalidOperand>
+    <InvalidTemplateParam>
+      <code><![CDATA[$machines->map(function (Machine $machine) use ($teamId, $dateRange, $monthStart) {
+            $base = FuelTransaction::where('team_id', $teamId)
+                ->where('machine_id', $machine->id)
+                ->where('transaction_type', 'dispensing');
+
+            $periodDispensed = (clone $base)
+                ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
+                ->sum('quantity_liters');
+            $monthDispensed = (clone $base)
+                ->where('transaction_date', '>=', $monthStart)
+                ->sum('quantity_liters');
+            $lastDispense = (clone $base)->with('fuelTank')->latest('transaction_date')->first();
+
+            $latestFuelMetric = $machine->metrics()
+                ->whereNotNull('fuel_level')
+                ->latest('recorded_at')
+                ->first();
+
+            return [
+                'machine' => $machine,
+                'period_dispensed' => (float) $periodDispensed,
+                'month_dispensed' => (float) $monthDispensed,
+                'event_count' => (clone $base)
+                    ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
+                    ->count(),
+                'last_dispense' => $lastDispense,
+                'telemetry_fuel_level' => $latestFuelMetric?->fuel_level,
+                'telemetry_recorded_at' => $latestFuelMetric?->recorded_at,
+            ];
+        })]]></code>
+    </InvalidTemplateParam>
     <MissingClosureParamType>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[$q]]></code>
@@ -4585,17 +4590,14 @@
     </MissingClosureReturnType>
     <MissingParamType>
       <code><![CDATA[$tab]]></code>
-      <code><![CDATA[$tab]]></code>
       <code><![CDATA[$tankId]]></code>
       <code><![CDATA[$tankId]]></code>
       <code><![CDATA[$tankId]]></code>
     </MissingParamType>
     <MissingReturnType>
-      <code><![CDATA[closeAllocationModal]]></code>
       <code><![CDATA[closeDeleteConfirm]]></code>
       <code><![CDATA[closeManageModal]]></code>
       <code><![CDATA[closeRefuelModal]]></code>
-      <code><![CDATA[closeTankModal]]></code>
       <code><![CDATA[confirmDeleteTank]]></code>
       <code><![CDATA[deleteTank]]></code>
       <code><![CDATA[getDateRange]]></code>
@@ -4608,7 +4610,6 @@
       <code><![CDATA[render]]></code>
       <code><![CDATA[saveAllocation]]></code>
       <code><![CDATA[saveTank]]></code>
-      <code><![CDATA[setManageTab]]></code>
     </MissingReturnType>
     <MixedArgument>
       <code><![CDATA[$aiAnalysis['insights'] ?? []]]></code>
@@ -4629,6 +4630,10 @@
       <code><![CDATA[$dateRange['end']]]></code>
       <code><![CDATA[$dateRange['end']]]></code>
       <code><![CDATA[$dateRange['end']]]></code>
+      <code><![CDATA[$dateRange['end']]]></code>
+      <code><![CDATA[$dateRange['end']]]></code>
+      <code><![CDATA[$dateRange['start']]]></code>
+      <code><![CDATA[$dateRange['start']]]></code>
       <code><![CDATA[$dateRange['start']]]></code>
       <code><![CDATA[$dateRange['start']]]></code>
       <code><![CDATA[$dateRange['start']]]></code>
@@ -4642,14 +4647,19 @@
     <MixedAssignment>
       <code><![CDATA[$activeAlerts]]></code>
       <code><![CDATA[$allocation]]></code>
+      <code><![CDATA[$base]]></code>
       <code><![CDATA[$canSeeInactive]]></code>
       <code><![CDATA[$currentUser]]></code>
       <code><![CDATA[$dateRange]]></code>
+      <code><![CDATA[$lastDispense]]></code>
+      <code><![CDATA[$latestFuelMetric]]></code>
       <code><![CDATA[$mineAreaId]]></code>
       <code><![CDATA[$mineAreaId]]></code>
+      <code><![CDATA[$monthDispensed]]></code>
       <code><![CDATA[$newLevel]]></code>
       <code><![CDATA[$newLevel]]></code>
       <code><![CDATA[$overflow]]></code>
+      <code><![CDATA[$periodDispensed]]></code>
       <code><![CDATA[$recentTransactions]]></code>
       <code><![CDATA[$remaining]]></code>
       <code><![CDATA[$tank]]></code>
@@ -4661,21 +4671,30 @@
       <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$this->confirmDeleteTankId]]></code>
-      <code><![CDATA[$this->manageTab]]></code>
       <code><![CDATA[$this->refuelTankId]]></code>
       <code><![CDATA[$this->selectedTankId]]></code>
       <code><![CDATA[$this->transactionTankId]]></code>
       <code><![CDATA[$topConsumers]]></code>
       <code><![CDATA[$unitPrice]]></code>
     </MixedAssignment>
+    <MixedClone>
+      <code><![CDATA[clone $base]]></code>
+      <code><![CDATA[clone $base]]></code>
+      <code><![CDATA[clone $base]]></code>
+      <code><![CDATA[clone $base]]></code>
+    </MixedClone>
     <MixedMethodCall>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
+      <code><![CDATA[count]]></code>
+      <code><![CDATA[exists]]></code>
       <code><![CDATA[filter]]></code>
       <code><![CDATA[filter]]></code>
+      <code><![CDATA[first]]></code>
+      <code><![CDATA[first]]></code>
       <code><![CDATA[get]]></code>
       <code><![CDATA[get]]></code>
       <code><![CDATA[get]]></code>
@@ -4684,6 +4703,9 @@
       <code><![CDATA[hasRole]]></code>
       <code><![CDATA[isBelowMinimum]]></code>
       <code><![CDATA[isCritical]]></code>
+      <code><![CDATA[isNotEmpty]]></code>
+      <code><![CDATA[latest]]></code>
+      <code><![CDATA[latest]]></code>
       <code><![CDATA[latest]]></code>
       <code><![CDATA[latest]]></code>
       <code><![CDATA[limit]]></code>
@@ -4701,6 +4723,8 @@
       <code><![CDATA[sum]]></code>
       <code><![CDATA[sum]]></code>
       <code><![CDATA[sum]]></code>
+      <code><![CDATA[sum]]></code>
+      <code><![CDATA[sum]]></code>
       <code><![CDATA[updateConsumption]]></code>
       <code><![CDATA[when]]></code>
       <code><![CDATA[where]]></code>
@@ -4709,6 +4733,11 @@
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[whereBetween]]></code>
+      <code><![CDATA[whereBetween]]></code>
       <code><![CDATA[whereBetween]]></code>
       <code><![CDATA[whereBetween]]></code>
       <code><![CDATA[whereBetween]]></code>
@@ -4723,6 +4752,7 @@
       <code><![CDATA[whereNotNull]]></code>
       <code><![CDATA[with]]></code>
       <code><![CDATA[with]]></code>
+      <code><![CDATA[with]]></code>
     </MixedMethodCall>
     <MixedOperand>
       <code><![CDATA[$newLevel]]></code>
@@ -4733,6 +4763,8 @@
       <code><![CDATA[$item->machine_id]]></code>
       <code><![CDATA[$item->total_consumed]]></code>
       <code><![CDATA[$item->total_cost]]></code>
+      <code><![CDATA[$latestFuelMetric?->fuel_level]]></code>
+      <code><![CDATA[$latestFuelMetric?->recorded_at]]></code>
       <code><![CDATA[$tank->id]]></code>
       <code><![CDATA[$tank->name]]></code>
     </MixedPropertyFetch>
@@ -4747,6 +4779,8 @@
       <code><![CDATA[now()->month]]></code>
       <code><![CDATA[now()->month]]></code>
       <code><![CDATA[now()->month]]></code>
+      <code><![CDATA[now()->month]]></code>
+      <code><![CDATA[now()->year]]></code>
       <code><![CDATA[now()->year]]></code>
       <code><![CDATA[now()->year]]></code>
       <code><![CDATA[now()->year]]></code>
@@ -4755,9 +4789,6 @@
       <code><![CDATA[$this->allocatedLiters]]></code>
       <code><![CDATA[$this->fuelPricePerLiter]]></code>
     </PossiblyNullOperand>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$teamId]]></code>
-    </PossiblyUndefinedVariable>
     <PossiblyUnusedMethod>
       <code><![CDATA[closeManageModal]]></code>
       <code><![CDATA[closeRefuelModal]]></code>
@@ -4773,7 +4804,7 @@
       <code><![CDATA[saveTank]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedProperty>
-      <code><![CDATA[$manageTab]]></code>
+      <code><![CDATA[$manageStep]]></code>
       <code><![CDATA[$selectedTankId]]></code>
       <code><![CDATA[$showDeleteConfirm]]></code>
       <code><![CDATA[$showManageModal]]></code>
@@ -4791,6 +4822,8 @@
     <UndefinedInterfaceMethod>
       <code><![CDATA[id]]></code>
       <code><![CDATA[id]]></code>
+      <code><![CDATA[user]]></code>
+      <code><![CDATA[user]]></code>
       <code><![CDATA[user]]></code>
       <code><![CDATA[user]]></code>
       <code><![CDATA[user]]></code>
@@ -4835,6 +4868,8 @@
       <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
       <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
       <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
+      <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
+      <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
       <code><![CDATA[active]]></code>
       <code><![CDATA[delete]]></code>
       <code><![CDATA[find]]></code>
@@ -4843,11 +4878,13 @@
       <code><![CDATA[find]]></code>
       <code><![CDATA[find]]></code>
       <code><![CDATA[orderBy]]></code>
-      <code><![CDATA[orderBy]]></code>
       <code><![CDATA[updateConsumption]]></code>
       <code><![CDATA[when]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[where]]></code>
+      <code><![CDATA[whereNotNull]]></code>
       <code><![CDATA[whereNull]]></code>
     </UndefinedMagicMethod>
     <UndefinedMagicPropertyAssignment>
@@ -4870,9 +4907,6 @@
       <code><![CDATA[$tank->team_id]]></code>
       <code><![CDATA[$tank->team_id]]></code>
     </UndefinedMagicPropertyFetch>
-    <UndefinedVariable>
-      <code><![CDATA[$teamId]]></code>
-    </UndefinedVariable>
     <UnusedVariable>
       <code><![CDATA[$transaction]]></code>
       <code><![CDATA[$transaction]]></code>
