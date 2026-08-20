@@ -105,3 +105,5 @@ jobs:
         if: failure()
         run: |
           echo '::error::Deploy failed. If it failed during or after migrations, the site may have been left in maintenance mode intentionally -- inspect the server before running `php artisan up`.'
+
+# registration-kick: touched to force Actions to (re)index this workflow
