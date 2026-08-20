@@ -23,6 +23,33 @@
     display: none;
 }
 
+/* Native form controls must match the dark theme everywhere. color-scheme
+   makes the browser render option popups, date/time pickers, and scrollbars
+   dark natively; the option rules cover browsers that style options via CSS.
+   Without this, any <select> that misses page-level utility classes falls
+   back to a white control with near-white text — invisible options. */
+:root {
+    color-scheme: dark;
+}
+
+@layer base {
+    select option,
+    select optgroup {
+        background-color: var(--ink-soft);
+        color: var(--stone);
+    }
+
+    select option:checked {
+        background-color: var(--umber);
+        color: var(--stone);
+    }
+
+    select option:disabled {
+        color: var(--sand);
+        opacity: 0.5;
+    }
+}
+
 /* ==========================================
    SMOOTH ANIMATIONS & TRANSITIONS
    ========================================== */

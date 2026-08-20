@@ -473,7 +473,7 @@
                         <div class="flex flex-col items-center justify-center p-4 border-b border-[var(--line)] bg-gradient-to-b from-[var(--gold)]/10 to-[var(--gold)]/5">
                             <img src="{{ asset($icon) }}" alt="Machine Icon" class="w-20 h-20 object-contain mb-2 drop-shadow-lg">
                             <a href="{{ route('fleet.show', $machine) }}" class="text-lg font-display font-semibold text-[var(--stone)] hover:text-[var(--gold)] hover:underline text-center block">{{ $machine->name }}</a>
-                            <div class="text-xs text-[var(--sand)] mt-1 text-center">{{ $machine->manufacturer ?: 'N/A' }} &bull; {{ $machine->model }}</div>
+                            <div class="text-xs text-[var(--sand)] mt-1 text-center">{{ $machine->manufacturer ? $machine->manufacturer.' • ' : '' }}{{ $machine->model }}</div>
                         </div>
                         <div class="flex-1 flex flex-col justify-between p-4 gap-2">
                             <div class="flex items-center gap-2 mb-2">
@@ -491,7 +491,16 @@
                                         Maintenance
                                     </span>
                                 @endif
-                                <span class="ml-auto text-xs text-[var(--sand)]">{{ $machine->capacity ? number_format($machine->capacity) . ' tons' : 'N/A' }}</span>
+                                {{-- Capacity when known; otherwise telemetry recency — an
+                                     operational fact we always have for connected machines.
+                                     Never a bare N/A. --}}
+                                @if ($machine->capacity)
+                                    <span class="ml-auto text-xs text-[var(--sand)]">{{ number_format($machine->capacity) }} tons</span>
+                                @elseif ($machine->latestEngineHoursMetric?->recorded_at ?? $machine->last_location_update)
+                                    <span class="ml-auto text-xs text-[var(--sand)]" title="Last telemetry received">
+                                        Seen {{ ($machine->latestEngineHoursMetric?->recorded_at ?? $machine->last_location_update)->diffForHumans(short: true) }}
+                                    </span>
+                                @endif
                             </div>
                             <div class="flex items-center gap-2 text-sm text-[var(--sand)]">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -502,7 +511,7 @@
                                     @if ($machine->latestEngineHoursMetric)
                                         {{ number_format($machine->latestEngineHoursMetric->operating_hours, 1) }} hrs
                                     @else
-                                        N/A
+                                        <span class="text-[var(--sand)] font-normal" title="This machine's telemetry feed has not reported engine hours yet">awaiting telemetry</span>
                                     @endif
                                 </span>
                             </div>
