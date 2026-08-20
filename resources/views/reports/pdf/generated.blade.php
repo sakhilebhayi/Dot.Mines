@@ -58,20 +58,79 @@
         table.data tr:nth-child(even) td {
             background: #faf7ef;
         }
-        .footer {
-            margin-top: 20px;
+        .brandbar {
+            width: 100%;
+            margin-bottom: 6px;
+        }
+        .brandbar .wordmark {
+            font-size: 16px;
+            font-weight: bold;
+            color: #211a14;
+            letter-spacing: 0.02em;
+        }
+        .brandbar .tag {
             font-size: 9px;
+            color: #6b6152;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+        }
+        .brandbar .logo {
+            width: 28px;
+            height: 28px;
+        }
+        /* dompdf repeats position:fixed elements on every page. */
+        .pagefooter {
+            position: fixed;
+            bottom: -22px;
+            left: 0;
+            right: 0;
+            font-size: 8px;
             color: #999;
+            border-top: 1px solid #e5ddc8;
+            padding-top: 4px;
+        }
+        body {
+            margin-bottom: 30px;
         }
     </style>
 </head>
 <body>
+    @php
+        // Embedded so the PDF never depends on a web host or hardcoded URL;
+        // asset lives in the repo, public_path() resolves per environment.
+        $logoPath = public_path('images/mark.png');
+        $logoData = is_file($logoPath) ? base64_encode(file_get_contents($logoPath)) : null;
+    @endphp
+
+    <div class="pagefooter">
+        Official {{ config('app.name') }} operational report
+        &middot; {{ $report->team?->name }}
+        &middot; Generated {{ now()->format('Y-m-d H:i') }} by {{ config('app.name') }}
+    </div>
+
     <div class="header">
+        <table class="brandbar" cellpadding="0" cellspacing="0">
+            <tr>
+                @if($logoData)
+                    <td style="width:34px;"><img class="logo" src="data:image/png;base64,{{ $logoData }}" alt=""></td>
+                @endif
+                <td>
+                    <div class="wordmark">{{ config('app.name') }}</div>
+                    <div class="tag">Operational Report</div>
+                </td>
+            </tr>
+        </table>
         <h1>{{ $report->title }}</h1>
         <div class="meta">
             Generated {{ now()->format('Y-m-d H:i') }}
+            @if($report->team)
+                &middot; Site: {{ $report->team->name }}
+            @endif
+            @if($report->type)
+                &middot; Type: {{ ucwords(str_replace('_', ' ', $report->type)) }}
+            @endif
             @if(isset($report->filters['start_date'], $report->filters['end_date']))
-                &middot; {{ \Carbon\Carbon::parse($report->filters['start_date'])->format('Y-m-d') }}
+                &middot; Period: {{ \Carbon\Carbon::parse($report->filters['start_date'])->format('Y-m-d') }}
                 to {{ \Carbon\Carbon::parse($report->filters['end_date'])->format('Y-m-d') }}
             @endif
         </div>
@@ -111,8 +170,5 @@
         </tbody>
     </table>
 
-    <div class="footer">
-        Dot.Mines &middot; {{ $report->team?->name }}
-    </div>
 </body>
 </html>
