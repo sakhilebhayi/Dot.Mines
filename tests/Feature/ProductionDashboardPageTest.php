@@ -168,6 +168,22 @@ class ProductionDashboardPageTest extends TestCase
             ->assertSet('endDate', Carbon::today()->subDays(3)->format('Y-m-d'));
     }
 
+    public function test_clearing_a_date_picker_does_not_crash_the_page(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        // A cleared native date input submits an empty string; every consumer
+        // must survive it (Carbon::parse('') would be a 500).
+        $component = Livewire::actingAs($user)
+            ->test(ProductionDashboard::class)
+            ->set('startDate', '')
+            ->assertStatus(200);
+
+        $this->assertIsArray($component->instance()->summary);
+    }
+
     public function test_kpis_and_chart_respect_the_selected_period(): void
     {
         $user = User::factory()->create();

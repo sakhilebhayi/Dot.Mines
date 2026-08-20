@@ -40,13 +40,18 @@
                     @endif
                 </div>
 
-                <!-- Custom Date Range Picker -->
+                <!-- Custom Date Range Picker. The value attribute is rendered
+                     server-side so quick-toggle updates (setPeriod) actually
+                     reach the DOM: without it, Livewire's morph sees identical
+                     input HTML and leaves the stale picker value in place. -->
                 <div class="flex gap-2 items-center bg-[var(--ink-soft)] rounded-lg px-3 py-2 border border-[var(--line)]">
-                    <input type="date" wire:model.live="startDate" 
-                        class="bg-transparent border-0 text-sm focus:ring-0 text-[var(--stone)] px-4 py-2 h-8">
+                    <input type="date" wire:model.live="startDate" value="{{ $startDate }}"
+                        class="bg-transparent border-0 text-sm focus:ring-0 text-[var(--stone)] px-4 py-2 h-8"
+                        aria-label="Start date">
                     <span class="text-[var(--sand)]">→</span>
-                    <input type="date" wire:model.live="endDate" 
-                        class="bg-transparent border-0 text-sm focus:ring-0 text-[var(--stone)] px-4 py-2 h-8">
+                    <input type="date" wire:model.live="endDate" value="{{ $endDate }}"
+                        class="bg-transparent border-0 text-sm focus:ring-0 text-[var(--stone)] px-4 py-2 h-8"
+                        aria-label="End date">
                 </div>
             </div>
         </div>

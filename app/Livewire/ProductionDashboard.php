@@ -120,13 +120,31 @@ class ProductionDashboard extends Component
 
     private function markCustomRange(): void
     {
+        // A cleared date input arrives as '' -- treat it as absent so no
+        // consumer ever hands Carbon::parse an empty string (a 500).
+        if ($this->startDate === '') {
+            $this->startDate = null;
+        }
+        if ($this->endDate === '') {
+            $this->endDate = null;
+        }
+
         // Keep the range valid: an end before the start is clamped.
-        if ($this->startDate && $this->endDate && $this->startDate > $this->endDate) {
+        if ($this->hasDateRange() && $this->startDate > $this->endDate) {
             $this->endDate = $this->startDate;
         }
 
         $this->dateFilter = 'custom';
         $this->resetPage();
+    }
+
+    /**
+     * Both pickers hold a usable date (neither null nor cleared-to-empty).
+     */
+    private function hasDateRange(): bool
+    {
+        return $this->startDate !== null && $this->startDate !== ''
+            && $this->endDate !== null && $this->endDate !== '';
     }
 
     /**
@@ -165,7 +183,7 @@ class ProductionDashboard extends Component
         // quick toggles used to drive a separate rolling-window filter here
         // while the pickers drove the charts -- two different answers on
         // one screen.
-        if ($this->startDate && $this->endDate) {
+        if ($this->hasDateRange()) {
             $query->betweenDates(Carbon::parse($this->startDate), Carbon::parse($this->endDate));
         }
 
@@ -176,10 +194,18 @@ class ProductionDashboard extends Component
     {
         // KPI tiles used to be pinned to a fixed last-30-days window no
         // matter what period the user selected.
+        if (! $this->hasDateRange()) {
+            return $this->productionService()->getProductionStatistics(
+                $this->teamId,
+                Carbon::today()->startOfMonth(),
+                Carbon::today()->endOfDay()
+            );
+        }
+
         return $this->productionService()->getProductionStatistics(
             $this->teamId,
-            Carbon::parse($this->startDate ?? Carbon::today()->startOfMonth()->format('Y-m-d')),
-            Carbon::parse($this->endDate ?? Carbon::today()->format('Y-m-d'))->endOfDay()
+            Carbon::parse($this->startDate),
+            Carbon::parse($this->endDate)->endOfDay()
         );
     }
 
@@ -189,8 +215,8 @@ class ProductionDashboard extends Component
         return $this->productionService()->getProductionTrend(
             $this->teamId,
             30,
-            $this->startDate ? Carbon::parse($this->startDate) : null,
-            $this->endDate ? Carbon::parse($this->endDate) : null,
+            $this->hasDateRange() ? Carbon::parse($this->startDate) : null,
+            $this->hasDateRange() ? Carbon::parse($this->endDate) : null,
         );
     }
 
@@ -316,7 +342,7 @@ class ProductionDashboard extends Component
     public function getAreaPerformanceProperty()
     {
         $mineAreas = $this->mineAreas;
-        if (! $mineAreas || $mineAreas->isEmpty()) {
+        if (! $mineAreas || $mineAreas->isEmpty() || ! $this->hasDateRange()) {
             return [];
         }
 
