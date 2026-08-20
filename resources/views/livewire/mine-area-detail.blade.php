@@ -86,8 +86,6 @@
             <div id="mine-area-detail-map" wire:ignore style="height: 400px; width: 100%; background: #1f2937; border-radius: 0.5rem; border: 1px solid #374151;"></div>
         </div>
     <!-- Leaflet Map Scripts -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             (function () {
                 const lat = {{ $mineArea->latitude ?? 'null' }};

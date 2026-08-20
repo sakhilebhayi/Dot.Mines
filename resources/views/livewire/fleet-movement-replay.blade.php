@@ -5,7 +5,6 @@
      data-routes="{{ json_encode($routes ?? []) }}"
      data-machine-type="{{ $selectedMachineDetails->machine_type ?? '' }}">
     <!-- Leaflet CSS - loaded directly in component -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     
     <style nonce="{{ request()->attributes->get('csp_nonce') }}">
         /* Map specific styles */
@@ -338,8 +337,6 @@
     </div>
 
     <!-- Leaflet JS - loaded directly in component -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.13.0/leaflet-providers.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         // Initialize with safe defaults - all at window scope
