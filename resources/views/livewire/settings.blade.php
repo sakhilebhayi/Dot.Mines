@@ -94,7 +94,7 @@
                                 <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
                         </select>
-                        <p class="text-[var(--sand)] text-xs mt-1">This currency will be used for all financial reports and displays</p>
+                        <p class="text-[var(--sand)] text-xs mt-1">Labels costs you record (fuel transactions, maintenance). Amounts are not converted between currencies. Subscription billing and fuel budgets remain in ZAR.</p>
                     </div>
 
                     <!-- Save Button -->

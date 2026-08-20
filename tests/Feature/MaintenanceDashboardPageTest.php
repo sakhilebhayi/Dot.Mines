@@ -53,7 +53,10 @@ class MaintenanceDashboardPageTest extends TestCase
         $response = $this->actingAs($user)->get('/maintenance');
 
         $response->assertOk();
-        $response->assertSee('No health assessments yet');
-        $response->assertDontSee('0%');
+        $response->assertSee('No health assessments yet (2 machines)');
+        // The health tile itself must not render a fabricated 0% average.
+        // (A plain assertDontSee('0%') is flaky: any other percentage on the
+        // page ending in 0 -- "100%", "50%" -- contains the substring.)
+        $response->assertDontSeeHtml('<div class="stat-value text-primary">0%</div>');
     }
 }

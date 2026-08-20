@@ -482,6 +482,10 @@ class MaintenanceDashboard extends Component
         $aiInsights = collect($aiAnalysis['insights'] ?? [])->take(3);
 
         return view('livewire.maintenance-dashboard', [
+            // Costs follow the team's Settings currency, same as Fuel
+            // Management -- maintenance was the one money surface still
+            // hardcoding "R" regardless of the setting.
+            'teamCurrency' => auth()->user()->currentTeam->currency ?? 'ZAR',
             'healthStatuses' => $healthStatuses,
             'healthStats' => $healthStats,
             'dueSchedules' => $dueSchedules,
