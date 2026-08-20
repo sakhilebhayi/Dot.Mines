@@ -267,22 +267,11 @@
 
         @stack('modals')
 
-        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-            // Prevent Livewire from warning about multiple Alpine instances when Alpine
-            // is bundled by Vite (`resources/js/app.js`). We mark the global Alpine
-            // object as coming from Livewire so Livewire won't attempt to re-initialize it.
-            (function(){
-                if (window.Alpine) {
-                    window.Alpine.__fromLivewire = true;
-                }
-
-                // If Alpine initializes later, ensure we set the flag when it does.
-                document.addEventListener('alpine:initialized', function(){
-                    if (window.Alpine) window.Alpine.__fromLivewire = true;
-                });
-            })();
-        </script>
-
+        {{-- Livewire owns Alpine: its script assigns window.Alpine and starts it.
+             Do not mark window.Alpine with __fromLivewire here -- that hack only
+             existed to silence the "multiple instances of Alpine" warning while
+             app.js was overwriting window.Alpine with a second copy, which broke
+             entangle() (see resources/js/app.js). The warning must stay audible. --}}
         @livewireScripts
 
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">

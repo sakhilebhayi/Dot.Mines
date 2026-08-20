@@ -22,10 +22,6 @@
     "file": "assets/rolldown-runtime-DwynqlJ6.js",
     "name": "rolldown-runtime"
   },
-  "_vendor-E7g-BmMn.js": {
-    "file": "assets/vendor-E7g-BmMn.js",
-    "name": "vendor"
-  },
   "node_modules/leaflet/dist/images/layers-2x.png": {
     "file": "assets/layers-2x-Bpkbi35X.png",
     "src": "node_modules/leaflet/dist/images/layers-2x.png"
@@ -48,13 +44,12 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-COb1upJB.js",
+    "file": "assets/app-nN5chI5K.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_rolldown-runtime-DwynqlJ6.js",
-      "_vendor-E7g-BmMn.js",
       "_maps-CUXt2WDH.js"
     ]
   },
