@@ -14,8 +14,18 @@ window.Pusher = Pusher;
  */
 
 const reverbKey = import.meta.env.VITE_REVERB_APP_KEY;
+const reverbHost = import.meta.env.VITE_REVERB_HOST;
 
-if (reverbKey) {
+// The build is committed, so whatever VITE_REVERB_HOST was at build time is
+// baked in. A dev-only host (0.0.0.0/localhost) reaching a real deployment
+// would make Echo retry wss://0.0.0.0 forever in every visitor's console --
+// skip realtime entirely unless the configured host is plausible for the
+// page actually being served.
+const devHosts = ['0.0.0.0', '127.0.0.1', 'localhost', '', undefined, null];
+const pageIsLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
+const reverbHostUsable = !devHosts.includes(reverbHost) || pageIsLocal;
+
+if (reverbKey && reverbHostUsable) {
     window.Echo = new Echo({
         broadcaster: 'reverb',
         key: reverbKey,
@@ -33,6 +43,8 @@ if (reverbKey) {
             },
         },
     });
-} else {
+} else if (!reverbKey) {
     console.warn('No Reverb credentials configured (VITE_REVERB_APP_KEY missing). Real-time updates disabled.');
+} else {
+    console.info('Realtime disabled: the built assets carry a dev-only Reverb host (' + reverbHost + ') that does not apply to ' + window.location.hostname + '.');
 }
