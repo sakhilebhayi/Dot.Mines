@@ -38,8 +38,21 @@ class SecurityHeaders
 
         $response = $next($request);
 
-        $scriptSrc = "'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com";
-        $styleSrc = "'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://fonts.bunny.net https://unpkg.com";
+        // 'unsafe-eval' is REQUIRED by Livewire 3: its bundled Alpine
+        // evaluates x-data/x-show expressions via new Function(). Without it
+        // every Alpine binding in the app EvalErrors -- confirmed live in
+        // production (mobile menu, notification panel, all toggles dead).
+        // Locally this never surfaced because non-production environments
+        // send the policy as Report-Only (see below).
+        $scriptSrc = "'self' 'nonce-{$nonce}' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com";
+
+        // Styles deliberately use 'unsafe-inline' WITHOUT a nonce: Livewire
+        // injects runtime <style> elements (wire:loading/wire:cloak rules)
+        // that can never carry our nonce, and per the CSP spec the presence
+        // of a nonce/hash in a directive makes browsers IGNORE
+        // 'unsafe-inline' there. Inline styles are a far weaker injection
+        // vector than scripts; script-src stays nonce-locked.
+        $styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://fonts.bunny.net https://unpkg.com";
 
         $csp = "default-src 'self'; ".
                "script-src {$scriptSrc}; ".
