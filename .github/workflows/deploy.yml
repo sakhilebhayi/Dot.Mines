@@ -1,0 +1,107 @@
+name: Deploy to Production
+
+# Manual-only by design: merging to main does NOT auto-deploy. Trigger from
+# the Actions tab (or `gh workflow run deploy.yml`) when a release is ready.
+# To switch to auto-deploy later, add:
+#   push:
+#     branches: [main]
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm deploying main to production'
+        required: true
+
+# Never run two deploys at once; a queued deploy waits for the running one.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy main to mines.infodot.co.za
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+
+    # Required repository secrets (Settings -> Secrets and variables -> Actions):
+    #   DEPLOY_HOST         e.g. mines.infodot.co.za
+    #   DEPLOY_USER         SSH user with write access to the app directory
+    #   DEPLOY_PATH         e.g. /var/www/html
+    #   DEPLOY_SSH_KEY      private key for DEPLOY_USER (a dedicated deploy key,
+    #                       not a personal one)
+    #   DEPLOY_KNOWN_HOSTS  output of: ssh-keyscan mines.infodot.co.za
+    #                       (pins the host key -- no blind trust-on-first-use)
+    #
+    # Optional server-side sudoers entry for restarting Reverb with new code
+    # (workers restart via `queue:restart` without sudo):
+    #   deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart reverb
+    steps:
+      - name: Refuse unconfirmed runs
+        if: ${{ github.event.inputs.confirm != 'deploy' }}
+        run: |
+          echo '::error::Confirmation input was not "deploy" -- aborting.'
+          exit 1
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+              "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+              DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}" 'bash -s' <<'DEPLOY'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+
+          echo "== Current release: $(git rev-parse --short HEAD)"
+          git fetch origin main
+
+          # Maintenance mode only for the risky window (migrations).
+          php artisan down --retry=30 || true
+
+          git reset --hard origin/main
+          composer install --no-interaction --optimize-autoloader --no-dev
+
+          # Built frontend assets are COMMITTED in public/build -- no npm here.
+          php artisan migrate --force
+
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan event:cache
+
+          # Workers pick up new code via the restart signal (no sudo needed).
+          php artisan queue:restart
+
+          # Reverb serves compiled code from boot; restart it if sudoers allows.
+          if sudo -n systemctl restart reverb 2>/dev/null; then
+            echo "Reverb restarted."
+          else
+            echo "::warning::Could not restart Reverb (no sudoers entry) -- WebSockets are still serving the PREVIOUS release until it is restarted manually."
+          fi
+
+          php artisan up
+          echo "== Deployed: $(git rev-parse --short HEAD)"
+          DEPLOY
+
+      - name: Health check
+        run: |
+          sleep 5
+          for path in /ready /up/realtime; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://${{ secrets.DEPLOY_HOST }}${path}")
+            echo "GET ${path} -> ${code}"
+            if [ "$code" != "200" ]; then
+              echo "::error::Health check failed on ${path} (HTTP ${code}). The site may still be in maintenance mode or the release is unhealthy."
+              exit 1
+            fi
+          done
+
+      - name: Failure notice
+        if: failure()
+        run: |
+          echo '::error::Deploy failed. If it failed during or after migrations, the site may have been left in maintenance mode intentionally -- inspect the server before running `php artisan up`.'
