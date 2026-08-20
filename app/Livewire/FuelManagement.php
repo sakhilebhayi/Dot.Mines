@@ -16,10 +16,10 @@ use Livewire\Component;
 
 class FuelManagement extends Component
 {
-    // Unified modal state
+    // Guided workflow modal: 1 Tank -> 2 Allocation -> 3 Dispense -> 4 Review
     public bool $showManageModal = false;
 
-    public string $manageTab = 'dispense'; // 'dispense', 'allocation', 'tank'
+    public int $manageStep = 1;
 
     // Dispense Fuel form
     public string $transactionTankId = '';
@@ -28,7 +28,7 @@ class FuelManagement extends Component
 
     public string $transactionType = 'dispensing';
 
-    public string $transactionMineAreaId = '';
+    public string $transactionMachineId = '';
 
     public string $transactionError = '';
 
@@ -108,8 +108,8 @@ class FuelManagement extends Component
         // mine area (user selects a machine), otherwise fall back to the tank's
         // mine area. This ensures allocations are looked up for the correct area.
         $mineAreaId = null;
-        if (! empty($this->transactionMineAreaId)) {
-            $machine = Machine::where('team_id', $tank->team_id)->find($this->transactionMineAreaId);
+        if (! empty($this->transactionMachineId)) {
+            $machine = Machine::where('team_id', $tank->team_id)->find($this->transactionMachineId);
             // Ensure the referenced machine belongs to the same team as the tank
             if ($machine) {
                 $mineAreaId = $machine->mine_area_id;
@@ -173,7 +173,7 @@ class FuelManagement extends Component
             $transaction = $service->recordTransaction([
                 'team_id' => $tank->team_id,
                 'fuel_tank_id' => $tank->id,
-                'machine_id' => $this->transactionMineAreaId ?: null,
+                'machine_id' => $this->transactionMachineId ?: null,
                 'user_id' => auth()->id(),
                 'transaction_type' => 'dispensing',
                 'quantity_liters' => $this->transactionQuantity,
@@ -191,7 +191,9 @@ class FuelManagement extends Component
             }
 
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Dispensing transaction recorded.']);
-            $this->reset(['transactionTankId', 'transactionQuantity', 'transactionMineAreaId']);
+            $this->reset(['transactionTankId', 'transactionQuantity', 'transactionMachineId']);
+            // Show the result of what was just dispensed.
+            $this->goToStep(4);
 
         } catch (\Throwable $e) {
             Log::error('Failed to record dispensing transaction', ['error' => $e->getMessage()]);
@@ -206,11 +208,25 @@ class FuelManagement extends Component
         $this->allocationMonth = now()->month;
     }
 
-    // Unified modal open/close
-    public function openManageModal($tab = 'dispense')
+    /**
+     * Open the guided fuel workflow. With no argument it opens at the first
+     * step that still needs doing (no tanks -> Tank, no allocation for this
+     * month -> Allocation, otherwise Dispense). Legacy tab names are mapped
+     * so existing callers keep working.
+     */
+    public function openManageModal($tab = null)
     {
         $this->showManageModal = true;
-        $this->setManageTab($tab);
+
+        $step = match ($tab) {
+            'tank' => 1,
+            'allocation' => 2,
+            'dispense' => 3,
+            'review' => 4,
+            default => $this->firstIncompleteStep(),
+        };
+
+        $this->goToStep($step);
     }
 
     public function closeManageModal()
@@ -218,31 +234,70 @@ class FuelManagement extends Component
         $this->showManageModal = false;
     }
 
-    public function closeTankModal()
+    /**
+     * Step navigation. Moving forward is gated on the prerequisites the
+     * server enforces anyway: dispensing needs a tank AND a monthly
+     * allocation, allocations are meaningless without a tank. Moving
+     * backward is always allowed.
+     */
+    public function goToStep(int $step): void
     {
-        $this->showManageModal = false;
-        $this->manageTab = 'dispense';
-        $this->reset(['tankName', 'tankNumber', 'tankCapacity', 'tankMinimumLevel', 'tankFuelType', 'tankLocationDescription', 'tankNotes', 'tankMineAreaId']);
-    }
+        $step = max(1, min(4, $step));
 
-    public function closeAllocationModal()
-    {
-        $this->showManageModal = false;
-        $this->manageTab = 'dispense';
-        $this->reset(['allocationYear', 'allocationMonth', 'allocatedLiters', 'fuelPricePerLiter', 'allocationNotes']);
-    }
+        if ($step >= 2 && ! $this->hasActiveTanks()) {
+            $this->manageStep = 1;
+            if ($step > 1) {
+                $this->dispatch('notify', ['type' => 'info', 'message' => 'Add a fuel tank first.']);
+            }
 
-    public function setManageTab($tab)
-    {
-        $this->manageTab = $tab;
-        // Optionally reset form fields when switching tabs
-        if ($tab === 'dispense') {
-            $this->reset(['transactionTankId', 'transactionQuantity', 'transactionError']);
-        } elseif ($tab === 'allocation') {
-            $this->reset(['allocatedLiters', 'fuelPricePerLiter', 'allocationNotes']);
-        } elseif ($tab === 'tank') {
-            $this->reset(['tankName', 'tankNumber', 'tankCapacity', 'tankMinimumLevel', 'tankFuelType', 'tankLocationDescription', 'tankNotes']);
+            return;
         }
+
+        if ($step === 3 && ! $this->hasCurrentAllocation()) {
+            $this->manageStep = 2;
+            $this->dispatch('notify', ['type' => 'info', 'message' => 'Set this month\'s allocation before dispensing.']);
+
+            return;
+        }
+
+        $this->manageStep = $step;
+
+        // Fresh forms per step.
+        if ($step === 1) {
+            $this->reset(['tankName', 'tankNumber', 'tankCapacity', 'tankMinimumLevel', 'tankFuelType', 'tankLocationDescription', 'tankNotes']);
+        } elseif ($step === 2) {
+            $this->reset(['allocatedLiters', 'fuelPricePerLiter', 'allocationNotes']);
+        } elseif ($step === 3) {
+            $this->reset(['transactionTankId', 'transactionQuantity', 'transactionError']);
+        }
+    }
+
+    private function firstIncompleteStep(): int
+    {
+        if (! $this->hasActiveTanks()) {
+            return 1;
+        }
+
+        if (! $this->hasCurrentAllocation()) {
+            return 2;
+        }
+
+        return 3;
+    }
+
+    private function hasActiveTanks(): bool
+    {
+        return FuelTank::where('team_id', auth()->user()->current_team_id)
+            ->where('status', 'active')
+            ->exists();
+    }
+
+    private function hasCurrentAllocation(): bool
+    {
+        return FuelMonthlyAllocation::where('team_id', auth()->user()->current_team_id)
+            ->where('year', now()->year)
+            ->where('month', now()->month)
+            ->exists();
     }
 
     public function saveTank()
@@ -287,7 +342,9 @@ class FuelManagement extends Component
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Fuel tank created successfully']);
             // Notify frontend and keep selection so new tank appears in dispense dropdown
             $this->dispatch('tank-created', ['id' => $tank->id, 'name' => $tank->name]);
-            $this->closeTankModal();
+            // Tank created: the natural next step is the monthly allocation.
+            $this->reset(['tankName', 'tankNumber', 'tankCapacity', 'tankMinimumLevel', 'tankFuelType', 'tankLocationDescription', 'tankNotes', 'tankMineAreaId']);
+            $this->goToStep(2);
 
         } catch (\Exception $e) {
             Log::error('Failed to create fuel tank', [
@@ -472,7 +529,9 @@ class FuelManagement extends Component
             $allocation->updateConsumption();
 
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Monthly allocation saved successfully']);
-            $this->closeAllocationModal();
+            // Allocation saved: continue to dispensing.
+            $this->reset(['allocatedLiters', 'fuelPricePerLiter', 'allocationNotes']);
+            $this->goToStep(3);
 
         } catch (\Exception $e) {
             Log::error('Failed to save fuel allocation', [
@@ -510,13 +569,23 @@ class FuelManagement extends Component
             ->get();
 
         // Machines for dispensing form
-        $machines = Machine::where('team_id', $teamId)->orderBy('name')->get();
+        $machines = Machine::query()->where('team_id', $teamId)->get()->sortBy('name')->values();
 
-        // Get AI-powered fuel insights
-        $aiAgent = new FuelPredictorAgent;
-        $aiAnalysis = $aiAgent->analyze(auth()->user()->currentTeam);
-        $aiRecommendations = collect($aiAnalysis['recommendations'] ?? [])->take(5);
-        $aiInsights = collect($aiAnalysis['insights'] ?? [])->take(3);
+        // AI fuel insights only make sense once there is real fuel data to
+        // analyse. With zero tanks and zero transactions the agent used to
+        // emit a fabricated "Critical: inventory lasts 0 days (confidence
+        // 88%)" recommendation -- alarming noise about a fuel system that
+        // does not exist yet.
+        $hasFuelData = $tanks->isNotEmpty()
+            || FuelTransaction::where('team_id', $teamId)->exists();
+
+        $aiRecommendations = collect();
+        $aiInsights = collect();
+        if ($hasFuelData) {
+            $aiAnalysis = (new FuelPredictorAgent)->analyze(auth()->user()->currentTeam);
+            $aiRecommendations = collect($aiAnalysis['recommendations'] ?? [])->take(5);
+            $aiInsights = collect($aiAnalysis['insights'] ?? [])->take(3);
+        }
 
         $tankStats = [
             'total' => $tanks->count(),
@@ -586,7 +655,11 @@ class FuelManagement extends Component
             ->orderByDesc('total_consumed')
             ->limit(5)
             ->get()
-            ->map(function ($item) {
+            // The missing use($teamId) here was latent: this map only runs
+            // once a dispensing transaction exists, and none could be
+            // created until the guided workflow shipped -- the first real
+            // dispense crashed the page.
+            ->map(function ($item) use ($teamId) {
                 $machine = Machine::where('team_id', $teamId)->find($item->machine_id);
 
                 return [
@@ -598,7 +671,50 @@ class FuelManagement extends Component
 
         $mineAreas = MineArea::where('team_id', $teamId)->orderBy('name')->get();
 
+        // Per-machine fuel activity: which truck received fuel, how much,
+        // when, from which tank -- manual dispensing records (entered by
+        // people) shown separately from the machine's own telemetry fuel
+        // level, never blended.
+        $monthStart = now()->startOfMonth();
+        $machineFuelActivity = $machines->map(function (Machine $machine) use ($teamId, $dateRange, $monthStart) {
+            $base = FuelTransaction::where('team_id', $teamId)
+                ->where('machine_id', $machine->id)
+                ->where('transaction_type', 'dispensing');
+
+            $periodDispensed = (clone $base)
+                ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
+                ->sum('quantity_liters');
+            $monthDispensed = (clone $base)
+                ->where('transaction_date', '>=', $monthStart)
+                ->sum('quantity_liters');
+            $lastDispense = (clone $base)->with('fuelTank')->latest('transaction_date')->first();
+
+            $latestFuelMetric = $machine->metrics()
+                ->whereNotNull('fuel_level')
+                ->latest('recorded_at')
+                ->first();
+
+            return [
+                'machine' => $machine,
+                'period_dispensed' => (float) $periodDispensed,
+                'month_dispensed' => (float) $monthDispensed,
+                'event_count' => (clone $base)
+                    ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
+                    ->count(),
+                'last_dispense' => $lastDispense,
+                'telemetry_fuel_level' => $latestFuelMetric?->fuel_level,
+                'telemetry_recorded_at' => $latestFuelMetric?->recorded_at,
+            ];
+        })->filter(function (array $row) {
+            // Only rows with something to say: a dispensing history or a
+            // live telemetry fuel reading.
+            return $row['month_dispensed'] > 0
+                || $row['period_dispensed'] > 0
+                || $row['telemetry_fuel_level'] !== null;
+        })->sortByDesc('period_dispensed')->values();
+
         return view('livewire.fuel-management', [
+            'machineFuelActivity' => $machineFuelActivity,
             'tanks' => $tanks,
             'machines' => $machines,
             'tankStats' => $tankStats,
