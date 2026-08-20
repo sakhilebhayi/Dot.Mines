@@ -8,7 +8,9 @@ use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Team;
+use App\Services\DispatchService;
 use App\Services\QueryCacheService;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -162,6 +164,19 @@ class Dashboard extends Component
 
         $this->loadDashboardData();
         $this->dispatch('alert-updated', message: 'Alert acknowledged successfully');
+    }
+
+    /**
+     * Live dispatch snapshot for the fleet-flow section. Computed property
+     * so the wire:poll on the section re-derives it from current telemetry
+     * and open geofence entries on every poll.
+     *
+     * @return array{machines: array<int, array<string, mixed>>, counts: array<string, int>, generated_at: CarbonInterface}
+     */
+    public function getFleetDispatchProperty(): array
+    {
+        return app(DispatchService::class)
+            ->fleetSnapshot(Auth::user()->current_team_id ?? 0);
     }
 
     public function render()
