@@ -111,14 +111,20 @@ jobs:
       - name: Health check
         run: |
           sleep 5
-          for path in /ready /up/realtime; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "https://${{ secrets.DEPLOY_HOST }}${path}")
-            echo "GET ${path} -> ${code}"
-            if [ "$code" != "200" ]; then
-              echo "::error::Health check failed on ${path} (HTTP ${code}). The site may still be in maintenance mode or the release is unhealthy."
-              exit 1
-            fi
-          done
+          # Hard gate: the app must boot and reach its database.
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://${{ secrets.DEPLOY_HOST }}/ready")
+          echo "GET /ready -> ${code}"
+          if [ "$code" != "200" ]; then
+            echo "::error::Health check failed on /ready (HTTP ${code}). The site may still be in maintenance mode or the release is unhealthy."
+            exit 1
+          fi
+          # Informational: /up/realtime verifies the Reverb PROCESS, which
+          # legitimately does not exist on shared hosting -- report, don't gate.
+          rt=$(curl -s -o /dev/null -w '%{http_code}' "https://${{ secrets.DEPLOY_HOST }}/up/realtime")
+          echo "GET /up/realtime -> ${rt}"
+          if [ "$rt" != "200" ]; then
+            echo "::warning::Realtime stack reports degraded (HTTP ${rt}) -- expected on hosts without a Reverb process; WebSocket features are unavailable there."
+          fi
 
       - name: Failure notice
         if: failure()
