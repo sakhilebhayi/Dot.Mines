@@ -1,33 +1,22 @@
-import Alpine from 'alpinejs';
-window.Alpine = Alpine;
-// Do not call `Alpine.start()` here because Livewire v3 bundles Alpine
-// and will initialize it. Starting Alpine twice triggers duplicate-instance
-// warnings. Mark this Alpine instance as coming from Livewire to avoid
-// Livewire's duplicate detection.
-if (window.Alpine) {
-	window.Alpine.__fromLivewire = true;
-}
+// Livewire v3 bundles and starts its own Alpine, and its dist assigns it to
+// `window.Alpine`. NEVER import/assign a second Alpine here: Livewire's dist
+// contains bare `Alpine.…` references (e.g. `Alpine.reactive()` in the
+// Component constructor) that resolve to the GLOBAL at call time, so
+// overwriting `window.Alpine` splits the page across two reactivity engines
+// -- component data lands on one engine while the DOM's x-data scopes run on
+// the other, which silently breaks every server->client `entangle()` sync
+// (confirmed live: all Jetstream confirms-password modals, incl. the 2FA
+// Enable flow, never opened because `x-show="show"` never received the
+// entangled update).
 
 // Shared mobile-nav drawer state. The sidebar, navbar, and backdrop are
 // three separate Livewire/Blade roots, so a plain local `x-data` property on
 // one isn't visible to the others.
 //
-// This deliberately does NOT use Alpine.store(): `livewire.js` (a plain,
-// non-module <script>, so it executes synchronously wherever it sits in the
-// document) calls Alpine.start() on its own bundled Alpine instance before
-// this file -- a Vite `type="module"` bundle, which the browser always
-// defers until after the document has finished parsing -- ever runs.
-// Confirmed live: window.Alpine.store('nav', ...) registers successfully,
-// but toggling it has zero effect on the actual page, because `window.
-// Alpine` at that point is a second, never-started Alpine instance, not the
-// one Livewire already initialized and bound the page's directives to.
-//
-// Plain window CustomEvents sidestep this entirely -- they don't go through
-// Alpine at all, so it doesn't matter which Alpine instance is "live".
-// Each Blade root keeps its own local `mobileOpen` (Alpine reactivity
-// *within* a single root already works correctly -- it's only cross-root
-// global state, like a store, that hit the instance mismatch above) and
-// stays in sync by listening for 'mobile-nav-changed'.
+// Plain window CustomEvents instead of Alpine.store(): they don't depend on
+// Alpine at all, so nav state can't be caught in any Alpine boot-order or
+// instance issue. Each Blade root keeps its own local `mobileOpen` and stays
+// in sync by listening for 'mobile-nav-changed'.
 let mobileNavOpen = false;
 
 function setMobileNavOpen(open) {
