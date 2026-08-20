@@ -1,6 +1,5 @@
 <div>
     <!-- Leaflet CSS - loaded directly in component -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
     <div class="container mx-auto py-8">
         <div class="flex flex-col lg:flex-row gap-8">
@@ -121,8 +120,6 @@
     <!-- Map Toast and Loading Indicator (overlay, always present) removed: handled inside map card -->
     
     <!-- Leaflet JS - loaded directly in component -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.13.0/leaflet-providers.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     @vite(['resources/js/live-map.js'])
 

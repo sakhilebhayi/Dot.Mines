@@ -5,16 +5,20 @@ namespace App\Livewire;
 use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
-use App\Services\RoutePlanningService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class FleetMovementReplay extends Component
 {
-    public ?Machine $selectedMachine = null;
+    /**
+     * The selected machine's ID. Every consumer (queries, blade, JS) treats
+     * this as an id; it was previously typed ?Machine, so the select's
+     * wire:model threw a TypeError the moment any machine was chosen --
+     * the page's core workflow was unusable.
+     */
+    public ?int $selectedMachine = null;
 
     public array $activityFeed = [];
 
@@ -94,7 +98,7 @@ class FleetMovementReplay extends Component
         // If a machine is selected, filter activities for that machine and date range
         $query = ActivityLog::where('team_id', $team->id)->latest('created_at');
 
-        if ($this->selectedMachine) {
+        if ($this->selectedMachine !== null) {
             $query->where('machine_id', $this->selectedMachine);
         }
 
@@ -146,18 +150,28 @@ class FleetMovementReplay extends Component
         $routes = [];
         $selectedMachineDetails = null;
 
-        if ($this->selectedMachine) {
+        // Tenant isolation: only proceed when the selected id is a machine
+        // of the CURRENT team -- the raw metrics query below is keyed by
+        // machine_id, so acting on an unverified id would replay another
+        // team's GPS history.
+        if ($this->selectedMachine !== null) {
             $selectedMachineDetails = Machine::where('team_id', $team->id)->find($this->selectedMachine);
+        }
+
+        if ($selectedMachineDetails) {
             $start = Carbon::parse($this->startDate.' '.$this->startTime);
             $end = Carbon::parse($this->endDate.' '.$this->endTime);
 
-            // Get location history from machine_metrics table (simulating historical data)
+            // Real GPS history from telemetry. recorded_at is the provider's
+            // own reading timestamp (Bell: TelemetryDate); created_at is only
+            // when the row was synced -- replaying by sync time distorts the
+            // timeline whenever a batch sync lands hours of readings at once.
             $locationHistory = DB::table('machine_metrics')
                 ->where('machine_id', $this->selectedMachine)
-                ->whereBetween('created_at', [$start, $end])
+                ->whereBetween(DB::raw('COALESCE(recorded_at, created_at)'), [$start, $end])
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->orderBy('created_at')
+                ->orderByRaw('COALESCE(recorded_at, created_at)')
                 ->get();
 
             $this->totalPositions = $locationHistory->count();
@@ -167,7 +181,7 @@ class FleetMovementReplay extends Component
                 return [
                     'lat' => $location->latitude,
                     'lng' => $location->longitude,
-                    'timestamp' => Carbon::parse($location->created_at)->format('Y-m-d H:i:s'),
+                    'timestamp' => Carbon::parse((string) ($location->recorded_at ?? $location->created_at))->format('Y-m-d H:i:s'),
                     'speed' => $location->speed ?? 0,
                     'heading' => $location->heading ?? 0,
                 ];
@@ -225,43 +239,14 @@ class FleetMovementReplay extends Component
 
             $routes = array_values($routesMap);
 
-            // Auto-calculate route between start and end points if no routes exist
-            // This ensures machine movement follows roads on the map
-            if (empty($routes) && ! empty($pathCoordinates) && count($pathCoordinates) >= 2) {
-                $start_point = reset($pathCoordinates);
-                $end_point = end($pathCoordinates);
-
-                if ($start_point && $end_point) {
-                    try {
-                        $routePlanningService = new RoutePlanningService;
-                        $calculatedRoute = $routePlanningService->calculateOptimalRoute(
-                            $start_point['lat'],
-                            $start_point['lng'],
-                            $end_point['lat'],
-                            $end_point['lng'],
-                            $this->selectedMachine,
-                            $team->id
-                        );
-
-                        if ($calculatedRoute && ! empty($calculatedRoute['waypoints'])) {
-                            // Add the calculated route to the routes array
-                            $routes[] = [
-                                'id' => 'auto-'.time(),
-                                'name' => 'Auto-calculated Route',
-                                'waypoints' => $calculatedRoute['waypoints'],
-                                'color' => '#f59e0b',
-                                'start_location' => $start_point['lat'].', '.$start_point['lng'],
-                                'end_location' => $end_point['lat'].', '.$end_point['lng'],
-                            ];
-                        }
-                    } catch (\Exception $e) {
-                        Log::warning('Failed to auto-calculate route for replay', [
-                            'machine_id' => $this->selectedMachine,
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                }
-            }
+            // NOTE: this used to fall back to synthesizing an
+            // "Auto-calculated Route" via an external OSRM call when no saved
+            // routes existed. A replay is a record of where the machine
+            // ACTUALLY went -- drawing a road-routing engine's guess over the
+            // history both fabricates a path the machine may never have taken
+            // and fired an external HTTP request inside render() on every
+            // Livewire update (each play/pause/seek). Removed: the replay
+            // shows real telemetry positions and real saved routes only.
 
             // Set map center to first position if available
             if ($locationHistory->isNotEmpty()) {
@@ -392,7 +377,7 @@ class FleetMovementReplay extends Component
 
     public function exportReplayData()
     {
-        if (! $this->selectedMachine) {
+        if ($this->selectedMachine === null) {
             session()->flash('error', 'Please select a machine to export.');
 
             return;
