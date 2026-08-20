@@ -135,10 +135,17 @@ class ProductionService
     /**
      * @return \Illuminate\Support\Collection<string, array<string, mixed>>
      */
-    public function getProductionTrend(int $teamId, int $days = 30): \Illuminate\Support\Collection
+    public function getProductionTrend(int $teamId, int $days = 30, ?Carbon $startDate = null, ?Carbon $endDate = null): \Illuminate\Support\Collection
     {
-        $records = ProductionRecord::forTeam($teamId)
-            ->where('record_date', '>=', Carbon::now()->subDays($days))
+        $query = ProductionRecord::forTeam($teamId);
+
+        if ($startDate !== null && $endDate !== null) {
+            $query->betweenDates($startDate, $endDate);
+        } else {
+            $query->where('record_date', '>=', Carbon::now()->subDays($days));
+        }
+
+        $records = $query
             ->orderBy('record_date')
             ->get()
             ->groupBy('record_date');

@@ -6418,6 +6418,7 @@
       <code><![CDATA[$validated]]></code>
     </MixedAssignment>
     <MixedMethodCall>
+      <code><![CDATA[betweenDates]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[filter]]></code>
       <code><![CDATA[format]]></code>
@@ -6437,7 +6438,6 @@
       <code><![CDATA[toArray]]></code>
       <code><![CDATA[toArray]]></code>
       <code><![CDATA[values]]></code>
-      <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
@@ -6481,9 +6481,13 @@
       <code><![CDATA[openEditModal]]></code>
       <code><![CDATA[render]]></code>
       <code><![CDATA[saveRecord]]></code>
+      <code><![CDATA[setPeriod]]></code>
       <code><![CDATA[switchView]]></code>
+      <code><![CDATA[updatedEndDate]]></code>
+      <code><![CDATA[updatedStartDate]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedProperty>
+      <code><![CDATA[$dateFilter]]></code>
       <code><![CDATA[$machine_id]]></code>
       <code><![CDATA[$mine_area_id]]></code>
       <code><![CDATA[$quantity_produced]]></code>
@@ -13274,6 +13278,7 @@
       <code><![CDATA[$cycles]]></code>
       <code><![CDATA[$loads]]></code>
       <code><![CDATA[$machine]]></code>
+      <code><![CDATA[$query]]></code>
       <code><![CDATA[$recordCount]]></code>
       <code><![CDATA[$records]]></code>
       <code><![CDATA[$records]]></code>
@@ -13286,6 +13291,7 @@
     </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[active]]></code>
+      <code><![CDATA[betweenDates]]></code>
       <code><![CDATA[betweenDates]]></code>
       <code><![CDATA[betweenDates]]></code>
       <code><![CDATA[count]]></code>

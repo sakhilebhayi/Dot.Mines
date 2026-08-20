@@ -15,32 +15,43 @@
 
             <!-- Date Filters -->
             <div class="flex flex-wrap gap-2 items-end">
-                <div class="flex gap-2">
-                    <button wire:click="$set('dateFilter', 'day')" 
+                <div class="flex gap-2 items-center">
+                    <button wire:click="setPeriod('day')"
                         class="px-4 py-2 rounded-lg transition-all {{ $dateFilter === 'day' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-[var(--ink-soft)] text-[var(--sand)] hover:bg-white/10' }}">
                         Today
                     </button>
-                    <button wire:click="$set('dateFilter', 'week')" 
+                    <button wire:click="setPeriod('week')"
                         class="px-4 py-2 rounded-lg transition-all {{ $dateFilter === 'week' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-[var(--ink-soft)] text-[var(--sand)] hover:bg-white/10' }}">
                         Week
                     </button>
-                    <button wire:click="$set('dateFilter', 'month')" 
+                    <button wire:click="setPeriod('month')"
                         class="px-4 py-2 rounded-lg transition-all {{ $dateFilter === 'month' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-[var(--ink-soft)] text-[var(--sand)] hover:bg-white/10' }}">
                         Month
                     </button>
-                    <button wire:click="$set('dateFilter', 'year')" 
+                    <button wire:click="setPeriod('year')"
                         class="px-4 py-2 rounded-lg transition-all {{ $dateFilter === 'year' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-[var(--ink-soft)] text-[var(--sand)] hover:bg-white/10' }}">
                         Year
                     </button>
+                    @if ($dateFilter === 'custom')
+                        {{-- Manual picker edits put the page on a user-chosen
+                             range; make that explicit instead of leaving a
+                             stale quick-toggle highlighted. --}}
+                        <span class="px-4 py-2 rounded-lg bg-[var(--gold)] text-[var(--ink)] font-medium">Custom</span>
+                    @endif
                 </div>
 
-                <!-- Custom Date Range Picker -->
+                <!-- Custom Date Range Picker. The value attribute is rendered
+                     server-side so quick-toggle updates (setPeriod) actually
+                     reach the DOM: without it, Livewire's morph sees identical
+                     input HTML and leaves the stale picker value in place. -->
                 <div class="flex gap-2 items-center bg-[var(--ink-soft)] rounded-lg px-3 py-2 border border-[var(--line)]">
-                    <input type="date" wire:model.live="startDate" 
-                        class="bg-transparent border-0 text-sm focus:ring-0 text-[var(--stone)] px-4 py-2 h-8">
+                    <input type="date" wire:model.live="startDate" value="{{ $startDate }}"
+                        class="bg-transparent border-0 text-sm focus:ring-0 text-[var(--stone)] px-4 py-2 h-8"
+                        aria-label="Start date">
                     <span class="text-[var(--sand)]">→</span>
-                    <input type="date" wire:model.live="endDate" 
-                        class="bg-transparent border-0 text-sm focus:ring-0 text-[var(--stone)] px-4 py-2 h-8">
+                    <input type="date" wire:model.live="endDate" value="{{ $endDate }}"
+                        class="bg-transparent border-0 text-sm focus:ring-0 text-[var(--stone)] px-4 py-2 h-8"
+                        aria-label="End date">
                 </div>
             </div>
         </div>
