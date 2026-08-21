@@ -249,8 +249,8 @@ XML;
         $service = new BellService($this->credentials());
         $service->fetchMachines();
 
-        // Past the 60s micro-cache window a fresh snapshot is fetched.
-        $this->travel(61)->seconds();
+        // Past the micro-cache window a fresh snapshot is fetched.
+        $this->travel(241)->seconds();
         $service->fetchMachines();
 
         Http::assertSentCount(3); // 1 token + 2 Fleet fetches across the cache boundary.
