@@ -8,10 +8,23 @@ use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
 use App\Models\AIRecommendation;
 use Illuminate\View\View;
+use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
+#[Lazy]
 class AIAnalytics extends Component
 {
+    /**
+     * Skeleton shown while this page lazy-loads -- the page shell paints
+     * immediately instead of blocking on mount()'s data queries.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- invoked by Livewire's lazy-loading lifecycle
+     */
+    public function placeholder(): \Illuminate\Contracts\View\View
+    {
+        return view('livewire.placeholders.dashboard');
+    }
+
     public string $timeRange = '30'; // days
 
     public string $selectedAgent = 'all';

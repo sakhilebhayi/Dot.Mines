@@ -9,11 +9,25 @@ use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use App\Services\AI\MaintenancePredictorAgent;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
+#[Lazy]
 class MaintenanceDashboard extends Component
 {
+    /**
+     * Skeleton shown while this page lazy-loads -- the page shell paints
+     * immediately instead of blocking on mount()'s data queries.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- invoked by Livewire's lazy-loading lifecycle
+     */
+    public function placeholder(): View
+    {
+        return view('livewire.placeholders.dashboard');
+    }
+
     public string $selectedPeriod = 'month';
 
     public bool $showCriticalOnly = false;

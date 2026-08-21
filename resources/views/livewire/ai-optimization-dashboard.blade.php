@@ -311,9 +311,10 @@
                         <div class="text-6xl mb-4">🤖</div>
                         <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Recommendations Yet</h3>
                         <p class="text-[var(--sand)] mb-4">Run AI Analysis to generate intelligent recommendations</p>
-                        <button wire:click="runAnalysis" 
-                            class="px-6 py-3 bg-[var(--gold)] text-[var(--ink)] rounded-lg hover:bg-[var(--gold-soft)] transition font-medium shadow-lg hover:shadow-xl transform hover:scale-105">
-                            Run Analysis Now
+                        <button wire:click="runAnalysis" wire:loading.attr="disabled" wire:target="runAnalysis"
+                            class="px-6 py-3 bg-[var(--gold)] text-[var(--ink)] rounded-lg hover:bg-[var(--gold-soft)] transition font-medium shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100">
+                            <span wire:loading.remove wire:target="runAnalysis">Run Analysis Now</span>
+                            <span wire:loading wire:target="runAnalysis">Analyzing…</span>
                         </button>
                     </div>
                 @endforelse
@@ -345,8 +346,11 @@
                             </div>
 
                             <div class="flex gap-2 justify-end mt-6 pt-4 border-t border-[var(--line)]">
-                                <button wire:click="cancelRecommendationAction" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-[var(--stone)] rounded">Cancel</button>
-                                <button wire:click="confirmRecommendationAction" class="px-4 py-2 bg-[var(--gold)] text-[var(--ink)] rounded hover:bg-[var(--gold-soft)] font-medium">Proceed</button>
+                                <button wire:click="cancelRecommendationAction" wire:loading.attr="disabled" wire:target="confirmRecommendationAction" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-[var(--stone)] rounded disabled:opacity-50">Cancel</button>
+                                <button wire:click="confirmRecommendationAction" wire:loading.attr="disabled" wire:target="confirmRecommendationAction" class="px-4 py-2 bg-[var(--gold)] text-[var(--ink)] rounded hover:bg-[var(--gold-soft)] font-medium disabled:opacity-50">
+                                    <span wire:loading.remove wire:target="confirmRecommendationAction">Proceed</span>
+                                    <span wire:loading wire:target="confirmRecommendationAction">Working…</span>
+                                </button>
                             </div>
                         </div>
                     </div>
