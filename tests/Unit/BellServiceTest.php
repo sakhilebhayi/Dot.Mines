@@ -234,7 +234,26 @@ XML;
         $service->fetchMachines();
         $service->fetchMachines();
 
-        Http::assertSentCount(3); // 1 token request + 2 Fleet requests, not 2 token requests.
+        // 1 token request + 1 Fleet request: the token is cached across
+        // calls AND the second fetchMachines() is served by the 60s
+        // snapshot micro-cache (location + status consumers share one
+        // provider call -- the anti-throttle batching from Slice 4).
+        Http::assertSentCount(2);
+    }
+
+    public function test_snapshot_cache_expires_and_failures_are_never_cached(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response($this->fleetXml(), 200)]);
+
+        $service = new BellService($this->credentials());
+        $service->fetchMachines();
+
+        // Past the 60s micro-cache window a fresh snapshot is fetched.
+        $this->travel(61)->seconds();
+        $service->fetchMachines();
+
+        Http::assertSentCount(3); // 1 token + 2 Fleet fetches across the cache boundary.
     }
 
     public function test_a_401_forces_exactly_one_token_refresh_and_retry(): void

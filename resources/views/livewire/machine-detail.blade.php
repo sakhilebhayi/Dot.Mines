@@ -1,4 +1,6 @@
-<div>
+{{-- 60s, visible-only: telemetry/loss panels re-render as new metric rows
+     land (5-minute location cadence, 15-minute full sync). --}}
+<div wire:poll.visible.60s>
     <!-- Header -->
     <div class="mb-6">
         <a href="{{ route('fleet') }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)] mb-4 inline-flex items-center gap-1">

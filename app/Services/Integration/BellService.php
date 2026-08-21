@@ -101,6 +101,17 @@ class BellService extends BaseManufacturerService
      */
     public function fetchMachines(): array
     {
+        // Micro-cache: location and status jobs both consume the snapshot
+        // within the same scheduler window; one Bell call serves both.
+        // 60s is far inside Bell's own 15-minute data cadence, so this
+        // never staleness-shifts anything a consumer could observe.
+        /** @var array{success: bool, machines: list<array<string, mixed>>, count: int}|null $cached */
+        $cached = Cache::get($this->fleetSnapshotCacheKey());
+
+        if (is_array($cached)) {
+            return $cached;
+        }
+
         try {
             $xml = $this->requestXml('/Fleet');
 
@@ -129,11 +140,17 @@ class BellService extends BaseManufacturerService
                 $equipmentNodes
             );
 
-            return [
+            $result = [
                 'success' => true,
                 'machines' => $machines,
                 'count' => count($machines),
             ];
+
+            // Only successful snapshots are cached -- a failure must be
+            // retried by the next caller, never replayed for 60 seconds.
+            Cache::put($this->fleetSnapshotCacheKey(), $result, now()->addSeconds(60));
+
+            return $result;
         } catch (Throwable $e) {
             $this->logError('Failed to fetch Bell fleet snapshot', $e);
 
@@ -160,6 +177,53 @@ class BellService extends BaseManufacturerService
         }
 
         return [];
+    }
+
+    /**
+     * Current locations for the WHOLE fleet from the single /Fleet
+     * snapshot. The per-machine Locations time-series endpoint costs one
+     * API call per machine; polling jobs calling it for a 26-machine
+     * fleet every few seconds is what got this server throttled by Bell
+     * on 2026-08-21. The snapshot already carries every machine's latest
+     * position in one call -- batch consumers must use this.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- reached dynamically via method_exists() from IntegrationService's batch paths
+     *
+     * @return list<array{manufacturer_id: string, latitude: float, longitude: float, timestamp: string, heading: null, speed: null, accuracy: null}>
+     */
+    public function fetchAllMachineLocations(): array
+    {
+        $result = $this->fetchMachines();
+
+        if (($result['success'] ?? false) !== true) {
+            return [];
+        }
+
+        $locations = [];
+
+        /** @var list<array{external_id?: string|null, last_location?: array{latitude: float, longitude: float, timestamp: string}|null}> $machines */
+        $machines = $result['machines'] ?? [];
+
+        foreach ($machines as $machine) {
+            $location = $machine['last_location'] ?? null;
+            $externalId = $machine['external_id'] ?? null;
+
+            if ($location === null || $externalId === null) {
+                continue;
+            }
+
+            $locations[] = [
+                'manufacturer_id' => $externalId,
+                'latitude' => $location['latitude'],
+                'longitude' => $location['longitude'],
+                'timestamp' => $location['timestamp'],
+                'heading' => null,
+                'speed' => null,
+                'accuracy' => null,
+            ];
+        }
+
+        return $locations;
     }
 
     public function fetchMachineLocation(string $machineId): ?array
@@ -525,6 +589,11 @@ class BellService extends BaseManufacturerService
     private function pinMapCacheKey(): string
     {
         return 'bell_equipment_pin_map_'.md5(($this->username ?? '').'|'.($this->clientId ?? ''));
+    }
+
+    private function fleetSnapshotCacheKey(): string
+    {
+        return 'bell_fleet_snapshot_'.md5(($this->username ?? '').'|'.($this->clientId ?? ''));
     }
 
     /**

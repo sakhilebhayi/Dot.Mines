@@ -1,4 +1,7 @@
-<div>
+{{-- 120s, visible-only: card data moves on the 5-minute location/status
+     cadence; this keeps freshness badges and statuses current without
+     hammering the server from idle tabs. --}}
+<div wire:poll.visible.120s>
 <div class="animate-fade-in">
     <!-- Loading Spinner -->
     @if ($isLoading)
