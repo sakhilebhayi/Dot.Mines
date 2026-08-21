@@ -52,7 +52,6 @@ class VerifyLivewireComponents extends Command
 
         // Jetstream components that should be auto-registered
         $jetstreamComponents = [
-            'navigation-menu',
             'profile.update-profile-information-form',
             'profile.update-password-form',
             'profile.two-factor-authentication-form',
@@ -91,7 +90,7 @@ class VerifyLivewireComponents extends Command
                 $className = 'Laravel\\Jetstream\\Http\\Livewire\\'.
                     str_replace(' ', '', ucwords(str_replace('-', ' ', $componentParts[1])));
             } else {
-                // navigation-menu -> NavigationMenu
+                // single-segment names map directly, e.g. some-form -> SomeForm
                 $className = 'Laravel\\Jetstream\\Http\\Livewire\\'.
                     str_replace(' ', '', ucwords(str_replace('-', ' ', $component)));
             }
