@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\MachineLocationUpdateJob;
 use App\Livewire\LiveMap;
 use App\Models\Integration;
 use App\Models\Machine;
@@ -9,6 +10,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Services\Integration\IntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -82,9 +84,9 @@ class LiveMapPositionsTest extends TestCase
 
     public function test_location_update_job_also_stores_the_providers_reading_time(): void
     {
-        \Illuminate\Support\Facades\Http::fake([
-            'https://sso.bellequipment.com/connect/token' => \Illuminate\Support\Facades\Http::response(['access_token' => 't', 'expires_in' => 18000], 200),
-            'https://b-fleet03.bellequipment.com:8080/Fleet' => \Illuminate\Support\Facades\Http::response(<<<'XML'
+        Http::fake([
+            'https://sso.bellequipment.com/connect/token' => Http::response(['access_token' => 't', 'expires_in' => 18000], 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet' => Http::response(<<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <Fleet version="1">
   <Equipment>
@@ -112,7 +114,7 @@ XML, 200),
             'last_location_update' => now()->subDay(),
         ]);
 
-        (new \App\Jobs\MachineLocationUpdateJob($integration))->handle(app(IntegrationService::class));
+        (new MachineLocationUpdateJob($integration))->handle(app(IntegrationService::class));
 
         $this->assertSame(
             '2026-08-21 13:37:00',
