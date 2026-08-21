@@ -9,12 +9,26 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Services\AI\FleetOptimizerAgent;
 use App\Services\MachinePerformanceService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Lazy;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+#[Lazy]
 class Fleet extends Component
 {
+    /**
+     * Skeleton shown while this page lazy-loads -- the page shell paints
+     * immediately instead of blocking on mount()'s data queries.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- invoked by Livewire's lazy-loading lifecycle
+     */
+    public function placeholder(): View
+    {
+        return view('livewire.placeholders.dashboard');
+    }
+
     public array $activityFeed = [];
 
     public bool $isLoading = true;

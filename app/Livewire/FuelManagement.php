@@ -10,12 +10,26 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Services\AI\FuelPredictorAgent;
 use App\Services\FuelManagementService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
+#[Lazy]
 class FuelManagement extends Component
 {
+    /**
+     * Skeleton shown while this page lazy-loads -- the page shell paints
+     * immediately instead of blocking on mount()'s data queries.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- invoked by Livewire's lazy-loading lifecycle
+     */
+    public function placeholder(): View
+    {
+        return view('livewire.placeholders.dashboard');
+    }
+
     // Guided workflow modal: 1 Tank -> 2 Allocation -> 3 Dispense -> 4 Review
     public bool $showManageModal = false;
 

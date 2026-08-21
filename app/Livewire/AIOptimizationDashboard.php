@@ -8,12 +8,26 @@ use App\Models\AIRecommendation;
 use App\Models\AiRecommendationAction;
 use App\Services\AI\AIOptimizationService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Lazy;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+#[Lazy]
 class AIOptimizationDashboard extends Component
 {
+    /**
+     * Skeleton shown while this page lazy-loads -- the page shell paints
+     * immediately instead of blocking on mount()'s data queries.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- invoked by Livewire's lazy-loading lifecycle
+     */
+    public function placeholder(): View
+    {
+        return view('livewire.placeholders.dashboard');
+    }
+
     use WithPagination;
 
     public string $activeTab = 'overview';
