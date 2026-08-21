@@ -103,8 +103,11 @@ class BellService extends BaseManufacturerService
     {
         // Micro-cache: location and status jobs both consume the snapshot
         // within the same scheduler window; one Bell call serves both.
-        // 60s is far inside Bell's own 15-minute data cadence, so this
-        // never staleness-shifts anything a consumer could observe.
+        // 240s guarantees at most ONE Bell call per 5-minute scheduler
+        // window regardless of how job timing aligns -- observed live
+        // (2026-08-21 21:02) that Bell's limiter 405s even back-to-back
+        // calls a minute apart. Still far inside Bell's own 15-minute
+        // data cadence, so no consumer can observe extra staleness.
         /** @var array{success: bool, machines: list<array<string, mixed>>, count: int}|null $cached */
         $cached = Cache::get($this->fleetSnapshotCacheKey());
 
@@ -148,7 +151,7 @@ class BellService extends BaseManufacturerService
 
             // Only successful snapshots are cached -- a failure must be
             // retried by the next caller, never replayed for 60 seconds.
-            Cache::put($this->fleetSnapshotCacheKey(), $result, now()->addSeconds(60));
+            Cache::put($this->fleetSnapshotCacheKey(), $result, now()->addSeconds(240));
 
             return $result;
         } catch (Throwable $e) {
