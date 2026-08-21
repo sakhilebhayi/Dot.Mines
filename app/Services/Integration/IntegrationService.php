@@ -476,13 +476,17 @@ class IntegrationService
             // real "column does not exist" SQL error on every sync attempt
             // that got this far; the create()/update() calls would have
             // silently dropped the non-fillable fields instead of erroring.
-            $machine = Machine::where('team_id', $integration->team_id)
+            /** @var array{latitude?: float|null, longitude?: float|null, timestamp?: string|null}|null $newLocation */
+            $newLocation = $machineData['last_location'] ?? null;
+
+            $machine = Machine::query()
+                ->where('team_id', $integration->team_id)
                 ->where('manufacturer_id', $externalId)
                 ->where('manufacturer', $integration->provider)
                 ->first();
 
             if (! $machine) {
-                $machine = Machine::create([
+                $machine = Machine::query()->create([
                     'team_id' => $integration->team_id,
                     // machines.mine_area_id is NOT NULL on MySQL/Postgres
                     // (2026_02_19_000010) and this create() never set it, so
@@ -508,16 +512,27 @@ class IntegrationService
                     'manufacturer_id' => $externalId,
                     'integration_id' => $integration->id,
                     'status' => $machineData['status'] ?? 'idle',
-                    'last_location_latitude' => $machineData['last_location']['latitude'] ?? null,
-                    'last_location_longitude' => $machineData['last_location']['longitude'] ?? null,
+                    'last_location_latitude' => $newLocation['latitude'] ?? null,
+                    'last_location_longitude' => $newLocation['longitude'] ?? null,
+                    // The provider's own reading time, not the sync moment --
+                    // the live map's "position reported X ago" is only honest
+                    // if this is when the machine actually reported.
+                    'last_location_update' => $newLocation !== null
+                        ? Carbon::parse($newLocation['timestamp'] ?? now())
+                        : null,
                     'capacity' => $machineData['capacity'] ?? null,
                 ]);
             } else {
                 $machine->update([
                     'status' => $machineData['status'] ?? 'idle',
-                    'last_location_latitude' => $machineData['last_location']['latitude'] ?? $machine->last_location_latitude,
-                    'last_location_longitude' => $machineData['last_location']['longitude'] ?? $machine->last_location_longitude,
-                    'last_location_update' => now(),
+                    'last_location_latitude' => $newLocation['latitude'] ?? $machine->last_location_latitude,
+                    'last_location_longitude' => $newLocation['longitude'] ?? $machine->last_location_longitude,
+                    // Only advance the position timestamp when a position
+                    // actually arrived; stamping now() on every sync made
+                    // stale positions look perpetually fresh.
+                    'last_location_update' => $newLocation !== null
+                        ? Carbon::parse($newLocation['timestamp'] ?? now())
+                        : $machine->last_location_update,
                 ]);
             }
 

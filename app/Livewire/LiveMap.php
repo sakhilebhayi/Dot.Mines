@@ -7,6 +7,7 @@ use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Traits\RealtimeUpdates;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -96,6 +97,23 @@ class LiveMap extends Component
         ]);
     }
 
+    /**
+     * Polled position refresh (wire:poll on the map root): pushes the
+     * current DB positions to the map JS as a browser event so markers
+     * move in place -- the map itself is never reloaded for a coordinate
+     * change. Positions land in the DB on the 5-minute location cadence
+     * (and the 15-minute full sync), so a 60s visible-only poll keeps the
+     * map within a minute of the freshest data this app can honestly show.
+     */
+    public function refreshPositions(): void
+    {
+        if (! $this->showMachines) {
+            return;
+        }
+
+        $this->dispatch('machines-positions-updated', machines: $this->getMachines()->toArray());
+    }
+
     public function toggleGeofences(): void
     {
         $this->showGeofences = ! $this->showGeofences;
@@ -126,11 +144,15 @@ class LiveMap extends Component
         ]);
     }
 
+    /**
+     * @return Collection<int, Machine>
+     */
     public function getMachines()
     {
         $team = Auth::user()->currentTeam;
 
-        $machinesQuery = Machine::where('team_id', $team->id)
+        $machinesQuery = Machine::query()
+            ->where('team_id', $team->id)
             ->whereNotNull('last_location_latitude')
             ->whereNotNull('last_location_longitude');
 
@@ -142,7 +164,14 @@ class LiveMap extends Component
             $machinesQuery->where('mine_area_id', $this->selectedMineAreaId);
         }
 
-        return $machinesQuery->get();
+        /**
+         * @psalm-suppress UnnecessaryVarAnnotation -- phpstan (unlike psalm) loses the Eloquent generics through whereNotNull()
+         *
+         * @var Collection<int, Machine> $machines
+         */
+        $machines = $machinesQuery->get();
+
+        return $machines;
     }
 
     public function getMineAreas()

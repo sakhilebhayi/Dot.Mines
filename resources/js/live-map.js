@@ -245,14 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return emojiMap[machineType] || '/machine-emojis/service-truck.svg';
     }
 
-    function addMachineMarkers() {
-        debugLog('addMachineMarkers called - showMachinesData:', showMachinesData, 'machinesData.length:', machinesData.length);
-        if (!showMachinesData || !map) {
-            debugLog('Skipping machine markers - showMachinesData:', showMachinesData, 'map:', !!map);
-            return;
-        }
-
-        machinesData.forEach(machine => {
+    function upsertMachineMarker(machine) {
             try {
                 if (!machine.last_location_latitude || !machine.last_location_longitude) {
                     debugLog('Skipping machine - no coordinates:', machine.name);
@@ -294,8 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     className: 'machine-marker'
                 });
 
-                const marker = L.marker([lat, lng], { icon: statusIcon })
-                    .bindPopup(`
+                const buildPopup = () => (`
                         <div class="p-3 min-w-max">
                             <p class="font-bold text-gray-900">${machine.name}</p>
                             <p class="text-sm text-gray-700">${machine.manufacturer || 'Unknown'} ${machine.model || ''}</p>
@@ -317,7 +309,26 @@ document.addEventListener('DOMContentLoaded', function () {
                                 View Details →
                             </a>
                         </div>
-                    `)
+                    `);
+
+                const existing = markers[machine.id];
+
+                if (existing) {
+                    // Same machine, fresh data: restyle + retext in place and
+                    // ease to the new REAL position. Nothing is extrapolated
+                    // beyond points the provider actually reported.
+                    existing.setIcon(statusIcon);
+                    const from = existing.getLatLng();
+                    const to = L.latLng(lat, lng);
+                    if (Math.abs(from.lat - to.lat) > 1e-7 || Math.abs(from.lng - to.lng) > 1e-7) {
+                        animateMarkerTo(existing, from, to);
+                    }
+                    existing.setPopupContent(buildPopup());
+                    return;
+                }
+
+                const marker = L.marker([lat, lng], { icon: statusIcon })
+                    .bindPopup(buildPopup())
                     .addTo(map);
 
                 markers[machine.id] = marker;
@@ -325,9 +336,76 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
                 console.error('Error adding marker for machine:', machine.name, error);
             }
-        });
+    }
+
+    /**
+     * Visual smoothing ONLY between two REAL reported positions: the marker
+     * eases from the previous known point to the newly reported one over
+     * ~1.5s. Nothing moves unless the provider reported a new coordinate.
+     */
+    function animateMarkerTo(marker, from, to, durationMs = 1500) {
+        const start = performance.now();
+
+        function step(now) {
+            const t = Math.min(1, (now - start) / durationMs);
+            const eased = t * (2 - t); // ease-out
+
+            marker.setLatLng([
+                from.lat + (to.lat - from.lat) * eased,
+                from.lng + (to.lng - from.lng) * eased,
+            ]);
+
+            if (t < 1) {
+                requestAnimationFrame(step);
+            }
+        }
+
+        requestAnimationFrame(step);
+    }
+
+    function addMachineMarkers() {
+        debugLog('addMachineMarkers called - showMachinesData:', showMachinesData, 'machinesData.length:', machinesData.length);
+        if (!showMachinesData || !map) {
+            debugLog('Skipping machine markers - showMachinesData:', showMachinesData, 'map:', !!map);
+            return;
+        }
+
+        machinesData.forEach(upsertMachineMarker);
         debugLog('Total markers added:', Object.keys(markers).length);
     }
+
+    /**
+     * Poll-driven refresh from the LiveMap component's refreshPositions()
+     * (machines-positions-updated browser event): diff in place -- move,
+     * restyle, add, or remove exactly the markers that changed. The map
+     * itself is NEVER reloaded for a coordinate change.
+     */
+    function updateMachinePositions(freshMachines) {
+        machinesData = Array.isArray(freshMachines) ? freshMachines : [];
+        originalMachinesData = JSON.parse(JSON.stringify(machinesData));
+
+        if (!map || !showMachinesData) {
+            return;
+        }
+
+        const seen = new Set();
+
+        machinesData.forEach(machine => {
+            seen.add(String(machine.id));
+            upsertMachineMarker(machine);
+        });
+
+        Object.keys(markers).forEach(id => {
+            if (!seen.has(String(id))) {
+                map.removeLayer(markers[id]);
+                delete markers[id];
+            }
+        });
+    }
+
+    window.addEventListener('machines-positions-updated', (event) => {
+        updateMachinePositions(event.detail?.machines ?? []);
+    });
 
     function addGeofences() {
         debugLog('addGeofences called - showGeofencesData:', showGeofencesData, 'geofencesData.length:', geofencesData.length);
