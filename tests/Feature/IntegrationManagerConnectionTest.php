@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\SyncIntegrationMachinesJob;
 use App\Livewire\IntegrationManager;
 use App\Models\Integration;
 use App\Models\Team;
@@ -9,6 +10,7 @@ use App\Models\User;
 use App\Services\TeamRoleProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -161,5 +163,31 @@ class IntegrationManagerConnectionTest extends TestCase
 
         $this->assertSame(7, $integration['machines_count']);
         $this->assertSame('Sync failed. Please try again.', $integration['last_error']);
+    }
+
+    public function test_manual_sync_dispatches_the_background_job_instead_of_syncing_inline(): void
+    {
+        Queue::fake();
+
+        $owner = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $owner->id]);
+        $owner->update(['current_team_id' => $team->id]);
+        TeamRoleProvisioner::assignRole($owner, $team, 'admin');
+
+        $integration = Integration::factory()->forProvider('bell')->create([
+            'team_id' => $team->id,
+            'status' => 'connected',
+        ]);
+
+        Livewire::actingAs($owner)
+            ->test(IntegrationManager::class)
+            ->call('syncMachines', $integration->id);
+
+        // A full manufacturer sync makes dozens of sequential API calls;
+        // running it inline in the Livewire request blew past the shared
+        // host's gateway timeout (observed live with 26 Bell machines). The
+        // click must only queue the job -- the queue worker owns the work
+        // and the last_sync_at/last_sync_status stamping.
+        Queue::assertPushed(SyncIntegrationMachinesJob::class, 1);
     }
 }

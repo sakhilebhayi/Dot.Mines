@@ -380,4 +380,148 @@ XML, 200),
         app(IntegrationService::class)->syncMachines($integration->fresh());
         $this->assertSame(1, Alert::where('machine_id', $machine->id)->count());
     }
+
+    /**
+     * The EXACT structure Bell's live server returned on 2026-08-21
+     * (element names verified against a real /Fleet response): values are
+     * nested inside per-section elements carrying a datetime attribute,
+     * not flattened onto <Equipment> as the spec-derived fixture above
+     * guessed. Both shapes must parse.
+     */
+    private function liveNestedFleetXml(): string
+    {
+        return <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<Fleet version="1" snapshotTime="2026-08-21T16:30:00Z">
+  <Equipment>
+    <EquipmentHeader>
+      <UnitInstallDateTime>2020-01-01T00:00:00Z</UnitInstallDateTime>
+      <OEMName>BELL</OEMName>
+      <Model>B50E</Model>
+      <EquipmentID>ASA B50E#9823</EquipmentID>
+      <SerialNumber>AEBA850EC03509823</SerialNumber>
+      <PIN>AEBA850EC03509823</PIN>
+    </EquipmentHeader>
+    <Location datetime="2026-08-21T16:12:44Z">
+      <Latitude>-26.0234</Latitude>
+      <Longitude>28.9384</Longitude>
+    </Location>
+    <CumulativeIdleHours datetime="2026-08-21T16:12:44Z">
+      <Hour>3808.96</Hour>
+    </CumulativeIdleHours>
+    <CumulativeLoadCount datetime="2026-08-21T16:12:44Z">
+      <Count>13252</Count>
+    </CumulativeLoadCount>
+    <CumulativeOperatingHours datetime="2026-08-21T16:12:44Z">
+      <Hour>8376.20</Hour>
+    </CumulativeOperatingHours>
+    <CumulativePayloadTotals datetime="2026-08-21T16:12:44Z">
+      <PayloadUnits>kilogram</PayloadUnits>
+      <Payload>596361594</Payload>
+    </CumulativePayloadTotals>
+    <DEFRemaining datetime="2026-08-21T16:12:44Z">
+      <Percent>47</Percent>
+      <DEFTankCapacityUnits>litre</DEFTankCapacityUnits>
+    </DEFRemaining>
+    <Distance datetime="2026-08-21T16:12:44Z">
+      <OdometerUnits>kilometre</OdometerUnits>
+      <Odometer>70439</Odometer>
+    </Distance>
+    <EngineStatus datetime="2026-08-21T16:12:44Z">
+      <EngineNumber>1</EngineNumber>
+      <Running>true</Running>
+    </EngineStatus>
+    <FuelUsed datetime="2026-08-21T16:12:44Z">
+      <FuelUnits>litre</FuelUnits>
+      <FuelConsumed>149529</FuelConsumed>
+    </FuelUsed>
+    <FuelRemaining datetime="2026-08-21T16:12:44Z">
+      <Percent>63</Percent>
+    </FuelRemaining>
+  </Equipment>
+</Fleet>
+XML;
+    }
+
+    public function test_fetch_machines_parses_the_live_nested_section_snapshot(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response($this->liveNestedFleetXml(), 200)]);
+
+        $result = (new BellService($this->credentials()))->fetchMachines();
+
+        $this->assertTrue($result['success']);
+        $machine = $result['machines'][0];
+
+        $this->assertSame('ASA B50E#9823', $machine['external_id']);
+        $this->assertSame('active', $machine['status'], 'EngineStatus/Running=true must map to active, not unknown.');
+        $this->assertEqualsWithDelta(-26.0234, $machine['last_location']['latitude'], 0.0001);
+        $this->assertEqualsWithDelta(28.9384, $machine['last_location']['longitude'], 0.0001);
+
+        $metrics = $machine['metrics'];
+        $this->assertSame(63.0, $metrics['fuel_level'], 'fuel_level must come from FuelRemaining/Percent, not DEFRemaining/Percent (which is 47).');
+        $this->assertSame(8376.20, $metrics['operating_hours'], 'operating_hours must come from CumulativeOperatingHours/Hour, not CumulativeIdleHours/Hour.');
+        $this->assertSame(3808.96, $metrics['idle_hours']);
+        $this->assertSame(
+            '2026-08-21T16:12:44Z',
+            $metrics['recorded_at'],
+            'recorded_at must be Bell\'s own telemetry datetime (Location@datetime), not the moment we happened to sync.'
+        );
+        $this->assertSame(13252.0, $metrics['raw_data']['load_count']);
+        $this->assertSame(47.0, $metrics['raw_data']['def_percent']);
+        $this->assertSame(70439.0, $metrics['raw_data']['odometer']);
+        $this->assertSame(596361594.0, $metrics['raw_data']['cumulative_payload']);
+        $this->assertTrue($metrics['raw_data']['engine_running']);
+    }
+
+    public function test_time_series_urls_use_zulu_timestamps_with_no_plus_sign(): void
+    {
+        $this->fakeToken();
+        Http::fake(['https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<LocationTimeSeries/>', 200)]);
+
+        (new BellService($this->credentials()))->fetchMachineLocation('ASA B50E#9823');
+
+        Http::assertSent(function ($request) {
+            $url = $request->url();
+            if (! str_contains($url, '/Locations/')) {
+                return false;
+            }
+
+            // Bell's IIS rejects the literal '+' that toIso8601String()'s
+            // '+00:00' offset puts in the path (observed live: every
+            // time-series call 400'd). Zulu format is what the AEMP 2.0
+            // convention and Bell's own Postman collection use.
+            return ! str_contains($url, '+')
+                && preg_match('#/Locations/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$#', $url) === 1;
+        });
+    }
+
+    public function test_client_errors_are_not_retried(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response('Bad Request', 400)]);
+
+        (new BellService($this->credentials()))->fetchMachines();
+
+        // One token request + exactly ONE /Fleet attempt: a 400/404/405 is
+        // deterministic, and retrying it tripled the call volume during the
+        // live sync on 2026-08-21 -- enough to get the server IP throttled
+        // by Bell. Only 5xx/connection failures are worth retrying (401
+        // gets its single token-refresh retry separately).
+        Http::assertSentCount(2);
+    }
+
+    public function test_server_errors_are_still_retried(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response('Server Error', 503)]);
+
+        $service = new BellService($this->credentials());
+        $service->setRetryDelay(0);
+
+        $service->fetchMachines();
+
+        // One token request + all three /Fleet attempts.
+        Http::assertSentCount(4);
+    }
 }
