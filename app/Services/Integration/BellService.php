@@ -112,9 +112,21 @@ class BellService extends BaseManufacturerService
                 ];
             }
 
+            $equipmentNodes = $this->extractEquipmentNodes($xml);
+
+            // Seed the EquipmentID->PIN map from the snapshot we already
+            // hold, so the per-machine time-series calls that follow a sync
+            // never need their own /Fleet round-trip to resolve IDs.
+            $map = $this->buildPinMap($equipmentNodes);
+
+            if ($map !== []) {
+                $this->pinByEquipmentId = $map;
+                Cache::put($this->pinMapCacheKey(), $map, now()->addMinutes(15));
+            }
+
             $machines = array_map(
                 fn (SimpleXMLElement $node) => $this->parseEquipmentNode($node),
-                $this->extractEquipmentNodes($xml)
+                $equipmentNodes
             );
 
             return [
@@ -427,6 +439,95 @@ class BellService extends BaseManufacturerService
     }
 
     /**
+     * Bell's per-equipment time-series endpoints are addressed by the
+     * machine's PIN/serial, NOT its display EquipmentID. Confirmed live
+     * 2026-08-21: "/Fleet/Equipment/AEBA850EH03509112/CautionCodes/..."
+     * returns 200 with ISO 15143-3 CautionMessages, while the same call
+     * with the EquipmentID ("ASA  B50E#9112 " -- note the '#', doubled and
+     * trailing spaces) is rejected 400 by ASP.NET path validation before
+     * it ever reaches a route. Callers throughout this app hold the
+     * EquipmentID (machines.manufacturer_id), so resolve it to the PIN via
+     * the /Fleet snapshot; fetchMachines() seeds the map for free during a
+     * sync, and other flows fall back to one cached snapshot call.
+     *
+     * @var array<string, string>
+     */
+    private array $pinByEquipmentId = [];
+
+    private function resolveTimeSeriesId(string $equipmentId): string
+    {
+        $map = $this->equipmentPinMap();
+        $trimmed = trim($equipmentId);
+
+        if (isset($map[$trimmed])) {
+            return $map[$trimmed];
+        }
+
+        // Already a PIN (or an ID Bell can route) -- pass through untouched.
+        return $trimmed;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function equipmentPinMap(): array
+    {
+        if ($this->pinByEquipmentId !== []) {
+            return $this->pinByEquipmentId;
+        }
+
+        $cacheKey = $this->pinMapCacheKey();
+
+        /** @var array<string, string>|null $cached */
+        $cached = Cache::get($cacheKey);
+
+        if (is_array($cached) && $cached !== []) {
+            return $this->pinByEquipmentId = $cached;
+        }
+
+        $xml = $this->requestXml('/Fleet');
+
+        if ($xml === null) {
+            // Do not cache a failure -- the next call should try again.
+            return [];
+        }
+
+        $map = $this->buildPinMap($this->extractEquipmentNodes($xml));
+
+        if ($map !== []) {
+            Cache::put($cacheKey, $map, now()->addMinutes(15));
+        }
+
+        return $this->pinByEquipmentId = $map;
+    }
+
+    /**
+     * @param  list<SimpleXMLElement>  $equipmentNodes
+     * @return array<string, string>
+     */
+    private function buildPinMap(array $equipmentNodes): array
+    {
+        $map = [];
+
+        foreach ($equipmentNodes as $node) {
+            $header = $node->xpath(".//*[local-name()='EquipmentHeader']")[0] ?? $node;
+            $id = trim((string) $this->findValue($header, ['EquipmentID']));
+            $pin = trim((string) ($this->findValue($header, ['PIN']) ?? $this->findValue($header, ['SerialNumber'])));
+
+            if ($id !== '' && $pin !== '') {
+                $map[$id] = $pin;
+            }
+        }
+
+        return $map;
+    }
+
+    private function pinMapCacheKey(): string
+    {
+        return 'bell_equipment_pin_map_'.md5(($this->username ?? '').'|'.($this->clientId ?? ''));
+    }
+
+    /**
      * Reads a value nested one level inside a named section element
      * (live Bell shape: <FuelRemaining datetime="..."><Percent>63</Percent>
      * </FuelRemaining>). Returns null when the section or field is absent
@@ -521,7 +622,7 @@ class BellService extends BaseManufacturerService
         // literal '+' in the URL path, which Bell's server rejects with 400
         // (observed live 2026-08-21 -- every time-series call failed).
         $path = strtr($template, [
-            '{equipmentId}' => rawurlencode($equipmentId),
+            '{equipmentId}' => rawurlencode($this->resolveTimeSeriesId($equipmentId)),
             '{startDateUTC}' => $start->clone()->utc()->format('Y-m-d\TH:i:s\Z'),
             '{endDateUTC}' => $end->clone()->utc()->format('Y-m-d\TH:i:s\Z'),
         ]);

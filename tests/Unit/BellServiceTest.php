@@ -215,6 +215,7 @@ XML;
     {
         $this->fakeToken();
         Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
             'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*/CautionCodes/*' => Http::response('<CautionCodesTimeSeries/>', 200),
         ]);
 
@@ -257,6 +258,7 @@ XML;
     {
         $this->fakeToken();
         Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
             'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*/Locations/*' => Http::response(<<<'XML'
 <LocationTimeSeries>
   <Reading ReadingUTC="2026-06-02T10:00:00Z" Latitude="-26.0200" Longitude="28.9300" Heading="180" Speed="12"/>
@@ -277,6 +279,7 @@ XML, 200),
     {
         $this->fakeToken();
         Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
             'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*/CautionCodes/*' => Http::response(<<<'XML'
 <CautionCodesTimeSeries>
   <Reading ReadingUTC="2026-06-02T09:00:00Z" Value="E204"/>
@@ -477,7 +480,10 @@ XML;
     public function test_time_series_urls_use_zulu_timestamps_with_no_plus_sign(): void
     {
         $this->fakeToken();
-        Http::fake(['https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<LocationTimeSeries/>', 200)]);
+        Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<LocationTimeSeries/>', 200),
+        ]);
 
         (new BellService($this->credentials()))->fetchMachineLocation('ASA B50E#9823');
 
@@ -493,6 +499,31 @@ XML;
             // convention and Bell's own Postman collection use.
             return ! str_contains($url, '+')
                 && preg_match('#/Locations/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$#', $url) === 1;
+        });
+    }
+
+    public function test_time_series_calls_are_addressed_by_pin_not_display_equipment_id(): void
+    {
+        $this->fakeToken();
+        Http::fake([
+            self::FLEET_URL => Http::response($this->liveNestedFleetXml(), 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<LocationTimeSeries/>', 200),
+        ]);
+
+        (new BellService($this->credentials()))->fetchMachineLocation('ASA B50E#9823');
+
+        // Confirmed live 2026-08-21: Bell's per-equipment endpoints are
+        // routed by PIN/serial -- the display EquipmentID's '#' (%23) is
+        // rejected 400 by ASP.NET path validation before routing, so every
+        // time-series call for this fleet failed until IDs were resolved
+        // through the snapshot's EquipmentID->PIN map.
+        Http::assertSent(function ($request) {
+            $url = $request->url();
+            if (! str_contains($url, '/Locations/')) {
+                return false;
+            }
+
+            return str_contains($url, 'AEBA850EC03509823') && ! str_contains($url, '%23');
         });
     }
 
