@@ -36,8 +36,16 @@ class QueryCacheService
     {
         $filterKey = md5(json_encode($filters));
 
+        // Version-keyed: the filter hash makes these keys impossible to
+        // enumerate for targeted invalidation, so invalidateMachine() bumps
+        // the version instead and stale entries simply age out on their
+        // 60-second TTL. (The old approach was Cache::flush() on EVERY
+        // machine save -- a 26-machine sync nuked the whole store 26
+        // times, taking the Bell API token cache with it each time.)
+        $version = (int) Cache::get("machines_list_version_{$teamId}", 0);
+
         return Cache::remember(
-            "machines_list_{$teamId}_{$filterKey}",
+            "machines_list_{$teamId}_v{$version}_{$filterKey}",
             60, // 1 minute for list views
             $callback
         );
@@ -117,8 +125,10 @@ class QueryCacheService
     public static function invalidateMachine(int $machineId, int $teamId): void
     {
         Cache::forget("machine_details_{$machineId}");
-        // Also clear team's machine list cache (all variations)
-        Cache::flush(); // Or use tags if using Redis
+        // Bump the list version so every filter variation goes stale at
+        // once -- NEVER Cache::flush() here: that wiped the whole store
+        // (API token caches included) on every machine save.
+        Cache::forever("machines_list_version_{$teamId}", now()->getTimestampMs());
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\MachineLocationUpdateJob;
 use App\Livewire\LiveMap;
 use App\Models\Integration;
 use App\Models\Machine;
@@ -9,6 +10,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Services\Integration\IntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -78,6 +80,47 @@ class LiveMapPositionsTest extends TestCase
 
         $this->assertNotNull($machine);
         $this->assertSame('2026-08-21 14:05:00', $machine->last_location_update->utc()->format('Y-m-d H:i:s'));
+    }
+
+    public function test_location_update_job_also_stores_the_providers_reading_time(): void
+    {
+        Http::fake([
+            'https://sso.bellequipment.com/connect/token' => Http::response(['access_token' => 't', 'expires_in' => 18000], 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet' => Http::response(<<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<Fleet version="1">
+  <Equipment>
+    <EquipmentHeader><OEMName>BELL</OEMName><Model>B50E</Model><EquipmentID>ASA B50E#0007</EquipmentID><SerialNumber>PIN0007</SerialNumber><PIN>PIN0007</PIN></EquipmentHeader>
+    <Location datetime="2026-08-21T13:37:00Z"><Latitude>-26.05</Latitude><Longitude>28.95</Longitude></Location>
+  </Equipment>
+</Fleet>
+XML, 200),
+        ]);
+
+        $team = Team::factory()->create();
+        $integration = Integration::factory()->forProvider('bell')->create([
+            'team_id' => $team->id,
+            'status' => 'connected',
+            'credentials' => ['username' => 'u', 'password' => 'p', 'client_secret' => 's'],
+        ]);
+        $machine = Machine::factory()->create([
+            'team_id' => $team->id,
+            'integration_id' => $integration->id,
+            'manufacturer' => 'bell',
+            'manufacturer_id' => 'ASA B50E#0007',
+            'status' => 'active',
+            'last_location_latitude' => -26.0,
+            'last_location_longitude' => 28.9,
+            'last_location_update' => now()->subDay(),
+        ]);
+
+        (new MachineLocationUpdateJob($integration))->handle(app(IntegrationService::class));
+
+        $this->assertSame(
+            '2026-08-21 13:37:00',
+            $machine->fresh()->last_location_update->utc()->format('Y-m-d H:i:s'),
+            'The location job must store Bell\'s reading time, not the job run time.'
+        );
     }
 
     public function test_sync_without_a_position_keeps_the_old_position_timestamp(): void

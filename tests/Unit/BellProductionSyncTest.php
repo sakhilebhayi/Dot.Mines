@@ -190,6 +190,9 @@ XML;
         $integration = $this->connectedBellIntegration($team);
 
         app(IntegrationService::class)->syncMachines($integration);
+        // The per-machine production series only refetch once the hourly
+        // deep-sync window elapses (anti-throttle gate, Slice 7).
+        $this->travel(3601)->seconds();
         app(IntegrationService::class)->syncMachines($integration->fresh());
 
         $machine = Machine::where('team_id', $team->id)->where('manufacturer', 'bell')->first();
@@ -231,6 +234,8 @@ XML,
 XML
         );
 
+        // Past the hourly deep-sync window so the series refetch runs.
+        $this->travel(3601)->seconds();
         app(IntegrationService::class)->syncMachines($integration->fresh());
 
         $records = ProductionRecord::where('machine_id', $machine->id)
@@ -291,6 +296,8 @@ XML
         $machine->update(['mine_area_id' => $area->id]);
 
         ProductionRecord::where('machine_id', $machine->id)->forceDelete();
+        // Past the hourly deep-sync window so the series refetch runs.
+        $this->travel(3601)->seconds();
         app(IntegrationService::class)->syncMachines($integration->fresh());
 
         $record = ProductionRecord::where('machine_id', $machine->id)->orderBy('record_date')->first();

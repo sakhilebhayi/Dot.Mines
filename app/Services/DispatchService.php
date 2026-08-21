@@ -32,7 +32,7 @@ class DispatchService
     {
         $machines = Machine::query()
             ->where('team_id', $teamId)
-            ->with('latestEngineHoursMetric')
+            ->with(['latestEngineHoursMetric', 'latestMetric'])
             ->get()
             ->sortBy('name')
             ->values();
@@ -52,11 +52,13 @@ class DispatchService
         ];
 
         foreach ($machines as $machine) {
+            // Eager-loaded latest row (newest created_at) instead of a
+            // per-machine recorded_at-ordered query: sync appends rows, so
+            // the newest-created row IS the newest reading in this
+            // pipeline, and the old per-machine query was an N+1 running
+            // 26 extra queries on every 30-second dispatch poll.
             /** @var MachineMetric|null $metric */
-            $metric = MachineMetric::query()
-                ->where('machine_id', $machine->id)
-                ->orderBy('recorded_at', 'desc')
-                ->first();
+            $metric = $machine->latestMetric;
 
             $recordedAt = $metric?->recorded_at ?? $metric?->created_at;
             $fresh = $recordedAt !== null

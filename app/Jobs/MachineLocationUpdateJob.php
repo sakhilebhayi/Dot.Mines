@@ -12,6 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
@@ -36,10 +37,6 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
         $this->onQueue('locations');
     }
 
-    /**
-     * Execute the job - fetches latest machine locations from integration
-     * and broadcasts them in real-time to connected clients.
-     */
     /**
      * One queued instance per integration: these are idempotent
      * polling jobs, so a backlog of duplicates (996 piled up on
@@ -117,11 +114,17 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
                     continue;
                 }
 
-                // Update machine location
+                // Update machine location. The timestamp is the PROVIDER's
+                // reading time (carried in the batched snapshot payload),
+                // never the job's run time -- same honesty rule as
+                // IntegrationService::syncMachine(): a machine that stopped
+                // reporting must visibly age, not look perpetually fresh.
                 $machine->update([
                     'last_location_latitude' => $location['latitude'] ?? null,
                     'last_location_longitude' => $location['longitude'] ?? null,
-                    'last_location_update' => now(),
+                    'last_location_update' => isset($location['timestamp'])
+                        ? Carbon::parse((string) $location['timestamp'])
+                        : now(),
                     'status' => $location['status'] ?? 'active',
                 ]);
 
