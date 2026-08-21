@@ -291,6 +291,21 @@ class IntegrationService
             ];
         }
 
+        // The per-machine time-series calls below (caution codes +
+        // production series) burst one API call per machine per endpoint --
+        // ~78 calls per sync for a 26-machine Bell fleet, every 15 minutes,
+        // which is what keeps tripping Bell's rate limiter (recurring 405s
+        // observed live 2026-08-21). The snapshot already carries current
+        // status AND cumulative production counters for every machine in
+        // ONE call, so the deep per-machine pass runs at most hourly:
+        // Cache::add is atomic -- true only for the run that claims the
+        // window.
+        $deepSync = Cache::add(
+            'integration_deep_sync_'.$integration->id,
+            now()->toIso8601String(),
+            now()->addSeconds((int) config('integrations.jobs.deep_sync_interval', 3600))
+        );
+
         $synced = 0;
         foreach ($machineList as $machineData) {
             $machine = $this->syncMachine($integration, $machineData);
@@ -304,14 +319,16 @@ class IntegrationService
             // but nothing ever called it, so real fault/caution codes
             // never reached the Alert table for any provider.
             if ($machine && $machine->manufacturer_id) {
-                $this->syncMachineAlertsFromService($service, $machine);
+                if ($deepSync) {
+                    $this->syncMachineAlertsFromService($service, $machine);
 
-                // Production used to stop dead here: Bell's cumulative
-                // load/payload counters were fetched into
-                // MachineMetric.raw_data and never turned into the
-                // ProductionRecord rows the Production page reads, so the
-                // page only ever showed manual entries.
-                $this->syncMachineProductionFromService($integration, $service, $machine);
+                    // Production used to stop dead here: Bell's cumulative
+                    // load/payload counters were fetched into
+                    // MachineMetric.raw_data and never turned into the
+                    // ProductionRecord rows the Production page reads, so the
+                    // page only ever showed manual entries.
+                    $this->syncMachineProductionFromService($integration, $service, $machine);
+                }
             }
 
             $synced++;

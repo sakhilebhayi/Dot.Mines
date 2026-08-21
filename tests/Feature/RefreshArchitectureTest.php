@@ -89,6 +89,55 @@ class RefreshArchitectureTest extends TestCase
         }
     }
 
+    public function test_per_machine_time_series_deep_sync_runs_at_most_hourly(): void
+    {
+        Http::fake([
+            'https://sso.bellequipment.com/connect/token' => Http::response(['access_token' => 't', 'expires_in' => 18000], 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet' => Http::response(<<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<Fleet version="1">
+  <Equipment>
+    <EquipmentHeader><OEMName>BELL</OEMName><Model>B50E</Model><EquipmentID>ASA B50E#0009</EquipmentID><SerialNumber>PIN0009</SerialNumber><PIN>PIN0009</PIN></EquipmentHeader>
+    <Location datetime="2026-08-21T10:00:00Z"><Latitude>-26.01</Latitude><Longitude>28.91</Longitude></Location>
+  </Equipment>
+</Fleet>
+XML, 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<CautionCodesTimeSeries/>', 200),
+        ]);
+
+        $integration = Integration::factory()->forProvider('bell')->create([
+            'team_id' => Team::factory()->create()->id,
+            'status' => 'connected',
+            'credentials' => ['username' => 'u', 'password' => 'p', 'client_secret' => 's'],
+        ]);
+
+        $service = app(IntegrationService::class);
+
+        $countSeriesCalls = fn (): int => Http::recorded()
+            ->filter(
+                fn (array $pair): bool => str_contains($pair[0]->url(), '/CautionCodes/')
+                    || str_contains($pair[0]->url(), '/CumulativeLoadCount/')
+                    || str_contains($pair[0]->url(), '/CumulativePayloadTotals/')
+            )
+            ->count();
+
+        // First sync claims the hourly window: deep per-machine series run.
+        $service->syncMachines($integration);
+        $afterFirst = $countSeriesCalls();
+        $this->assertGreaterThan(0, $afterFirst, 'The first sync of the hour performs the deep per-machine pass.');
+
+        // A second sync inside the window must NOT burst the per-machine
+        // endpoints again -- ~78 calls per sync every 15 minutes is what
+        // kept tripping Bell's rate limiter.
+        $service->syncMachines($integration->fresh());
+        $this->assertSame($afterFirst, $countSeriesCalls(), 'Syncs inside the hourly window skip the per-machine time-series burst.');
+
+        // Past the window, the deep pass runs again.
+        $this->travel(3601)->seconds();
+        $service->syncMachines($integration->fresh());
+        $this->assertGreaterThan($afterFirst, $countSeriesCalls(), 'The deep pass resumes once the hourly window has elapsed.');
+    }
+
     public function test_bell_locations_for_a_whole_fleet_cost_one_snapshot_call(): void
     {
         Http::fake([

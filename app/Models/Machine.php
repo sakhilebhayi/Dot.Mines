@@ -51,6 +51,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read MachineHealthStatus|null $healthStatus
  * @property-read Collection<int, Alert> $alerts
  * @property-read Collection<int, MachineMetric> $metrics
+ * @property-read MachineMetric|null $latestMetric
+ * @property-read MachineMetric|null $latestEngineHoursMetric
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Machine where(string $column, mixed $operator = null, mixed $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Machine whereIn(string $column, array<string|int> $values)

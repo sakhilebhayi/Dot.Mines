@@ -117,11 +117,17 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
                     continue;
                 }
 
-                // Update machine location
+                // Update machine location. The timestamp is the PROVIDER's
+                // reading time (carried in the batched snapshot payload),
+                // never the job's run time -- same honesty rule as
+                // IntegrationService::syncMachine(): a machine that stopped
+                // reporting must visibly age, not look perpetually fresh.
                 $machine->update([
                     'last_location_latitude' => $location['latitude'] ?? null,
                     'last_location_longitude' => $location['longitude'] ?? null,
-                    'last_location_update' => now(),
+                    'last_location_update' => isset($location['timestamp'])
+                        ? \Illuminate\Support\Carbon::parse($location['timestamp'])
+                        : now(),
                     'status' => $location['status'] ?? 'active',
                 ]);
 
