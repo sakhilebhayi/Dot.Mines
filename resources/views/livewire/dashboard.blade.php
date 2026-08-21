@@ -179,51 +179,92 @@
         @if (count($dispatch['machines']) === 0)
             <p class="text-[var(--sand)] text-sm py-4 text-center">No machines in the fleet yet. <a href="{{ route('fleet') }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">Add machines</a> to see live dispatch.</p>
         @else
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="border-b border-[var(--line)]">
-                        <tr>
-                            <th class="text-left px-3 py-2 text-[var(--sand)] font-medium">Machine</th>
-                            <th class="text-left px-3 py-2 text-[var(--sand)] font-medium">Activity</th>
-                            <th class="text-left px-3 py-2 text-[var(--sand)] font-medium">Where</th>
-                            <th class="text-left px-3 py-2 text-[var(--sand)] font-medium">Speed</th>
-                            <th class="text-left px-3 py-2 text-[var(--sand)] font-medium">Last Report</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-[var(--line)]">
-                        @foreach ($dispatch['machines'] as $row)
-                            <tr class="hover:bg-white/5" wire:key="dispatch-{{ $row['machine']->id }}">
-                                <td class="px-3 py-2">
-                                    <a href="{{ route('fleet.show', $row['machine']) }}" class="text-[var(--stone)] font-medium hover:text-[var(--gold)]">{{ $row['machine']->name }}</a>
-                                </td>
-                                <td class="px-3 py-2">
-                                    @php
-                                        [$label, $chip] = match ($row['state']) {
-                                            'loading' => ['Loading', 'bg-green-500/15 text-green-400'],
-                                            'dumping' => ['Dumping', 'bg-orange-500/15 text-orange-400'],
-                                            'travelling' => ['Travelling', 'bg-blue-500/15 text-blue-400'],
-                                            'idling' => ['Idling', 'bg-yellow-500/15 text-yellow-400'],
-                                            'parked' => ['Parked', 'bg-gray-500/15 text-[var(--sand)]'],
-                                            default => ['No telemetry', 'bg-red-500/15 text-red-400'],
-                                        };
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $chip }}" title="{{ $row['basis'] }}">{{ $label }}</span>
-                                </td>
-                                <td class="px-3 py-2 text-[var(--sand)]">
-                                    @if ($row['zone'])
-                                        {{ $row['zone'] }}
-                                    @elseif ($row['latitude'] && $row['longitude'])
-                                        <a href="{{ route('map') }}" class="hover:text-[var(--gold)]">{{ number_format((float) $row['latitude'], 4) }}, {{ number_format((float) $row['longitude'], 4) }}</a>
-                                    @else
-                                        <span class="text-[var(--sand)]/60">Unknown</span>
-                                    @endif
-                                </td>
-                                <td class="px-3 py-2 text-[var(--sand)]">{{ $row['speed'] !== null ? number_format($row['speed'], 0).' km/h' : '—' }}</td>
-                                <td class="px-3 py-2 text-[var(--sand)]">{{ $row['updated_at']?->diffForHumans(short: true) ?? 'never' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            @php
+                $byState = collect($dispatch['machines'])->groupBy('state');
+
+                /* One visual chip per machine: status dot + name + the most
+                   useful secondary fact for that state (zone > speed > age).
+                   The classification basis rides in the tooltip, and the
+                   whole chip links to the machine without losing context. */
+                $dispatchChip = function ($row, string $dotClass) {
+                    $machine = $row['machine'];
+                    $sub = $row['zone']
+                        ?? ($row['speed'] !== null && $row['speed'] >= 1 ? number_format($row['speed'], 0).' km/h' : null)
+                        ?? $row['updated_at']?->diffForHumans(short: true)
+                        ?? 'no report';
+
+                    return [$machine, $sub, $dotClass];
+                };
+            @endphp
+
+            {{-- The pit cycle, left to right: what the operation actually
+                 looks like at a glance (brief §14-15). Loading/dumping are
+                 only ever claimed inside a typed zone; travel direction
+                 (haul vs return) is not distinguishable from the available
+                 telemetry, so one honest Haul Route lane carries all
+                 movement rather than guessing outbound vs inbound. --}}
+            <div class="flex flex-col md:flex-row items-stretch gap-2 mb-4">
+                @foreach ([
+                    'loading' => ['Loading Area', 'border-green-500/30', 'text-green-400', 'bg-green-400'],
+                    'travelling' => ['Haul Route', 'border-blue-500/30', 'text-blue-400', 'bg-blue-400'],
+                    'dumping' => ['Dump Area', 'border-orange-500/30', 'text-orange-400', 'bg-orange-400'],
+                ] as $state => [$laneLabel, $laneBorder, $laneText, $dot])
+                    @if (! $loop->first)
+                        <div class="flex items-center justify-center text-[var(--sand)]/50 shrink-0" aria-hidden="true">
+                            <svg class="w-5 h-5 rotate-90 md:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        </div>
+                    @endif
+                    <div class="flex-1 rounded-lg border {{ $laneBorder }} bg-[var(--ink)]/40 p-3 min-h-[7rem]">
+                        <p class="text-xs font-semibold uppercase tracking-wider {{ $laneText }} mb-2 flex items-center justify-between">
+                            {{ $laneLabel }}
+                            <span class="text-[var(--sand)] font-normal normal-case tracking-normal">{{ ($byState[$state] ?? collect())->count() }}</span>
+                        </p>
+                        <div class="flex flex-wrap gap-1.5">
+                            @forelse ($byState[$state] ?? [] as $row)
+                                @php [$machine, $sub, $dotClass] = $dispatchChip($row, $dot); @endphp
+                                <a href="{{ route('fleet.show', $machine) }}" wire:key="dispatch-{{ $machine->id }}"
+                                   title="{{ $row['basis'] }}"
+                                   class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[var(--ink-soft)] border border-[var(--line)] hover:border-[var(--gold)] transition-colors">
+                                    <span class="size-1.5 rounded-full {{ $dotClass }}" aria-hidden="true"></span>
+                                    <span class="text-xs font-medium text-[var(--stone)]">{{ $machine->name }}</span>
+                                    <span class="text-[10px] text-[var(--sand)]">{{ $sub }}</span>
+                                </a>
+                            @empty
+                                <span class="text-xs text-[var(--sand)]/50 py-1">None right now</span>
+                            @endforelse
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Off-cycle machines: idle, parked, silent. Same chips, muted lanes. --}}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                @foreach ([
+                    'idling' => ['Idle', 'text-yellow-400', 'bg-yellow-400'],
+                    'parked' => ['Parked', 'text-[var(--sand)]', 'bg-gray-400'],
+                    'no_telemetry' => ['No telemetry', 'text-red-400', 'bg-red-400'],
+                ] as $state => [$laneLabel, $laneText, $dot])
+                    <div class="rounded-lg border border-[var(--line)] bg-[var(--ink)]/40 p-3">
+                        <p class="text-xs font-semibold uppercase tracking-wider {{ $laneText }} mb-2 flex items-center justify-between">
+                            {{ $laneLabel }}
+                            <span class="text-[var(--sand)] font-normal normal-case tracking-normal">{{ ($byState[$state] ?? collect())->count() }}</span>
+                        </p>
+                        <div class="flex flex-wrap gap-1.5">
+                            @forelse ($byState[$state] ?? [] as $row)
+                                @php [$machine, $sub, $dotClass] = $dispatchChip($row, $dot); @endphp
+                                <a href="{{ route('fleet.show', $machine) }}" wire:key="dispatch-{{ $machine->id }}"
+                                   title="{{ $row['basis'] }}"
+                                   class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[var(--ink-soft)] border border-[var(--line)] hover:border-[var(--gold)] transition-colors">
+                                    <span class="size-1.5 rounded-full {{ $dotClass }}" aria-hidden="true"></span>
+                                    <span class="text-xs font-medium text-[var(--stone)]">{{ $machine->name }}</span>
+                                    <span class="text-[10px] text-[var(--sand)]">{{ $sub }}</span>
+                                </a>
+                            @empty
+                                <span class="text-xs text-[var(--sand)]/50 py-1">None right now</span>
+                            @endforelse
+                        </div>
+                    </div>
+                @endforeach
             </div>
         @endif
     </div>
