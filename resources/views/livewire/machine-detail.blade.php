@@ -9,6 +9,9 @@
         </a>
         <h1 class="text-3xl font-bold text-[var(--stone)]">{{ $machine->name }}</h1>
         <p class="text-[var(--sand)] mt-2">{{ $machine->manufacturer }} {{ $machine->model }}</p>
+        <div class="mt-2">
+            <x-freshness :timestamp="$metrics->first()?->recorded_at" :stale-after="1800" label="Telemetry" />
+        </div>
     </div>
 
     <!-- Machine Information Grid -->

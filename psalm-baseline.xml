@@ -5167,7 +5167,6 @@
       <code><![CDATA[$integration]]></code>
       <code><![CDATA[$integration]]></code>
       <code><![CDATA[$integration]]></code>
-      <code><![CDATA[$integration]]></code>
     </MixedArgument>
     <MixedArrayAssignment>
       <code><![CDATA[$this->formData['credentials']['client_id']]]></code>
@@ -5194,9 +5193,6 @@
       <code><![CDATA[map]]></code>
       <code><![CDATA[toArray]]></code>
     </MixedMethodCall>
-    <MixedOperand>
-      <code><![CDATA[$result['error']]]></code>
-    </MixedOperand>
     <MixedPropertyFetch>
       <code><![CDATA[$integration->capabilities]]></code>
       <code><![CDATA[$integration->created_at]]></code>
@@ -8262,6 +8258,7 @@
     </ClassMustBeFinal>
     <InvalidDocblock>
       <code><![CDATA[public function latestEngineHoursMetric(): HasOne]]></code>
+      <code><![CDATA[public function latestMetric(): HasOne]]></code>
       <code><![CDATA[public function lossEvents(): HasMany]]></code>
       <code><![CDATA[public function productionRecords(): HasMany]]></code>
     </InvalidDocblock>
@@ -11343,8 +11340,6 @@
     </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$response->body()]]></code>
-      <code><![CDATA[$response->body()]]></code>
-      <code><![CDATA[$response->body()]]></code>
       <code><![CDATA[$template]]></code>
     </MixedArgument>
     <MixedArrayAccess>
@@ -11398,16 +11393,9 @@
     </PossiblyNullOperand>
     <PossiblyUndefinedMethod>
       <code><![CDATA[body]]></code>
-      <code><![CDATA[body]]></code>
-      <code><![CDATA[body]]></code>
-      <code><![CDATA[body]]></code>
       <code><![CDATA[json]]></code>
       <code><![CDATA[status]]></code>
       <code><![CDATA[status]]></code>
-      <code><![CDATA[status]]></code>
-      <code><![CDATA[status]]></code>
-      <code><![CDATA[status]]></code>
-      <code><![CDATA[successful]]></code>
       <code><![CDATA[successful]]></code>
     </PossiblyUndefinedMethod>
     <PossiblyUnusedMethod>
