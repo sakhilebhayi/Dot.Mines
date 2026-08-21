@@ -32,7 +32,11 @@ Schedule::job(new MachineIdleMonitoringJob)
 // Request Timeout. With QUEUE_CONNECTION=database, dispatches land in the
 // jobs table and this drains them within a minute, off the web request.
 // --max-time keeps each drain inside the minute so ticks never stack up.
-Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=1')
+// --queue must list EVERY named queue jobs dispatch to: a bare queue:work
+// drains only "default", and 996 location/status/monitoring jobs silently
+// piled up on 2026-08-21 while their queues went unserviced. Default
+// first: user-triggered work (syncs, reports) beats background polling.
+Schedule::command('queue:work --queue=default,locations,status,monitoring,alerts,geofences,notifications --stop-when-empty --max-time=50 --tries=1')
     ->everyMinute()
     ->withoutOverlapping()
     ->runInBackground()

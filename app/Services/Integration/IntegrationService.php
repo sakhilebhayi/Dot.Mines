@@ -342,6 +342,23 @@ class IntegrationService
             return [];
         }
 
+        // Providers whose fleet snapshot carries every machine's position
+        // (Bell's does) answer the whole fleet in ONE API call. The
+        // per-machine fallback below costs a call per machine -- polling
+        // a 26-machine fleet through it is what got this server throttled
+        // by Bell on 2026-08-21.
+        if (method_exists($service, 'fetchAllMachineLocations')) {
+            $wanted = array_flip(array_map('trim', $manufacturerIds));
+
+            /** @var list<array{manufacturer_id: string, latitude: float, longitude: float, timestamp: string, heading: null, speed: null, accuracy: null}> $all */
+            $all = $service->fetchAllMachineLocations();
+
+            return array_values(array_filter(
+                $all,
+                fn (array $location): bool => isset($wanted[trim($location['manufacturer_id'])])
+            ));
+        }
+
         $locations = [];
         foreach ($manufacturerIds as $manufacturerId) {
             try {
@@ -385,6 +402,29 @@ class IntegrationService
 
         if (! $service || empty($manufacturerIds)) {
             return [];
+        }
+
+        // Same single-snapshot batching as getMachineLocations(): a
+        // successful snapshot position IS the connectivity signal, at one
+        // API call for the whole fleet instead of one per machine.
+        if (method_exists($service, 'fetchAllMachineLocations')) {
+            $wanted = array_flip(array_map('trim', $manufacturerIds));
+
+            /** @var list<array{manufacturer_id: string, latitude: float, longitude: float, timestamp: string, heading: null, speed: null, accuracy: null}> $fleetLocations */
+            $fleetLocations = $service->fetchAllMachineLocations();
+
+            $statuses = [];
+            foreach ($fleetLocations as $location) {
+                if (isset($wanted[trim($location['manufacturer_id'])])) {
+                    $statuses[] = [
+                        'manufacturer_id' => $location['manufacturer_id'],
+                        'online' => true,
+                        'status' => 'active',
+                    ];
+                }
+            }
+
+            return $statuses;
         }
 
         $statuses = [];

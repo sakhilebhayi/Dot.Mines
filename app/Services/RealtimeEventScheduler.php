@@ -19,19 +19,25 @@ class RealtimeEventScheduler
      * This service is called from AppServiceProvider to schedule all
      * the jobs that power the real-time update system:
      *
-     * - Machine location updates (every 10 seconds)
-     * - Alert generation (every 30 seconds)
-     * - Geofence crossing detection (every 30 seconds)
-     * - Machine status monitoring (every 20 seconds)
+     * - Machine location updates (every 5 minutes -- API-bound)
+     * - Alert generation (every 30 seconds -- database-only)
+     * - Geofence crossing detection (every 30 seconds -- database-only)
+     * - Machine status monitoring (every 5 minutes -- API-bound)
      *
      * All jobs queue independently and are non-blocking.
      */
     public static function register(Schedule $schedule): void
     {
-        // Location updates: Every 10 seconds for real-time responsiveness
+        // Location updates: every five minutes. This ran every TEN SECONDS
+        // -- a Reverb-era relic that dispatched an API-polling job per
+        // integration 360 times an hour into queues nothing drained, and
+        // (once drained) hammered a provider whose data only changes every
+        // 15 minutes. Bell throttled the server IP for exactly this on
+        // 2026-08-21. Five minutes still beats the 15-minute full sync for
+        // position updates without abusing anyone's API.
         $schedule->call(function () {
             self::scheduleLocationUpdates();
-        })->everyTenSeconds()
+        })->everyFiveMinutes()
             ->name('schedule-location-updates')
             ->onOneServer();
 
@@ -49,10 +55,12 @@ class RealtimeEventScheduler
             ->name('schedule-geofence-detection')
             ->onOneServer();
 
-        // Status monitoring: Every 20 seconds to catch offline machines
+        // Status monitoring: every five minutes, same reasoning (and same
+        // incident) as the location schedule above -- connectivity is
+        // derived from the same provider snapshot.
         $schedule->call(function () {
             self::scheduleStatusMonitoring();
-        })->everyTwentySeconds()
+        })->everyFiveMinutes()
             ->name('schedule-status-monitoring')
             ->onOneServer();
     }

@@ -1,4 +1,7 @@
-<div class="animate-fade-in" wire:poll.10s="loadDashboardData">
+{{-- 30s, visible-only: KPIs/alerts change on the 30s alert-generation
+     cadence at fastest, and background tabs should cost the server nothing.
+     (Was an unconditional 10s -- 90 wasted requests per real data change.) --}}
+<div class="animate-fade-in" wire:poll.visible.30s="loadDashboardData">
     <!-- Loading Spinner -->
     @if ($isLoading)
         <div class="flex justify-center items-center h-96">
@@ -148,7 +151,7 @@
          zones). States are conservative -- loading/dumping are only claimed
          inside a zone of that type; stale machines say so. Polls every 30s. -->
     <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)] mb-8"
-        wire:poll.30s>
+        wire:poll.visible.30s>
         @php $dispatch = $this->fleetDispatch; @endphp
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h2 class="text-xl font-display font-semibold text-[var(--stone)] flex items-center gap-2">

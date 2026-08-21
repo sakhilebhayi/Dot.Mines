@@ -7,13 +7,14 @@ use App\Models\Integration;
 use App\Models\Machine;
 use App\Services\Integration\IntegrationService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class MachineLocationUpdateJob implements ShouldQueue
+class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -39,6 +40,20 @@ class MachineLocationUpdateJob implements ShouldQueue
      * Execute the job - fetches latest machine locations from integration
      * and broadcasts them in real-time to connected clients.
      */
+    /**
+     * One queued instance per integration: these are idempotent
+     * polling jobs, so a backlog of duplicates (996 piled up on
+     * 2026-08-21 while named queues went undrained) adds only
+     * redundant API calls. Duplicate dispatches are dropped while
+     * one is already queued.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- invoked by Laravel's unique-job middleware
+     */
+    public function uniqueId(): string
+    {
+        return (string) $this->integration->id;
+    }
+
     public function handle(IntegrationService $integrationService): void
     {
         Log::info('Starting location update job', [
