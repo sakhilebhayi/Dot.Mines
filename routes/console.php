@@ -24,6 +24,21 @@ Schedule::job(new MachineIdleMonitoringJob)
     ->withoutOverlapping()
     ->onOneServer();
 
+// Drain the database queue from the scheduler's cron tick. Shared hosting
+// has no systemd/supervisor for a resident queue worker, and the sync
+// driver runs "background" jobs inline in whatever process dispatched them
+// -- which is how a manual integration sync (dozens of sequential Bell API
+// calls) ran inside a web request until the gateway killed it with a
+// Request Timeout. With QUEUE_CONNECTION=database, dispatches land in the
+// jobs table and this drains them within a minute, off the web request.
+// --max-time keeps each drain inside the minute so ticks never stack up.
+Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=1')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->onOneServer()
+    ->when(fn (): bool => config('queue.default') === 'database');
+
 // Dispatch a machine/metric sync for every connected manufacturer
 // integration whose own configured interval has elapsed (Bell: 15 minutes,
 // most others: 5 minutes) -- previously nothing scheduled this at all, for

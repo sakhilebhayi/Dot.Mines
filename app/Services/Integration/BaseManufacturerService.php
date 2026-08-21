@@ -26,6 +26,15 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     protected int $retryDelay = 1000; // milliseconds
 
     /**
+     * Tests exercising retry behaviour need to skip the real inter-attempt
+     * sleep; production code never changes this.
+     */
+    public function setRetryDelay(int $milliseconds): void
+    {
+        $this->retryDelay = $milliseconds;
+    }
+
+    /**
      * Initialize the service with API credentials
      */
     public function __construct(array $credentials = [])

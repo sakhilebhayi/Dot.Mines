@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
 use Illuminate\Support\Facades\Auth;
@@ -349,19 +350,15 @@ class IntegrationManager extends Component
                 ->findOrFail($integrationId);
             $this->authorize('sync', $integration);
 
-            $service = app(IntegrationService::class);
-            $result = $service->syncMachines($integration);
+            // Dispatch, never run inline: a full Bell sync makes dozens of
+            // sequential API calls (fleet snapshot + per-machine series) and
+            // ran for minutes inside this web request -- shared hosting's
+            // gateway killed it with a Request Timeout mid-sync, leaving
+            // machines half-updated and last_sync_at never stamped. The job
+            // owns last_sync_at/last_sync_status/sync_streams stamping.
+            SyncIntegrationMachinesJob::dispatch($integration);
 
-            if ($result['success']) {
-                $integration->update([
-                    'last_sync_at' => now(),
-                    'last_sync_status' => 'success',
-                ]);
-                $this->dispatch('notify', ['type' => 'success', 'message' => 'Sync started successfully!']);
-            } else {
-                $integration->update(['last_sync_status' => 'failed']);
-                $this->dispatch('notify', ['type' => 'error', 'message' => 'Sync failed: '.$result['error']]);
-            }
+            $this->dispatch('notify', ['type' => 'success', 'message' => 'Sync started in the background — machines will update as data arrives.']);
 
             $this->loadIntegrations();
         } catch (\Throwable $e) {

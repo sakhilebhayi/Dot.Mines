@@ -323,9 +323,11 @@ class BellService extends BaseManufacturerService
         $header = $equipment->xpath(".//*[local-name()='EquipmentHeader']")[0] ?? $equipment;
 
         $externalId = $this->findValue($header, ['EquipmentID']);
-        $latitude = $this->toFloatOrNull($this->findValue($equipment, ['Latitude']));
-        $longitude = $this->toFloatOrNull($this->findValue($equipment, ['Longitude']));
-        $telemetryDate = $this->findValue($equipment, ['TelemetryDate']) ?? now()->toIso8601String();
+        $latitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Latitude') ?? $this->findValue($equipment, ['Latitude']));
+        $longitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Longitude') ?? $this->findValue($equipment, ['Longitude']));
+        $telemetryDate = $this->sectionDatetime($equipment, 'Location')
+            ?? $this->findValue($equipment, ['TelemetryDate'])
+            ?? now()->toIso8601String();
         $engineRunning = $this->parseEngineRunning($equipment);
 
         return [
@@ -363,12 +365,17 @@ class BellService extends BaseManufacturerService
      */
     private function buildCurrentMetric(SimpleXMLElement $equipment): array
     {
-        $latitude = $this->toFloatOrNull($this->findValue($equipment, ['Latitude']));
-        $longitude = $this->toFloatOrNull($this->findValue($equipment, ['Longitude']));
-        $telemetryDate = $this->findValue($equipment, ['TelemetryDate']) ?? now()->toIso8601String();
+        $latitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Latitude') ?? $this->findValue($equipment, ['Latitude']));
+        $longitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Longitude') ?? $this->findValue($equipment, ['Longitude']));
+        $telemetryDate = $this->sectionDatetime($equipment, 'Location')
+            ?? $this->findValue($equipment, ['TelemetryDate'])
+            ?? now()->toIso8601String();
         $engineRunning = $this->parseEngineRunning($equipment);
 
-        $fuelRemaining = $this->toFloatOrNull($this->findValue($equipment, ['FuelRemainingPercent', 'FuelRemainingRatio']));
+        $fuelRemaining = $this->toFloatOrNull(
+            $this->sectionValue($equipment, 'FuelRemaining', 'Percent')
+            ?? $this->findValue($equipment, ['FuelRemainingPercent', 'FuelRemainingRatio'])
+        );
         // ISO 15143-3's own element is a *ratio* (0-1); Bell's flattened
         // example uses a percent (0-100) under a differently named field.
         // Normalise defensively either way rather than assuming which one a
@@ -382,22 +389,29 @@ class BellService extends BaseManufacturerService
             'latitude' => $this->isValidLatitude($latitude) ? $latitude : null,
             'longitude' => $this->isValidLongitude($longitude) ? $longitude : null,
             'fuel_level' => $this->isValidPercent($fuelRemaining) ? $fuelRemaining : null,
-            'operating_hours' => $this->toFloatOrNull($this->findValue($equipment, ['OperatingHours'])),
-            'idle_hours' => $this->toFloatOrNull($this->findValue($equipment, ['IdleHours'])),
+            // Live Bell nests these under sections whose CHILD names
+            // collide (CumulativeIdleHours/Hour vs CumulativeOperatingHours/
+            // Hour, DEFRemaining/Percent vs FuelRemaining/Percent), so every
+            // read must be scoped to its section -- a document-order search
+            // for the bare child name would silently return the wrong
+            // section's value. Flattened-attribute fallbacks keep the
+            // spec-derived shape parsing too.
+            'operating_hours' => $this->toFloatOrNull($this->sectionValue($equipment, 'CumulativeOperatingHours', 'Hour') ?? $this->findValue($equipment, ['OperatingHours'])),
+            'idle_hours' => $this->toFloatOrNull($this->sectionValue($equipment, 'CumulativeIdleHours', 'Hour') ?? $this->findValue($equipment, ['IdleHours'])),
             // ISO's "Payload" here is a cumulative lifetime total, not an
             // instantaneous load -- kept in raw_data instead of the
             // load_weight column, which the rest of this app treats as
             // "what's on the machine right now".
             'load_weight' => null,
             'raw_data' => [
-                'load_count' => $this->toFloatOrNull($this->findValue($equipment, ['LoadCount'])),
-                'cumulative_payload' => $this->toFloatOrNull($this->findValue($equipment, ['Payload'])),
-                'payload_units' => $this->findValue($equipment, ['PayloadUnits']),
-                'def_percent' => $this->toFloatOrNull($this->findValue($equipment, ['DEFPercent'])),
-                'odometer' => $this->toFloatOrNull($this->findValue($equipment, ['Odometer'])),
-                'odometer_units' => $this->findValue($equipment, ['OdometerUnits']),
-                'fuel_consumed_cumulative' => $this->toFloatOrNull($this->findValue($equipment, ['FuelConsumed'])),
-                'fuel_units' => $this->findValue($equipment, ['FuelUnits']),
+                'load_count' => $this->toFloatOrNull($this->sectionValue($equipment, 'CumulativeLoadCount', 'Count') ?? $this->findValue($equipment, ['LoadCount'])),
+                'cumulative_payload' => $this->toFloatOrNull($this->sectionValue($equipment, 'CumulativePayloadTotals', 'Payload') ?? $this->findValue($equipment, ['Payload'])),
+                'payload_units' => $this->sectionValue($equipment, 'CumulativePayloadTotals', 'PayloadUnits') ?? $this->findValue($equipment, ['PayloadUnits']),
+                'def_percent' => $this->toFloatOrNull($this->sectionValue($equipment, 'DEFRemaining', 'Percent') ?? $this->findValue($equipment, ['DEFPercent'])),
+                'odometer' => $this->toFloatOrNull($this->sectionValue($equipment, 'Distance', 'Odometer') ?? $this->findValue($equipment, ['Odometer'])),
+                'odometer_units' => $this->sectionValue($equipment, 'Distance', 'OdometerUnits') ?? $this->findValue($equipment, ['OdometerUnits']),
+                'fuel_consumed_cumulative' => $this->toFloatOrNull($this->sectionValue($equipment, 'FuelUsed', 'FuelConsumed') ?? $this->findValue($equipment, ['FuelConsumed'])),
+                'fuel_units' => $this->sectionValue($equipment, 'FuelUsed', 'FuelUnits') ?? $this->findValue($equipment, ['FuelUnits']),
                 'engine_running' => $engineRunning,
             ],
         ];
@@ -405,9 +419,36 @@ class BellService extends BaseManufacturerService
 
     private function parseEngineRunning(SimpleXMLElement $equipment): ?bool
     {
-        $raw = $this->findValue($equipment, ['EngineRunning']);
+        $raw = $this->sectionValue($equipment, 'EngineStatus', 'Running')
+            ?? $this->findValue($equipment, ['EngineRunning']);
 
         return $raw === null ? null : filter_var($raw, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Reads a value nested one level inside a named section element
+     * (live Bell shape: <FuelRemaining datetime="..."><Percent>63</Percent>
+     * </FuelRemaining>). Returns null when the section or field is absent
+     * so callers can fall back to the flattened-attribute spec shape.
+     */
+    private function sectionValue(SimpleXMLElement $equipment, string $section, string $field): ?string
+    {
+        $matches = $equipment->xpath(".//*[local-name()='{$section}']/*[local-name()='{$field}']");
+        $value = isset($matches[0]) ? (string) $matches[0] : '';
+
+        return $value !== '' ? $value : null;
+    }
+
+    /**
+     * The live snapshot carries no TelemetryDate element -- each section
+     * stamps its own reading time in a datetime attribute instead.
+     */
+    private function sectionDatetime(SimpleXMLElement $equipment, string $section): ?string
+    {
+        $matches = $equipment->xpath(".//*[local-name()='{$section}']");
+        $value = isset($matches[0]) ? (string) ($matches[0]['datetime'] ?? '') : '';
+
+        return $value !== '' ? $value : null;
     }
 
     /**
@@ -475,10 +516,13 @@ class BellService extends BaseManufacturerService
             return [];
         }
 
+        // Zulu format, never toIso8601String(): its '+00:00' offset puts a
+        // literal '+' in the URL path, which Bell's server rejects with 400
+        // (observed live 2026-08-21 -- every time-series call failed).
         $path = strtr($template, [
             '{equipmentId}' => rawurlencode($equipmentId),
-            '{startDateUTC}' => $start->clone()->utc()->toIso8601String(),
-            '{endDateUTC}' => $end->clone()->utc()->toIso8601String(),
+            '{startDateUTC}' => $start->clone()->utc()->format('Y-m-d\TH:i:s\Z'),
+            '{endDateUTC}' => $end->clone()->utc()->format('Y-m-d\TH:i:s\Z'),
         ]);
 
         $xml = $this->requestXml($path);
@@ -578,6 +622,15 @@ class BellService extends BaseManufacturerService
                     'url' => $url,
                     'status' => $response->status(),
                 ]);
+
+                // 4xx (other than the 401 handled above) is deterministic --
+                // the same request will fail the same way. Retrying tripled
+                // the call volume during the first live sync and got the
+                // server IP throttled by Bell. Fail fast; only 5xx and
+                // connection errors below are worth another attempt.
+                if ($response->clientError()) {
+                    return null;
+                }
             } catch (Throwable $e) {
                 $this->lastError = $e->getMessage();
                 Log::warning('Bell integration: request exception', [
