@@ -28,6 +28,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     /**
      * Tests exercising retry behaviour need to skip the real inter-attempt
      * sleep; production code never changes this.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- called from tests only
      */
     public function setRetryDelay(int $milliseconds): void
     {

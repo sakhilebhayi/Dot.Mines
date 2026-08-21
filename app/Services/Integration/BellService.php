@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration;
 
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -577,6 +578,7 @@ class BellService extends BaseManufacturerService
 
         while ($attempt < $this->retries) {
             try {
+                /** @var Response $response */
                 $response = Http::withToken($token)
                     ->withHeaders(['Accept' => 'application/xml'])
                     ->timeout($this->timeout)
@@ -628,7 +630,7 @@ class BellService extends BaseManufacturerService
                 // the call volume during the first live sync and got the
                 // server IP throttled by Bell. Fail fast; only 5xx and
                 // connection errors below are worth another attempt.
-                if ($response->clientError()) {
+                if ($response->status() >= 400 && $response->status() < 500) {
                     return null;
                 }
             } catch (Throwable $e) {
