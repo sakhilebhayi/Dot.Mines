@@ -1,4 +1,8 @@
-<div>
+{{-- 60s, visible-only: positions land in the DB on the 5-minute location
+     cadence, so this keeps markers within a minute of the freshest honest
+     data without polling from background tabs. Marker updates are diffed
+     and animated in live-map.js -- the map never reloads. --}}
+<div wire:poll.visible.60s="refreshPositions">
     <!-- Leaflet CSS - loaded directly in component -->
 
     <div class="container mx-auto py-8">
