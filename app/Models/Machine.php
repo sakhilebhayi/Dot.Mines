@@ -296,4 +296,27 @@ class Machine extends Model
             fn ($query) => $query->whereNotNull('operating_hours')
         );
     }
+
+    /**
+     * The newest telemetry row of any kind -- its recorded_at is the
+     * machine's honest data age (Bell's own telemetry timestamp, not the
+     * moment we synced), which is what freshness badges must show.
+     * Eager-loadable so listing pages avoid an N+1.
+     *
+     * Eager-loaded by name from Fleet::render(), which psalm cannot see;
+     * ofMany()'s framework stubs return an untyped relation, as with the
+     * sibling latestEngineHoursMetric().
+     *
+     * @psalm-suppress PossiblyUnusedMethod
+     * @psalm-suppress MixedReturnStatement
+     * @psalm-suppress MixedMethodCall
+     *
+     * @return HasOne<MachineMetric, $this>
+     */
+    public function latestMetric(): HasOne
+    {
+        return $this->hasOne(MachineMetric::class)->ofMany(
+            ['created_at' => 'max', 'id' => 'max']
+        );
+    }
 }

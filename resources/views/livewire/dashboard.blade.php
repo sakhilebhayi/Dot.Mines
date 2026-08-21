@@ -153,7 +153,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h2 class="text-xl font-display font-semibold text-[var(--stone)] flex items-center gap-2">
                 Fleet Dispatch
-                <span class="text-xs font-normal text-[var(--sand)]">live · updated {{ $dispatch['generated_at']->format('H:i:s') }}</span>
+                <x-freshness :timestamp="$this->telemetryFreshAt" :stale-after="1800" label="Telemetry" class="font-normal" />
             </h2>
             <div class="flex flex-wrap gap-2 text-xs">
                 @foreach ([

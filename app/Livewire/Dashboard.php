@@ -6,12 +6,14 @@ use App\Models\ActivityLog;
 use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\Team;
 use App\Services\DispatchService;
 use App\Services\QueryCacheService;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
@@ -191,6 +193,26 @@ class Dashboard extends Component
     {
         return app(DispatchService::class)
             ->fleetSnapshot(Auth::user()->current_team_id ?? 0);
+    }
+
+    /**
+     * The newest telemetry timestamp across the whole fleet -- the honest
+     * "how old is what you're looking at" for the dispatch section. This is
+     * the DATA's own recorded_at (Bell's telemetry time), not the moment
+     * the snapshot was computed; the two can legitimately differ by many
+     * minutes on a polled integration and pretending otherwise is exactly
+     * the fake liveness the UX brief forbids.
+     */
+    public function getTelemetryFreshAtProperty(): ?CarbonInterface
+    {
+        $teamId = $this->resolveCurrentTeam()?->id ?? 0;
+
+        /** @var string|null $latest */
+        $latest = MachineMetric::query()
+            ->where('team_id', $teamId)
+            ->max('recorded_at');
+
+        return $latest !== null ? Carbon::parse($latest) : null;
     }
 
     public function render()

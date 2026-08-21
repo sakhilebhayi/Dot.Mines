@@ -473,6 +473,9 @@
                         <div class="flex flex-col items-center justify-center p-4 border-b border-[var(--line)] bg-gradient-to-b from-[var(--gold)]/10 to-[var(--gold)]/5">
                             <img src="{{ asset($icon) }}" alt="Machine Icon" class="w-20 h-20 object-contain mb-2 drop-shadow-lg">
                             <a href="{{ route('fleet.show', $machine) }}" class="text-lg font-display font-semibold text-[var(--stone)] hover:text-[var(--gold)] hover:underline text-center block">{{ $machine->name }}</a>
+                            <div class="flex justify-center mt-1">
+                                <x-freshness :timestamp="$machine->latestMetric?->recorded_at" :stale-after="1800" />
+                            </div>
                             <div class="text-xs text-[var(--sand)] mt-1 text-center">{{ $machine->manufacturer ? $machine->manufacturer.' • ' : '' }}{{ $machine->model }}</div>
                         </div>
                         <div class="flex-1 flex flex-col justify-between p-4 gap-2">

@@ -67,7 +67,21 @@
             Skip to main content
         </a>
         <x-banner />
-        
+
+        {{-- Offline is not the same as "no data": when the BROWSER loses its
+             connection, say so explicitly instead of letting stale panels or
+             failing polls masquerade as empty data (UX brief §8/§19). Plain
+             browser online/offline events -- works with or without Livewire. --}}
+        <div x-data="{ offline: ! navigator.onLine }"
+             x-on:offline.window="offline = true"
+             x-on:online.window="offline = false"
+             x-show="offline"
+             x-cloak
+             class="fixed top-0 inset-x-0 z-[60] bg-amber-500 text-[var(--ink)] text-sm font-medium text-center py-1.5"
+             role="alert">
+            No connection — showing last known data. Reconnecting automatically…
+        </div>
+
         <!-- Notification System -->
         <div x-data="{
             notifications: [],
