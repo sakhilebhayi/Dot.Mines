@@ -31,6 +31,9 @@ class DispatchAdvisorAgent
     /** How far back to average historical dwell time for context on the recommendation. */
     private const DWELL_HISTORY_DAYS = 7;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];

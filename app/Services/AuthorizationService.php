@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
@@ -17,7 +19,7 @@ class AuthorizationService
     /**
      * Check if user can perform an action
      */
-    public static function can($user, $permission, $teamId = null): bool
+    public static function can(?User $user, string $permission, ?int $teamId = null): bool
     {
         if (! $user) {
             return false;
@@ -40,7 +42,7 @@ class AuthorizationService
     /**
      * Get all permissions for a role
      */
-    public static function getRolePermissions($role, $teamId = null): Collection
+    public static function getRolePermissions(string|Role $role, ?int $teamId = null): Collection
     {
         if (is_string($role)) {
             $role = Role::where('name', $role)
@@ -54,7 +56,8 @@ class AuthorizationService
     /**
      * Get all roles for a team
      */
-    public static function getTeamRoles($teamId): Collection
+    /** @return Collection<int|string, mixed> */
+    public static function getTeamRoles(int $teamId): Collection
     {
         return Role::where('team_id', $teamId)->get();
     }
@@ -62,7 +65,8 @@ class AuthorizationService
     /**
      * Get all permissions for a team
      */
-    public static function getTeamPermissions($teamId): Collection
+    /** @return Collection<int|string, mixed> */
+    public static function getTeamPermissions(int $teamId): Collection
     {
         return Permission::where('team_id', $teamId)->get();
     }
@@ -70,7 +74,8 @@ class AuthorizationService
     /**
      * Get permissions grouped by group
      */
-    public static function getPermissionsByGroup($teamId): Collection
+    /** @return Collection<int|string, mixed> */
+    public static function getPermissionsByGroup(int $teamId): Collection
     {
         return Permission::where('team_id', $teamId)
             ->get()
@@ -80,7 +85,7 @@ class AuthorizationService
     /**
      * Get role with permissions
      */
-    public static function getRoleWithPermissions($roleId)
+    public static function getRoleWithPermissions(int $roleId): ?Role
     {
         return Role::with('permissions')->findOrFail($roleId);
     }
@@ -88,7 +93,7 @@ class AuthorizationService
     /**
      * Create default roles for a team
      */
-    public static function createDefaultRoles($team)
+    public static function createDefaultRoles(Team $team): void
     {
         $roles = [
             [
@@ -127,7 +132,7 @@ class AuthorizationService
     /**
      * Assign user to role
      */
-    public static function assignUserRole($user, $role, $teamId = null)
+    public static function assignUserRole(User $user, string|Role $role, ?int $teamId = null): bool
     {
         $teamId = $teamId ?? $user->current_team_id;
 
@@ -141,13 +146,15 @@ class AuthorizationService
             return false;
         }
 
-        return $user->roles()->attach($role->id);
+        $user->roles()->attach($role->id);
+
+        return true;
     }
 
     /**
      * Remove user from role
      */
-    public static function removeUserRole($user, $role, $teamId = null)
+    public static function removeUserRole(User $user, string|Role $role, ?int $teamId = null): int|false
     {
         $teamId = $teamId ?? $user->current_team_id;
 

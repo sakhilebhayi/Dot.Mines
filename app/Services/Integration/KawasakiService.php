@@ -36,6 +36,7 @@ class KawasakiService extends BaseManufacturerService
     /**
      * Fetch machines from Kawasaki API
      */
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         try {
@@ -66,6 +67,8 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Fetch location data for a machine
+     *
+     * @return array<string, mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -89,6 +92,7 @@ class KawasakiService extends BaseManufacturerService
     /**
      * Fetch metrics for a machine
      */
+    /** @return array<string, mixed> */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -119,6 +123,7 @@ class KawasakiService extends BaseManufacturerService
     /**
      * Fetch alerts for a machine
      */
+    /** @return array<string, mixed> */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -149,6 +154,8 @@ class KawasakiService extends BaseManufacturerService
     /**
      * Parse machine data from Kawasaki format
      */
+    /** @param array<string, mixed> $data
+     * @return array<string, mixed> */
     protected function parseMachineData(array $data): array
     {
         return [
@@ -171,6 +178,8 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Parse location data from Kawasaki format
+     *
+     * @return array<string, mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -185,6 +194,9 @@ class KawasakiService extends BaseManufacturerService
 
     /**
      * Parse metric data from Kawasaki format
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -235,6 +247,7 @@ class KawasakiService extends BaseManufacturerService
     /**
      * Fetch machine details from Kawasaki API
      */
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view

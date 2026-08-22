@@ -11,6 +11,9 @@ use App\Models\Team;
  */
 class CostAnalyzerAgent
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];

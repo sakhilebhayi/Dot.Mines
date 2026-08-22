@@ -38,6 +38,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Fetch machines from Roundebult API
      */
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         try {
@@ -68,6 +69,8 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Fetch location data for a machine
+     *
+     * @return array<string, mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -91,6 +94,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Fetch metrics for a machine
      */
+    /** @return array<string, mixed> */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -124,6 +128,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Fetch alerts for a machine
      */
+    /** @return array<string, mixed> */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -154,6 +159,8 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Parse machine data from Roundebult format
      */
+    /** @param array<string, mixed> $data
+     * @return array<string, mixed> */
     protected function parseMachineData(array $data): array
     {
         return [
@@ -175,6 +182,8 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse location data from Roundebult format
+     *
+     * @return array<string, mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -189,6 +198,9 @@ class RoundebultService extends BaseManufacturerService
 
     /**
      * Parse metric data from Roundebult format
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -238,6 +250,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Fetch machine details from Roundebult API
      */
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view

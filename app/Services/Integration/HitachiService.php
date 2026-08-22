@@ -36,6 +36,7 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
     /**
      * Fetch machines from Hitachi ConSite
      */
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         try {
@@ -66,6 +67,8 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
     /**
      * Fetch machine location
+     *
+     * @return array<string, mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -89,6 +92,7 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
     /**
      * Fetch machine metrics
      */
+    /** @return array<string, mixed> */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -125,6 +129,7 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
     /**
      * Fetch machine alerts
      */
+    /** @return array<string, mixed> */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -160,6 +165,7 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
     /**
      * Fetch machine details from Hitachi API
      */
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view

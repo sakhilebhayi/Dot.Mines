@@ -156,6 +156,7 @@ class DataQualityService
 
     /**
      * @param  Model  $record
+     * @return array<string, mixed>
      */
     private function finding($record, string $category, string $description): array
     {

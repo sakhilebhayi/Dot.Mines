@@ -13,6 +13,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property float|numeric-string|null $quantity_liters
  * @property float|numeric-string|null $total_cost
+ * @property int $id
+ * @property int $team_id
+ * @property int|null $fuel_tank_id
+ * @property int|null $machine_id
+ * @property int|null $from_tank_id
+ * @property int|null $to_tank_id
+ * @property string $transaction_type
+ * @property float|numeric-string|null $unit_price
+ * @property Carbon|null $transaction_date
+ * @property-read FuelTank|null $fuelTank
+ * @property-read Machine|null $machine
  */
 class FuelTransaction extends Model
 {
@@ -29,6 +40,8 @@ class FuelTransaction extends Model
      * @property int|null $machine_id
      * @property int|null $user_id
      * @property string $transaction_type
+     * @property float|numeric-string|null $unit_price
+     * @property Carbon|null $transaction_date
      * @property string|float $quantity_liters
      * @property string|float $unit_price
      * @property string|float $total_cost

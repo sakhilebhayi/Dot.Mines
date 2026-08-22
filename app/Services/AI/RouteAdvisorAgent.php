@@ -17,6 +17,9 @@ class RouteAdvisorAgent
         protected RoutePlanningService $routePlanningService
     ) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];
@@ -55,6 +58,9 @@ class RouteAdvisorAgent
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function analyzeRouteEfficiency(Route $route): array
     {
         $directDistance = $this->routePlanningService->calculateDistance(

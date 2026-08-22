@@ -38,6 +38,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Fetch machines from Komatsu KOMTRAX API
      */
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         try {
@@ -68,6 +69,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Fetch location data for equipment
+     *
+     * @return array<string, mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -91,6 +94,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Fetch performance/metrics for equipment
      */
+    /** @return array<string, mixed> */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -158,6 +162,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Fetch alerts/cautions for equipment
      */
+    /** @return array<string, mixed> */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -189,6 +194,8 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Parse equipment data from Komatsu format
      */
+    /** @param array<string, mixed> $data
+     * @return array<string, mixed> */
     protected function parseMachineData(array $data): array
     {
         return [
@@ -212,6 +219,8 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse location data from Komatsu format
+     *
+     * @return array<string, mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -226,6 +235,9 @@ class KomatsuService extends BaseManufacturerService
 
     /**
      * Parse performance/metric data from Komatsu format
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -280,6 +292,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Fetch machine details from Komatsu API
      */
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view

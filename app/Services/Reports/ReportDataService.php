@@ -44,6 +44,10 @@ class ReportDataService
         };
     }
 
+    /**
+     * @param  array<string, mixed>  $machineIds
+     * @return array<string, mixed>
+     */
     private function production(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
         // whereDate bounds, not whereBetween on date strings: the model's
@@ -86,6 +90,10 @@ class ReportDataService
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $machineIds
+     * @return array<string, mixed>
+     */
     private function fleetUtilization(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
         $query = Machine::where('team_id', $teamId);
@@ -145,6 +153,10 @@ class ReportDataService
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $machineIds
+     * @return array<string, mixed>
+     */
     private function maintenanceSchedule(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
         $query = MaintenanceRecord::where('team_id', $teamId)
@@ -183,6 +195,10 @@ class ReportDataService
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $machineIds
+     * @return array<string, mixed>
+     */
     private function fuelConsumption(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
         $query = FuelTransaction::where('team_id', $teamId)
@@ -217,6 +233,10 @@ class ReportDataService
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $geofenceIds
+     * @return array<string, mixed>
+     */
     private function materialTracking(int $teamId, Carbon $start, Carbon $end, array $geofenceIds): array
     {
         $query = GeofenceEntry::where('team_id', $teamId)
@@ -248,6 +268,10 @@ class ReportDataService
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $machineIds
+     * @return array<string, mixed>
+     */
     private function downtimeAnalysis(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
         $query = MaintenanceRecord::where('team_id', $teamId)
@@ -293,6 +317,8 @@ class ReportDataService
      * violation register with detection date, severity, remediation
      * deadline, and resolution status, plus a compliance score summary
      * a Mine Manager can attach to a regulator submission.
+     *
+     * @return array<string, mixed>
      */
     private function compliance(int $teamId, Carbon $start, Carbon $end): array
     {

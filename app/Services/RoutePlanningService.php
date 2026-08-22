@@ -26,6 +26,8 @@ class RoutePlanningService
 
     /**
      * Calculate optimal route between two points following actual roads
+     *
+     * @return array<string, mixed>
      */
     public function calculateOptimalRoute(
         float $startLat,
@@ -73,6 +75,8 @@ class RoutePlanningService
 
     /**
      * Get route from OSRM routing engine
+     *
+     * @return array<string, mixed>|null
      */
     protected function getOSRMRoute(float $startLon, float $startLat, float $endLon, float $endLat): ?array
     {
@@ -133,6 +137,9 @@ class RoutePlanningService
 
     /**
      * Sample waypoints from route geometry to avoid too many points
+     *
+     * @param  array<string, mixed>  $routeCoordinates
+     * @return array<string, mixed>
      */
     protected function sampleRouteWaypoints(array $routeCoordinates, Collection $geofences): array
     {
@@ -174,6 +181,8 @@ class RoutePlanningService
 
     /**
      * Fallback: Calculate straight-line route when OSRM is unavailable
+     *
+     * @return array<string, mixed>
      */
     protected function calculateStraightLineRoute(
         float $startLat,
@@ -200,6 +209,8 @@ class RoutePlanningService
 
     /**
      * Generate waypoints avoiding restricted geofences
+     *
+     * @return array<string, mixed>
      */
     protected function generateWaypoints(
         float $startLat,
@@ -284,6 +295,8 @@ class RoutePlanningService
 
     /**
      * Calculate point to avoid geofence
+     *
+     * @return array<string, mixed>
      */
     protected function calculateAvoidancePoint(
         float $startLat,
@@ -370,6 +383,9 @@ class RoutePlanningService
 
     /**
      * Find nearest fuel stations along route
+     *
+     * @param  array<string, mixed>  $waypoints
+     * @return array<string, mixed>
      */
     public function findNearbyFuelStations(array $waypoints, float $maxDetourKm = 5): array
     {

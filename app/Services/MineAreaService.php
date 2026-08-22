@@ -3,13 +3,16 @@
 namespace App\Services;
 
 use App\Models\MineArea;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class MineAreaService
 {
     /**
      * Get all mine areas for a team
      */
-    public function getAllForTeam($teamId, $perPage = 15)
+    /** @return LengthAwarePaginator<int, MineArea> */
+    public function getAllForTeam(int $teamId, int $perPage = 15): LengthAwarePaginator
     {
         return MineArea::forTeam($teamId)
             ->orderBy('created_at', 'desc')
@@ -19,7 +22,8 @@ class MineAreaService
     /**
      * Get active mine areas for a team
      */
-    public function getActiveForTeam($teamId)
+    /** @return Collection<int, MineArea> */
+    public function getActiveForTeam(int $teamId): Collection
     {
         return MineArea::forTeam($teamId)
             ->byStatus('active')
@@ -29,8 +33,10 @@ class MineAreaService
 
     /**
      * Create a new mine area
+     *
+     * @param  array<string, mixed>  $data
      */
-    public function create($teamId, array $data): MineArea
+    public function create(int $teamId, array $data): MineArea
     {
         $data['team_id'] = $teamId;
         // Ensure legacy columns expected by current schema are populated when possible
@@ -96,6 +102,8 @@ class MineAreaService
 
     /**
      * Update an existing mine area
+     *
+     * @param  array<string, mixed>  $data
      */
     public function update(MineArea $mineArea, array $data): MineArea
     {
@@ -115,7 +123,7 @@ class MineAreaService
     /**
      * Get mine area by ID with authorization check
      */
-    public function getById($id, $teamId)
+    public function getById(int $id, int $teamId): ?MineArea
     {
         return MineArea::forTeam($teamId)->find($id);
     }
@@ -123,7 +131,8 @@ class MineAreaService
     /**
      * Get statistics for a team's mine areas
      */
-    public function getTeamStatistics($teamId)
+    /** @return array<string, mixed> */
+    public function getTeamStatistics(int $teamId): array
     {
         $areas = MineArea::forTeam($teamId)->get();
 

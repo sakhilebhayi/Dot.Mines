@@ -19,12 +19,14 @@ class YanmarService extends BaseManufacturerService implements ManufacturerServi
         return false;
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Implement Yanmar API fetch logic
         return [];
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement Yanmar API fetch machine details

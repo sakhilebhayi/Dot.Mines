@@ -8,8 +8,10 @@ class IoTSensorService
 {
     /**
      * Get sensor readings with statistics
+     *
+     * @return array<string, mixed>
      */
-    public function getReadingStats(IoTSensor $sensor, $days = 7): array
+    public function getReadingStats(IoTSensor $sensor, int $days = 7): array
     {
         $readings = $sensor->readings()
             ->whereDate('timestamp', '>=', now()->subDays($days)->startOfDay())
@@ -46,6 +48,8 @@ class IoTSensorService
 
     /**
      * Check sensor health
+     *
+     * @return array<string, mixed>
      */
     public function checkSensorHealth(IoTSensor $sensor): array
     {
@@ -68,6 +72,8 @@ class IoTSensorService
 
     /**
      * Calculate trend from values
+     *
+     * @param  array<string, mixed>  $values
      */
     private function calculateTrend(array $values): string
     {

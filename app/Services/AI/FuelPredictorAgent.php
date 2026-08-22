@@ -13,6 +13,9 @@ use App\Models\Team;
  */
 class FuelPredictorAgent
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];
@@ -37,6 +40,9 @@ class FuelPredictorAgent
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function analyzeFuelConsumption(Team $team): array
     {
         $recommendations = [];
@@ -145,6 +151,9 @@ class FuelPredictorAgent
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function predictFuelNeeds(Team $team): array
     {
         $recommendations = [];
@@ -225,6 +234,9 @@ class FuelPredictorAgent
         return ['recommendations' => $recommendations];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function analyzeTankLevels(Team $team): array
     {
         $recommendations = [];

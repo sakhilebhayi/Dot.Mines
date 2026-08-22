@@ -19,8 +19,10 @@ class QueryCacheService
 
     /**
      * Cache dashboard statistics
+     *
+     * @return array<string, mixed>
      */
-    public static function dashboardStats(int $teamId, callable $callback): array
+    public static function dashboardStats(int $teamId, \Closure $callback): array
     {
         return Cache::remember(
             "dashboard_stats_{$teamId}",
@@ -31,10 +33,15 @@ class QueryCacheService
 
     /**
      * Cache machine list for team
+     *
+     * @param  array<string, mixed>  $filters
      */
-    public static function machineList(int $teamId, array $filters, callable $callback)
+    /**
+     * @param  array<string, mixed>  $filters
+     */
+    public static function machineList(int $teamId, array $filters, \Closure $callback): mixed
     {
-        $filterKey = md5(json_encode($filters));
+        $filterKey = md5((string) json_encode($filters));
 
         // Version-keyed: the filter hash makes these keys impossible to
         // enumerate for targeted invalidation, so invalidateMachine() bumps
@@ -54,7 +61,7 @@ class QueryCacheService
     /**
      * Cache machine details
      */
-    public static function machineDetails(int $machineId, callable $callback)
+    public static function machineDetails(int $machineId, \Closure $callback): mixed
     {
         return Cache::remember(
             "machine_details_{$machineId}",
@@ -65,8 +72,10 @@ class QueryCacheService
 
     /**
      * Cache alert statistics
+     *
+     * @return array<string, mixed>
      */
-    public static function alertStats(int $teamId, callable $callback): array
+    public static function alertStats(int $teamId, \Closure $callback): array
     {
         return Cache::remember(
             "alert_stats_{$teamId}",
@@ -77,8 +86,10 @@ class QueryCacheService
 
     /**
      * Cache geofence statistics
+     *
+     * @return array<string, mixed>
      */
-    public static function geofenceStats(int $geofenceId, callable $callback): array
+    public static function geofenceStats(int $geofenceId, \Closure $callback): array
     {
         return Cache::remember(
             "geofence_stats_{$geofenceId}",
@@ -89,8 +100,10 @@ class QueryCacheService
 
     /**
      * Cache integration sync status
+     *
+     * @return array<string, mixed>
      */
-    public static function integrationStatus(int $teamId, callable $callback): array
+    public static function integrationStatus(int $teamId, \Closure $callback): array
     {
         return Cache::remember(
             "integration_status_{$teamId}",
@@ -101,8 +114,10 @@ class QueryCacheService
 
     /**
      * Cache report templates
+     *
+     * @return array<string, mixed>
      */
-    public static function reportTemplates(callable $callback): array
+    public static function reportTemplates(\Closure $callback): array
     {
         return Cache::remember(
             'report_templates',

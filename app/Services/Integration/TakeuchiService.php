@@ -19,12 +19,14 @@ class TakeuchiService extends BaseManufacturerService implements ManufacturerSer
         return false;
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Implement Takeuchi API fetch logic
         return [];
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement Takeuchi API fetch machine details

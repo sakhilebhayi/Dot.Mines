@@ -19,12 +19,14 @@ class CASEService extends BaseManufacturerService implements ManufacturerService
         return false;
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Implement CASE API fetch logic
         return [];
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement CASE API fetch machine details

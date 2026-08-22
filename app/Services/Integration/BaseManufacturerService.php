@@ -38,6 +38,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Initialize the service with API credentials
+     *
+     * @param  array<string, mixed>  $credentials
      */
     public function __construct(array $credentials = [])
     {
@@ -48,6 +50,10 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Make HTTP request to manufacturer API with retry logic
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $headers
+     * @return array<string, mixed>
      */
     protected function request(
         string $method,
@@ -115,6 +121,10 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * (PHP's Error, not Exception, so their own catch (Exception $e) blocks
      * never caught it) the instant a user actually tested or synced one of
      * those integrations.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $headers
+     * @return array<string, mixed>
      */
     protected function makeRequest(
         string $method,
@@ -141,6 +151,9 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Get authentication headers for API requests
+     *
+     * @param  array<string, mixed>  $additionalHeaders
+     * @return array<string, mixed>
      */
     protected function getAuthHeaders(array $additionalHeaders = []): array
     {
@@ -154,6 +167,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     /**
      * Parse machine data from API response to standard format
      */
+    /** @param array<string, mixed> $rawData
+     * @return array<string, mixed> */
     protected function parseMachineData(array $rawData): array
     {
         return [
@@ -175,6 +190,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     /**
      * Parse location data from API response
      */
+    /** @param array<string, mixed> $rawData
+     * @return array<string, mixed>|null */
     protected function parseLocation(array $rawData): ?array
     {
         if (empty($rawData['latitude']) || empty($rawData['longitude'])) {
@@ -200,6 +217,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * silently dropped by mass assignment on every single metrics sync, for
      * every manufacturer service that calls this method.
      */
+    /** @param array<string, mixed> $rawData
+     * @return array<string, mixed> */
     protected function parseMetrics(array $rawData): array
     {
         return [
@@ -228,6 +247,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * survived. This keeps the first non-null value found for each field
      * instead, and unions raw_data rather than letting later ones replace it.
      *
+     * @param  array<string, mixed>  $metricSets
      * @return array<string, mixed>
      */
     protected function mergeMetricsPreferNonNull(array ...$metricSets): array
@@ -277,6 +297,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * empty, ready for real field mapping once a real response is seen.
      *
      * @param  list<array<string, mixed>>  $readings
+     * @return array<string, mixed>
      */
     protected function normalizeMetricsForStorage(array $readings): array
     {
@@ -308,6 +329,32 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Parse alerts from API response
+     */
+    /**
+     * Normalise ONE raw provider alert into the standard shape. Ten
+     * manufacturer services called $this->parseAlert() without any
+     * definition in their hierarchy -- a guaranteed fatal on the first
+     * real fetchAlerts() against those providers (refactor R5 find).
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function parseAlert(array $data): array
+    {
+        return [
+            'external_id' => $data['id'] ?? $data['alert_id'] ?? null,
+            'type' => $this->mapAlertType((string) ($data['type'] ?? $data['code'] ?? 'unknown')),
+            'priority' => $this->mapAlertPriority((string) ($data['severity'] ?? $data['priority'] ?? 'medium')),
+            'message' => $data['message'] ?? $data['description'] ?? "Alert from {$this->manufacturer}",
+            'timestamp' => $data['timestamp'] ?? $data['created_at'] ?? now()->toIso8601String(),
+            'acknowledged' => (bool) ($data['acknowledged'] ?? false),
+            'raw_data' => $data,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $alerts
+     * @return array<string, mixed>
      */
     protected function parseAlerts(array $alerts): array
     {
@@ -499,6 +546,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     /**
      * Log integration activity
+     *
+     * @param  array<string, mixed>  $details
      */
     protected function logActivity(string $action, array $details = []): void
     {

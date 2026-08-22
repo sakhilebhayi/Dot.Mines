@@ -32,6 +32,9 @@ class IntegrationService
         return $this->registry->resolveFor($integration);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getAvailableManufacturers(): array
     {
         return $this->registry->catalog();
@@ -39,6 +42,8 @@ class IntegrationService
 
     /**
      * Test connection to a manufacturer API
+     *
+     * @return array<string, mixed>
      */
     public function testConnection(Integration $integration): array
     {
@@ -81,6 +86,8 @@ class IntegrationService
      * path, not a simulated probe. On success, updates the Integration's
      * status/capabilities/sync_streams in one place so the UI always
      * reflects exactly what this method verified.
+     *
+     * @return array<string, mixed>
      */
     public function connect(Integration $integration): array
     {
@@ -224,6 +231,8 @@ class IntegrationService
 
     /**
      * Sync all machines for an integration
+     *
+     * @return array<string, mixed>
      */
     public function syncMachines(Integration $integration): array
     {
@@ -274,6 +283,9 @@ class IntegrationService
      * own deep-check already fetched, instead of calling fetchMachines() a
      * second time against the live API (spec's "avoid unnecessary
      * duplicate API calls").
+     *
+     * @param  array<string, mixed>  $machineList
+     * @return array<string, mixed>
      */
     public function persistMachines(Integration $integration, ManufacturerServiceInterface $service, array $machineList): array
     {
@@ -469,6 +481,8 @@ class IntegrationService
 
     /**
      * Sync a single machine
+     *
+     * @param  array<string, mixed>  $machineData
      */
     public function syncMachine(Integration $integration, array $machineData): ?Machine
     {
@@ -579,6 +593,8 @@ class IntegrationService
 
     /**
      * Sync machine metrics
+     *
+     * @param  array<string, mixed>  $metrics
      */
     protected function syncMachineMetrics(Machine $machine, array $metrics): void
     {
@@ -597,6 +613,8 @@ class IntegrationService
 
     /**
      * Sync machine alerts
+     *
+     * @param  array<string, mixed>  $alerts
      */
     protected function syncMachineAlerts(Machine $machine, array $alerts): void
     {
@@ -915,6 +933,7 @@ class IntegrationService
      * BaseManufacturerService::parseMetrics()/BellService::buildCurrentMetric()
      * actually produce today.
      *
+     * @param  array<string, mixed>  $sampleMachine
      * @return list<'fleet'|'telemetry'|'production'|'location'>
      */
     public function deriveCapabilities(array $sampleMachine): array
@@ -955,6 +974,8 @@ class IntegrationService
 
     /**
      * Get integration status
+     *
+     * @return array<string, mixed>
      */
     public function getStatus(Integration $integration): array
     {

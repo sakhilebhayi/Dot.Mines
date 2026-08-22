@@ -30,6 +30,7 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         }
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         try {
@@ -58,6 +59,9 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function fetchLocation(string $machineId): array
     {
         try {
@@ -77,6 +81,7 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         }
     }
 
+    /** @return array<string, mixed> */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -109,6 +114,7 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         }
     }
 
+    /** @return array<string, mixed> */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -144,6 +150,7 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
     /**
      * Fetch machine details from Liebherr API
      */
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
