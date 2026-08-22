@@ -26,7 +26,7 @@ class MinePlanDownloadController extends Controller
 
         // Expected query params: disk and path (or the MinePlan model can be looked up)
         $diskParam = $request->query('disk');
-        $disk = is_string($diskParam) && $diskParam !== '' ? $diskParam : (string) config('filesystems.default');
+        $disk = is_string($diskParam) && $diskParam !== '' ? $diskParam : config('filesystems.default');
         $path = $request->query('path');
 
         if (! is_string($path) || $path === '') {
@@ -48,7 +48,7 @@ class MinePlanDownloadController extends Controller
         // Optional model-level authorization: if a MinePlan model exists, verify ownership
         if (class_exists(MinePlan::class)) {
             $minePlan = MinePlan::find($minePlanId);
-            if (! $minePlan || $minePlan->team_id !== auth()->user()->current_team_id) {
+            if (! $minePlan || $minePlan->team_id !== auth()->user()?->current_team_id) {
                 abort(403);
             }
         }

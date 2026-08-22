@@ -48,7 +48,10 @@ class CTrackService extends BaseManufacturerService
 
             $machines = [];
             if (! empty($response['data']['vehicles'])) {
-                foreach ($response['data']['vehicles'] as $vehicle) {
+                $rows5 = data_get($response, 'data.vehicles');
+                /** @var list<array<string, mixed>> $rows5 */
+                $rows5 = is_array($rows5) ? array_values(array_filter($rows5, 'is_array')) : [];
+                foreach ($rows5 as $vehicle) {
                     $machines[] = $this->parseMachineData($vehicle);
                 }
             }
@@ -78,7 +81,7 @@ class CTrackService extends BaseManufacturerService
         try {
             $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/location");
 
-            return $this->parseLocation($response['data'] ?? []);
+            return $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []);
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
 
@@ -101,8 +104,8 @@ class CTrackService extends BaseManufacturerService
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics($history['data'] ?? []),
-                $this->parseMetrics($events['data'] ?? [])
+                $this->parseMetrics(is_array($history['data'] ?? null) ? $history['data'] : []),
+                $this->parseMetrics(is_array($events['data'] ?? null) ? $events['data'] : [])
             );
 
             return $metrics;
@@ -128,7 +131,10 @@ class CTrackService extends BaseManufacturerService
 
             $alerts = [];
             if (! empty($response['data']['events'])) {
-                foreach ($response['data']['events'] as $event) {
+                $rows6 = data_get($response, 'data.events');
+                /** @var list<array<string, mixed>> $rows6 */
+                $rows6 = is_array($rows6) ? array_values(array_filter($rows6, 'is_array')) : [];
+                foreach ($rows6 as $event) {
                     if (($event['type'] ?? '') === 'alert') {
                         $alerts[] = $this->parseAlert($event);
                     }
@@ -181,8 +187,8 @@ class CTrackService extends BaseManufacturerService
             'name' => $data['name'] ?? $data['plate'] ?? 'Unknown Vehicle',
             'model' => $data['model'] ?? $data['vehicle_type'] ?? 'Unknown Model',
             'manufacturer' => 'C-Track',
-            'status' => $this->parseStatus($data['status'] ?? 'unknown'),
-            'location' => $this->parseLocation($data['position'] ?? []),
+            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'location' => $this->parseLocation(is_array($data['position'] ?? null) ? $data['position'] : []),
             'last_heartbeat' => $data['last_gps'] ?? $data['last_update'] ?? null,
             'specifications' => [
                 'type' => 'gps_tracker',

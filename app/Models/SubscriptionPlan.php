@@ -90,7 +90,7 @@ class SubscriptionPlan extends Model
      */
     protected function getYearlySavingsPercentageAttribute(): int
     {
-        if (! $this->yearly_price || $this->price <= 0) {
+        if (($this->yearly_price === null || $this->yearly_price === 0.0) || $this->price <= 0) {
             return 0;
         }
 
@@ -113,7 +113,7 @@ class SubscriptionPlan extends Model
      */
     protected function getYearlyPriceDisplayAttribute(): string
     {
-        return $this->yearly_price ? number_format($this->yearly_price, 2) : '0.00';
+        return ($this->yearly_price !== null && $this->yearly_price !== 0.0) ? number_format($this->yearly_price, 2) : '0.00';
     }
 
     /**

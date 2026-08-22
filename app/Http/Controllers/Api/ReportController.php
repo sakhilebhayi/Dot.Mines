@@ -30,7 +30,7 @@ class ReportController extends Controller
             'type' => 'nullable|string',
         ]);
 
-        $query = Report::where('team_id', auth()->user()->current_team_id);
+        $query = Report::where('team_id', auth()->user()?->current_team_id);
 
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
@@ -84,7 +84,7 @@ class ReportController extends Controller
             'filters' => 'nullable|json',
         ]);
 
-        $validated['team_id'] = auth()->user()->current_team_id;
+        $validated['team_id'] = auth()->user()?->current_team_id;
         $validated['status'] = 'pending';
         $validated['generated_by'] = auth()->id();
         $validated['format'] = $request->input('format', 'pdf');
@@ -169,7 +169,7 @@ class ReportController extends Controller
         $this->authorize('delete', $report);
 
         // Delete file if exists
-        if ($report->file_path) {
+        if (($report->file_path !== null && $report->file_path !== '' && $report->file_path !== '0')) {
             $disk = config('filesystems.default');
             $relative = ltrim($report->file_path, '/');
             if (! (strpos($relative, '..') !== false) && str_starts_with($relative, 'reports/') && Storage::disk($disk)->exists($relative)) {
@@ -243,14 +243,14 @@ class ReportController extends Controller
     public function stats(): JsonResponse
     {
         $stats = [
-            'total' => Report::where('team_id', auth()->user()->current_team_id)->count(),
-            'pending' => Report::where('team_id', auth()->user()->current_team_id)
+            'total' => Report::where('team_id', auth()->user()?->current_team_id)->count(),
+            'pending' => Report::where('team_id', auth()->user()?->current_team_id)
                 ->where('status', 'pending')
                 ->count(),
-            'completed' => Report::where('team_id', auth()->user()->current_team_id)
+            'completed' => Report::where('team_id', auth()->user()?->current_team_id)
                 ->where('status', 'completed')
                 ->count(),
-            'failed' => Report::where('team_id', auth()->user()->current_team_id)
+            'failed' => Report::where('team_id', auth()->user()?->current_team_id)
                 ->where('status', 'failed')
                 ->count(),
         ];

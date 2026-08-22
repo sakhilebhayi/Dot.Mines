@@ -5,8 +5,8 @@ namespace App\Livewire;
 use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class GeofenceDetail extends Component
@@ -15,7 +15,7 @@ class GeofenceDetail extends Component
 
     public function mount(Geofence $geofence): void
     {
-        if ($geofence->team_id !== Auth::user()->currentTeam->id) {
+        if ($geofence->team_id !== CurrentUser::get()?->currentTeam?->id) {
             abort(403);
         }
         $this->geofence = $geofence;
@@ -36,7 +36,7 @@ class GeofenceDetail extends Component
 
         $totalEntries = $this->geofence->entries()->count();
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         // Count machine types present in entries (e.g., excavator, articulatd_hauler, dozer)
         $machineIds = $this->geofence->entries()->distinct('machine_id')->pluck('machine_id')->toArray();
@@ -62,7 +62,7 @@ class GeofenceDetail extends Component
             // Attempt to find an activity log that references this machine and mentions authorization
             $possible = ActivityLog::where('team_id', $team->id)
                 ->where(function ($q) use ($entry) {
-                    $q->where('description', 'like', "%{$entry->machine->name}%")
+                    $q->where('description', 'like', "%{$entry->machine?->name}%")
                         ->orWhere('action', 'like', '%authoriz%')
                         ->orWhere('description', 'like', '%authoriz%');
                 })

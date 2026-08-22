@@ -11,11 +11,11 @@ use App\Models\ProductionTarget;
 use App\Models\Team;
 use App\Services\OperationalSnapshotService;
 use App\Services\ProductionService;
+use App\Support\CurrentUser;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -104,7 +104,7 @@ class ProductionDashboard extends Component
     public function mount(): void
     {
         $this->productionService = app(ProductionService::class);
-        $this->team = Auth::user()->currentTeam;
+        $this->team = CurrentUser::get()?->currentTeam;
         $this->teamId = $this->team?->id ?? 0;
         $this->record_date = Carbon::today()->format('Y-m-d');
         // Default period is "Month": start of the current calendar month
@@ -190,7 +190,7 @@ class ProductionDashboard extends Component
             $this->productionService = app(ProductionService::class);
         }
 
-        $this->team = Auth::user()->currentTeam;
+        $this->team = CurrentUser::get()?->currentTeam;
         $this->teamId = $this->team?->id ?? $this->teamId;
     }
 
@@ -207,7 +207,7 @@ class ProductionDashboard extends Component
             })->orWhere('notes', 'like', "%{$this->search}%");
         }
 
-        if ($this->mineAreaFilter) {
+        if (($this->mineAreaFilter !== null && $this->mineAreaFilter !== 0)) {
             $query->where('mine_area_id', $this->mineAreaFilter);
         }
 
@@ -422,8 +422,8 @@ class ProductionDashboard extends Component
             return [
                 'area_name' => $area->name,
                 'area_type' => $area->status ?? 'active',
-                'loads' => (int) $records->sum(fn ($record) => $this->productionService()->recordLoads($record)),
-                'cycles' => (int) $records->sum(fn ($record) => $this->productionService()->recordCycles($record)),
+                'loads' => $records->sum(fn ($record) => $this->productionService()->recordLoads($record)),
+                'cycles' => $records->sum(fn ($record) => $this->productionService()->recordCycles($record)),
                 'tonnage' => $records->sum('quantity_produced') ?? 0,
                 'bcm' => $records->sum('quantity_produced') ?? 0, // Using quantity_produced as BCM proxy
             ];
@@ -480,7 +480,7 @@ class ProductionDashboard extends Component
             'status' => 'required|in:completed,in-progress,pending,paused',
         ]);
 
-        if ($this->editingRecordId) {
+        if (($this->editingRecordId !== null && $this->editingRecordId !== 0)) {
             /** @var ProductionRecord $record */
             $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($this->editingRecordId);
             $this->productionService()->updateProductionRecord($record, [

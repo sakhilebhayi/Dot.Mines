@@ -98,7 +98,7 @@ class GeofenceController extends Controller
             'perimeter_m' => 'nullable|numeric|min:0',
         ]);
 
-        $validated['team_id'] = auth()->user()->current_team_id;
+        $validated['team_id'] = auth()->user()?->current_team_id;
         $validated['status'] = 'active';
         $validated['coordinates'] = json_decode($request->input('coordinates'), true);
 

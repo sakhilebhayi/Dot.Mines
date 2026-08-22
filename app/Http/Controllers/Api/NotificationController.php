@@ -15,9 +15,9 @@ class NotificationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $teamId = auth()->user()->current_team_id
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
+            ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
 
-        if (! $teamId) {
+        if (($teamId === null || $teamId === 0)) {
             return response()->json(['data' => [], 'meta' => ['total' => 0]]);
         }
 
@@ -53,9 +53,9 @@ class NotificationController extends Controller
      */
     public function unread(Request $request): JsonResponse
     {
-        $userId = auth()->user()->id;
+        $userId = auth()->user()?->id;
         $teamId = auth()->user()->current_team_id
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
+            ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
 
         $unread = Notification::where('team_id', $teamId)
             ->where('is_read', false)
@@ -96,7 +96,7 @@ class NotificationController extends Controller
         ]);
 
         $teamId = auth()->user()->current_team_id
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
+            ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
 
         Notification::whereIn('id', $validated['notification_ids'])
             ->where('team_id', $teamId)
@@ -111,7 +111,7 @@ class NotificationController extends Controller
     public function stats(Request $request): JsonResponse
     {
         $teamId = auth()->user()->current_team_id
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
+            ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
         $days = $request->get('days', 7);
         $fromDate = now()->subDays($days);
 
@@ -152,14 +152,14 @@ class NotificationController extends Controller
         ]);
 
         $teamId = auth()->user()->current_team_id
-            ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
+            ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
         $query = Notification::where('team_id', $teamId);
 
-        if ($validated['type'] ?? false) {
+        if (($validated['type'] ?? '') !== '') {
             $query->where('type', $validated['type']);
         }
 
-        if ($validated['alert_level'] ?? false) {
+        if (($validated['alert_level'] ?? '') !== '') {
             $query->where('alert_level', $validated['alert_level']);
         }
 

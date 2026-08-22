@@ -258,7 +258,7 @@ class ReportDataService
             $e->geofence?->name ?? '—',
             $e->machine?->name ?? '—',
             $e->exit_time?->format('Y-m-d H:i') ?? 'Still inside',
-            $e->tonnage_loaded !== null ? (float) $e->tonnage_loaded : null,
+            $e->tonnage_loaded !== null ? $e->tonnage_loaded : null,
             $e->material_type ?? '—',
         ])->all();
 

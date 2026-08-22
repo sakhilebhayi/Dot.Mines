@@ -42,6 +42,7 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property Carbon|null $two_factor_confirmed_at
  * @property-read Collection<int, PersonalAccessToken> $tokens
  * @property-read Collection<int, Team> $ownedTeams
+ * @property-read Collection<int, Role> $roles
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -176,7 +177,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return $this->permissions()
-            ->whereIn('permissions.name', (array) $permissions)
+            ->whereIn('permissions.name', $permissions)
             ->exists();
     }
 
@@ -262,10 +263,10 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         $count = $this->permissions()
-            ->whereIn('permissions.name', (array) $permissions)
+            ->whereIn('permissions.name', $permissions)
             ->count();
 
-        return $count === count((array) $permissions);
+        return $count === count($permissions);
     }
 
     /**

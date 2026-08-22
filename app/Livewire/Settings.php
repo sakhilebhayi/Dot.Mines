@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Services\TeamRoleProvisioner;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -72,12 +73,12 @@ class Settings extends Component
 
     public function mount(): void
     {
-        $team = auth()->user()->currentTeam;
+        $team = CurrentUser::team();
         $this->teamName = $team->name;
         $this->teamEmail = $team->email ?? '';
-        $this->timezone = $team->timezone ?? 'UTC';
-        $this->language = $team->language ?? 'en';
-        $this->currency = $team->currency ?? 'USD';
+        $this->timezone = $team->timezone;
+        $this->language = $team->language;
+        $this->currency = $team->currency;
 
         $preferences = auth()->user()->notification_preferences ?? [];
         $this->emailAlerts = $preferences['email_alerts'] ?? true;
@@ -112,7 +113,7 @@ class Settings extends Component
     {
         $this->validate();
 
-        $team = auth()->user()->currentTeam;
+        $team = auth()->user()?->currentTeam;
         $this->authorize('update', $team);
 
         $team->update([
@@ -130,7 +131,7 @@ class Settings extends Component
 
     public function loadTeamMembers(): void
     {
-        $team = auth()->user()->currentTeam;
+        $team = auth()->user()?->currentTeam;
         $this->teamMembers = $team->users()
             ->with('roles')
             ->get()
@@ -163,7 +164,7 @@ class Settings extends Component
         ]);
 
         try {
-            $team = auth()->user()->currentTeam;
+            $team = auth()->user()?->currentTeam;
             $this->authorize('addTeamMember', $team);
 
             // Delegate to Jetstream's own invitation action (also used by
@@ -198,12 +199,12 @@ class Settings extends Component
     public function removeUser($userId): void
     {
         try {
-            $team = auth()->user()->currentTeam;
+            $team = auth()->user()?->currentTeam;
             $this->authorize('removeTeamMember', $team);
             $currentUser = auth()->user();
 
             // Prevent removing self
-            if ((int) $userId === (int) $currentUser->id) {
+            if ((int) $userId === (int) $currentUser?->id) {
                 $this->dispatch('notify', ['type' => 'error', 'message' => 'Cannot remove yourself from the team']);
 
                 return;
@@ -224,7 +225,7 @@ class Settings extends Component
     public function updateUserRole($userId, $newRole): void
     {
         try {
-            $team = auth()->user()->currentTeam;
+            $team = auth()->user()?->currentTeam;
             $this->authorize('updateTeamMember', $team);
 
             // Ensure the user is a member of this team
@@ -234,7 +235,7 @@ class Settings extends Component
                 return;
             }
 
-            $team = auth()->user()->currentTeam;
+            $team = auth()->user()?->currentTeam;
             $user = $team->users()->findOrFail($userId);
 
             TeamRoleProvisioner::assignRole($user, $team, $newRole);

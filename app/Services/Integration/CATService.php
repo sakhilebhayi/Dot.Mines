@@ -49,7 +49,10 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
             $machines = [];
             if (! empty($response['assets'])) {
-                foreach ($response['assets'] as $asset) {
+                $rows2 = data_get($response, 'assets');
+                /** @var list<array<string, mixed>> $rows2 */
+                $rows2 = is_array($rows2) ? array_values(array_filter($rows2, 'is_array')) : [];
+                foreach ($rows2 as $asset) {
                     $machines[] = $this->parseMachineData($asset);
                 }
             }
@@ -82,7 +85,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
+                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -111,7 +114,10 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
             // Parse diagnostics
             if (! empty($diagnostics['diagnostics'])) {
-                foreach ($diagnostics['diagnostics'] as $diagnostic) {
+                $rows3 = data_get($diagnostics, 'diagnostics');
+                /** @var list<array<string, mixed>> $rows3 */
+                $rows3 = is_array($rows3) ? array_values(array_filter($rows3, 'is_array')) : [];
+                foreach ($rows3 as $diagnostic) {
                     $metrics[] = $this->parseMetric($diagnostic);
                 }
             }
@@ -120,9 +126,9 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             if (! empty($fuelUsed['fuelUsed'])) {
                 $metrics[] = [
                     'type' => 'fuel_used',
-                    'value' => $fuelUsed['fuelUsed']['totalFuelUsed'] ?? 0,
+                    'value' => data_get($fuelUsed, 'fuelUsed.totalFuelUsed') ?? 0,
                     'unit' => 'liters',
-                    'timestamp' => $fuelUsed['fuelUsed']['timestamp'] ?? now(),
+                    'timestamp' => data_get($fuelUsed, 'fuelUsed.timestamp') ?? now(),
                 ];
             }
 
@@ -130,9 +136,9 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             if (! empty($engineHours['engineHours'])) {
                 $metrics[] = [
                     'type' => 'engine_hours',
-                    'value' => $engineHours['engineHours']['totalHours'] ?? 0,
+                    'value' => data_get($engineHours, 'engineHours.totalHours') ?? 0,
                     'unit' => 'hours',
-                    'timestamp' => $engineHours['engineHours']['timestamp'] ?? now(),
+                    'timestamp' => data_get($engineHours, 'engineHours.timestamp') ?? now(),
                 ];
             }
 
@@ -171,7 +177,10 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                foreach ($response['data']['alerts'] as $alert) {
+                $rows4 = data_get($response, 'data.alerts');
+                /** @var list<array<string, mixed>> $rows4 */
+                $rows4 = is_array($rows4) ? array_values(array_filter($rows4, 'is_array')) : [];
+                foreach ($rows4 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
@@ -204,8 +213,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             'name' => $data['name'] ?? $data['asset_name'] ?? 'Unknown Machine',
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Caterpillar',
-            'status' => $this->parseStatus($data['status'] ?? 'unknown'),
-            'location' => $this->parseLocation($data['location'] ?? []),
+            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'location' => $this->parseLocation(is_array($data['location'] ?? null) ? $data['location'] : []),
             'last_heartbeat' => $data['last_heartbeat'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'heavy_equipment',
@@ -322,7 +331,9 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -340,7 +351,10 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             // fetchMetrics() builds a list of {type, value, unit, timestamp}
             // readings, not the flat MachineMetric-column shape the sync
             // pipeline expects -- see normalizeMetricsForStorage().
-            return $this->normalizeMetricsForStorage($result['metrics'] ?? []);
+            /** @var list<array<string, mixed>> $readings */
+            $readings = array_values(array_filter((array) data_get($result, 'metrics', []), 'is_array'));
+
+            return $this->normalizeMetricsForStorage($readings);
         } catch (Exception $e) {
             return [];
         }
@@ -355,7 +369,9 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

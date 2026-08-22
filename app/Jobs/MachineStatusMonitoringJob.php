@@ -125,7 +125,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
                         event(new MachineOffline(
                             machine: $machine,
                             reason: 'No connectivity',
-                            lastLocation: $machine->last_location_latitude && $machine->last_location_longitude ? [
+                            lastLocation: ($machine->last_location_latitude !== null && $machine->last_location_latitude !== 0.0) && ($machine->last_location_longitude !== null && $machine->last_location_longitude !== 0.0) ? [
                                 'latitude' => $machine->last_location_latitude,
                                 'longitude' => $machine->last_location_longitude,
                             ] : null
@@ -244,7 +244,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
                 event(new MachineOffline(
                     machine: $machine,
                     reason: 'No location update for 5+ minutes',
-                    lastLocation: $machine->last_location_latitude && $machine->last_location_longitude ? [
+                    lastLocation: ($machine->last_location_latitude !== null && $machine->last_location_latitude !== 0.0) && ($machine->last_location_longitude !== null && $machine->last_location_longitude !== 0.0) ? [
                         'latitude' => $machine->last_location_latitude,
                         'longitude' => $machine->last_location_longitude,
                     ] : null,

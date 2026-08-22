@@ -8,6 +8,7 @@ use App\Models\Geofence;
 use App\Models\MineArea;
 use App\Models\User;
 use App\Services\GeofenceSuggestionService;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -89,7 +90,7 @@ class GeofenceManager extends Component
      */
     public function getZoneSuggestionsProperty(): array
     {
-        $user = Auth::user();
+        $user = CurrentUser::get();
         $team = $user instanceof User ? $user->currentTeam : null;
 
         if ($team === null) {
@@ -148,13 +149,13 @@ class GeofenceManager extends Component
     public function editGeofence(Geofence $geofence): void
     {
         $this->editingGeofenceId = $geofence->id;
-        $this->teamId = auth()->user()->current_team_id;
+        $this->teamId = auth()->user()?->current_team_id;
         $this->mineAreaId = $geofence->mine_area_id;
         $this->name = $geofence->name;
         $this->description = $geofence->description ?? '';
         $this->type = $geofence->type;
-        $this->centerLatitude = (float) $geofence->center_latitude;
-        $this->centerLongitude = (float) $geofence->center_longitude;
+        $this->centerLatitude = $geofence->center_latitude;
+        $this->centerLongitude = $geofence->center_longitude;
         $this->coordinates = is_string($geofence->coordinates) ? json_decode($geofence->coordinates, true) : $geofence->coordinates ?? [];
         $this->showCreateModal = true;
     }
@@ -171,7 +172,7 @@ class GeofenceManager extends Component
             'centerLongitude' => 'required|numeric',
         ]);
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         $data = [
             'team_id' => $this->teamId,
@@ -184,7 +185,7 @@ class GeofenceManager extends Component
             'coordinates' => json_encode($this->coordinates),
         ];
 
-        if ($this->editingGeofenceId) {
+        if (($this->editingGeofenceId !== null && $this->editingGeofenceId !== 0)) {
             $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->editingGeofenceId);
             $this->authorize('update', $geofence);
             $geofence->update($data);
@@ -210,7 +211,7 @@ class GeofenceManager extends Component
 
     public function render(): View
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         $geofencesQuery = Geofence::where('team_id', $team->id)
             ->when($this->search, function ($query) {

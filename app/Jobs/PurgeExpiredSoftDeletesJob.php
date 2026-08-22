@@ -30,7 +30,7 @@ class PurgeExpiredSoftDeletesJob implements ShouldQueue
 
     public function handle(): void
     {
-        $graceDays = (int) config('retention.soft_delete_grace_days', 30);
+        $graceDays = config('retention.soft_delete_grace_days', 30);
         $cutoff = now()->subDays($graceDays);
 
         $totals = [];

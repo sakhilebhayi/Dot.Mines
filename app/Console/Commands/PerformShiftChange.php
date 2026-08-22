@@ -20,7 +20,7 @@ class PerformShiftChange extends Command
 
         $this->info("Starting shift change for team {$teamId}, shift={$shiftType}");
 
-        $shift = $shiftService->performShiftChange($teamId, $shiftType, $defaultMineArea ? (int) $defaultMineArea : null);
+        $shift = $shiftService->performShiftChange($teamId, $shiftType, ($defaultMineArea !== null && $defaultMineArea !== '' && $defaultMineArea !== '0') ? (int) $defaultMineArea : null);
 
         $this->info("Shift record created: {$shift->id}");
 

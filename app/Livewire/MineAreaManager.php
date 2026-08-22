@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use App\Models\MineArea;
 use App\Services\MineAreaService;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -144,7 +144,7 @@ class MineAreaManager extends Component
     {
         $this->validate();
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $data = [
             'name' => $this->name,
             'description' => $this->description,
@@ -157,7 +157,7 @@ class MineAreaManager extends Component
             'manager_contact' => $this->manager_contact,
         ];
 
-        if ($this->editingMineAreaId) {
+        if (($this->editingMineAreaId !== null && $this->editingMineAreaId !== 0)) {
             $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
             if (! $mineArea) {
                 $this->dispatch('notify', ['message' => 'Mine area not found', 'type' => 'error']);
@@ -170,7 +170,7 @@ class MineAreaManager extends Component
         }
 
         try {
-            if ($this->editingMineAreaId) {
+            if (($this->editingMineAreaId !== null && $this->editingMineAreaId !== 0)) {
                 $this->getService()->update($mineArea, $data);
                 $this->dispatch('notify', ['message' => 'Mine area updated successfully', 'type' => 'success']);
                 $this->showEditModal = false;
@@ -185,14 +185,14 @@ class MineAreaManager extends Component
             $this->resetForm();
             $this->resetPage();
         } catch (\Throwable $e) {
-            Log::error('Failed to save mine area', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            Log::error('Failed to save mine area', ['team_id' => $team?->id, 'error' => $e->getMessage()]);
             $this->dispatch('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
         }
     }
 
     public function deleteMineArea(MineArea $mineArea): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         if ($mineArea->team_id !== $team->id) {
             abort(403);
         }
@@ -280,13 +280,13 @@ class MineAreaManager extends Component
 
         $this->validate();
 
-        if (empty($this->boundaryCoordinates)) {
+        if ($this->boundaryCoordinates === null || $this->boundaryCoordinates === []) {
             $this->dispatch('notify', ['message' => 'Please draw a boundary on the map', 'type' => 'error']);
 
             return;
         }
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $data = [
             'name' => $this->name,
             'description' => $this->description,
@@ -320,7 +320,7 @@ class MineAreaManager extends Component
 
     public function render(): View
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         $query = MineArea::forTeam($team->id)
             ->withCount(['machines', 'geofences', 'alerts' => function ($q) {

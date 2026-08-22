@@ -20,7 +20,10 @@ use Laravel\Jetstream\Team as JetstreamTeam;
  * @property int $user_id
  * @property string $name
  * @property string|null $personal_team
- * @property string|null $timezone
+ * @property string $timezone
+ * @property string $currency
+ * @property string $language
+ * @property string|null $email
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read User $owner

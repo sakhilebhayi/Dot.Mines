@@ -72,13 +72,13 @@ class GeofenceSuggestionService
             $cells[$key]['lat_sum'] += $lat;
             $cells[$key]['lng_sum'] += $lng;
             $cells[$key]['count']++;
-            $cells[$key]['machines'][(int) $metric->machine_id] = true;
+            $cells[$key]['machines'][$metric->machine_id] = true;
             $cells[$key]['days'][$metric->recorded_at?->toDateString() ?? 'unknown'] = true;
         }
 
         $existingCenters = Geofence::where('team_id', $team->id)
             ->get(['center_latitude', 'center_longitude'])
-            ->map(fn (Geofence $geofence): array => [(float) $geofence->center_latitude, (float) $geofence->center_longitude]);
+            ->map(fn (Geofence $geofence): array => [$geofence->center_latitude, $geofence->center_longitude]);
 
         $suggestions = [];
 

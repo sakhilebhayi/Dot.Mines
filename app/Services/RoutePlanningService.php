@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Geofence;
 use App\Models\Route;
-use Illuminate\Support\Collection;
+use App\Support\Geo;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -32,29 +31,24 @@ class RoutePlanningService
         float $startLat,
         float $startLon,
         float $endLat,
-        float $endLon,
-        ?int $machineId = null,
-        ?int $teamId = null
+        float $endLon
     ): array {
-        // Get geofences for the team
-        $geofences = $teamId ? Geofence::where('team_id', $teamId)->get() : collect();
-
         // Get road-based route from OSRM
         $roadRoute = $this->getOSRMRoute($startLon, $startLat, $endLon, $endLat);
 
-        if (! $roadRoute) {
+        if ($roadRoute === null) {
             // Fallback to straight-line calculation if OSRM fails
             return $this->calculateStraightLineRoute($startLat, $startLon, $endLat, $endLon);
         }
 
         // Extract route geometry (array of [lat, lon] coordinates)
         $routeCoordinates = $roadRoute['geometry'];
-        $totalDistance = $roadRoute['distance'] / 1000; // Convert meters to km
-        $totalDuration = $roadRoute['duration'] / 60; // Convert seconds to minutes
+        $totalDistance = $roadRoute['distance'] / 1000.0; // Convert meters to km
+        $totalDuration = $roadRoute['duration'] / 60.0; // Convert seconds to minutes
 
         // Generate waypoints from the route geometry
         // Sample points along the route to avoid too many waypoints
-        $waypointData = $this->sampleRouteWaypoints($routeCoordinates, $geofences);
+        $waypointData = $this->sampleRouteWaypoints($routeCoordinates);
 
         $estimatedTime = (int) $totalDuration;
         $estimatedFuel = round($totalDistance * $this->fuelConsumption, 2);
@@ -75,7 +69,7 @@ class RoutePlanningService
     /**
      * Get route from OSRM routing engine
      *
-     * @return array<string, mixed>|null
+     * @return array{geometry: list<array{0: float, 1: float}>, distance: float, duration: float, steps: list<mixed>}|null
      */
     protected function getOSRMRoute(float $startLon, float $startLat, float $endLon, float $endLat): ?array
     {
@@ -100,7 +94,7 @@ class RoutePlanningService
 
             $data = $response->json();
 
-            if ($data['code'] !== 'Ok' || empty($data['routes'])) {
+            if (! is_array($data) || ($data['code'] ?? null) !== 'Ok' || ! is_array($data['routes'] ?? null) || $data['routes'] === []) {
                 Log::warning('OSRM returned no valid routes', ['data' => $data]);
 
                 return null;
@@ -108,19 +102,28 @@ class RoutePlanningService
 
             $route = $data['routes'][0];
 
-            // Extract geometry coordinates from GeoJSON
-            $coordinates = $route['geometry']['coordinates'] ?? [];
+            if (! is_array($route)) {
+                return null;
+            }
 
-            // Convert from [lon, lat] to [lat, lon] format
-            $routeCoordinates = array_map(function ($coord) {
-                return [$coord[1], $coord[0]]; // Swap to [lat, lon]
-            }, $coordinates);
+            // Extract geometry coordinates from GeoJSON, converting each
+            // [lon, lat] pair to [lat, lon] and dropping malformed entries.
+            $rawCoordinates = data_get($route, 'geometry.coordinates');
+            $routeCoordinates = [];
+
+            foreach (is_array($rawCoordinates) ? $rawCoordinates : [] as $coord) {
+                if (is_array($coord) && is_numeric($coord[0] ?? null) && is_numeric($coord[1] ?? null)) {
+                    $routeCoordinates[] = [(float) $coord[1], (float) $coord[0]];
+                }
+            }
+
+            $steps = data_get($route, 'legs.0.steps');
 
             return [
                 'geometry' => $routeCoordinates,
-                'distance' => $route['distance'] ?? 0,
-                'duration' => $route['duration'] ?? 0,
-                'steps' => $route['legs'][0]['steps'] ?? [],
+                'distance' => is_numeric($route['distance'] ?? null) ? (float) $route['distance'] : 0.0,
+                'duration' => is_numeric($route['duration'] ?? null) ? (float) $route['duration'] : 0.0,
+                'steps' => is_array($steps) ? array_values($steps) : [],
             ];
 
         } catch (\Exception $e) {
@@ -137,13 +140,12 @@ class RoutePlanningService
     /**
      * Sample waypoints from route geometry to avoid too many points
      *
-     * @param  array<int, mixed>  $routeCoordinates
-     * @param  Collection<array-key, mixed>  $geofences
+     * @param  list<array{0: float, 1: float}>  $routeCoordinates
      * @return list<array<string, mixed>>
      */
-    protected function sampleRouteWaypoints(array $routeCoordinates, Collection $geofences): array
+    protected function sampleRouteWaypoints(array $routeCoordinates): array
     {
-        if (empty($routeCoordinates)) {
+        if ($routeCoordinates === []) {
             return [];
         }
 
@@ -160,7 +162,7 @@ class RoutePlanningService
             $lat = $routeCoordinates[$i][0];
             $lon = $routeCoordinates[$i][1];
 
-            $distance = $this->calculateDistance($prevLat, $prevLon, $lat, $lon);
+            $distance = Geo::distanceKm($prevLat, $prevLon, $lat, $lon);
 
             $waypointData[] = [
                 'sequence_order' => count($waypointData) + 1,
@@ -169,7 +171,7 @@ class RoutePlanningService
                 'waypoint_type' => 'navigation',
                 'name' => 'Waypoint '.(count($waypointData) + 1),
                 'distance_from_previous' => round($distance, 2),
-                'estimated_time_from_previous' => (int) (($distance / $this->avgSpeed) * 60),
+                'estimated_time_from_previous' => (int) (($distance / $this->avgSpeed) * 60.0),
             ];
 
             $prevLat = $lat;
@@ -190,8 +192,8 @@ class RoutePlanningService
         float $endLat,
         float $endLon
     ): array {
-        $totalDistance = $this->calculateDistance($startLat, $startLon, $endLat, $endLon);
-        $estimatedTime = (int) (($totalDistance / $this->avgSpeed) * 60);
+        $totalDistance = Geo::distanceKm($startLat, $startLon, $endLat, $endLon);
+        $estimatedTime = (int) (($totalDistance / $this->avgSpeed) * 60.0);
         $estimatedFuel = round($totalDistance * $this->fuelConsumption, 2);
 
         return [
@@ -208,108 +210,12 @@ class RoutePlanningService
     }
 
     /**
-     * Check if path intersects with geofence
+     * Great-circle distance between two coordinates in kilometres.
+     * Thin delegate kept for external callers (RouteAdvisorAgent); the
+     * single shared implementation lives in \App\Support\Geo.
      */
-    protected function pathIntersectsGeofence(
-        float $startLat,
-        float $startLon,
-        float $endLat,
-        float $endLon,
-        Geofence $geofence
-    ): bool {
-        // Simple bounding box check
-        $coordinates = is_string($geofence->coordinates) ? json_decode($geofence->coordinates, true) : $geofence->coordinates;
-
-        if (empty($coordinates)) {
-            return false;
-        }
-
-        // Get geofence bounds
-        $lats = array_column($coordinates, 'lat');
-        $lngs = array_column($coordinates, 'lng');
-
-        if ($lats === [] || $lngs === []) {
-            return false;
-        }
-
-        $minLat = min($lats);
-        $maxLat = max($lats);
-        $minLon = min($lngs);
-        $maxLon = max($lngs);
-
-        // Check if line segment passes through bounding box
-        $lineMinLat = min($startLat, $endLat);
-        $lineMaxLat = max($startLat, $endLat);
-        $lineMinLon = min($startLon, $endLon);
-        $lineMaxLon = max($startLon, $endLon);
-
-        return ! ($lineMaxLat < $minLat || $lineMinLat > $maxLat ||
-                 $lineMaxLon < $minLon || $lineMinLon > $maxLon);
-    }
-
-    /**
-     * Calculate point to avoid geofence
-     *
-     * @return array<string, mixed>
-     */
-    protected function calculateAvoidancePoint(
-        float $startLat,
-        float $startLon,
-        float $endLat,
-        float $endLon,
-        Geofence $geofence
-    ): ?array {
-        $coordinates = is_string($geofence->coordinates) ? json_decode($geofence->coordinates, true) : $geofence->coordinates;
-
-        if (empty($coordinates)) {
-            return null;
-        }
-
-        // Calculate geofence center
-        $centerLat = array_sum(array_column($coordinates, 'lat')) / count($coordinates);
-        $centerLon = array_sum(array_column($coordinates, 'lng')) / count($coordinates);
-
-        // Calculate perpendicular offset point
-        $midLat = ($startLat + $endLat) / 2;
-        $midLon = ($startLon + $endLon) / 2;
-
-        // Calculate vector from geofence center to route midpoint
-        $vecLat = $midLat - $centerLat;
-        $vecLon = $midLon - $centerLon;
-
-        // Normalize and scale
-        $magnitude = sqrt($vecLat * $vecLat + $vecLon * $vecLon);
-        if ($magnitude > 0) {
-            $vecLat = ($vecLat / $magnitude) * 0.01; // ~1km offset
-            $vecLon = ($vecLon / $magnitude) * 0.01;
-        }
-
-        return [
-            'lat' => $centerLat + $vecLat,
-            'lon' => $centerLon + $vecLon,
-        ];
-    }
-
-    /**
-     * Calculate distance between two coordinates using Haversine formula
-     */
-    public function calculateDistance(
-        float $lat1,
-        float $lon1,
-        float $lat2,
-        float $lon2
-    ): float {
-        $earthRadius = 6371; // km
-
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-
-        $a = sin($dLat / 2) * sin($dLat / 2) +
-             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-             sin($dLon / 2) * sin($dLon / 2);
-
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
-        return $earthRadius * $c;
+    public function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        return Geo::distanceKm($lat1, $lon1, $lat2, $lon2);
     }
 }

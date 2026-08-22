@@ -35,7 +35,7 @@ class FuelManagementService
             $transaction = FuelTransaction::create($data);
 
             // Update tank level based on transaction type
-            if ($transaction->fuel_tank_id) {
+            if (($transaction->fuel_tank_id !== null && $transaction->fuel_tank_id !== 0)) {
                 $this->updateTankLevel($transaction);
             }
 
@@ -84,11 +84,11 @@ class FuelManagementService
                 break;
 
             case 'transfer':
-                if ($transaction->from_tank_id) {
+                if (($transaction->from_tank_id !== null && $transaction->from_tank_id !== 0)) {
                     FuelTank::query()->find($transaction->from_tank_id)
                         ?->decrement('current_level_liters', (float) $transaction->quantity_liters);
                 }
-                if ($transaction->to_tank_id) {
+                if (($transaction->to_tank_id !== null && $transaction->to_tank_id !== 0)) {
                     FuelTank::query()->find($transaction->to_tank_id)
                         ?->increment('current_level_liters', (float) $transaction->quantity_liters);
                 }
@@ -102,7 +102,7 @@ class FuelManagementService
     protected function checkAndCreateAlerts(FuelTransaction $transaction): void
     {
         // Check tank level alerts
-        $tank = $transaction->fuel_tank_id ? $transaction->fuelTank : null;
+        $tank = ($transaction->fuel_tank_id !== null && $transaction->fuel_tank_id !== 0) ? $transaction->fuelTank : null;
 
         if ($tank !== null) {
             if ($tank->isCritical()) {
@@ -127,7 +127,7 @@ class FuelManagementService
         }
 
         // Check machine fuel consumption patterns
-        if ($transaction->machine_id && $transaction->transaction_type === 'dispensing') {
+        if (($transaction->machine_id !== null && $transaction->machine_id !== 0) && $transaction->transaction_type === 'dispensing') {
             $this->checkMachineConsumptionPatterns($transaction);
         }
 
@@ -302,12 +302,12 @@ class FuelManagementService
         ];
 
         // Calculate efficiency if we have operating hours
-        if ($operatingHours && $operatingHours > 0) {
+        if (($operatingHours !== null && $operatingHours !== 0.0) && $operatingHours > 0) {
             $data['fuel_efficiency_lph'] = round($totalFuel / $operatingHours, 4);
         }
 
         // Calculate idle fuel consumption estimate (25% of total if idling)
-        if ($idleTime && $idleTime > 0) {
+        if (($idleTime !== null && $idleTime !== 0.0) && $idleTime > 0) {
             $data['idle_fuel_consumed'] = round($totalFuel * 0.25, 2);
         }
 

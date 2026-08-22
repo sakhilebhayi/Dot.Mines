@@ -20,7 +20,7 @@ class CsvReportWriter
             fputcsv($handle, $row);
         }
 
-        if (! empty($data['summary'])) {
+        if (is_array($data['summary'] ?? null) && $data['summary'] !== []) {
             fputcsv($handle, []);
             fputcsv($handle, ['Summary']);
             foreach ($data['summary'] as $label => $value) {

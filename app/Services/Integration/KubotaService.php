@@ -40,7 +40,10 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
             $machines = [];
             if (! empty($response['data']['machines'])) {
-                foreach ($response['data']['machines'] as $machine) {
+                $rows24 = data_get($response, 'data.machines');
+                /** @var list<array<string, mixed>> $rows24 */
+                $rows24 = is_array($rows24) ? array_values(array_filter($rows24, 'is_array')) : [];
+                foreach ($rows24 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
@@ -71,7 +74,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
+                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -96,9 +99,9 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics($telemetry['data'] ?? []),
-                $this->parseMetrics($diagnostics['data'] ?? []),
-                $this->parseMetrics($service['data'] ?? [])
+                $this->parseMetrics(is_array($telemetry['data'] ?? null) ? $telemetry['data'] : []),
+                $this->parseMetrics(is_array($diagnostics['data'] ?? null) ? $diagnostics['data'] : []),
+                $this->parseMetrics(is_array($service['data'] ?? null) ? $service['data'] : [])
             );
 
             return [
@@ -125,7 +128,10 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                foreach ($response['data']['alerts'] as $alert) {
+                $rows25 = data_get($response, 'data.alerts');
+                /** @var list<array<string, mixed>> $rows25 */
+                $rows25 = is_array($rows25) ? array_values(array_filter($rows25, 'is_array')) : [];
+                foreach ($rows25 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
@@ -176,7 +182,9 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -191,7 +199,9 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
         try {
             $result = $this->fetchMetrics($machineId);
 
-            return $result['metrics'] ?? [];
+            $metrics = $result['metrics'] ?? [];
+
+            return is_array($metrics) ? $metrics : [];
         } catch (Exception $e) {
             return [];
         }
@@ -206,7 +216,9 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

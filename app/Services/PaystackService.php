@@ -114,8 +114,8 @@ class PaystackService
     {
         $subscription = Subscription::where('team_id', $team->id)->first();
 
-        if ($subscription?->paystack_customer_code) {
-            return $subscription->paystack_customer_code;
+        if (($subscription?->paystack_customer_code !== null && $subscription?->paystack_customer_code !== '' && $subscription?->paystack_customer_code !== '0')) {
+            return $subscription?->paystack_customer_code;
         }
 
         $response = $this->post('/customer', [
@@ -164,7 +164,7 @@ class PaystackService
 
         $priceFor = fn (SubscriptionPlan $plan): float => $billingCycle === 'yearly'
             ? (float) $plan->yearly_price
-            : (float) $plan->price;
+            : $plan->price;
 
         $total = ((float) $quantities['adt'] * $priceFor($adtPlan)) + ((float) $quantities['heavy'] * $priceFor($heavyPlan));
 
@@ -257,7 +257,7 @@ class PaystackService
      */
     public function generateManageLink(Subscription $subscription): ?string
     {
-        if (! $subscription->paystack_subscription_code) {
+        if (($subscription->paystack_subscription_code === null || $subscription->paystack_subscription_code === '' || $subscription->paystack_subscription_code === '0')) {
             return null;
         }
 
@@ -299,7 +299,7 @@ class PaystackService
      */
     public function cancelSubscription(Subscription $subscription, bool $immediately = false): bool
     {
-        if (! $subscription->paystack_subscription_code || ! $subscription->paystack_email_token) {
+        if (($subscription->paystack_subscription_code === null || $subscription->paystack_subscription_code === '' || $subscription->paystack_subscription_code === '0') || ($subscription->paystack_email_token === null || $subscription->paystack_email_token === '' || $subscription->paystack_email_token === '0')) {
             Log::warning('Cannot cancel subscription: missing code or token', [
                 'subscription_id' => $subscription->id,
             ]);
@@ -334,7 +334,7 @@ class PaystackService
      */
     public function resumeSubscription(Subscription $subscription): bool
     {
-        if (! $subscription->paystack_subscription_code || ! $subscription->paystack_email_token) {
+        if (($subscription->paystack_subscription_code === null || $subscription->paystack_subscription_code === '' || $subscription->paystack_subscription_code === '0') || ($subscription->paystack_email_token === null || $subscription->paystack_email_token === '' || $subscription->paystack_email_token === '0')) {
             Log::warning('Cannot resume subscription: missing code or token', [
                 'subscription_id' => $subscription->id,
             ]);

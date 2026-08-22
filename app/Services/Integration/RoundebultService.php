@@ -48,7 +48,10 @@ class RoundebultService extends BaseManufacturerService
 
             $machines = [];
             if (! empty($response['data']['machines'])) {
-                foreach ($response['data']['machines'] as $machine) {
+                $rows28 = data_get($response, 'data.machines');
+                /** @var list<array<string, mixed>> $rows28 */
+                $rows28 = is_array($rows28) ? array_values(array_filter($rows28, 'is_array')) : [];
+                foreach ($rows28 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
@@ -81,7 +84,7 @@ class RoundebultService extends BaseManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
+                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -108,8 +111,8 @@ class RoundebultService extends BaseManufacturerService
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $allMetrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics($metrics['data'] ?? []),
-                $this->parseMetrics($operations['data'] ?? [])
+                $this->parseMetrics(is_array($metrics['data'] ?? null) ? $metrics['data'] : []),
+                $this->parseMetrics(is_array($operations['data'] ?? null) ? $operations['data'] : [])
             );
 
             return [
@@ -138,7 +141,10 @@ class RoundebultService extends BaseManufacturerService
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                foreach ($response['data']['alerts'] as $alert) {
+                $rows29 = data_get($response, 'data.alerts');
+                /** @var list<array<string, mixed>> $rows29 */
+                $rows29 = is_array($rows29) ? array_values(array_filter($rows29, 'is_array')) : [];
+                foreach ($rows29 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
@@ -171,8 +177,8 @@ class RoundebultService extends BaseManufacturerService
             'name' => $data['name'] ?? 'Unknown Machine',
             'model' => $data['model'] ?? 'Unknown Model',
             'manufacturer' => 'Roundebult',
-            'status' => $this->parseStatus($data['status'] ?? 'unknown'),
-            'location' => $this->parseLocation($data['location'] ?? []),
+            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'location' => $this->parseLocation(is_array($data['location'] ?? null) ? $data['location'] : []),
             'last_heartbeat' => $data['last_heartbeat'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'mining_machine',
@@ -212,8 +218,8 @@ class RoundebultService extends BaseManufacturerService
             // normaliser, pinned by ManufacturerAlertsShapeTest.
             'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? null,
-            'type' => $this->mapAlertType($data['alert_type'] ?? 'unknown'),
-            'priority' => $this->mapAlertPriority($data['severity'] ?? 'medium'),
+            'type' => $this->mapAlertType(is_string($data['alert_type'] ?? null) ? $data['alert_type'] : 'unknown'),
+            'priority' => $this->mapAlertPriority(is_string($data['severity'] ?? null) ? $data['severity'] : 'medium'),
             'message' => $data['message'] ?? 'Alert from Roundebult',
             'timestamp' => $data['timestamp'] ?? now()->toIso8601String(),
             'acknowledged' => $data['acknowledged'] ?? false,
@@ -265,7 +271,9 @@ class RoundebultService extends BaseManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -280,7 +288,9 @@ class RoundebultService extends BaseManufacturerService
         try {
             $result = $this->fetchMetrics($machineId);
 
-            return $result['metrics'] ?? [];
+            $metrics = $result['metrics'] ?? [];
+
+            return is_array($metrics) ? $metrics : [];
         } catch (Exception $e) {
             return [];
         }
@@ -295,7 +305,9 @@ class RoundebultService extends BaseManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

@@ -187,7 +187,10 @@ class BellService extends BaseManufacturerService
             return [];
         }
 
-        foreach ($result['machines'] as $machine) {
+        $rows1 = data_get($result, 'machines');
+        /** @var list<array<string, mixed>> $rows1 */
+        $rows1 = is_array($rows1) ? array_values(array_filter($rows1, 'is_array')) : [];
+        foreach ($rows1 as $machine) {
             if (($machine['external_id'] ?? null) === $machineId) {
                 return $machine;
             }
@@ -254,8 +257,8 @@ class BellService extends BaseManufacturerService
             }
 
             $latest = end($readings);
-            $latitude = $this->parser->toFloatOrNull($latest['attributes']['Latitude'] ?? null);
-            $longitude = $this->parser->toFloatOrNull($latest['attributes']['Longitude'] ?? null);
+            $latitude = $this->parser->toFloatOrNull(data_get($latest, 'attributes.Latitude') ?? null);
+            $longitude = $this->parser->toFloatOrNull(data_get($latest, 'attributes.Longitude') ?? null);
 
             if (! $this->parser->isValidCoordinate($latitude, $longitude)) {
                 return null;
@@ -266,8 +269,8 @@ class BellService extends BaseManufacturerService
                 'longitude' => $longitude,
                 'accuracy' => null,
                 'timestamp' => $latest['timestamp'],
-                'heading' => $this->parser->toFloatOrNull($latest['attributes']['Heading'] ?? null),
-                'speed' => $this->parser->toFloatOrNull($latest['attributes']['Speed'] ?? null),
+                'heading' => $this->parser->toFloatOrNull(data_get($latest, 'attributes.Heading') ?? null),
+                'speed' => $this->parser->toFloatOrNull(data_get($latest, 'attributes.Speed') ?? null),
             ];
         } catch (Throwable $e) {
             $this->logError('Failed to fetch Bell machine location', $e);
@@ -490,7 +493,7 @@ class BellService extends BaseManufacturerService
         foreach (is_array($nodes) ? $nodes : [] as $node) {
             $attributes = [];
             foreach ($node->attributes() ?? [] as $name => $value) {
-                $attributes[(string) $name] = (string) $value;
+                $attributes[$name] = (string) $value;
             }
 
             // Bell's cumulative production series (CumulativeLoadCount,
@@ -535,7 +538,7 @@ class BellService extends BaseManufacturerService
     {
         $token = $this->getAccessToken();
 
-        if (! $token) {
+        if (($token === null || $token === '' || $token === '0')) {
             return null;
         }
 
@@ -579,7 +582,7 @@ class BellService extends BaseManufacturerService
                     $this->forgetCachedToken();
                     $token = $this->getAccessToken();
 
-                    if (! $token) {
+                    if (($token === null || $token === '' || $token === '0')) {
                         return null;
                     }
 
@@ -640,7 +643,7 @@ class BellService extends BaseManufacturerService
      */
     private function getAccessToken(): ?string
     {
-        if (! $this->username || ! $this->password || ! $this->clientSecret) {
+        if (($this->username === null || $this->username === '' || $this->username === '0') || ($this->password === null || $this->password === '' || $this->password === '0') || ($this->clientSecret === null || $this->clientSecret === '' || $this->clientSecret === '0')) {
             $this->lastError = 'Bell integration is missing username, password, or client secret.';
 
             return null;

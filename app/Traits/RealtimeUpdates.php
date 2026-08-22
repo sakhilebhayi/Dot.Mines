@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Support\CurrentUser;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -21,7 +22,7 @@ trait RealtimeUpdates
     public function initializeRealtimeUpdates(): void
     {
         $userId = Auth::id();
-        $teamId = Auth::user()->current_team_id;
+        $teamId = CurrentUser::get()?->current_team_id;
 
         // Dispatch JavaScript to initialize Reverb
         $this->dispatch('realtime:init', userId: $userId, teamId: $teamId);
@@ -32,7 +33,7 @@ trait RealtimeUpdates
      */
     public function getCurrentUser(): ?User
     {
-        $user = Auth::user();
+        $user = CurrentUser::get();
 
         return $user instanceof User ? $user : null;
     }
@@ -58,7 +59,7 @@ trait RealtimeUpdates
      */
     public function getTeamId(): string
     {
-        return (string) Auth::user()->current_team_id;
+        return (string) CurrentUser::get()?->current_team_id;
     }
 
     /**

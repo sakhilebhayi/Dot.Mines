@@ -6,6 +6,7 @@ use App\Events\MachineLocationUpdated;
 use App\Models\Integration;
 use App\Models\Machine;
 use App\Services\Integration\IntegrationService;
+use App\Support\Geo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -200,12 +201,12 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
     private function hasLocationChanged(Machine $machine, array $newLocation): bool
     {
         // Always update if no previous location
-        if (! $machine->last_location_latitude || ! $machine->last_location_longitude) {
+        if (($machine->last_location_latitude === null || $machine->last_location_latitude === 0.0) || ($machine->last_location_longitude === null || $machine->last_location_longitude === 0.0)) {
             return true;
         }
 
         // Calculate distance using Haversine formula
-        $distance = $this->calculateDistance(
+        $distance = Geo::distanceKm(
             $machine->last_location_latitude,
             $machine->last_location_longitude,
             $newLocation['latitude'] ?? 0,
@@ -220,31 +221,6 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
         $significantTime = $lastUpdate === null || $lastUpdate->diffInMinutes(now()) >= 5;
 
         return $significantDistance || $significantTime;
-    }
-
-    /**
-     * Calculate distance between two coordinates in kilometers.
-     * Uses Haversine formula for great-circle distance.
-     */
-    private function calculateDistance(
-        float $lat1,
-        float $lon1,
-        float $lat2,
-        float $lon2
-    ): float {
-        $earthRadiusKm = 6371;
-
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-
-        $a = sin($dLat / 2) * sin($dLat / 2) +
-            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($dLon / 2) * sin($dLon / 2);
-
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-        $distance = $earthRadiusKm * $c;
-
-        return $distance;
     }
 
     /**

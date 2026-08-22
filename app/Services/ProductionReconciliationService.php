@@ -60,7 +60,7 @@ class ProductionReconciliationService
             'date' => $date,
             'totals' => [
                 'machines' => $records->pluck('machine_id')->unique()->count(),
-                'loads' => (int) $records->sum(fn (ProductionRecord $record): int => (int) data_get($record->metadata, 'loads', 0)),
+                'loads' => $records->sum(fn (ProductionRecord $record): int => (int) data_get($record->metadata, 'loads', 0)),
                 'tonnes' => round((float) $records->sum('quantity_produced'), 1),
             ],
             'checks' => $checks,
@@ -106,7 +106,7 @@ class ProductionReconciliationService
         return [
             'label' => 'Record consistency',
             'state' => 'error',
-            'detail' => $mismatched->count().' record(s) where stored tonnes disagree with the payload delta they were derived from (e.g. machine #'.$worst->machine_id.' on '.$worst->record_date?->toDateString().')',
+            'detail' => $mismatched->count().' record(s) where stored tonnes disagree with the payload delta they were derived from (e.g. machine #'.$worst?->machine_id.' on '.$worst?->record_date?->toDateString().')',
         ];
     }
 
@@ -158,7 +158,7 @@ class ProductionReconciliationService
         }
 
         $liveLoads = (int) $live->sum('loads_today');
-        $storedLoads = (int) $records->sum(fn (ProductionRecord $record): int => (int) data_get($record->metadata, 'loads', 0));
+        $storedLoads = $records->sum(fn (ProductionRecord $record): int => (int) data_get($record->metadata, 'loads', 0));
         $skew = abs($liveLoads - $storedLoads);
 
         $detail = "live counters say {$liveLoads} loads today, stored records say {$storedLoads} (skew {$skew})";

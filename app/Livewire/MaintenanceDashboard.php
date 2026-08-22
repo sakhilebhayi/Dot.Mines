@@ -103,7 +103,7 @@ class MaintenanceDashboard extends Component
         ]);
 
         $user = auth()->user();
-        $teamId = $user->current_team_id;
+        $teamId = $user?->current_team_id;
 
         // Verify machine belongs to team
         $machine = Machine::where('id', $this->machine_id)
@@ -135,7 +135,7 @@ class MaintenanceDashboard extends Component
             ]);
 
             Log::info('Maintenance scheduled', [
-                'user_id' => $user->id,
+                'user_id' => $user?->id,
                 'machine_id' => $this->machine_id,
                 'type' => $this->maintenance_type,
             ]);
@@ -164,7 +164,7 @@ class MaintenanceDashboard extends Component
             return;
         }
 
-        $record = MaintenanceRecord::where('team_id', auth()->user()->current_team_id)
+        $record = MaintenanceRecord::where('team_id', auth()->user()?->current_team_id)
             ->find($recordId);
 
         if (! $record) {
@@ -207,7 +207,7 @@ class MaintenanceDashboard extends Component
             return;
         }
 
-        $record = MaintenanceRecord::where('team_id', auth()->user()->current_team_id)
+        $record = MaintenanceRecord::where('team_id', auth()->user()?->current_team_id)
             ->find($recordId);
 
         if (! $record) {
@@ -392,7 +392,7 @@ class MaintenanceDashboard extends Component
 
     public function render(): View
     {
-        $teamId = auth()->user()->current_team_id;
+        $teamId = auth()->user()?->current_team_id;
 
         // Get date range
         $dateRange = $this->getDateRange();

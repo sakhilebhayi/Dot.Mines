@@ -9,10 +9,10 @@ use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\User;
 use App\Services\OperationalSnapshotService;
+use App\Support\CurrentUser;
 use App\Traits\RealtimeUpdates;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -46,8 +46,8 @@ class LiveMap extends Component
     public function mount(): void
     {
         // Try to center on first machine location if available, else default to South Africa
-        $team = Auth::user()->currentTeam;
-        $firstMachine = Machine::where('team_id', $team->id)
+        $team = CurrentUser::get()?->currentTeam;
+        $firstMachine = Machine::where('team_id', $team?->id)
             ->whereNotNull('last_location_latitude')
             ->whereNotNull('last_location_longitude')
             ->first();
@@ -72,8 +72,8 @@ class LiveMap extends Component
 
     public function loadActivityFeed(): void
     {
-        $team = Auth::user()->currentTeam;
-        $this->activityFeed = ActivityLog::where('team_id', $team->id)
+        $team = CurrentUser::get()?->currentTeam;
+        $this->activityFeed = ActivityLog::where('team_id', $team?->id)
             ->latest('created_at')
             ->take(10)
             ->get()
@@ -146,7 +146,7 @@ class LiveMap extends Component
      */
     public function getTrails(): array
     {
-        $user = Auth::user();
+        $user = CurrentUser::get();
         $team = $user instanceof User ? $user->currentTeam : null;
 
         if ($team === null) {
@@ -179,8 +179,8 @@ class LiveMap extends Component
 
             if (count($points) >= 2) {
                 $trails[] = [
-                    'machine_id' => (int) $machineId,
-                    'name' => (string) ($names[$machineId] ?? ('Machine #'.$machineId)),
+                    'machine_id' => $machineId,
+                    'name' => ($names[$machineId] ?? ('Machine #'.$machineId)),
                     'points' => $points,
                 ];
             }
@@ -224,10 +224,10 @@ class LiveMap extends Component
      */
     public function getMachines()
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::get()?->currentTeam;
 
         $machinesQuery = Machine::query()
-            ->where('team_id', $team->id)
+            ->where('team_id', $team?->id)
             ->whereNotNull('last_location_latitude')
             ->whereNotNull('last_location_longitude');
 
@@ -235,7 +235,7 @@ class LiveMap extends Component
             $machinesQuery->where('status', $this->selectedStatus);
         }
 
-        if ($this->selectedMineAreaId) {
+        if (($this->selectedMineAreaId !== null && $this->selectedMineAreaId !== 0)) {
             $machinesQuery->where('mine_area_id', $this->selectedMineAreaId);
         }
 
@@ -254,10 +254,10 @@ class LiveMap extends Component
      */
     public function getMineAreas(): array
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::get()?->currentTeam;
 
         // Return active mine areas with coordinates decoded for client-side use
-        return MineArea::forTeam($team->id)
+        return MineArea::forTeam($team?->id)
             ->byStatus('active')
             ->orderBy('name')
             ->get()
@@ -290,16 +290,16 @@ class LiveMap extends Component
      */
     public function getGeofences(): \Illuminate\Support\Collection
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::get()?->currentTeam;
 
-        return Geofence::where('team_id', $team->id)
+        return Geofence::where('team_id', $team?->id)
             ->get()
             ->map(function ($geofence) {
                 return [
                     'id' => $geofence->id,
                     'name' => $geofence->name,
-                    'center_latitude' => (float) $geofence->center_latitude,
-                    'center_longitude' => (float) $geofence->center_longitude,
+                    'center_latitude' => $geofence->center_latitude,
+                    'center_longitude' => $geofence->center_longitude,
                     'coordinates' => is_string($geofence->coordinates) ? json_decode($geofence->coordinates, true) : $geofence->coordinates ?? [],
                 ];
             });
@@ -309,13 +309,13 @@ class LiveMap extends Component
     {
         $machines = $this->getMachines();
         $geofences = $this->getGeofences();
-        $machineStatuses = Machine::where('team_id', Auth::user()->currentTeam->id)
+        $machineStatuses = Machine::where('team_id', CurrentUser::get()?->currentTeam?->id)
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
 
-        $user = Auth::user();
+        $user = CurrentUser::get();
         $team = $user instanceof User ? $user->currentTeam : null;
         $snapshots = $team ? app(OperationalSnapshotService::class) : null;
 

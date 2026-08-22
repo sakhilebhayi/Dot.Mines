@@ -4,7 +4,10 @@ namespace App\Livewire;
 
 use App\Models\Alert;
 use App\Models\Geofence;
+use App\Models\User;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -80,7 +83,7 @@ class Alerts extends Component
      */
     public function getAlerts(): LengthAwarePaginator
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         return Alert::where('team_id', $team->id)
             ->when($this->search, function ($query) {
@@ -119,7 +122,7 @@ class Alerts extends Component
      */
     public function acknowledgeAlert($alertId): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $alert = Alert::where('team_id', $team->id)->find($alertId);
 
         if ($alert) {
@@ -139,7 +142,7 @@ class Alerts extends Component
      */
     public function resolveAlert($alertId): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $alert = Alert::where('team_id', $team->id)->find($alertId);
 
         if ($alert) {
@@ -170,7 +173,7 @@ class Alerts extends Component
      */
     public function dismissAlert($alertId): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $alert = Alert::where('team_id', $team->id)->find($alertId);
 
         if ($alert) {
@@ -198,7 +201,7 @@ class Alerts extends Component
      */
     public function confirmDismiss($choice = 'dismiss'): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $alert = Alert::where('team_id', $team->id)->find($this->pendingDismissAlertId);
 
         if (! $alert) {
@@ -263,8 +266,8 @@ class Alerts extends Component
 
     public function getSelectedAlert(): ?Alert
     {
-        if ($this->selectedAlertId) {
-            $team = Auth::user()->currentTeam;
+        if (($this->selectedAlertId !== null && $this->selectedAlertId !== 0)) {
+            $team = CurrentUser::team();
 
             // Ensure selected alert belongs to the current team to avoid cross-team access
             $alert = Alert::where('team_id', $team->id)
@@ -293,7 +296,7 @@ class Alerts extends Component
      * Return an array of mine-area managers (team users with manager-like roles)
      *
      * @param  Alert|null  $alert
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function getMineAreaManagersForAlert($alert): array
     {
@@ -301,21 +304,22 @@ class Alerts extends Component
             return [];
         }
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
+        /** @var Collection<int, User> $candidates */
         $candidates = $team->users()->with('roles')->get();
 
-        $managers = $candidates->filter(function ($user) {
+        $managers = $candidates->filter(function (User $user): bool {
             $role = $user->roles->first()?->name ?? null;
 
-            return in_array($role, ['admin', 'fleet_manager', 'manager']);
-        })->map(function ($user) {
+            return in_array($role, ['admin', 'fleet_manager', 'manager'], true);
+        })->map(function (User $user): array {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->roles->first()?->name ?? '',
             ];
-        })->values()->toArray();
+        })->values()->all();
 
         return $managers;
     }

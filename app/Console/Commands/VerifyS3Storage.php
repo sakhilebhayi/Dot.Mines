@@ -51,7 +51,7 @@ class VerifyS3Storage extends Command
                 }
             }
 
-            if (! $url) {
+            if (($url === null || $url === '' || $url === '0')) {
                 try {
                     $url = Storage::disk($disk)->url($testPath);
                 } catch (\Exception $e) {
@@ -59,7 +59,7 @@ class VerifyS3Storage extends Command
                 }
             }
 
-            if ($url) {
+            if (($url !== null && $url !== '' && $url !== '0')) {
                 $this->info('URL to access test file (may be temporary or require credentials):');
                 $this->line($url);
             } else {

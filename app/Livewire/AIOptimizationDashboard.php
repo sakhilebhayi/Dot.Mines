@@ -63,7 +63,7 @@ class AIOptimizationDashboard extends Component
     public function mount(): void
     {
         // Auto-run analysis if no recent data
-        $lastRecommendation = AIRecommendation::where('team_id', auth()->user()->currentTeam->id)
+        $lastRecommendation = AIRecommendation::where('team_id', auth()->user()?->currentTeam?->id)
             ->latest()
             ->first();
 
@@ -80,7 +80,7 @@ class AIOptimizationDashboard extends Component
             $aiService = $this->aiService;
             assert($aiService !== null);
             $aiService->runComprehensiveAnalysis(
-                auth()->user()->currentTeam,
+                auth()->user()?->currentTeam,
                 auth()->user()
             );
 
@@ -125,8 +125,8 @@ class AIOptimizationDashboard extends Component
      */
     public function implementRecommendation($recommendationId): void
     {
-        $team = auth()->user()->currentTeam;
-        $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
+        $team = auth()->user()?->currentTeam;
+        $recommendation = AIRecommendation::where('team_id', $team?->id)->findOrFail($recommendationId);
         try {
             $this->authorize('update', $recommendation);
 
@@ -156,8 +156,8 @@ class AIOptimizationDashboard extends Component
      */
     public function rejectRecommendation($recommendationId, string $reason = ''): void
     {
-        $team = auth()->user()->currentTeam;
-        $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
+        $team = auth()->user()?->currentTeam;
+        $recommendation = AIRecommendation::where('team_id', $team?->id)->findOrFail($recommendationId);
 
         if (trim($reason) === '') {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'A rejection reason is required.']);
@@ -203,7 +203,7 @@ class AIOptimizationDashboard extends Component
 
     public function confirmRecommendationAction(): void
     {
-        if (! $this->pendingRecommendationId || ! in_array($this->pendingRecommendationAction, ['implement', 'reject'])) {
+        if (($this->pendingRecommendationId === null || $this->pendingRecommendationId === 0) || ! in_array($this->pendingRecommendationAction, ['implement', 'reject'])) {
             $this->showRecommendationConfirm = false;
             $this->pendingRecommendationId = null;
             $this->pendingRecommendationAction = null;
@@ -248,8 +248,8 @@ class AIOptimizationDashboard extends Component
      */
     public function markInsightAsRead($insightId): void
     {
-        $team = auth()->user()->currentTeam;
-        $insight = AIInsight::where('team_id', $team->id)->findOrFail($insightId);
+        $team = auth()->user()?->currentTeam;
+        $insight = AIInsight::where('team_id', $team?->id)->findOrFail($insightId);
         $this->authorize('update', $insight);
         $insight->markAsRead();
         $this->dispatch('notify', ['type' => 'success', 'message' => 'Insight marked as read.']);
@@ -257,7 +257,7 @@ class AIOptimizationDashboard extends Component
 
     public function render(): View
     {
-        $team = auth()->user()->currentTeam;
+        $team = auth()->user()?->currentTeam;
 
         // Get dashboard data
         $aiService = $this->aiService;

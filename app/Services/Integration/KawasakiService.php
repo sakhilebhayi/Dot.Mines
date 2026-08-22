@@ -46,7 +46,10 @@ class KawasakiService extends BaseManufacturerService
 
             $machines = [];
             if (! empty($response['data']['machines'])) {
-                foreach ($response['data']['machines'] as $machine) {
+                $rows17 = data_get($response, 'data.machines');
+                /** @var list<array<string, mixed>> $rows17 */
+                $rows17 = is_array($rows17) ? array_values(array_filter($rows17, 'is_array')) : [];
+                foreach ($rows17 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
@@ -79,7 +82,7 @@ class KawasakiService extends BaseManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
+                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -102,7 +105,10 @@ class KawasakiService extends BaseManufacturerService
 
             $metrics = [];
             if (! empty($response['data']['metrics'])) {
-                foreach ($response['data']['metrics'] as $metric) {
+                $rows18 = data_get($response, 'data.metrics');
+                /** @var list<array<string, mixed>> $rows18 */
+                $rows18 = is_array($rows18) ? array_values(array_filter($rows18, 'is_array')) : [];
+                foreach ($rows18 as $metric) {
                     $metrics[] = $this->parseMetric($metric);
                 }
             }
@@ -133,7 +139,10 @@ class KawasakiService extends BaseManufacturerService
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                foreach ($response['data']['alerts'] as $alert) {
+                $rows19 = data_get($response, 'data.alerts');
+                /** @var list<array<string, mixed>> $rows19 */
+                $rows19 = is_array($rows19) ? array_values(array_filter($rows19, 'is_array')) : [];
+                foreach ($rows19 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
@@ -166,8 +175,8 @@ class KawasakiService extends BaseManufacturerService
             'name' => $data['name'] ?? 'Unknown Machine',
             'model' => $data['model'] ?? 'Unknown Model',
             'manufacturer' => 'Kawasaki',
-            'status' => $this->parseStatus($data['status'] ?? 'unknown'),
-            'location' => $this->parseLocation($data['location'] ?? []),
+            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'location' => $this->parseLocation(is_array($data['location'] ?? null) ? $data['location'] : []),
             'last_heartbeat' => $data['last_heartbeat'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'mining_machine',
@@ -279,7 +288,9 @@ class KawasakiService extends BaseManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -297,7 +308,10 @@ class KawasakiService extends BaseManufacturerService
             // fetchMetrics() builds a list of {type, value, unit, timestamp}
             // readings, not the flat MachineMetric-column shape the sync
             // pipeline expects -- see normalizeMetricsForStorage().
-            return $this->normalizeMetricsForStorage($result['metrics'] ?? []);
+            /** @var list<array<string, mixed>> $readings */
+            $readings = array_values(array_filter((array) data_get($result, 'metrics', []), 'is_array'));
+
+            return $this->normalizeMetricsForStorage($readings);
         } catch (Exception $e) {
             return [];
         }
@@ -312,7 +326,9 @@ class KawasakiService extends BaseManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

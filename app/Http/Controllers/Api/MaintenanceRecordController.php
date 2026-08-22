@@ -222,7 +222,7 @@ class MaintenanceRecordController extends Controller
             foreach ($records as $record) {
                 $csv .= implode(',', [
                     $record->work_order_number,
-                    $record->machine->name,
+                    $record->machine?->name,
                     $record->maintenance_type,
                     $record->status,
                     $record->scheduled_at->format('Y-m-d'),

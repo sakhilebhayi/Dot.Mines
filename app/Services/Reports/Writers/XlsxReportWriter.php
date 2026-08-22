@@ -35,7 +35,7 @@ class XlsxReportWriter
         }
 
         // Summary block below the data
-        if (! empty($data['summary'])) {
+        if (is_array($data['summary'] ?? null) && $data['summary'] !== []) {
             $summaryStartRow = count($data['rows']) + 4;
             $sheet->setCellValue("A{$summaryStartRow}", 'Summary');
             $sheet->getStyle("A{$summaryStartRow}")->getFont()->setBold(true);

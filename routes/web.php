@@ -23,6 +23,7 @@ use App\Livewire\SystemHealth;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\Report;
+use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -207,7 +208,7 @@ Route::middleware([
     // teams.show -- redirect here instead of maintaining a second,
     // half-built copy of the same page.
     Route::get('/team/settings', function () {
-        return redirect()->route('teams.show', Auth::user()->currentTeam);
+        return redirect()->route('teams.show', CurrentUser::get()?->currentTeam);
     })->name('team.settings');
 });
 

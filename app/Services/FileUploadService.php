@@ -213,7 +213,7 @@ class FileUploadService
 
         // Only run virus scanning when explicitly enabled in config/env to avoid
         // accidental command execution in restricted environments.
-        if (! (bool) config('scanning.virus.enabled', false)) {
+        if (! config('scanning.virus.enabled', false)) {
             return;
         }
 

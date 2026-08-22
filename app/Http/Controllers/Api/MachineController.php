@@ -111,14 +111,14 @@ class MachineController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $validated['team_id'] = auth()->user()->current_team_id;
+        $validated['team_id'] = auth()->user()?->current_team_id;
         $validated['status'] = 'active';
 
         // Same entitlement gate as every other creation path -- the API is
         // not a way around the allocation limit (brief §4).
         try {
             $machine = app(MachineProvisioningService::class)->provision(
-                auth()->user()->currentTeam,
+                auth()->user()?->currentTeam,
                 $validated['machine_type'],
                 fn (): Machine => Machine::create($validated),
             );

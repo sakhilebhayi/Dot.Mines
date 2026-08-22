@@ -87,7 +87,7 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
                     $isInside = $this->isPointInPolygon(
                         (float) $machine->last_location_latitude,
                         (float) $machine->last_location_longitude,
-                        (array) $geofence->coordinates
+                        $geofence->coordinates
                     );
 
                     // Check last known state

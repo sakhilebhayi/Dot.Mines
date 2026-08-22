@@ -94,7 +94,7 @@ class AlertController extends Controller
             'metadata' => 'nullable|json',
         ]);
 
-        $validated['team_id'] = auth()->user()->current_team_id;
+        $validated['team_id'] = auth()->user()?->current_team_id;
         $validated['status'] = 'active';
 
         $alert = Alert::create($validated);

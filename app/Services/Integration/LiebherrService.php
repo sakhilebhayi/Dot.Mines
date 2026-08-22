@@ -40,7 +40,10 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
 
             $machines = [];
             if (! empty($response['data']['equipment'])) {
-                foreach ($response['data']['equipment'] as $equipment) {
+                $rows26 = data_get($response, 'data.equipment');
+                /** @var list<array<string, mixed>> $rows26 */
+                $rows26 = is_array($rows26) ? array_values(array_filter($rows26, 'is_array')) : [];
+                foreach ($rows26 as $equipment) {
                     $machines[] = $this->parseMachineData($equipment);
                 }
             }
@@ -71,7 +74,7 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
+                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch position', $e);
@@ -96,9 +99,9 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics($operatingData['data'] ?? []),
-                $this->parseMetrics($telemetry['data'] ?? []),
-                $this->parseMetrics($serviceIntervals['data'] ?? [])
+                $this->parseMetrics(is_array($operatingData['data'] ?? null) ? $operatingData['data'] : []),
+                $this->parseMetrics(is_array($telemetry['data'] ?? null) ? $telemetry['data'] : []),
+                $this->parseMetrics(is_array($serviceIntervals['data'] ?? null) ? $serviceIntervals['data'] : [])
             );
 
             return [
@@ -124,7 +127,10 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
 
             $alerts = [];
             if (! empty($response['data']['errorCodes'])) {
-                foreach ($response['data']['errorCodes'] as $error) {
+                $rows27 = data_get($response, 'data.errorCodes');
+                /** @var list<array<string, mixed>> $rows27 */
+                $rows27 = is_array($rows27) ? array_values(array_filter($rows27, 'is_array')) : [];
+                foreach ($rows27 as $error) {
                     $alerts[] = $this->parseAlert($error);
                 }
             }
@@ -175,7 +181,9 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -190,7 +198,9 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         try {
             $result = $this->fetchMetrics($machineId);
 
-            return $result['metrics'] ?? [];
+            $metrics = $result['metrics'] ?? [];
+
+            return is_array($metrics) ? $metrics : [];
         } catch (Exception $e) {
             return [];
         }
@@ -205,7 +215,9 @@ class LiebherrService extends BaseManufacturerService implements ManufacturerSer
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

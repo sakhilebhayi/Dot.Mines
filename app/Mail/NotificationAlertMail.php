@@ -32,8 +32,8 @@ class NotificationAlertMail extends Mailable
 
         return new Envelope(
             from: new Address(
-                (string) config('mail.addresses.info', config('mail.from.address')),
-                (string) config('app.name'),
+                config('mail.addresses.info', config('mail.from.address')),
+                config('app.name'),
             ),
             subject: $subject,
             using: [
