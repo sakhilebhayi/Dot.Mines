@@ -50,6 +50,7 @@ class GdprRequest extends Model
     /**
      * @return array<mixed>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -58,7 +59,7 @@ class GdprRequest extends Model
         ];
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

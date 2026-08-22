@@ -53,20 +53,20 @@ class ComponentReplacement extends Model
     /**
      * Relationships
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return BelongsTo<MaintenanceRecord, $this> */
+    /** @return BelongsTo<MaintenanceRecord,$this> */
     public function maintenanceRecord(): BelongsTo
     {
         return $this->belongsTo(MaintenanceRecord::class);
@@ -105,7 +105,7 @@ class ComponentReplacement extends Model
     /**
      * Get expected replacement date based on hours
      */
-    public function getExpectedReplacementHoursAttribute(): ?int
+    protected function getExpectedReplacementHoursAttribute(): ?int
     {
         if (! $this->expected_lifespan_hours) {
             return null;
@@ -117,7 +117,7 @@ class ComponentReplacement extends Model
     /**
      * Get expected replacement km
      */
-    public function getExpectedReplacementKmAttribute(): ?int
+    protected function getExpectedReplacementKmAttribute(): ?int
     {
         if (! $this->expected_lifespan_km) {
             return null;
@@ -179,7 +179,7 @@ class ComponentReplacement extends Model
     /**
      * Check if warranty is still valid
      */
-    public function getIsUnderWarrantyAttribute(): bool
+    protected function getIsUnderWarrantyAttribute(): bool
     {
         return $this->warranty_expiry && $this->warranty_expiry >= now();
     }

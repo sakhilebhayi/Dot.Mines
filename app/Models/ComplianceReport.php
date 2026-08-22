@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $updated_at
  * @property-read MineArea|null $mineArea
  * @property-read User|null $generator
+ *
+ * @psalm-suppress UnusedClass -- schema holder for the compliance_reports table; UI consumer planned
  */
 class ComplianceReport extends Model
 {
@@ -45,13 +47,13 @@ class ComplianceReport extends Model
         'compliance_score' => 'float',
     ];
 
-    /** @return BelongsTo<MineArea, $this> */
+    /** @return BelongsTo<MineArea,$this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function generator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');

@@ -38,7 +38,7 @@ class AIInsight extends Model
         'valid_until' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

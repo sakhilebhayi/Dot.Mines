@@ -45,13 +45,13 @@ class IoTSensor extends Model
         'last_reading_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return HasMany<SensorReading, $this> */
+    /** @return HasMany<SensorReading,$this> */
     public function readings(): HasMany
     {
         return $this->hasMany(SensorReading::class);

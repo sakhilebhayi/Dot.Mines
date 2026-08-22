@@ -63,7 +63,7 @@ class Report extends Model
     /**
      * Get the team this report belongs to
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -73,7 +73,7 @@ class Report extends Model
     /**
      * Get the user who generated this report
      */
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function generatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');

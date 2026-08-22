@@ -59,6 +59,7 @@ class MachineMetric extends Model
      * so a metric insert IS a fleet-state change. Direct DB update on
      * purpose -- no model events, no touched timestamps.
      */
+    #[\Override]
     protected static function booted(): void
     {
         static::created(function (MachineMetric $metric): void {
@@ -131,7 +132,7 @@ class MachineMetric extends Model
     /**
      * Get the machine this metric belongs to
      *
-     * @return BelongsTo<Machine, $this>
+     * @return BelongsTo<Machine,$this>
      */
     public function machine(): BelongsTo
     {
@@ -141,7 +142,7 @@ class MachineMetric extends Model
     /**
      * Get the team this metric belongs to
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {

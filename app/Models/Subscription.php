@@ -65,7 +65,7 @@ class Subscription extends Model
     /**
      * Get the team that owns the subscription.
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -75,7 +75,7 @@ class Subscription extends Model
     /**
      * Get the plan for this subscription.
      *
-     * @return BelongsTo<SubscriptionPlan, $this>
+     * @return BelongsTo<SubscriptionPlan,$this>
      */
     public function plan(): BelongsTo
     {
@@ -85,7 +85,7 @@ class Subscription extends Model
     /**
      * Get payments for this subscription.
      *
-     * @return HasMany<Payment, $this>
+     * @return HasMany<Payment,$this>
      */
     public function payments(): HasMany
     {
@@ -95,7 +95,7 @@ class Subscription extends Model
     /**
      * Get invoices for this subscription.
      *
-     * @return HasMany<Invoice, $this>
+     * @return HasMany<Invoice,$this>
      */
     public function invoices(): HasMany
     {
@@ -172,7 +172,7 @@ class Subscription extends Model
     /**
      * Get status badge color
      */
-    public function getStatusColorAttribute(): string
+    protected function getStatusColorAttribute(): string
     {
         return match ($this->status) {
             'trial' => 'blue',
@@ -187,7 +187,7 @@ class Subscription extends Model
     /**
      * Get formatted status text
      */
-    public function getStatusTextAttribute(): string
+    protected function getStatusTextAttribute(): string
     {
         return match ($this->status) {
             'trial' => 'Trial',

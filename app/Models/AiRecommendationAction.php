@@ -32,13 +32,13 @@ class AiRecommendationAction extends Model
         'actioned_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<AIRecommendation, $this> */
+    /** @return BelongsTo<AIRecommendation,$this> */
     public function aiRecommendation(): BelongsTo
     {
         return $this->belongsTo(AIRecommendation::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function actionedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'actioned_by');

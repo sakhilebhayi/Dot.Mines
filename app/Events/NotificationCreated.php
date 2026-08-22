@@ -22,6 +22,7 @@ class NotificationCreated implements ShouldBroadcast
      *
      * @return array<int, PrivateChannel>
      */
+    #[\Override]
     public function broadcastOn(): array
     {
         return [

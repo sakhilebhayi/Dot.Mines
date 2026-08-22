@@ -8,6 +8,7 @@ class CASEService extends BaseManufacturerService implements ManufacturerService
 {
     protected string $manufacturer = 'case';
 
+    #[\Override]
     public function testConnection(): bool
     {
         // No real CASE API integration has been built yet -- this
@@ -20,6 +21,7 @@ class CASEService extends BaseManufacturerService implements ManufacturerService
     }
 
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         // Implement CASE API fetch logic
@@ -27,41 +29,35 @@ class CASEService extends BaseManufacturerService implements ManufacturerService
     }
 
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement CASE API fetch machine details
         return [];
     }
 
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         // Implement CASE API fetch machine location
         return null;
     }
 
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         // Implement CASE API fetch machine metrics
         return [];
     }
 
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         // Implement CASE API fetch machine alerts
         return [];
     }
 
-    public function fetchMachineData(string $machineId): array
-    {
-        // Implement CASE API fetch comprehensive machine data
-        return [];
-    }
-
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
+    #[\Override]
     public function getLastError(): ?string
     {
         // Return last error if any

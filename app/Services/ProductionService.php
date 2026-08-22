@@ -7,34 +7,9 @@ use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\Paginator;
 
 class ProductionService
 {
-    /**
-     * @return Paginator<int, ProductionRecord>
-     */
-    public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null)
-    {
-        $startDate = $startDate ?? Carbon::now()->subDays(30);
-        $endDate = $endDate ?? Carbon::now();
-
-        return ProductionRecord::forTeam($teamId)
-            ->betweenDates($startDate, $endDate)
-            ->orderByDesc('record_date')
-            ->paginate(15);
-    }
-
-    /**
-     * @return Collection<int,ProductionRecord>
-     */
-    public function getTodayProduction(int $teamId): Collection
-    {
-        return ProductionRecord::forTeam($teamId)
-            ->where('record_date', Carbon::today())
-            ->get();
-    }
-
     /**
      * @return array<string, mixed>
      */
@@ -115,24 +90,6 @@ class ProductionService
     }
 
     /**
-     * @param  array<string, mixed>  $data
-     */
-    public function createTarget(int $teamId, array $data): ProductionTarget
-    {
-        return ProductionTarget::create([
-            'team_id' => $teamId,
-            'mine_area_id' => $data['mine_area_id'] ?? null,
-            'period_type' => $data['period_type'] ?? 'daily',
-            'start_date' => $data['start_date'],
-            'end_date' => $data['end_date'],
-            'target_quantity' => $data['target_quantity'],
-            'unit' => $data['unit'] ?? 'tonnes',
-            'description' => $data['description'] ?? null,
-            'is_active' => $data['is_active'] ?? true,
-        ]);
-    }
-
-    /**
      * @return \Illuminate\Support\Collection<string, array<string, mixed>>
      */
     public function getProductionTrend(int $teamId, int $days = 30, ?Carbon $startDate = null, ?Carbon $endDate = null): \Illuminate\Support\Collection
@@ -189,35 +146,14 @@ class ProductionService
     }
 
     /**
-     * @return \Illuminate\Support\Collection<string, array<string, mixed>>
-     */
-    public function getProductionByMineArea(int $teamId): \Illuminate\Support\Collection
-    {
-        $records = ProductionRecord::forTeam($teamId)
-            ->where('record_date', '>=', Carbon::now()->subDays(30))
-            ->with('mineArea')
-            ->get();
-
-        return $records->groupBy('mine_area_id')->map(function ($areaRecords) {
-            $area = $areaRecords->first()?->mineArea;
-
-            return [
-                'mine_area_id' => $area?->id,
-                'mine_area_name' => $area?->name ?? 'Unknown',
-                'total_produced' => $areaRecords->sum('quantity_produced'),
-                'total_target' => $areaRecords->sum('target_quantity'),
-                'record_count' => $areaRecords->count(),
-            ];
-        });
-    }
-
-    /**
      * Production per machine over the trailing 30 days -- mirrors
      * getProductionByMineArea() but grouped by machine instead of area.
      * Real per-machine breakdown was entirely missing: getProductionStatistics()
      * only ever aggregated at the team level.
      *
      * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- exercised only by its test today; kept as covered public API
      */
     public function getProductionByMachine(int $teamId): \Illuminate\Support\Collection
     {

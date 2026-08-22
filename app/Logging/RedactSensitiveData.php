@@ -7,6 +7,8 @@ use Monolog\LogRecord;
 
 /**
  * Log channel tap that adds a processor to redact sensitive keys in log records.
+ *
+ * @psalm-suppress UnusedClass -- referenced as a string tap in config/logging.php
  */
 class RedactSensitiveData
 {

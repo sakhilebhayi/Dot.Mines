@@ -58,7 +58,7 @@ class FuelBudget extends Model
         'updated_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -67,7 +67,7 @@ class FuelBudget extends Model
     /**
      * Get budget utilization percentage (money)
      */
-    public function getBudgetUtilizationAttribute(): float
+    protected function getBudgetUtilizationAttribute(): float
     {
         if ($this->budgeted_amount == 0) {
             return 0;
@@ -79,7 +79,7 @@ class FuelBudget extends Model
     /**
      * Get remaining budget
      */
-    public function getRemainingBudgetAttribute(): float
+    protected function getRemainingBudgetAttribute(): float
     {
         return $this->budgeted_amount - $this->actual_spent;
     }
@@ -87,7 +87,7 @@ class FuelBudget extends Model
     /**
      * Get volume utilization percentage
      */
-    public function getVolumeUtilizationAttribute(): ?float
+    protected function getVolumeUtilizationAttribute(): ?float
     {
         if (! $this->budgeted_liters || $this->budgeted_liters == 0) {
             return null;

@@ -41,6 +41,7 @@ class MachinePerformanceService
 
     private const LOADS_TREND_RATIO = 0.10;
 
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(private ProductionService $productionService) {}
 
     /**

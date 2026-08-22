@@ -346,29 +346,15 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
             'type' => $this->mapAlertType((string) ($data['type'] ?? $data['code'] ?? 'unknown')),
             'priority' => $this->mapAlertPriority((string) ($data['severity'] ?? $data['priority'] ?? 'medium')),
             'message' => $data['message'] ?? $data['description'] ?? "Alert from {$this->manufacturer}",
+            // Default missing statuses to 'active', never the legacy 'new'
+            // (not in the alerts.status enum -- the bug ManufacturerAlerts-
+            // ShapeTest pins). This lived in the deleted, never-called
+            // parseAlerts(); the live single-alert normaliser owns it now.
+            'status' => $data['status'] ?? 'active',
             'timestamp' => $data['timestamp'] ?? $data['created_at'] ?? now()->toIso8601String(),
             'acknowledged' => (bool) ($data['acknowledged'] ?? false),
             'raw_data' => $data,
         ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $alerts
-     * @return array<string, mixed>
-     */
-    protected function parseAlerts(array $alerts): array
-    {
-        return array_map(function ($alert) {
-            return [
-                'external_id' => $alert['id'] ?? null,
-                'title' => $alert['title'] ?? 'Alert',
-                'description' => $alert['description'] ?? '',
-                'type' => $this->mapAlertType($alert['type'] ?? 'sensor'),
-                'priority' => $this->mapAlertPriority($alert['severity'] ?? 'medium'),
-                'status' => $alert['status'] ?? 'active',
-                'timestamp' => $alert['timestamp'] ?? now(),
-            ];
-        }, $alerts);
     }
 
     /**
@@ -428,16 +414,9 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     }
 
     /**
-     * Get manufacturer name
-     */
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
-    /**
      * Get last error message
      */
+    #[\Override]
     public function getLastError(): ?string
     {
         return $this->lastError;
@@ -447,6 +426,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Test the connection to the manufacturer API
      * Concrete classes should override this
      */
+    #[\Override]
     public function testConnection(): bool
     {
         // Default implementation - concrete classes should override
@@ -459,6 +439,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function fetchMachines(): array
     {
         // Default implementation - concrete classes should override
@@ -471,6 +452,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Default implementation - concrete classes should override
@@ -483,6 +465,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      *
      * @return array<string, mixed>|null
      */
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         // Default implementation - concrete classes should override
@@ -495,6 +478,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         // Default implementation - concrete classes should override
@@ -507,19 +491,8 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      *
      * @return list<array<string, mixed>>
      */
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
-    {
-        // Default implementation - concrete classes should override
-        return [];
-    }
-
-    /**
-     * Fetch all data for a machine (comprehensive sync)
-     * Concrete classes should override this
-     *
-     * @return array<string, mixed>
-     */
-    public function fetchMachineData(string $machineId): array
     {
         // Default implementation - concrete classes should override
         return [];
@@ -535,6 +508,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      *
      * @return array{success: bool, load_count_readings: list<array{timestamp: string, value: float, units: ?string}>, payload_readings: list<array{timestamp: string, value: float, units: ?string}>}
      */
+    #[\Override]
     public function fetchMachineProduction(string $machineId, Carbon $start, Carbon $end): array
     {
         return [
@@ -542,18 +516,5 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
             'load_count_readings' => [],
             'payload_readings' => [],
         ];
-    }
-
-    /**
-     * Log integration activity
-     *
-     * @param  array<string, mixed>  $details
-     */
-    protected function logActivity(string $action, array $details = []): void
-    {
-        Log::info("Integration Activity: {$action}", array_merge([
-            'manufacturer' => $this->manufacturer,
-            'timestamp' => now(),
-        ], $details));
     }
 }

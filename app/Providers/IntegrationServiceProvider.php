@@ -10,6 +10,7 @@ class IntegrationServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
+    #[\Override]
     public function register(): void
     {
         $this->app->singleton(IntegrationService::class, function ($app) {

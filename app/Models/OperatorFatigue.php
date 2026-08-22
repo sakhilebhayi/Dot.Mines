@@ -78,7 +78,7 @@ class OperatorFatigue extends Model
     /**
      * Get the user (operator) this fatigue record belongs to.
      *
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<User,$this>
      */
     public function user(): BelongsTo
     {
@@ -88,7 +88,7 @@ class OperatorFatigue extends Model
     /**
      * Get the team this fatigue record belongs to.
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -98,7 +98,7 @@ class OperatorFatigue extends Model
     /**
      * Get the machine this fatigue record is associated with.
      *
-     * @return BelongsTo<Machine, $this>
+     * @return BelongsTo<Machine,$this>
      */
     public function machine(): BelongsTo
     {

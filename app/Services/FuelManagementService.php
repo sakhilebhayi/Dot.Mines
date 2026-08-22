@@ -259,6 +259,8 @@ class FuelManagementService
 
     /**
      * Calculate daily fuel consumption metrics for a machine
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- exercised only by its test today; kept as covered public API
      */
     public function calculateDailyMetrics(Machine $machine, Carbon $date): FuelConsumptionMetric
     {
@@ -479,48 +481,6 @@ class FuelManagementService
             'tank_status' => $tankStatus,
             'active_alerts' => $activeAlerts,
             'budget_status' => $budgetStatus,
-        ];
-    }
-
-    /**
-     * Get machine fuel efficiency report
-     *
-     * @return array<string, mixed>
-     */
-    public function getMachineFuelEfficiency(Machine $machine, Carbon $startDate, Carbon $endDate): array
-    {
-        $metrics = FuelConsumptionMetric::where('machine_id', $machine->id)
-            ->whereBetween('date', [$startDate, $endDate])
-            ->get();
-
-        $totalFuel = $metrics->sum('fuel_consumed_liters');
-        $totalHours = $metrics->sum('operating_hours');
-        $avgLph = $totalHours > 0 ? round($totalFuel / $totalHours, 4) : null;
-
-        // Get trend data
-        $trend = $metrics->map(function ($metric) {
-            return [
-                'date' => $metric->date->toDateString(),
-                'fuel_consumed' => $metric->fuel_consumed_liters,
-                'operating_hours' => $metric->operating_hours,
-                'efficiency_lph' => $metric->fuel_efficiency_lph,
-            ];
-        });
-
-        return [
-            'machine_id' => $machine->id,
-            'machine_name' => $machine->name,
-            'period' => [
-                'start_date' => $startDate->toDateString(),
-                'end_date' => $endDate->toDateString(),
-            ],
-            'summary' => [
-                'total_fuel_consumed' => round($totalFuel, 2),
-                'total_operating_hours' => round($totalHours, 2),
-                'average_lph' => $avgLph,
-                'total_idle_fuel' => round($metrics->sum('idle_fuel_consumed'), 2),
-            ],
-            'daily_metrics' => $trend,
         ];
     }
 }

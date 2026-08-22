@@ -59,19 +59,19 @@ class ProductionRecord extends Model
         'metadata' => 'array',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<MineArea, $this> */
+    /** @return BelongsTo<MineArea,$this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -115,7 +115,7 @@ class ProductionRecord extends Model
         return $query->where('mine_area_id', $mineAreaId);
     }
 
-    public function getVariancePercentageAttribute(): float
+    protected function getVariancePercentageAttribute(): float
     {
         if (! $this->target_quantity || $this->target_quantity == 0) {
             return 0;
@@ -124,7 +124,7 @@ class ProductionRecord extends Model
         return (((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100;
     }
 
-    public function getIsAboveTargetAttribute(): bool
+    protected function getIsAboveTargetAttribute(): bool
     {
         if (! $this->target_quantity) {
             return false;

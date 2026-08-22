@@ -88,7 +88,7 @@ class Route extends Model
     /**
      * Get the team that owns the route.
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -98,7 +98,7 @@ class Route extends Model
     /**
      * Get the machine this route is planned for.
      *
-     * @return BelongsTo<Machine, $this>
+     * @return BelongsTo<Machine,$this>
      */
     public function machine(): BelongsTo
     {
@@ -108,7 +108,7 @@ class Route extends Model
     /**
      * Get the mine area this route belongs to.
      *
-     * @return BelongsTo<MineArea, $this>
+     * @return BelongsTo<MineArea,$this>
      */
     public function mineArea(): BelongsTo
     {
@@ -118,7 +118,7 @@ class Route extends Model
     /**
      * Get the waypoints for this route.
      *
-     * @return HasMany<Waypoint, $this>
+     * @return HasMany<Waypoint,$this>
      */
     public function waypoints(): HasMany
     {
@@ -131,7 +131,7 @@ class Route extends Model
     /**
      * Calculate fuel savings compared to direct route
      */
-    public function getFuelSavingsAttribute(): float
+    protected function getFuelSavingsAttribute(): float
     {
         // Calculate direct distance using Haversine formula
         $directDistance = $this->calculateDistance(
@@ -150,7 +150,7 @@ class Route extends Model
     /**
      * Calculate time savings compared to direct route
      */
-    public function getTimeSavingsAttribute(): int
+    protected function getTimeSavingsAttribute(): int
     {
         // Calculate direct distance
         $directDistance = $this->calculateDistance(

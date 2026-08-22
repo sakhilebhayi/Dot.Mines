@@ -32,6 +32,7 @@ class NotificationDeliveryLog extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -39,13 +40,13 @@ class NotificationDeliveryLog extends Model
         ];
     }
 
-    /** @return BelongsTo<Notification, $this> */
+    /** @return BelongsTo<Notification,$this> */
     public function notification(): BelongsTo
     {
         return $this->belongsTo(Notification::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

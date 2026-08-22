@@ -62,14 +62,14 @@ class HealthMetric extends Model
     /**
      * Relationships
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -126,7 +126,7 @@ class HealthMetric extends Model
     /**
      * Get deviation from normal
      */
-    public function getDeviationAttribute(): ?float
+    protected function getDeviationAttribute(): ?float
     {
         if (! $this->normal_min || ! $this->normal_max) {
             return null;
@@ -140,7 +140,7 @@ class HealthMetric extends Model
     /**
      * Get deviation percentage
      */
-    public function getDeviationPercentageAttribute(): ?float
+    protected function getDeviationPercentageAttribute(): ?float
     {
         if (! $this->normal_min || ! $this->normal_max) {
             return null;

@@ -42,7 +42,7 @@ class Permission extends Model
     /**
      * Get the team that owns this permission
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -52,7 +52,7 @@ class Permission extends Model
     /**
      * Get all roles with this permission
      */
-    /** @return BelongsToMany<Role, $this> */
+    /** @return BelongsToMany<Role,$this> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);

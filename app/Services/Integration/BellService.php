@@ -65,6 +65,7 @@ class BellService extends BaseManufacturerService
     /**
      * @param  array<string, mixed>  $credentials
      */
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(array $credentials = [])
     {
         parent::__construct($credentials);
@@ -87,6 +88,7 @@ class BellService extends BaseManufacturerService
      * a successful /Fleet call on top of that proves the data endpoint is
      * reachable and returning something parseable.
      */
+    #[\Override]
     public function testConnection(): bool
     {
         try {
@@ -108,6 +110,7 @@ class BellService extends BaseManufacturerService
      * drill-down only (see fetchMachineMetrics()/fetchMachineAlerts()).
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         // Micro-cache: location and status jobs both consume the snapshot
@@ -175,6 +178,7 @@ class BellService extends BaseManufacturerService
     }
 
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         $result = $this->fetchMachines();
@@ -239,6 +243,7 @@ class BellService extends BaseManufacturerService
         return $locations;
     }
 
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
@@ -280,6 +285,7 @@ class BellService extends BaseManufacturerService
      * status inline per machine, so this reuses that one call rather than
      * making eleven separate time-series requests for what's already there.
      */
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
@@ -313,6 +319,7 @@ class BellService extends BaseManufacturerService
      *
      * @return list<array<string, mixed>>
      */
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
@@ -338,16 +345,6 @@ class BellService extends BaseManufacturerService
         }
     }
 
-    public function fetchMachineData(string $machineId): array
-    {
-        return [
-            'details' => $this->fetchMachineDetails($machineId),
-            'location' => $this->fetchMachineLocation($machineId),
-            'metrics' => $this->fetchMachineMetrics($machineId),
-            'alerts' => $this->fetchMachineAlerts($machineId),
-        ];
-    }
-
     /**
      * Production history from Bell's two cumulative production counters:
      * CumulativeLoadCount (lifetime load count) and CumulativePayloadTotals
@@ -357,6 +354,7 @@ class BellService extends BaseManufacturerService
      * turns consecutive cumulative readings into per-day production deltas,
      * so nothing here is estimated.
      */
+    #[\Override]
     public function fetchMachineProduction(string $machineId, Carbon $start, Carbon $end): array
     {
         try {

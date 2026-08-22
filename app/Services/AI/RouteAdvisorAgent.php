@@ -13,6 +13,7 @@ use App\Services\RoutePlanningService;
  */
 class RouteAdvisorAgent
 {
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(
         protected RoutePlanningService $routePlanningService
     ) {}

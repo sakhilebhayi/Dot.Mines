@@ -224,47 +224,6 @@ class MaintenanceHealthService
     }
 
     /**
-     * Record health metric
-     *
-     * @param  array<string, mixed>  $data
-     */
-    public function recordHealthMetric(Machine $machine, array $data): HealthMetric
-    {
-        $data['team_id'] = $machine->team_id;
-        $data['machine_id'] = $machine->id;
-        $data['recorded_at'] = $data['recorded_at'] ?? now();
-
-        // Check if value is within normal range
-        if (isset($data['normal_min']) && isset($data['normal_max'])) {
-            $data['is_normal'] = $data['value'] >= $data['normal_min'] && $data['value'] <= $data['normal_max'];
-            $data['severity'] = $data['is_normal'] ? 'normal' : 'warning';
-
-            // Critical if very far from normal
-            if (! $data['is_normal']) {
-                $range = $data['normal_max'] - $data['normal_min'];
-                $deviation = abs($data['value'] - (($data['normal_min'] + $data['normal_max']) / 2));
-                if ($deviation > $range) {
-                    $data['severity'] = 'critical';
-                }
-            }
-        }
-
-        $metric = HealthMetric::create($data);
-
-        // Create alert if critical
-        if ($metric->severity === 'critical') {
-            $this->createMaintenanceAlert($machine, [
-                'alert_type' => 'component_warning',
-                'title' => "Critical Reading: {$metric->component}",
-                'message' => "{$metric->metric_type} reading of {$metric->value}{$metric->unit} is outside normal range",
-                'severity' => 'critical',
-            ]);
-        }
-
-        return $metric;
-    }
-
-    /**
      * Get maintenance analytics
      *
      * @return array<string, mixed>

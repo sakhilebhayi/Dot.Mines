@@ -85,19 +85,19 @@ class MachineHealthStatus extends Model
         'updated_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return HasMany<HealthMetric, $this> */
+    /** @return HasMany<HealthMetric,$this> */
     public function healthMetrics(): HasMany
     {
         return $this->hasMany(HealthMetric::class, 'machine_id', 'machine_id');

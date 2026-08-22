@@ -20,6 +20,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Test connection to Roundebult API
      */
+    #[\Override]
     public function testConnection(): bool
     {
         try {
@@ -39,6 +40,7 @@ class RoundebultService extends BaseManufacturerService
      * Fetch machines from Roundebult API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         try {
@@ -161,6 +163,7 @@ class RoundebultService extends BaseManufacturerService
      */
     /** @param array<string, mixed> $data
      * @return array<string, mixed> */
+    #[\Override]
     protected function parseMachineData(array $data): array
     {
         return [
@@ -185,6 +188,7 @@ class RoundebultService extends BaseManufacturerService
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     protected function parseLocation(array $data): array
     {
         return [
@@ -197,28 +201,16 @@ class RoundebultService extends BaseManufacturerService
     }
 
     /**
-     * Parse metric data from Roundebult format
-     *
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    protected function parseMetric(array $data): array
-    {
-        return [
-            'type' => $data['type'] ?? 'unknown',
-            'value' => $data['value'] ?? 0,
-            'unit' => $data['unit'] ?? '',
-            'timestamp' => $data['timestamp'] ?? now()->toIso8601String(),
-            'tags' => $data['tags'] ?? [],
-        ];
-    }
-
-    /**
      * Parse alert data from Roundebult format
      */
+    #[\Override]
     protected function parseAlert(array $data): array
     {
         return [
+            // Missing statuses default to 'active', never the legacy 'new'
+            // (not in the alerts.status enum) -- same invariant as the Base
+            // normaliser, pinned by ManufacturerAlertsShapeTest.
+            'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? null,
             'type' => $this->mapAlertType($data['alert_type'] ?? 'unknown'),
             'priority' => $this->mapAlertPriority($data['severity'] ?? 'medium'),
@@ -232,6 +224,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Map Roundebult status to standard status
      */
+    #[\Override]
     protected function parseStatus(string $status): string
     {
         $statusMap = [
@@ -251,6 +244,7 @@ class RoundebultService extends BaseManufacturerService
      * Fetch machine details from Roundebult API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
@@ -265,6 +259,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Fetch machine location
      */
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
@@ -279,6 +274,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Fetch machine metrics
      */
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
@@ -293,6 +289,7 @@ class RoundebultService extends BaseManufacturerService
     /**
      * Fetch machine alerts
      */
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
@@ -305,29 +302,9 @@ class RoundebultService extends BaseManufacturerService
     }
 
     /**
-     * Fetch comprehensive machine data
-     */
-    public function fetchMachineData(string $machineId): array
-    {
-        return [
-            'details' => $this->fetchMachineDetails($machineId),
-            'location' => $this->fetchMachineLocation($machineId),
-            'metrics' => $this->fetchMachineMetrics($machineId),
-            'alerts' => $this->fetchMachineAlerts($machineId),
-        ];
-    }
-
-    /**
-     * Get the manufacturer name
-     */
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
-    /**
      * Get API error if any occurred
      */
+    #[\Override]
     public function getLastError(): ?string
     {
         return $this->lastError;

@@ -90,6 +90,7 @@ class Alert extends Model
     /**
      * The "booted" method of the model.
      */
+    #[\Override]
     protected static function booted(): void
     {
         // Invalidate cache when alert is created, updated, or deleted
@@ -105,7 +106,7 @@ class Alert extends Model
     /**
      * Get the machine this alert is about
      *
-     * @return BelongsTo<Machine, $this>
+     * @return BelongsTo<Machine,$this>
      */
     public function machine(): BelongsTo
     {
@@ -115,7 +116,7 @@ class Alert extends Model
     /**
      * Get the mine area this alert is about
      *
-     * @return BelongsTo<MineArea, $this>
+     * @return BelongsTo<MineArea,$this>
      */
     public function mineArea(): BelongsTo
     {
@@ -125,7 +126,7 @@ class Alert extends Model
     /**
      * Get the team this alert belongs to
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -135,7 +136,7 @@ class Alert extends Model
     /**
      * Get the user who acknowledged this alert
      */
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function acknowledgedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
@@ -144,7 +145,7 @@ class Alert extends Model
     /**
      * Get the user who resolved this alert
      */
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function resolvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

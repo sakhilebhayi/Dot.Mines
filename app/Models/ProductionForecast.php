@@ -42,13 +42,13 @@ class ProductionForecast extends Model
         'forecast_method' => 'array',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<MineArea, $this> */
+    /** @return BelongsTo<MineArea,$this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);

@@ -62,32 +62,32 @@ class MaintenanceAlert extends Model
     /**
      * Relationships
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return BelongsTo<MaintenanceSchedule, $this> */
+    /** @return BelongsTo<MaintenanceSchedule,$this> */
     public function maintenanceSchedule(): BelongsTo
     {
         return $this->belongsTo(MaintenanceSchedule::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function acknowledgedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function resolvedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');
@@ -181,7 +181,7 @@ class MaintenanceAlert extends Model
     /**
      * Get age of alert in hours
      */
-    public function getAgeHoursAttribute(): float
+    protected function getAgeHoursAttribute(): float
     {
         return $this->triggered_at->diffInHours(now());
     }
@@ -189,7 +189,7 @@ class MaintenanceAlert extends Model
     /**
      * Check if alert is stale (unacknowledged for > 24 hours)
      */
-    public function getIsStaleAttribute(): bool
+    protected function getIsStaleAttribute(): bool
     {
         return ! $this->acknowledged_at && $this->age_hours > 24;
     }
@@ -197,7 +197,7 @@ class MaintenanceAlert extends Model
     /**
      * Get priority score (for sorting)
      */
-    public function getPriorityScoreAttribute(): int
+    protected function getPriorityScoreAttribute(): int
     {
         $score = 0;
 

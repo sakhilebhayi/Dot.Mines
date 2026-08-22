@@ -49,13 +49,13 @@ class FuelConsumptionMetric extends Model
         'updated_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -88,7 +88,7 @@ class FuelConsumptionMetric extends Model
     /**
      * Get idle fuel percentage
      */
-    public function getIdleFuelPercentageAttribute(): ?float
+    protected function getIdleFuelPercentageAttribute(): ?float
     {
         if ($this->fuel_consumed_liters == 0 || ! $this->idle_fuel_consumed) {
             return null;

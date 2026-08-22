@@ -134,67 +134,6 @@ class PaystackService
     }
 
     /**
-     * Initialize a Paystack transaction for a subscription plan.
-     * Returns ['authorization_url' => ..., 'reference' => ...].
-     *
-     * @return array<string, mixed>|null
-     */
-    public function initializeTransaction(
-        Team $team,
-        SubscriptionPlan $plan,
-        string $billingCycle = 'monthly'
-    ): ?array {
-        $customerCode = $this->createOrGetCustomer($team);
-
-        if (! $customerCode) {
-            return null;
-        }
-
-        $planCode = $billingCycle === 'yearly'
-            ? $plan->paystack_yearly_plan_code
-            : $plan->paystack_plan_code;
-
-        if (! $planCode) {
-            Log::warning('No Paystack plan code configured for plan', [
-                'plan_id' => $plan->id,
-                'billing_cycle' => $billingCycle,
-            ]);
-
-            return null;
-        }
-
-        // Paystack amounts are in smallest currency unit (cents for ZAR)
-        $amount = (int) (($billingCycle === 'yearly' ? $plan->yearly_price : $plan->price) * 100);
-
-        $response = $this->post('/transaction/initialize', [
-            'email' => $team->owner->email,
-            'amount' => $amount,
-            'plan' => $planCode,
-            'callback_url' => config('services.paystack.callback_url', route('billing.success')),
-            'metadata' => [
-                'team_id' => (string) $team->id,
-                'plan_id' => (string) $plan->id,
-                'billing_cycle' => $billingCycle,
-                'customer_code' => $customerCode,
-            ],
-        ]);
-
-        if (empty($response['status'])) {
-            Log::error('Paystack transaction initialization failed', [
-                'team_id' => $team->id,
-                'plan_id' => $plan->id,
-            ]);
-
-            return null;
-        }
-
-        return [
-            'authorization_url' => $response['data']['authorization_url'],
-            'reference' => $response['data']['reference'],
-        ];
-    }
-
-    /**
      * Checkout for machine-allocation purchases (the per-machine pricing
      * model). The total is computed from the allocation plan rows -- the
      * single pricing source of truth -- and billed through a dynamically
@@ -336,23 +275,6 @@ class PaystackService
     }
 
     /**
-     * Verify a Paystack transaction by reference.
-     */
-    /** @return array<mixed>|null */
-    public function verifyTransaction(string $reference): ?array
-    {
-        $response = $this->get('/transaction/verify/'.urlencode($reference));
-
-        if (empty($response['status'])) {
-            Log::error('Paystack transaction verification failed', ['reference' => $reference]);
-
-            return null;
-        }
-
-        return $response['data'] ?? null;
-    }
-
-    /**
      * Handle subscription.create webhook event.
      */
     /** @param array<string, mixed> $data */
@@ -440,15 +362,5 @@ class PaystackService
         ]);
 
         return true;
-    }
-
-    /**
-     * Verify the HMAC-SHA512 webhook signature from Paystack.
-     */
-    public function verifyWebhookSignature(string $payload, string $signature): bool
-    {
-        $expected = hash_hmac('sha512', $payload, config('services.paystack.secret', ''));
-
-        return hash_equals($expected, $signature);
     }
 }

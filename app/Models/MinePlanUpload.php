@@ -49,7 +49,7 @@ class MinePlanUpload extends Model
         'metadata' => 'array',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -76,13 +76,13 @@ class MinePlanUpload extends Model
         );
     }
 
-    /** @return BelongsTo<MineArea, $this> */
+    /** @return BelongsTo<MineArea,$this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
@@ -118,7 +118,7 @@ class MinePlanUpload extends Model
     /**
      * Get human-readable file size
      */
-    public function getFormattedFileSizeAttribute(): string
+    protected function getFormattedFileSizeAttribute(): string
     {
         $bytes = $this->file_size;
         if ($bytes >= 1073741824) {
@@ -135,7 +135,7 @@ class MinePlanUpload extends Model
     /**
      * Check if file is an image type
      */
-    public function getIsImageAttribute(): bool
+    protected function getIsImageAttribute(): bool
     {
         return in_array($this->file_type, ['image', 'png', 'jpg', 'jpeg', 'gif']);
     }
@@ -143,7 +143,7 @@ class MinePlanUpload extends Model
     /**
      * Check if plan is currently effective
      */
-    public function getIsEffectiveAttribute(): bool
+    protected function getIsEffectiveAttribute(): bool
     {
         if ($this->status !== 'active') {
             return false;

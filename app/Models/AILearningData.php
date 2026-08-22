@@ -35,19 +35,19 @@ class AILearningData extends Model
         'was_accurate' => 'boolean',
     ];
 
-    /** @return BelongsTo<AIAgent, $this> */
+    /** @return BelongsTo<AIAgent,$this> */
     public function aiAgent(): BelongsTo
     {
         return $this->belongsTo(AIAgent::class);
     }
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<AIRecommendation, $this> */
+    /** @return BelongsTo<AIRecommendation,$this> */
     public function recommendation(): BelongsTo
     {
         return $this->belongsTo(AIRecommendation::class);

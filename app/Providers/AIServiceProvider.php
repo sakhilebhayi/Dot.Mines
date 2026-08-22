@@ -16,6 +16,7 @@ class AIServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
+    #[\Override]
     public function register(): void
     {
         // Register individual AI agents

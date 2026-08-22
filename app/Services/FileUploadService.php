@@ -41,15 +41,12 @@ class FileUploadService
 
     /**
      * Setter for max uncompressed size to ease testing.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- exercised only by its test today; kept as covered public API
      */
     public function setMaxUncompressedSize(int $bytes): void
     {
         $this->maxUncompressedSize = $bytes;
-    }
-
-    public function setMaxPerFileSize(int $bytes): void
-    {
-        $this->maxPerFileSize = $bytes;
     }
 
     /**
@@ -379,20 +376,6 @@ class FileUploadService
             'file_name' => $safeName,
             'size' => $file->getSize(),
         ];
-    }
-
-    public function temporaryUrl(string $path, string $disk = 's3', int $minutes = 60): string
-    {
-        if (! Storage::disk($disk)->exists($path)) {
-            throw new \Exception('File not found');
-        }
-
-        if ($disk === 's3') {
-            return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes($minutes));
-        }
-
-        // For local/private disk, create a signed route elsewhere; fallback to local URL
-        return Storage::disk($disk)->url($path);
     }
 
     /**

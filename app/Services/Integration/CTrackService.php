@@ -20,6 +20,7 @@ class CTrackService extends BaseManufacturerService
     /**
      * Test connection to C-Track API
      */
+    #[\Override]
     public function testConnection(): bool
     {
         try {
@@ -39,6 +40,7 @@ class CTrackService extends BaseManufacturerService
      * Fetch vehicles from C-Track API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         try {
@@ -70,6 +72,7 @@ class CTrackService extends BaseManufacturerService
     /**
      * Fetch current location for vehicle
      */
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
@@ -86,6 +89,7 @@ class CTrackService extends BaseManufacturerService
     /**
      * Fetch tracking metrics and history for vehicle
      */
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
@@ -114,6 +118,7 @@ class CTrackService extends BaseManufacturerService
      *
      * @return list<array<string, mixed>>
      */
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
@@ -142,6 +147,7 @@ class CTrackService extends BaseManufacturerService
      * Fetch machine details from C-Track API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         try {
@@ -154,125 +160,12 @@ class CTrackService extends BaseManufacturerService
     }
 
     /**
-     * Fetch comprehensive machine data
-     */
-    public function fetchMachineData(string $machineId): array
-    {
-        return [
-            'details' => $this->fetchMachineDetails($machineId),
-            'location' => $this->fetchMachineLocation($machineId),
-            'metrics' => $this->fetchMachineMetrics($machineId),
-            'alerts' => $this->fetchMachineAlerts($machineId),
-        ];
-    }
-
-    /**
-     * Get the manufacturer name
-     */
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
-    /**
      * Get API error if any occurred
      */
+    #[\Override]
     public function getLastError(): ?string
     {
         return $this->lastError;
-    }
-
-    /**
-     * Fetch current location for vehicle
-     *
-     * @return array<string, mixed>
-     */
-    public function fetchLocation(string $machineId): array
-    {
-        try {
-            $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/location");
-
-            return [
-                'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
-            ];
-        } catch (Exception $e) {
-            $this->logError('Failed to fetch location', $e);
-
-            return [
-                'success' => false,
-                'error' => $e->getMessage(),
-            ];
-        }
-    }
-
-    /**
-     * Fetch tracking metrics and history for vehicle
-     */
-    /** @return array<string, mixed> */
-    public function fetchMetrics(string $machineId): array
-    {
-        try {
-            $history = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/history");
-            $events = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/events");
-
-            // array_merge() would let whichever source is listed last
-            // silently overwrite every field from the earlier one, since
-            // parseMetrics() always returns the same set of keys -- see
-            // mergeMetricsPreferNonNull().
-            $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics($history['data'] ?? []),
-                $this->parseMetrics($events['data'] ?? [])
-            );
-
-            return [
-                'success' => true,
-                'metrics' => $metrics,
-            ];
-        } catch (Exception $e) {
-            $this->logError('Failed to fetch metrics', $e);
-
-            return [
-                'success' => false,
-                'error' => $e->getMessage(),
-                'metrics' => [],
-            ];
-        }
-    }
-
-    /**
-     * Fetch geofence violations and alerts
-     */
-    /** @return array<string, mixed> */
-    public function fetchAlerts(string $machineId): array
-    {
-        try {
-            $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}/events", [
-                'query' => ['type' => 'alert'],
-            ]);
-
-            $alerts = [];
-            if (! empty($response['data']['events'])) {
-                foreach ($response['data']['events'] as $event) {
-                    if (($event['type'] ?? '') === 'alert') {
-                        $alerts[] = $this->parseAlert($event);
-                    }
-                }
-            }
-
-            return [
-                'success' => true,
-                'alerts' => $alerts,
-            ];
-        } catch (Exception $e) {
-            $this->logError('Failed to fetch alerts', $e);
-
-            return [
-                'success' => false,
-                'error' => $e->getMessage(),
-                'alerts' => [],
-            ];
-        }
     }
 
     /**
@@ -280,6 +173,7 @@ class CTrackService extends BaseManufacturerService
      */
     /** @param array<string, mixed> $data
      * @return array<string, mixed> */
+    #[\Override]
     protected function parseMachineData(array $data): array
     {
         return [
@@ -307,6 +201,7 @@ class CTrackService extends BaseManufacturerService
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     protected function parseLocation(array $data): array
     {
         return [
@@ -321,31 +216,16 @@ class CTrackService extends BaseManufacturerService
     }
 
     /**
-     * Parse tracking summary/metric data from C-Track format
-     *
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    protected function parseMetric(array $data): array
-    {
-        return [
-            'type' => $data['metric_type'] ?? $data['type'] ?? 'unknown',
-            'value' => $data['value'] ?? 0,
-            'unit' => $data['unit'] ?? '',
-            'timestamp' => $data['recorded_at'] ?? $data['timestamp'] ?? now()->toIso8601String(),
-            'tags' => [
-                'category' => $data['category'] ?? null,
-                'source' => 'c-track',
-            ],
-        ];
-    }
-
-    /**
      * Parse event/alert data from C-Track format
      */
+    #[\Override]
     protected function parseAlert(array $data): array
     {
         return [
+            // Missing statuses default to 'active', never the legacy 'new'
+            // (not in the alerts.status enum) -- same invariant as the Base
+            // normaliser, pinned by ManufacturerAlertsShapeTest.
+            'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? $data['event_id'] ?? null,
             'type' => $this->mapAlertType($data['event_type'] ?? $data['type'] ?? 'unknown'),
             'priority' => $this->mapAlertPriority($data['severity'] ?? $data['priority'] ?? 'medium'),
@@ -359,6 +239,7 @@ class CTrackService extends BaseManufacturerService
     /**
      * Map C-Track vehicle status to standard status
      */
+    #[\Override]
     protected function parseStatus(string $status): string
     {
         $statusMap = [

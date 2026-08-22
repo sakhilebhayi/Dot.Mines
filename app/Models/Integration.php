@@ -92,7 +92,7 @@ class Integration extends Model
     /**
      * Get the team this integration belongs to
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -102,7 +102,7 @@ class Integration extends Model
     /**
      * Get all machines synced from this integration
      *
-     * @return HasMany<Machine, $this>
+     * @return HasMany<Machine,$this>
      */
     public function machines(): HasMany
     {

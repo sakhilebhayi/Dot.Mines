@@ -3,34 +3,9 @@
 namespace App\Services;
 
 use App\Models\MineArea;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 
 class MineAreaService
 {
-    /**
-     * Get all mine areas for a team
-     */
-    /** @return LengthAwarePaginator<int, MineArea> */
-    public function getAllForTeam(int $teamId, int $perPage = 15): LengthAwarePaginator
-    {
-        return MineArea::forTeam($teamId)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
-    }
-
-    /**
-     * Get active mine areas for a team
-     */
-    /** @return Collection<int, MineArea> */
-    public function getActiveForTeam(int $teamId): Collection
-    {
-        return MineArea::forTeam($teamId)
-            ->byStatus('active')
-            ->orderBy('name')
-            ->get();
-    }
-
     /**
      * Create a new mine area
      *

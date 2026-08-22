@@ -14,6 +14,7 @@ use App\Models\User;
  */
 class OperatorFatigueService
 {
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(private RealTimeAlertService $alertService) {}
 
     /**

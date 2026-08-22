@@ -30,6 +30,7 @@
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "1.12.32",
         "phpunit/phpunit": "^11.5.3",
+        "psalm/plugin-laravel": "^3.15",
         "vimeo/psalm": "^6.0"
     },
     "autoload": {

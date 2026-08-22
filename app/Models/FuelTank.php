@@ -72,19 +72,19 @@ class FuelTank extends Model
         'updated_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return HasMany<FuelTransaction, $this> */
+    /** @return HasMany<FuelTransaction,$this> */
     public function transactions(): HasMany
     {
         return $this->hasMany(FuelTransaction::class);
     }
 
-    /** @return HasMany<FuelAlert, $this> */
+    /** @return HasMany<FuelAlert,$this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(FuelAlert::class);
@@ -93,7 +93,7 @@ class FuelTank extends Model
     /**
      * Belongs to a mine area (optional)
      *
-     * @return BelongsTo<MineArea, $this>
+     * @return BelongsTo<MineArea,$this>
      */
     public function mineArea(): BelongsTo
     {
@@ -103,7 +103,7 @@ class FuelTank extends Model
     /**
      * Get the fill percentage
      */
-    public function getFillPercentageAttribute(): float
+    protected function getFillPercentageAttribute(): float
     {
         if ($this->capacity_liters == 0) {
             return 0;
@@ -131,7 +131,7 @@ class FuelTank extends Model
     /**
      * Get available capacity
      */
-    public function getAvailableCapacityAttribute(): float
+    protected function getAvailableCapacityAttribute(): float
     {
         return (float) $this->capacity_liters - (float) $this->current_level_liters;
     }

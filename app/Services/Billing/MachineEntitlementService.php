@@ -124,13 +124,6 @@ class MachineEntitlementService
             && $subscription->current_period_end->isFuture();
     }
 
-    public function hasCapacityFor(Team $team, string $class): bool
-    {
-        $summary = $this->summary($team);
-
-        return $summary['available'][$class] > 0;
-    }
-
     /**
      * @return array{adt: int, heavy: int}
      */

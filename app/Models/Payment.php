@@ -59,7 +59,7 @@ class Payment extends Model
     /**
      * Get the team that owns the payment.
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -69,7 +69,7 @@ class Payment extends Model
     /**
      * Get the subscription for this payment.
      *
-     * @return BelongsTo<Subscription, $this>
+     * @return BelongsTo<Subscription,$this>
      */
     public function subscription(): BelongsTo
     {
@@ -79,7 +79,7 @@ class Payment extends Model
     /**
      * Get the invoice for this payment.
      *
-     * @return BelongsTo<Invoice, $this>
+     * @return BelongsTo<Invoice,$this>
      */
     public function invoice(): BelongsTo
     {
@@ -89,7 +89,7 @@ class Payment extends Model
     /**
      * Get formatted amount
      */
-    public function getFormattedAmountAttribute(): string
+    protected function getFormattedAmountAttribute(): string
     {
         return 'R'.number_format($this->amount, 2);
     }
@@ -97,7 +97,7 @@ class Payment extends Model
     /**
      * Get status color
      */
-    public function getStatusColorAttribute(): string
+    protected function getStatusColorAttribute(): string
     {
         return match ($this->status) {
             'succeeded' => 'green',

@@ -1031,28 +1031,4 @@ class IntegrationService
 
         return array_values(array_unique($capabilities));
     }
-
-    /**
-     * Get integration status
-     *
-     * @return array<string, mixed>
-     */
-    public function getStatus(Integration $integration): array
-    {
-        $cacheKey = "integration_{$integration->id}_status";
-
-        return Cache::remember($cacheKey, 300, function () use ($integration) {
-            return [
-                'id' => $integration->id,
-                'provider' => $integration->provider,
-                'status' => $integration->status,
-                'connected' => $integration->status === 'connected',
-                'last_sync_at' => $integration->last_sync_at,
-                'last_sync_status' => $integration->last_sync_status,
-                'machines_count' => Machine::where('team_id', $integration->team_id)
-                    ->where('manufacturer', $integration->provider)
-                    ->count(),
-            ];
-        });
-    }
 }
