@@ -49,6 +49,29 @@ class TelemetryProductionCalculatorTest extends TestCase
         $this->assertSame(25.0, $days['2026-06-02']['first_value']);
     }
 
+    public function test_a_snapshot_at_exact_local_midnight_closes_the_previous_day(): void
+    {
+        // Bell emits its cumulative counters once a day at 22:00Z, which is
+        // exactly 00:00 SAST. That snapshot is the CLOSING value of the day
+        // that just ended -- booking it to the new day would shift every
+        // day's production one day late.
+        $days = $this->calculator->groupCumulativeReadingsByDay(
+            [
+                ['timestamp' => '2026-08-20T22:00:00Z', 'value' => 16461],
+                ['timestamp' => '2026-08-21T22:00:00Z', 'value' => 16491],
+            ],
+            'Africa/Johannesburg',
+            Carbon::parse('2026-08-19T00:00:00Z'),
+            Carbon::parse('2026-08-22T12:00:00Z'),
+        );
+
+        $this->assertSame(['2026-08-20', '2026-08-21'], array_keys($days));
+
+        $deltas = $this->calculator->dailyDeltas($days, null);
+
+        $this->assertSame(30.0, $deltas['2026-08-21']['delta'], "Aug 21's 30 loads must book to Aug 21, not Aug 22.");
+    }
+
     public function test_payload_units_convert_to_tonnes(): void
     {
         $this->assertSame(1.5, $this->calculator->payloadToTonnes(1500.0, 'kilogram'));

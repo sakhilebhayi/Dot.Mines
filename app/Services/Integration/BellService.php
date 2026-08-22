@@ -487,13 +487,29 @@ class BellService extends BaseManufacturerService
 
         $readings = [];
 
-        foreach ($xml->xpath("//*[@*[local-name()='ReadingUTC'] or @*[local-name()='Timestamp'] or @*[local-name()='DateTimeUTC']]") as $node) {
+        $nodes = $xml->xpath("//*[@*[local-name()='ReadingUTC'] or @*[local-name()='Timestamp'] or @*[local-name()='DateTimeUTC'] or @*[local-name()='datetime'] or @*[local-name()='DateTime']]");
+
+        foreach (is_array($nodes) ? $nodes : [] as $node) {
             $attributes = [];
-            foreach ($node->attributes() as $name => $value) {
+            foreach ($node->attributes() ?? [] as $name => $value) {
                 $attributes[(string) $name] = (string) $value;
             }
 
-            $timestamp = $attributes['ReadingUTC'] ?? $attributes['Timestamp'] ?? $attributes['DateTimeUTC'] ?? null;
+            // Bell's cumulative production series (CumulativeLoadCount,
+            // CumulativePayloadTotals) are element-style: a lowercase
+            // `datetime` attribute with the value in CHILD elements
+            // (<Count>, <Payload>, <PayloadUnits>) -- observed live
+            // 2026-08-22. Only locations/caution codes use the
+            // attribute-style shape matched above, so without folding
+            // children in, production sync parsed zero readings forever.
+            $children = $node->xpath('./*');
+            foreach (is_array($children) ? $children : [] as $child) {
+                if ($child->count() === 0) {
+                    $attributes[$child->getName()] = trim((string) $child);
+                }
+            }
+
+            $timestamp = $attributes['ReadingUTC'] ?? $attributes['Timestamp'] ?? $attributes['DateTimeUTC'] ?? $attributes['datetime'] ?? $attributes['DateTime'] ?? null;
 
             if ($timestamp === null) {
                 continue;
@@ -502,7 +518,7 @@ class BellService extends BaseManufacturerService
             $readings[] = [
                 'timestamp' => $timestamp,
                 'attributes' => $attributes,
-                'value' => $attributes['Value'] ?? $attributes['Reading'] ?? $attributes['Amount'] ?? (string) $node,
+                'value' => $attributes['Value'] ?? $attributes['Reading'] ?? $attributes['Amount'] ?? $attributes['Count'] ?? $attributes['Payload'] ?? trim((string) $node),
             ];
         }
 

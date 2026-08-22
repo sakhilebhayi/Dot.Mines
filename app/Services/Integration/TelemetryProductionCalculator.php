@@ -42,7 +42,19 @@ final class TelemetryProductionCalculator
                 continue;
             }
 
-            $date = $timestamp->clone()->setTimezone($timezone)->toDateString();
+            $local = $timestamp->clone()->setTimezone($timezone);
+
+            // A cumulative snapshot stamped exactly at local midnight closes
+            // the day that just ENDED, it doesn't open the new one -- Bell
+            // emits its daily counters at 22:00Z, which is 00:00 SAST, so
+            // without this rule every day's production books one day late
+            // (the brief's "a cycle completed at 23:59 must not appear in
+            // the following day" boundary case, in reverse).
+            if ($local->format('H:i:s') === '00:00:00') {
+                $local = $local->subSecond();
+            }
+
+            $date = $local->toDateString();
             $value = (float) $value;
 
             if (! isset($days[$date])) {
