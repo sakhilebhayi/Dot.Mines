@@ -38,6 +38,7 @@ class CTrackService extends BaseManufacturerService
     /**
      * Fetch vehicles from C-Track API
      */
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         try {
@@ -110,6 +111,8 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch geofence violations and alerts
+     *
+     * @return list<array<string, mixed>>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -138,6 +141,7 @@ class CTrackService extends BaseManufacturerService
     /**
      * Fetch machine details from C-Track API
      */
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         try {
@@ -182,6 +186,8 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Fetch current location for vehicle
+     *
+     * @return array<string, mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -205,6 +211,7 @@ class CTrackService extends BaseManufacturerService
     /**
      * Fetch tracking metrics and history for vehicle
      */
+    /** @return array<string, mixed> */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -238,6 +245,7 @@ class CTrackService extends BaseManufacturerService
     /**
      * Fetch geofence violations and alerts
      */
+    /** @return array<string, mixed> */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -272,6 +280,8 @@ class CTrackService extends BaseManufacturerService
     /**
      * Parse vehicle data from C-Track format
      */
+    /** @param array<string, mixed> $data
+     * @return array<string, mixed> */
     protected function parseMachineData(array $data): array
     {
         return [
@@ -296,6 +306,8 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse location data from C-Track format
+     *
+     * @return array<string, mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -312,6 +324,9 @@ class CTrackService extends BaseManufacturerService
 
     /**
      * Parse tracking summary/metric data from C-Track format
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {

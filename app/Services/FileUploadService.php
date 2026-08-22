@@ -322,6 +322,9 @@ class FileUploadService
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function storeMinePlan(UploadedFile $file, int $teamId, int $mineAreaId, ?string $disk = null): array
     {
         $this->validateFile($file);

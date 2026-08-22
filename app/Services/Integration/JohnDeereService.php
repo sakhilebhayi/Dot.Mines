@@ -19,12 +19,14 @@ class JohnDeereService extends BaseManufacturerService implements ManufacturerSe
         return false;
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Implement John Deere API fetch logic
         return [];
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement John Deere API fetch machine details

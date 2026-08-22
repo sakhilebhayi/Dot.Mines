@@ -16,6 +16,7 @@ use Illuminate\Support\Collection;
  */
 class AIOptimizationService
 {
+    /** @var array<string, object> */
     protected array $agents = [];
 
     public function __construct(
@@ -40,6 +41,8 @@ class AIOptimizationService
 
     /**
      * Run comprehensive analysis across all AI agents
+     *
+     * @return Collection<int|string, mixed>
      */
     public function runComprehensiveAnalysis(Team $team, ?User $user = null): Collection
     {
@@ -127,6 +130,8 @@ class AIOptimizationService
 
     /**
      * Get recommendations for a specific category
+     *
+     * @return Collection<int|string, mixed>
      */
     public function getRecommendationsForCategory(Team $team, string $category, ?User $user = null): Collection
     {
@@ -161,6 +166,8 @@ class AIOptimizationService
 
     /**
      * Get AI insights dashboard
+     *
+     * @return array<string, mixed>
      */
     public function getDashboardInsights(Team $team): array
     {
@@ -253,6 +260,9 @@ class AIOptimizationService
         };
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getAgentCapabilities(string $type): array
     {
         return match ($type) {
@@ -282,6 +292,14 @@ class AIOptimizationService
         };
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    /**
+     * @param  Collection<int|string, mixed>  $recommendations
+     * @param  Collection<int|string, mixed>  $insights
+     * @return array<string, mixed>
+     */
     protected function generateSummary(Collection $recommendations, Collection $insights): array
     {
         return [

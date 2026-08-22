@@ -14,6 +14,9 @@ use App\Models\Team;
  */
 class MaintenancePredictorAgent
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];
@@ -34,6 +37,9 @@ class MaintenancePredictorAgent
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function predictMaintenanceNeeds(Team $team): array
     {
         $recommendations = [];
@@ -132,6 +138,9 @@ class MaintenancePredictorAgent
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function optimizeMaintenanceSchedules(Team $team): array
     {
         $recommendations = [];
@@ -231,6 +240,9 @@ class MaintenancePredictorAgent
         return max(7, (int) ($baseDays * (1 - $riskScore)));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getContributingFactors(Machine $machine): array
     {
         $factors = [];

@@ -11,6 +11,9 @@ class FuelReserveRunwayCalculator
 {
     private const TRAILING_DAYS = 30;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function calculate(): array
     {
         $currentReserves = (float) FuelTank::active()->sum('current_level_liters');
@@ -57,6 +60,9 @@ class FuelReserveRunwayCalculator
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function unavailable(): array
     {
         return [
@@ -71,6 +77,9 @@ class FuelReserveRunwayCalculator
         ];
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     private function computeWhatIf(Collection $dispensing, float $dailyConsumption, float $currentReserves, int $daysSpanned): ?array
     {
         $topMachine = $dispensing->whereNotNull('machine_id')

@@ -18,6 +18,8 @@ class FuelManagementService
 {
     /**
      * Record a fuel transaction and update tank levels
+     *
+     * @param  array<string, mixed>  $data
      */
     public function recordTransaction(array $data): FuelTransaction
     {
@@ -56,31 +58,39 @@ class FuelManagementService
     {
         $tank = $transaction->fuelTank;
 
+        if ($tank === null && $transaction->transaction_type !== 'transfer') {
+            // Transfers carry their own from/to tank ids; every other type
+            // needs the owning tank to exist to have any level to adjust.
+            return;
+        }
+
         switch ($transaction->transaction_type) {
             case 'refill':
             case 'delivery':
-                $tank->increment('current_level_liters', $transaction->quantity_liters);
+                $tank?->increment('current_level_liters', (float) $transaction->quantity_liters);
                 break;
 
             case 'dispensing':
             case 'spillage':
             case 'theft':
-                $tank->decrement('current_level_liters', $transaction->quantity_liters);
+                $tank?->decrement('current_level_liters', (float) $transaction->quantity_liters);
                 break;
 
             case 'adjustment':
-                $tank->current_level_liters = $transaction->quantity_liters;
-                $tank->save();
+                if ($tank !== null) {
+                    $tank->current_level_liters = (float) $transaction->quantity_liters;
+                    $tank->save();
+                }
                 break;
 
             case 'transfer':
                 if ($transaction->from_tank_id) {
-                    $fromTank = FuelTank::find($transaction->from_tank_id);
-                    $fromTank->decrement('current_level_liters', $transaction->quantity_liters);
+                    FuelTank::query()->find($transaction->from_tank_id)
+                        ?->decrement('current_level_liters', (float) $transaction->quantity_liters);
                 }
                 if ($transaction->to_tank_id) {
-                    $toTank = FuelTank::find($transaction->to_tank_id);
-                    $toTank->increment('current_level_liters', $transaction->quantity_liters);
+                    FuelTank::query()->find($transaction->to_tank_id)
+                        ?->increment('current_level_liters', (float) $transaction->quantity_liters);
                 }
                 break;
         }
@@ -92,9 +102,9 @@ class FuelManagementService
     protected function checkAndCreateAlerts(FuelTransaction $transaction): void
     {
         // Check tank level alerts
-        if ($transaction->fuel_tank_id) {
-            $tank = $transaction->fuelTank;
+        $tank = $transaction->fuel_tank_id ? $transaction->fuelTank : null;
 
+        if ($tank !== null) {
             if ($tank->isCritical()) {
                 $this->createFuelAlert([
                     'team_id' => $tank->team_id,
@@ -172,6 +182,10 @@ class FuelManagementService
     {
         $machine = $transaction->machine;
 
+        if ($machine === null) {
+            return;
+        }
+
         // Get average daily consumption for this machine
         $avgConsumption = FuelConsumptionMetric::where('machine_id', $machine->id)
             ->where('date', '>=', now()->subDays(30))
@@ -191,6 +205,8 @@ class FuelManagementService
 
     /**
      * Create fuel alert (avoid duplicates)
+     *
+     * @param  array<string, mixed>  $data
      */
     protected function createFuelAlert(array $data): ?FuelAlert
     {
@@ -321,6 +337,8 @@ class FuelManagementService
 
     /**
      * Get fuel analytics for team
+     *
+     * @return array<string, mixed>
      */
     public function getTeamAnalytics(int $teamId, Carbon $startDate, Carbon $endDate): array
     {
@@ -466,6 +484,8 @@ class FuelManagementService
 
     /**
      * Get machine fuel efficiency report
+     *
+     * @return array<string, mixed>
      */
     public function getMachineFuelEfficiency(Machine $machine, Carbon $startDate, Carbon $endDate): array
     {

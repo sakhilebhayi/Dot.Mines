@@ -19,12 +19,14 @@ class BobcatService extends BaseManufacturerService implements ManufacturerServi
         return false;
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Implement Bobcat API fetch logic
         return [];
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement Bobcat API fetch machine details

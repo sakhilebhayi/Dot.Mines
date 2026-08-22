@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
  */
 class AnalyzerBaselineRatchetTest extends TestCase
 {
-    private const PHPSTAN_BASELINE_HIGH_WATER = 890;
+    private const PHPSTAN_BASELINE_HIGH_WATER = 635;
 
     private const PSALM_BASELINE_FILES_HIGH_WATER = 258;
 

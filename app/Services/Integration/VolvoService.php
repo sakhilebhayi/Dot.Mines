@@ -38,6 +38,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Fetch machines from Volvo CareTrack API
      */
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         try {
@@ -68,6 +69,8 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Fetch location data for equipment
+     *
+     * @return array<string, mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -91,6 +94,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Fetch telemetry/metrics for equipment
      */
+    /** @return array<string, mixed> */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -155,6 +159,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Fetch alerts/faults for equipment
      */
+    /** @return array<string, mixed> */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -193,6 +198,8 @@ class VolvoService extends BaseManufacturerService
     /**
      * Parse equipment data from Volvo format
      */
+    /** @param array<string, mixed> $data
+     * @return array<string, mixed> */
     protected function parseMachineData(array $data): array
     {
         return [
@@ -216,6 +223,8 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Parse location data from Volvo format
+     *
+     * @return array<string, mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -230,6 +239,9 @@ class VolvoService extends BaseManufacturerService
 
     /**
      * Parse diagnostic/metric data from Volvo format
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -286,6 +298,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Fetch machine details from Volvo API
      */
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view

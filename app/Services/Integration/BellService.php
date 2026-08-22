@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration;
 
+use Carbon\CarbonInterface;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -51,7 +52,7 @@ class BellService extends BaseManufacturerService
 
     private ?string $password;
 
-    private ?string $clientId;
+    private string $clientId;
 
     private ?string $clientSecret;
 
@@ -61,6 +62,9 @@ class BellService extends BaseManufacturerService
 
     private readonly BellFleetParser $parser;
 
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
     public function __construct(array $credentials = [])
     {
         parent::__construct($credentials);
@@ -103,6 +107,7 @@ class BellService extends BaseManufacturerService
      * the 12 per-machine time-series endpoints are for historical
      * drill-down only (see fetchMachineMetrics()/fetchMachineAlerts()).
      */
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Micro-cache: location and status jobs both consume the snapshot
@@ -169,6 +174,7 @@ class BellService extends BaseManufacturerService
         }
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         $result = $this->fetchMachines();
@@ -304,6 +310,8 @@ class BellService extends BaseManufacturerService
      * Bell's caution codes are raw manufacturer fault codes -- this
      * integration has no access to Bell's fault-code-to-description lookup
      * table, so codes are surfaced as-is rather than guessed at.
+     *
+     * @return list<array<string, mixed>>
      */
     public function fetchMachineAlerts(string $machineId): array
     {
@@ -454,7 +462,7 @@ class BellService extends BaseManufacturerService
      *
      * @return list<array{timestamp: string, value: string, attributes: array<string, string>}>
      */
-    private function fetchTimeSeries(string $equipmentId, string $endpointKey, Carbon $start, Carbon $end): array
+    private function fetchTimeSeries(string $equipmentId, string $endpointKey, CarbonInterface $start, CarbonInterface $end): array
     {
         $template = config("integrations.manufacturers.bell.supported_endpoints.{$endpointKey}");
 

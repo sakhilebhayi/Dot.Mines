@@ -19,12 +19,14 @@ class NewHollandService extends BaseManufacturerService implements ManufacturerS
         return false;
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Implement New Holland API fetch logic
         return [];
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement New Holland API fetch machine details

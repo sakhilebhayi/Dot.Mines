@@ -19,12 +19,14 @@ class AtlasCopcoService extends BaseManufacturerService implements ManufacturerS
         return false;
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Implement Atlas Copco API fetch logic
         return [];
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement Atlas Copco API fetch machine details

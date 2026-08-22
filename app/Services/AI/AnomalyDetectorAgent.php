@@ -10,6 +10,9 @@ use App\Models\Team;
  */
 class AnomalyDetectorAgent
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function analyze(Team $team): array
     {
         $recommendations = [];

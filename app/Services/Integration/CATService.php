@@ -39,6 +39,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Fetch machines from CAT VisionLink API
      */
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         try {
@@ -69,6 +70,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Fetch location data for a machine
+     *
+     * @return array<string, mixed>
      */
     public function fetchLocation(string $machineId): array
     {
@@ -92,6 +95,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Fetch diagnostics/metrics for a machine
      */
+    /** @return array<string, mixed> */
     public function fetchMetrics(string $machineId): array
     {
         try {
@@ -157,6 +161,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Fetch alerts for a machine
      */
+    /** @return array<string, mixed> */
     public function fetchAlerts(string $machineId): array
     {
         try {
@@ -187,6 +192,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Parse machine data from CAT format
      */
+    /** @param array<string, mixed> $data
+     * @return array<string, mixed> */
     protected function parseMachineData(array $data): array
     {
         return [
@@ -210,6 +217,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Parse location data from CAT format
+     *
+     * @return array<string, mixed>
      */
     protected function parseLocation(array $data): array
     {
@@ -224,6 +233,9 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
     /**
      * Parse telemetry/metric data from CAT format
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function parseMetric(array $data): array
     {
@@ -278,6 +290,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Fetch machine details from CAT API
      */
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view

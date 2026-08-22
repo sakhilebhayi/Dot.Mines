@@ -15,6 +15,8 @@ class MaintenanceHealthService
 {
     /**
      * Update machine health status
+     *
+     * @param  array<string, mixed>  $data
      */
     public function updateHealthStatus(Machine $machine, array $data): MachineHealthStatus
     {
@@ -71,6 +73,8 @@ class MaintenanceHealthService
 
     /**
      * Create maintenance alert (avoid duplicates)
+     *
+     * @param  array<string, mixed>  $data
      */
     protected function createMaintenanceAlert(Machine $machine, array $data): ?MaintenanceAlert
     {
@@ -141,6 +145,8 @@ class MaintenanceHealthService
 
     /**
      * Create maintenance record (work order)
+     *
+     * @param  array<string, mixed>  $data
      */
     public function createMaintenanceRecord(array $data): MaintenanceRecord
     {
@@ -184,6 +190,8 @@ class MaintenanceHealthService
 
     /**
      * Complete maintenance record
+     *
+     * @param  array<string, mixed>  $data
      */
     public function completeMaintenanceRecord(MaintenanceRecord $record, array $data): MaintenanceRecord
     {
@@ -214,6 +222,8 @@ class MaintenanceHealthService
 
     /**
      * Record health metric
+     *
+     * @param  array<string, mixed>  $data
      */
     public function recordHealthMetric(Machine $machine, array $data): HealthMetric
     {
@@ -253,6 +263,8 @@ class MaintenanceHealthService
 
     /**
      * Get maintenance analytics
+     *
+     * @return array<string, mixed>
      */
     public function getMaintenanceAnalytics(int $teamId, Carbon $startDate, Carbon $endDate): array
     {
@@ -339,6 +351,8 @@ class MaintenanceHealthService
 
     /**
      * Get machine health report
+     *
+     * @return array<string, mixed>
      */
     public function getMachineHealthReport(Machine $machine): array
     {

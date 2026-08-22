@@ -19,12 +19,14 @@ class SandvikService extends BaseManufacturerService implements ManufacturerServ
         return false;
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachines(): array
     {
         // Implement Sandvik API fetch logic
         return [];
     }
 
+    /** @return array<string, mixed> */
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement Sandvik API fetch machine details
