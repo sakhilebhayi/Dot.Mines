@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Models\MachineAllocation;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Team;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -160,6 +162,123 @@ class PaystackService
     }
 
     /**
+     * Checkout for machine-allocation purchases (the per-machine pricing
+     * model). The total is computed from the allocation plan rows -- the
+     * single pricing source of truth -- and billed through a dynamically
+     * created Paystack plan for that exact amount (Paystack plan codes are
+     * fixed-amount). The requested quantities ride in transaction metadata;
+     * NOTHING is granted here -- the signature-verified charge.success
+     * webhook is the only grant path (brief §8).
+     *
+     * @param  array{adt: int, heavy: int}  $quantities
+     * @return array{authorization_url: string, reference: string}|null
+     */
+    public function initializeAllocationPurchase(Team $team, array $quantities, string $billingCycle = 'monthly'): ?array
+    {
+        $customerCode = $this->createOrGetCustomer($team);
+
+        if ($customerCode === null || $customerCode === '') {
+            return null;
+        }
+
+        $adtPlan = SubscriptionPlan::query()->where('slug', 'adt-allocation')->where('is_active', true)->first();
+        $heavyPlan = SubscriptionPlan::query()->where('slug', 'heavy-allocation')->where('is_active', true)->first();
+
+        if (! $adtPlan || ! $heavyPlan) {
+            Log::error('Allocation plans are not seeded; cannot start allocation checkout');
+
+            return null;
+        }
+
+        $priceFor = fn (SubscriptionPlan $plan): float => $billingCycle === 'yearly'
+            ? (float) $plan->yearly_price
+            : (float) $plan->price;
+
+        $total = ((float) $quantities['adt'] * $priceFor($adtPlan)) + ((float) $quantities['heavy'] * $priceFor($heavyPlan));
+
+        if ($total <= 0) {
+            return null;
+        }
+
+        $amount = (int) round($total * 100.0);
+        $interval = $billingCycle === 'yearly' ? 'annually' : 'monthly';
+
+        $planCode = $this->createOrGetPlanForAmount($amount, $interval);
+
+        if ($planCode === null) {
+            return null;
+        }
+
+        $response = $this->post('/transaction/initialize', [
+            'email' => $team->owner->email,
+            'amount' => $amount,
+            'plan' => $planCode,
+            'callback_url' => config('services.paystack.callback_url', route('billing.success')),
+            'metadata' => [
+                'team_id' => (string) $team->id,
+                'billing_cycle' => $billingCycle,
+                'customer_code' => $customerCode,
+                'allocation_adt' => (string) $quantities['adt'],
+                'allocation_heavy' => (string) $quantities['heavy'],
+            ],
+        ]);
+
+        if (empty($response['status'])) {
+            Log::error('Paystack allocation checkout initialization failed', ['team_id' => $team->id]);
+
+            return null;
+        }
+
+        return [
+            'authorization_url' => $response['data']['authorization_url'],
+            'reference' => $response['data']['reference'],
+        ];
+    }
+
+    /**
+     * Create (or reuse) a Paystack plan for an exact amount + interval.
+     * Codes persist in paystack_dynamic_plans so every checkout for the
+     * same total reuses one plan instead of littering the Paystack account.
+     */
+    public function createOrGetPlanForAmount(int $amount, string $interval): ?string
+    {
+        /** @var string|null $existing */
+        $existing = DB::table('paystack_dynamic_plans')
+            ->where('amount', $amount)
+            ->where('interval', $interval)
+            ->value('plan_code');
+
+        if ($existing !== null) {
+            return $existing;
+        }
+
+        $response = $this->post('/plan', [
+            'name' => sprintf('Dot.Mines Machine Allocations R%s/%s', number_format($amount / 100, 2), $interval),
+            'amount' => $amount,
+            'interval' => $interval,
+            'currency' => 'ZAR',
+        ]);
+
+        $planCode = $response['data']['plan_code'] ?? null;
+
+        if (! is_string($planCode) || $planCode === '') {
+            Log::error('Paystack dynamic plan creation failed', ['amount' => $amount, 'interval' => $interval]);
+
+            return null;
+        }
+
+        DB::table('paystack_dynamic_plans')->insert([
+            'amount' => $amount,
+            'interval' => $interval,
+            'plan_code' => $planCode,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return $planCode;
+    }
+
+    /**
      * Generate Paystack's hosted subscription-management link -- the
      * closest equivalent to a billing portal (card updates, cancellation)
      * that Paystack offers.
@@ -305,18 +424,25 @@ class PaystackService
 
             $subscription = Subscription::where('team_id', $teamId)->first();
 
-            Payment::create([
-                'team_id' => $teamId,
-                'subscription_id' => $subscription?->id,
-                'paystack_reference' => $charge['reference'],
-                'paystack_invoice_id' => null,
-                'amount' => ($charge['amount'] ?? 0) / 100,
-                'currency' => strtoupper($charge['currency'] ?? 'ZAR'),
-                'status' => 'succeeded',
-                'payment_method' => $charge['channel'] ?? 'card',
-                'paid_at' => now(),
-                'metadata' => $metadata,
-            ]);
+            // Idempotent on the Paystack reference: webhook retries and
+            // duplicate deliveries must not double-record the payment --
+            // and must NEVER double-grant allocations below.
+            $payment = Payment::firstOrCreate(
+                ['paystack_reference' => $charge['reference']],
+                [
+                    'team_id' => $teamId,
+                    'subscription_id' => $subscription?->id,
+                    'paystack_invoice_id' => null,
+                    'amount' => ($charge['amount'] ?? 0) / 100,
+                    'currency' => strtoupper($charge['currency'] ?? 'ZAR'),
+                    'status' => 'succeeded',
+                    'payment_method' => $charge['channel'] ?? 'card',
+                    'paid_at' => now(),
+                    'metadata' => $metadata,
+                ]
+            );
+
+            $this->grantAllocationsForPayment($payment, $metadata);
 
         } catch (\Exception $e) {
             Log::error('Failed to handle charge.success webhook', [
@@ -324,6 +450,49 @@ class PaystackService
                 'data' => $data,
             ]);
         }
+    }
+
+    /**
+     * The ONLY place purchased machine allocations are granted: from a
+     * signature-verified, successfully charged payment (brief §8). Doubly
+     * idempotent -- firstOrCreate above dedupes the payment, and the
+     * payment_id guard here dedupes the grant even if two workers race
+     * the same first delivery.
+     *
+     * @param  array<string, mixed>  $metadata
+     */
+    private function grantAllocationsForPayment(Payment $payment, array $metadata): void
+    {
+        $adt = (int) ($metadata['allocation_adt'] ?? 0);
+        $heavy = (int) ($metadata['allocation_heavy'] ?? 0);
+
+        if ($adt <= 0 && $heavy <= 0) {
+            return; // Not an allocation purchase (e.g. a legacy tier charge).
+        }
+
+        if (MachineAllocation::withoutGlobalScopes()->where('payment_id', $payment->id)->exists()) {
+            return;
+        }
+
+        foreach (['adt' => $adt, 'heavy' => $heavy] as $class => $quantity) {
+            if ($quantity > 0) {
+                MachineAllocation::create([
+                    'team_id' => $payment->team_id,
+                    'class' => $class,
+                    'delta' => $quantity,
+                    'source' => 'purchase',
+                    'payment_id' => $payment->id,
+                    'subscription_id' => $payment->subscription_id,
+                ]);
+            }
+        }
+
+        Log::info('Machine allocations granted from verified payment', [
+            'team_id' => $payment->team_id,
+            'payment_id' => $payment->id,
+            'adt' => $adt,
+            'heavy' => $heavy,
+        ]);
     }
 
     /**

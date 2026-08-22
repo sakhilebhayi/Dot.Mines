@@ -149,12 +149,19 @@ class PaystackBillingTest extends TestCase
         $this->assertNotNull($subscription->canceled_at);
     }
 
-    public function test_subscribe_redirects_to_the_paystack_hosted_checkout(): void
+    public function test_allocation_purchase_redirects_to_the_paystack_hosted_checkout(): void
     {
+        // The tier-select subscribe() flow was replaced by the per-machine
+        // allocation purchase (billing brief, 2026-08-22); checkout still
+        // rides the same PaystackService transaction/initialize pipeline.
         Http::fake([
             'https://api.paystack.co/customer' => Http::response([
                 'status' => true,
                 'data' => ['customer_code' => 'CUS_def456'],
+            ]),
+            'https://api.paystack.co/plan' => Http::response([
+                'status' => true,
+                'data' => ['plan_code' => 'PLN_dyn'],
             ]),
             'https://api.paystack.co/transaction/initialize' => Http::response([
                 'status' => true,
@@ -168,14 +175,12 @@ class PaystackBillingTest extends TestCase
         $user = User::factory()->create();
         $team = Team::factory()->create(['user_id' => $user->id]);
         $user->update(['current_team_id' => $team->id]);
-        $plan = $this->makePlan();
 
         Livewire::actingAs($user)
             ->test(BillingPortal::class)
-            ->set('selectedPlanId', $plan->id)
-            ->set('selectedAdtCount', 2)
-            ->set('selectedBillingCycle', 'monthly')
-            ->call('subscribe')
+            ->set('qtyAdt', 2)
+            ->set('billingCycle', 'monthly')
+            ->call('purchase')
             ->assertRedirect('https://checkout.paystack.com/abc123');
     }
 }

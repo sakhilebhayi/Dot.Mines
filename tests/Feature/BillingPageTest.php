@@ -34,6 +34,6 @@ class BillingPageTest extends TestCase
         $response = $this->actingAs($user)->get('/billing');
 
         $response->assertOk();
-        $response->assertSee('Choose Your Plan');
+        $response->assertSee('Your Machine Capacity');
     }
 }
