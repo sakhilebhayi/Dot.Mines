@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mines-verify",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "SESSION_SECURE_COOKIE=false",
+        "APP_URL=http://127.0.0.1:8010",
+        "ASSET_URL=http://127.0.0.1:8010",
+        "php",
+        "artisan",
+        "serve",
+        "--host=127.0.0.1",
+        "--port=8010"
+      ],
+      "port": 8010
+    }
+  ]
+}
