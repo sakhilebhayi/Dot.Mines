@@ -59,6 +59,20 @@
             </div>
         </div>
 
+        <!-- Live today: counter arithmetic from the operational snapshot
+             (Bell cumulative counters), independent of the date filters
+             below. Null means no counter baseline yet -- say so, never 0. -->
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg px-6 py-4 mb-6 flex flex-wrap items-center gap-x-8 gap-y-2">
+            <span class="text-sm font-medium text-[var(--gold)] uppercase tracking-wide">Live Today</span>
+            @if ($fleetToday['loads'] !== null)
+                <span class="text-sm text-[var(--sand)]">Loads <span class="text-lg font-semibold text-[var(--stone)] ml-1">{{ number_format($fleetToday['loads']) }}</span></span>
+                <span class="text-sm text-[var(--sand)]">Hauled <span class="text-lg font-semibold text-[var(--stone)] ml-1">{{ number_format($fleetToday['tonnes'], 1) }} t</span></span>
+                <span class="text-xs text-[var(--sand)]/70">{{ $fleetToday['reporting'] }} of {{ $fleetToday['total'] }} machines reporting counters</span>
+            @else
+                <span class="text-sm text-[var(--sand)]">Awaiting API data — no machine has reported a counter baseline yet today.</span>
+            @endif
+        </div>
+
         <!-- Production Summary Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
             <!-- Total Loads -->

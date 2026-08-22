@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Machine;
+use App\Services\OperationalSnapshotService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
@@ -47,6 +48,7 @@ class MachineDetail extends Component
         return view('livewire.machine-detail', [
             'metrics' => $metrics,
             'recentAlerts' => $recentAlerts,
+            'snapshot' => app(OperationalSnapshotService::class)->forMachine($this->machine),
         ]);
     }
 }

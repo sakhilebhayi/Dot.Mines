@@ -13,6 +13,7 @@ use App\Services\AI\FleetOptimizerAgent;
 use App\Services\Billing\MachineEntitlementService;
 use App\Services\Billing\MachineProvisioningService;
 use App\Services\MachinePerformanceService;
+use App\Services\OperationalSnapshotService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
@@ -556,6 +557,7 @@ class Fleet extends Component
 
         return view('livewire.fleet', [
             'machines' => $machinesQuery,
+            'snapshots' => app(OperationalSnapshotService::class)->forTeam($team),
             'excavators' => $excavators,
             'adts' => $adts,
             'mineAreas' => $mineAreas,

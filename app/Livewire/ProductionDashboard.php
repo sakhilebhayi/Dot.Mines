@@ -537,7 +537,20 @@ class ProductionDashboard extends Component
         $team = auth()->user()?->currentTeam;
         $snapshotService = app(OperationalSnapshotService::class);
 
+        $fleetToday = ['loads' => null, 'tonnes' => null, 'reporting' => 0, 'total' => 0];
+        if ($team !== null) {
+            $snapshots = $snapshotService->forTeam($team);
+            $reporting = $snapshots->filter(fn (array $snap): bool => $snap['loads_today'] !== null);
+            $fleetToday = [
+                'loads' => $reporting->isNotEmpty() ? (int) $reporting->sum('loads_today') : null,
+                'tonnes' => $reporting->isNotEmpty() ? round((float) $reporting->sum('tonnes_today'), 1) : null,
+                'reporting' => $reporting->count(),
+                'total' => $snapshots->count(),
+            ];
+        }
+
         return view('livewire.production-dashboard', [
+            'fleetToday' => $fleetToday,
             'telemetryFreshestAt' => $team ? $snapshotService->teamTelemetryFreshestAt($team) : null,
             'telemetryStaleAfter' => $team ? $snapshotService->staleAfterSeconds($team->id) : 900,
             'records' => $this->productionRecords,
