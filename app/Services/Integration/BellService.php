@@ -487,9 +487,11 @@ class BellService extends BaseManufacturerService
 
         $readings = [];
 
-        foreach ($xml->xpath("//*[@*[local-name()='ReadingUTC'] or @*[local-name()='Timestamp'] or @*[local-name()='DateTimeUTC'] or @*[local-name()='datetime'] or @*[local-name()='DateTime']]") as $node) {
+        $nodes = $xml->xpath("//*[@*[local-name()='ReadingUTC'] or @*[local-name()='Timestamp'] or @*[local-name()='DateTimeUTC'] or @*[local-name()='datetime'] or @*[local-name()='DateTime']]");
+
+        foreach (is_array($nodes) ? $nodes : [] as $node) {
             $attributes = [];
-            foreach ($node->attributes() as $name => $value) {
+            foreach ($node->attributes() ?? [] as $name => $value) {
                 $attributes[(string) $name] = (string) $value;
             }
 
@@ -500,7 +502,8 @@ class BellService extends BaseManufacturerService
             // 2026-08-22. Only locations/caution codes use the
             // attribute-style shape matched above, so without folding
             // children in, production sync parsed zero readings forever.
-            foreach ($node->xpath('./*') ?: [] as $child) {
+            $children = $node->xpath('./*');
+            foreach (is_array($children) ? $children : [] as $child) {
                 if ($child->count() === 0) {
                     $attributes[$child->getName()] = trim((string) $child);
                 }
