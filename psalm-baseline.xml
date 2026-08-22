@@ -3759,75 +3759,27 @@
     <ClassMustBeFinal>
       <code><![CDATA[BillingPortal]]></code>
     </ClassMustBeFinal>
-    <MissingParamType>
-      <code><![CDATA[$invoiceId]]></code>
-      <code><![CDATA[$planId]]></code>
-    </MissingParamType>
     <MissingReturnType>
-      <code><![CDATA[calculateUsageBasedPricing]]></code>
-      <code><![CDATA[cancelSubscription]]></code>
-      <code><![CDATA[downloadInvoice]]></code>
-      <code><![CDATA[getUserSelectedMonthlyTotalProperty]]></code>
-      <code><![CDATA[getUserSelectedYearlyTotalProperty]]></code>
-      <code><![CDATA[loadAvailablePlans]]></code>
-      <code><![CDATA[loadRecentActivity]]></code>
-      <code><![CDATA[loadSubscriptionData]]></code>
-      <code><![CDATA[manageBilling]]></code>
-      <code><![CDATA[mount]]></code>
       <code><![CDATA[render]]></code>
-      <code><![CDATA[resumeSubscription]]></code>
-      <code><![CDATA[selectPlan]]></code>
-      <code><![CDATA[subscribe]]></code>
-      <code><![CDATA[switchBillingCycle]]></code>
-      <code><![CDATA[togglePlanSelector]]></code>
-      <code><![CDATA[updatedSelectedAdtCount]]></code>
-      <code><![CDATA[updatedSelectedBigMachineCount]]></code>
     </MissingReturnType>
     <MixedArgument>
-      <code><![CDATA[$checkout['authorization_url']]]></code>
       <code><![CDATA[$invoice->pdf_url]]></code>
-      <code><![CDATA[$plan]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$this->currentSubscription]]></code>
       <code><![CDATA[$this->currentSubscription]]></code>
       <code><![CDATA[$this->currentSubscription]]></code>
+      <code><![CDATA[Auth::user()->currentTeam]]></code>
     </MixedArgument>
     <MixedAssignment>
-      <code><![CDATA[$plan]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$this->adtCount]]></code>
-      <code><![CDATA[$this->availablePlans]]></code>
-      <code><![CDATA[$this->bigMachineCount]]></code>
-      <code><![CDATA[$this->monthlyPrice]]></code>
       <code><![CDATA[$this->nextBillingDate]]></code>
-      <code><![CDATA[$this->selectedBillingCycle]]></code>
-      <code><![CDATA[$this->selectedPlanId]]></code>
       <code><![CDATA[$this->totalPaid]]></code>
       <code><![CDATA[$this->totalPaidCurrency]]></code>
-      <code><![CDATA[$this->yearlyPrice]]></code>
     </MixedAssignment>
-    <MixedMethodCall>
-      <code><![CDATA[count]]></code>
-      <code><![CDATA[count]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[get]]></code>
-      <code><![CDATA[machines]]></code>
-      <code><![CDATA[machines]]></code>
-      <code><![CDATA[toArray]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[whereIn]]></code>
-    </MixedMethodCall>
-    <MixedOperand>
-      <code><![CDATA[$this->adtCount]]></code>
-      <code><![CDATA[$this->bigMachineCount]]></code>
-      <code><![CDATA[$this->monthlyPrice]]></code>
-      <code><![CDATA[$this->userSelectedMonthlyTotal]]></code>
-    </MixedOperand>
     <MixedPropertyFetch>
       <code><![CDATA[$team->currency]]></code>
       <code><![CDATA[$team->id]]></code>
@@ -3861,40 +3813,35 @@
     <PossiblyUnusedMethod>
       <code><![CDATA[cancelSubscription]]></code>
       <code><![CDATA[downloadInvoice]]></code>
-      <code><![CDATA[getUserSelectedMonthlyTotalProperty]]></code>
-      <code><![CDATA[getUserSelectedYearlyTotalProperty]]></code>
+      <code><![CDATA[getAdtPlanProperty]]></code>
+      <code><![CDATA[getAllocationSummaryProperty]]></code>
+      <code><![CDATA[getHeavyPlanProperty]]></code>
+      <code><![CDATA[getPurchaseTotalProperty]]></code>
       <code><![CDATA[manageBilling]]></code>
       <code><![CDATA[mount]]></code>
+      <code><![CDATA[purchase]]></code>
       <code><![CDATA[render]]></code>
       <code><![CDATA[resumeSubscription]]></code>
-      <code><![CDATA[selectPlan]]></code>
-      <code><![CDATA[subscribe]]></code>
       <code><![CDATA[switchBillingCycle]]></code>
-      <code><![CDATA[togglePlanSelector]]></code>
-      <code><![CDATA[updatedSelectedAdtCount]]></code>
-      <code><![CDATA[updatedSelectedBigMachineCount]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedProperty>
-      <code><![CDATA[$availablePlans]]></code>
       <code><![CDATA[$currentPlan]]></code>
       <code><![CDATA[$nextBillingDate]]></code>
       <code><![CDATA[$recentInvoices]]></code>
       <code><![CDATA[$recentPayments]]></code>
-      <code><![CDATA[$showConfirmModal]]></code>
       <code><![CDATA[$totalPaid]]></code>
       <code><![CDATA[$totalPaidCurrency]]></code>
       <code><![CDATA[$trialDaysRemaining]]></code>
-      <code><![CDATA[$yearlyPrice]]></code>
     </PossiblyUnusedProperty>
+    <RedundantCastGivenDocblockType>
+      <code><![CDATA[(float) $adt->price]]></code>
+      <code><![CDATA[(float) $heavy->price]]></code>
+    </RedundantCastGivenDocblockType>
     <RiskyTruthyFalsyComparison>
-      <code><![CDATA[! $checkout]]></code>
-      <code><![CDATA[! $plan]]></code>
       <code><![CDATA[! $portalUrl]]></code>
-      <code><![CDATA[$this->selectedPlanId]]></code>
     </RiskyTruthyFalsyComparison>
     <UndefinedMagicMethod>
-      <code><![CDATA[SubscriptionPlan::active()]]></code>
-      <code><![CDATA[SubscriptionPlan::active()]]></code>
+      <code><![CDATA[latest]]></code>
       <code><![CDATA[latest]]></code>
       <code><![CDATA[trialDaysRemaining]]></code>
       <code><![CDATA[where]]></code>
@@ -3902,16 +3849,10 @@
     </UndefinedMagicMethod>
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$invoice->pdf_url]]></code>
-      <code><![CDATA[$this->currentSubscription->billing_cycle]]></code>
       <code><![CDATA[$this->currentSubscription->current_period_end]]></code>
       <code><![CDATA[$this->currentSubscription->plan]]></code>
       <code><![CDATA[$this->currentSubscription->plan]]></code>
     </UndefinedMagicPropertyFetch>
-    <UndefinedThisPropertyFetch>
-      <code><![CDATA[$this->userSelectedMonthlyTotal]]></code>
-      <code><![CDATA[$this->userSelectedMonthlyTotal]]></code>
-      <code><![CDATA[$this->userSelectedYearlyTotal]]></code>
-    </UndefinedThisPropertyFetch>
   </file>
   <file src="app/Livewire/Dashboard.php">
     <ClassMustBeFinal>
@@ -13186,6 +13127,8 @@
     <MixedArgument>
       <code><![CDATA[$charge['currency'] ?? 'ZAR']]></code>
       <code><![CDATA[$invoiceData['currency'] ?? 'ZAR']]></code>
+      <code><![CDATA[$metadata]]></code>
+      <code><![CDATA[$payment]]></code>
       <code><![CDATA[$subscriptionData['status'] ?? 'active']]></code>
       <code><![CDATA[config('services.paystack.secret', '')]]></code>
     </MixedArgument>
@@ -13211,6 +13154,8 @@
       <code><![CDATA[$metadata['team_id']]]></code>
       <code><![CDATA[$metadata['team_id']]]></code>
       <code><![CDATA[$response['data']['authorization_url']]]></code>
+      <code><![CDATA[$response['data']['authorization_url']]]></code>
+      <code><![CDATA[$response['data']['reference']]]></code>
       <code><![CDATA[$response['data']['reference']]]></code>
       <code><![CDATA[$subscriptionData['customer']]]></code>
       <code><![CDATA[$subscriptionData['customer']['customer_code']]]></code>
@@ -13230,6 +13175,7 @@
       <code><![CDATA[$invoiceData]]></code>
       <code><![CDATA[$metadata]]></code>
       <code><![CDATA[$metadata]]></code>
+      <code><![CDATA[$payment]]></code>
       <code><![CDATA[$planCode]]></code>
       <code><![CDATA[$planId]]></code>
       <code><![CDATA[$planId]]></code>
@@ -13241,6 +13187,10 @@
       <code><![CDATA[$this->secretKey]]></code>
       <code><![CDATA[$txReference]]></code>
     </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[exists]]></code>
+      <code><![CDATA[where]]></code>
+    </MixedMethodCall>
     <MixedOperand>
       <code><![CDATA[$charge['amount'] ?? 0]]></code>
       <code><![CDATA[$invoiceData['amount'] ?? 0]]></code>
@@ -13259,6 +13209,13 @@
       <code><![CDATA[$subscription->paystack_customer_code]]></code>
       <code><![CDATA[$subscription->paystack_customer_code]]></code>
     </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[[
+            'authorization_url' => $response['data']['authorization_url'],
+            'reference' => $response['data']['reference'],
+        ]]]></code>
+      <code><![CDATA[array{authorization_url: string, reference: string}|null]]></code>
+    </MixedReturnTypeCoercion>
     <PossiblyNullOperand>
       <code><![CDATA[$billingCycle === 'yearly' ? $plan->yearly_price : $plan->price]]></code>
     </PossiblyNullOperand>
@@ -13274,9 +13231,13 @@
       <code><![CDATA[status]]></code>
     </PossiblyUndefinedMethod>
     <PossiblyUnusedMethod>
+      <code><![CDATA[initializeTransaction]]></code>
       <code><![CDATA[verifyTransaction]]></code>
       <code><![CDATA[verifyWebhookSignature]]></code>
     </PossiblyUnusedMethod>
+    <RedundantCastGivenDocblockType>
+      <code><![CDATA[(float) $plan->price]]></code>
+    </RedundantCastGivenDocblockType>
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[! $customerCode]]></code>
       <code><![CDATA[! $planCode]]></code>
@@ -13315,18 +13276,29 @@
                     'line_items' => [$invoiceData],
                 ]
             )]]></code>
-      <code><![CDATA[Payment::create([
-                'team_id' => $teamId,
-                'subscription_id' => $subscription?->id,
-                'paystack_reference' => $charge['reference'],
-                'paystack_invoice_id' => null,
-                'amount' => ($charge['amount'] ?? 0) / 100,
-                'currency' => strtoupper($charge['currency'] ?? 'ZAR'),
-                'status' => 'succeeded',
-                'payment_method' => $charge['channel'] ?? 'card',
-                'paid_at' => now(),
-                'metadata' => $metadata,
-            ])]]></code>
+      <code><![CDATA[MachineAllocation::create([
+                    'team_id' => $payment->team_id,
+                    'class' => $class,
+                    'delta' => $quantity,
+                    'source' => 'purchase',
+                    'payment_id' => $payment->id,
+                    'subscription_id' => $payment->subscription_id,
+                ])]]></code>
+      <code><![CDATA[MachineAllocation::withoutGlobalScopes()]]></code>
+      <code><![CDATA[Payment::firstOrCreate(
+                ['paystack_reference' => $charge['reference']],
+                [
+                    'team_id' => $teamId,
+                    'subscription_id' => $subscription?->id,
+                    'paystack_invoice_id' => null,
+                    'amount' => ($charge['amount'] ?? 0) / 100,
+                    'currency' => strtoupper($charge['currency'] ?? 'ZAR'),
+                    'status' => 'succeeded',
+                    'payment_method' => $charge['channel'] ?? 'card',
+                    'paid_at' => now(),
+                    'metadata' => $metadata,
+                ]
+            )]]></code>
       <code><![CDATA[Subscription::updateOrCreate(
                 ['paystack_subscription_code' => $subscriptionData['subscription_code']],
                 [
