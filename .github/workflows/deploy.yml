@@ -102,6 +102,14 @@ jobs:
           $PHP artisan view:cache
           $PHP artisan event:cache
 
+          # Webroot symlinks: the cPanel docroot is the site directory, not
+          # mines/public, so each public asset entry must be linked in.
+          # Idempotent (-sfn); sw.js must live at the webroot ROOT for the
+          # service worker's scope to cover the whole app.
+          for target in build images audio machine-emojis sw.js; do
+            ln -sfn "mines/public/${target}" "../${target}"
+          done
+
           # Workers pick up new code via the restart signal (no sudo needed).
           $PHP artisan queue:restart
 
