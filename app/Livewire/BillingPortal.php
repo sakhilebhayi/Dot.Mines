@@ -3,11 +3,13 @@
 namespace App\Livewire;
 
 use App\Models\Invoice;
+use App\Models\MachineAllocation;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Services\Billing\MachineEntitlementService;
 use App\Services\PaystackService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -70,6 +72,36 @@ class BillingPortal extends Component
     public function getHeavyPlanProperty(): ?SubscriptionPlan
     {
         return SubscriptionPlan::query()->where('slug', 'heavy-allocation')->where('is_active', true)->first();
+    }
+
+    /**
+     * The §18 audit trail, straight from the ledger -- purchases, admin
+     * adjustments, refunds; every row immutable and attributable.
+     *
+     * @return array<int, array{class: string, delta: int, source: string, reason: string|null, created_at: string}>
+     */
+    public function getAllocationHistoryProperty(): array
+    {
+        /**
+         * @psalm-suppress UnnecessaryVarAnnotation -- phpstan (unlike psalm) loses the Eloquent generics through latest()/limit()
+         *
+         * @var Collection<int, MachineAllocation> $rows
+         */
+        $rows = MachineAllocation::query()
+            ->where('team_id', Auth::user()->currentTeam->id)
+            ->latest('id')
+            ->limit(10)
+            ->get();
+
+        return $rows
+            ->map(fn (MachineAllocation $row): array => [
+                'class' => $row->class,
+                'delta' => $row->delta,
+                'source' => $row->source,
+                'reason' => $row->reason,
+                'created_at' => $row->created_at->format('j M Y H:i'),
+            ])
+            ->all();
     }
 
     public function getPurchaseTotalProperty(): float
