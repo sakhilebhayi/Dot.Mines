@@ -9,6 +9,7 @@ use App\Models\ProductionForecast;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use App\Models\Team;
+use App\Services\OperationalSnapshotService;
 use App\Services\ProductionService;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -533,7 +534,12 @@ class ProductionDashboard extends Component
 
     public function render(): View
     {
+        $team = auth()->user()?->currentTeam;
+        $snapshotService = app(OperationalSnapshotService::class);
+
         return view('livewire.production-dashboard', [
+            'telemetryFreshestAt' => $team ? $snapshotService->teamTelemetryFreshestAt($team) : null,
+            'telemetryStaleAfter' => $team ? $snapshotService->staleAfterSeconds($team->id) : 900,
             'records' => $this->productionRecords,
             'summary' => $this->summary,
             'statistics' => $this->statistics,

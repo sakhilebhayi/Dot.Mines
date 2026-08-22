@@ -11,6 +11,9 @@
                 <p class="mt-1 text-sm text-[var(--sand)]">
                     Track loads, cycles, tonnages, and BCM's across your fleet
                 </p>
+                <div class="mt-1">
+                    <x-freshness :timestamp="$telemetryFreshestAt" :stale-after="$telemetryStaleAfter" label="Telemetry" />
+                </div>
             </div>
 
             <!-- Date Filters -->
