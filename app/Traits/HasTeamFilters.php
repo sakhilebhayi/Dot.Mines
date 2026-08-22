@@ -39,7 +39,7 @@ trait HasTeamFilters
      * Get all models without team filtering
      * Use with caution - only for admin operations
      *
-     * @return Builder
+     * @return Builder<static>
      */
     public static function withoutTeamFilter()
     {
@@ -59,8 +59,9 @@ trait HasTeamFilters
     /**
      * Scope to a specific team
      *
+     * @param  Builder<static>  $query
      * @param  int  $teamId
-     * @return Builder
+     * @return Builder<static>
      */
     public function scopeForTeam(Builder $query, $teamId)
     {

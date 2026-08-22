@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\InsufficientAllocationException;
 use App\Models\Machine;
+use App\Services\Billing\MachineProvisioningService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -111,7 +113,20 @@ class MachineController extends Controller
         $validated['team_id'] = auth()->user()->current_team_id;
         $validated['status'] = 'active';
 
-        $machine = Machine::create($validated);
+        // Same entitlement gate as every other creation path -- the API is
+        // not a way around the allocation limit (brief §4).
+        try {
+            $machine = app(MachineProvisioningService::class)->provision(
+                auth()->user()->currentTeam,
+                $validated['machine_type'],
+                fn (): Machine => Machine::create($validated),
+            );
+        } catch (InsufficientAllocationException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'errors' => ['allocation' => [$e->getMessage()]],
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         return response()->json([
             'data' => $machine,

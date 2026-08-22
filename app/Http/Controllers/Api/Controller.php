@@ -14,11 +14,9 @@ class Controller extends BaseController
 {
     use AuthorizesRequests;
 
-    public function __construct()
-    {
-        // All API endpoints require authentication
-        $this->middleware('auth:sanctum');
-        // Validate team context
-        $this->middleware('ensure_team');
-    }
+    // No constructor middleware: Laravel 12 removed Controller::middleware(),
+    // so the old constructor 500'd EVERY API request. Both middleware this
+    // constructor used to (re)declare -- auth:sanctum and ensure_team -- are
+    // already applied by the route group in routes/api.php, which is the
+    // single place API middleware is defined.
 }

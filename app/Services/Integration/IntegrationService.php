@@ -11,6 +11,7 @@ use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
+use App\Services\Billing\MachineProvisioningService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -503,42 +504,51 @@ class IntegrationService
                 ->first();
 
             if (! $machine) {
-                $machine = Machine::query()->create([
-                    'team_id' => $integration->team_id,
-                    // machines.mine_area_id is NOT NULL on MySQL/Postgres
-                    // (2026_02_19_000010) and this create() never set it, so
-                    // on those drivers every machine insert from a sync died
-                    // on the constraint -- silently, because syncMachine()
-                    // catches and logs. Default to the team's first active
-                    // area, the exact same default that migration's own
-                    // backfill used; a dispatcher can reassign from Fleet.
-                    'mine_area_id' => MineArea::where('team_id', $integration->team_id)
-                        ->where('status', 'active')
-                        ->orderBy('id')
-                        ->value('id'),
-                    'name' => $machineData['model'] ?? 'Unknown Machine',
-                    // machine_type is NOT NULL with no default and this
-                    // create() never set it at all; manufacturer telemetry
-                    // APIs don't return this app's own adt/excavator/dozer/
-                    // etc categorization, so 'other' is the honest fallback
-                    // -- a real user can reclassify it from the Fleet page.
-                    'machine_type' => $machineData['type'] ?? 'other',
-                    'manufacturer' => $integration->provider,
-                    'model' => $machineData['model'] ?? null,
-                    'serial_number' => $machineData['serial_number'] ?? null,
-                    'manufacturer_id' => $externalId,
-                    'integration_id' => $integration->id,
-                    'status' => $machineData['status'] ?? 'idle',
-                    'last_location_latitude' => $newLocation['latitude'] ?? null,
-                    'last_location_longitude' => $newLocation['longitude'] ?? null,
-                    // The provider's own reading time, not the sync moment --
-                    // the live map's "position reported X ago" is only honest
-                    // if this is when the machine actually reported.
-                    'last_location_update' => $newLocation !== null
-                        ? Carbon::parse($newLocation['timestamp'] ?? now())
-                        : null,
-                    'capacity' => $machineData['capacity'] ?? null,
-                ]);
+                // OEM discovery routes through the same entitlement gate as
+                // every other creation path (brief §23): with capacity the
+                // machine occupies an allocation; beyond capacity it is
+                // recorded as pending_activation -- visible and preserved,
+                // never billable, never silently dropped.
+                $machine = app(MachineProvisioningService::class)->provisionOrPend(
+                    $integration->team ?? throw new \RuntimeException("Integration {$integration->id} has no team"),
+                    (string) ($machineData['type'] ?? 'other'),
+                    fn (): Machine => Machine::query()->create([
+                        'team_id' => $integration->team_id,
+                        // machines.mine_area_id is NOT NULL on MySQL/Postgres
+                        // (2026_02_19_000010) and this create() never set it, so
+                        // on those drivers every machine insert from a sync died
+                        // on the constraint -- silently, because syncMachine()
+                        // catches and logs. Default to the team's first active
+                        // area, the exact same default that migration's own
+                        // backfill used; a dispatcher can reassign from Fleet.
+                        'mine_area_id' => MineArea::where('team_id', $integration->team_id)
+                            ->where('status', 'active')
+                            ->orderBy('id')
+                            ->value('id'),
+                        'name' => $machineData['model'] ?? 'Unknown Machine',
+                        // machine_type is NOT NULL with no default and this
+                        // create() never set it at all; manufacturer telemetry
+                        // APIs don't return this app's own adt/excavator/dozer/
+                        // etc categorization, so 'other' is the honest fallback
+                        // -- a real user can reclassify it from the Fleet page.
+                        'machine_type' => $machineData['type'] ?? 'other',
+                        'manufacturer' => $integration->provider,
+                        'model' => $machineData['model'] ?? null,
+                        'serial_number' => $machineData['serial_number'] ?? null,
+                        'manufacturer_id' => $externalId,
+                        'integration_id' => $integration->id,
+                        'status' => $machineData['status'] ?? 'idle',
+                        'last_location_latitude' => $newLocation['latitude'] ?? null,
+                        'last_location_longitude' => $newLocation['longitude'] ?? null,
+                        // The provider's own reading time, not the sync moment --
+                        // the live map's "position reported X ago" is only honest
+                        // if this is when the machine actually reported.
+                        'last_location_update' => $newLocation !== null
+                            ? Carbon::parse($newLocation['timestamp'] ?? now())
+                            : null,
+                        'capacity' => $machineData['capacity'] ?? null,
+                    ]),
+                );
             } else {
                 $machine->update([
                     'status' => $machineData['status'] ?? 'idle',

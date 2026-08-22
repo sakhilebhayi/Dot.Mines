@@ -955,6 +955,16 @@
       <code><![CDATA[broadcastWith]]></code>
     </PossiblyUnusedMethod>
   </file>
+  <file src="app/Exceptions/InsufficientAllocationException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[InsufficientAllocationException]]></code>
+    </ClassMustBeFinal>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$capacity]]></code>
+      <code><![CDATA[$occupied]]></code>
+      <code><![CDATA[$trial]]></code>
+    </PossiblyUnusedProperty>
+  </file>
   <file src="app/Http/Controllers/Api/AlertController.php">
     <ClassMustBeFinal>
       <code><![CDATA[AlertController]]></code>
@@ -1167,15 +1177,6 @@
     <UnusedParam>
       <code><![CDATA[$type]]></code>
     </UnusedParam>
-  </file>
-  <file src="app/Http/Controllers/Api/Controller.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
-    <UndefinedMethod>
-      <code><![CDATA[middleware]]></code>
-      <code><![CDATA[middleware]]></code>
-    </UndefinedMethod>
   </file>
   <file src="app/Http/Controllers/Api/FuelTankController.php">
     <ClassMustBeFinal>
@@ -1710,6 +1711,8 @@
       <code><![CDATA[$perPage]]></code>
       <code><![CDATA[$validated['latitude']]]></code>
       <code><![CDATA[$validated['longitude']]]></code>
+      <code><![CDATA[$validated['machine_type']]]></code>
+      <code><![CDATA[auth()->user()->currentTeam]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$validated]]></code>
@@ -1717,7 +1720,6 @@
     <MixedAssignment>
       <code><![CDATA[$hoursBack]]></code>
       <code><![CDATA[$limit]]></code>
-      <code><![CDATA[$machine]]></code>
       <code><![CDATA[$perPage]]></code>
       <code><![CDATA[$search]]></code>
       <code><![CDATA[$sort]]></code>
@@ -1727,6 +1729,9 @@
       <code><![CDATA[orWhere]]></code>
       <code><![CDATA[orWhere]]></code>
     </MixedMethodCall>
+    <MixedReturnStatement>
+      <code><![CDATA[Machine::create($validated)]]></code>
+    </MixedReturnStatement>
     <PossiblyUnusedMethod>
       <code><![CDATA[alerts]]></code>
       <code><![CDATA[destroy]]></code>
@@ -1738,6 +1743,7 @@
       <code><![CDATA[updateLocation]]></code>
     </PossiblyUnusedMethod>
     <UndefinedInterfaceMethod>
+      <code><![CDATA[user]]></code>
       <code><![CDATA[user]]></code>
     </UndefinedInterfaceMethod>
     <UndefinedMagicMethod>
@@ -4101,7 +4107,9 @@
     </MissingReturnType>
     <MixedArgument>
       <code><![CDATA[$team]]></code>
+      <code><![CDATA[$team]]></code>
       <code><![CDATA[$team->id]]></code>
+      <code><![CDATA[Auth::user()->currentTeam]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$validAdts]]></code>
@@ -4154,8 +4162,23 @@
       <code><![CDATA[$team->id]]></code>
       <code><![CDATA[$team->id]]></code>
     </MixedPropertyFetch>
+    <MixedReturnStatement>
+      <code><![CDATA[Machine::create([
+                        'team_id' => $team->id,
+                        'name' => $this->name,
+                        'model' => $this->model,
+                        'manufacturer' => $this->manufacturer ?: null,
+                        'machine_type' => $this->machineType,
+                        'status' => $this->status,
+                        'serial_number' => $this->serialNumber,
+                        'capacity' => $this->capacity ?: null,
+                        'latitude' => $this->latitude ?: null,
+                        'longitude' => $this->longitude ?: null,
+                    ])]]></code>
+    </MixedReturnStatement>
     <NoInterfaceProperties>
       <code><![CDATA[$user->currentTeam]]></code>
+      <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
@@ -4181,6 +4204,7 @@
     </PossiblyNullPropertyAssignmentValue>
     <PossiblyNullPropertyFetch>
       <code><![CDATA[$user->currentTeam]]></code>
+      <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
@@ -4254,17 +4278,17 @@
             'reject_reason' => $this->rejectReason,
         ])]]></code>
       <code><![CDATA[Machine::create([
-                'team_id' => $team->id,
-                'name' => $this->name,
-                'model' => $this->model,
-                'manufacturer' => $this->manufacturer ?: null,
-                'machine_type' => $this->machineType,
-                'status' => $this->status,
-                'serial_number' => $this->serialNumber,
-                'capacity' => $this->capacity ?: null,
-                'latitude' => $this->latitude ?: null,
-                'longitude' => $this->longitude ?: null,
-            ])]]></code>
+                        'team_id' => $team->id,
+                        'name' => $this->name,
+                        'model' => $this->model,
+                        'manufacturer' => $this->manufacturer ?: null,
+                        'machine_type' => $this->machineType,
+                        'status' => $this->status,
+                        'serial_number' => $this->serialNumber,
+                        'capacity' => $this->capacity ?: null,
+                        'latitude' => $this->latitude ?: null,
+                        'longitude' => $this->longitude ?: null,
+                    ])]]></code>
       <code><![CDATA[assignToExcavator]]></code>
       <code><![CDATA[find]]></code>
       <code><![CDATA[find]]></code>
@@ -5312,7 +5336,6 @@
     </MissingParamType>
     <MissingReturnType>
       <code><![CDATA[getGeofences]]></code>
-      <code><![CDATA[getMachines]]></code>
       <code><![CDATA[getMineAreas]]></code>
       <code><![CDATA[loadActivityFeed]]></code>
       <code><![CDATA[render]]></code>
@@ -5322,7 +5345,6 @@
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$geofences]]></code>
-      <code><![CDATA[$machines]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
       <code><![CDATA[$team]]></code>
@@ -5372,7 +5394,6 @@
       <code><![CDATA[get]]></code>
       <code><![CDATA[latest]]></code>
       <code><![CDATA[selectRaw]]></code>
-      <code><![CDATA[whereNotNull]]></code>
       <code><![CDATA[whereNotNull]]></code>
     </UndefinedMagicMethod>
     <UndefinedMagicPropertyFetch>
@@ -8322,6 +8343,26 @@
       <code><![CDATA[unassignFromExcavator]]></code>
     </PossiblyUnusedMethod>
   </file>
+  <file src="app/Models/MachineAllocation.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[MachineAllocation]]></code>
+    </ClassMustBeFinal>
+    <InvalidDocblock>
+      <code><![CDATA[public function payment(): BelongsTo]]></code>
+      <code><![CDATA[public function team(): BelongsTo]]></code>
+    </InvalidDocblock>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function casts(): array]]></code>
+    </MissingOverrideAttribute>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->belongsTo(Payment::class)]]></code>
+      <code><![CDATA[$this->belongsTo(Team::class)]]></code>
+    </MixedReturnStatement>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[payment]]></code>
+      <code><![CDATA[team]]></code>
+    </PossiblyUnusedMethod>
+  </file>
   <file src="app/Models/MachineAreaAssignment.php">
     <ClassMustBeFinal>
       <code><![CDATA[MachineAreaAssignment]]></code>
@@ -10653,6 +10694,121 @@
       <code><![CDATA[AuthorizationService]]></code>
     </UnusedClass>
   </file>
+  <file src="app/Services/Billing/MachineEntitlementService.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[MachineEntitlementService]]></code>
+    </ClassMustBeFinal>
+    <MixedAssignment>
+      <code><![CDATA[$machineType]]></code>
+      <code><![CDATA[$rows]]></code>
+      <code><![CDATA[$total]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[groupBy]]></code>
+      <code><![CDATA[pluck]]></code>
+      <code><![CDATA[select]]></code>
+      <code><![CDATA[where]]></code>
+    </MixedMethodCall>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[hasCapacityFor]]></code>
+    </PossiblyUnusedMethod>
+    <TooManyArguments>
+      <code><![CDATA[select]]></code>
+    </TooManyArguments>
+  </file>
+  <file src="app/Services/Billing/MachineProvisioningService.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[MachineProvisioningService]]></code>
+    </ClassMustBeFinal>
+    <MixedReturnStatement>
+      <code><![CDATA[Cache::lock($this->lockName($team), 10)->block(5, function () use ($team, $machine): Machine {
+            return DB::transaction(function () use ($team, $machine): Machine {
+                $class = $this->entitlements->classFor($machine->machine_type);
+                $summary = $this->entitlements->summary($team);
+
+                if ($summary['available'][$class] <= 0) {
+                    $capacity = $summary['trial'] ? $summary['trial_allowance'] : $summary['purchased'][$class];
+
+                    throw new InsufficientAllocationException(
+                        occupied: $summary['occupied']['adt'] + $summary['occupied']['heavy'],
+                        capacity: $capacity,
+                        trial: $summary['trial'],
+                    );
+                }
+
+                $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_OCCUPYING])->save();
+
+                return $machine;
+            });
+        })]]></code>
+      <code><![CDATA[Cache::lock($this->lockName($team), 10)->block(5, function () use ($team, $machineType, $create): Machine {
+            return DB::transaction(function () use ($team, $machineType, $create): Machine {
+                $class = $this->entitlements->classFor($machineType);
+                $summary = $this->entitlements->summary($team);
+
+                if ($summary['available'][$class] <= 0) {
+                    $capacity = $summary['trial']
+                        ? $summary['trial_allowance']
+                        : $summary['purchased'][$class];
+
+                    throw new InsufficientAllocationException(
+                        occupied: $summary['occupied']['adt'] + $summary['occupied']['heavy'],
+                        capacity: $capacity,
+                        trial: $summary['trial'],
+                    );
+                }
+
+                $machine = $create();
+                $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_OCCUPYING])->save();
+
+                return $machine;
+            });
+        })]]></code>
+      <code><![CDATA[DB::transaction(function () use ($team, $machine): Machine {
+                $class = $this->entitlements->classFor($machine->machine_type);
+                $summary = $this->entitlements->summary($team);
+
+                if ($summary['available'][$class] <= 0) {
+                    $capacity = $summary['trial'] ? $summary['trial_allowance'] : $summary['purchased'][$class];
+
+                    throw new InsufficientAllocationException(
+                        occupied: $summary['occupied']['adt'] + $summary['occupied']['heavy'],
+                        capacity: $capacity,
+                        trial: $summary['trial'],
+                    );
+                }
+
+                $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_OCCUPYING])->save();
+
+                return $machine;
+            })]]></code>
+      <code><![CDATA[DB::transaction(function () use ($team, $machineType, $create): Machine {
+                $class = $this->entitlements->classFor($machineType);
+                $summary = $this->entitlements->summary($team);
+
+                if ($summary['available'][$class] <= 0) {
+                    $capacity = $summary['trial']
+                        ? $summary['trial_allowance']
+                        : $summary['purchased'][$class];
+
+                    throw new InsufficientAllocationException(
+                        occupied: $summary['occupied']['adt'] + $summary['occupied']['heavy'],
+                        capacity: $capacity,
+                        trial: $summary['trial'],
+                    );
+                }
+
+                $machine = $create();
+                $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_OCCUPYING])->save();
+
+                return $machine;
+            })]]></code>
+    </MixedReturnStatement>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+      <code><![CDATA[activate]]></code>
+    </PossiblyUnusedMethod>
+  </file>
   <file src="app/Services/DataQuality/DataQualityService.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[each]]></code>
@@ -11762,8 +11918,6 @@
     </MissingClosureParamType>
     <MixedArgument>
       <code><![CDATA[$latest->record_date->toDateString()]]></code>
-      <code><![CDATA[$machine]]></code>
-      <code><![CDATA[$machine]]></code>
       <code><![CDATA[$machineData]]></code>
       <code><![CDATA[$machineData['alerts']]]></code>
       <code><![CDATA[$machineData['metrics']]]></code>
@@ -11796,7 +11950,6 @@
       <code><![CDATA[$checks['tenant_associated']]]></code>
       <code><![CDATA[$externalId]]></code>
       <code><![CDATA[$externalId]]></code>
-      <code><![CDATA[$machine]]></code>
       <code><![CDATA[$machineData]]></code>
       <code><![CDATA[$machineList]]></code>
       <code><![CDATA[$metrics]]></code>
@@ -11823,8 +11976,6 @@
       <code><![CDATA[$target?->target_quantity]]></code>
     </MixedPropertyFetch>
     <MixedReturnStatement>
-      <code><![CDATA[$machine]]></code>
-      <code><![CDATA[$machine]]></code>
       <code><![CDATA[$this->services[$name] ?? null]]></code>
       <code><![CDATA[$this->services[$name] ?? null]]></code>
       <code><![CDATA[Cache::remember($cacheKey, 300, function () use ($integration) {
@@ -11889,36 +12040,6 @@
                         'triggered_at' => now(),
                         'metadata' => ['external_id' => $externalId],
                     ])]]></code>
-      <code><![CDATA[Machine::create([
-                    'team_id' => $integration->team_id,
-                    // machines.mine_area_id is NOT NULL on MySQL/Postgres
-                    // (2026_02_19_000010) and this create() never set it, so
-                    // on those drivers every machine insert from a sync died
-                    // on the constraint -- silently, because syncMachine()
-                    // catches and logs. Default to the team's first active
-                    // area, the exact same default that migration's own
-                    // backfill used; a dispatcher can reassign from Fleet.
-                    'mine_area_id' => MineArea::where('team_id', $integration->team_id)
-                        ->where('status', 'active')
-                        ->orderBy('id')
-                        ->value('id'),
-                    'name' => $machineData['model'] ?? 'Unknown Machine',
-                    // machine_type is NOT NULL with no default and this
-                    // create() never set it at all; manufacturer telemetry
-                    // APIs don't return this app's own adt/excavator/dozer/
-                    // etc categorization, so 'other' is the honest fallback
-                    // -- a real user can reclassify it from the Fleet page.
-                    'machine_type' => $machineData['type'] ?? 'other',
-                    'manufacturer' => $integration->provider,
-                    'model' => $machineData['model'] ?? null,
-                    'serial_number' => $machineData['serial_number'] ?? null,
-                    'manufacturer_id' => $externalId,
-                    'integration_id' => $integration->id,
-                    'status' => $machineData['status'] ?? 'idle',
-                    'last_location_latitude' => $machineData['last_location']['latitude'] ?? null,
-                    'last_location_longitude' => $machineData['last_location']['longitude'] ?? null,
-                    'capacity' => $machineData['capacity'] ?? null,
-                ])]]></code>
       <code><![CDATA[ProductionRecord::create([
             'team_id' => $integration->team_id,
             'mine_area_id' => $machine->mine_area_id,
@@ -11938,12 +12059,9 @@
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
     </UndefinedMagicMethod>
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$latest->record_date]]></code>
-      <code><![CDATA[$machine->last_location_latitude]]></code>
-      <code><![CDATA[$machine->last_location_longitude]]></code>
     </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Services/Integration/JCBService.php">
@@ -13599,9 +13717,6 @@
       <code><![CDATA[machineList]]></code>
       <code><![CDATA[reportTemplates]]></code>
     </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$teamId]]></code>
-    </PossiblyUnusedParam>
   </file>
   <file src="app/Services/RealTimeAlertService.php">
     <ClassMustBeFinal>
@@ -14696,6 +14811,18 @@
                 $builder->where('team_id', $teamId);
             }
         }]]></code>
+      <code><![CDATA[function (Builder $builder) {
+            $teamId = auth()->user()?->current_team_id;
+
+            // Allow non-HTTP contexts (jobs/commands) to set the current team
+            if (empty($teamId) && app()->has('current_team_id')) {
+                $teamId = app('current_team_id');
+            }
+
+            if ($teamId) {
+                $builder->where('team_id', $teamId);
+            }
+        }]]></code>
     </InvalidArgument>
     <MixedAssignment>
       <code><![CDATA[$teamId]]></code>
@@ -14728,6 +14855,8 @@
       <code><![CDATA[bootHasTeamFilters]]></code>
       <code><![CDATA[bootHasTeamFilters]]></code>
       <code><![CDATA[bootHasTeamFilters]]></code>
+      <code><![CDATA[bootHasTeamFilters]]></code>
+      <code><![CDATA[getTeamId]]></code>
       <code><![CDATA[getTeamId]]></code>
       <code><![CDATA[getTeamId]]></code>
       <code><![CDATA[getTeamId]]></code>
@@ -14780,6 +14909,8 @@
       <code><![CDATA[scopeForTeam]]></code>
       <code><![CDATA[scopeForTeam]]></code>
       <code><![CDATA[scopeForTeam]]></code>
+      <code><![CDATA[scopeForTeam]]></code>
+      <code><![CDATA[withoutTeamFilter]]></code>
       <code><![CDATA[withoutTeamFilter]]></code>
       <code><![CDATA[withoutTeamFilter]]></code>
       <code><![CDATA[withoutTeamFilter]]></code>
@@ -14811,6 +14942,7 @@
       <code><![CDATA[user]]></code>
     </UndefinedInterfaceMethod>
     <UndefinedMagicMethod>
+      <code><![CDATA[static::withoutGlobalScope('team')]]></code>
       <code><![CDATA[static::withoutGlobalScope('team')]]></code>
       <code><![CDATA[static::withoutGlobalScope('team')]]></code>
       <code><![CDATA[static::withoutGlobalScope('team')]]></code>
