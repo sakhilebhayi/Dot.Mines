@@ -16,6 +16,13 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
+     * Reverse-proxy hosts trusted for X-Forwarded-* headers ('*' or a
+     * comma-separated list). Read via config so config:cache works; env()
+     * calls inside app code return null once the config is cached.
+     */
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------

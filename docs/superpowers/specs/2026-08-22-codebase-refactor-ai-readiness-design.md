@@ -27,10 +27,11 @@ tests.
 2. God classes: IntegrationService 1,177 / BellService 951 / FuelManagement 764 / Fleet 707 /
    PaystackService 698 / MineAreaDetail 660 / MaintenanceDashboard 532; blades to 1,675 lines
    (fleet-movement-replay), maintenance-dashboard 1,021, mine-area-detail 1,015.
-3. Realtime JS spans three eras: LivewireEcho (exported, zero consumers),
-   livewire-realtime.js (277 lines, NOT in the Vite build, cited by a navbar comment as if
-   live), ReverbService (407 lines, never instantiated historically; superseded by the direct
-   live-map wire + realtimeBridge).
+3. Realtime JS spans three eras. Verified during R0: livewire-realtime.js IS live (imported
+   by app.js; drives ReverbService.init via the RealtimeUpdates trait's realtime:init event —
+   alerts→toasts, per-machine locations, connection monitor). Genuinely dead: LivewireEcho
+   (zero consumers) and the dormant 'realtime:team-locations' listener (nothing ever
+   dispatched it; superseded by the direct live-map wire from PR #123).
 4. Zero Form Requests; validation inline across 27 controllers (Livewire rules() idiomatic and
    stays; API controllers audited).
 5. 15/60 Livewire components carry no explicit authz keyword — verify coverage-by-middleware
@@ -52,9 +53,9 @@ tests.
 ## Slices (each: branch → PR → full gates → merge on green → deploy → tracker update)
 
 - **R0 — Ratchet + hygiene.** Baseline-ratchet test; env()→config (Sentry bootstrap,
-  TrustProxies, ArchiveOldMetricsJob); delete dead realtime JS (LivewireEcho,
-  livewire-realtime.js after confirming zero runtime references; fold ReverbService's still-
-  useful subscriptions into the Slice-3 architecture or delete); route-closure audit;
+  TrustProxies, ArchiveOldMetricsJob); delete dead realtime JS (LivewireEcho and the
+  dormant team-locations listener + its orphaned ReverbService method; livewire-realtime.js
+  itself stays — it is live); route-closure audit;
   `.ai/rules` entries for Actions + ratchet.
 - **R1 — Security & tenancy verification.** Per-component authz verdict for the 15 unmarked
   Livewire components (explicit checks added to any with writes); API controller validation

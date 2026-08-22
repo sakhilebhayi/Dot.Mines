@@ -74,30 +74,6 @@ class ReverbService {
         }
     }
 
-    /**
-     * Subscribe to all team machine location updates
-     * @param {Function} callback - Function called when any location updates
-     */
-    subscribeTeamLocations(callback) {
-        const channelName = `team.${this.teamId}`;
-
-        if (this.subscriptions.has(channelName)) {
-            console.warn(`Already subscribed to ${channelName}`);
-            return;
-        }
-
-        try {
-            const channel = window.Echo.private(channelName);
-
-            channel.listen('.machine.location.updated', (data) => {
-                callback(data);
-            });
-
-            this.subscriptions.set(channelName, channel);
-        } catch (error) {
-            console.error(`❌ Failed to subscribe to ${channelName}:`, error);
-        }
-    }
 
     /**
      * Subscribe to team alerts

@@ -38,7 +38,7 @@ class ArchiveOldMetricsJob implements ShouldQueue
     public function handle(): void
     {
         $retentionDays = $this->retentionDays ?: (int) config('retention.metrics_days', 90);
-        $batchSize = $this->batchSize ?: (int) env('METRICS_ARCHIVE_BATCH', 5000);
+        $batchSize = $this->batchSize ?: (int) config('retention.archive_batch', 5000);
         $cutoff = now()->subDays($retentionDays);
 
         Log::info('ArchiveOldMetricsJob: starting', [

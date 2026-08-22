@@ -164,11 +164,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Configure Sentry release/environment if present
         try {
-            if (env('SENTRY_DSN')) {
+            if (config('sentry.dsn')) {
                 if (function_exists('\Sentry\configureScope')) {
                     \Sentry\configureScope(function ($scope): void {
-                        $env = env('SENTRY_ENVIRONMENT');
-                        $release = env('SENTRY_RELEASE');
+                        $env = config('sentry.environment');
+                        $release = config('sentry.release');
                         if ($env) {
                             $scope->setTag('environment', $env);
                         }
