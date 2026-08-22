@@ -11443,9 +11443,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[BellService]]></code>
     </ClassMustBeFinal>
-    <InvalidOperand>
-      <code><![CDATA[$fuelRemaining *= 100]]></code>
-    </InvalidOperand>
     <InvalidReturnStatement>
       <code><![CDATA[array_map(fn (array $reading) => [
                 'external_id' => $machineId.'-'.$reading['timestamp'].'-'.$reading['value'],
@@ -11460,9 +11457,6 @@
     <InvalidReturnType>
       <code><![CDATA[array]]></code>
     </InvalidReturnType>
-    <LessSpecificReturnStatement>
-      <code><![CDATA[$fleet->xpath("//*[local-name()='Equipment']") ?: []]]></code>
-    </LessSpecificReturnStatement>
     <MissingOverrideAttribute>
       <code><![CDATA[public function fetchMachineAlerts(string $machineId): array]]></code>
       <code><![CDATA[public function fetchMachineData(string $machineId): array]]></code>
@@ -11512,13 +11506,6 @@
       <code><![CDATA[$cached['access_token']]]></code>
       <code><![CDATA[$machine]]></code>
     </MixedReturnStatement>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[$this->buildCurrentMetric($node)]]></code>
-      <code><![CDATA[array]]></code>
-    </MixedReturnTypeCoercion>
-    <MoreSpecificReturnType>
-      <code><![CDATA[list<SimpleXMLElement>]]></code>
-    </MoreSpecificReturnType>
     <PossiblyNullIterator>
       <code><![CDATA[$xml->xpath("//*[@*[local-name()='ReadingUTC'] or @*[local-name()='Timestamp'] or @*[local-name()='DateTimeUTC']]")]]></code>
     </PossiblyNullIterator>
@@ -11543,8 +11530,6 @@
       <code><![CDATA[! $this->username]]></code>
       <code><![CDATA[! $token]]></code>
       <code><![CDATA[! $token]]></code>
-      <code><![CDATA[$fleet->xpath("//*[local-name()='Equipment']")]]></code>
-      <code><![CDATA[empty($matches)]]></code>
     </RiskyTruthyFalsyComparison>
   </file>
   <file src="app/Services/Integration/BobcatService.php">
@@ -11884,10 +11869,6 @@
       <code><![CDATA[$machine->mine_area_id]]></code>
       <code><![CDATA[$this->dailyProductionTarget($integration->team_id, $existing->mine_area_id ?? $machine->mine_area_id, $date)]]></code>
     </DocblockTypeContradiction>
-    <InvalidOperand>
-      <code><![CDATA[$value / 1000]]></code>
-      <code><![CDATA[$value / 1000]]></code>
-    </InvalidOperand>
     <InvalidScalarArgument>
       <code><![CDATA[$timezone]]></code>
       <code><![CDATA[$timezone]]></code>
@@ -11955,8 +11936,6 @@
       <code><![CDATA[$target?->target_quantity]]></code>
     </MixedPropertyFetch>
     <MixedReturnStatement>
-      <code><![CDATA[$this->services[$name] ?? null]]></code>
-      <code><![CDATA[$this->services[$name] ?? null]]></code>
       <code><![CDATA[Cache::remember($cacheKey, 300, function () use ($integration) {
             return [
                 'id' => $integration->id,
@@ -11982,14 +11961,8 @@
       <code><![CDATA[$target->target_quantity]]></code>
     </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
-      <code><![CDATA[all]]></code>
-      <code><![CDATA[get]]></code>
       <code><![CDATA[getStatus]]></code>
-      <code><![CDATA[register]]></code>
     </PossiblyUnusedMethod>
-    <RedundantCastGivenDocblockType>
-      <code><![CDATA[(float) $value]]></code>
-    </RedundantCastGivenDocblockType>
     <RedundantConditionGivenDocblockType>
       <code><![CDATA[$existing->mine_area_id]]></code>
       <code><![CDATA[$existing->target_quantity]]></code>
@@ -11999,7 +11972,6 @@
       <code><![CDATA[! $externalId]]></code>
       <code><![CDATA[! $externalId]]></code>
       <code><![CDATA[! $manufacturerId]]></code>
-      <code><![CDATA[! $rawTimestamp]]></code>
       <code><![CDATA[! ($machines['success'] ?? false)]]></code>
       <code><![CDATA[$integration->team?->timezone]]></code>
       <code><![CDATA[$location]]></code>
@@ -15075,15 +15047,6 @@
     <UnusedClosureParam>
       <code><![CDATA[$request]]></code>
     </UnusedClosureParam>
-  </file>
-  <file src="routes/channels.php">
-    <MissingClosureParamType>
-      <code><![CDATA[$id]]></code>
-      <code><![CDATA[$user]]></code>
-    </MissingClosureParamType>
-    <MixedPropertyFetch>
-      <code><![CDATA[$user->id]]></code>
-    </MixedPropertyFetch>
   </file>
   <file src="routes/console.php">
     <InvalidScope>
