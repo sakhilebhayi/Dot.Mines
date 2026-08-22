@@ -65,7 +65,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('mine_area_id')->constrained('mine_areas')->onDelete('cascade');
             $table->enum('report_type', ['environmental', 'safety', 'production', 'equipment', 'custom']);
-            $table->foreignId('generated_by')->constrained('users')->onDelete('set null')->nullable();
+            // nullable() must precede constrained(): chained after, it lands on
+            // the FK definition, leaving the column NOT NULL while the FK says
+            // SET NULL -- MySQL refuses that contradiction at DDL time (1005).
+            $table->foreignId('generated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->date('report_date');
             $table->enum('status', ['draft', 'pending_review', 'approved', 'archived'])->default('draft');
             $table->json('data')->nullable();
