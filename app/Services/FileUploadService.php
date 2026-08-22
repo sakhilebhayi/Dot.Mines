@@ -203,7 +203,7 @@ class FileUploadService
 
         // Only run virus scanning when explicitly enabled in config/env to avoid
         // accidental command execution in restricted environments.
-        if (! (bool) config('scanning.virus.enabled', env('VIRUS_SCAN_ENABLED', false))) {
+        if (! (bool) config('scanning.virus.enabled', false)) {
             return;
         }
 
@@ -218,9 +218,9 @@ class FileUploadService
         // Prefer talking to a clamd daemon via socket (INSTREAM) to avoid
         // spawning external processes. Configuration may provide a unix socket
         // path (`scanning.clamav.socket`) or a host/port (`scanning.clamav.host`, `scanning.clamav.port`).
-        $socketPath = config('scanning.clamav.socket', env('CLAMD_SOCKET', ''));
-        $host = config('scanning.clamav.host', env('CLAMD_HOST', '127.0.0.1'));
-        $port = config('scanning.clamav.port', env('CLAMD_PORT', 3310));
+        $socketPath = config('scanning.clamav.socket', '');
+        $host = config('scanning.clamav.host', '127.0.0.1');
+        $port = config('scanning.clamav.port', 3310);
 
         $scanned = false;
 

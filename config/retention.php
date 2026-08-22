@@ -22,6 +22,9 @@ return [
 
     'metrics_days' => (int) env('METRICS_RETENTION_DAYS', 90),
 
+    // Rows moved per chunk by the nightly ArchiveOldMetricsJob.
+    'archive_batch' => (int) env('METRICS_ARCHIVE_BATCH', 5000),
+
     'soft_delete_grace_days' => (int) env('SOFT_DELETE_GRACE_DAYS', 30),
 
 ];

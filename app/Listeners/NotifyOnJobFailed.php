@@ -27,7 +27,7 @@ class NotifyOnJobFailed
 
         // Send to Sentry if available and configured
         try {
-            if (env('SENTRY_DSN') && class_exists('\\Sentry\\State\\HubInterface')) {
+            if (config('sentry.dsn') && class_exists('\\Sentry\\State\\HubInterface')) {
                 // safe-call Sentry capture if SDK is installed
                 if (function_exists('\\Sentry\\captureException')) {
                     \Sentry\captureException($event->exception);

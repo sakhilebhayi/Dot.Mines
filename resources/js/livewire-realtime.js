@@ -80,21 +80,10 @@ function setupLivewireListeners() {
         });
     });
 
-    /**
-     * Subscribe to team-wide location updates
-     */
-    window.Livewire.on('realtime:team-locations', () => {
-        ReverbService.subscribeTeamLocations((data) => {
-            ReverbService.emit('teamLocationUpdated', data);
-            
-            // Update map if available
-            getService('RealtimeMapManager').then(mapManager => {
-                if (mapManager.map) {
-                    mapManager.updateMachineMarker(data);
-                }
-            });
-        });
-    });
+    // NOTE: team-wide location->marker updates are wired directly in
+    // live-map.js (Echo team channel -> RealtimeMapManager). A dormant
+    // 'realtime:team-locations' listener used to live here, but nothing
+    // ever dispatched that event.
 
     /**
      * Subscribe to team alerts

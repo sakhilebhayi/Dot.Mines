@@ -132,8 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
             debugLog('Map initialized:', map);
 
             // Give the real-time map manager the live Leaflet instance so
-            // WebSocket-driven marker updates (see livewire-realtime.js)
-            // have somewhere to draw. Without this, RealtimeMapManager's
+            // the push subscription below has somewhere to draw. Without this, RealtimeMapManager's
             // internal `this.map` stays null and updateMachineMarker() is a
             // silent no-op.
             if (window.RealtimeMapManager) {

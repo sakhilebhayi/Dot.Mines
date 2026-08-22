@@ -8,4 +8,14 @@ return [
     'virus' => [
         'enabled' => env('VIRUS_SCAN_ENABLED', false),
     ],
+
+    /*
+     * clamd connection: prefer a unix socket; else TCP host/port. Defined
+     * here (not as env() fallbacks in the service) so config:cache works.
+     */
+    'clamav' => [
+        'socket' => env('CLAMD_SOCKET', ''),
+        'host' => env('CLAMD_HOST', '127.0.0.1'),
+        'port' => (int) env('CLAMD_PORT', 3310),
+    ],
 ];
