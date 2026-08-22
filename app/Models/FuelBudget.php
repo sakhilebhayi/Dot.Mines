@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -25,17 +25,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|FuelBudget where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelBudget whereIn(string $column, array<string|int> $values)
- * @method static FuelBudget|null find(mixed $id, array<string> $columns = ['*'])
- * @method static FuelBudget findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,FuelBudget> all(array<string> $columns = ['*'])
+ * @property-read float $budget_utilization
  */
 class FuelBudget extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -50,6 +46,7 @@ class FuelBudget extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
@@ -61,6 +58,7 @@ class FuelBudget extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -117,6 +115,10 @@ class FuelBudget extends Model
     /**
      * Scope for active budgets
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -125,6 +127,10 @@ class FuelBudget extends Model
     /**
      * Scope for exceeded budgets
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeExceeded($query)
     {
         return $query->whereRaw('actual_spent > budgeted_amount');
@@ -132,6 +138,10 @@ class FuelBudget extends Model
 
     /**
      * Scope for current period
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCurrent($query)
     {

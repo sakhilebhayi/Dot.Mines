@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -27,18 +26,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $color
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Waypoint where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Waypoint whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Waypoint orderBy(string $column, string $direction = 'asc')
- * @method static Waypoint|null find(mixed $id, array $columns = ['*'])
- * @method static Waypoint findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class Waypoint extends Model
 {
-    use HasFactory;
-
+    /** @var list<string> */
     protected $fillable = [
         'route_id',
         'sequence_order',
@@ -51,6 +42,7 @@ class Waypoint extends Model
         'distance_from_previous',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'sequence_order' => 'integer',
         'latitude' => 'float',
@@ -63,6 +55,8 @@ class Waypoint extends Model
 
     /**
      * Get the route that owns the waypoint.
+     *
+     * @return BelongsTo<Route, $this>
      */
     public function route(): BelongsTo
     {

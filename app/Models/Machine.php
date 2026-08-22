@@ -55,24 +55,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Collection<int, MachineMetric> $metrics
  * @property-read MachineMetric|null $latestMetric
  * @property-read MachineMetric|null $latestEngineHoursMetric
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Machine where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Machine whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Machine orderBy(string $column, string $direction = 'asc')
- * @method static \Illuminate\Database\Eloquent\Builder|Machine latest(string $column = 'created_at')
- * @method static \Illuminate\Database\Eloquent\Builder|Machine select(array<string> $columns = ['*'])
- * @method static Machine|null find(mixed $id, array<string> $columns = ['*'])
- * @method static Machine findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,Machine> all(array<string> $columns = ['*'])
- * @method static \Illuminate\Pagination\Paginator paginate(int $perPage = 15, array<string> $columns = ['*'], string $pageName = 'page', int $page = null)
- *
  * @property int|null $sync_version
+ * @property float|numeric-string|null $operating_hours
+ * @property float|numeric-string|null $total_distance_km
+ * @property float|numeric-string|null $odometer
+ * @property mixed|null $last_seen_at
  */
 class Machine extends Model
 {
     /** @use HasFactory<MachineFactory> */
     use HasFactory, HasSyncVersion, HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'name',
@@ -98,6 +92,7 @@ class Machine extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'capacity' => 'float',
         'fuel_capacity' => 'float',
@@ -128,6 +123,8 @@ class Machine extends Model
 
     /**
      * Get the team that owns this machine
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -136,6 +133,8 @@ class Machine extends Model
 
     /**
      * Get the integration this machine belongs to
+     *
+     * @return BelongsTo<Integration, $this>
      */
     public function integration(): BelongsTo
     {
@@ -144,6 +143,8 @@ class Machine extends Model
 
     /**
      * Get all metrics for this machine
+     *
+     * @return HasMany<MachineMetric, $this>
      */
     public function metrics(): HasMany
     {
@@ -152,6 +153,8 @@ class Machine extends Model
 
     /**
      * Get all alerts for this machine
+     *
+     * @return HasMany<Alert, $this>
      */
     public function alerts(): HasMany
     {
@@ -160,6 +163,8 @@ class Machine extends Model
 
     /**
      * Get all geofence entries for this machine
+     *
+     * @return HasMany<GeofenceEntry, $this>
      */
     public function geofenceEntries(): HasMany
     {
@@ -168,6 +173,8 @@ class Machine extends Model
 
     /**
      * Get the mine area this machine is assigned to
+     *
+     * @return BelongsTo<MineArea, $this>
      */
     public function mineArea(): BelongsTo
     {
@@ -176,6 +183,8 @@ class Machine extends Model
 
     /**
      * Get assignment history for this machine
+     *
+     * @return HasMany<MachineAreaAssignment, $this>
      */
     public function areaAssignments(): HasMany
     {
@@ -184,6 +193,8 @@ class Machine extends Model
 
     /**
      * Get the excavator this machine is assigned to
+     *
+     * @return BelongsTo<Machine, $this>
      */
     public function excavator(): BelongsTo
     {
@@ -192,6 +203,8 @@ class Machine extends Model
 
     /**
      * Get all machines assigned to this excavator
+     *
+     * @return HasMany<Machine, $this>
      */
     public function assignedMachines(): HasMany
     {
@@ -200,6 +213,8 @@ class Machine extends Model
 
     /**
      * Get all maintenance records for this machine
+     *
+     * @return HasMany<MaintenanceRecord, $this>
      */
     public function maintenanceRecords(): HasMany
     {
@@ -228,6 +243,8 @@ class Machine extends Model
 
     /**
      * Get the health status for this machine
+     *
+     * @return HasOne<MachineHealthStatus, $this>
      */
     public function healthStatus(): HasOne
     {

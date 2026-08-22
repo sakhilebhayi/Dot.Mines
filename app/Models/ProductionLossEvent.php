@@ -69,6 +69,7 @@ class ProductionLossEvent extends Model
         'other' => ['unknown', 'other'],
     ];
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',

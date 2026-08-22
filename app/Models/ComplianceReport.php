@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ComplianceReport extends Model
 {
+    /** @var list<string> */
     protected $fillable = [
         'mine_area_id',
         'report_type',
@@ -18,6 +19,7 @@ class ComplianceReport extends Model
         'issues',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'data' => 'json',
         'issues' => 'json',

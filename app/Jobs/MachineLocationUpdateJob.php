@@ -25,6 +25,7 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
 
     public int $timeout = 120;
 
+    /** @var list<int> */
     public array $backoff = [30, 90, 300]; // 30s, 90s, 5 mins
 
     /**

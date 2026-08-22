@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -25,21 +25,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon|null $resolved_at
  * @property int|null $acknowledged_by
  * @property int|null $resolved_by
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|FuelAlert where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelAlert whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelAlert orderBy(string $column, string $direction = 'asc')
- * @method static FuelAlert|null find(mixed $id, array $columns = ['*'])
- * @method static FuelAlert findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class FuelAlert extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'fuel_tank_id',
@@ -57,6 +51,7 @@ class FuelAlert extends Model
         'metadata',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'triggered_at' => 'datetime',
         'acknowledged_at' => 'datetime',
@@ -66,26 +61,31 @@ class FuelAlert extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<FuelTank, $this> */
     public function fuelTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function acknowledgedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function resolvedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');
@@ -93,6 +93,10 @@ class FuelAlert extends Model
 
     /**
      * Scope for active alerts
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive($query)
     {
@@ -102,6 +106,10 @@ class FuelAlert extends Model
     /**
      * Scope for critical alerts
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeCritical($query)
     {
         return $query->where('severity', 'critical');
@@ -109,6 +117,10 @@ class FuelAlert extends Model
 
     /**
      * Scope for unacknowledged alerts
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeUnacknowledged($query)
     {

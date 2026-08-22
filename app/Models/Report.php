@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Mail\ReportReadyMail;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
@@ -24,24 +23,19 @@ use Illuminate\Support\Facades\Mail;
  * @property string|null $file_path
  * @property int|null $file_size
  * @property string|null $format
- * @property array|null $filters
+ * @property array<string, mixed>|null $filters
  * @property int|string|null $generated_by
  * @property Carbon|null $generated_at
  * @property Carbon|null $expires_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Report where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Report orderBy(string $column, string $direction = 'asc')
- * @method static Report|null find(mixed $id, array $columns = ['*'])
- * @method static Report findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property-read Team|null $team
  */
 class Report extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'title',
@@ -57,6 +51,7 @@ class Report extends Model
         'expires_at',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'filters' => 'json',
         'generated_at' => 'datetime',
@@ -67,6 +62,8 @@ class Report extends Model
 
     /**
      * Get the team this report belongs to
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {

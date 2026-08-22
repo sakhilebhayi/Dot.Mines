@@ -6,9 +6,11 @@ use App\Notifications\VerifyEmailNotification;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -104,7 +106,8 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get roles for current team
      */
-    public function roles()
+    /** @return BelongsToMany<Role, $this> */
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user');
     }
@@ -112,7 +115,8 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get permissions through roles for current team
      */
-    public function permissions()
+    /** @return Builder<Permission> */
+    public function permissions(): Builder
     {
         // Return a query builder for permissions granted to this user via their roles.
         // We join through permission_role -> roles -> role_user so callers can further
@@ -129,7 +133,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Check if user has a specific role in current team
      */
-    public function hasRole($role): bool
+    public function hasRole(string|Role $role): bool
     {
         if (is_string($role)) {
             return $this->roles()
@@ -147,7 +151,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Check if user has a specific permission
      */
-    public function hasPermission($permission): bool
+    public function hasPermission(string $permission): bool
     {
         if ($this->hasRole('admin')) {
             return true; // Admins have all permissions
@@ -161,7 +165,8 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Check if user has any of the given permissions
      */
-    public function hasAnyPermission($permissions): bool
+    /** @param list<string> $permissions */
+    public function hasAnyPermission(array $permissions): bool
     {
         if ($this->hasRole('admin')) {
             return true;
@@ -246,7 +251,8 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Check if user has all of the given permissions
      */
-    public function hasAllPermissions($permissions): bool
+    /** @param list<string> $permissions */
+    public function hasAllPermissions(array $permissions): bool
     {
         if ($this->hasRole('admin')) {
             return true;
@@ -262,7 +268,8 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get all roles for user
      */
-    public function getAllRoles()
+    /** @return Collection<int, Role> */
+    public function getAllRoles(): Collection
     {
         return $this->roles()
             ->where('team_id', $this->current_team_id)
@@ -272,10 +279,11 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Assign a role to user
      */
-    public function assignRole($role)
+    /** @return array<string, mixed>|false */
+    public function assignRole(string|Role $role): array|false
     {
         if (is_string($role)) {
-            $role = Role::where('team_id', $this->current_team_id)
+            $role = Role::query()->where('team_id', $this->current_team_id)
                 ->where('name', $role)
                 ->first();
         }
@@ -290,10 +298,10 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Remove a role from user
      */
-    public function removeRole($role)
+    public function removeRole(string|Role $role): int|false
     {
         if (is_string($role)) {
-            $role = Role::where('team_id', $this->current_team_id)
+            $role = Role::query()->where('team_id', $this->current_team_id)
                 ->where('name', $role)
                 ->first();
         }
@@ -305,6 +313,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->roles()->detach($role->id);
     }
 
+    /** @return HasMany<Team, $this> */
     public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'user_id');
@@ -318,6 +327,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * got a hard null instead of their own team. Restored to match the
      * trait's real behavior.
      */
+    /** @return BelongsTo<Team, $this> */
     public function currentTeam(): BelongsTo
     {
         if (is_null($this->current_team_id) && $this->id) {

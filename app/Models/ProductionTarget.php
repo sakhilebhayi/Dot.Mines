@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,18 +24,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Carbon|null $deleted_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionTarget where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionTarget whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionTarget orderBy(string $column, string $direction = 'asc')
- * @method static ProductionTarget|null find(mixed $id, array $columns = ['*'])
- * @method static ProductionTarget findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class ProductionTarget extends Model
 {
     use SoftDeletes;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -47,6 +42,7 @@ class ProductionTarget extends Model
         'is_active',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'target_quantity' => 'decimal:2',
         'start_date' => 'date',
@@ -54,26 +50,40 @@ class ProductionTarget extends Model
         'is_active' => 'boolean',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam($query, $teamId)
     {
         return $query->where('team_id', $teamId);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeByPeriod($query, $periodType)
     {
         return $query->where('period_type', $periodType);

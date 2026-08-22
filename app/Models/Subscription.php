@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,21 +27,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon|null $current_period_end
  * @property Carbon|null $canceled_at
  * @property Carbon|null $ends_at
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Subscription orderBy(string $column, string $direction = 'asc')
- * @method static Subscription|null find(mixed $id, array $columns = ['*'])
- * @method static Subscription findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class Subscription extends Model
 {
-    use HasFactory;
-
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'subscription_plan_id',
@@ -58,6 +50,7 @@ class Subscription extends Model
         'metadata',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'trial_ends_at' => 'datetime',
         'current_period_start' => 'datetime',
@@ -71,6 +64,8 @@ class Subscription extends Model
 
     /**
      * Get the team that owns the subscription.
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -79,6 +74,8 @@ class Subscription extends Model
 
     /**
      * Get the plan for this subscription.
+     *
+     * @return BelongsTo<SubscriptionPlan, $this>
      */
     public function plan(): BelongsTo
     {
@@ -87,6 +84,8 @@ class Subscription extends Model
 
     /**
      * Get payments for this subscription.
+     *
+     * @return HasMany<Payment, $this>
      */
     public function payments(): HasMany
     {
@@ -95,6 +94,8 @@ class Subscription extends Model
 
     /**
      * Get invoices for this subscription.
+     *
+     * @return HasMany<Invoice, $this>
      */
     public function invoices(): HasMany
     {
@@ -201,6 +202,10 @@ class Subscription extends Model
     /**
      * Scope query to active subscriptions
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive($query)
     {
         return $query->whereIn('status', ['trial', 'active']);
@@ -208,6 +213,10 @@ class Subscription extends Model
 
     /**
      * Scope query to trial subscriptions
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeOnTrial($query)
     {

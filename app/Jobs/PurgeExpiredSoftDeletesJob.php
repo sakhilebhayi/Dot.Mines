@@ -25,6 +25,7 @@ class PurgeExpiredSoftDeletesJob implements ShouldQueue
     public int $timeout = 300;
 
     /** @var array<int> */
+    /** @var list<int> */
     public array $backoff = [60, 300];
 
     public function handle(): void

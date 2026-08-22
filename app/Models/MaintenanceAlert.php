@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -29,18 +28,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceAlert where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceAlert whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceAlert orderBy(string $column, string $direction = 'asc')
- * @method static MaintenanceAlert|null find(mixed $id, array<string> $columns = ['*'])
- * @method static MaintenanceAlert findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,MaintenanceAlert> all(array<string> $columns = ['*'])
+ * @property mixed|null $age_hours
  */
 class MaintenanceAlert extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -58,6 +52,7 @@ class MaintenanceAlert extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'triggered_at' => 'datetime',
         'acknowledged_at' => 'datetime',
@@ -66,27 +61,33 @@ class MaintenanceAlert extends Model
 
     /**
      * Relationships
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
+    /** @return BelongsTo<MaintenanceSchedule, $this> */
     public function maintenanceSchedule(): BelongsTo
     {
         return $this->belongsTo(MaintenanceSchedule::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function acknowledgedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function resolvedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

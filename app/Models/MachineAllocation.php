@@ -27,6 +27,7 @@ class MachineAllocation extends Model
 {
     use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'class',

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\GeofenceEntryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,18 +30,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|GeofenceEntry where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|GeofenceEntry whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|GeofenceEntry orderBy(string $column, string $direction = 'asc')
- * @method static GeofenceEntry|null find(mixed $id, array $columns = ['*'])
- * @method static GeofenceEntry findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property mixed|null $latitude
+ * @property mixed|null $longitude
+ * @property-read Machine|null $machine
+ * @property-read Geofence|null $geofence
+ * @property mixed|null $exited_at
  */
 class GeofenceEntry extends Model
 {
+    /** @use HasFactory<GeofenceEntryFactory> */
     use HasFactory, HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'geofence_id',
@@ -56,6 +57,7 @@ class GeofenceEntry extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'entry_time' => 'datetime',
         'exit_time' => 'datetime',
@@ -70,6 +72,8 @@ class GeofenceEntry extends Model
 
     /**
      * Get the machine for this entry
+     *
+     * @return BelongsTo<Machine, $this>
      */
     public function machine(): BelongsTo
     {
@@ -78,6 +82,8 @@ class GeofenceEntry extends Model
 
     /**
      * Get the geofence for this entry
+     *
+     * @return BelongsTo<Geofence, $this>
      */
     public function geofence(): BelongsTo
     {
@@ -86,6 +92,8 @@ class GeofenceEntry extends Model
 
     /**
      * Get the team for this entry
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasSyncVersion;
 use Carbon\Carbon;
+use Database\Factories\NotificationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,27 +19,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $title
  * @property string $message
  * @property string $alert_level
- * @property array|null $data
+ * @property array<string, mixed>|null $data
  * @property string|null $action_url
  * @property bool $is_read
  * @property Carbon|null $read_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Notification where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Notification whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Notification orderBy(string $column, string $direction = 'asc')
- * @method static Notification|null find(mixed $id, array $columns = ['*'])
- * @method static Notification findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
- *
  * @property int|null $sync_version
  */
 class Notification extends Model
 {
+    /** @use HasFactory<NotificationFactory> */
     use HasFactory;
+
     use HasSyncVersion;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'type',
@@ -51,17 +47,20 @@ class Notification extends Model
         'read_at',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'data' => 'json',
         'is_read' => 'boolean',
         'read_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsToMany<User, $this> */
     public function readBy(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'notification_read')

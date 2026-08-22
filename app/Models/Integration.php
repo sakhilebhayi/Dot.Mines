@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\IntegrationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string|null $api_key
  * @property string|null $api_secret
- * @property array|null $credentials
+ * @property array<string, mixed>|null $credentials
  * @property string|null $webhook_url
  * @property string|null $webhook_secret
  * @property string $status
@@ -29,15 +30,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $last_sync_status
  * @property string|null $last_error
  * @property int $machines_count
- * @property array|null $config
+ * @property array<string, mixed>|null $config
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Team|null $team
  */
 class Integration extends Model
 {
+    /** @use HasFactory<IntegrationFactory> */
     use HasFactory, HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'provider', // volvo, cat, komatsu, bell, c_track
@@ -58,12 +61,14 @@ class Integration extends Model
         'sync_streams', // JSON per-stream status: {status, last_synced_at, records} per capability key
     ];
 
+    /** @var list<string> */
     protected $hidden = [
         'api_key',
         'api_secret',
         'webhook_secret',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'last_sync_at' => 'datetime',
         'last_error_at' => 'datetime',
@@ -83,6 +88,8 @@ class Integration extends Model
 
     /**
      * Get the team this integration belongs to
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -91,6 +98,8 @@ class Integration extends Model
 
     /**
      * Get all machines synced from this integration
+     *
+     * @return HasMany<Machine, $this>
      */
     public function machines(): HasMany
     {

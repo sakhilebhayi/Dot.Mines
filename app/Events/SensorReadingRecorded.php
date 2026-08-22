@@ -13,30 +13,25 @@ class SensorReadingRecorded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $sensor;
+    /** @param array<string, mixed> $reading */
+    public function __construct(
+        public IoTSensor $sensor,
+        public array $reading,
+        public int $teamId,
+    ) {}
 
-    public $reading;
-
-    public $teamId;
-
-    public function __construct(IoTSensor $sensor, array $reading, $teamId)
-    {
-        $this->sensor = $sensor;
-        $this->reading = $reading;
-        $this->teamId = $teamId;
-    }
-
-    public function broadcastOn()
+    public function broadcastOn(): PrivateChannel
     {
         return new PrivateChannel("team.{$this->teamId}.sensors");
     }
 
-    public function broadcastAs()
+    public function broadcastAs(): string
     {
         return 'sensor.reading';
     }
 
-    public function broadcastWith()
+    /** @return array<string, mixed> */
+    public function broadcastWith(): array
     {
         return [
             'sensor_id' => $this->sensor->id,

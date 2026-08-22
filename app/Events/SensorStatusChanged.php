@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\IoTSensor;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -12,33 +13,25 @@ class SensorStatusChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $sensor;
+    public function __construct(
+        public IoTSensor $sensor,
+        public string $oldStatus,
+        public string $newStatus,
+        public int $teamId,
+    ) {}
 
-    public $oldStatus;
-
-    public $newStatus;
-
-    public $teamId;
-
-    public function __construct($sensor, $oldStatus, $newStatus, $teamId)
-    {
-        $this->sensor = $sensor;
-        $this->oldStatus = $oldStatus;
-        $this->newStatus = $newStatus;
-        $this->teamId = $teamId;
-    }
-
-    public function broadcastOn()
+    public function broadcastOn(): PrivateChannel
     {
         return new PrivateChannel("team.{$this->teamId}.alerts");
     }
 
-    public function broadcastAs()
+    public function broadcastAs(): string
     {
         return 'sensor.status_changed';
     }
 
-    public function broadcastWith()
+    /** @return array<string, mixed> */
+    public function broadcastWith(): array
     {
         return [
             'sensor_id' => $this->sensor->id,

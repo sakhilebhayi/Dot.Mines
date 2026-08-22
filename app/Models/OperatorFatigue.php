@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -29,26 +28,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $incidents_count
  * @property bool $is_rested
  * @property string|null $notes
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read User|null $user
  * @property-read Machine|null $machine
  * @property-read Team|null $team
- *
- * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|OperatorFatigue orderBy(string $column, string $direction = 'asc')
- * @method static OperatorFatigue|null find(mixed $id, array $columns = ['*'])
- * @method static OperatorFatigue findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class OperatorFatigue extends Model
 {
-    use HasFactory;
-
     protected $table = 'operator_fatigue';
 
+    /** @var list<string> */
     protected $fillable = [
         'user_id',
         'team_id',
@@ -68,6 +59,7 @@ class OperatorFatigue extends Model
         'metadata',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'shift_date' => 'date',
         'shift_start' => 'datetime:H:i',
@@ -85,6 +77,8 @@ class OperatorFatigue extends Model
 
     /**
      * Get the user (operator) this fatigue record belongs to.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -93,6 +87,8 @@ class OperatorFatigue extends Model
 
     /**
      * Get the team this fatigue record belongs to.
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -101,6 +97,8 @@ class OperatorFatigue extends Model
 
     /**
      * Get the machine this fatigue record is associated with.
+     *
+     * @return BelongsTo<Machine, $this>
      */
     public function machine(): BelongsTo
     {

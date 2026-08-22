@@ -4,12 +4,19 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\FuelTransactionFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property float|numeric-string|null $quantity_liters
+ * @property float|numeric-string|null $total_cost
+ */
 class FuelTransaction extends Model
 {
+    /** @use HasFactory<FuelTransactionFactory> */
     use HasFactory, HasTeamFilters;
 
     /**
@@ -46,6 +53,7 @@ class FuelTransaction extends Model
      * @method static FuelTransaction findOrFail(mixed $id, array $columns = ['*'])
      * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
      */
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'monthly_allocation_id',
@@ -69,6 +77,7 @@ class FuelTransaction extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'quantity_liters' => 'decimal:2',
         'unit_price' => 'decimal:2',
@@ -80,31 +89,37 @@ class FuelTransaction extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<FuelTank, $this> */
     public function fuelTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<FuelTank, $this> */
     public function fromTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class, 'from_tank_id');
     }
 
+    /** @return BelongsTo<FuelTank, $this> */
     public function toTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class, 'to_tank_id');
@@ -125,6 +140,10 @@ class FuelTransaction extends Model
     /**
      * Scope for specific transaction type
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeOfType($query, string $type)
     {
         return $query->where('transaction_type', $type);
@@ -133,6 +152,10 @@ class FuelTransaction extends Model
     /**
      * Scope for date range
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeDateRange($query, $startDate, $endDate)
     {
         return $query->whereBetween('transaction_date', [$startDate, $endDate]);
@@ -140,6 +163,10 @@ class FuelTransaction extends Model
 
     /**
      * Scope for specific fuel type
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeFuelType($query, string $type)
     {

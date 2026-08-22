@@ -2,16 +2,24 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Database\Factories\IoTSensorFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property Carbon|string|null $last_reading_at
+ * @property string|null $status
+ */
 class IoTSensor extends Model
 {
+    /** @use HasFactory<IoTSensorFactory> */
     use HasFactory;
 
     protected $table = 'iot_sensors';
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -26,12 +34,14 @@ class IoTSensor extends Model
         'metadata',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'last_reading' => 'json',
         'metadata' => 'json',
         'last_reading_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

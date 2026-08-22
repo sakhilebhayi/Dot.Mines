@@ -2,15 +2,28 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\URL;
 
+/**
+ * @property int $id
+ * @property string|null $status
+ * @property array<string, mixed>|null $metadata
+ * @property string|null $file_type
+ * @property int|null $file_size
+ * @property string|null $file_path
+ * @property Carbon|string|null $expiry_date
+ * @property Carbon|string|null $effective_date
+ */
 class MinePlanUpload extends Model
 {
     use SoftDeletes;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -28,6 +41,7 @@ class MinePlanUpload extends Model
         'metadata',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'file_size' => 'integer',
         'effective_date' => 'date',
@@ -35,6 +49,7 @@ class MinePlanUpload extends Model
         'metadata' => 'array',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -61,26 +76,40 @@ class MinePlanUpload extends Model
         );
     }
 
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam($query, $teamId)
     {
         return $query->where('team_id', $teamId);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeByType($query, $type)
     {
         return $query->where('file_type', $type);

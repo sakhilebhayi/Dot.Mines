@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -27,18 +27,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|HealthMetric where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|HealthMetric whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|HealthMetric orderBy(string $column, string $direction = 'asc')
- * @method static HealthMetric|null find(mixed $id, array<string> $columns = ['*'])
- * @method static HealthMetric findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,HealthMetric> all(array<string> $columns = ['*'])
+ * @property mixed|null $deviation
  */
 class HealthMetric extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -55,6 +50,7 @@ class HealthMetric extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'value' => 'float',
         'normal_min' => 'float',
@@ -65,12 +61,15 @@ class HealthMetric extends Model
 
     /**
      * Relationships
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
@@ -79,26 +78,46 @@ class HealthMetric extends Model
     /**
      * Scopes
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeAbnormal($query)
     {
         return $query->where('is_normal', false);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeCritical($query)
     {
         return $query->where('severity', 'critical');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeComponent($query, string $component)
     {
         return $query->where('component', $component);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeMetricType($query, string $type)
     {
         return $query->where('metric_type', $type);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeRecent($query, int $days = 7)
     {
         return $query->where('recorded_at', '>=', now()->subDays($days));
