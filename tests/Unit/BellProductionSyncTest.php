@@ -432,4 +432,84 @@ XML,
         // and a zero-production day creates no record at all.
         $this->assertCount(0, $records);
     }
+
+    public function test_duplicate_and_out_of_order_readings_do_not_change_the_result(): void
+    {
+        // Brief §19: the same API reading delivered twice, or readings
+        // delivered out of order, must not create or inflate production.
+        $dayOne = now()->subDays(2)->toDateString();
+        $dayTwo = now()->subDay()->toDateString();
+        $this->fakeBellApi(
+            <<<XML
+<CumulativeLoadCountMessages xmlns="http://standards.iso.org/iso/15143/-3">
+  <CumulativeLoadCount datetime="{$dayTwo}T18:00:00Z"><Count>13200</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayOne}T06:00:00Z"><Count>13000</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayOne}T18:00:00Z"><Count>13050</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayOne}T18:00:00Z"><Count>13050</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayTwo}T06:00:00Z"><Count>13120</Count></CumulativeLoadCount>
+</CumulativeLoadCountMessages>
+XML,
+            '<CumulativePayloadTotalMessages xmlns="http://standards.iso.org/iso/15143/-3"/>'
+        );
+
+        $team = Team::factory()->create();
+        $integration = $this->connectedBellIntegration($team);
+
+        app(IntegrationService::class)->syncMachines($integration);
+
+        $machine = Machine::where('team_id', $team->id)->where('manufacturer', 'bell')->first();
+        $records = ProductionRecord::where('machine_id', $machine->id)->orderBy('record_date')->get();
+
+        $this->assertCount(2, $records);
+        $this->assertSame(50, (int) data_get($records->first()->metadata, 'loads'));
+        $this->assertSame(150, (int) data_get($records->last()->metadata, 'loads'));
+    }
+
+    public function test_partial_response_with_only_load_counts_still_records_loads(): void
+    {
+        // Brief §19: a partial response (payload series empty) records what
+        // IS real -- the loads -- with zero tonnes, not a fabricated mass.
+        $dayOne = now()->subDay()->toDateString();
+        $this->fakeBellApi(
+            <<<XML
+<CumulativeLoadCountMessages xmlns="http://standards.iso.org/iso/15143/-3">
+  <CumulativeLoadCount datetime="{$dayOne}T06:00:00Z"><Count>13000</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayOne}T18:00:00Z"><Count>13040</Count></CumulativeLoadCount>
+</CumulativeLoadCountMessages>
+XML,
+            '<CumulativePayloadTotalMessages xmlns="http://standards.iso.org/iso/15143/-3"/>'
+        );
+
+        $team = Team::factory()->create();
+        $integration = $this->connectedBellIntegration($team);
+
+        app(IntegrationService::class)->syncMachines($integration);
+
+        $machine = Machine::where('team_id', $team->id)->where('manufacturer', 'bell')->first();
+        $record = ProductionRecord::where('machine_id', $machine->id)->first();
+
+        $this->assertNotNull($record);
+        $this->assertSame(40, (int) data_get($record->metadata, 'loads'));
+        $this->assertSame(0.0, (float) $record->quantity_produced);
+    }
+
+    public function test_sync_records_run_statistics_for_the_api_health_panel(): void
+    {
+        $this->fakeBellApi();
+
+        $team = Team::factory()->create();
+        $integration = $this->connectedBellIntegration($team);
+
+        app(IntegrationService::class)->syncMachines($integration);
+
+        $stats = $integration->fresh()->last_sync_stats;
+
+        $this->assertIsArray($stats);
+        $this->assertArrayHasKey('duration_ms', $stats);
+        $this->assertSame(1, $stats['machines_received']);
+        $this->assertSame(1, $stats['machines_synced']);
+        $this->assertTrue($stats['deep_sync']);
+        $this->assertSame(2, $stats['production_records_total']);
+        $this->assertSame(2, $stats['production_records_delta']);
+    }
 }

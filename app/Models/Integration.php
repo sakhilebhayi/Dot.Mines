@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $status
  * @property Carbon|null $last_sync_at
  * @property string|null $last_sync_status
+ * @property array<string, mixed>|null $last_sync_stats
  * @property string|null $last_error
  * @property int $machines_count
  * @property array<string, mixed>|null $config
@@ -52,6 +53,7 @@ class Integration extends Model
         'webhook_secret',
         'status', // connected, disconnected, error
         'last_sync_at',
+        'last_sync_stats',
         'last_sync_status', // success, failed
         'last_error',
         'last_error_at',
@@ -71,6 +73,7 @@ class Integration extends Model
     /** @var array<string, string> */
     protected $casts = [
         'last_sync_at' => 'datetime',
+        'last_sync_stats' => 'array',
         'last_error_at' => 'datetime',
         // Real third-party API secrets live here (OAuth client secrets,
         // passwords, tokens) -- encrypted:json transparently encrypts on

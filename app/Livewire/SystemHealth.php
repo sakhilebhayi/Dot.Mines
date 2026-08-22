@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Integration;
+use App\Services\ProductionReconciliationService;
 use App\Services\Sync\SyncSequence;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -18,6 +19,10 @@ use Livewire\Component;
  *
  * @psalm-suppress UnusedClass -- routed Livewire component
  * @psalm-suppress ClassMustBeFinal -- Livewire components stay extendable by convention here
+ *
+ * @property-read array{integration: Integration|null, stats: array<string, mixed>} $apiHealth
+ * @property-read array{date: string, totals: array{machines: int, loads: int, tonnes: float}, checks: list<array{label: string, state: string, detail: string}>}|null $reconciliation
+ * @property-read list<array{label: string, state: string, detail: string}> $checks
  */
 #[Layout('layouts.app')]
 class SystemHealth extends Component
@@ -144,6 +149,50 @@ class SystemHealth extends Component
             'state' => self::STATE_HEALTHY,
             'detail' => "Version {$current}, last data change {$age}",
         ];
+    }
+
+    /**
+     * What the last integration sync actually received and wrote, straight
+     * from Integration.last_sync_stats (brief §21) -- so "why did production
+     * stop updating?" is answered by numbers, not log spelunking.
+     *
+     * @return array{integration: Integration|null, stats: array<string, mixed>}
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- Livewire computed property
+     */
+    public function getApiHealthProperty(): array
+    {
+        /** @var Integration|null $integration -- withoutGlobalScopes() erases the builder generics */
+        $integration = Integration::query()
+            ->withoutGlobalScopes()
+            ->whereNotNull('last_sync_at')
+            ->orderByDesc('last_sync_at')
+            ->first();
+
+        return [
+            'integration' => $integration,
+            'stats' => is_array($integration?->last_sync_stats) ? $integration->last_sync_stats : [],
+        ];
+    }
+
+    /**
+     * Today's production reconciliation for the synced team (brief §18):
+     * discrepancies are shown with their size and likely cause, never
+     * hidden.
+     *
+     * @return array{date: string, totals: array{machines: int, loads: int, tonnes: float}, checks: list<array{label: string, state: string, detail: string}>}|null
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- Livewire computed property
+     */
+    public function getReconciliationProperty(): ?array
+    {
+        $team = $this->apiHealth['integration']?->team;
+
+        if ($team === null) {
+            return null;
+        }
+
+        return app(ProductionReconciliationService::class)->forDay($team);
     }
 
     /** @psalm-suppress PossiblyUnusedMethod -- Livewire lifecycle */

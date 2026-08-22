@@ -236,12 +236,18 @@ class IntegrationService
      */
     public function syncMachines(Integration $integration): array
     {
+        $startedAt = microtime(true);
+
         try {
             $service = $this->getServiceForIntegration($integration);
 
             if (! $service) {
                 return ['success' => false, 'error' => 'Service not found'];
             }
+
+            $productionRecordsBefore = ProductionRecord::where('team_id', $integration->team_id)
+                ->where('metadata->source', 'telemetry')
+                ->count();
 
             $machines = $service->fetchMachines();
 
@@ -261,13 +267,38 @@ class IntegrationService
 
             $result = $this->persistMachines($integration, $service, $machines['machines'] ?? []);
 
-            $integration->update(['last_sync_at' => now()]);
+            $productionRecordsAfter = ProductionRecord::where('team_id', $integration->team_id)
+                ->where('metadata->source', 'telemetry')
+                ->count();
+
+            // The System Health API panel reads these (brief §21) -- what
+            // the last run actually received and wrote, not a guess.
+            $integration->update([
+                'last_sync_at' => now(),
+                'last_sync_stats' => [
+                    'finished_at' => now()->toIso8601String(),
+                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+                    'machines_received' => count($machines['machines'] ?? []),
+                    'machines_synced' => (int) ($result['count'] ?? 0),
+                    'production_records_total' => $productionRecordsAfter,
+                    'production_records_delta' => $productionRecordsAfter - $productionRecordsBefore,
+                    'deep_sync' => (bool) ($result['deep_sync'] ?? false),
+                ],
+            ]);
 
             return $result;
         } catch (\Throwable $e) {
             Log::error('Integration machine sync failed', [
                 'integration_id' => $integration->id,
                 'error' => $e->getMessage(),
+            ]);
+
+            $integration->update([
+                'last_sync_stats' => [
+                    'finished_at' => now()->toIso8601String(),
+                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+                    'failed' => true,
+                ],
             ]);
 
             return [
@@ -344,6 +375,7 @@ class IntegrationService
             'success' => true,
             'message' => "Synced {$synced} machines",
             'count' => $synced,
+            'deep_sync' => $deepSync,
         ];
     }
 
