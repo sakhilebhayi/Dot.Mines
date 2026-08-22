@@ -12,13 +12,23 @@ return new class extends Migration
         // mine_area_id on alerts may already exist from a previous migration attempt
         // Only add if missing — use raw SQL to avoid SQLite table recreation issues
         if (! Schema::hasColumn('alerts', 'mine_area_id')) {
-            DB::statement('ALTER TABLE alerts ADD COLUMN mine_area_id INTEGER NULL REFERENCES mine_areas(id) ON DELETE SET NULL');
+            if (DB::connection()->getDriverName() === 'sqlite') {
+                // Raw SQL avoids SQLite's table-recreation on ALTER; the loose
+                // INTEGER type is fine there because SQLite ignores FK types.
+                DB::statement('ALTER TABLE alerts ADD COLUMN mine_area_id INTEGER NULL REFERENCES mine_areas(id) ON DELETE SET NULL');
 
-            // Add index separately
-            try {
-                DB::statement('CREATE INDEX alerts_mine_area_id_index ON alerts (mine_area_id)');
-            } catch (Exception $e) {
-                // Index may already exist
+                try {
+                    DB::statement('CREATE INDEX alerts_mine_area_id_index ON alerts (mine_area_id)');
+                } catch (Exception $e) {
+                    // Index may already exist
+                }
+            } else {
+                // MySQL requires the FK column type to match users of BIGINT
+                // UNSIGNED ids exactly (errno 150 otherwise); the builder gets
+                // it right, and the FK's implicit index covers lookups.
+                Schema::table('alerts', function (Blueprint $table) {
+                    $table->foreignId('mine_area_id')->nullable()->constrained('mine_areas')->nullOnDelete();
+                });
             }
         }
 
