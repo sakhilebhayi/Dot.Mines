@@ -140,6 +140,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.RealtimeMapManager.init(map);
             }
 
+            // The push→marker wire (brief §26): broadcast location events
+            // move the marker the moment they arrive — no waiting for the
+            // next wire:poll. The event payload (MachineLocationUpdated::
+            // broadcastWith) matches updateMachineMarker's shape exactly.
+            // Echo caches channels by name, so this shares the team channel
+            // the sync bridge already subscribes to.
+            if (window.Echo && window.__syncContext && window.RealtimeMapManager) {
+                window.Echo.private(`team.${window.__syncContext.teamId}`)
+                    .listen('.machine.location.updated', (data) => {
+                        window.RealtimeMapManager.updateMachineMarker(data);
+                        debugLog('Push-moved machine', data.id, data.latitude, data.longitude);
+                    });
+            }
+
             const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19
