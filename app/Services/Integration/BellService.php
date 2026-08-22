@@ -59,9 +59,13 @@ class BellService extends BaseManufacturerService
 
     private string $tokenUrl;
 
+    private readonly BellFleetParser $parser;
+
     public function __construct(array $credentials = [])
     {
         parent::__construct($credentials);
+
+        $this->parser = new BellFleetParser;
 
         $config = config('integrations.manufacturers.bell', []);
 
@@ -126,12 +130,12 @@ class BellService extends BaseManufacturerService
                 ];
             }
 
-            $equipmentNodes = $this->extractEquipmentNodes($xml);
+            $equipmentNodes = $this->parser->extractEquipmentNodes($xml);
 
             // Seed the EquipmentID->PIN map from the snapshot we already
             // hold, so the per-machine time-series calls that follow a sync
             // never need their own /Fleet round-trip to resolve IDs.
-            $map = $this->buildPinMap($equipmentNodes);
+            $map = $this->parser->buildPinMap($equipmentNodes);
 
             if ($map !== []) {
                 $this->pinByEquipmentId = $map;
@@ -139,7 +143,7 @@ class BellService extends BaseManufacturerService
             }
 
             $machines = array_map(
-                fn (SimpleXMLElement $node) => $this->parseEquipmentNode($node),
+                fn (SimpleXMLElement $node) => $this->parser->parseEquipmentNode($node),
                 $equipmentNodes
             );
 
@@ -239,10 +243,10 @@ class BellService extends BaseManufacturerService
             }
 
             $latest = end($readings);
-            $latitude = $this->toFloatOrNull($latest['attributes']['Latitude'] ?? null);
-            $longitude = $this->toFloatOrNull($latest['attributes']['Longitude'] ?? null);
+            $latitude = $this->parser->toFloatOrNull($latest['attributes']['Latitude'] ?? null);
+            $longitude = $this->parser->toFloatOrNull($latest['attributes']['Longitude'] ?? null);
 
-            if (! $this->isValidCoordinate($latitude, $longitude)) {
+            if (! $this->parser->isValidCoordinate($latitude, $longitude)) {
                 return null;
             }
 
@@ -251,8 +255,8 @@ class BellService extends BaseManufacturerService
                 'longitude' => $longitude,
                 'accuracy' => null,
                 'timestamp' => $latest['timestamp'],
-                'heading' => $this->toFloatOrNull($latest['attributes']['Heading'] ?? null),
-                'speed' => $this->toFloatOrNull($latest['attributes']['Speed'] ?? null),
+                'heading' => $this->parser->toFloatOrNull($latest['attributes']['Heading'] ?? null),
+                'speed' => $this->parser->toFloatOrNull($latest['attributes']['Speed'] ?? null),
             ];
         } catch (Throwable $e) {
             $this->logError('Failed to fetch Bell machine location', $e);
@@ -279,11 +283,12 @@ class BellService extends BaseManufacturerService
                 return [];
             }
 
-            foreach ($this->extractEquipmentNodes($xml) as $node) {
+            foreach ($this->parser->extractEquipmentNodes($xml) as $node) {
                 $header = $node->xpath(".//*[local-name()='EquipmentHeader']")[0] ?? $node;
 
-                if ($this->findValue($header, ['EquipmentID']) === $machineId) {
-                    return $this->buildCurrentMetric($node);
+                if ($this->parser->findValue($header, ['EquipmentID']) === $machineId) {
+                    /** @var array<string, mixed> */
+                    return $this->parser->buildCurrentMetric($node);
                 }
             }
 
@@ -349,10 +354,10 @@ class BellService extends BaseManufacturerService
         try {
             return [
                 'success' => true,
-                'load_count_readings' => $this->toProductionReadings(
+                'load_count_readings' => $this->parser->toProductionReadings(
                     $this->fetchTimeSeries($machineId, 'loadCount', $start, $end)
                 ),
-                'payload_readings' => $this->toProductionReadings(
+                'payload_readings' => $this->parser->toProductionReadings(
                     $this->fetchTimeSeries($machineId, 'payloadTotals', $start, $end)
                 ),
             ];
@@ -365,144 +370,6 @@ class BellService extends BaseManufacturerService
                 'payload_readings' => [],
             ];
         }
-    }
-
-    /**
-     * @param  list<array{timestamp: string, value: string, attributes: array<string, string>}>  $readings
-     * @return list<array{timestamp: string, value: float, units: ?string}>
-     */
-    private function toProductionReadings(array $readings): array
-    {
-        $parsed = [];
-
-        foreach ($readings as $reading) {
-            $value = $this->toFloatOrNull($reading['value'] ?? null);
-
-            if ($value === null) {
-                continue;
-            }
-
-            $parsed[] = [
-                'timestamp' => $reading['timestamp'],
-                'value' => $value,
-                'units' => $reading['attributes']['PayloadUnits']
-                    ?? $reading['attributes']['Units']
-                    ?? null,
-            ];
-        }
-
-        return $parsed;
-    }
-
-    /**
-     * Parse a single <Equipment> node from the /Fleet snapshot into this
-     * app's standard machine-sync shape (see IntegrationService::syncMachine()).
-     */
-    private function parseEquipmentNode(SimpleXMLElement $equipment): array
-    {
-        $header = $equipment->xpath(".//*[local-name()='EquipmentHeader']")[0] ?? $equipment;
-
-        $externalId = $this->findValue($header, ['EquipmentID']);
-        $latitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Latitude') ?? $this->findValue($equipment, ['Latitude']));
-        $longitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Longitude') ?? $this->findValue($equipment, ['Longitude']));
-        $telemetryDate = $this->sectionDatetime($equipment, 'Location')
-            ?? $this->findValue($equipment, ['TelemetryDate'])
-            ?? now()->toIso8601String();
-        $engineRunning = $this->parseEngineRunning($equipment);
-
-        return [
-            'external_id' => $externalId,
-            'name' => $externalId ?? 'Unknown Bell Machine',
-            'model' => $this->findValue($header, ['Model']),
-            'manufacturer' => 'Bell',
-            'serial_number' => $this->findValue($header, ['SerialNumber']),
-            'status' => $engineRunning === null
-                ? 'unknown'
-                : $this->parseStatus($engineRunning ? 'running' : 'idle'),
-            'last_location' => $this->isValidCoordinate($latitude, $longitude) ? [
-                'latitude' => $latitude,
-                'longitude' => $longitude,
-                'timestamp' => $telemetryDate,
-            ] : null,
-            'specifications' => [
-                'type' => 'haul_truck',
-                'pin' => $this->findValue($header, ['PIN']),
-            ],
-            // IntegrationService::syncMachineMetrics() feeds this directly
-            // into `new MachineMetric($metrics)` -- a single flat array of
-            // MachineMetric's own fillable columns, not a list of readings.
-            'metrics' => $this->buildCurrentMetric($equipment),
-            'alerts' => [],
-        ];
-    }
-
-    /**
-     * The current-status shape shared by fetchMachines() (per equipment
-     * node in the /Fleet snapshot) and fetchMachineMetrics() (looked up by
-     * ID from that same snapshot) -- a single flat array of MachineMetric's
-     * fillable columns. 'recorded_at' (not 'timestamp') is the fillable
-     * column name.
-     */
-    private function buildCurrentMetric(SimpleXMLElement $equipment): array
-    {
-        $latitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Latitude') ?? $this->findValue($equipment, ['Latitude']));
-        $longitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Longitude') ?? $this->findValue($equipment, ['Longitude']));
-        $telemetryDate = $this->sectionDatetime($equipment, 'Location')
-            ?? $this->findValue($equipment, ['TelemetryDate'])
-            ?? now()->toIso8601String();
-        $engineRunning = $this->parseEngineRunning($equipment);
-
-        $fuelRemaining = $this->toFloatOrNull(
-            $this->sectionValue($equipment, 'FuelRemaining', 'Percent')
-            ?? $this->findValue($equipment, ['FuelRemainingPercent', 'FuelRemainingRatio'])
-        );
-        // ISO 15143-3's own element is a *ratio* (0-1); Bell's flattened
-        // example uses a percent (0-100) under a differently named field.
-        // Normalise defensively either way rather than assuming which one a
-        // given response actually used.
-        if ($fuelRemaining !== null && $fuelRemaining <= 1) {
-            $fuelRemaining *= 100;
-        }
-
-        return [
-            'recorded_at' => $telemetryDate,
-            'latitude' => $this->isValidLatitude($latitude) ? $latitude : null,
-            'longitude' => $this->isValidLongitude($longitude) ? $longitude : null,
-            'fuel_level' => $this->isValidPercent($fuelRemaining) ? $fuelRemaining : null,
-            // Live Bell nests these under sections whose CHILD names
-            // collide (CumulativeIdleHours/Hour vs CumulativeOperatingHours/
-            // Hour, DEFRemaining/Percent vs FuelRemaining/Percent), so every
-            // read must be scoped to its section -- a document-order search
-            // for the bare child name would silently return the wrong
-            // section's value. Flattened-attribute fallbacks keep the
-            // spec-derived shape parsing too.
-            'operating_hours' => $this->toFloatOrNull($this->sectionValue($equipment, 'CumulativeOperatingHours', 'Hour') ?? $this->findValue($equipment, ['OperatingHours'])),
-            'idle_hours' => $this->toFloatOrNull($this->sectionValue($equipment, 'CumulativeIdleHours', 'Hour') ?? $this->findValue($equipment, ['IdleHours'])),
-            // ISO's "Payload" here is a cumulative lifetime total, not an
-            // instantaneous load -- kept in raw_data instead of the
-            // load_weight column, which the rest of this app treats as
-            // "what's on the machine right now".
-            'load_weight' => null,
-            'raw_data' => [
-                'load_count' => $this->toFloatOrNull($this->sectionValue($equipment, 'CumulativeLoadCount', 'Count') ?? $this->findValue($equipment, ['LoadCount'])),
-                'cumulative_payload' => $this->toFloatOrNull($this->sectionValue($equipment, 'CumulativePayloadTotals', 'Payload') ?? $this->findValue($equipment, ['Payload'])),
-                'payload_units' => $this->sectionValue($equipment, 'CumulativePayloadTotals', 'PayloadUnits') ?? $this->findValue($equipment, ['PayloadUnits']),
-                'def_percent' => $this->toFloatOrNull($this->sectionValue($equipment, 'DEFRemaining', 'Percent') ?? $this->findValue($equipment, ['DEFPercent'])),
-                'odometer' => $this->toFloatOrNull($this->sectionValue($equipment, 'Distance', 'Odometer') ?? $this->findValue($equipment, ['Odometer'])),
-                'odometer_units' => $this->sectionValue($equipment, 'Distance', 'OdometerUnits') ?? $this->findValue($equipment, ['OdometerUnits']),
-                'fuel_consumed_cumulative' => $this->toFloatOrNull($this->sectionValue($equipment, 'FuelUsed', 'FuelConsumed') ?? $this->findValue($equipment, ['FuelConsumed'])),
-                'fuel_units' => $this->sectionValue($equipment, 'FuelUsed', 'FuelUnits') ?? $this->findValue($equipment, ['FuelUnits']),
-                'engine_running' => $engineRunning,
-            ],
-        ];
-    }
-
-    private function parseEngineRunning(SimpleXMLElement $equipment): ?bool
-    {
-        $raw = $this->sectionValue($equipment, 'EngineStatus', 'Running')
-            ?? $this->findValue($equipment, ['EngineRunning']);
-
-        return $raw === null ? null : filter_var($raw, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -559,34 +426,13 @@ class BellService extends BaseManufacturerService
             return [];
         }
 
-        $map = $this->buildPinMap($this->extractEquipmentNodes($xml));
+        $map = $this->parser->buildPinMap($this->parser->extractEquipmentNodes($xml));
 
         if ($map !== []) {
             Cache::put($cacheKey, $map, now()->addMinutes(15));
         }
 
         return $this->pinByEquipmentId = $map;
-    }
-
-    /**
-     * @param  list<SimpleXMLElement>  $equipmentNodes
-     * @return array<string, string>
-     */
-    private function buildPinMap(array $equipmentNodes): array
-    {
-        $map = [];
-
-        foreach ($equipmentNodes as $node) {
-            $header = $node->xpath(".//*[local-name()='EquipmentHeader']")[0] ?? $node;
-            $id = trim((string) $this->findValue($header, ['EquipmentID']));
-            $pin = trim((string) ($this->findValue($header, ['PIN']) ?? $this->findValue($header, ['SerialNumber'])));
-
-            if ($id !== '' && $pin !== '') {
-                $map[$id] = $pin;
-            }
-        }
-
-        return $map;
     }
 
     private function pinMapCacheKey(): string
@@ -597,80 +443,6 @@ class BellService extends BaseManufacturerService
     private function fleetSnapshotCacheKey(): string
     {
         return 'bell_fleet_snapshot_'.md5(($this->username ?? '').'|'.($this->clientId ?? ''));
-    }
-
-    /**
-     * Reads a value nested one level inside a named section element
-     * (live Bell shape: <FuelRemaining datetime="..."><Percent>63</Percent>
-     * </FuelRemaining>). Returns null when the section or field is absent
-     * so callers can fall back to the flattened-attribute spec shape.
-     */
-    private function sectionValue(SimpleXMLElement $equipment, string $section, string $field): ?string
-    {
-        $matches = $equipment->xpath(".//*[local-name()='{$section}']/*[local-name()='{$field}']");
-        $value = isset($matches[0]) ? (string) $matches[0] : '';
-
-        return $value !== '' ? $value : null;
-    }
-
-    /**
-     * The live snapshot carries no TelemetryDate element -- each section
-     * stamps its own reading time in a datetime attribute instead.
-     */
-    private function sectionDatetime(SimpleXMLElement $equipment, string $section): ?string
-    {
-        $matches = $equipment->xpath(".//*[local-name()='{$section}']");
-        $value = isset($matches[0]) ? (string) ($matches[0]['datetime'] ?? '') : '';
-
-        return $value !== '' ? $value : null;
-    }
-
-    /**
-     * @return list<SimpleXMLElement>
-     */
-    private function extractEquipmentNodes(SimpleXMLElement $fleet): array
-    {
-        return $fleet->xpath("//*[local-name()='Equipment']") ?: [];
-    }
-
-    /**
-     * Looks for each candidate name first as an attribute on $node, then
-     * anywhere in $node's subtree as either an element's own text or a
-     * Value/Reading/Amount attribute on it. Searching by local-name() (not
-     * a fixed path) means this keeps working regardless of exactly how
-     * Bell nests these fields or which XML namespace it uses.
-     *
-     * @param  list<string>  $candidateNames
-     */
-    private function findValue(SimpleXMLElement $node, array $candidateNames): ?string
-    {
-        foreach ($candidateNames as $name) {
-            if (isset($node[$name]) && (string) $node[$name] !== '') {
-                return (string) $node[$name];
-            }
-        }
-
-        foreach ($candidateNames as $name) {
-            $matches = $node->xpath(".//*[local-name()='{$name}']");
-
-            if (empty($matches)) {
-                continue;
-            }
-
-            $match = $matches[0];
-
-            foreach (['Value', 'Reading', 'Amount'] as $attr) {
-                if (isset($match[$attr]) && (string) $match[$attr] !== '') {
-                    return (string) $match[$attr];
-                }
-            }
-
-            if ((string) $match !== '') {
-                return (string) $match;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -918,34 +690,5 @@ class BellService extends BaseManufacturerService
     private function tokenCacheKey(): string
     {
         return 'bell_iso15143_token_'.md5($this->username.'|'.$this->clientId);
-    }
-
-    private function isValidLatitude(?float $value): bool
-    {
-        return $value !== null && $value >= -90 && $value <= 90;
-    }
-
-    private function isValidLongitude(?float $value): bool
-    {
-        return $value !== null && $value >= -180 && $value <= 180;
-    }
-
-    private function isValidPercent(?float $value): bool
-    {
-        return $value !== null && $value >= 0 && $value <= 100;
-    }
-
-    private function isValidCoordinate(?float $latitude, ?float $longitude): bool
-    {
-        return $this->isValidLatitude($latitude) && $this->isValidLongitude($longitude);
-    }
-
-    private function toFloatOrNull(?string $value): ?float
-    {
-        if ($value === null || $value === '') {
-            return null;
-        }
-
-        return is_numeric($value) ? (float) $value : null;
     }
 }

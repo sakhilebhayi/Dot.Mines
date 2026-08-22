@@ -18,30 +18,23 @@ use Illuminate\Support\Facades\Log;
 
 class IntegrationService
 {
-    protected array $services = [];
+    public function __construct(
+        private readonly ManufacturerRegistry $registry = new ManufacturerRegistry,
+        private readonly TelemetryProductionCalculator $calculator = new TelemetryProductionCalculator,
+    ) {}
 
     /**
-     * Register a manufacturer service
+     * Resolve the manufacturer service for an integration (delegates to
+     * the registry -- kept here so existing callers keep one entry point).
      */
-    public function register(string $name, ManufacturerServiceInterface $service): void
+    public function getServiceForIntegration(Integration $integration): ?ManufacturerServiceInterface
     {
-        $this->services[$name] = $service;
+        return $this->registry->resolveFor($integration);
     }
 
-    /**
-     * Get a registered service
-     */
-    public function get(string $name): ?ManufacturerServiceInterface
+    public function getAvailableManufacturers(): array
     {
-        return $this->services[$name] ?? null;
-    }
-
-    /**
-     * Get all registered services
-     */
-    public function all(): array
-    {
-        return $this->services;
+        return $this->registry->catalog();
     }
 
     /**
@@ -736,18 +729,18 @@ class IntegrationService
                 return;
             }
 
-            $loadDays = $this->groupCumulativeReadingsByDay($result['load_count_readings'] ?? [], $timezone, $start, $end);
-            $payloadDays = $this->groupCumulativeReadingsByDay($result['payload_readings'] ?? [], $timezone, $start, $end);
+            $loadDays = $this->calculator->groupCumulativeReadingsByDay($result['load_count_readings'] ?? [], $timezone, $start, $end);
+            $payloadDays = $this->calculator->groupCumulativeReadingsByDay($result['payload_readings'] ?? [], $timezone, $start, $end);
 
             if (empty($loadDays) && empty($payloadDays)) {
                 return;
             }
 
-            $loadDeltas = $this->dailyDeltas(
+            $loadDeltas = $this->calculator->dailyDeltas(
                 $loadDays,
                 $this->storedCumulativeBaseline($machine, array_key_first($loadDays), 'cumulative_load_count_end')
             );
-            $payloadDeltas = $this->dailyDeltas(
+            $payloadDeltas = $this->calculator->dailyDeltas(
                 $payloadDays,
                 $this->storedCumulativeBaseline($machine, array_key_first($payloadDays), 'cumulative_payload_end')
             );
@@ -771,96 +764,6 @@ class IntegrationService
                 'error' => $e->getMessage(),
             ]);
         }
-    }
-
-    /**
-     * Bucket cumulative counter readings into local calendar days for the
-     * team's timezone, keeping each day's first/last reading. Readings
-     * outside the requested window are dropped defensively -- the day
-     * bucketing (and therefore the upsert) must only ever cover days this
-     * sync actually asked the provider about.
-     *
-     * @param  list<array{timestamp: string, value: float, units: ?string}>  $readings
-     * @return array<string, array{first_ts: string, last_ts: string, first_value: float, last_value: float, units: ?string}>
-     */
-    private function groupCumulativeReadingsByDay(array $readings, string $timezone, Carbon $start, Carbon $end): array
-    {
-        $days = [];
-
-        foreach ($readings as $reading) {
-            $rawTimestamp = $reading['timestamp'] ?? null;
-            $value = $reading['value'] ?? null;
-
-            if (! $rawTimestamp || ! is_numeric($value)) {
-                continue;
-            }
-
-            try {
-                $timestamp = Carbon::parse($rawTimestamp);
-            } catch (\Throwable) {
-                continue;
-            }
-
-            if ($timestamp->lt($start) || $timestamp->gt($end)) {
-                continue;
-            }
-
-            $date = $timestamp->clone()->setTimezone($timezone)->toDateString();
-            $value = (float) $value;
-
-            if (! isset($days[$date])) {
-                $days[$date] = [
-                    'first_ts' => $rawTimestamp,
-                    'last_ts' => $rawTimestamp,
-                    'first_value' => $value,
-                    'last_value' => $value,
-                    'units' => $reading['units'] ?? null,
-                ];
-            } else {
-                $days[$date]['last_ts'] = $rawTimestamp;
-                $days[$date]['last_value'] = $value;
-                $days[$date]['units'] = $days[$date]['units'] ?? ($reading['units'] ?? null);
-            }
-        }
-
-        ksort($days);
-
-        return $days;
-    }
-
-    /**
-     * Convert day buckets of a cumulative counter into per-day deltas.
-     * Each day's baseline is the previous day's closing value ($carried
-     * baseline for the window's first day, recovered from the last synced
-     * record so re-syncs stay consistent with what was already stored);
-     * a day with no earlier baseline at all falls back to its own first
-     * reading, which can only ever under-count -- never invent
-     * production. Negative deltas (counter reset after an ECU/machine
-     * swap) clamp to zero for the same reason.
-     *
-     * @param  array<string, array{first_ts: string, last_ts: string, first_value: float, last_value: float, units: ?string}>  $days
-     * @return array<string, array{delta: float, first_reading_utc: string, last_reading_utc: string, end_value: float, units: ?string}>
-     */
-    private function dailyDeltas(array $days, ?float $carriedBaseline): array
-    {
-        $deltas = [];
-        $previousEnd = $carriedBaseline;
-
-        foreach ($days as $date => $day) {
-            $baseline = $previousEnd ?? $day['first_value'];
-
-            $deltas[$date] = [
-                'delta' => max(0.0, $day['last_value'] - $baseline),
-                'first_reading_utc' => $day['first_ts'],
-                'last_reading_utc' => $day['last_ts'],
-                'end_value' => $day['last_value'],
-                'units' => $day['units'],
-            ];
-
-            $previousEnd = $day['last_value'];
-        }
-
-        return $deltas;
     }
 
     /**
@@ -904,7 +807,7 @@ class IntegrationService
     private function upsertTelemetryProductionRecord(Integration $integration, Machine $machine, string $date, ?array $loadDay, ?array $payloadDay): void
     {
         $loads = (int) round($loadDay['delta'] ?? 0);
-        $tonnes = $this->payloadToTonnes($payloadDay['delta'] ?? null, $payloadDay['units'] ?? null);
+        $tonnes = $this->calculator->payloadToTonnes($payloadDay['delta'] ?? null, $payloadDay['units'] ?? null);
 
         /** @var ProductionRecord|null $existing */
         $existing = ProductionRecord::withTrashed()
@@ -976,26 +879,6 @@ class IntegrationService
     }
 
     /**
-     * Bell's ISO 15143-3 reference data reports payload in kilograms; the
-     * per-reading units attribute is honoured when the feed carries one.
-     */
-    private function payloadToTonnes(?float $value, ?string $units): float
-    {
-        if ($value === null) {
-            return 0.0;
-        }
-
-        $normalised = strtolower(trim($units ?? 'kilogram'));
-
-        return match (true) {
-            in_array($normalised, ['kilogram', 'kilograms', 'kg'], true) => $value / 1000,
-            in_array($normalised, ['tonne', 'tonnes', 't', 'metric ton', 'metricton'], true) => $value,
-            in_array($normalised, ['pound', 'pounds', 'lb', 'lbs'], true) => $value * 0.00045359237,
-            default => $value / 1000,
-        };
-    }
-
-    /**
      * The applicable daily production target for a machine-day, preferring
      * a mine-area-specific target over a team-wide one. Only ever fills a
      * target the user hasn't already set on the record.
@@ -1021,89 +904,6 @@ class IntegrationService
         } catch (\Throwable) {
             return null;
         }
-    }
-
-    /**
-     * Get service instance for an integration
-     */
-    public function getServiceForIntegration(Integration $integration): ?ManufacturerServiceInterface
-    {
-        // Integration::credentials is already cast to an array ('json' cast
-        // in the model) -- json_decode()-ing it again threw a TypeError
-        // ("Argument #1 ($json) must be of type string, array given") on
-        // every single test/sync attempt, for every manufacturer, before
-        // any manufacturer-specific code ever ran.
-        $credentials = $integration->credentials ?? [];
-
-        return match ($integration->provider) {
-            'volvo' => app(VolvoService::class, ['credentials' => $credentials]),
-            'cat' => app(CATService::class, ['credentials' => $credentials]),
-            'komatsu' => app(KomatsuService::class, ['credentials' => $credentials]),
-            'bell' => app(BellService::class, ['credentials' => $credentials]),
-            'hitachi' => app(HitachiService::class, ['credentials' => $credentials]),
-            'john-deere' => app(JohnDeereService::class, ['credentials' => $credentials]),
-            'liebherr' => app(LiebherrService::class, ['credentials' => $credentials]),
-            'hyundai' => app(HyundaiService::class, ['credentials' => $credentials]),
-            'doosan' => app(DoosanService::class, ['credentials' => $credentials]),
-            'jcb' => app(JCBService::class, ['credentials' => $credentials]),
-            'case' => app(CASEService::class, ['credentials' => $credentials]),
-            'sany' => app(SanyService::class, ['credentials' => $credentials]),
-            'xcmg' => app(XCMGService::class, ['credentials' => $credentials]),
-            'kobelco' => app(KobelcoService::class, ['credentials' => $credentials]),
-            'new-holland' => app(NewHollandService::class, ['credentials' => $credentials]),
-            'takeuchi' => app(TakeuchiService::class, ['credentials' => $credentials]),
-            'kubota' => app(KubotaService::class, ['credentials' => $credentials]),
-            'bobcat' => app(BobcatService::class, ['credentials' => $credentials]),
-            'yanmar' => app(YanmarService::class, ['credentials' => $credentials]),
-            'atlas-copco' => app(AtlasCopcoService::class, ['credentials' => $credentials]),
-            'sandvik' => app(SandvikService::class, ['credentials' => $credentials]),
-            'epiroc' => app(EpirocService::class, ['credentials' => $credentials]),
-            'ctrack' => app(CTrackService::class, ['credentials' => $credentials]),
-            'roundebult' => app(RoundebultService::class, ['credentials' => $credentials]),
-            'kawasaki' => app(KawasakiService::class, ['credentials' => $credentials]),
-            default => null,
-        };
-    }
-
-    /**
-     * Get available manufacturers
-     */
-    public function getAvailableManufacturers(): array
-    {
-        // 'status' reflects whether the manufacturer's service class actually
-        // attempts a real API call (only verifiable this way -- these are
-        // third-party APIs this app can't reach in CI/testing to confirm
-        // credentials genuinely work end to end). 8 of the 25 have no real
-        // implementation at all: their testConnection() always returned
-        // true regardless of what credentials were entered, until that was
-        // fixed to honestly report 'not yet available' instead.
-        return [
-            'volvo' => ['name' => 'Volvo', 'icon' => '🔵', 'description' => 'Volvo Heavy Equipment', 'status' => 'available'],
-            'cat' => ['name' => 'Caterpillar', 'icon' => '🟡', 'description' => 'Caterpillar Heavy Equipment', 'status' => 'available'],
-            'komatsu' => ['name' => 'Komatsu', 'icon' => '🔶', 'description' => 'Komatsu Heavy Equipment', 'status' => 'available'],
-            'bell' => ['name' => 'Bell', 'icon' => '🟠', 'description' => 'Bell Equipment ISO 15143-3 Fleet API', 'status' => 'available'],
-            'hitachi' => ['name' => 'Hitachi', 'icon' => '🟧', 'description' => 'Hitachi Construction Machinery', 'status' => 'available'],
-            'john-deere' => ['name' => 'John Deere', 'icon' => '🟩', 'description' => 'John Deere Equipment', 'status' => 'coming_soon'],
-            'liebherr' => ['name' => 'Liebherr', 'icon' => '🟨', 'description' => 'Liebherr Mining Equipment', 'status' => 'available'],
-            'hyundai' => ['name' => 'Hyundai', 'icon' => '🟦', 'description' => 'Hyundai Construction Equipment', 'status' => 'available'],
-            'doosan' => ['name' => 'Doosan', 'icon' => '🟧', 'description' => 'Doosan Heavy Equipment', 'status' => 'available'],
-            'jcb' => ['name' => 'JCB', 'icon' => '🟨', 'description' => 'JCB Construction Equipment', 'status' => 'available'],
-            'case' => ['name' => 'CASE', 'icon' => '🟫', 'description' => 'CASE Construction Equipment', 'status' => 'coming_soon'],
-            'sany' => ['name' => 'Sany', 'icon' => '🟥', 'description' => 'Sany Heavy Equipment', 'status' => 'available'],
-            'xcmg' => ['name' => 'XCMG', 'icon' => '🟦', 'description' => 'XCMG Construction Equipment', 'status' => 'available'],
-            'kobelco' => ['name' => 'Kobelco', 'icon' => '🟦', 'description' => 'Kobelco Construction Machinery', 'status' => 'available'],
-            'new-holland' => ['name' => 'New Holland', 'icon' => '🟨', 'description' => 'New Holland Equipment', 'status' => 'coming_soon'],
-            'takeuchi' => ['name' => 'Takeuchi', 'icon' => '🟥', 'description' => 'Takeuchi Compact Equipment', 'status' => 'coming_soon'],
-            'kubota' => ['name' => 'Kubota', 'icon' => '🟧', 'description' => 'Kubota Construction Equipment', 'status' => 'available'],
-            'bobcat' => ['name' => 'Bobcat', 'icon' => '⬜', 'description' => 'Bobcat Compact Equipment', 'status' => 'coming_soon'],
-            'yanmar' => ['name' => 'Yanmar', 'icon' => '🟨', 'description' => 'Yanmar Mini Excavators', 'status' => 'coming_soon'],
-            'atlas-copco' => ['name' => 'Atlas Copco', 'icon' => '🟡', 'description' => 'Atlas Copco Drilling Equipment', 'status' => 'coming_soon'],
-            'sandvik' => ['name' => 'Sandvik', 'icon' => '🟥', 'description' => 'Sandvik Mining Equipment', 'status' => 'coming_soon'],
-            'epiroc' => ['name' => 'Epiroc', 'icon' => '🟦', 'description' => 'Epiroc Drilling Equipment', 'status' => 'available'],
-            'ctrack' => ['name' => 'C-Track', 'icon' => '📍', 'description' => 'C-Track GPS Tracking', 'status' => 'available'],
-            'roundebult' => ['name' => 'Roundebult', 'icon' => '⛏️', 'description' => 'Roundebult Mining Machines', 'status' => 'available'],
-            'kawasaki' => ['name' => 'Kawasaki', 'icon' => '🏗️', 'description' => 'Kawasaki Mining Equipment', 'status' => 'available'],
-        ];
     }
 
     /**
