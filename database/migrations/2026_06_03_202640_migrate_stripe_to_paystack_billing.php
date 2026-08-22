@@ -16,9 +16,9 @@ return new class extends Migration
         // Drop all stale indexes that reference non-existent columns.
         // SQLite validates the entire schema during any ALTER TABLE operation,
         // so these must be removed before any column add/drop can succeed.
-        DB::statement('DROP INDEX IF EXISTS idx_alerts_severity');
-        DB::statement('DROP INDEX IF EXISTS idx_reports_team_type');
-        DB::statement('DROP INDEX IF EXISTS idx_maintenance_scheduled');
+        $this->dropIndexIfExists('alerts', 'idx_alerts_severity');
+        $this->dropIndexIfExists('reports', 'idx_reports_team_type');
+        $this->dropIndexIfExists('maintenance_schedules', 'idx_maintenance_scheduled');
         // Drop Stripe-column uniques/indexes so the columns can be dropped.
         // On SQLite a ->unique() is a standalone index (DROP INDEX works);
         // on Postgres it is a table CONSTRAINT whose backing index cannot be
@@ -115,6 +115,31 @@ return new class extends Migration
     {
         if (DB::connection()->getDriverName() === 'pgsql') {
             DB::statement("ALTER TABLE {$table} DROP CONSTRAINT IF EXISTS {$name}");
+        }
+
+        $this->dropIndexIfExists($table, $name);
+    }
+
+    /**
+     * Cross-engine DROP INDEX: MySQL/MariaDB have no bare
+     * "DROP INDEX IF EXISTS name" form (the table is mandatory), so
+     * existence is checked in information_schema first.
+     */
+    private function dropIndexIfExists(string $table, string $name): void
+    {
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            $exists = DB::selectOne(
+                'select 1 as x from information_schema.statistics where table_schema = database() and table_name = ? and index_name = ? limit 1',
+                [$table, $name],
+            );
+
+            if ($exists !== null) {
+                DB::statement("ALTER TABLE `{$table}` DROP INDEX `{$name}`");
+            }
+
+            return;
         }
 
         DB::statement("DROP INDEX IF EXISTS {$name}");
