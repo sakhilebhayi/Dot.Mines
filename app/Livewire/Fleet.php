@@ -2,12 +2,15 @@
 
 namespace App\Livewire;
 
+use App\Exceptions\InsufficientAllocationException;
 use App\Models\ActivityLog;
 use App\Models\AIAgent;
 use App\Models\AiRecommendationAction;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Services\AI\FleetOptimizerAgent;
+use App\Services\Billing\MachineEntitlementService;
+use App\Services\Billing\MachineProvisioningService;
 use App\Services\MachinePerformanceService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -190,18 +193,31 @@ class Fleet extends Component
         } else {
             $this->authorize('create', Machine::class);
 
-            Machine::create([
-                'team_id' => $team->id,
-                'name' => $this->name,
-                'model' => $this->model,
-                'manufacturer' => $this->manufacturer ?: null,
-                'machine_type' => $this->machineType,
-                'status' => $this->status,
-                'serial_number' => $this->serialNumber,
-                'capacity' => $this->capacity ?: null,
-                'latitude' => $this->latitude ?: null,
-                'longitude' => $this->longitude ?: null,
-            ]);
+            try {
+                app(MachineProvisioningService::class)->provision(
+                    $team,
+                    $this->machineType,
+                    fn (): Machine => Machine::create([
+                        'team_id' => $team->id,
+                        'name' => $this->name,
+                        'model' => $this->model,
+                        'manufacturer' => $this->manufacturer ?: null,
+                        'machine_type' => $this->machineType,
+                        'status' => $this->status,
+                        'serial_number' => $this->serialNumber,
+                        'capacity' => $this->capacity ?: null,
+                        'latitude' => $this->latitude ?: null,
+                        'longitude' => $this->longitude ?: null,
+                    ]),
+                );
+            } catch (InsufficientAllocationException $e) {
+                // Server-side gate, not a UI nicety: the same exception fires
+                // no matter which door a creation attempt comes through.
+                $this->addError('allocation', $e->getMessage());
+
+                return;
+            }
+
             $this->dispatch('notify', ['message' => 'Machine created successfully', 'type' => 'success']);
         }
 
@@ -409,6 +425,18 @@ class Fleet extends Component
     // fuel efficiency, so every machine scored an identical, meaningless
     // "15%". MachinePerformanceService now derives real daily metrics from
     // the telemetry and production data the sync actually stores.
+
+    /**
+     * Entitlement numbers for the page banner -- computed so the banner
+     * stays current after every create/delete without extra wiring.
+     *
+     * @return array{purchased: array{adt: int, heavy: int}, occupied: array{adt: int, heavy: int}, available: array{adt: int, heavy: int}, trial: bool, trial_allowance: int, over_allocated: bool}
+     */
+    public function getAllocationSummaryProperty(): array
+    {
+        return app(MachineEntitlementService::class)
+            ->summary(Auth::user()->currentTeam);
+    }
 
     public function render()
     {

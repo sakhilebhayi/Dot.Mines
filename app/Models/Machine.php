@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property float $fuel_capacity
  * @property float $hours_meter
  * @property string $status
+ * @property string $allocation_state
  * @property float|null $last_location_latitude
  * @property float|null $last_location_longitude
  * @property Carbon|null $last_location_update
@@ -83,6 +84,7 @@ class Machine extends Model
         'fuel_capacity', // in litres
         'hours_meter', // total hours
         'status', // active, idle, maintenance, offline
+        'allocation_state', // occupying, pending_activation, released (entitlement dimension)
         'last_location_latitude',
         'last_location_longitude',
         'last_location_update',

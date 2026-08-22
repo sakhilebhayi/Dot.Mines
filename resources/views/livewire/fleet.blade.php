@@ -14,6 +14,32 @@
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">window.scrollTo(0,0);</script>
     @else
         <!-- Chart Visualization Placeholder removed -->
+    {{-- Machine allocation entitlement (server-enforced; this banner is the
+         honest mirror of the numbers the provisioning gate uses). --}}
+    @php $alloc = $this->allocationSummary; @endphp
+    @error('allocation')
+        <div class="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl p-4 mb-6" role="alert">
+            <p class="font-semibold">No machine allocations available</p>
+            <p class="text-sm mt-1 text-red-300">{{ $message }}</p>
+            <a href="{{ route('billing.index') }}" class="inline-flex items-center mt-3 px-4 py-2 bg-[var(--gold)] text-[var(--ink)] rounded-lg text-sm font-semibold hover:bg-[var(--gold-soft)]">Purchase Machine Allocation</a>
+        </div>
+    @enderror
+    @if ($alloc['over_allocated'])
+        <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl p-4 mb-6" role="alert">
+            <p class="font-semibold">Allocation review required</p>
+            <p class="text-sm mt-1 text-amber-300">
+                This account currently runs {{ $alloc['occupied']['adt'] + $alloc['occupied']['heavy'] }} machines against
+                @if ($alloc['trial'])
+                    a trial allowance of {{ $alloc['trial_allowance'] }}.
+                @else
+                    {{ $alloc['purchased']['adt'] + $alloc['purchased']['heavy'] }} purchased allocation{{ ($alloc['purchased']['adt'] + $alloc['purchased']['heavy']) === 1 ? '' : 's' }}.
+                @endif
+                Existing machines keep running; adding machines requires purchasing allocations.
+            </p>
+            <a href="{{ route('billing.index') }}" class="inline-flex items-center mt-3 px-4 py-2 bg-[var(--gold)] text-[var(--ink)] rounded-lg text-sm font-semibold hover:bg-[var(--gold-soft)]">Purchase Machine Allocations</a>
+        </div>
+    @endif
+
     <!-- Header Section with gradient -->
     <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-xl shadow-lg p-6 mb-6 animate-slide-down">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -479,6 +505,13 @@
                             <div class="flex justify-center mt-1">
                                 <x-freshness :timestamp="$machine->latestMetric?->recorded_at" :stale-after="1800" />
                             </div>
+                            @if ($machine->allocation_state === 'pending_activation')
+                                <div class="flex justify-center mt-1">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/15 text-amber-400" title="Discovered by an integration; activation requires an available machine allocation.">
+                                        Awaiting allocation
+                                    </span>
+                                </div>
+                            @endif
                             <div class="text-xs text-[var(--sand)] mt-1 text-center">{{ $machine->manufacturer ? $machine->manufacturer.' • ' : '' }}{{ $machine->model }}</div>
                         </div>
                         <div class="flex-1 flex flex-col justify-between p-4 gap-2">
