@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class Sidebar extends Component
@@ -13,7 +14,7 @@ class Sidebar extends Component
         $this->sidebarOpen = ! $this->sidebarOpen;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.sidebar');
     }

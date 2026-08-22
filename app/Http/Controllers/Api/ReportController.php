@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Jobs\GenerateReportJob;
 use App\Models\Report;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +21,7 @@ class ReportController extends Controller
      *
      * GET /api/reports
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'page' => 'nullable|integer|min:1',
@@ -60,7 +61,7 @@ class ReportController extends Controller
      *
      * GET /api/reports/{id}
      */
-    public function show(Report $report)
+    public function show(Report $report): JsonResponse
     {
         return response()->json([
             'data' => $report->load('generatedBy'),
@@ -72,7 +73,7 @@ class ReportController extends Controller
      *
      * POST /api/reports/generate
      */
-    public function generate(Request $request)
+    public function generate(Request $request): JsonResponse
     {
         $this->authorize('generate', Report::class);
 
@@ -114,7 +115,7 @@ class ReportController extends Controller
      *
      * GET /api/reports/{id}/download
      */
-    public function download(Report $report)
+    public function download(Report $report): \Symfony\Component\HttpFoundation\Response
     {
         $this->authorize('view', $report);
 
@@ -163,7 +164,7 @@ class ReportController extends Controller
      *
      * DELETE /api/reports/{id}
      */
-    public function destroy(Report $report)
+    public function destroy(Report $report): JsonResponse
     {
         $this->authorize('delete', $report);
 
@@ -188,7 +189,7 @@ class ReportController extends Controller
      *
      * GET /api/reports/templates
      */
-    public function templates()
+    public function templates(): JsonResponse
     {
         $templates = [
             [
@@ -239,7 +240,7 @@ class ReportController extends Controller
      *
      * GET /api/reports/stats
      */
-    public function stats()
+    public function stats(): JsonResponse
     {
         $stats = [
             'total' => Report::where('team_id', auth()->user()->current_team_id)->count(),

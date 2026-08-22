@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Database\Factories\AIPredictiveAlertFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read AIAgent|null $aiAgent
+ * @property int $id
+ * @property string $severity
+ * @property string $title
+ * @property string|null $description
+ * @property Carbon $created_at
+ * @property-read Machine|null $machine
  */
 class AIPredictiveAlert extends Model
 {

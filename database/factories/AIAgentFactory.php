@@ -5,6 +5,9 @@ namespace Database\Factories;
 use App\Models\AIAgent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<AIAgent>
+ */
 class AIAgentFactory extends Factory
 {
     protected $model = AIAgent::class;

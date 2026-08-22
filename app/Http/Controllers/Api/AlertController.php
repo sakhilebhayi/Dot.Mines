@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Alert;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -18,7 +19,7 @@ class AlertController extends Controller
      *
      * GET /api/alerts
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'page' => 'nullable|integer|min:1',
@@ -68,7 +69,7 @@ class AlertController extends Controller
      *
      * GET /api/alerts/{id}
      */
-    public function show(Alert $alert)
+    public function show(Alert $alert): JsonResponse
     {
         return response()->json([
             'data' => $alert->load('machine', 'acknowledgedBy', 'resolvedBy'),
@@ -80,7 +81,7 @@ class AlertController extends Controller
      *
      * POST /api/alerts
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('manage', Alert::class);
 
@@ -109,7 +110,7 @@ class AlertController extends Controller
      *
      * POST /api/alerts/{id}/acknowledge
      */
-    public function acknowledge(Alert $alert)
+    public function acknowledge(Alert $alert): JsonResponse
     {
         $this->authorize('acknowledge', $alert);
 
@@ -126,7 +127,7 @@ class AlertController extends Controller
      *
      * POST /api/alerts/{id}/resolve
      */
-    public function resolve(Alert $alert)
+    public function resolve(Alert $alert): JsonResponse
     {
         $this->authorize('resolve', $alert);
 
@@ -143,7 +144,7 @@ class AlertController extends Controller
      *
      * GET /api/alerts/stats/active
      */
-    public function activeCount()
+    public function activeCount(): JsonResponse
     {
         $counts = [
             'critical' => Alert::where('status', 'active')
@@ -171,8 +172,10 @@ class AlertController extends Controller
      * Get alerts for machine
      *
      * GET /api/alerts/machine/{machineId}
+     *
+     * @param  int|string  $machineId
      */
-    public function machineAlerts(Request $request, $machineId)
+    public function machineAlerts(Request $request, $machineId): JsonResponse
     {
         $query = Alert::where('machine_id', $machineId);
 

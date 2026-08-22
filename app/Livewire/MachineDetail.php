@@ -24,7 +24,7 @@ class MachineDetail extends Component
 
     public Machine $machine;
 
-    public function mount(Machine $machine)
+    public function mount(Machine $machine): void
     {
         if ($machine->team_id !== Auth::user()->currentTeam->id) {
             abort(403);
@@ -32,7 +32,7 @@ class MachineDetail extends Component
         $this->machine = $machine;
     }
 
-    public function render()
+    public function render(): View
     {
         $metrics = $this->machine->metrics()
             ->latest('created_at')

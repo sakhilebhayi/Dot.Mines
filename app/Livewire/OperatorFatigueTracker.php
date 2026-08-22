@@ -6,6 +6,7 @@ use App\Models\OperatorFatigue;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\OperatorFatigueService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -44,13 +45,15 @@ class OperatorFatigueTracker extends Component
             return;
         }
 
-        $this->operatorId = Auth::id();
+        $this->operatorId = (int) Auth::id();
         $this->shiftDate = now()->toDateString();
     }
 
     private function resolveCurrentTeam(): ?Team
     {
-        return Auth::user()?->currentTeam;
+        $user = Auth::user();
+
+        return $user instanceof User ? $user->currentTeam : null;
     }
 
     /**
@@ -62,7 +65,7 @@ class OperatorFatigueTracker extends Component
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, OperatorFatigue>
+     * @return Collection<int, OperatorFatigue>
      */
     public function getRosterProperty()
     {
@@ -129,7 +132,7 @@ class OperatorFatigueTracker extends Component
         $this->breakTimeMinutes = 60;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.operator-fatigue-tracker');
     }

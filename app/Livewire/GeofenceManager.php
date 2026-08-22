@@ -6,6 +6,7 @@ use App\Models\AIInsight;
 use App\Models\AIRecommendation;
 use App\Models\Geofence;
 use App\Models\MineArea;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -39,6 +40,7 @@ class GeofenceManager extends Component
 
     public float $centerLongitude = 0;
 
+    /** @var array<int|string, mixed> */
     public array $coordinates = [];
 
     /** @var array<string, string> */
@@ -152,7 +154,7 @@ class GeofenceManager extends Component
         $this->dispatch('notify', ['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
     }
 
-    public function render()
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 

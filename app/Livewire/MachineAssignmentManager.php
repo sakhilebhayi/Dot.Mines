@@ -7,10 +7,14 @@ use App\Actions\MineAreas\UnassignMachineFromArea;
 use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
 use App\Models\MineArea;
+use App\Models\Team;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Per-mine-area machine assignment dashboard.
@@ -278,7 +282,7 @@ class MachineAssignmentManager extends Component
             ->execute($team, $this->mineArea, $machine, $authUser->id) !== null;
     }
 
-    public function exportAssignmentReport()
+    public function exportAssignmentReport(): StreamedResponse
     {
         /** @var User $authUser */
         $authUser = Auth::user();
@@ -305,7 +309,10 @@ class MachineAssignmentManager extends Component
         }, $filename, ['Content-Type' => 'text/csv']);
     }
 
-    private function assignableMachinesQuery($team)
+    /**
+     * @return Builder<Machine>
+     */
+    private function assignableMachinesQuery(Team $team): Builder
     {
         return Machine::where('team_id', $team->id)
             ->where('mine_area_id', '!=', $this->mineArea->id)
@@ -316,7 +323,7 @@ class MachineAssignmentManager extends Component
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus));
     }
 
-    public function render()
+    public function render(): View
     {
         /** @var User $authUser */
         $authUser = Auth::user();

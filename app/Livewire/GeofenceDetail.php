@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -12,7 +13,7 @@ class GeofenceDetail extends Component
 {
     public Geofence $geofence;
 
-    public function mount(Geofence $geofence)
+    public function mount(Geofence $geofence): void
     {
         if ($geofence->team_id !== Auth::user()->currentTeam->id) {
             abort(403);
@@ -20,7 +21,7 @@ class GeofenceDetail extends Component
         $this->geofence = $geofence;
     }
 
-    public function render()
+    public function render(): View
     {
         $recentEntries = $this->geofence->entries()
             ->with('machine')

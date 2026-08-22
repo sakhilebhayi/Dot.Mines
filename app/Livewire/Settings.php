@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Services\TeamRoleProvisioner;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Jetstream\Contracts\InvitesTeamMembers;
@@ -30,6 +31,7 @@ class Settings extends Component
     public string $currency = 'USD';
 
     // Users & Roles
+    /** @var array<int|string, mixed> */
     public array $teamMembers = [];
 
     public string $inviteEmail = '';
@@ -68,7 +70,7 @@ class Settings extends Component
         'notificationMinSeverity' => 'required|in:low,medium,high,critical',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $team = auth()->user()->currentTeam;
         $this->teamName = $team->name;
@@ -89,7 +91,7 @@ class Settings extends Component
         $this->loadTeamMembers();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings', [
             'roles' => $this->getRoles(),
@@ -99,14 +101,14 @@ class Settings extends Component
         ]);
     }
 
-    public function setActiveTab(string $tab)
+    public function setActiveTab(string $tab): void
     {
         $this->activeTab = $tab;
     }
 
     // ==================== GENERAL SETTINGS ====================
 
-    public function saveGeneralSettings()
+    public function saveGeneralSettings(): void
     {
         $this->validate();
 
@@ -126,7 +128,7 @@ class Settings extends Component
 
     // ==================== USERS & ROLES ====================
 
-    public function loadTeamMembers()
+    public function loadTeamMembers(): void
     {
         $team = auth()->user()->currentTeam;
         $this->teamMembers = $team->users()
@@ -144,7 +146,7 @@ class Settings extends Component
             ->toArray();
     }
 
-    public function toggleInviteForm()
+    public function toggleInviteForm(): void
     {
         $this->showInviteForm = ! $this->showInviteForm;
         if (! $this->showInviteForm) {
@@ -153,7 +155,7 @@ class Settings extends Component
         }
     }
 
-    public function inviteUser()
+    public function inviteUser(): void
     {
         $this->validate([
             'inviteEmail' => 'required|email|max:255',
@@ -190,7 +192,10 @@ class Settings extends Component
         }
     }
 
-    public function removeUser($userId)
+    /**
+     * @param  int|string  $userId
+     */
+    public function removeUser($userId): void
     {
         try {
             $team = auth()->user()->currentTeam;
@@ -212,7 +217,11 @@ class Settings extends Component
         }
     }
 
-    public function updateUserRole($userId, $newRole)
+    /**
+     * @param  string  $newRole
+     * @param  int|string  $userId
+     */
+    public function updateUserRole($userId, $newRole): void
     {
         try {
             $team = auth()->user()->currentTeam;
@@ -239,7 +248,7 @@ class Settings extends Component
 
     // ==================== NOTIFICATION SETTINGS ====================
 
-    public function saveNotificationSettings()
+    public function saveNotificationSettings(): void
     {
         try {
             // Store in user preferences
@@ -264,6 +273,9 @@ class Settings extends Component
 
     // ==================== HELPER METHODS ====================
 
+    /**
+     * @return array<string, string>
+     */
     private function getRoles(): array
     {
         return [
@@ -274,6 +286,9 @@ class Settings extends Component
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function getTimezones(): array
     {
         return [
@@ -288,6 +303,9 @@ class Settings extends Component
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function getLanguages(): array
     {
         return [
@@ -303,6 +321,9 @@ class Settings extends Component
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function getCurrencies(): array
     {
         return [

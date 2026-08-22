@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Machine;
 use App\Models\MachineHealthStatus;
+use App\Models\User;
 use App\Services\MaintenanceHealthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,19 +22,19 @@ class MachineHealthController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = MachineHealthStatus::with(['machine', 'team'])
-            ->where('team_id', $request->user()->current_team_id);
+            ->where('team_id', $this->currentTeamId($request));
 
         // Filter by health status
         if ($request->filled('health_status')) {
-            $query->where('health_status', $request->health_status);
+            $query->where('health_status', $request->input('health_status'));
         }
 
         // Filter by score range
         if ($request->filled('min_score')) {
-            $query->where('overall_health_score', '>=', $request->min_score);
+            $query->where('overall_health_score', '>=', $request->input('min_score'));
         }
         if ($request->filled('max_score')) {
-            $query->where('overall_health_score', '<=', $request->max_score);
+            $query->where('overall_health_score', '<=', $request->input('max_score'));
         }
 
         // Filter machines needing attention
@@ -132,7 +133,7 @@ class MachineHealthController extends Controller
      */
     public function statistics(Request $request): JsonResponse
     {
-        $teamId = $request->user()->current_team_id;
+        $teamId = $this->currentTeamId($request);
 
         $stats = [
             'total_machines' => Machine::where('team_id', $teamId)->count(),
@@ -154,5 +155,20 @@ class MachineHealthController extends Controller
         ];
 
         return response()->json($stats);
+    }
+
+    /**
+     * Resolve the authenticated user's current team id or abort.
+     */
+    private function currentTeamId(Request $request): int
+    {
+        $user = $request->user();
+        $teamId = $user instanceof User ? $user->current_team_id : null;
+
+        if ($teamId === null) {
+            abort(401);
+        }
+
+        return $teamId;
     }
 }

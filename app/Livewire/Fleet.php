@@ -8,6 +8,7 @@ use App\Models\AIAgent;
 use App\Models\AiRecommendationAction;
 use App\Models\Machine;
 use App\Models\MineArea;
+use App\Models\User;
 use App\Services\AI\FleetOptimizerAgent;
 use App\Services\Billing\MachineEntitlementService;
 use App\Services\Billing\MachineProvisioningService;
@@ -32,6 +33,7 @@ class Fleet extends Component
         return view('livewire.placeholders.dashboard');
     }
 
+    /** @var array<int|string, mixed> */
     public array $activityFeed = [];
 
     public bool $isLoading = true;
@@ -39,6 +41,7 @@ class Fleet extends Component
     use WithPagination;
 
     // AI recommendation interaction state
+    /** @var array<int|string, mixed> */
     public array $lastAiRecommendations = [];
 
     public ?int $pendingRecommendationIndex = null;
@@ -63,6 +66,7 @@ class Fleet extends Component
 
     public ?int $selectedExcavatorId = null;
 
+    /** @var list<int|string> */
     public array $selectedAdtIds = [];
 
     public string $assignMode = 'assign_to_excavator';
@@ -151,7 +155,7 @@ class Fleet extends Component
         $this->manufacturer = $machine->manufacturer ?? '';
         $this->machineType = $machine->machine_type;
         $this->status = $machine->status;
-        $this->serialNumber = $machine->serial_number;
+        $this->serialNumber = $machine->serial_number ?? '';
         $this->capacity = $machine->capacity ?? 0;
         $this->latitude = $machine->latitude ?? 0;
         $this->longitude = $machine->longitude ?? 0;
@@ -292,7 +296,7 @@ class Fleet extends Component
                 ->toArray();
         } else {
             // For ADTs and other machines, allow selecting a single excavator
-            if ($machine && $machine->excavator_id) {
+            if ($machine->excavator_id) {
                 $this->selectedExcavatorId = $machine->excavator_id;
             }
             $this->assignMode = 'assign_to_excavator';
@@ -471,7 +475,7 @@ class Fleet extends Component
             ->summary(Auth::user()->currentTeam);
     }
 
-    public function render()
+    public function render(): View
     {
         $this->isLoading = true;
         $team = Auth::user()->currentTeam;
@@ -566,7 +570,7 @@ class Fleet extends Component
         ]);
     }
 
-    public function implementRecommendation(int $index)
+    public function implementRecommendation(int $index): void
     {
         $this->authorizeRecommendationAction();
 
@@ -579,7 +583,7 @@ class Fleet extends Component
         }
 
         // Compute a stable hash for the recommendation
-        $hash = md5(json_encode($rec));
+        $hash = md5(json_encode($rec) ?: '');
 
         // Create action record
         $action = AiRecommendationAction::create([
@@ -634,14 +638,14 @@ class Fleet extends Component
         }
     }
 
-    public function openRejectRecommendation(int $index)
+    public function openRejectRecommendation(int $index): void
     {
         $this->pendingRecommendationIndex = $index;
         $this->rejectReason = '';
         $this->showRejectRecommendationModal = true;
     }
 
-    public function confirmRejectRecommendation()
+    public function confirmRejectRecommendation(): void
     {
         $this->authorizeRecommendationAction();
 
@@ -660,7 +664,7 @@ class Fleet extends Component
             return;
         }
 
-        $hash = md5(json_encode($rec));
+        $hash = md5(json_encode($rec) ?: '');
 
         AiRecommendationAction::create([
             'team_id' => $team->id,
@@ -700,7 +704,7 @@ class Fleet extends Component
     {
         $user = Auth::user();
 
-        if (! $user->hasPermission('update_recommendations') && ! $user->ownsTeam($user->currentTeam)) {
+        if (! $user instanceof User || (! $user->hasPermission('update_recommendations') && ! $user->ownsTeam($user->currentTeam))) {
             abort(403, 'You are not authorized to act on AI recommendations.');
         }
     }

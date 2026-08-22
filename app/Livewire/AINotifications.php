@@ -6,6 +6,7 @@ use App\Models\AIPredictiveAlert;
 use App\Models\Alert;
 use App\Models\FuelAlert;
 use App\Models\Notification;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -229,7 +230,7 @@ class AINotifications extends Component
         $this->loadNotifications();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.ai-notifications');
     }

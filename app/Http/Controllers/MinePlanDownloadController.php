@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MinePlan;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -14,17 +15,21 @@ class MinePlanDownloadController extends Controller
      * Serve a signed download for a mine plan file.
      * The route should be signed and authorized prior to calling this method.
      */
-    public function __invoke(Request $request, $minePlanId)
+    /**
+     * @param  int|string  $minePlanId
+     */
+    public function __invoke(Request $request, $minePlanId): RedirectResponse
     {
         if (! $request->hasValidSignature()) {
             abort(403);
         }
 
         // Expected query params: disk and path (or the MinePlan model can be looked up)
-        $disk = $request->query('disk', config('filesystems.default'));
+        $diskParam = $request->query('disk');
+        $disk = is_string($diskParam) && $diskParam !== '' ? $diskParam : (string) config('filesystems.default');
         $path = $request->query('path');
 
-        if (empty($path)) {
+        if (! is_string($path) || $path === '') {
             abort(404);
         }
 

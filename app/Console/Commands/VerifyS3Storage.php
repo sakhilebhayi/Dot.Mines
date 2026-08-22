@@ -23,7 +23,8 @@ class VerifyS3Storage extends Command
 
     public function handle(): int
     {
-        $disk = $this->option('disk') ?? 's3';
+        $rawDisk = $this->option('disk');
+        $disk = is_string($rawDisk) && $rawDisk !== '' ? $rawDisk : 's3';
 
         $this->info("Verifying storage disk: {$disk}");
 

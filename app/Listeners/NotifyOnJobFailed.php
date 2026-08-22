@@ -12,7 +12,7 @@ class NotifyOnJobFailed
     public function handle(JobFailed $event): void
     {
         $payload = [
-            'connection' => $event->connectionName ?? null,
+            'connection' => $event->connectionName,
             'queue' => $event->job?->getQueue(),
             'job' => $event->job?->resolveName() ?? $event->job?->getName() ?? 'unknown',
             'exception' => $event->exception->getMessage(),

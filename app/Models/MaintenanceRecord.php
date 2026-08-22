@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon|null $completed_at
  * @property int|null $machine_id
  * @property Carbon|null $started_at
+ * @property string $maintenance_type
+ * @property string $title
+ * @property Carbon $scheduled_date
  */
 class MaintenanceRecord extends Model
 {
@@ -26,6 +29,9 @@ class MaintenanceRecord extends Model
      * @property int $id
      * @property int $team_id
      * @property int $machine_id
+     * @property string $maintenance_type
+     * @property string $title
+     * @property Carbon $scheduled_date
      * @property int|null $maintenance_schedule_id
      * @property string $work_order_number
      * @property string $maintenance_type

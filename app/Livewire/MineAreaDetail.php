@@ -14,6 +14,7 @@ use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use App\Models\User;
 use App\Services\FileUploadService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -104,7 +105,10 @@ class MineAreaDetail extends Component
 
     public ?int $selectedGeofenceId = null;
 
-    protected function rules()
+    /**
+     * @return array<string, string>
+     */
+    protected function rules(): array
     {
         return [
             'selectedMachineId' => 'required_if:showAssignModal,true|nullable|exists:machines,id',
@@ -127,7 +131,7 @@ class MineAreaDetail extends Component
         ];
     }
 
-    public function mount(MineArea $mineArea)
+    public function mount(MineArea $mineArea): void
     {
         /** @var User $authUser */
         $authUser = Auth::user();
@@ -146,7 +150,7 @@ class MineAreaDetail extends Component
         $this->planEffectiveDate = now()->toDateString();
     }
 
-    public function setTab(string $tab)
+    public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
         $this->resetPage();
@@ -154,21 +158,21 @@ class MineAreaDetail extends Component
 
     // === MACHINE ASSIGNMENT ===
 
-    public function openAssignModal()
+    public function openAssignModal(): void
     {
         $this->showAssignModal = true;
         $this->selectedMachineId = null;
         $this->assignmentReason = '';
     }
 
-    public function closeAssignModal()
+    public function closeAssignModal(): void
     {
         $this->showAssignModal = false;
         $this->selectedMachineId = null;
         $this->assignmentReason = '';
     }
 
-    public function assignMachine()
+    public function assignMachine(): void
     {
         $this->authorize('update', $this->mineArea);
 
@@ -197,7 +201,7 @@ class MineAreaDetail extends Component
         $this->dispatch('notify', ['message' => "{$machine->name} assigned to {$this->mineArea->name}", 'type' => 'success']);
     }
 
-    public function unassignMachine(int $machineId)
+    public function unassignMachine(int $machineId): void
     {
         $this->authorize('update', $this->mineArea);
 
@@ -224,7 +228,7 @@ class MineAreaDetail extends Component
 
     // === PRODUCTION TRACKING ===
 
-    public function openProductionModal()
+    public function openProductionModal(): void
     {
         $this->showProductionModal = true;
         $this->productionDate = now()->toDateString();
@@ -234,12 +238,12 @@ class MineAreaDetail extends Component
         $this->productionMachineId = null;
     }
 
-    public function closeProductionModal()
+    public function closeProductionModal(): void
     {
         $this->showProductionModal = false;
     }
 
-    public function saveProductionRecord()
+    public function saveProductionRecord(): void
     {
         $this->authorize('update', $this->mineArea);
 
@@ -274,19 +278,19 @@ class MineAreaDetail extends Component
         $this->dispatch('notify', ['message' => 'Production record saved successfully', 'type' => 'success']);
     }
 
-    public function openTargetModal()
+    public function openTargetModal(): void
     {
         $this->showTargetModal = true;
         $this->targetValue = null;
         $this->targetDescription = '';
     }
 
-    public function closeTargetModal()
+    public function closeTargetModal(): void
     {
         $this->showTargetModal = false;
     }
 
-    public function saveProductionTarget()
+    public function saveProductionTarget(): void
     {
         $this->authorize('update', $this->mineArea);
 
@@ -322,7 +326,7 @@ class MineAreaDetail extends Component
 
     // === MINE PLAN UPLOADS ===
 
-    public function openUploadModal()
+    public function openUploadModal(): void
     {
         $this->showUploadModal = true;
         $this->planTitle = '';
@@ -333,13 +337,13 @@ class MineAreaDetail extends Component
         $this->planEffectiveDate = now()->toDateString();
     }
 
-    public function closeUploadModal()
+    public function closeUploadModal(): void
     {
         $this->showUploadModal = false;
         $this->planFile = null;
     }
 
-    public function uploadMinePlan()
+    public function uploadMinePlan(): void
     {
         $this->authorize('update', $this->mineArea);
 
@@ -357,6 +361,10 @@ class MineAreaDetail extends Component
         }
 
         $file = $this->planFile;
+
+        if ($file === null) {
+            return;
+        }
 
         try {
             $uploader = new FileUploadService;
@@ -405,7 +413,7 @@ class MineAreaDetail extends Component
         }
     }
 
-    public function deleteMinePlan(int $planId)
+    public function deleteMinePlan(int $planId): void
     {
         $this->authorize('delete', $this->mineArea);
 
@@ -424,7 +432,7 @@ class MineAreaDetail extends Component
         $this->dispatch('notify', ['message' => 'Mine plan deleted', 'type' => 'success']);
     }
 
-    public function activateMinePlan(int $planId)
+    public function activateMinePlan(int $planId): void
     {
         $this->authorize('update', $this->mineArea);
 
@@ -441,7 +449,7 @@ class MineAreaDetail extends Component
         $this->dispatch('notify', ['message' => 'Mine plan activated', 'type' => 'success']);
     }
 
-    public function archiveMinePlan(int $planId)
+    public function archiveMinePlan(int $planId): void
     {
         $this->authorize('update', $this->mineArea);
 
@@ -460,7 +468,7 @@ class MineAreaDetail extends Component
 
     // === AREA-SPECIFIC ALERTS ===
 
-    public function openAlertModal()
+    public function openAlertModal(): void
     {
         $this->showAlertModal = true;
         $this->alertTitle = '';
@@ -469,12 +477,12 @@ class MineAreaDetail extends Component
         $this->alertPriority = 'medium';
     }
 
-    public function closeAlertModal()
+    public function closeAlertModal(): void
     {
         $this->showAlertModal = false;
     }
 
-    public function createAreaAlert()
+    public function createAreaAlert(): void
     {
         $this->authorize('create', Alert::class);
 
@@ -511,7 +519,7 @@ class MineAreaDetail extends Component
         $this->dispatch('notify', ['message' => 'Area alert created', 'type' => 'success']);
     }
 
-    public function acknowledgeAlert(int $alertId)
+    public function acknowledgeAlert(int $alertId): void
     {
         /** @var User $authUser */
         $authUser = Auth::user();
@@ -527,7 +535,7 @@ class MineAreaDetail extends Component
         $this->dispatch('notify', ['message' => 'Alert acknowledged', 'type' => 'success']);
     }
 
-    public function resolveAlert(int $alertId)
+    public function resolveAlert(int $alertId): void
     {
         /** @var User $authUser */
         $authUser = Auth::user();
@@ -545,18 +553,18 @@ class MineAreaDetail extends Component
 
     // === GEOFENCE INTEGRATION ===
 
-    public function openGeofenceModal()
+    public function openGeofenceModal(): void
     {
         $this->showGeofenceModal = true;
         $this->selectedGeofenceId = null;
     }
 
-    public function closeGeofenceModal()
+    public function closeGeofenceModal(): void
     {
         $this->showGeofenceModal = false;
     }
 
-    public function linkGeofence()
+    public function linkGeofence(): void
     {
         $this->validate([
             'selectedGeofenceId' => 'required|exists:geofences,id',
@@ -577,7 +585,7 @@ class MineAreaDetail extends Component
         $this->dispatch('notify', ['message' => "{$geofence->name} linked to {$this->mineArea->name}", 'type' => 'success']);
     }
 
-    public function unlinkGeofence(int $geofenceId)
+    public function unlinkGeofence(int $geofenceId): void
     {
         /** @var User $authUser */
         $authUser = Auth::user();
@@ -595,7 +603,7 @@ class MineAreaDetail extends Component
 
     // === RENDER ===
 
-    public function render()
+    public function render(): View
     {
         /** @var User $authUser */
         $authUser = Auth::user();
@@ -694,6 +702,9 @@ class MineAreaDetail extends Component
         ]);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getProductionSummary(int $teamId): array
     {
         $now = now();

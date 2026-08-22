@@ -6,6 +6,7 @@ use App\Console\Commands\ScanBladeUnescaped;
 use App\Listeners\NotifyOnJobFailed;
 use App\Livewire\AINotifications;
 use App\Mail\WelcomeMail;
+use App\Models\User;
 use App\Services\RealtimeEventScheduler;
 use App\Services\TeamRoleProvisioner;
 use Illuminate\Auth\Events\Registered;
@@ -47,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
-        if (self::shouldRefuseBoot($this->app->environment('production'), config('app.debug') === true)) {
+        if (self::shouldRefuseBoot((bool) $this->app->environment('production'), config('app.debug') === true)) {
             throw new \RuntimeException(
                 'Refusing to boot: APP_ENV=production with APP_DEBUG=true. This leaks stack traces, '.
                 'SQL queries, and other internals to any visitor who triggers an error page. '.
@@ -117,10 +118,14 @@ class AppServiceProvider extends ServiceProvider
 
         // Send welcome email when users register
         Event::listen(Registered::class, function (Registered $event) {
+            if (! $event->user instanceof User) {
+                return;
+            }
+
             try {
-                Mail::to($event->user->email)->queue(new WelcomeMail($event->user));
+                Mail::to($event->user)->queue(new WelcomeMail($event->user));
             } catch (\Exception $e) {
-                Log::error('Failed to queue welcome email', ['user_id' => $event->user->id, 'error' => $e->getMessage()]);
+                Log::error('Failed to queue welcome email', ['user_id' => $event->user->getAuthIdentifier(), 'error' => $e->getMessage()]);
             }
         });
 

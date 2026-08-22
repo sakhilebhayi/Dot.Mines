@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportDownloadController
 {
-    public function download(Request $request, Report $report)
+    public function download(Request $request, Report $report): StreamedResponse
     {
         // Verify signed URL
         if (! $request->hasValidSignature()) {
@@ -17,7 +19,7 @@ class ReportDownloadController
         }
 
         $user = Auth::user();
-        if (! $user || $user->current_team_id !== $report->team_id) {
+        if (! $user instanceof User || $user->current_team_id !== $report->team_id) {
             abort(403);
         }
 

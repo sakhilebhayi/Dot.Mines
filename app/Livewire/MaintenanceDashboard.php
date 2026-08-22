@@ -9,7 +9,9 @@ use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use App\Services\AI\MaintenancePredictorAgent;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
@@ -58,19 +60,19 @@ class MaintenanceDashboard extends Component
 
     public string $technician_notes = '';
 
-    public function openBookingModal()
+    public function openBookingModal(): void
     {
         $this->resetForm();
         $this->showBookingModal = true;
     }
 
-    public function closeBookingModal()
+    public function closeBookingModal(): void
     {
         $this->showBookingModal = false;
         $this->resetForm();
     }
 
-    public function resetForm()
+    public function resetForm(): void
     {
         $this->editingScheduleId = null;
         $this->machine_id = '';
@@ -85,7 +87,7 @@ class MaintenanceDashboard extends Component
         $this->technician_notes = '';
     }
 
-    public function bookMaintenance()
+    public function bookMaintenance(): void
     {
         $this->validate([
             'machine_id' => 'required|exists:machines,id',
@@ -151,7 +153,10 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function completeScheduledMaintenance($recordId)
+    /**
+     * @param  int|string  $recordId
+     */
+    public function completeScheduledMaintenance($recordId): void
     {
         if (! is_numeric($recordId)) {
             $this->dispatch('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
@@ -191,7 +196,10 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function cancelScheduledMaintenance($recordId)
+    /**
+     * @param  int|string  $recordId
+     */
+    public function cancelScheduledMaintenance($recordId): void
     {
         if (! is_numeric($recordId)) {
             $this->dispatch('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
@@ -230,8 +238,15 @@ class MaintenanceDashboard extends Component
     /**
      * Get delayed machines with reasons and color codes
      */
-    protected function getDelayedMachines($teamId)
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    protected function getDelayedMachines(?int $teamId): Collection
     {
+        if ($teamId === null) {
+            return collect();
+        }
+
         $delayedMachines = [];
 
         // Get all machines
@@ -269,7 +284,10 @@ class MaintenanceDashboard extends Component
     /**
      * Calculate delay information for a machine
      */
-    protected function calculateMachineDelay($machine)
+    /**
+     * @return array<string, mixed>
+     */
+    protected function calculateMachineDelay(Machine $machine): array
     {
         $delayInfo = [
             'is_delayed' => false,
@@ -343,7 +361,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get color code based on delay duration
      */
-    protected function getDelayColorCode($hours)
+    protected function getDelayColorCode(int|float $hours): string
     {
         if ($hours >= 48) {
             return 'red'; // Critical - 2+ days
@@ -359,7 +377,7 @@ class MaintenanceDashboard extends Component
     /**
      * Get delay severity label
      */
-    protected function getDelaySeverity($hours)
+    protected function getDelaySeverity(int|float $hours): string
     {
         if ($hours >= 48) {
             return 'Critical';
@@ -372,7 +390,7 @@ class MaintenanceDashboard extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $teamId = auth()->user()->current_team_id;
 
@@ -490,10 +508,16 @@ class MaintenanceDashboard extends Component
         ];
 
         // Get AI-powered maintenance predictions
-        $aiAgent = new MaintenancePredictorAgent;
-        $aiAnalysis = $aiAgent->analyze(auth()->user()->currentTeam);
-        $aiRecommendations = collect($aiAnalysis['recommendations'] ?? [])->take(5);
-        $aiInsights = collect($aiAnalysis['insights'] ?? [])->take(3);
+        $aiRecommendations = collect();
+        $aiInsights = collect();
+        $currentTeam = auth()->user()?->currentTeam;
+        if ($currentTeam !== null) {
+            $aiAnalysis = (new MaintenancePredictorAgent)->analyze($currentTeam);
+            $recommendations = $aiAnalysis['recommendations'] ?? [];
+            $insights = $aiAnalysis['insights'] ?? [];
+            $aiRecommendations = collect(is_array($recommendations) ? $recommendations : [])->take(5);
+            $aiInsights = collect(is_array($insights) ? $insights : [])->take(3);
+        }
 
         return view('livewire.maintenance-dashboard', [
             // Costs follow the team's Settings currency, same as Fuel
@@ -518,7 +542,10 @@ class MaintenanceDashboard extends Component
         ]);
     }
 
-    protected function getDateRange()
+    /**
+     * @return array{start: CarbonInterface, end: CarbonInterface}
+     */
+    protected function getDateRange(): array
     {
         return match ($this->selectedPeriod) {
             'today' => ['start' => now()->startOfDay(), 'end' => now()->endOfDay()],

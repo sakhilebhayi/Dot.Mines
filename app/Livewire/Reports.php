@@ -7,6 +7,7 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Report;
 use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[Lazy]
 class Reports extends Component
@@ -65,7 +67,7 @@ class Reports extends Component
         'compliance' => 'Compliance (MHSA/DMRE)',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->sortBy = 'created_at';
         $this->sortDirection = 'desc';
@@ -74,6 +76,9 @@ class Reports extends Component
         $this->selectedMachineId = '';
     }
 
+    /**
+     * @return Collection<int, mixed>|LengthAwarePaginator<int, Report>
+     */
     public function getReports()
     {
         $team = Auth::user()->currentTeam;
@@ -108,7 +113,10 @@ class Reports extends Component
             ->paginate(10);
     }
 
-    public function setSortBy($column)
+    /**
+     * @param  string  $column
+     */
+    public function setSortBy($column): void
     {
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -118,7 +126,10 @@ class Reports extends Component
         }
     }
 
-    public function deleteReport($reportId)
+    /**
+     * @param  int|string  $reportId
+     */
+    public function deleteReport($reportId): void
     {
         // Validate report ID
         if (! is_numeric($reportId)) {
@@ -168,25 +179,32 @@ class Reports extends Component
         $this->deleteReportId = null;
     }
 
-    public function confirmDelete($reportId)
+    /**
+     * @param  int|string  $reportId
+     */
+    public function confirmDelete($reportId): void
     {
-        $this->deleteReportId = $reportId;
+        $this->deleteReportId = (int) $reportId;
         $this->showDeleteConfirm = true;
     }
 
-    public function cancelDelete()
+    public function cancelDelete(): void
     {
         $this->showDeleteConfirm = false;
         $this->deleteReportId = null;
     }
 
+    /**
+     * @param  int|string  $reportId
+     * @return StreamedResponse|null
+     */
     public function downloadReport($reportId)
     {
         // Validate report ID
         if (! is_numeric($reportId)) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'Invalid report ID']);
 
-            return;
+            return null;
         }
 
         $team = Auth::user()->currentTeam;
@@ -195,7 +213,7 @@ class Reports extends Component
         if (! $report) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
 
-            return;
+            return null;
         }
 
         $this->authorize('download', $report);
@@ -203,7 +221,7 @@ class Reports extends Component
         if ($report->status !== 'completed') {
             $this->dispatch('notify', ['type' => 'warning', 'message' => 'Report is not ready for download']);
 
-            return;
+            return null;
         }
 
         // Prevent path traversal attacks
@@ -219,9 +237,11 @@ class Reports extends Component
         }
 
         $this->dispatch('notify', ['type' => 'error', 'message' => 'Report file not found']);
+
+        return null;
     }
 
-    public function render()
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 

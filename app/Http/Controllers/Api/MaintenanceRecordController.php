@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Machine;
 use App\Models\MaintenanceRecord;
+use App\Models\User;
 use App\Services\MaintenanceHealthService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -22,34 +23,34 @@ class MaintenanceRecordController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = MaintenanceRecord::with(['machine', 'team', 'assignedTo', 'completedBy'])
-            ->where('team_id', $request->user()->current_team_id);
+            ->where('team_id', $this->currentTeamId($request));
 
         // Filter by machine
         if ($request->filled('machine_id')) {
-            $query->where('machine_id', $request->machine_id);
+            $query->where('machine_id', $request->input('machine_id'));
         }
 
         // Filter by status
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', $request->input('status'));
         }
 
         // Filter by maintenance type
         if ($request->filled('maintenance_type')) {
-            $query->where('maintenance_type', $request->maintenance_type);
+            $query->where('maintenance_type', $request->input('maintenance_type'));
         }
 
         // Filter by date range
         if ($request->filled('start_date')) {
-            $query->where('scheduled_at', '>=', $request->start_date);
+            $query->where('scheduled_at', '>=', $request->input('start_date'));
         }
         if ($request->filled('end_date')) {
-            $query->where('scheduled_at', '<=', $request->end_date);
+            $query->where('scheduled_at', '<=', $request->input('end_date'));
         }
 
         // Filter by assigned user
         if ($request->filled('assigned_to')) {
-            $query->where('assigned_to', $request->assigned_to);
+            $query->where('assigned_to', $request->input('assigned_to'));
         }
 
         $records = $query->latest('scheduled_at')->paginate(50);
@@ -78,7 +79,7 @@ class MaintenanceRecordController extends Controller
         $machine = Machine::findOrFail($validated['machine_id']);
         $this->authorize('update', $machine);
 
-        $validated['team_id'] = $request->user()->current_team_id;
+        $validated['team_id'] = $this->currentTeamId($request);
         $validated['status'] = 'scheduled';
 
         $record = $this->maintenanceService->createMaintenanceRecord($validated);
@@ -188,7 +189,7 @@ class MaintenanceRecordController extends Controller
 
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = Carbon::parse($validated['end_date']);
-        $teamId = $request->user()->current_team_id;
+        $teamId = $this->currentTeamId($request);
 
         $analytics = $this->maintenanceService->getMaintenanceAnalytics($teamId, $startDate, $endDate);
 
@@ -206,7 +207,7 @@ class MaintenanceRecordController extends Controller
             'format' => 'sometimes|in:csv,json',
         ]);
 
-        $records = MaintenanceRecord::where('team_id', $request->user()->current_team_id)
+        $records = MaintenanceRecord::where('team_id', $this->currentTeamId($request))
             ->with(['machine', 'assignedTo', 'completedBy'])
             ->whereBetween('completed_at', [
                 $validated['start_date'],
@@ -245,5 +246,20 @@ class MaintenanceRecordController extends Controller
             'data' => $records,
             'count' => $records->count(),
         ]);
+    }
+
+    /**
+     * Resolve the authenticated user's current team id or abort.
+     */
+    private function currentTeamId(Request $request): int
+    {
+        $user = $request->user();
+        $teamId = $user instanceof User ? $user->current_team_id : null;
+
+        if ($teamId === null) {
+            abort(401);
+        }
+
+        return $teamId;
     }
 }

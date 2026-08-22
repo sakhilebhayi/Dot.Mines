@@ -22,7 +22,13 @@ class RedactSensitiveData
      */
     public function __invoke(Logger $logger)
     {
-        $logger->getLogger()->pushProcessor(function (LogRecord $record) {
+        $monolog = $logger->getLogger();
+
+        if (! $monolog instanceof \Monolog\Logger) {
+            return;
+        }
+
+        $monolog->pushProcessor(function (LogRecord $record) {
             $configured = config('logging_redaction.keys', []);
             $defaults = [
                 'password', 'pass', 'pwd', 'secret', 'token', 'access_token', 'refresh_token',
@@ -60,8 +66,8 @@ class RedactSensitiveData
 
                 if (is_string($value)) {
                     // redact common inline patterns
-                    $value = preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $value);
-                    $value = preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $value);
+                    $value = preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $value) ?? $value;
+                    $value = preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $value) ?? $value;
 
                     return $value;
                 }
@@ -86,6 +92,7 @@ class RedactSensitiveData
      * Public helper to redact arbitrary values (useful for tests and reuse).
      *
      * @param  mixed  $value
+     * @param  list<string>  $additionalKeys
      * @return mixed
      */
     public static function redactValue($value, array $additionalKeys = [])
@@ -115,8 +122,8 @@ class RedactSensitiveData
                 return $v;
             }
             if (is_string($v)) {
-                $v = preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $v);
-                $v = preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $v);
+                $v = preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $v) ?? $v;
+                $v = preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $v) ?? $v;
 
                 return $v;
             }

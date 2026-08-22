@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property int|null $sync_version
+ * @property-read Team|null $team
  */
 class MineArea extends Model
 {

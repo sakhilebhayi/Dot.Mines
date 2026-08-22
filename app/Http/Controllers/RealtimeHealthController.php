@@ -37,6 +37,9 @@ class RealtimeHealthController extends Controller
         ], $healthy ? 200 : 503);
     }
 
+    /**
+     * @return array{status: string, detail: string}
+     */
     private function checkBroadcastingConfig(): array
     {
         $driver = config('broadcasting.default');
@@ -55,6 +58,9 @@ class RealtimeHealthController extends Controller
         return ['status' => 'ok', 'detail' => 'Broadcasting configured for reverb with credentials present.'];
     }
 
+    /**
+     * @return array{status: string, detail: string}
+     */
     private function checkQueueConnection(): array
     {
         $connection = config('queue.default');
@@ -72,6 +78,9 @@ class RealtimeHealthController extends Controller
         }
     }
 
+    /**
+     * @return array{status: string, detail: string}
+     */
     private function checkReverbProcess(): array
     {
         // The internal bind address (loopback-only in production, see

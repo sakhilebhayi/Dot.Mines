@@ -47,6 +47,8 @@ return new class extends Migration
      * `CHECK (...)` in a single ALTER COLUMN clause, which Postgres rejects
      * with a syntax error (confirmed live). Postgres needs the check
      * constraint dropped and re-added as separate statements instead.
+     *
+     * @param  list<string>  $values
      */
     private function setAllowedValues(array $values): void
     {

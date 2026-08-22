@@ -6,6 +6,9 @@ use App\Models\AIInsight;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<AIInsight>
+ */
 class AIInsightFactory extends Factory
 {
     protected $model = AIInsight::class;

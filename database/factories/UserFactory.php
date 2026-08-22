@@ -60,11 +60,15 @@ class UserFactory extends Factory
 
         return $this->has(
             Team::factory()
-                ->state(fn (array $attributes, User $user) => [
-                    'name' => $user->name.'\'s Team',
-                    'user_id' => $user->id,
-                    'personal_team' => true,
-                ])
+                ->state(function (array $attributes, mixed $user): array {
+                    $owner = $user instanceof User ? $user : null;
+
+                    return [
+                        'name' => ($owner?->name ?? 'Personal').'\'s Team',
+                        'user_id' => $owner?->id,
+                        'personal_team' => true,
+                    ];
+                })
                 ->when(is_callable($callback), $callback),
             'ownedTeams'
         );

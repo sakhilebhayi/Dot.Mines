@@ -9,6 +9,7 @@ use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\Team;
+use App\Models\User;
 use App\Services\DispatchService;
 use App\Services\QueryCacheService;
 use Carbon\CarbonInterface;
@@ -42,10 +43,13 @@ class Dashboard extends Component
 
     public int $totalMineAreas = 0;
 
+    /** @var array<int|string, mixed> */
     public array $recentAlerts = [];
 
+    /** @var array<int|string, mixed> */
     public array $machineStatus = [];
 
+    /** @var array<int|string, mixed> */
     public array $activityFeed = [];
 
     public bool $isLoading = true;
@@ -74,7 +78,9 @@ class Dashboard extends Component
      */
     private function resolveCurrentTeam(): ?Team
     {
-        return Auth::user()?->currentTeam;
+        $user = Auth::user();
+
+        return $user instanceof User ? $user->currentTeam : null;
     }
 
     public function loadDashboardData(): void
@@ -215,7 +221,7 @@ class Dashboard extends Component
         return $latest !== null ? Carbon::parse($latest) : null;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.dashboard');
     }

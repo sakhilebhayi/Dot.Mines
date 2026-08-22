@@ -9,6 +9,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Services\Billing\MachineEntitlementService;
 use App\Services\PaystackService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -46,8 +47,10 @@ class BillingPortal extends Component
 
     public string $totalPaidCurrency = 'ZAR';
 
+    /** @var array<int|string, mixed> */
     public array $recentPayments = [];
 
+    /** @var array<int|string, mixed> */
     public array $recentInvoices = [];
 
     public function mount(): void
@@ -300,7 +303,7 @@ class BillingPortal extends Component
         return null;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.billing-portal');
     }
