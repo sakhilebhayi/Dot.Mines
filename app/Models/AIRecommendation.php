@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property string|null $status
+ * @property int $team_id
+ * @property-read Team|null $team
  */
 class AIRecommendation extends Model
 {

@@ -8,6 +8,7 @@ use App\Models\MineArea;
 use App\Models\Route;
 use App\Models\Waypoint;
 use App\Services\RoutePlanningService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,7 @@ class RoutePlanning extends Component
     // View mode
     public string $viewMode = 'create'; // create, view
 
+    /** @var array<int, mixed> */
     public array $routes = [];
 
     public ?int $selectedRouteId = null;
@@ -76,14 +78,14 @@ class RoutePlanning extends Component
         'speedLimit' => 'nullable|integer|min:1|max:200',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->isLoading = true;
         $this->loadRoutes();
         $this->isLoading = false;
     }
 
-    public function render()
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 
@@ -123,7 +125,7 @@ class RoutePlanning extends Component
         ]);
     }
 
-    public function calculateRoute()
+    public function calculateRoute(): void
     {
         // Validate only the fields required for route calculation (name is not required here)
         $this->validate([
@@ -135,6 +137,10 @@ class RoutePlanning extends Component
             'speedLimit' => 'nullable|integer|min:1|max:200',
             'machineId' => 'nullable|exists:machines,id',
         ]);
+
+        if ($this->startLat === null || $this->startLon === null || $this->endLat === null || $this->endLon === null) {
+            return;
+        }
 
         $this->isCalculating = true;
         $this->routeSaved = false;
@@ -164,7 +170,7 @@ class RoutePlanning extends Component
         }
     }
 
-    public function saveRoute()
+    public function saveRoute(): void
     {
         if (! $this->calculatedRoute) {
             session()->flash('error', 'Please calculate a route first.');
@@ -231,7 +237,7 @@ class RoutePlanning extends Component
         }
     }
 
-    public function loadRoutes()
+    public function loadRoutes(): void
     {
         $team = Auth::user()->currentTeam;
         $this->routes = Route::where('team_id', $team->id)
@@ -241,7 +247,10 @@ class RoutePlanning extends Component
             ->toArray();
     }
 
-    public function viewRoute($routeId)
+    /**
+     * @param  int|string  $routeId
+     */
+    public function viewRoute($routeId): void
     {
         $team = Auth::user()->currentTeam;
         $route = Route::where('team_id', $team->id)
@@ -251,7 +260,7 @@ class RoutePlanning extends Component
 
         if ($route) {
             // Keep the list visible — do not switch to a hidden 'view' state.
-            $this->selectedRouteId = $routeId;
+            $this->selectedRouteId = (int) $routeId;
             // Ensure viewMode stays as 'list' so the routes list remains visible.
             $this->viewMode = 'list';
 
@@ -282,7 +291,10 @@ class RoutePlanning extends Component
         }
     }
 
-    public function deleteRoute($routeId)
+    /**
+     * @param  int|string  $routeId
+     */
+    public function deleteRoute($routeId): void
     {
         $team = Auth::user()->currentTeam;
         $route = Route::where('team_id', $team->id)
@@ -314,7 +326,7 @@ class RoutePlanning extends Component
         }
     }
 
-    public function switchToCreateMode()
+    public function switchToCreateMode(): void
     {
         $this->viewMode = 'create';
 
@@ -343,19 +355,27 @@ class RoutePlanning extends Component
         $this->dispatch('clearMapMarkers');
     }
 
-    public function updateStartPoint($lat, $lon)
+    /**
+     * @param  float|int|string  $lat
+     * @param  float|int|string  $lon
+     */
+    public function updateStartPoint($lat, $lon): void
     {
-        $this->startLat = $lat;
-        $this->startLon = $lon;
+        $this->startLat = (float) $lat;
+        $this->startLon = (float) $lon;
     }
 
-    public function updateEndPoint($lat, $lon)
+    /**
+     * @param  float|int|string  $lat
+     * @param  float|int|string  $lon
+     */
+    public function updateEndPoint($lat, $lon): void
     {
-        $this->endLat = $lat;
-        $this->endLon = $lon;
+        $this->endLat = (float) $lat;
+        $this->endLon = (float) $lon;
     }
 
-    public function clearPoints()
+    public function clearPoints(): void
     {
         $this->startLat = null;
         $this->startLon = null;

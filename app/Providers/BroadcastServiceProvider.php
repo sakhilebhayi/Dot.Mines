@@ -190,6 +190,8 @@ class BroadcastServiceProvider extends ServiceProvider
      * column), and passing them to a typed `int` closure parameter throws
      * a TypeError before the callback body even runs. Both used to
      * surface as an uncaught 500 instead of a clean, fail-closed 403.
+     *
+     * @param  mixed  $value
      */
     protected static function toId($value): ?int
     {

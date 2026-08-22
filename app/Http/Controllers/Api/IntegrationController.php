@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +25,7 @@ class IntegrationController extends Controller
      *
      * GET /api/integrations
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $this->authorize('viewAny', Integration::class);
 
@@ -43,7 +44,7 @@ class IntegrationController extends Controller
      *
      * GET /api/integrations/{id}
      */
-    public function show(Integration $integration)
+    public function show(Integration $integration): JsonResponse
     {
         $this->authorize('view', $integration);
 
@@ -69,7 +70,7 @@ class IntegrationController extends Controller
      *
      * POST /api/integrations
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('create', Integration::class);
 
@@ -90,20 +91,20 @@ class IntegrationController extends Controller
 
         // Check if integration for this provider already exists
         if (Integration::where('team_id', auth()->user()->current_team_id)
-            ->where('provider', $request->provider)
+            ->where('provider', $request->input('provider'))
             ->exists()) {
             return response()->json([
                 'success' => false,
-                'message' => "Integration for {$request->provider} already exists",
+                'message' => "Integration for {$request->input('provider')} already exists",
             ], Response::HTTP_CONFLICT);
         }
 
         try {
             $integration = Integration::create([
                 'team_id' => auth()->user()->current_team_id,
-                'provider' => $request->provider,
-                'name' => $request->name,
-                'credentials' => $request->credentials,
+                'provider' => $request->input('provider'),
+                'name' => $request->input('name'),
+                'credentials' => $request->input('credentials'),
                 'status' => 'disconnected',
             ]);
 
@@ -118,7 +119,7 @@ class IntegrationController extends Controller
                 ],
             ], Response::HTTP_CREATED);
         } catch (\Throwable $e) {
-            Log::error('Failed to create integration', ['provider' => $request->provider, 'error' => $e->getMessage()]);
+            Log::error('Failed to create integration', ['provider' => $request->input('provider'), 'error' => $e->getMessage()]);
 
             return response()->json([
                 'success' => false,
@@ -132,7 +133,7 @@ class IntegrationController extends Controller
      *
      * PUT /api/integrations/{id}
      */
-    public function update(Request $request, Integration $integration)
+    public function update(Request $request, Integration $integration): JsonResponse
     {
         $this->authorize('update', $integration);
 
@@ -176,7 +177,7 @@ class IntegrationController extends Controller
      *
      * DELETE /api/integrations/{id}
      */
-    public function destroy(Integration $integration)
+    public function destroy(Integration $integration): JsonResponse
     {
         $this->authorize('delete', $integration);
 
@@ -202,7 +203,7 @@ class IntegrationController extends Controller
      *
      * POST /api/integrations/{id}/test
      */
-    public function test(Integration $integration)
+    public function test(Integration $integration): JsonResponse
     {
         $this->authorize('test', $integration);
 
@@ -226,7 +227,7 @@ class IntegrationController extends Controller
      *
      * POST /api/integrations/{id}/sync
      */
-    public function sync(Integration $integration)
+    public function sync(Integration $integration): JsonResponse
     {
         $this->authorize('sync', $integration);
 
@@ -252,7 +253,7 @@ class IntegrationController extends Controller
      *
      * GET /api/integrations/{id}/machines
      */
-    public function machines(Integration $integration)
+    public function machines(Integration $integration): JsonResponse
     {
         $this->authorize('view', $integration);
 
@@ -271,7 +272,7 @@ class IntegrationController extends Controller
      *
      * GET /api/integrations/manufacturers
      */
-    public function manufacturers()
+    public function manufacturers(): JsonResponse
     {
         return response()->json([
             'success' => true,

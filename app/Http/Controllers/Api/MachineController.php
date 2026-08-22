@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\InsufficientAllocationException;
 use App\Models\Machine;
 use App\Services\Billing\MachineProvisioningService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -22,7 +23,7 @@ class MachineController extends Controller
      * GET /api/machines
      * Query params: page, per_page, sort, filter
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'page' => 'nullable|integer|min:1',
@@ -82,7 +83,7 @@ class MachineController extends Controller
      *
      * GET /api/machines/{id}
      */
-    public function show(Machine $machine)
+    public function show(Machine $machine): JsonResponse
     {
         return response()->json([
             'data' => $machine->load('metrics', 'alerts', 'geofenceEntries', 'integration'),
@@ -94,7 +95,7 @@ class MachineController extends Controller
      *
      * POST /api/machines
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('create', Machine::class);
 
@@ -139,7 +140,7 @@ class MachineController extends Controller
      *
      * PUT /api/machines/{id}
      */
-    public function update(Request $request, Machine $machine)
+    public function update(Request $request, Machine $machine): JsonResponse
     {
         $this->authorize('update', $machine);
 
@@ -165,7 +166,7 @@ class MachineController extends Controller
      *
      * DELETE /api/machines/{id}
      */
-    public function destroy(Machine $machine)
+    public function destroy(Machine $machine): JsonResponse
     {
         $this->authorize('delete', $machine);
 
@@ -181,7 +182,7 @@ class MachineController extends Controller
      *
      * GET /api/machines/{id}/metrics
      */
-    public function metrics(Request $request, Machine $machine)
+    public function metrics(Request $request, Machine $machine): JsonResponse
     {
         $validated = $request->validate([
             'limit' => 'nullable|integer|min:1|max:1000',
@@ -209,7 +210,7 @@ class MachineController extends Controller
      *
      * POST /api/machines/{id}/location
      */
-    public function updateLocation(Request $request, Machine $machine)
+    public function updateLocation(Request $request, Machine $machine): JsonResponse
     {
         $validated = $request->validate([
             'latitude' => 'required|numeric|between:-90,90',
@@ -229,7 +230,7 @@ class MachineController extends Controller
      *
      * GET /api/machines/{id}/alerts
      */
-    public function alerts(Machine $machine)
+    public function alerts(Machine $machine): JsonResponse
     {
         $alerts = $machine->activeAlerts()
             ->orderBy('priority', 'desc')

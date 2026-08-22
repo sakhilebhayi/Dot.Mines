@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
@@ -11,7 +12,7 @@ class NotificationController extends Controller
     /**
      * Get all notifications for team
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $teamId = auth()->user()->current_team_id
             ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
@@ -23,11 +24,11 @@ class NotificationController extends Controller
         $query = Notification::where('team_id', $teamId);
 
         if ($request->has('type')) {
-            $query->where('type', $request->type);
+            $query->where('type', $request->input('type'));
         }
 
         if ($request->has('alert_level')) {
-            $query->whereIn('alert_level', (array) $request->alert_level);
+            $query->whereIn('alert_level', (array) $request->input('alert_level'));
         }
 
         if ($request->get('unread_only') === 'true') {
@@ -50,7 +51,7 @@ class NotificationController extends Controller
     /**
      * Get unread notifications for user
      */
-    public function unread(Request $request)
+    public function unread(Request $request): JsonResponse
     {
         $userId = auth()->user()->id;
         $teamId = auth()->user()->current_team_id
@@ -75,7 +76,7 @@ class NotificationController extends Controller
     /**
      * Mark notification as read
      */
-    public function markAsRead(Request $request, Notification $notification)
+    public function markAsRead(Request $request, Notification $notification): JsonResponse
     {
         $this->authorize('view', $notification);
 
@@ -87,7 +88,7 @@ class NotificationController extends Controller
     /**
      * Mark multiple as read
      */
-    public function markMultipleAsRead(Request $request)
+    public function markMultipleAsRead(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'notification_ids' => 'required|array|min:1',
@@ -107,7 +108,7 @@ class NotificationController extends Controller
     /**
      * Get alert statistics
      */
-    public function stats(Request $request)
+    public function stats(Request $request): JsonResponse
     {
         $teamId = auth()->user()->current_team_id
             ?? (auth()->user()->currentTeam ? auth()->user()->currentTeam->id : null);
@@ -142,7 +143,7 @@ class NotificationController extends Controller
     /**
      * Clear notifications
      */
-    public function clear(Request $request)
+    public function clear(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'type' => 'string|nullable',

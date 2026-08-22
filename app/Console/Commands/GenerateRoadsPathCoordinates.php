@@ -9,6 +9,7 @@ use App\Models\Team;
 use App\Services\RoutePlanningService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
 class GenerateRoadsPathCoordinates extends Command
@@ -41,6 +42,7 @@ class GenerateRoadsPathCoordinates extends Command
 
     protected int $days;
 
+    /** @var array<string, int> */
     protected array $stats = [
         'created' => 0,
         'deleted' => 0,
@@ -130,6 +132,8 @@ class GenerateRoadsPathCoordinates extends Command
 
     /**
      * Handle deletion of Komatsu PC800-ALPHA coordinates
+     *
+     * @param  Team  $team
      */
     protected function handleKomatsuDeletion($team): void
     {
@@ -159,6 +163,8 @@ class GenerateRoadsPathCoordinates extends Command
 
     /**
      * Generate path coordinates for a single machine
+     *
+     * @param  Collection<int, Route>  $routes
      */
     protected function generatePathForMachine(Machine $machine, $routes): int
     {
@@ -184,7 +190,10 @@ class GenerateRoadsPathCoordinates extends Command
      * Select the best route for a machine based on proximity
      * Returns null for machines without specific routes to force OSRM generation
      */
-    protected function selectBestRoute(Machine $machine, $routes)
+    /**
+     * @param  Collection<int, Route>  $routes
+     */
+    protected function selectBestRoute(Machine $machine, $routes): ?Route
     {
         if ($routes->isEmpty()) {
             return null;
@@ -296,6 +305,9 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Sample exact points from OSRM route - NO interpolation
      * This guarantees all coordinates are on actual roads
+     *
+     * @param  array<int, mixed>  $routePoints
+     * @return array<int, mixed>
      */
     protected function sampleRoutePoints(array $routePoints, int $targetCount): array
     {
@@ -327,6 +339,8 @@ class GenerateRoadsPathCoordinates extends Command
 
     /**
      * Interpolate points between two coordinates
+     *
+     * @return array<int, mixed>
      */
     protected function interpolateAlongRoute(
         float $startLat,
@@ -456,6 +470,9 @@ class GenerateRoadsPathCoordinates extends Command
      * Interpolate OSRM route geometry to get exact number of coordinates
      * Uses distance-based sampling to ensure we follow road curves precisely
      * and never cut through buildings, rivers, or non-road areas
+     *
+     * @param  array<int, mixed>  $routeGeometry
+     * @return array<int, mixed>
      */
     protected function interpolateRouteGeometry(array $routeGeometry, int $targetCount): array
     {
@@ -559,6 +576,9 @@ class GenerateRoadsPathCoordinates extends Command
     /**
      * Densify route geometry by interpolating between points
      * Used when OSRM returns fewer points than we need
+     *
+     * @param  array<int, mixed>  $routeGeometry
+     * @return array<int, mixed>
      */
     protected function densifyRouteGeometry(array $routeGeometry, int $targetCount): array
     {
@@ -623,6 +643,8 @@ class GenerateRoadsPathCoordinates extends Command
 
     /**
      * Save coordinates to database with calculated heading and speed
+     *
+     * @param  array<int, mixed>  $coordinates
      */
     protected function saveCoordinatesToDatabase(Machine $machine, array $coordinates): int
     {
@@ -649,7 +671,7 @@ class GenerateRoadsPathCoordinates extends Command
             $speed = max(20, min(60, $baseSpeed + $speedVariation));
 
             // Calculate timestamp
-            $timestamp = $startTime->copy()->addMinutes($index * $timeInterval);
+            $timestamp = $startTime->copy()->addMinutes((int) $index * $timeInterval);
 
             try {
                 MachineMetric::create([
@@ -720,6 +742,8 @@ class GenerateRoadsPathCoordinates extends Command
 
     /**
      * Display generation results
+     *
+     * @param  Collection<int, Machine>  $machines
      */
     protected function displayResults($machines): void
     {

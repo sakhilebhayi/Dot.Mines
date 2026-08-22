@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\MineArea;
 use App\Services\MineAreaService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -52,6 +53,7 @@ class MineAreaManager extends Component
     public string $manager_contact = '';
 
     // Map properties
+    /** @var array<int, mixed>|null */
     public ?array $boundaryCoordinates = null;
 
     public float $centerLat = -26.2041;
@@ -76,7 +78,7 @@ class MineAreaManager extends Component
         'boundaryCoordinates' => 'nullable|array',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->service = app(MineAreaService::class);
     }
@@ -90,12 +92,12 @@ class MineAreaManager extends Component
         return $this->service;
     }
 
-    public function updatedSearch()
+    public function updatedSearch(): void
     {
         $this->resetPage();
     }
 
-    public function toggleSort(string $column)
+    public function toggleSort(string $column): void
     {
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -105,19 +107,19 @@ class MineAreaManager extends Component
         }
     }
 
-    public function openCreateModal()
+    public function openCreateModal(): void
     {
         $this->resetForm();
         $this->showCreateModal = true;
     }
 
-    public function closeCreateModal()
+    public function closeCreateModal(): void
     {
         $this->showCreateModal = false;
         $this->resetForm();
     }
 
-    public function openEditModal(MineArea $mineArea)
+    public function openEditModal(MineArea $mineArea): void
     {
         $this->editingMineAreaId = $mineArea->id;
         $this->name = $mineArea->name;
@@ -132,13 +134,13 @@ class MineAreaManager extends Component
         $this->showEditModal = true;
     }
 
-    public function closeEditModal()
+    public function closeEditModal(): void
     {
         $this->showEditModal = false;
         $this->resetForm();
     }
 
-    public function saveMineArea()
+    public function saveMineArea(): void
     {
         $this->validate();
 
@@ -188,7 +190,7 @@ class MineAreaManager extends Component
         }
     }
 
-    public function deleteMineArea(MineArea $mineArea)
+    public function deleteMineArea(MineArea $mineArea): void
     {
         $team = Auth::user()->currentTeam;
         if ($mineArea->team_id !== $team->id) {
@@ -206,7 +208,7 @@ class MineAreaManager extends Component
         }
     }
 
-    protected function resetForm()
+    protected function resetForm(): void
     {
         $this->editingMineAreaId = null;
         $this->name = '';
@@ -220,13 +222,13 @@ class MineAreaManager extends Component
         $this->manager_contact = '';
     }
 
-    public function switchToMapMode()
+    public function switchToMapMode(): void
     {
         $this->viewMode = 'map';
         $this->showCreateModal = false;
     }
 
-    public function switchToListMode()
+    public function switchToListMode(): void
     {
         $this->viewMode = 'list';
         // Ensure drawing state is cleared so the map/draw UI is not kept active
@@ -235,7 +237,7 @@ class MineAreaManager extends Component
         $this->showCreateModal = false;
     }
 
-    public function openCreateMapModal()
+    public function openCreateMapModal(): void
     {
         $this->resetForm();
         $this->boundaryCoordinates = null;
@@ -243,13 +245,16 @@ class MineAreaManager extends Component
         $this->switchToMapMode();
     }
 
-    public function closeMapModal()
+    public function closeMapModal(): void
     {
         $this->isDrawing = false;
         $this->boundaryCoordinates = null;
     }
 
-    public function setBoundary(array $coordinates)
+    /**
+     * @param  array<int, mixed>  $coordinates
+     */
+    public function setBoundary(array $coordinates): void
     {
         $this->boundaryCoordinates = $coordinates;
         // Calculate center and approximate area from polygon
@@ -262,14 +267,14 @@ class MineAreaManager extends Component
         }
     }
 
-    public function clearBoundary()
+    public function clearBoundary(): void
     {
         $this->boundaryCoordinates = null;
         $this->latitude = null;
         $this->longitude = null;
     }
 
-    public function saveMineAreaWithBoundary()
+    public function saveMineAreaWithBoundary(): void
     {
         $this->authorize('create', MineArea::class);
 
@@ -313,7 +318,7 @@ class MineAreaManager extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
 

@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Jobs\GenerateReportJob;
 use App\Models\Machine;
 use App\Models\Report;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -26,8 +28,10 @@ class ReportGenerator extends Component
 
     public string $format = 'pdf';
 
+    /** @var array<int, mixed> */
     public array $selectedMachines = [];
 
+    /** @var array<int, mixed> */
     public array $selectedGeofences = [];
 
     public bool $includeMetrics = true;
@@ -99,27 +103,33 @@ class ReportGenerator extends Component
         'endDate.after_or_equal' => 'End date must be after or equal to start date.',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->startDate = now()->subDays(30)->format('Y-m-d');
         $this->endDate = now()->format('Y-m-d');
     }
 
-    public function getMachines()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Machine>
+     */
+    public function getMachines(): \Illuminate\Database\Eloquent\Collection
     {
         $team = Auth::user()->currentTeam;
 
         return Machine::where('team_id', $team->id)->get();
     }
 
-    public function getGeofences()
+    /**
+     * @return Collection<int, \stdClass>
+     */
+    public function getGeofences(): Collection
     {
         $team = Auth::user()->currentTeam;
 
         return DB::table('geofences')->where('team_id', $team->id)->get();
     }
 
-    public function nextStep()
+    public function nextStep(): void
     {
         if ($this->step === 1) {
             $this->validate([
@@ -137,14 +147,14 @@ class ReportGenerator extends Component
         }
     }
 
-    public function previousStep()
+    public function previousStep(): void
     {
         if ($this->step > 1) {
             $this->step--;
         }
     }
 
-    public function generateReport()
+    public function generateReport(): void
     {
         $this->validate();
 
@@ -229,18 +239,21 @@ class ReportGenerator extends Component
         }
     }
 
-    public function selectAllMachines()
+    public function selectAllMachines(): void
     {
         $machines = $this->getMachines();
         $this->selectedMachines = $machines->pluck('id')->toArray();
     }
 
-    public function clearMachines()
+    public function clearMachines(): void
     {
         $this->selectedMachines = [];
     }
 
-    public function toggleMachine($machineId)
+    /**
+     * @param  int|string  $machineId
+     */
+    public function toggleMachine($machineId): void
     {
         if (in_array($machineId, $this->selectedMachines)) {
             $this->selectedMachines = array_filter($this->selectedMachines, fn ($id) => $id !== $machineId);
@@ -249,7 +262,7 @@ class ReportGenerator extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.report-generator', [
             'reportTypes' => $this->reportTypes,

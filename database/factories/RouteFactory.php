@@ -6,6 +6,9 @@ use App\Models\Route;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Route>
+ */
 class RouteFactory extends Factory
 {
     protected $model = Route::class;

@@ -6,6 +6,9 @@ use App\Models\Role;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Role>
+ */
 class RoleFactory extends Factory
 {
     protected $model = Role::class;

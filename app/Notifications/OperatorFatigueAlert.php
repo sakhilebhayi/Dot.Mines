@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\OperatorFatigue;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -31,7 +32,7 @@ class OperatorFatigueAlert extends Notification
      */
     public function via(object $notifiable): array
     {
-        if (! $notifiable->wantsEmailAlert($this->fatigue->alert_level)) {
+        if (! $notifiable instanceof User || ! $notifiable->wantsEmailAlert($this->fatigue->alert_level)) {
             return [];
         }
 

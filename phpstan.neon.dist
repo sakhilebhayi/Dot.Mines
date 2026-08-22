@@ -49,7 +49,6 @@ parameters:
     - '#^Using nullsafe (property access|method call) on non\-nullable type#'
 includes:
   - vendor/phpstan/phpstan/conf/bleedingEdge.neon
-  - phpstan-baseline.neon
 # Note: keep a single `parameters` section above. Adjust level and paths there if needed.
 # Customize autoloading or bootstrap if needed
 # bootstrapFiles:

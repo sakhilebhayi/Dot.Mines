@@ -30,7 +30,7 @@ class GeofenceFactory extends Factory
 
         return [
             'team_id' => Team::factory(),
-            'name' => $this->faker->words(2, true).' Zone',
+            'name' => implode(' ', (array) $this->faker->words(2)).' Zone',
             'description' => $this->faker->sentence(),
             'type' => $this->faker->randomElement(['pit', 'stockpile', 'dump', 'facility']),
             'coordinates' => $coordinates,

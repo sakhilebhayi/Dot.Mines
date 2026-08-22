@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Geofence;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -19,7 +20,7 @@ class GeofenceController extends Controller
      *
      * GET /api/geofences
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'page' => 'nullable|integer|min:1',
@@ -59,7 +60,7 @@ class GeofenceController extends Controller
      *
      * GET /api/geofences/{id}
      */
-    public function show(Geofence $geofence)
+    public function show(Geofence $geofence): JsonResponse
     {
         $activeMachines = $geofence->activeMachines()->map(function ($machine) {
             return [
@@ -82,7 +83,7 @@ class GeofenceController extends Controller
      *
      * POST /api/geofences
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('create', Geofence::class);
 
@@ -114,7 +115,7 @@ class GeofenceController extends Controller
      *
      * PUT /api/geofences/{id}
      */
-    public function update(Request $request, Geofence $geofence)
+    public function update(Request $request, Geofence $geofence): JsonResponse
     {
         $this->authorize('update', $geofence);
 
@@ -146,7 +147,7 @@ class GeofenceController extends Controller
      *
      * DELETE /api/geofences/{id}
      */
-    public function destroy(Geofence $geofence)
+    public function destroy(Geofence $geofence): JsonResponse
     {
         $this->authorize('delete', $geofence);
 
@@ -162,7 +163,7 @@ class GeofenceController extends Controller
      *
      * GET /api/geofences/{id}/entries
      */
-    public function entries(Request $request, Geofence $geofence)
+    public function entries(Request $request, Geofence $geofence): JsonResponse
     {
         $validated = $request->validate([
             'date_from' => 'nullable|date',
@@ -193,7 +194,7 @@ class GeofenceController extends Controller
      *
      * GET /api/geofences/{id}/tonnage-stats
      */
-    public function tonnageStats(Request $request, Geofence $geofence)
+    public function tonnageStats(Request $request, Geofence $geofence): JsonResponse
     {
         $validated = $request->validate([
             'date_from' => 'required|date',
@@ -208,12 +209,14 @@ class GeofenceController extends Controller
             ->whereBetween('entry_time', [$dateFrom, $dateTo])
             ->get();
 
-        $tonnageByMachine = $entries->groupBy('machine_id')->map(function ($entries) {
+        $tonnageByMachine = $entries->groupBy('machine_id')->map(function ($group) {
+            $first = $group->first();
+
             return [
-                'machine_id' => $entries->first()->machine_id,
-                'machine_name' => $entries->first()->machine->name,
-                'tonnage' => $entries->sum('tonnage_loaded'),
-                'loads' => $entries->count(),
+                'machine_id' => $first?->machine_id,
+                'machine_name' => $first?->machine?->name,
+                'tonnage' => $group->sum('tonnage_loaded'),
+                'loads' => $group->count(),
             ];
         });
 
@@ -235,7 +238,7 @@ class GeofenceController extends Controller
      *
      * GET /api/geofences/{id}/active-machines
      */
-    public function activeMachines(Geofence $geofence)
+    public function activeMachines(Geofence $geofence): JsonResponse
     {
         $machines = $geofence->activeMachines();
 

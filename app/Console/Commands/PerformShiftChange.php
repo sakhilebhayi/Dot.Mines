@@ -11,10 +11,11 @@ class PerformShiftChange extends Command
 
     protected $description = 'Perform shift change: snapshot assignments and reset fleet for next shift.';
 
-    public function handle(ShiftService $shiftService)
+    public function handle(ShiftService $shiftService): int
     {
         $teamId = (int) $this->argument('team_id');
-        $shiftType = $this->argument('shift_type') ?? 'day';
+        $rawShiftType = $this->argument('shift_type');
+        $shiftType = is_string($rawShiftType) ? $rawShiftType : 'day';
         $defaultMineArea = $this->option('default-mine-area');
 
         $this->info("Starting shift change for team {$teamId}, shift={$shiftType}");

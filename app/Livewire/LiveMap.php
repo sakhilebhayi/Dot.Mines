@@ -7,6 +7,7 @@ use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Traits\RealtimeUpdates;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
@@ -18,6 +19,7 @@ class LiveMap extends Component
 
     public float $centerLat = -28.4793; // South Africa center latitude
 
+    /** @var array<int|string, mixed> */
     public array $activityFeed = [];
 
     public bool $isLoading = true;
@@ -63,7 +65,7 @@ class LiveMap extends Component
         $this->subscribeToTeamLocations();
     }
 
-    public function loadActivityFeed()
+    public function loadActivityFeed(): void
     {
         $team = Auth::user()->currentTeam;
         $this->activityFeed = ActivityLog::where('team_id', $team->id)
@@ -174,7 +176,10 @@ class LiveMap extends Component
         return $machines;
     }
 
-    public function getMineAreas()
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getMineAreas(): array
     {
         $team = Auth::user()->currentTeam;
 
@@ -193,6 +198,9 @@ class LiveMap extends Component
             ->toArray();
     }
 
+    /**
+     * @param  mixed  $value
+     */
     public function updatedSelectedMineAreaId($value): void
     {
         // When user selects a mine area, push an update to the map with filtered machines
@@ -204,7 +212,10 @@ class LiveMap extends Component
         ]);
     }
 
-    public function getGeofences()
+    /**
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    public function getGeofences(): \Illuminate\Support\Collection
     {
         $team = Auth::user()->currentTeam;
 
@@ -221,7 +232,7 @@ class LiveMap extends Component
             });
     }
 
-    public function render()
+    public function render(): View
     {
         $machines = $this->getMachines();
         $geofences = $this->getGeofences();

@@ -6,6 +6,7 @@ use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Database\Factories\RouteFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,6 +38,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property array<string, mixed>|null $route_geometry
  * @property float $fuel_savings
  * @property int $time_savings
+ * @property-read Collection<int, Waypoint> $waypoints
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Machine|null $machine

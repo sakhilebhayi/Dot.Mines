@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -14,8 +15,10 @@ class IntegrationManager extends Component
 {
     public mixed $team = null;
 
+    /** @var array<int|string, mixed> */
     public array $integrations = [];
 
+    /** @var array<int|string, mixed> */
     public array $availableManufacturers = [];
 
     public bool $showAddModal = false;
@@ -26,6 +29,7 @@ class IntegrationManager extends Component
 
     public mixed $testResult = null;
 
+    /** @var array<string, mixed> */
     public array $formData = [
         'provider' => '',
         'name' => '',
@@ -42,7 +46,7 @@ class IntegrationManager extends Component
     /** @var array<string, string> */
     protected $listeners = ['refresh' => '$refresh'];
 
-    public function mount()
+    public function mount(): void
     {
         $this->team = Auth::user()->currentTeam;
 
@@ -54,7 +58,7 @@ class IntegrationManager extends Component
         $this->loadAvailableManufacturers();
     }
 
-    public function loadIntegrations()
+    public function loadIntegrations(): void
     {
         if (! $this->team) {
             return;
@@ -79,25 +83,25 @@ class IntegrationManager extends Component
             ->toArray();
     }
 
-    public function loadAvailableManufacturers()
+    public function loadAvailableManufacturers(): void
     {
         $service = app(IntegrationService::class);
         $this->availableManufacturers = $service->getAvailableManufacturers();
     }
 
-    public function openAddModal()
+    public function openAddModal(): void
     {
         $this->showAddModal = true;
         $this->resetForm();
     }
 
-    public function closeAddModal()
+    public function closeAddModal(): void
     {
         $this->showAddModal = false;
         $this->resetForm();
     }
 
-    public function resetForm()
+    public function resetForm(): void
     {
         $this->formData = [
             'provider' => '',
@@ -113,7 +117,7 @@ class IntegrationManager extends Component
         ];
     }
 
-    public function createIntegration()
+    public function createIntegration(): void
     {
         if (! $this->team) {
             $this->addError('general', 'No team context available');
@@ -198,7 +202,7 @@ class IntegrationManager extends Component
      * separate credential fields) so a submission that would have been
      * accepted by the old two-step flow is accepted here too.
      */
-    public function connectIntegration()
+    public function connectIntegration(): void
     {
         if (! $this->team) {
             $this->addError('general', 'No team context available');
@@ -266,8 +270,10 @@ class IntegrationManager extends Component
      * re-entering credentials unnecessarily." Distinct from testConnection()
      * (the shallow, pre-existing action left untouched for backward
      * compatibility) so both remain independently callable.
+     *
+     * @param  int|string  $integrationId
      */
-    public function retestConnection($integrationId)
+    public function retestConnection($integrationId): void
     {
         if (! $this->team) {
             $this->testResult = ['success' => false, 'message' => 'No team context available'];
@@ -291,7 +297,10 @@ class IntegrationManager extends Component
         }
     }
 
-    public function testConnection($integrationId)
+    /**
+     * @param  int|string  $integrationId
+     */
+    public function testConnection($integrationId): void
     {
         if (! $this->team) {
             $this->testResult = [
@@ -337,7 +346,10 @@ class IntegrationManager extends Component
         }
     }
 
-    public function syncMachines($integrationId)
+    /**
+     * @param  int|string  $integrationId
+     */
+    public function syncMachines($integrationId): void
     {
         if (! $this->team) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'No team context available']);
@@ -367,7 +379,10 @@ class IntegrationManager extends Component
         }
     }
 
-    public function deleteIntegration($integrationId)
+    /**
+     * @param  int|string  $integrationId
+     */
+    public function deleteIntegration($integrationId): void
     {
         if (! $this->team) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'No team context available']);
@@ -389,7 +404,7 @@ class IntegrationManager extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.integration-manager');
     }

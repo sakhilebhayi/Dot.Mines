@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Alert;
 use App\Models\Geofence;
+use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -33,6 +35,7 @@ class Alerts extends Component
     public bool $showDismissConfirm = false;
 
     // Track when a dismissed-unresolved alert was created so UI can render specially
+    /** @var array<int|string, mixed> */
     public array $recentlyDismissedUnresolved = [];
 
     /** @var array<string, string> */
@@ -72,7 +75,10 @@ class Alerts extends Component
         // page), so nothing further is needed here.
     }
 
-    public function getAlerts()
+    /**
+     * @return LengthAwarePaginator<int, Alert>
+     */
+    public function getAlerts(): LengthAwarePaginator
     {
         $team = Auth::user()->currentTeam;
 
@@ -95,7 +101,10 @@ class Alerts extends Component
             ->paginate(15);
     }
 
-    public function setSortBy($column)
+    /**
+     * @param  string  $column
+     */
+    public function setSortBy($column): void
     {
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -105,7 +114,10 @@ class Alerts extends Component
         }
     }
 
-    public function acknowledgeAlert($alertId)
+    /**
+     * @param  int|string  $alertId
+     */
+    public function acknowledgeAlert($alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -122,7 +134,10 @@ class Alerts extends Component
         }
     }
 
-    public function resolveAlert($alertId)
+    /**
+     * @param  int|string  $alertId
+     */
+    public function resolveAlert($alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -150,7 +165,10 @@ class Alerts extends Component
         }
     }
 
-    public function dismissAlert($alertId)
+    /**
+     * @param  int|string  $alertId
+     */
+    public function dismissAlert($alertId): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($alertId);
@@ -175,7 +193,10 @@ class Alerts extends Component
         }
     }
 
-    public function confirmDismiss($choice = 'dismiss')
+    /**
+     * @param  string  $choice
+     */
+    public function confirmDismiss($choice = 'dismiss'): void
     {
         $team = Auth::user()->currentTeam;
         $alert = Alert::where('team_id', $team->id)->find($this->pendingDismissAlertId);
@@ -219,25 +240,28 @@ class Alerts extends Component
         $this->pendingDismissAlertId = null;
     }
 
-    public function cancelDismiss()
+    public function cancelDismiss(): void
     {
         $this->showDismissConfirm = false;
         $this->pendingDismissAlertId = null;
     }
 
-    public function showDetails($alertId)
+    /**
+     * @param  int|string  $alertId
+     */
+    public function showDetails($alertId): void
     {
-        $this->selectedAlertId = $alertId;
+        $this->selectedAlertId = (int) $alertId;
         $this->showDetailsModal = true;
     }
 
-    public function closeDetails()
+    public function closeDetails(): void
     {
         $this->showDetailsModal = false;
         $this->selectedAlertId = null;
     }
 
-    public function getSelectedAlert()
+    public function getSelectedAlert(): ?Alert
     {
         if ($this->selectedAlertId) {
             $team = Auth::user()->currentTeam;
@@ -267,6 +291,9 @@ class Alerts extends Component
 
     /**
      * Return an array of mine-area managers (team users with manager-like roles)
+     *
+     * @param  Alert|null  $alert
+     * @return list<array<string, mixed>>
      */
     public function getMineAreaManagersForAlert($alert): array
     {
@@ -293,7 +320,7 @@ class Alerts extends Component
         return $managers;
     }
 
-    public function render()
+    public function render(): View
     {
         $selected = $this->getSelectedAlert();
 

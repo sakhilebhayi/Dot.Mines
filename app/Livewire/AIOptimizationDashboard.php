@@ -36,6 +36,7 @@ class AIOptimizationDashboard extends Component
 
     public string $selectedPriority = 'all';
 
+    /** @var array<string, mixed> */
     public array $filters = [
         'category' => '',
         'priority' => '',
@@ -54,12 +55,12 @@ class AIOptimizationDashboard extends Component
 
     protected ?AIOptimizationService $aiService = null;
 
-    public function boot(AIOptimizationService $aiService)
+    public function boot(AIOptimizationService $aiService): void
     {
         $this->aiService = $aiService;
     }
 
-    public function mount()
+    public function mount(): void
     {
         // Auto-run analysis if no recent data
         $lastRecommendation = AIRecommendation::where('team_id', auth()->user()->currentTeam->id)
@@ -71,7 +72,7 @@ class AIOptimizationDashboard extends Component
         }
     }
 
-    public function runAnalysis()
+    public function runAnalysis(): void
     {
         $this->analysisRunning = true;
 
@@ -101,19 +102,28 @@ class AIOptimizationDashboard extends Component
         $this->analysisRunning = false;
     }
 
-    public function setCategory($category)
+    /**
+     * @param  string  $category
+     */
+    public function setCategory($category): void
     {
         $this->selectedCategory = $category;
         $this->resetPage();
     }
 
-    public function setPriority($priority)
+    /**
+     * @param  string  $priority
+     */
+    public function setPriority($priority): void
     {
         $this->selectedPriority = $priority;
         $this->resetPage();
     }
 
-    public function implementRecommendation($recommendationId)
+    /**
+     * @param  int|string  $recommendationId
+     */
+    public function implementRecommendation($recommendationId): void
     {
         $team = auth()->user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
@@ -141,7 +151,10 @@ class AIOptimizationDashboard extends Component
         }
     }
 
-    public function rejectRecommendation($recommendationId, string $reason = '')
+    /**
+     * @param  int|string  $recommendationId
+     */
+    public function rejectRecommendation($recommendationId, string $reason = ''): void
     {
         $team = auth()->user()->currentTeam;
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
@@ -177,14 +190,18 @@ class AIOptimizationDashboard extends Component
         }
     }
 
-    public function promptRecommendationAction($recommendationId, $action)
+    /**
+     * @param  string  $action
+     * @param  int|string  $recommendationId
+     */
+    public function promptRecommendationAction($recommendationId, $action): void
     {
-        $this->pendingRecommendationId = $recommendationId;
+        $this->pendingRecommendationId = (int) $recommendationId;
         $this->pendingRecommendationAction = $action;
         $this->showRecommendationConfirm = true;
     }
 
-    public function confirmRecommendationAction()
+    public function confirmRecommendationAction(): void
     {
         if (! $this->pendingRecommendationId || ! in_array($this->pendingRecommendationAction, ['implement', 'reject'])) {
             $this->showRecommendationConfirm = false;
@@ -216,7 +233,7 @@ class AIOptimizationDashboard extends Component
         $this->resetPage();
     }
 
-    public function cancelRecommendationAction()
+    public function cancelRecommendationAction(): void
     {
         $this->showRecommendationConfirm = false;
         $this->pendingRecommendationId = null;
@@ -226,7 +243,10 @@ class AIOptimizationDashboard extends Component
 
     // (Possibly missing function for alert acknowledgement should be implemented here if needed)
 
-    public function markInsightAsRead($insightId)
+    /**
+     * @param  int|string  $insightId
+     */
+    public function markInsightAsRead($insightId): void
     {
         $team = auth()->user()->currentTeam;
         $insight = AIInsight::where('team_id', $team->id)->findOrFail($insightId);
@@ -235,7 +255,7 @@ class AIOptimizationDashboard extends Component
         $this->dispatch('notify', ['type' => 'success', 'message' => 'Insight marked as read.']);
     }
 
-    public function render()
+    public function render(): View
     {
         $team = auth()->user()->currentTeam;
 

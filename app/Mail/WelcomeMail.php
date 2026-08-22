@@ -11,7 +11,7 @@ class WelcomeMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
+    public User $user;
 
     /**
      * Create a new message instance.
@@ -24,7 +24,7 @@ class WelcomeMail extends Mailable
     /**
      * Build the message.
      */
-    public function build()
+    public function build(): static
     {
         return $this->subject('Welcome to '.config('app.name'))
             ->view('emails.welcome')

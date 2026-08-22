@@ -13,6 +13,7 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\User;
 use App\Services\AI\FuelPredictorAgent;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -100,7 +101,7 @@ class FuelManagement extends Component
 
     public ?int $confirmDeleteTankId = null;
 
-    public function recordDispensingTransaction()
+    public function recordDispensingTransaction(): void
     {
         $this->transactionError = '';
         $this->validate([
@@ -134,7 +135,7 @@ class FuelManagement extends Component
         }
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->allocationYear = now()->year;
         $this->allocationMonth = now()->month;
@@ -145,8 +146,10 @@ class FuelManagement extends Component
      * step that still needs doing (no tanks -> Tank, no allocation for this
      * month -> Allocation, otherwise Dispense). Legacy tab names are mapped
      * so existing callers keep working.
+     *
+     * @param  string|null  $tab
      */
-    public function openManageModal($tab = null)
+    public function openManageModal($tab = null): void
     {
         $this->showManageModal = true;
 
@@ -161,7 +164,7 @@ class FuelManagement extends Component
         $this->goToStep($step);
     }
 
-    public function closeManageModal()
+    public function closeManageModal(): void
     {
         $this->showManageModal = false;
     }
@@ -235,7 +238,7 @@ class FuelManagement extends Component
             ->exists();
     }
 
-    public function saveTank()
+    public function saveTank(): void
     {
         $this->validate([
             'tankName' => 'required|string|max:255',
@@ -248,7 +251,7 @@ class FuelManagement extends Component
         ]);
 
         $user = Auth::user();
-        if (! $user || ! $user->current_team_id) {
+        if (! $user instanceof User || ! $user->current_team_id) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'User session invalid']);
 
             return;
@@ -294,7 +297,7 @@ class FuelManagement extends Component
     /**
      * Refuel (record a refill/delivery) for a tank and update its current level.
      */
-    public function refuelTank()
+    public function refuelTank(): void
     {
         $this->validate([
             'refuelTankId' => 'required|exists:fuel_tanks,id',
@@ -332,31 +335,37 @@ class FuelManagement extends Component
         }
     }
 
-    public function openRefuelModal($tankId)
+    /**
+     * @param  int|string  $tankId
+     */
+    public function openRefuelModal($tankId): void
     {
-        $this->refuelTankId = $tankId;
+        $this->refuelTankId = (string) $tankId;
         $this->showRefuelModal = true;
     }
 
-    public function closeRefuelModal()
+    public function closeRefuelModal(): void
     {
         $this->showRefuelModal = false;
         $this->reset(['refuelTankId', 'refuelQuantity', 'refuelUnitPrice', 'refuelNotes']);
     }
 
-    public function confirmDeleteTank($tankId)
+    /**
+     * @param  int|string  $tankId
+     */
+    public function confirmDeleteTank($tankId): void
     {
-        $this->confirmDeleteTankId = $tankId;
+        $this->confirmDeleteTankId = (int) $tankId;
         $this->showDeleteConfirm = true;
     }
 
-    public function closeDeleteConfirm()
+    public function closeDeleteConfirm(): void
     {
         $this->showDeleteConfirm = false;
         $this->confirmDeleteTankId = null;
     }
 
-    public function performDeleteConfirmed()
+    public function performDeleteConfirmed(): void
     {
         if ($this->confirmDeleteTankId) {
             $this->deleteTank($this->confirmDeleteTankId);
@@ -366,11 +375,20 @@ class FuelManagement extends Component
 
     /**
      * Permanently delete a tank. Caller should ensure confirmation on the frontend.
+     *
+     * @param  int|string  $tankId
      */
-    public function deleteTank($tankId)
+    public function deleteTank($tankId): void
     {
         $user = Auth::user();
-        $teamId = $user?->current_team_id;
+
+        if (! $user instanceof User || ! $user->current_team_id) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Tank not found.']);
+
+            return;
+        }
+
+        $teamId = $user->current_team_id;
 
         $tank = FuelTank::where('team_id', $teamId)->find($tankId);
         if (! $tank) {
@@ -395,7 +413,7 @@ class FuelManagement extends Component
         }
     }
 
-    public function saveAllocation()
+    public function saveAllocation(): void
     {
         $this->validate([
             'allocationYear' => 'required|integer|min:2020|max:2100',
@@ -407,7 +425,7 @@ class FuelManagement extends Component
         ]);
 
         $user = Auth::user();
-        if (! $user || ! $user->current_team_id) {
+        if (! $user instanceof User || ! $user->current_team_id) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'User session invalid']);
 
             return;
@@ -453,7 +471,7 @@ class FuelManagement extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $teamId = auth()->user()->current_team_id;
 
@@ -491,10 +509,13 @@ class FuelManagement extends Component
 
         $aiRecommendations = collect();
         $aiInsights = collect();
-        if ($hasFuelData) {
-            $aiAnalysis = (new FuelPredictorAgent)->analyze(auth()->user()->currentTeam);
-            $aiRecommendations = collect($aiAnalysis['recommendations'] ?? [])->take(5);
-            $aiInsights = collect($aiAnalysis['insights'] ?? [])->take(3);
+        $currentTeam = auth()->user()?->currentTeam;
+        if ($hasFuelData && $currentTeam !== null) {
+            $aiAnalysis = (new FuelPredictorAgent)->analyze($currentTeam);
+            $recommendations = $aiAnalysis['recommendations'] ?? [];
+            $insights = $aiAnalysis['insights'] ?? [];
+            $aiRecommendations = collect(is_array($recommendations) ? $recommendations : [])->take(5);
+            $aiInsights = collect(is_array($insights) ? $insights : [])->take(3);
         }
 
         $tankStats = [
@@ -654,7 +675,10 @@ class FuelManagement extends Component
         ]);
     }
 
-    protected function getDateRange()
+    /**
+     * @return array{start: CarbonInterface, end: CarbonInterface}
+     */
+    protected function getDateRange(): array
     {
         return match ($this->selectedPeriod) {
             'today' => ['start' => now()->startOfDay(), 'end' => now()->endOfDay()],

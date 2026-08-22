@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Machine;
 use App\Models\MaintenanceSchedule;
+use App\Models\User;
 use App\Services\MaintenanceHealthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,26 +22,26 @@ class MaintenanceScheduleController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = MaintenanceSchedule::with(['machine', 'team'])
-            ->where('team_id', $request->user()->current_team_id);
+            ->where('team_id', $this->currentTeamId($request));
 
         // Filter by machine
         if ($request->filled('machine_id')) {
-            $query->where('machine_id', $request->machine_id);
+            $query->where('machine_id', $request->input('machine_id'));
         }
 
         // Filter by status
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', $request->input('status'));
         }
 
         // Filter by schedule type
         if ($request->filled('schedule_type')) {
-            $query->where('schedule_type', $request->schedule_type);
+            $query->where('schedule_type', $request->input('schedule_type'));
         }
 
         // Filter by maintenance type
         if ($request->filled('maintenance_type')) {
-            $query->where('maintenance_type', $request->maintenance_type);
+            $query->where('maintenance_type', $request->input('maintenance_type'));
         }
 
         // Filter due/overdue
@@ -84,7 +85,7 @@ class MaintenanceScheduleController extends Controller
         $machine = Machine::findOrFail($validated['machine_id']);
         $this->authorize('update', $machine);
 
-        $validated['team_id'] = $request->user()->current_team_id;
+        $validated['team_id'] = $this->currentTeamId($request);
         $validated['status'] = 'active';
 
         $schedule = MaintenanceSchedule::create($validated);
@@ -175,7 +176,7 @@ class MaintenanceScheduleController extends Controller
      */
     public function dueSchedules(Request $request): JsonResponse
     {
-        $teamId = $request->user()->current_team_id;
+        $teamId = $this->currentTeamId($request);
 
         $due = MaintenanceSchedule::where('team_id', $teamId)
             ->with('machine')
@@ -195,5 +196,20 @@ class MaintenanceScheduleController extends Controller
                 'overdue_count' => $overdue->count(),
             ],
         ]);
+    }
+
+    /**
+     * Resolve the authenticated user's current team id or abort.
+     */
+    private function currentTeamId(Request $request): int
+    {
+        $user = $request->user();
+        $teamId = $user instanceof User ? $user->current_team_id : null;
+
+        if ($teamId === null) {
+            abort(401);
+        }
+
+        return $teamId;
     }
 }

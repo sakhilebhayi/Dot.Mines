@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
      *
      * @var array
      */
+    /** @var array<int, class-string> */
     protected $commands = [
         PerformShiftChange::class,
     ];

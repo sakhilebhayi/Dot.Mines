@@ -140,6 +140,8 @@ class OperatorFatigueSeeder extends Seeder
 
     /**
      * Get shift details based on shift type
+     *
+     * @return array{string, string, float|int}
      */
     private function getShiftDetails(string $shiftType): array
     {

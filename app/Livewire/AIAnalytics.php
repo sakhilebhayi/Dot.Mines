@@ -7,7 +7,7 @@ use App\Models\AIAnalysisSession;
 use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
 use App\Models\AIRecommendation;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
@@ -20,7 +20,7 @@ class AIAnalytics extends Component
      *
      * @psalm-suppress PossiblyUnusedMethod -- invoked by Livewire's lazy-loading lifecycle
      */
-    public function placeholder(): \Illuminate\Contracts\View\View
+    public function placeholder(): View
     {
         return view('livewire.placeholders.dashboard');
     }

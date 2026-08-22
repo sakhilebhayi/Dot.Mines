@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SyncController;
 use App\Models\Machine;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -44,7 +46,19 @@ Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(functi
     });
 
     Route::post('/user/team/{team_id}', function (Request $request, $team_id) {
-        $request->user()->update(['current_team_id' => $team_id]);
+        $user = $request->user();
+
+        if (! $user instanceof User) {
+            abort(401);
+        }
+
+        $team = Team::query()->findOrFail((int) $team_id);
+
+        if (! $user->belongsToTeam($team)) {
+            abort(403, 'You do not belong to this team.');
+        }
+
+        $user->update(['current_team_id' => $team->id]);
 
         return response()->json(['message' => 'Team switched successfully']);
     });

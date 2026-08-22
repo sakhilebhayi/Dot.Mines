@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -28,17 +30,19 @@ trait RealtimeUpdates
     /**
      * Get the current user
      */
-    public function getCurrentUser()
+    public function getCurrentUser(): ?User
     {
-        return Auth::user();
+        $user = Auth::user();
+
+        return $user instanceof User ? $user : null;
     }
 
     /**
      * Get the current team
      */
-    public function getCurrentTeam()
+    public function getCurrentTeam(): ?Team
     {
-        return Auth::user()->currentTeam;
+        return $this->getCurrentUser()?->currentTeam;
     }
 
     /**

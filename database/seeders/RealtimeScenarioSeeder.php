@@ -65,6 +65,9 @@ class RealtimeScenarioSeeder extends Seeder
         $this->command->info('  Viewer:    viewer@roundebult.local / password');
     }
 
+    /**
+     * @return list<User>
+     */
     private function createUsers(Team $team): array
     {
         $userData = [
@@ -91,6 +94,9 @@ class RealtimeScenarioSeeder extends Seeder
         return $users;
     }
 
+    /**
+     * @return list<MineArea>
+     */
     private function createMineAreas(Team $team): array
     {
         $areas = [
@@ -141,6 +147,10 @@ class RealtimeScenarioSeeder extends Seeder
         return $mineAreas;
     }
 
+    /**
+     * @param  list<MineArea>  $mineAreas
+     * @return list<Machine>
+     */
     private function createMachines(Team $team, array $mineAreas): array
     {
         $machineData = [
@@ -163,15 +173,16 @@ class RealtimeScenarioSeeder extends Seeder
         $machines = [];
         foreach ($machineData as $data) {
             $data['team_id'] = $team->id;
-            if (isset($data['mine_area_id']) && $data['mine_area_id']) {
-                $data['mine_area_id'] = $mineAreas[$data['mine_area_id'] - 1]->id;
-            }
+            $data['mine_area_id'] = $mineAreas[$data['mine_area_id'] - 1]->id;
             $machines[] = Machine::create($data);
         }
 
         return $machines;
     }
 
+    /**
+     * @return list<Geofence>
+     */
     private function createGeofences(Team $team): array
     {
         $geofenceData = [
@@ -189,6 +200,11 @@ class RealtimeScenarioSeeder extends Seeder
         return $geofences;
     }
 
+    /**
+     * @param  list<Machine>  $machines
+     * @param  list<User>  $users
+     * @return list<MaintenanceRecord>
+     */
     private function createMaintenanceRecords(Team $team, array $machines, array $users): array
     {
         $records = [];
@@ -199,6 +215,11 @@ class RealtimeScenarioSeeder extends Seeder
         return $records;
     }
 
+    /**
+     * @param  list<Machine>  $machines
+     * @param  list<User>  $users
+     * @return list<FuelTransaction>
+     */
     private function createFuelTransactions(Team $team, array $machines, array $users): array
     {
         $transactions = [];
@@ -219,18 +240,31 @@ class RealtimeScenarioSeeder extends Seeder
         return $transactions;
     }
 
+    /**
+     * @param  list<Machine>  $machines
+     * @return array{}
+     */
     private function createHealthStatuses(array $machines): array
     {
         // Skip health statuses for now - table structure varies
         return [];
     }
 
+    /**
+     * @param  list<Geofence>  $geofences
+     * @param  list<Machine>  $machines
+     * @return array{}
+     */
     private function createGeofenceEntries(array $machines, array $geofences): array
     {
         // Skip geofence entries due to complex schema requirements
         return [];
     }
 
+    /**
+     * @param  list<Machine>  $machines
+     * @return list<Alert>
+     */
     private function createAlerts(Team $team, array $machines): array
     {
         $alerts = [];

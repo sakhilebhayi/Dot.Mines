@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\FuelTank;
+use App\Models\User;
 use App\Services\FuelManagementService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,32 +19,32 @@ class FuelTankController extends Controller
     /**
      * Get all fuel tanks for team
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $teamId = $request->user()->currentTeam->id;
+        $teamId = $this->currentTeamId($request);
 
         $query = FuelTank::where('team_id', $teamId)
             ->with(['mineArea:id,name']);
 
         // Filters
         if ($request->has('status')) {
-            $query->where('status', $request->status);
+            $query->where('status', $request->input('status'));
         }
 
         if ($request->has('fuel_type')) {
-            $query->where('fuel_type', $request->fuel_type);
+            $query->where('fuel_type', $request->input('fuel_type'));
         }
 
-        if ($request->has('low_fuel') && $request->low_fuel) {
+        if ($request->has('low_fuel') && $request->input('low_fuel')) {
             $query->lowFuel();
         }
 
-        if ($request->has('critical') && $request->critical) {
+        if ($request->has('critical') && $request->input('critical')) {
             $query->critical();
         }
 
         if ($request->has('mine_area_id')) {
-            $query->where('mine_area_id', $request->mine_area_id);
+            $query->where('mine_area_id', $request->input('mine_area_id'));
         }
 
         $tanks = $query->latest()->paginate(20);
@@ -63,7 +65,7 @@ class FuelTankController extends Controller
     /**
      * Create new fuel tank
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -87,7 +89,7 @@ class FuelTankController extends Controller
         }
 
         $data = $validator->validated();
-        $data['team_id'] = $request->user()->currentTeam->id;
+        $data['team_id'] = $this->currentTeamId($request);
         $data['current_level_liters'] = $data['current_level_liters'] ?? 0;
 
         $tank = FuelTank::create($data);
@@ -98,10 +100,10 @@ class FuelTankController extends Controller
     /**
      * Get single fuel tank
      */
-    public function show(Request $request, FuelTank $fuelTank)
+    public function show(Request $request, FuelTank $fuelTank): JsonResponse
     {
         // Authorization check
-        if ($fuelTank->team_id !== $request->user()->currentTeam->id) {
+        if ($fuelTank->team_id !== $this->currentTeamId($request)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -121,10 +123,10 @@ class FuelTankController extends Controller
     /**
      * Update fuel tank
      */
-    public function update(Request $request, FuelTank $fuelTank)
+    public function update(Request $request, FuelTank $fuelTank): JsonResponse
     {
         // Authorization check
-        if ($fuelTank->team_id !== $request->user()->currentTeam->id) {
+        if ($fuelTank->team_id !== $this->currentTeamId($request)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -156,10 +158,10 @@ class FuelTankController extends Controller
     /**
      * Delete fuel tank
      */
-    public function destroy(Request $request, FuelTank $fuelTank)
+    public function destroy(Request $request, FuelTank $fuelTank): JsonResponse
     {
         // Authorization check
-        if ($fuelTank->team_id !== $request->user()->currentTeam->id) {
+        if ($fuelTank->team_id !== $this->currentTeamId($request)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -171,10 +173,10 @@ class FuelTankController extends Controller
     /**
      * Get tank statistics
      */
-    public function statistics(Request $request, FuelTank $fuelTank)
+    public function statistics(Request $request, FuelTank $fuelTank): JsonResponse
     {
         // Authorization check
-        if ($fuelTank->team_id !== $request->user()->currentTeam->id) {
+        if ($fuelTank->team_id !== $this->currentTeamId($request)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -214,5 +216,20 @@ class FuelTankController extends Controller
         ];
 
         return response()->json($stats);
+    }
+
+    /**
+     * Resolve the authenticated user's current team id or abort.
+     */
+    private function currentTeamId(Request $request): int
+    {
+        $user = $request->user();
+        $teamId = $user instanceof User ? $user->currentTeam?->id : null;
+
+        if ($teamId === null) {
+            abort(401);
+        }
+
+        return $teamId;
     }
 }

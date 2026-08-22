@@ -25,18 +25,24 @@ class ComprehensiveDataSeeder extends Seeder
 {
     private Team $team;
 
-    private $aiAgent;
+    private AIAgent $aiAgent;
 
+    /** @var list<Machine> */
     private array $machines = [];
 
+    /** @var list<MineArea> */
     private array $mineAreas = [];
 
+    /** @var list<Machine> */
     private array $excavators = [];
 
+    /** @var list<Machine> */
     private array $haulers = [];
 
+    /** @var list<User> */
     private array $users = [];
 
+    /** @var list<array<string, mixed>> */
     private array $allTeams = [];
 
     /**
@@ -120,6 +126,9 @@ class ComprehensiveDataSeeder extends Seeder
         $this->printSummary();
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     private function getTeamConfigurations(): array
     {
         return [
@@ -181,6 +190,9 @@ class ComprehensiveDataSeeder extends Seeder
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
     private function createTeamAndUsers($config): void
     {
         $this->command->info('Creating team and users...');
@@ -226,6 +238,9 @@ class ComprehensiveDataSeeder extends Seeder
         $this->command->info('Created team and '.count($config['users']).' users');
     }
 
+    /**
+     * @param  int  $areaCount
+     */
     private function createMineAreas($areaCount): void
     {
         $this->command->info('Creating mine areas...');
@@ -288,6 +303,9 @@ class ComprehensiveDataSeeder extends Seeder
         $this->command->info('Created '.count($this->mineAreas).' mine areas');
     }
 
+    /**
+     * @param  array<string, mixed>  $machineConfig
+     */
     private function createMachines($machineConfig): void
     {
         $this->command->info('Creating fleet machines...');
@@ -459,7 +477,7 @@ class ComprehensiveDataSeeder extends Seeder
         $this->command->info('Assigning machines to mine areas...');
 
         // Assign excavators to pits
-        $pits = array_filter($this->mineAreas, fn ($area) => $area->type === 'pit');
+        $pits = array_filter($this->mineAreas, fn ($area) => $area->getAttribute('type') === 'pit');
 
         foreach ($this->excavators as $index => $excavator) {
             $pit = $pits[array_rand($pits)];
@@ -502,12 +520,12 @@ class ComprehensiveDataSeeder extends Seeder
                 'mine_area_id' => $area->id,
                 'name' => "{$area->name} Boundary",
                 'description' => "Safety boundary for {$area->name}",
-                'type' => $area->type,
+                'type' => $area->getAttribute('type'),
                 'center_latitude' => $area->center_latitude,
                 'center_longitude' => $area->center_longitude,
                 'coordinates' => $area->coordinates,
-                'area_sqm' => $area->area_sqm,
-                'perimeter_m' => $area->perimeter_m,
+                'area_sqm' => $area->getAttribute('area_sqm'),
+                'perimeter_m' => $area->getAttribute('perimeter_m'),
                 'status' => 'active',
             ]);
         }
@@ -529,7 +547,7 @@ class ComprehensiveDataSeeder extends Seeder
             $loadingPoint = $hauler->mineArea;
             $dumpPoint = array_values(array_filter(
                 $this->mineAreas,
-                fn ($area) => in_array($area->type, ['stockpile', 'dump'])
+                fn ($area) => in_array($area->getAttribute('type'), ['stockpile', 'dump'])
             ))[0] ?? null;
 
             if (! $loadingPoint || ! $dumpPoint) {
@@ -647,7 +665,7 @@ class ComprehensiveDataSeeder extends Seeder
         $productionCount = 0;
 
         // Get only pit mine areas
-        $pits = array_filter($this->mineAreas, fn ($area) => $area->type === 'pit');
+        $pits = array_filter($this->mineAreas, fn ($area) => $area->getAttribute('type') === 'pit');
 
         // Generate production for last 30 days
         for ($day = 30; $day >= 0; $day--) {
@@ -675,7 +693,7 @@ class ComprehensiveDataSeeder extends Seeder
                 $loads = $machineCount * rand(20, 40);
                 $cycles = $machineCount * rand(15, 30);
                 $tonnage = $baseTonnage + rand(-200, 200);
-                $bcm = $tonnage * rand(0.7, 0.9); // BCM typically less than tonnage
+                $bcm = $tonnage * (rand(70, 90) / 100); // BCM typically less than tonnage
 
                 MineAreaProduction::create([
                     'mine_area_id' => $pit->id,
@@ -1027,7 +1045,7 @@ class ComprehensiveDataSeeder extends Seeder
 
                 $scheduledDate = now()->subDays($daysAgo);
                 $startedAt = $status !== 'scheduled' ? $scheduledDate->copy()->addHours(rand(1, 3)) : null;
-                $completedAt = $status === 'completed' ? $startedAt->copy()->addHours(rand(1, 8)) : null;
+                $completedAt = $status === 'completed' && $startedAt !== null ? $startedAt->copy()->addHours(rand(1, 8)) : null;
 
                 $laborHours = $completedAt ? $completedAt->diffInHours($startedAt) + (rand(0, 30) / 10) : rand(2, 8);
                 $laborCost = $laborHours * rand(350, 500); // R350-R500 per hour
@@ -1159,6 +1177,9 @@ class ComprehensiveDataSeeder extends Seeder
         return $work[array_rand($work)];
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     private function getRandomPartsUsed(): array
     {
         $partsSets = [
@@ -1182,6 +1203,9 @@ class ComprehensiveDataSeeder extends Seeder
         return $partsSets[array_rand($partsSets)];
     }
 
+    /**
+     * @return list<array{lat: float, lng: float}>
+     */
     private function generatePolygonCoordinates(float $centerLat, float $centerLon, float $radius): array
     {
         $coordinates = [];

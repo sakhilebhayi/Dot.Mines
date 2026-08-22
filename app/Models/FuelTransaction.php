@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $from_tank_id
  * @property int|null $to_tank_id
  * @property string $transaction_type
+ * @property string|null $receipt_file_path
  * @property float|numeric-string|null $unit_price
  * @property Carbon|null $transaction_date
  * @property-read FuelTank|null $fuelTank

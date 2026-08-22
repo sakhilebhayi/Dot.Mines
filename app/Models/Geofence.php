@@ -99,13 +99,16 @@ class Geofence extends Model
      * Get all active machines currently in this geofence
      */
     /** @return Collection<int, Machine|null> */
+    /** @return Collection<int, Machine> */
     public function activeMachines(): Collection
     {
         return $this->entries()
             ->where('exit_time', null)
             ->with('machine')
             ->get()
-            ->pluck('machine');
+            ->pluck('machine')
+            ->filter()
+            ->values();
     }
 
     /**

@@ -55,6 +55,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Collection<int, MachineMetric> $metrics
  * @property-read MachineMetric|null $latestMetric
  * @property-read MachineMetric|null $latestEngineHoursMetric
+ * @property-read Collection<int, MaintenanceRecord> $maintenanceRecords
  * @property int|null $sync_version
  * @property float|numeric-string|null $operating_hours
  * @property float|numeric-string|null $total_distance_km

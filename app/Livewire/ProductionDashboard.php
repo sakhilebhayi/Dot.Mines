@@ -5,16 +5,35 @@ namespace App\Livewire;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\OperatorFatigue;
+use App\Models\ProductionForecast;
 use App\Models\ProductionRecord;
+use App\Models\ProductionTarget;
 use App\Models\Team;
 use App\Services\ProductionService;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * @property-read LengthAwarePaginator<int, ProductionRecord> $productionRecords
+ * @property-read array<string, mixed> $statistics
+ * @property-read Collection<string, array<string, mixed>> $trend
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductionTarget> $targets
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductionForecast> $forecasts
+ * @property-read array<string, mixed> $summary
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, MineArea> $mineAreas
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Machine> $machines
+ * @property-read array{}|Collection<int, array<string, mixed>> $dailyChart
+ * @property-read array{} $materialBreakdown
+ * @property-read array<int, array{operator_name: string, machine_name: string|null, shift_type: string, hours_worked: float, consecutive_days: float, fatigue_score: int, alert_level: string}> $fatigueData
+ * @property-read array<string, int> $fatigueStats
+ * @property-read array{}|Collection<int, array<string, mixed>> $areaPerformance
+ */
 #[Lazy]
 class ProductionDashboard extends Component
 {
@@ -81,7 +100,7 @@ class ProductionDashboard extends Component
         return $this->productionService;
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->productionService = app(ProductionService::class);
         $this->team = Auth::user()->currentTeam;
@@ -164,7 +183,7 @@ class ProductionDashboard extends Component
     /**
      * Ensure services and team are available after Livewire hydration.
      */
-    public function hydrate()
+    public function hydrate(): void
     {
         if (! $this->productionService) {
             $this->productionService = app(ProductionService::class);
@@ -174,7 +193,10 @@ class ProductionDashboard extends Component
         $this->teamId = $this->team?->id ?? $this->teamId;
     }
 
-    public function getProductionRecordsProperty()
+    /**
+     * @return LengthAwarePaginator<int, ProductionRecord>
+     */
+    public function getProductionRecordsProperty(): LengthAwarePaginator
     {
         $query = ProductionRecord::forTeam($this->teamId);
 
@@ -204,7 +226,10 @@ class ProductionDashboard extends Component
         return $query->orderByDesc('record_date')->paginate(15);
     }
 
-    public function getStatisticsProperty()
+    /**
+     * @return array<string, mixed>
+     */
+    public function getStatisticsProperty(): array
     {
         // KPI tiles used to be pinned to a fixed last-30-days window no
         // matter what period the user selected.
@@ -223,7 +248,10 @@ class ProductionDashboard extends Component
         );
     }
 
-    public function getTrendProperty()
+    /**
+     * @return Collection<string, array<string, mixed>>
+     */
+    public function getTrendProperty(): Collection
     {
         // The daily chart follows the selected range too (was fixed 30 days).
         return $this->productionService()->getProductionTrend(
@@ -234,17 +262,26 @@ class ProductionDashboard extends Component
         );
     }
 
-    public function getTargetsProperty()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, ProductionTarget>
+     */
+    public function getTargetsProperty(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->productionService()->getActiveTargets($this->teamId);
     }
 
-    public function getForecastsProperty()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, ProductionForecast>
+     */
+    public function getForecastsProperty(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->productionService()->getRecentForecasts($this->teamId, 7);
     }
 
-    public function getSummaryProperty()
+    /**
+     * @return array<string, mixed>
+     */
+    public function getSummaryProperty(): array
     {
         $stats = $this->statistics;
         $activeAreas = MineArea::forTeam($this->teamId)->where('status', 'active')->count();
@@ -262,16 +299,25 @@ class ProductionDashboard extends Component
         ];
     }
 
-    public function getMineAreasProperty()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, MineArea>
+     */
+    public function getMineAreasProperty(): \Illuminate\Database\Eloquent\Collection
     {
         return MineArea::forTeam($this->teamId)->get();
     }
 
-    public function getMachinesProperty()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Machine>
+     */
+    public function getMachinesProperty(): \Illuminate\Database\Eloquent\Collection
     {
         return Machine::where('team_id', $this->teamId)->get();
     }
 
+    /**
+     * @return array{}|Collection<int, array<string, mixed>>
+     */
     public function getDailyChartProperty()
     {
         $trend = $this->trend;
@@ -288,7 +334,10 @@ class ProductionDashboard extends Component
         })->toArray();
     }
 
-    public function getMaterialBreakdownProperty()
+    /**
+     * @return array{}
+     */
+    public function getMaterialBreakdownProperty(): array
     {
         // Production records carry no material dimension on this schema, so
         // there is nothing real to aggregate -- the blade renders its
@@ -353,6 +402,9 @@ class ProductionDashboard extends Component
         ];
     }
 
+    /**
+     * @return array{}|Collection<int, array<string, mixed>>
+     */
     public function getAreaPerformanceProperty()
     {
         $mineAreas = $this->mineAreas;
@@ -379,22 +431,25 @@ class ProductionDashboard extends Component
         })->values()->toArray();
     }
 
-    public function openCreateModal()
+    public function openCreateModal(): void
     {
         $this->showCreateModal = true;
         $this->resetForm();
     }
 
-    public function closeCreateModal()
+    public function closeCreateModal(): void
     {
         $this->showCreateModal = false;
         $this->resetForm();
     }
 
-    public function openEditModal($id)
+    /**
+     * @param  int|string  $id
+     */
+    public function openEditModal($id): void
     {
         $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($id);
-        $this->editingRecordId = $id;
+        $this->editingRecordId = (int) $id;
         $this->record_date = $record->record_date->format('Y-m-d');
         $this->shift = $record->shift;
         $this->quantity_produced = $record->quantity_produced;
@@ -406,13 +461,13 @@ class ProductionDashboard extends Component
         $this->showEditModal = true;
     }
 
-    public function closeEditModal()
+    public function closeEditModal(): void
     {
         $this->showEditModal = false;
         $this->resetForm();
     }
 
-    public function saveRecord()
+    public function saveRecord(): void
     {
         $validated = $this->validate([
             'record_date' => 'required|date',
@@ -444,14 +499,17 @@ class ProductionDashboard extends Component
         $this->dispatch('record-saved');
     }
 
-    public function deleteRecord($id)
+    /**
+     * @param  int|string  $id
+     */
+    public function deleteRecord($id): void
     {
         /** @var ProductionRecord $record */
         $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($id);
         $this->productionService()->deleteProductionRecord($record);
     }
 
-    public function resetForm()
+    public function resetForm(): void
     {
         $this->record_date = Carbon::today()->format('Y-m-d');
         $this->shift = 'day';
@@ -464,13 +522,16 @@ class ProductionDashboard extends Component
         $this->editingRecordId = null;
     }
 
-    public function switchView($mode)
+    /**
+     * @param  string  $mode
+     */
+    public function switchView($mode): void
     {
         $this->viewMode = $mode;
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.production-dashboard', [
             'records' => $this->productionRecords,

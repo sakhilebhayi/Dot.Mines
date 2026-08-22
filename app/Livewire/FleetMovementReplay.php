@@ -6,9 +6,11 @@ use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FleetMovementReplay extends Component
 {
@@ -20,8 +22,10 @@ class FleetMovementReplay extends Component
      */
     public ?int $selectedMachine = null;
 
+    /** @var array<int|string, mixed> */
     public array $activityFeed = [];
 
+    /** @var array<int|string, mixed> */
     public array $machineActivities = [];
 
     public bool $showActivities = false;
@@ -66,7 +70,7 @@ class FleetMovementReplay extends Component
         'loadReplay' => 'loadReplay',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->isLoading = true;
         $this->startDate = now()->subDays(1)->format('Y-m-d');
@@ -75,7 +79,7 @@ class FleetMovementReplay extends Component
         $this->isLoading = false;
     }
 
-    public function loadActivityFeed()
+    public function loadActivityFeed(): void
     {
         $team = Auth::user()->currentTeam;
         $this->activityFeed = ActivityLog::where('team_id', $team->id)
@@ -91,7 +95,7 @@ class FleetMovementReplay extends Component
             ->toArray();
     }
 
-    public function showRecentActivities()
+    public function showRecentActivities(): void
     {
         $team = Auth::user()->currentTeam;
 
@@ -123,19 +127,19 @@ class FleetMovementReplay extends Component
         $this->showActivities = true;
     }
 
-    public function hideRecentActivities()
+    public function hideRecentActivities(): void
     {
         $this->showActivities = false;
         $this->machineActivities = [];
     }
 
-    public function showRoutes()
+    public function showRoutes(): void
     {
         // Trigger frontend to highlight routes and center
         $this->dispatch('show-routes');
     }
 
-    public function render()
+    public function render(): View
     {
         $team = Auth::user()->currentTeam;
         $machines = Machine::where('team_id', $team->id)
@@ -267,41 +271,47 @@ class FleetMovementReplay extends Component
         ]);
     }
 
-    public function setMachine($machineId)
+    /**
+     * @param  int|string  $machineId
+     */
+    public function setMachine($machineId): void
     {
-        $this->selectedMachine = $machineId;
+        $this->selectedMachine = (int) $machineId;
         $this->currentPosition = 0;
         $this->isPlaying = false;
         $this->dispatch('machine-selected');
     }
 
-    public function loadReplay()
+    public function loadReplay(): void
     {
         $this->currentPosition = 0;
         $this->isPlaying = false;
         $this->dispatch('replay-loaded');
     }
 
-    public function play()
+    public function play(): void
     {
         $this->isPlaying = true;
         $this->dispatch('replay-play', speed: $this->playbackSpeed);
     }
 
-    public function pause()
+    public function pause(): void
     {
         $this->isPlaying = false;
         $this->dispatch('replay-pause');
     }
 
-    public function stop()
+    public function stop(): void
     {
         $this->isPlaying = false;
         $this->currentPosition = 0;
         $this->dispatch('replay-stop');
     }
 
-    public function updated($propertyName)
+    /**
+     * @param  string  $propertyName
+     */
+    public function updated($propertyName): void
     {
         // When currentPosition is updated via wire:model, dispatch seek event
         if ($propertyName === 'currentPosition') {
@@ -313,31 +323,40 @@ class FleetMovementReplay extends Component
         }
     }
 
-    public function setSpeed($speed)
+    /**
+     * @param  float|int|string  $speed
+     */
+    public function setSpeed($speed): void
     {
-        $this->playbackSpeed = $speed;
+        $this->playbackSpeed = (float) $speed;
         if ($this->isPlaying) {
             $this->dispatch('replay-speed-change', speed: $speed);
         }
     }
 
-    public function seekTo($position)
+    /**
+     * @param  float|int|string  $position
+     */
+    public function seekTo($position): void
     {
-        $this->currentPosition = $position;
+        $this->currentPosition = (int) $position;
         $this->dispatch('replay-seek', position: $position);
     }
 
-    public function handlePlaybackStopped()
+    public function handlePlaybackStopped(): void
     {
         $this->isPlaying = false;
     }
 
-    public function handlePositionUpdated($data)
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function handlePositionUpdated($data): void
     {
         $this->currentPosition = $data['position'] ?? 0;
     }
 
-    public function nextFrame()
+    public function nextFrame(): void
     {
         if ($this->currentPosition < $this->totalPositions - 1) {
             $this->currentPosition++;
@@ -345,7 +364,7 @@ class FleetMovementReplay extends Component
         }
     }
 
-    public function previousFrame()
+    public function previousFrame(): void
     {
         if ($this->currentPosition > 0) {
             $this->currentPosition--;
@@ -353,7 +372,7 @@ class FleetMovementReplay extends Component
         }
     }
 
-    public function loadRecentReplay()
+    public function loadRecentReplay(): void
     {
         // Load the most recent replay data automatically
         $team = Auth::user()->currentTeam;
@@ -375,12 +394,15 @@ class FleetMovementReplay extends Component
         }
     }
 
+    /**
+     * @return StreamedResponse|null
+     */
     public function exportReplayData()
     {
         if ($this->selectedMachine === null) {
             session()->flash('error', 'Please select a machine to export.');
 
-            return;
+            return null;
         }
 
         $team = Auth::user()->currentTeam;
@@ -389,7 +411,7 @@ class FleetMovementReplay extends Component
         if (! $machine) {
             session()->flash('error', 'Machine not found');
 
-            return;
+            return null;
         }
 
         $start = Carbon::parse($this->startDate.' '.$this->startTime);
@@ -406,7 +428,7 @@ class FleetMovementReplay extends Component
         if ($locationHistory->isEmpty()) {
             session()->flash('error', 'No movement data found for the selected machine and date range.');
 
-            return;
+            return null;
         }
 
         $csvData = [];
@@ -424,6 +446,10 @@ class FleetMovementReplay extends Component
 
         $filename = 'replay_'.$machine->name.'_'.now()->format('Y-m-d_His').'.csv';
         $handle = fopen('php://temp', 'r+');
+
+        if ($handle === false) {
+            throw new \RuntimeException('Unable to open temporary stream for replay export.');
+        }
 
         foreach ($csvData as $row) {
             fputcsv($handle, $row);

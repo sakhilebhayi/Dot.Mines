@@ -38,8 +38,11 @@ Route::get('/', function () {
 // natively. There's no Jetstream equivalent for a Cookie Policy, so this one is wired by hand,
 // following the exact same Markdown-source convention.
 Route::get('/cookies', function () {
+    $path = Jetstream::localizedMarkdownPath('cookies.md');
+    $markdown = is_string($path) ? file_get_contents($path) : false;
+
     return view('cookies', [
-        'cookies' => Str::markdown(file_get_contents(Jetstream::localizedMarkdownPath('cookies.md'))),
+        'cookies' => Str::markdown($markdown === false ? '' : $markdown),
     ]);
 })->name('cookies');
 
