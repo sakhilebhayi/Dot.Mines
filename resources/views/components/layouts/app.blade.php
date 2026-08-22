@@ -52,7 +52,7 @@
             @notify.window="addNotification($event.detail.type, $event.detail.message)"
             @keydown.escape.window="notifications = []"
             aria-label="Notifications"
-            class="fixed top-24 right-4 z-[10000] space-y-2 max-w-md">
+            class="fixed top-24 right-4 z-[1200] space-y-2 max-w-md">
             <template x-for="notification in notifications" :key="notification.id">
                 <div x-show="true"
                      :role="notification.type === 'error' ? 'alert' : 'status'"

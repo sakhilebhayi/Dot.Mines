@@ -321,7 +321,7 @@
 
                 @if($showRecommendationConfirm && $pendingRecommendationId)
                     @php $pending = \App\Models\AIRecommendation::find($pendingRecommendationId); @endphp
-                    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
                         <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 w-96 max-h-80 overflow-y-auto">
                             <div class="mb-4">
                                 <h3 class="text-lg font-semibold text-[var(--stone)]">Confirm Action</h3>

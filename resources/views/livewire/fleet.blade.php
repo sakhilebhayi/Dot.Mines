@@ -662,7 +662,7 @@
 
     <!-- Create/Edit Modal -->
     @if ($showCreateModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeModal">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto" wire:click="closeModal">
             <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 w-full max-w-2xl" @click.stop>
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold text-[var(--stone)]">
@@ -846,7 +846,7 @@
 
     <!-- Mine Area Assignment Modal -->
     @if ($showMineAreaAssignModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-8 w-full max-w-md animate-scale-in">
                 <h2 class="text-xl font-display font-semibold text-[var(--stone)] mb-4 flex items-center gap-2">
                     Assign Machine to Mine Area
@@ -870,7 +870,7 @@
 
     <!-- Excavator Assignment Modal -->
     @if ($showAssignModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeAssignModal">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto" wire:click="closeAssignModal">
             <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 w-full max-w-md" @click.stop>
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold text-[var(--stone)]">Assign to Excavator</h2>

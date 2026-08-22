@@ -834,7 +834,7 @@
 
     <!-- Book Maintenance Modal -->
     @if($showBookingModal)
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeBookingModal">
+    <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto" wire:click="closeBookingModal">
         <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-[var(--line)] text-[var(--stone)] shadow-lg" x-on:click.stop>
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Book Maintenance</h2>

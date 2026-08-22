@@ -252,7 +252,7 @@
             $isSpeedAlert = in_array(strtolower($selectedAlert->type ?? ''), ['speed', 'speed_limit', 'overspeed']);
             $modalSizeClass = $isSpeedAlert ? 'w-full max-w-3xl max-h-[80vh]' : 'w-96 max-h-96';
         @endphp
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 {{ $modalSizeClass }} overflow-y-auto">
                 <div class="flex justify-between items-start mb-4">
                     <h3 class="text-lg font-semibold text-[var(--stone)]">{{ $selectedAlert->title }}</h3>
@@ -503,7 +503,7 @@
     <!-- Dismiss Confirmation Modal -->
     @if($showDismissConfirm && isset($pendingDismissAlertId))
         @php $pendingAlert = \App\Models\Alert::find($pendingDismissAlertId); @endphp
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 w-96 max-h-80 overflow-y-auto">
                 <div class="mb-4">
                     <h3 class="text-lg font-semibold text-[var(--stone)]">Confirm Dismissal</h3>

@@ -79,3 +79,39 @@ document.addEventListener('livewire:load', function () {
 		});
 	}
 });
+
+// Body scroll lock for standardised overlays (`data-app-overlay`). These
+// modals mount/unmount via Blade @if, so DOM presence is the open signal.
+// Jetstream modals lock their own scroll via x-trap.noscroll and are not
+// marked. Padding compensates for the vanished scrollbar so the page
+// underneath never shifts when the lock engages.
+(function () {
+	let locked = false;
+
+	const syncScrollLock = () => {
+		const open = document.querySelector('[data-app-overlay]') !== null;
+		if (open === locked) return;
+		locked = open;
+		if (open) {
+			const scrollbar = window.innerWidth - document.documentElement.clientWidth;
+			document.body.style.overflow = 'hidden';
+			if (scrollbar > 0) {
+				document.body.style.paddingRight = `${scrollbar}px`;
+			}
+		} else {
+			document.body.style.overflow = '';
+			document.body.style.paddingRight = '';
+		}
+	};
+
+	const observer = new MutationObserver(syncScrollLock);
+	const start = () => {
+		observer.observe(document.body, { childList: true, subtree: true });
+		syncScrollLock();
+	};
+	if (document.body) {
+		start();
+	} else {
+		document.addEventListener('DOMContentLoaded', start);
+	}
+})();

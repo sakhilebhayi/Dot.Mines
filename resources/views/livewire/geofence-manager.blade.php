@@ -330,7 +330,7 @@
 
     <!-- Create/Edit Modal -->
     @if ($showCreateModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeModal">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto" wire:click="closeModal">
             <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 w-full max-w-2xl" @click.stop>
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold text-[var(--stone)]">

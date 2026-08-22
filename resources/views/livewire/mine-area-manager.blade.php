@@ -361,7 +361,7 @@
 
     <!-- Create/Edit Modal -->
     @if($showCreateModal || $showEditModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[var(--line)]">
                 <div class="sticky top-0 bg-[var(--ink-soft)] border-b border-[var(--line)] p-6 flex items-center justify-between">
                     <h2 class="text-xl font-bold text-[var(--stone)]">

@@ -142,8 +142,8 @@
 
     {{-- Record / classify dialog --}}
     @if ($showRecordModal || $classifyingEventId !== null)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-black/60" wire:click="cancelDialogs" aria-hidden="true"></div>
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="absolute inset-0" wire:click="cancelDialogs" aria-hidden="true"></div>
             <div class="relative w-full max-w-lg bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6"
                 role="dialog" aria-modal="true" aria-labelledby="loss-dialog-title">
                 <h4 id="loss-dialog-title" class="text-lg font-semibold text-[var(--stone)] mb-4">
