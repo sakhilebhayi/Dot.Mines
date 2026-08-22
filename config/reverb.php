@@ -84,7 +84,16 @@ return [
                     'scheme' => env('REVERB_SCHEME', 'https'),
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
                 ],
-                'allowed_origins' => [env('APP_URL', 'http://localhost')],
+                /*
+                 * Reverb compares the Origin header's HOST against these
+                 * entries, so they must be hostnames -- the old full-URL
+                 * APP_URL entry ('https://...') could never match anything.
+                 * REVERB_ALLOWED_ORIGINS overrides (comma-separated hosts).
+                 */
+                'allowed_origins' => explode(',', (string) env(
+                    'REVERB_ALLOWED_ORIGINS',
+                    parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost',
+                )),
                 'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
                 'activity_timeout' => env('REVERB_APP_ACTIVITY_TIMEOUT', 30),
                 'max_connections' => env('REVERB_APP_MAX_CONNECTIONS', 10_000),
