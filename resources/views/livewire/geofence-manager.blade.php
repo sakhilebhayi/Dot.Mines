@@ -17,6 +17,7 @@
                     </svg>
                     <span>Create a mine area first</span>
                 </div>
+
                 <a href="{{ route('mine-areas') }}" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-[var(--line)] text-[var(--stone)] rounded-lg transition-colors flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -26,6 +27,34 @@
             </div>
         @endif
     </div>
+
+    @php $suggestions = $this->zoneSuggestions; @endphp
+    @if (count($suggestions) > 0)
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold text-[var(--stone)] mb-1">Suggested zones from GPS history</h2>
+            <p class="text-xs text-[var(--sand)] mb-4">
+                Places where your machines repeatedly dwell with the engine running, derived from the last 14 days of real telemetry.
+                Nothing is created until you confirm, name, and type each zone yourself.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                @foreach ($suggestions as $index => $suggestion)
+                    <div wire:key="zone-suggestion-{{ $index }}" class="border border-[var(--line)] rounded-lg p-4 bg-[var(--ink)]">
+                        <p class="text-sm font-medium text-[var(--stone)]">
+                            {{ round($suggestion['center_latitude'], 4) }}, {{ round($suggestion['center_longitude'], 4) }}
+                        </p>
+                        <p class="text-xs text-[var(--sand)] mt-1">
+                            {{ $suggestion['readings'] }} dwell readings · {{ $suggestion['machines'] }} machine(s) · {{ $suggestion['days'] }} day(s)
+                        </p>
+                        <button wire:click="useSuggestion({{ $index }})"
+                            class="mt-3 text-xs px-3 py-1.5 rounded-lg bg-[var(--gold)] text-[var(--ink)] font-semibold hover:bg-[var(--gold-soft)]">
+                            Review &amp; create zone
+                        </button>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
 
     <!-- Dispatch intelligence derived from geofence queue activity -->
     @if($aiRecommendations->count() > 0 || $aiInsights->count() > 0)

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\User;
 use App\Services\OperationalSnapshotService;
@@ -33,6 +34,8 @@ class LiveMap extends Component
     public string $mapStyle = 'satellite'; // 'osm' or 'satellite'
 
     public bool $showGeofences = true;
+
+    public bool $showTrails = false;
 
     public bool $showMachines = true;
 
@@ -116,6 +119,74 @@ class LiveMap extends Component
         }
 
         $this->dispatch('machines-positions-updated', machines: $this->getMachines()->toArray());
+    }
+
+    /**
+     * Toggle 24-hour travelled-path overlays: the haul-road network as the
+     * fleet's own GPS history reveals it (brief §9) -- real recorded
+     * positions joined in reading order, nothing routed or invented.
+     */
+    public function toggleTrails(): void
+    {
+        $this->showTrails = ! $this->showTrails;
+        $this->dispatch('map-updated', [
+            'mapStyle' => $this->mapStyle,
+            'machines' => $this->showMachines ? $this->getMachines() : [],
+            'geofences' => $this->showGeofences ? $this->getGeofences() : [],
+            'trails' => $this->showTrails ? $this->getTrails() : [],
+        ]);
+    }
+
+    /**
+     * Per-machine polylines of REAL recorded positions from the last 24
+     * hours, consecutive duplicates collapsed. Machines with fewer than two
+     * distinct points draw nothing -- a single reading is a dot, not a road.
+     *
+     * @return list<array{machine_id: int, name: string, points: list<array{lat: float, lng: float}>}>
+     */
+    public function getTrails(): array
+    {
+        $user = Auth::user();
+        $team = $user instanceof User ? $user->currentTeam : null;
+
+        if ($team === null) {
+            return [];
+        }
+
+        $metrics = MachineMetric::query()
+            ->where('team_id', $team->id)
+            ->where('recorded_at', '>=', now()->subDay())
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderBy('machine_id')
+            ->orderBy('recorded_at')
+            ->get(['machine_id', 'latitude', 'longitude']);
+
+        $names = Machine::where('team_id', $team->id)->pluck('name', 'id');
+
+        $trails = [];
+
+        foreach ($metrics->groupBy('machine_id') as $machineId => $rows) {
+            $points = [];
+
+            foreach ($rows as $row) {
+                $point = ['lat' => (float) $row->latitude, 'lng' => (float) $row->longitude];
+
+                if ($points === [] || end($points) !== $point) {
+                    $points[] = $point;
+                }
+            }
+
+            if (count($points) >= 2) {
+                $trails[] = [
+                    'machine_id' => (int) $machineId,
+                    'name' => (string) ($names[$machineId] ?? ('Machine #'.$machineId)),
+                    'points' => $points,
+                ];
+            }
+        }
+
+        return $trails;
     }
 
     public function toggleGeofences(): void

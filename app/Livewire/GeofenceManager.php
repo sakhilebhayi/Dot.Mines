@@ -6,11 +6,16 @@ use App\Models\AIInsight;
 use App\Models\AIRecommendation;
 use App\Models\Geofence;
 use App\Models\MineArea;
+use App\Models\User;
+use App\Services\GeofenceSuggestionService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * @property-read list<array{center_latitude: float, center_longitude: float, readings: int, machines: int, days: int, coordinates: list<array{lat: float, lng: float}>}> $zoneSuggestions
+ */
 class GeofenceManager extends Component
 {
     use WithPagination;
@@ -69,6 +74,55 @@ class GeofenceManager extends Component
     public function openCreateModal(): void
     {
         $this->resetForm();
+        $this->showCreateModal = true;
+    }
+
+    /**
+     * Candidate zones derived from real GPS dwell history (brief §9/§10) --
+     * the fleet's own movement revealing where the operation actually
+     * works. Suggestions only; nothing is created without the user
+     * confirming through the normal form.
+     *
+     * @return list<array{center_latitude: float, center_longitude: float, readings: int, machines: int, days: int, coordinates: list<array{lat: float, lng: float}>}>
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- Livewire computed property
+     */
+    public function getZoneSuggestionsProperty(): array
+    {
+        $user = Auth::user();
+        $team = $user instanceof User ? $user->currentTeam : null;
+
+        if ($team === null) {
+            return [];
+        }
+
+        return app(GeofenceSuggestionService::class)->suggestForTeam($team);
+    }
+
+    /**
+     * Prefill the create form from a GPS-derived suggestion. The user
+     * still chooses the type and name and presses save -- that is the
+     * confirmation step the brief requires.
+     */
+    public function useSuggestion(int $index): void
+    {
+        $suggestion = $this->zoneSuggestions[$index] ?? null;
+
+        if ($suggestion === null) {
+            return;
+        }
+
+        $this->resetForm();
+        $this->name = 'Activity hotspot '.($index + 1);
+        $this->description = sprintf(
+            'Suggested from %d dwell readings by %d machine(s) across %d day(s) of real GPS history. Rename and set the correct type before saving.',
+            $suggestion['readings'],
+            $suggestion['machines'],
+            $suggestion['days'],
+        );
+        $this->centerLatitude = $suggestion['center_latitude'];
+        $this->centerLongitude = $suggestion['center_longitude'];
+        $this->coordinates = $suggestion['coordinates'];
         $this->showCreateModal = true;
     }
 

@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let map = null;
     let markers = {};
     let geofencePolygons = {};
+    let trailPolylines = [];
     let currentLayer = null;
     let layers = {};
     let initRetryCount = 0;
@@ -594,6 +595,25 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!map) {
             debugLog('Map not initialized yet, skipping update');
             return;
+        }
+
+        // Travelled-path overlays: polylines of REAL recorded GPS readings
+        // (last 24h, sent by LiveMap::getTrails()) -- the haul-road network
+        // as the fleet actually drove it. Always rebuilt from the event so
+        // toggling off clears them.
+        if ('trails' in data) {
+            trailPolylines.forEach((line) => map.removeLayer(line));
+            trailPolylines = [];
+            (data.trails || []).forEach((trail) => {
+                const line = L.polyline(trail.points.map((p) => [p.lat, p.lng]), {
+                    color: '#f59e0b',
+                    weight: 2,
+                    opacity: 0.6,
+                    dashArray: '6 6',
+                }).bindTooltip(trail.name + ' — travelled path (last 24h, real GPS readings)');
+                line.addTo(map);
+                trailPolylines.push(line);
+            });
         }
 
         // Handle map style changes

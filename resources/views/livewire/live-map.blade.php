@@ -16,6 +16,14 @@
                             <x-freshness :timestamp="$telemetryFreshestAt" :stale-after="$telemetryStaleAfter" label="Telemetry" />
                         </div>
                         <div class="flex flex-wrap gap-2 items-center">
+                            <button wire:click="toggleTrails" title="Travelled paths from the last 24 hours of real GPS readings — nothing routed or invented" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showTrails ? 'bg-amber-600 hover:bg-amber-700' : 'bg-white/5 hover:bg-white/10 border border-[var(--line)]' }} text-[var(--stone)] text-sm">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                    </svg>
+                                    {{ $showTrails ? 'Hide Trails' : 'Show Trails (24h)' }}
+                                </span>
+                            </button>
                             <button wire:click="toggleMachines" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showMachines ? 'bg-green-600 hover:bg-green-700' : 'bg-white/5 hover:bg-white/10 border border-[var(--line)]' }} text-[var(--stone)] text-sm">
                                 <span class="flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

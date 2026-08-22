@@ -642,6 +642,17 @@ class IntegrationService
     protected function syncMachineMetrics(Machine $machine, array $metrics): void
     {
         try {
+            // §19 idempotency: the fleet snapshot carries the PROVIDER's
+            // reading timestamp; while a machine is parked, every 15-minute
+            // sync returns the same reading. Re-storing it created 78% of
+            // all metric rows as exact duplicates (observed live) and made
+            // GPS trails/dwell analysis lie about visit counts.
+            $recordedAt = $metrics['recorded_at'] ?? null;
+
+            if ($recordedAt !== null && MachineMetric::where('machine_id', $machine->id)->where('recorded_at', $recordedAt)->exists()) {
+                return;
+            }
+
             $metric = new MachineMetric($metrics);
             $metric->machine_id = $machine->id;
             $metric->team_id = $machine->team_id;
