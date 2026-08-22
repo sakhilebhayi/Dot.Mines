@@ -42,6 +42,11 @@ Route::get('/cookies', function () {
     ]);
 })->name('cookies');
 
+// Offline shell (hybrid Slice 2): cached by the service worker and served
+// for any navigation while the network is down. Reads only IndexedDB
+// client-side, so it needs no auth and must stay outside auth groups.
+Route::view('/offline', 'offline')->name('offline');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),

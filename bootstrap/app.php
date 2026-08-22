@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Session-cookie authentication for the incremental sync API
+        // (hybrid Slice 2): the browser's sync client is a first-party
+        // frontend, so Sanctum treats same-origin API requests as stateful.
+        $middleware->statefulApi();
+
         $middleware->alias([
             'ensure_team' => EnsureTeamContext::class,
             'cache.headers' => CacheControlHeaders::class,

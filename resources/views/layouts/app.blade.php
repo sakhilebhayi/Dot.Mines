@@ -274,5 +274,15 @@
         @stack('scripts')
         
         <!-- Alpine is bundled via Vite in resources/js/app.js; avoid double-loading CDN version -->
-    </body>
+            @auth
+
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+            window.__syncContext = {
+                userId: {{ (int) auth()->id() }},
+                teamId: {{ (int) auth()->user()->current_team_id }},
+            };
+        </script>
+        @endauth
+        <x-connectivity-pill />
+</body>
 </html>

@@ -115,3 +115,28 @@ document.addEventListener('livewire:load', function () {
 		document.addEventListener('DOMContentLoaded', start);
 	}
 })();
+
+// Hybrid local layer (Slice 2): service worker app shell + IndexedDB sync.
+// The sync client only boots on pages that inject an authenticated
+// __syncContext; the /offline shell instead renders the cached snapshot.
+import * as syncClient from './local/syncClient';
+import * as offlineSnapshot from './local/offlineSnapshot';
+
+if ('serviceWorker' in navigator) {
+	window.addEventListener('load', () => {
+		navigator.serviceWorker.register('/sw.js').catch(() => {
+			// Registration failure just means no offline shell; never fatal.
+		});
+	});
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+	if (window.__syncContext) {
+		syncClient.boot(window.__syncContext);
+	}
+
+	const snapshotRoot = document.getElementById('offline-snapshot');
+	if (snapshotRoot) {
+		offlineSnapshot.render(snapshotRoot);
+	}
+});
