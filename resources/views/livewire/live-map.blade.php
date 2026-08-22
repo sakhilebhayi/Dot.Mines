@@ -11,7 +11,10 @@
             <div class="w-full space-y-6">
                 <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 mb-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h1 class="text-2xl font-bold text-[var(--stone)]">Live Fleet Tracking</h1>
+                        <div>
+                            <h1 class="text-2xl font-bold text-[var(--stone)]">Live Fleet Tracking</h1>
+                            <x-freshness :timestamp="$telemetryFreshestAt" :stale-after="$telemetryStaleAfter" label="Telemetry" />
+                        </div>
                         <div class="flex flex-wrap gap-2 items-center">
                             <button wire:click="toggleMachines" class="px-4 py-2 min-w-[9rem] rounded-lg transition-colors {{ $showMachines ? 'bg-green-600 hover:bg-green-700' : 'bg-white/5 hover:bg-white/10 border border-[var(--line)]' }} text-[var(--stone)] text-sm">
                                 <span class="flex items-center gap-2">

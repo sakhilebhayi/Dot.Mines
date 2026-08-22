@@ -6,6 +6,8 @@ use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MineArea;
+use App\Models\User;
+use App\Services\OperationalSnapshotService;
 use App\Traits\RealtimeUpdates;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -242,11 +244,17 @@ class LiveMap extends Component
             ->pluck('count', 'status')
             ->toArray();
 
+        $user = Auth::user();
+        $team = $user instanceof User ? $user->currentTeam : null;
+        $snapshots = $team ? app(OperationalSnapshotService::class) : null;
+
         return view('livewire.live-map', [
             'machines' => $machines,
             'geofences' => $geofences,
             'machineStatuses' => $machineStatuses,
             'mineAreas' => $this->getMineAreas(),
+            'telemetryFreshestAt' => $team && $snapshots ? $snapshots->teamTelemetryFreshestAt($team) : null,
+            'telemetryStaleAfter' => $team && $snapshots ? $snapshots->staleAfterSeconds($team->id) : 900,
         ]);
     }
 }
