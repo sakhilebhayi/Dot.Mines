@@ -30,6 +30,7 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property string $password
  * @property string|null $remember_token
  * @property int|null $current_team_id
+ * @property-read Team|null $currentTeam
  * @property string|null $profile_photo_path
  * @property bool $two_factor_confirmed
  * @property string|null $two_factor_secret

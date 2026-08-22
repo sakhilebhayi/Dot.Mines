@@ -1827,22 +1827,12 @@ parameters:
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$current_team_id\\.$#"
-			count: 5
+			count: 3
 			path: app/Livewire/FuelManagement.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$id\\.$#"
 			count: 2
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^Cannot call method updateConsumption\\(\\) on Illuminate\\\\Database\\\\Eloquent\\\\Model\\|stdClass\\.$#"
-			count: 1
-			path: app/Livewire/FuelManagement.php
-
-		-
-			message: "#^If condition is always true\\.$#"
-			count: 1
 			path: app/Livewire/FuelManagement.php
 
 		-
@@ -4031,11 +4021,6 @@ parameters:
 			path: app/Models/FuelMonthlyAllocation.php
 
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\FuelMonthlyAllocation\\:\\:\\$remaining_liters\\.$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\FuelMonthlyAllocation\\:\\:\\$spent_zar\\.$#"
 			count: 2
 			path: app/Models/FuelMonthlyAllocation.php
@@ -4056,26 +4041,6 @@ parameters:
 			path: app/Models/FuelMonthlyAllocation.php
 
 		-
-			message: "#^Class App\\\\Models\\\\FuelMonthlyAllocation has PHPDoc tag @method for method all\\(\\) parameter \\#1 \\$columns with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\FuelMonthlyAllocation has PHPDoc tag @method for method find\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\FuelMonthlyAllocation has PHPDoc tag @method for method findOrFail\\(\\) parameter \\#2 \\$columns with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^Class App\\\\Models\\\\FuelMonthlyAllocation has PHPDoc tag @method for method whereIn\\(\\) parameter \\#2 \\$values with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
 			message: "#^Class App\\\\Models\\\\FuelMonthlyAllocation uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#"
 			count: 1
 			path: app/Models/FuelMonthlyAllocation.php
@@ -4092,26 +4057,6 @@ parameters:
 
 		-
 			message: "#^Method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:transactions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^PHPDoc tag @method for method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:all\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Collection but does not specify its types\\: TKey, TModel$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^PHPDoc tag @method for method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:orderBy\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^PHPDoc tag @method for method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:where\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
-			count: 1
-			path: app/Models/FuelMonthlyAllocation.php
-
-		-
-			message: "#^PHPDoc tag @method for method App\\\\Models\\\\FuelMonthlyAllocation\\:\\:whereIn\\(\\) return type contains generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#"
 			count: 1
 			path: app/Models/FuelMonthlyAllocation.php
 
@@ -6914,11 +6859,6 @@ parameters:
 			message: "#^Access to an undefined property App\\\\Models\\\\AIRecommendation\\:\\:\\$team_id\\.$#"
 			count: 3
 			path: app/Policies/AIRecommendationPolicy.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$currentTeam\\.$#"
-			count: 3
-			path: app/Policies/NotificationPolicy.php
 
 		-
 			message: "#^Access to an undefined property Illuminate\\\\Contracts\\\\Auth\\\\Authenticatable\\:\\:\\$email\\.$#"

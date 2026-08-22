@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Actions\MineAreas\AssignMachineToArea;
+use App\Actions\MineAreas\UnassignMachineFromArea;
 use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\Machine;
@@ -10,6 +12,7 @@ use App\Models\MineArea;
 use App\Models\MinePlanUpload;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
+use App\Models\User;
 use App\Services\FileUploadService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -126,7 +129,13 @@ class MineAreaDetail extends Component
 
     public function mount(MineArea $mineArea)
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         if ($mineArea->team_id !== $team->id) {
             abort(403);
         }
@@ -167,21 +176,22 @@ class MineAreaDetail extends Component
             'selectedMachineId' => 'required|exists:machines,id',
         ]);
 
-        $team = Auth::user()->currentTeam;
-        $machine = Machine::where('team_id', $team->id)->findOrFail($this->selectedMachineId);
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
 
-        // Update machine's mine_area_id
-        $machine->update(['mine_area_id' => $this->mineArea->id]);
+        if ($team === null) {
+            abort(403);
+        }
+        $machine = Machine::query()->where('team_id', $team->id)->findOrFail($this->selectedMachineId);
 
-        // Record assignment history
-        MachineAreaAssignment::create([
-            'team_id' => $team->id,
-            'machine_id' => $machine->id,
-            'mine_area_id' => $this->mineArea->id,
-            'assigned_by' => Auth::id(),
-            'assigned_at' => now(),
-            'reason' => $this->assignmentReason ?: null,
-        ]);
+        app(AssignMachineToArea::class)->execute(
+            $team,
+            $this->mineArea,
+            $machine,
+            (int) Auth::id(),
+            $this->assignmentReason ?: null,
+        );
 
         $this->closeAssignModal();
         $this->dispatch('notify', ['message' => "{$machine->name} assigned to {$this->mineArea->name}", 'type' => 'success']);
@@ -191,30 +201,25 @@ class MineAreaDetail extends Component
     {
         $this->authorize('update', $this->mineArea);
 
-        $team = Auth::user()->currentTeam;
-        $machine = Machine::where('team_id', $team->id)->findOrFail($machineId);
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
 
-        // Close active assignment record
-        MachineAreaAssignment::where('machine_id', $machine->id)
-            ->where('mine_area_id', $this->mineArea->id)
-            ->whereNull('unassigned_at')
-            ->update(['unassigned_at' => now()]);
+        if ($team === null) {
+            abort(403);
+        }
+        $machine = Machine::query()->where('team_id', $team->id)->findOrFail($machineId);
 
-        // Try to find another active mine area to assign the machine to.
-        $otherArea = MineArea::where('team_id', $team->id)
-            ->where('status', 'active')
-            ->where('id', '!=', $this->mineArea->id)
-            ->first();
+        $newArea = app(UnassignMachineFromArea::class)->execute($team, $this->mineArea, $machine, (int) Auth::id());
 
-        if ($otherArea) {
-            $machine->update(['mine_area_id' => $otherArea->id]);
-            $this->dispatch('notify', ['message' => "{$machine->name} reassigned to {$otherArea->name} (cannot leave unassigned)", 'type' => 'success']);
-        } else {
-            // No other active area exists — do not allow unassigning to null to preserve invariant
+        if ($newArea === null) {
+            // Machine::mine_area_id is NOT NULL -- refusing preserves the invariant.
             $this->dispatch('notify', ['message' => "Cannot unassign {$machine->name}; at least one active mine area must be set. Assign to another area first.", 'type' => 'error']);
 
             return;
         }
+
+        $this->dispatch('notify', ['message' => "{$machine->name} reassigned to {$newArea->name} (cannot leave unassigned)", 'type' => 'success']);
     }
 
     // === PRODUCTION TRACKING ===
@@ -244,7 +249,13 @@ class MineAreaDetail extends Component
             'productionShift' => 'required|in:day,night,continuous',
         ]);
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
 
         ProductionRecord::create([
             'team_id' => $team->id,
@@ -285,7 +296,13 @@ class MineAreaDetail extends Component
             'targetValue' => 'required|numeric|min:0',
         ]);
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
 
         ProductionTarget::create([
             'team_id' => $team->id,
@@ -331,7 +348,13 @@ class MineAreaDetail extends Component
             'planFile' => 'required|file|max:51200',
         ]);
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
 
         $file = $this->planFile;
 
@@ -386,7 +409,13 @@ class MineAreaDetail extends Component
     {
         $this->authorize('delete', $this->mineArea);
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $disk = data_get($plan->metadata, 'disk', 'public');
         Storage::disk($disk)->delete($plan->file_path);
@@ -399,7 +428,13 @@ class MineAreaDetail extends Component
     {
         $this->authorize('update', $this->mineArea);
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $plan->update(['status' => 'active']);
 
@@ -410,7 +445,13 @@ class MineAreaDetail extends Component
     {
         $this->authorize('update', $this->mineArea);
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $plan->update(['status' => 'archived']);
 
@@ -442,7 +483,13 @@ class MineAreaDetail extends Component
             'alertPriority' => 'required|in:critical,high,medium,low',
         ]);
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
 
         Alert::create([
             'team_id' => $team->id,
@@ -466,7 +513,13 @@ class MineAreaDetail extends Component
 
     public function acknowledgeAlert(int $alertId)
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
         $this->authorize('acknowledge', $alert);
         $alert->acknowledge(Auth::id());
@@ -476,7 +529,13 @@ class MineAreaDetail extends Component
 
     public function resolveAlert(int $alertId)
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
         $this->authorize('resolve', $alert);
         $alert->resolve(Auth::id());
@@ -503,7 +562,13 @@ class MineAreaDetail extends Component
             'selectedGeofenceId' => 'required|exists:geofences,id',
         ]);
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->selectedGeofenceId);
         $this->authorize('update', $geofence);
         $geofence->update(['mine_area_id' => $this->mineArea->id]);
@@ -514,7 +579,13 @@ class MineAreaDetail extends Component
 
     public function unlinkGeofence(int $geofenceId)
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $geofence = Geofence::where('team_id', $team->id)->findOrFail($geofenceId);
         $this->authorize('update', $geofence);
         $geofence->update(['mine_area_id' => null]);
@@ -526,7 +597,13 @@ class MineAreaDetail extends Component
 
     public function render()
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
 
         // Refresh mine area with counts
         $this->mineArea->loadCount(['machines', 'geofences', 'minePlanUploads', 'productionRecords']);

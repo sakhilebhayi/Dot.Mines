@@ -3,11 +3,10 @@
 namespace App\Services;
 
 use App\Models\Invoice;
-use App\Models\MachineAllocation;
-use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Team;
+use App\Services\Billing\PaystackWebhookProcessor;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -15,6 +14,40 @@ use Illuminate\Support\Facades\Log;
 
 class PaystackService
 {
+    /**
+     * Webhook handling lives in PaystackWebhookProcessor; these delegates
+     * keep WebhookController's single entry point unchanged.
+     */
+    /** @param array<string, mixed> $data */
+    public function handleSubscriptionCreated(array $data): void
+    {
+        app(PaystackWebhookProcessor::class)->handleSubscriptionCreated($data);
+    }
+
+    /** @param array<string, mixed> $data */
+    public function handleSubscriptionDisabled(array $data): void
+    {
+        app(PaystackWebhookProcessor::class)->handleSubscriptionDisabled($data);
+    }
+
+    /** @param array<string, mixed> $data */
+    public function handleChargeSuccess(array $data): void
+    {
+        app(PaystackWebhookProcessor::class)->handleChargeSuccess($data);
+    }
+
+    /** @param array<string, mixed> $data */
+    public function handlePaymentFailed(array $data): void
+    {
+        app(PaystackWebhookProcessor::class)->handlePaymentFailed($data);
+    }
+
+    /** @param array<string, mixed> $data */
+    public function handleInvoiceUpdate(array $data): void
+    {
+        app(PaystackWebhookProcessor::class)->handleInvoiceUpdate($data);
+    }
+
     protected string $secretKey;
 
     protected string $baseUrl = 'https://api.paystack.co';
@@ -323,283 +356,21 @@ class PaystackService
      * Handle subscription.create webhook event.
      */
     /** @param array<string, mixed> $data */
-    public function handleSubscriptionCreated(array $data): void
-    {
-        try {
-            $subscriptionData = $data['data'];
-            $metadata = $subscriptionData['metadata'] ?? [];
-            $teamId = $metadata['team_id'] ?? null;
-
-            $planCode = $subscriptionData['plan']['plan_code'] ?? null;
-            $planId = $metadata['plan_id'] ?? null;
-
-            if (! $planId && $planCode) {
-                $planId = SubscriptionPlan::where('paystack_plan_code', $planCode)
-                    ->orWhere('paystack_yearly_plan_code', $planCode)
-                    ->value('id');
-            }
-
-            if (! $teamId) {
-                Log::warning('Missing team_id in subscription.create webhook', [
-                    'subscription_code' => $subscriptionData['subscription_code'] ?? 'unknown',
-                ]);
-
-                return;
-            }
-
-            $nextPaymentDate = isset($subscriptionData['next_payment_date'])
-                ? date('Y-m-d H:i:s', (int) strtotime((string) $subscriptionData['next_payment_date']))
-                : null;
-
-            Subscription::updateOrCreate(
-                ['paystack_subscription_code' => $subscriptionData['subscription_code']],
-                [
-                    'team_id' => $teamId,
-                    'subscription_plan_id' => $planId,
-                    'paystack_customer_code' => $subscriptionData['customer']['customer_code'] ?? null,
-                    'paystack_email_token' => $subscriptionData['email_token'] ?? null,
-                    'status' => $this->mapPaystackStatus($subscriptionData['status'] ?? 'active'),
-                    'current_period_start' => now()->toDateTimeString(),
-                    'current_period_end' => $nextPaymentDate,
-                ]
-            );
-
-        } catch (\Exception $e) {
-            Log::error('Failed to handle subscription.create webhook', [
-                'error' => $e->getMessage(),
-                'data' => $data,
-            ]);
-        }
-    }
 
     /**
      * Handle subscription.disable / subscription.not_renew webhook event.
      */
     /** @param array<string, mixed> $data */
-    public function handleSubscriptionDisabled(array $data): void
-    {
-        try {
-            $subscriptionData = $data['data'];
-            $subscription = Subscription::where(
-                'paystack_subscription_code',
-                $subscriptionData['subscription_code'] ?? ''
-            )->first();
-
-            if (! $subscription) {
-                Log::warning('Subscription not found for disable event', [
-                    'code' => $subscriptionData['subscription_code'] ?? 'unknown',
-                ]);
-
-                return;
-            }
-
-            $subscription->update([
-                'status' => 'canceled',
-                'canceled_at' => now(),
-                'ends_at' => $subscription->current_period_end,
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Failed to handle subscription.disable webhook', [
-                'error' => $e->getMessage(),
-                'data' => $data,
-            ]);
-        }
-    }
 
     /**
      * Handle charge.success webhook event.
      */
     /** @param array<string, mixed> $data */
-    public function handleChargeSuccess(array $data): void
-    {
-        try {
-            $charge = $data['data'];
-            $metadata = $charge['metadata'] ?? [];
-            $teamId = $metadata['team_id'] ?? null;
-
-            if (! $teamId) {
-                return;
-            }
-
-            $subscription = Subscription::where('team_id', $teamId)->first();
-
-            // Idempotent on the Paystack reference: webhook retries and
-            // duplicate deliveries must not double-record the payment --
-            // and must NEVER double-grant allocations below.
-            $payment = Payment::firstOrCreate(
-                ['paystack_reference' => $charge['reference']],
-                [
-                    'team_id' => $teamId,
-                    'subscription_id' => $subscription?->id,
-                    'paystack_invoice_id' => null,
-                    'amount' => ($charge['amount'] ?? 0) / 100,
-                    'currency' => strtoupper($charge['currency'] ?? 'ZAR'),
-                    'status' => 'succeeded',
-                    'payment_method' => $charge['channel'] ?? 'card',
-                    'paid_at' => now(),
-                    'metadata' => $metadata,
-                ]
-            );
-
-            $this->grantAllocationsForPayment($payment, $metadata);
-
-        } catch (\Exception $e) {
-            Log::error('Failed to handle charge.success webhook', [
-                'error' => $e->getMessage(),
-                'data' => $data,
-            ]);
-        }
-    }
-
-    /**
-     * The ONLY place purchased machine allocations are granted: from a
-     * signature-verified, successfully charged payment (brief §8). Doubly
-     * idempotent -- firstOrCreate above dedupes the payment, and the
-     * payment_id guard here dedupes the grant even if two workers race
-     * the same first delivery.
-     *
-     * @param  array<string, mixed>  $metadata
-     */
-    private function grantAllocationsForPayment(Payment $payment, array $metadata): void
-    {
-        $adt = (int) ($metadata['allocation_adt'] ?? 0);
-        $heavy = (int) ($metadata['allocation_heavy'] ?? 0);
-
-        if ($adt <= 0 && $heavy <= 0) {
-            return; // Not an allocation purchase (e.g. a legacy tier charge).
-        }
-
-        if (MachineAllocation::withoutGlobalScopes()->where('payment_id', $payment->id)->exists()) {
-            return;
-        }
-
-        foreach (['adt' => $adt, 'heavy' => $heavy] as $class => $quantity) {
-            if ($quantity > 0) {
-                MachineAllocation::create([
-                    'team_id' => $payment->team_id,
-                    'class' => $class,
-                    'delta' => $quantity,
-                    'source' => 'purchase',
-                    'payment_id' => $payment->id,
-                    'subscription_id' => $payment->subscription_id,
-                ]);
-            }
-        }
-
-        Log::info('Machine allocations granted from verified payment', [
-            'team_id' => $payment->team_id,
-            'payment_id' => $payment->id,
-            'adt' => $adt,
-            'heavy' => $heavy,
-        ]);
-
-        NotificationService::dispatch([
-            'team_id' => $payment->team_id,
-            'type' => 'billing.allocation_granted',
-            'title' => 'Machine allocations added',
-            'message' => sprintf(
-                'Payment confirmed — %s now available. You can add your machine%s right away.',
-                collect(['ADT' => $adt, 'heavy machine' => $heavy])
-                    ->filter()
-                    ->map(fn (int $qty, string $label): string => "{$qty} {$label} allocation".($qty === 1 ? '' : 's'))
-                    ->implode(' and '),
-                ($adt + $heavy) === 1 ? '' : 's',
-            ),
-            'action_url' => route('fleet'),
-        ]);
-    }
-
-    /**
-     * A failed charge/renewal grants nothing (brief §9) -- but the
-     * customer must hear about it in-app, not discover it when a machine
-     * refuses to activate.
-     *
-     * @param  array<array-key, mixed>  $data
-     */
-    public function handlePaymentFailed(array $data): void
-    {
-        /** @var array<string, mixed> $inner */
-        $inner = is_array($data['data'] ?? null) ? $data['data'] : [];
-
-        /** @var array<string, mixed> $metadata */
-        $metadata = is_array($inner['metadata'] ?? null) ? $inner['metadata'] : [];
-        $teamId = (int) ($metadata['team_id'] ?? 0);
-
-        if ($teamId === 0) {
-            /** @var array<string, mixed> $subscriptionInfo */
-            $subscriptionInfo = is_array($inner['subscription'] ?? null) ? $inner['subscription'] : [];
-
-            /** @var mixed $code */
-            $code = $subscriptionInfo['subscription_code'] ?? null;
-            $teamId = is_string($code)
-                ? (int) (Subscription::query()->where('paystack_subscription_code', $code)->value('team_id') ?? 0)
-                : 0;
-        }
-
-        if ($teamId === 0) {
-            return;
-        }
-
-        NotificationService::dispatch([
-            'team_id' => $teamId,
-            'type' => 'billing.payment_failed',
-            'title' => 'Payment unsuccessful',
-            'message' => 'Your payment could not be processed, so no machine allocation was added. Please try again or use another payment method.',
-            'alert_level' => NotificationService::LEVEL_WARNING,
-            'action_url' => route('billing.index'),
-        ]);
-    }
 
     /**
      * Handle invoice.update webhook event (invoice paid).
      */
     /** @param array<string, mixed> $data */
-    public function handleInvoiceUpdate(array $data): void
-    {
-        try {
-            $invoiceData = $data['data'];
-            $subscriptionCode = $invoiceData['subscription']['subscription_code'] ?? null;
-
-            $subscription = Subscription::where('paystack_subscription_code', $subscriptionCode)->first();
-
-            if (! $subscription) {
-                return;
-            }
-
-            $txReference = $invoiceData['transaction']['reference'] ?? null;
-            $payment = $txReference
-                ? Payment::where('paystack_reference', $txReference)->first()
-                : null;
-
-            Invoice::updateOrCreate(
-                ['paystack_invoice_code' => $invoiceData['invoice_code']],
-                [
-                    'team_id' => $subscription->team_id,
-                    'subscription_id' => $subscription->id,
-                    'payment_id' => $payment?->id,
-                    'invoice_number' => $invoiceData['invoice_code'],
-                    'subtotal' => ($invoiceData['amount'] ?? 0) / 100,
-                    'tax' => 0,
-                    'total' => ($invoiceData['amount'] ?? 0) / 100,
-                    'currency' => strtoupper($invoiceData['currency'] ?? 'ZAR'),
-                    'status' => ($invoiceData['paid'] ?? false) ? 'paid' : 'open',
-                    'issued_at' => isset($invoiceData['created_at'])
-                        ? date('Y-m-d H:i:s', (int) strtotime((string) $invoiceData['created_at']))
-                        : now()->toDateTimeString(),
-                    'paid_at' => ($invoiceData['paid'] ?? false) ? now()->toDateTimeString() : null,
-                    'pdf_url' => null,
-                    'line_items' => [$invoiceData],
-                ]
-            );
-
-        } catch (\Exception $e) {
-            Log::error('Failed to handle invoice.update webhook', [
-                'error' => $e->getMessage(),
-                'data' => $data,
-            ]);
-        }
-    }
 
     /**
      * Cancel (disable) a Paystack subscription.
@@ -679,20 +450,5 @@ class PaystackService
         $expected = hash_hmac('sha512', $payload, config('services.paystack.secret', ''));
 
         return hash_equals($expected, $signature);
-    }
-
-    /**
-     * Map Paystack subscription status to our internal status.
-     */
-    protected function mapPaystackStatus(string $status): string
-    {
-        return match ($status) {
-            'active' => 'active',
-            'non-renewing' => 'canceled',
-            'attention' => 'past_due',
-            'cancelled', 'canceled', 'disabled' => 'canceled',
-            'completed' => 'expired',
-            default => 'expired',
-        };
     }
 }
