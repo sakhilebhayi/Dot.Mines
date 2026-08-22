@@ -505,7 +505,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * Fetch machine alerts/faults
      * Concrete classes should override this
      *
-     * @return array<string, mixed>
+     * @return list<array<string, mixed>>
      */
     public function fetchMachineAlerts(string $machineId): array
     {

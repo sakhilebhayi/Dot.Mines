@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $team_id
  * @property int $mine_area_id
  * @property int $machine_id
- * @property string|Carbon $record_date
+ * @property Carbon|null $record_date
  * @property string $shift
  * @property string|float $quantity_produced
  * @property string $unit

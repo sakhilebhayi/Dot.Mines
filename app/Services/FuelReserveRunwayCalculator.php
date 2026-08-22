@@ -78,6 +78,7 @@ class FuelReserveRunwayCalculator
     }
 
     /**
+     * @param  Collection<array-key, mixed>  $dispensing
      * @return array<string, mixed>|null
      */
     private function computeWhatIf(Collection $dispensing, float $dailyConsumption, float $currentReserves, int $daysSpanned): ?array

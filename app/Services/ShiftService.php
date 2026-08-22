@@ -6,6 +6,7 @@ use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
 use App\Models\ProductionRecord;
 use App\Models\Shift;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ShiftService
@@ -26,7 +27,7 @@ class ShiftService
                     'machine_type' => $m->machine_type,
                     'mine_area_id' => $m->mine_area_id,
                     'excavator_id' => $m->excavator_id,
-                    'assigned_to_excavator_at' => optional($m->assigned_to_excavator_at)->toDateTimeString(),
+                    'assigned_to_excavator_at' => $m->assigned_to_excavator_at instanceof Carbon ? $m->assigned_to_excavator_at->toDateTimeString() : null,
                     'status' => $m->status,
                 ];
             })->toArray();

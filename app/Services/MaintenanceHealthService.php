@@ -9,6 +9,7 @@ use App\Models\MaintenanceAlert;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class MaintenanceHealthService
@@ -204,8 +205,10 @@ class MaintenanceHealthService
         if (! empty($data['fault_codes_cleared'])) {
             $health = MachineHealthStatus::where('machine_id', $record->machine_id)->first();
             if ($health) {
-                $clearedCodes = collect($data['fault_codes_cleared']);
-                $activeCodes = collect($health->active_fault_codes ?? []);
+                /** @var Collection<array-key, mixed> $clearedCodes */
+                $clearedCodes = collect(is_array($data['fault_codes_cleared']) ? $data['fault_codes_cleared'] : []);
+                /** @var Collection<array-key, mixed> $activeCodes */
+                $activeCodes = collect(is_array($health->active_fault_codes ?? null) ? $health->active_fault_codes : []);
 
                 $remainingCodes = $activeCodes->filter(function ($code) use ($clearedCodes) {
                     return ! $clearedCodes->contains($code);

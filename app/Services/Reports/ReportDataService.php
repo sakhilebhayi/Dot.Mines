@@ -27,6 +27,10 @@ class ReportDataService
         $filters = $report->filters ?? [];
         $team = $report->team;
 
+        if ($team === null) {
+            throw new \InvalidArgumentException('Report has no owning team.');
+        }
+
         $start = Carbon::parse($filters['start_date'] ?? now()->subDays(30))->startOfDay();
         $end = Carbon::parse($filters['end_date'] ?? now())->endOfDay();
         $machineIds = $filters['machine_ids'] ?? [];
@@ -46,7 +50,7 @@ class ReportDataService
 
     /**
      * @param  array<string, mixed>  $machineIds
-     * @return array<string, mixed>
+     * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function production(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
@@ -92,7 +96,7 @@ class ReportDataService
 
     /**
      * @param  array<string, mixed>  $machineIds
-     * @return array<string, mixed>
+     * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function fleetUtilization(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
@@ -155,7 +159,7 @@ class ReportDataService
 
     /**
      * @param  array<string, mixed>  $machineIds
-     * @return array<string, mixed>
+     * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function maintenanceSchedule(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
@@ -197,7 +201,7 @@ class ReportDataService
 
     /**
      * @param  array<string, mixed>  $machineIds
-     * @return array<string, mixed>
+     * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function fuelConsumption(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
@@ -235,7 +239,7 @@ class ReportDataService
 
     /**
      * @param  array<string, mixed>  $geofenceIds
-     * @return array<string, mixed>
+     * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function materialTracking(int $teamId, Carbon $start, Carbon $end, array $geofenceIds): array
     {
@@ -270,7 +274,7 @@ class ReportDataService
 
     /**
      * @param  array<string, mixed>  $machineIds
-     * @return array<string, mixed>
+     * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function downtimeAnalysis(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
     {
@@ -318,7 +322,7 @@ class ReportDataService
      * deadline, and resolution status, plus a compliance score summary
      * a Mine Manager can attach to a regulator submission.
      *
-     * @return array<string, mixed>
+     * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function compliance(int $teamId, Carbon $start, Carbon $end): array
     {

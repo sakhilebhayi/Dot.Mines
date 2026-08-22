@@ -183,8 +183,20 @@ class MachinePerformanceService
         }
 
         if ($boundedByElapsedTime) {
-            $first = $readings->first()->recorded_at ?? $readings->first()->created_at;
-            $last = $readings->last()->recorded_at ?? $readings->last()->created_at;
+            $firstReading = $readings->first();
+            $lastReading = $readings->last();
+
+            if ($firstReading === null || $lastReading === null) {
+                return null;
+            }
+
+            $first = $firstReading->recorded_at ?? $firstReading->created_at;
+            $last = $lastReading->recorded_at ?? $lastReading->created_at;
+
+            if ($first === null || $last === null) {
+                return null;
+            }
+
             $elapsedHours = abs($last->getTimestamp() - $first->getTimestamp()) / 3600;
 
             // The margin absorbs device-vs-server clock skew on otherwise

@@ -41,6 +41,8 @@ class AuthorizationService
 
     /**
      * Get all permissions for a role
+     *
+     * @return Collection<array-key, mixed>
      */
     public static function getRolePermissions(string|Role $role, ?int $teamId = null): Collection
     {

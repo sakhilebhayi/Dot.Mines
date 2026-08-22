@@ -79,7 +79,7 @@ class KomatsuService extends BaseManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response ?? []),
+                'location' => $this->parseLocation($response),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);

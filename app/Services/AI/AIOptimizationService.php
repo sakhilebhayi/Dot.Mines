@@ -16,7 +16,9 @@ use Illuminate\Support\Collection;
  */
 class AIOptimizationService
 {
-    /** @var array<string, object> */
+    /**
+     * @var array<string, AnomalyDetectorAgent|CostAnalyzerAgent|DispatchAdvisorAgent|FleetOptimizerAgent|FuelPredictorAgent|MaintenancePredictorAgent|RouteAdvisorAgent>
+     */
     protected array $agents = [];
 
     public function __construct(
@@ -42,7 +44,7 @@ class AIOptimizationService
     /**
      * Run comprehensive analysis across all AI agents
      *
-     * @return Collection<int|string, mixed>
+     * @return Collection<string, mixed>
      */
     public function runComprehensiveAnalysis(Team $team, ?User $user = null): Collection
     {
@@ -131,7 +133,7 @@ class AIOptimizationService
     /**
      * Get recommendations for a specific category
      *
-     * @return Collection<int|string, mixed>
+     * @return Collection<int, mixed>
      */
     public function getRecommendationsForCategory(Team $team, string $category, ?User $user = null): Collection
     {
@@ -144,8 +146,12 @@ class AIOptimizationService
 
         $agentModel = $this->getOrCreateAgent($agentType);
         $result = $agent->analyze($team);
+        $rawRecommendations = $result['recommendations'] ?? [];
 
-        return collect($result['recommendations'])->map(function ($rec) use ($team, $agentModel, $user) {
+        /** @var list<array<string, mixed>> $recommendationRows */
+        $recommendationRows = is_array($rawRecommendations) ? array_values($rawRecommendations) : [];
+
+        return collect($recommendationRows)->map(function (array $rec) use ($team, $agentModel, $user): AIRecommendation {
             return AIRecommendation::create([
                 'team_id' => $team->id,
                 'ai_agent_id' => $agentModel->id,
@@ -261,7 +267,7 @@ class AIOptimizationService
     }
 
     /**
-     * @return array<string, mixed>
+     * @return list<string>
      */
     protected function getAgentCapabilities(string $type): array
     {

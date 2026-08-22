@@ -12,7 +12,7 @@ use Illuminate\Pagination\Paginator;
 class ProductionService
 {
     /**
-     * @return Paginator<ProductionRecord>
+     * @return Paginator<int, ProductionRecord>
      */
     public function getProductionByTeam(int $teamId, ?Carbon $startDate = null, ?Carbon $endDate = null)
     {
