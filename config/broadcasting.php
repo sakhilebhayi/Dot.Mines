@@ -12,7 +12,12 @@ return [
     |
     */
 
-    'default' => env('BROADCAST_DRIVER', 'pusher'),
+    /*
+     * Laravel 12 key first, legacy key second, and a SAFE resting default:
+     * 'null'. The old 'pusher' fallback meant hosts without broadcast env
+     * vars silently queued real Pusher API calls with empty credentials.
+     */
+    'default' => env('BROADCAST_CONNECTION', env('BROADCAST_DRIVER', 'null')),
 
     /*
     |--------------------------------------------------------------------------

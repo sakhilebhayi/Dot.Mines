@@ -120,6 +120,7 @@ document.addEventListener('livewire:load', function () {
 // The sync client only boots on pages that inject an authenticated
 // __syncContext; the /offline shell instead renders the cached snapshot.
 import * as syncClient from './local/syncClient';
+import * as realtimeBridge from './local/realtimeBridge';
 import * as offlineSnapshot from './local/offlineSnapshot';
 
 if ('serviceWorker' in navigator) {
@@ -133,6 +134,7 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', () => {
 	if (window.__syncContext) {
 		syncClient.boot(window.__syncContext);
+		realtimeBridge.boot(window.__syncContext);
 	}
 
 	const snapshotRoot = document.getElementById('offline-snapshot');
