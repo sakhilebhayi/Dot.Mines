@@ -40,7 +40,10 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
             $machines = [];
             if (! empty($response['data']['equipment'])) {
-                foreach ($response['data']['equipment'] as $equipment) {
+                $rows9 = data_get($response, 'data.equipment');
+                /** @var list<array<string, mixed>> $rows9 */
+                $rows9 = is_array($rows9) ? array_values(array_filter($rows9, 'is_array')) : [];
+                foreach ($rows9 as $equipment) {
                     $machines[] = $this->parseMachineData($equipment);
                 }
             }
@@ -71,7 +74,7 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
+                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -96,9 +99,9 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics($performance['data'] ?? []),
-                $this->parseMetrics($production['data'] ?? []),
-                $this->parseMetrics($maintenance['data'] ?? [])
+                $this->parseMetrics(is_array($performance['data'] ?? null) ? $performance['data'] : []),
+                $this->parseMetrics(is_array($production['data'] ?? null) ? $production['data'] : []),
+                $this->parseMetrics(is_array($maintenance['data'] ?? null) ? $maintenance['data'] : [])
             );
 
             return [
@@ -124,7 +127,10 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
 
             $alerts = [];
             if (! empty($response['data']['events'])) {
-                foreach ($response['data']['events'] as $event) {
+                $rows10 = data_get($response, 'data.events');
+                /** @var list<array<string, mixed>> $rows10 */
+                $rows10 = is_array($rows10) ? array_values(array_filter($rows10, 'is_array')) : [];
+                foreach ($rows10 as $event) {
                     $alerts[] = $this->parseAlert($event);
                 }
             }
@@ -175,7 +181,9 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -190,7 +198,9 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
         try {
             $result = $this->fetchMetrics($machineId);
 
-            return $result['metrics'] ?? [];
+            $metrics = $result['metrics'] ?? [];
+
+            return is_array($metrics) ? $metrics : [];
         } catch (Exception $e) {
             return [];
         }
@@ -205,7 +215,9 @@ class EpirocService extends BaseManufacturerService implements ManufacturerServi
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

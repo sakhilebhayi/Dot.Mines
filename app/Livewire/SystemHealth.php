@@ -118,7 +118,7 @@ class SystemHealth extends Component
      */
     private function broadcastingCheck(): array
     {
-        $driver = (string) config('broadcasting.default');
+        $driver = config('broadcasting.default');
         $pusherKey = (string) config('broadcasting.connections.pusher.key');
 
         if ($driver === 'pusher' && $pusherKey !== '') {
@@ -171,7 +171,7 @@ class SystemHealth extends Component
 
         return [
             'integration' => $integration,
-            'stats' => is_array($integration?->last_sync_stats) ? $integration->last_sync_stats : [],
+            'stats' => is_array($integration?->last_sync_stats) ? $integration?->last_sync_stats : [],
         ];
     }
 

@@ -28,7 +28,7 @@ class ReportDownloadController
         }
 
         // Prevent path traversal
-        if (! $report->file_path || str_contains($report->file_path, '..')) {
+        if (($report->file_path === null || $report->file_path === '' || $report->file_path === '0') || str_contains($report->file_path, '..')) {
             abort(404);
         }
 

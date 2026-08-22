@@ -90,8 +90,8 @@ class ExportUserDataJob implements ShouldQueue
                 'Your data export is ready. Download it within 7 days from your Privacy & Data page.',
                 fn ($m) => $m->to($user->email)
                     ->from(
-                        (string) config('mail.addresses.privacy'),
-                        (string) config('app.name'),
+                        config('mail.addresses.privacy'),
+                        config('app.name'),
                     )
                     ->subject('Your Data Export is Ready – '.config('app.name'))
             );

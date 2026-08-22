@@ -358,7 +358,7 @@ class MachineAssignmentManager extends Component
             ? $this->assignableMachinesQuery($team)->paginate(10)
             : null;
 
-        $selectedMachine = $this->selectedMachineId
+        $selectedMachine = ($this->selectedMachineId !== null && $this->selectedMachineId !== 0)
             ? Machine::where('team_id', $team->id)->find($this->selectedMachineId)
             : null;
 

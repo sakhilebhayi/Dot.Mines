@@ -5,9 +5,9 @@ namespace App\Livewire;
 use App\Jobs\GenerateReportJob;
 use App\Models\Machine;
 use App\Models\Report;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -114,9 +114,9 @@ class ReportGenerator extends Component
      */
     public function getMachines(): \Illuminate\Database\Eloquent\Collection
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::get()?->currentTeam;
 
-        return Machine::where('team_id', $team->id)->get();
+        return Machine::where('team_id', $team?->id)->get();
     }
 
     /**
@@ -124,9 +124,9 @@ class ReportGenerator extends Component
      */
     public function getGeofences(): Collection
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::get()?->currentTeam;
 
-        return DB::table('geofences')->where('team_id', $team->id)->get();
+        return DB::table('geofences')->where('team_id', $team?->id)->get();
     }
 
     public function nextStep(): void
@@ -158,8 +158,8 @@ class ReportGenerator extends Component
     {
         $this->validate();
 
-        $user = Auth::user();
-        $team = $user->currentTeam;
+        $user = CurrentUser::get();
+        $team = $user?->currentTeam;
 
         if (! $team) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'No team selected']);
@@ -195,10 +195,10 @@ class ReportGenerator extends Component
                 'end_date' => $this->endDate,
                 'machine_ids' => $this->selectedMachines,
                 'geofence_ids' => $this->selectedGeofences,
-                'include_metrics' => (bool) $this->includeMetrics,
-                'include_alerts' => (bool) $this->includeAlerts,
-                'include_chart' => (bool) $this->includeChart,
-                'auto_schedule' => (bool) $this->autoSchedule,
+                'include_metrics' => $this->includeMetrics,
+                'include_alerts' => $this->includeAlerts,
+                'include_chart' => $this->includeChart,
+                'auto_schedule' => $this->autoSchedule,
                 'schedule_frequency' => $this->scheduleFrequency,
                 'description' => strip_tags($this->description), // Sanitize HTML
             ];
@@ -206,7 +206,7 @@ class ReportGenerator extends Component
             // Create report record
             $report = Report::create([
                 'team_id' => $team->id,
-                'generated_by' => $user->id,
+                'generated_by' => $user?->id,
                 'title' => strip_tags($this->reportName), // Sanitize HTML
                 'type' => $this->reportType,
                 'format' => $this->format,

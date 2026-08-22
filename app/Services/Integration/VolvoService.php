@@ -48,7 +48,10 @@ class VolvoService extends BaseManufacturerService
 
             $machines = [];
             if (! empty($response['data'])) {
-                foreach ($response['data'] as $machine) {
+                $rows32 = data_get($response, 'data');
+                /** @var list<array<string, mixed>> $rows32 */
+                $rows32 = is_array($rows32) ? array_values(array_filter($rows32, 'is_array')) : [];
+                foreach ($rows32 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
@@ -81,7 +84,7 @@ class VolvoService extends BaseManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
+                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -110,7 +113,10 @@ class VolvoService extends BaseManufacturerService
 
             // Parse telemetry data
             if (! empty($telemetry['data'])) {
-                foreach ($telemetry['data'] as $metric) {
+                $rows33 = data_get($telemetry, 'data');
+                /** @var list<array<string, mixed>> $rows33 */
+                $rows33 = is_array($rows33) ? array_values(array_filter($rows33, 'is_array')) : [];
+                foreach ($rows33 as $metric) {
                     $metrics[] = $this->parseMetric($metric);
                 }
             }
@@ -119,8 +125,8 @@ class VolvoService extends BaseManufacturerService
             if (! empty($health['data'])) {
                 $metrics[] = [
                     'type' => 'health_status',
-                    'value' => $health['data']['status'] ?? 'unknown',
-                    'timestamp' => $health['data']['timestamp'] ?? now(),
+                    'value' => data_get($health, 'data.status') ?? 'unknown',
+                    'timestamp' => data_get($health, 'data.timestamp') ?? now(),
                 ];
             }
 
@@ -128,8 +134,8 @@ class VolvoService extends BaseManufacturerService
             if (! empty($utilization['data'])) {
                 $metrics[] = [
                     'type' => 'utilization',
-                    'value' => $utilization['data']['percentage'] ?? 0,
-                    'timestamp' => $utilization['data']['timestamp'] ?? now(),
+                    'value' => data_get($utilization, 'data.percentage') ?? 0,
+                    'timestamp' => data_get($utilization, 'data.timestamp') ?? now(),
                 ];
             }
 
@@ -137,9 +143,9 @@ class VolvoService extends BaseManufacturerService
             if (! empty($fuel['data'])) {
                 $metrics[] = [
                     'type' => 'fuel_level',
-                    'value' => $fuel['data']['level'] ?? 0,
-                    'unit' => $fuel['data']['unit'] ?? 'liters',
-                    'timestamp' => $fuel['data']['timestamp'] ?? now(),
+                    'value' => data_get($fuel, 'data.level') ?? 0,
+                    'unit' => data_get($fuel, 'data.unit') ?? 'liters',
+                    'timestamp' => data_get($fuel, 'data.timestamp') ?? now(),
                 ];
             }
 
@@ -170,14 +176,20 @@ class VolvoService extends BaseManufacturerService
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                foreach ($response['data']['alerts'] as $alert) {
+                $rows34 = data_get($response, 'data.alerts');
+                /** @var list<array<string, mixed>> $rows34 */
+                $rows34 = is_array($rows34) ? array_values(array_filter($rows34, 'is_array')) : [];
+                foreach ($rows34 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
 
             // Also check for faults/warnings
             if (! empty($response['data']['faults'])) {
-                foreach ($response['data']['faults'] as $fault) {
+                $rows35 = data_get($response, 'data.faults');
+                /** @var list<array<string, mixed>> $rows35 */
+                $rows35 = is_array($rows35) ? array_values(array_filter($rows35, 'is_array')) : [];
+                foreach ($rows35 as $fault) {
                     $alerts[] = $this->parseAlert($fault);
                 }
             }
@@ -210,8 +222,8 @@ class VolvoService extends BaseManufacturerService
             'name' => $data['name'] ?? $data['equipment_name'] ?? 'Unknown Equipment',
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Volvo',
-            'status' => $this->parseStatus($data['status'] ?? 'unknown'),
-            'location' => $this->parseLocation($data['position'] ?? []),
+            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'location' => $this->parseLocation(is_array($data['position'] ?? null) ? $data['position'] : []),
             'last_heartbeat' => $data['last_update'] ?? $data['last_heartbeat'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'heavy_equipment',
@@ -330,7 +342,9 @@ class VolvoService extends BaseManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -348,7 +362,10 @@ class VolvoService extends BaseManufacturerService
             // fetchMetrics() builds a list of {type, value, unit, timestamp}
             // readings, not the flat MachineMetric-column shape the sync
             // pipeline expects -- see normalizeMetricsForStorage().
-            return $this->normalizeMetricsForStorage($result['metrics'] ?? []);
+            /** @var list<array<string, mixed>> $readings */
+            $readings = array_values(array_filter((array) data_get($result, 'metrics', []), 'is_array'));
+
+            return $this->normalizeMetricsForStorage($readings);
         } catch (Exception $e) {
             return [];
         }
@@ -363,7 +380,9 @@ class VolvoService extends BaseManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

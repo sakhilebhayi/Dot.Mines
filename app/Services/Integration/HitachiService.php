@@ -46,7 +46,10 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
             $machines = [];
             if (! empty($response['data']['machines'])) {
-                foreach ($response['data']['machines'] as $machine) {
+                $rows11 = data_get($response, 'data.machines');
+                /** @var list<array<string, mixed>> $rows11 */
+                $rows11 = is_array($rows11) ? array_values(array_filter($rows11, 'is_array')) : [];
+                foreach ($rows11 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
@@ -79,7 +82,7 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation($response['data'] ?? []),
+                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -108,9 +111,9 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics($operatingHours['data'] ?? []),
-                $this->parseMetrics($status['data'] ?? []),
-                $this->parseMetrics($diagnostics['data'] ?? [])
+                $this->parseMetrics(is_array($operatingHours['data'] ?? null) ? $operatingHours['data'] : []),
+                $this->parseMetrics(is_array($status['data'] ?? null) ? $status['data'] : []),
+                $this->parseMetrics(is_array($diagnostics['data'] ?? null) ? $diagnostics['data'] : [])
             );
 
             return [
@@ -139,7 +142,10 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                foreach ($response['data']['alerts'] as $alert) {
+                $rows12 = data_get($response, 'data.alerts');
+                /** @var list<array<string, mixed>> $rows12 */
+                $rows12 = is_array($rows12) ? array_values(array_filter($rows12, 'is_array')) : [];
+                foreach ($rows12 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
             }
@@ -190,7 +196,9 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -205,7 +213,9 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
         try {
             $result = $this->fetchMetrics($machineId);
 
-            return $result['metrics'] ?? [];
+            $metrics = $result['metrics'] ?? [];
+
+            return is_array($metrics) ? $metrics : [];
         } catch (Exception $e) {
             return [];
         }
@@ -220,7 +230,9 @@ class HitachiService extends BaseManufacturerService implements ManufacturerServ
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

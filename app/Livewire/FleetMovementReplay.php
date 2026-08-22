@@ -5,9 +5,9 @@ namespace App\Livewire;
 use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Support\CurrentUser;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -81,7 +81,7 @@ class FleetMovementReplay extends Component
 
     public function loadActivityFeed(): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $this->activityFeed = ActivityLog::where('team_id', $team->id)
             ->latest('created_at')
             ->take(10)
@@ -97,7 +97,7 @@ class FleetMovementReplay extends Component
 
     public function showRecentActivities(): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         // If a machine is selected, filter activities for that machine and date range
         $query = ActivityLog::where('team_id', $team->id)->latest('created_at');
@@ -141,7 +141,7 @@ class FleetMovementReplay extends Component
 
     public function render(): View
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $machines = Machine::where('team_id', $team->id)
             ->orderBy('machine_type')
             ->orderBy('name')
@@ -375,7 +375,7 @@ class FleetMovementReplay extends Component
     public function loadRecentReplay(): void
     {
         // Load the most recent replay data automatically
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $machine = Machine::where('team_id', $team->id)
             ->orderBy('updated_at', 'desc')
             ->first();
@@ -405,7 +405,7 @@ class FleetMovementReplay extends Component
             return null;
         }
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $machine = Machine::where('team_id', $team->id)->find($this->selectedMachine);
 
         if (! $machine) {

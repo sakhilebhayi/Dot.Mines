@@ -170,7 +170,7 @@ class FuelTransactionController extends Controller
         // Note: Deleting might affect tank levels - consider reverting the transaction
         // For now, we'll just delete the record
 
-        if ($fuelTransaction->receipt_file_path) {
+        if (($fuelTransaction->receipt_file_path !== null && $fuelTransaction->receipt_file_path !== '' && $fuelTransaction->receipt_file_path !== '0')) {
             Storage::disk('public')->delete($fuelTransaction->receipt_file_path);
         }
 
@@ -219,7 +219,7 @@ class FuelTransactionController extends Controller
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $callback = function () use ($transactions) {
+        $callback = function () use ($transactions): void {
             $file = fopen('php://output', 'w');
 
             if ($file === false) {
@@ -245,7 +245,7 @@ class FuelTransactionController extends Controller
                     $transaction->total_cost,
                     $transaction->supplier,
                     $transaction->invoice_number,
-                    $transaction->user->name,
+                    $transaction->user?->name,
                     $transaction->notes,
                 ]);
             }

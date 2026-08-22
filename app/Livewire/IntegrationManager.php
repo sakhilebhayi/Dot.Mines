@@ -5,8 +5,8 @@ namespace App\Livewire;
 use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Livewire\Component;
@@ -48,7 +48,7 @@ class IntegrationManager extends Component
 
     public function mount(): void
     {
-        $this->team = Auth::user()->currentTeam;
+        $this->team = CurrentUser::get()?->currentTeam;
 
         if (! $this->team) {
             abort(403, 'No team context available.');

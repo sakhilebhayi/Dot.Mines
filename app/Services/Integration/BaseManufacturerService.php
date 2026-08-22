@@ -176,7 +176,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
             'manufacturer' => $this->manufacturer,
             'model' => $rawData['model'] ?? 'Unknown',
             'serial_number' => $rawData['serial_number'] ?? null,
-            'status' => $this->parseStatus($rawData['status'] ?? 'unknown'),
+            'status' => $this->parseStatus(is_string($rawData['status'] ?? null) ? $rawData['status'] : 'unknown'),
             'last_location' => [
                 'latitude' => $rawData['latitude'] ?? null,
                 'longitude' => $rawData['longitude'] ?? null,

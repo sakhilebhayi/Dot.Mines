@@ -9,9 +9,9 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Services\Billing\MachineEntitlementService;
 use App\Services\PaystackService;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
@@ -64,7 +64,9 @@ class BillingPortal extends Component
      */
     public function getAllocationSummaryProperty(): array
     {
-        return app(MachineEntitlementService::class)->summary(Auth::user()->currentTeam);
+        $team = CurrentUser::team();
+
+        return app(MachineEntitlementService::class)->summary($team);
     }
 
     public function getAdtPlanProperty(): ?SubscriptionPlan
@@ -91,7 +93,7 @@ class BillingPortal extends Component
          * @var Collection<int, MachineAllocation> $rows
          */
         $rows = MachineAllocation::query()
-            ->where('team_id', Auth::user()->currentTeam->id)
+            ->where('team_id', CurrentUser::get()?->currentTeam?->id)
             ->latest('id')
             ->limit(10)
             ->get();
@@ -116,8 +118,8 @@ class BillingPortal extends Component
             return 0.0;
         }
 
-        $adtPrice = $this->billingCycle === 'yearly' ? (float) $adt->yearly_price : (float) $adt->price;
-        $heavyPrice = $this->billingCycle === 'yearly' ? (float) $heavy->yearly_price : (float) $heavy->price;
+        $adtPrice = $this->billingCycle === 'yearly' ? (float) $adt->yearly_price : $adt->price;
+        $heavyPrice = $this->billingCycle === 'yearly' ? (float) $heavy->yearly_price : $heavy->price;
 
         return ((float) $this->qtyAdt * $adtPrice) + ((float) $this->qtyHeavy * $heavyPrice);
     }
@@ -136,7 +138,7 @@ class BillingPortal extends Component
             return null;
         }
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         try {
             $this->authorize('update', $team);
@@ -155,7 +157,7 @@ class BillingPortal extends Component
 
             return redirect()->to($checkout['authorization_url']);
         } catch (\Throwable $e) {
-            Log::error('Failed to start allocation checkout', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            Log::error('Failed to start allocation checkout', ['team_id' => $team?->id, 'error' => $e->getMessage()]);
             $this->addError('purchase', "We couldn't start checkout. Please try again, or contact support if this keeps happening.");
 
             return null;
@@ -169,7 +171,7 @@ class BillingPortal extends Component
 
     public function loadSubscriptionData(): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         $this->currentSubscription = Subscription::where('team_id', $team->id)
             ->with('plan')
@@ -184,15 +186,14 @@ class BillingPortal extends Component
 
     public function loadRecentActivity(): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         $succeededPayments = Payment::where('team_id', $team->id)
             ->where('status', 'succeeded');
 
         $this->totalPaid = (clone $succeededPayments)->sum('amount');
         $this->totalPaidCurrency = (clone $succeededPayments)->latest()->value('currency')
-            ?? $team->currency
-            ?? 'ZAR';
+            ?? $team->currency;
 
         $this->recentPayments = Payment::where('team_id', $team->id)
             ->latest()
@@ -209,7 +210,7 @@ class BillingPortal extends Component
 
     public function manageBilling(): mixed
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         try {
             $this->authorize('update', $team);
@@ -222,7 +223,7 @@ class BillingPortal extends Component
 
             $portalUrl = (new PaystackService)->generateManageLink($this->currentSubscription);
 
-            if (! $portalUrl) {
+            if (($portalUrl === null || $portalUrl === '' || $portalUrl === '0')) {
                 session()->flash('error', 'Unable to access billing portal.');
 
                 return null;
@@ -230,7 +231,7 @@ class BillingPortal extends Component
 
             return redirect($portalUrl);
         } catch (\Throwable $e) {
-            Log::error('Failed to open billing portal', ['team_id' => $team->id, 'error' => $e->getMessage()]);
+            Log::error('Failed to open billing portal', ['team_id' => $team?->id, 'error' => $e->getMessage()]);
             session()->flash('error', "We couldn't open the billing portal. Please try again, or contact support if this keeps happening.");
 
             return null;
@@ -246,7 +247,7 @@ class BillingPortal extends Component
         }
 
         try {
-            $this->authorize('update', Auth::user()->currentTeam);
+            $this->authorize('update', CurrentUser::get()?->currentTeam);
 
             $success = (new PaystackService)->cancelSubscription($this->currentSubscription, false);
 
@@ -271,7 +272,7 @@ class BillingPortal extends Component
         }
 
         try {
-            $this->authorize('update', Auth::user()->currentTeam);
+            $this->authorize('update', CurrentUser::get()?->currentTeam);
 
             $success = (new PaystackService)->resumeSubscription($this->currentSubscription);
 
@@ -289,12 +290,12 @@ class BillingPortal extends Component
 
     public function downloadInvoice(int $invoiceId): mixed
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $invoice = Invoice::where('team_id', $team->id)
             ->where('id', $invoiceId)
             ->first();
 
-        if ($invoice && $invoice->pdf_url) {
+        if ($invoice && ($invoice->pdf_url !== null && $invoice->pdf_url !== '' && $invoice->pdf_url !== '0')) {
             return redirect($invoice->pdf_url);
         }
 

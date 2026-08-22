@@ -69,8 +69,8 @@ class DeleteUserDataJob implements ShouldQueue
                 'Your account and personal data have been permanently deleted from '.config('app.name').' as requested.',
                 fn ($m) => $m->to($email)
                     ->from(
-                        (string) config('mail.addresses.privacy'),
-                        (string) config('app.name'),
+                        config('mail.addresses.privacy'),
+                        config('app.name'),
                     )
                     ->subject('Account Deleted – '.config('app.name'))
             );

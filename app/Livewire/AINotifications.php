@@ -47,7 +47,7 @@ class AINotifications extends Component
     #[On('alert-created')]
     public function loadNotifications(): void
     {
-        $team = auth()->user()->currentTeam;
+        $team = auth()->user()?->currentTeam;
 
         if (! $team) {
             $this->notifications = collect();
@@ -168,16 +168,16 @@ class AINotifications extends Component
 
     public function acknowledge(int $id, string $source): void
     {
-        $team = auth()->user()->currentTeam;
+        $team = auth()->user()?->currentTeam;
 
         match ($source) {
-            'ai' => AIPredictiveAlert::where('team_id', $team->id)->find($id)?->update([
+            'ai' => AIPredictiveAlert::where('team_id', $team?->id)->find($id)?->update([
                 'is_acknowledged' => true,
                 'acknowledged_at' => now(),
                 'acknowledged_by' => auth()->id(),
             ]),
-            'alert' => Alert::where('team_id', $team->id)->find($id)?->acknowledge(auth()->id()),
-            'fuel_alert' => FuelAlert::where('team_id', $team->id)->find($id)?->update([
+            'alert' => Alert::where('team_id', $team?->id)->find($id)?->acknowledge(auth()->id()),
+            'fuel_alert' => FuelAlert::where('team_id', $team?->id)->find($id)?->update([
                 'status' => 'acknowledged',
                 'acknowledged_at' => now(),
                 'acknowledged_by' => auth()->id(),
@@ -187,7 +187,7 @@ class AINotifications extends Component
             // the other three sources -- markAsRead() records this user
             // specifically, so the notification can still be unread for
             // teammates.
-            'notification' => Notification::where('team_id', $team->id)->find($id)?->markAsRead(auth()->id()),
+            'notification' => Notification::where('team_id', $team?->id)->find($id)?->markAsRead(auth()->id()),
             default => null,
         };
 
@@ -198,7 +198,7 @@ class AINotifications extends Component
 
     public function acknowledgeAll(): void
     {
-        $team = auth()->user()->currentTeam;
+        $team = auth()->user()?->currentTeam;
 
         if (! $team) {
             return;

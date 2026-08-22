@@ -128,7 +128,7 @@ class HealthMetric extends Model
      */
     protected function getDeviationAttribute(): ?float
     {
-        if (! $this->normal_min || ! $this->normal_max) {
+        if (($this->normal_min === null || $this->normal_min === 0.0) || ($this->normal_max === null || $this->normal_max === 0.0)) {
             return null;
         }
 
@@ -142,7 +142,7 @@ class HealthMetric extends Model
      */
     protected function getDeviationPercentageAttribute(): ?float
     {
-        if (! $this->normal_min || ! $this->normal_max) {
+        if (($this->normal_min === null || $this->normal_min === 0.0) || ($this->normal_max === null || $this->normal_max === 0.0)) {
             return null;
         }
 

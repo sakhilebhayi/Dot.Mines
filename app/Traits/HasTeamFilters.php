@@ -25,7 +25,7 @@ trait HasTeamFilters
             $teamId = auth()->user()?->current_team_id;
 
             // Allow non-HTTP contexts (jobs/commands) to set the current team
-            if (empty($teamId) && app()->has('current_team_id')) {
+            if (($teamId === null || $teamId === 0) && app()->has('current_team_id')) {
                 $teamId = app('current_team_id');
             }
 

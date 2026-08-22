@@ -8,8 +8,8 @@ use App\Models\MineArea;
 use App\Models\Route;
 use App\Models\Waypoint;
 use App\Services\RoutePlanningService;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -87,7 +87,7 @@ class RoutePlanning extends Component
 
     public function render(): View
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         $machines = Machine::where('team_id', $team->id)
             ->orderBy('name')
@@ -146,16 +146,14 @@ class RoutePlanning extends Component
         $this->routeSaved = false;
 
         try {
-            $team = Auth::user()->currentTeam;
+            $team = CurrentUser::team();
             $service = new RoutePlanningService;
 
             $this->calculatedRoute = $service->calculateOptimalRoute(
                 $this->startLat,
                 $this->startLon,
                 $this->endLat,
-                $this->endLon,
-                $this->machineId,
-                $team->id
+                $this->endLon
             );
 
             $this->showCalculatedRoute = true;
@@ -181,7 +179,7 @@ class RoutePlanning extends Component
         $this->validate(['name' => 'required|min:3|max:255']);
 
         try {
-            $team = Auth::user()->currentTeam;
+            $team = CurrentUser::team();
 
             DB::beginTransaction();
 
@@ -239,7 +237,7 @@ class RoutePlanning extends Component
 
     public function loadRoutes(): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $this->routes = Route::where('team_id', $team->id)
             ->with(['machine', 'mineArea', 'waypoints'])
             ->latest()
@@ -252,7 +250,7 @@ class RoutePlanning extends Component
      */
     public function viewRoute($routeId): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $route = Route::where('team_id', $team->id)
             ->where('id', $routeId)
             ->with('waypoints')
@@ -296,7 +294,7 @@ class RoutePlanning extends Component
      */
     public function deleteRoute($routeId): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $route = Route::where('team_id', $team->id)
             ->where('id', $routeId)
             ->first();

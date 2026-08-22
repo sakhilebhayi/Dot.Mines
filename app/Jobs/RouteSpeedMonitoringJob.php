@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Alert;
 use App\Models\Machine;
 use App\Models\Route;
+use App\Support\Geo;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -107,14 +108,14 @@ class RouteSpeedMonitoringJob implements ShouldQueue
     private function isMachineOnRoute(float $lat, float $lon, Route $route): bool
     {
         // Check if machine is near start or end points
-        $distanceFromStart = $this->calculateDistance(
+        $distanceFromStart = Geo::distanceKm(
             $lat,
             $lon,
             $route->start_latitude,
             $route->start_longitude
         );
 
-        $distanceFromEnd = $this->calculateDistance(
+        $distanceFromEnd = Geo::distanceKm(
             $lat,
             $lon,
             $route->end_latitude,
@@ -132,7 +133,7 @@ class RouteSpeedMonitoringJob implements ShouldQueue
             ->get();
 
         foreach ($waypoints as $waypoint) {
-            $distanceFromWaypoint = $this->calculateDistance(
+            $distanceFromWaypoint = Geo::distanceKm(
                 $lat,
                 $lon,
                 $waypoint->latitude,
@@ -145,25 +146,6 @@ class RouteSpeedMonitoringJob implements ShouldQueue
         }
 
         return false;
-    }
-
-    /**
-     * Calculate distance between two coordinates in kilometers
-     */
-    private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
-    {
-        $earthRadius = 6371; // km
-
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-
-        $a = sin($dLat / 2) * sin($dLat / 2) +
-            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($dLon / 2) * sin($dLon / 2);
-
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
-        return $earthRadius * $c;
     }
 
     /**

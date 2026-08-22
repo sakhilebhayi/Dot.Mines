@@ -29,7 +29,7 @@ class IntegrationController extends Controller
     {
         $this->authorize('viewAny', Integration::class);
 
-        $integrations = Integration::where('team_id', auth()->user()->current_team_id)
+        $integrations = Integration::where('team_id', auth()->user()?->current_team_id)
             ->select('id', 'provider', 'name', 'status', 'last_sync_at', 'last_sync_status', 'machines_count', 'last_error')
             ->get();
 
@@ -90,7 +90,7 @@ class IntegrationController extends Controller
         }
 
         // Check if integration for this provider already exists
-        if (Integration::where('team_id', auth()->user()->current_team_id)
+        if (Integration::where('team_id', auth()->user()?->current_team_id)
             ->where('provider', $request->input('provider'))
             ->exists()) {
             return response()->json([
@@ -101,7 +101,7 @@ class IntegrationController extends Controller
 
         try {
             $integration = Integration::create([
-                'team_id' => auth()->user()->current_team_id,
+                'team_id' => auth()->user()?->current_team_id,
                 'provider' => $request->input('provider'),
                 'name' => $request->input('name'),
                 'credentials' => $request->input('credentials'),

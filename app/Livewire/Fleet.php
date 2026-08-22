@@ -14,6 +14,7 @@ use App\Services\Billing\MachineEntitlementService;
 use App\Services\Billing\MachineProvisioningService;
 use App\Services\MachinePerformanceService;
 use App\Services\OperationalSnapshotService;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
@@ -177,9 +178,9 @@ class Fleet extends Component
             'longitude' => 'nullable|numeric',
         ]);
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
-        if ($this->editingMachineId) {
+        if (($this->editingMachineId !== null && $this->editingMachineId !== 0)) {
             $machine = Machine::where('team_id', $team->id)->findOrFail($this->editingMachineId);
             $this->authorize('update', $machine);
 
@@ -277,7 +278,7 @@ class Fleet extends Component
         $this->selectedExcavatorId = null;
         $this->selectedAdtIds = [];
         $this->assignMode = 'assign_to_excavator';
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $machine = Machine::where('team_id', $team->id)->find($machineId);
         if (! $machine) {
             $this->dispatch('notify', ['message' => 'Machine not found', 'type' => 'error']);
@@ -293,11 +294,11 @@ class Fleet extends Component
                 ->where('excavator_id', $machine->id)
                 ->where('machine_type', 'adt')
                 ->pluck('id')
-                ->map(fn ($id) => (int) $id)
+                ->map(fn ($id) => $id)
                 ->toArray();
         } else {
             // For ADTs and other machines, allow selecting a single excavator
-            if ($machine->excavator_id) {
+            if (($machine->excavator_id !== null && $machine->excavator_id !== 0)) {
                 $this->selectedExcavatorId = $machine->excavator_id;
             }
             $this->assignMode = 'assign_to_excavator';
@@ -324,13 +325,13 @@ class Fleet extends Component
             return;
         }
 
-        if (! $this->assigningMachineId || ! $this->selectedExcavatorId) {
+        if (($this->assigningMachineId === null || $this->assigningMachineId === 0) || ($this->selectedExcavatorId === null || $this->selectedExcavatorId === 0)) {
             $this->dispatch('notify', ['message' => 'Please select an excavator', 'type' => 'error']);
 
             return;
         }
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $machine = Machine::where('team_id', $team->id)->find($this->assigningMachineId);
         $excavator = Machine::where('team_id', $team->id)->find($this->selectedExcavatorId);
 
@@ -364,13 +365,13 @@ class Fleet extends Component
 
     public function assignAdtsToExcavator(): void
     {
-        if (! $this->assigningMachineId) {
+        if (($this->assigningMachineId === null || $this->assigningMachineId === 0)) {
             $this->dispatch('notify', ['message' => 'Excavator not specified', 'type' => 'error']);
 
             return;
         }
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $excavator = Machine::where('team_id', $team->id)->find($this->assigningMachineId);
         if (! $excavator) {
             abort(403);
@@ -400,7 +401,7 @@ class Fleet extends Component
 
     public function unassignFromExcavator(int $machineId): void
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $machine = Machine::where('team_id', $team->id)->find($machineId);
 
         if (! $machine) {
@@ -430,13 +431,13 @@ class Fleet extends Component
 
     public function assignToMineArea(): void
     {
-        if (! $this->assigningMineAreaMachineId || ! $this->selectedMineAreaId) {
+        if (($this->assigningMineAreaMachineId === null || $this->assigningMineAreaMachineId === 0) || ($this->selectedMineAreaId === null || $this->selectedMineAreaId === 0)) {
             $this->dispatch('notify', ['message' => 'Please select a mine area', 'type' => 'error']);
 
             return;
         }
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $machine = Machine::where('team_id', $team->id)->find($this->assigningMineAreaMachineId);
 
         if (! $machine) {
@@ -472,14 +473,15 @@ class Fleet extends Component
      */
     public function getAllocationSummaryProperty(): array
     {
-        return app(MachineEntitlementService::class)
-            ->summary(Auth::user()->currentTeam);
+        $team = CurrentUser::team();
+
+        return app(MachineEntitlementService::class)->summary($team);
     }
 
     public function render(): View
     {
         $this->isLoading = true;
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
 
         $machinesQuery = Machine::where('team_id', $team->id)
             ->with(['excavator', 'latestEngineHoursMetric', 'latestMetric'])
@@ -551,7 +553,7 @@ class Fleet extends Component
         $aiInsights = collect($aiAnalysis['insights'])->take(3);
 
         // Keep a serializable copy to reference in action handlers (Livewire methods)
-        $this->lastAiRecommendations = $aiRecommendations->values()->map(fn ($r) => (array) $r)->toArray();
+        $this->lastAiRecommendations = $aiRecommendations->values()->map(fn ($r) => $r)->toArray();
 
         $this->isLoading = false;
 
@@ -576,7 +578,7 @@ class Fleet extends Component
     {
         $this->authorizeRecommendationAction();
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $rec = $this->lastAiRecommendations[$index] ?? null;
         if (! $rec) {
             $this->dispatch('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
@@ -657,7 +659,7 @@ class Fleet extends Component
             return;
         }
 
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::team();
         $rec = $this->lastAiRecommendations[$this->pendingRecommendationIndex] ?? null;
         if (! $rec) {
             $this->dispatch('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
@@ -704,7 +706,7 @@ class Fleet extends Component
      */
     private function authorizeRecommendationAction(): void
     {
-        $user = Auth::user();
+        $user = CurrentUser::get();
 
         if (! $user instanceof User || (! $user->hasPermission('update_recommendations') && ! $user->ownsTeam($user->currentTeam))) {
             abort(403, 'You are not authorized to act on AI recommendations.');

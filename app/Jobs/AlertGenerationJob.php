@@ -94,7 +94,7 @@ class AlertGenerationJob implements ShouldQueue
         }
 
         // Check fuel level
-        if ($machine->fuel_capacity && $metrics->fuel_level) {
+        if ($machine->fuel_capacity && ($metrics->fuel_level !== null && $metrics->fuel_level !== 0.0)) {
             $fuelPercentage = ($metrics->fuel_level / $machine->fuel_capacity) * 100;
 
             if ($fuelPercentage <= 10) {
@@ -133,7 +133,7 @@ class AlertGenerationJob implements ShouldQueue
         }
 
         // Check engine temperature
-        if ($metrics->engine_temperature) {
+        if (($metrics->engine_temperature !== null && $metrics->engine_temperature !== 0.0)) {
             if ($metrics->engine_temperature > 95) {
                 $alerts[] = [
                     'type' => 'temperature',

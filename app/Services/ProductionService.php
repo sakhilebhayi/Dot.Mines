@@ -31,8 +31,8 @@ class ProductionService
         return [
             'total_produced' => $totalProduced,
             'total_target' => $totalTarget,
-            'total_loads' => (int) $records->sum(fn (ProductionRecord $record) => $this->recordLoads($record)),
-            'total_cycles' => (int) $records->sum(fn (ProductionRecord $record) => $this->recordCycles($record)),
+            'total_loads' => $records->sum(fn (ProductionRecord $record) => $this->recordLoads($record)),
+            'total_cycles' => $records->sum(fn (ProductionRecord $record) => $this->recordCycles($record)),
             'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100 : 0,
             'average_daily_production' => $avgProduction,
             'total_records' => $recordCount,
@@ -109,11 +109,11 @@ class ProductionService
 
         return $records->map(function ($dayRecords) {
             return [
-                'date' => $dayRecords->first()->record_date->format('Y-m-d'),
+                'date' => $dayRecords->first()?->record_date->format('Y-m-d'),
                 'produced' => $dayRecords->sum('quantity_produced'),
                 'target' => $dayRecords->sum('target_quantity'),
                 'count' => $dayRecords->count(),
-                'loads' => (int) $dayRecords->sum(fn (ProductionRecord $record) => $this->recordLoads($record)),
+                'loads' => $dayRecords->sum(fn (ProductionRecord $record) => $this->recordLoads($record)),
             ];
         });
     }

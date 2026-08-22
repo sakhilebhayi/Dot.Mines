@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Machine;
 use App\Services\OperationalSnapshotService;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
@@ -27,7 +27,7 @@ class MachineDetail extends Component
 
     public function mount(Machine $machine): void
     {
-        if ($machine->team_id !== Auth::user()->currentTeam->id) {
+        if ($machine->team_id !== CurrentUser::get()?->currentTeam?->id) {
             abort(403);
         }
         $this->machine = $machine;

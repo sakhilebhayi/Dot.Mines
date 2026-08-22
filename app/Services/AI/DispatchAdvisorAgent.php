@@ -59,7 +59,7 @@ class DispatchAdvisorAgent
             $busiest = $stats->sortByDesc('queue')->first();
             $quietest = $stats->sortBy('queue')->first();
 
-            if ($busiest['geofence']->id === $quietest['geofence']->id) {
+            if ($busiest['geofence']?->id === $quietest['geofence']?->id) {
                 continue;
             }
 
@@ -69,12 +69,12 @@ class DispatchAdvisorAgent
                 $recommendations[] = [
                     'category' => 'dispatch',
                     'priority' => $gap >= self::MIN_QUEUE_GAP * 2 ? 'high' : 'medium',
-                    'title' => "Queue Imbalance: {$busiest['geofence']->name} vs {$quietest['geofence']->name}",
-                    'description' => "{$busiest['geofence']->name} currently has {$busiest['queue']} machines queued versus {$quietest['queue']} at {$quietest['geofence']->name}, both {$busiest['geofence']->type} points in the same mine area.",
+                    'title' => "Queue Imbalance: {$busiest['geofence']?->name} vs {$quietest['geofence']?->name}",
+                    'description' => "{$busiest['geofence']->name} currently has {$busiest['queue']} machines queued versus {$quietest['queue']} at {$quietest['geofence']->name}, both {$busiest['geofence']?->type} points in the same mine area.",
                     'proposed_action' => "Reroute the next available machine from {$busiest['geofence']->name} to {$quietest['geofence']->name} to close the {$gap}-machine queue gap.",
                     'confidence_score' => 0.75,
                     'estimated_efficiency_gain' => min(50, $gap * 8),
-                    'related_mine_area_id' => $busiest['geofence']->mine_area_id,
+                    'related_mine_area_id' => $busiest['geofence']?->mine_area_id,
                     'data' => [
                         'busiest_geofence_id' => $busiest['geofence']->id,
                         'busiest_queue' => $busiest['queue'],

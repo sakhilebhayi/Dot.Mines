@@ -165,13 +165,13 @@ class MaintenanceHealthService
                     $schedule->last_service_km = $record->odometer_reading;
 
                     // Calculate next service
-                    if ($schedule->schedule_type === 'hours' && $schedule->interval_hours) {
+                    if ($schedule->schedule_type === 'hours' && ($schedule->interval_hours !== null && $schedule->interval_hours !== 0)) {
                         $schedule->next_service_hours = $record->hour_meter_reading + $schedule->interval_hours;
                     }
-                    if ($schedule->schedule_type === 'kilometers' && $schedule->interval_km) {
+                    if ($schedule->schedule_type === 'kilometers' && ($schedule->interval_km !== null && $schedule->interval_km !== 0)) {
                         $schedule->next_service_km = $record->odometer_reading + $schedule->interval_km;
                     }
-                    if ($schedule->schedule_type === 'calendar' && $schedule->interval_days) {
+                    if ($schedule->schedule_type === 'calendar' && ($schedule->interval_days !== null && $schedule->interval_days !== 0)) {
                         $schedule->next_service_date = now()->addDays($schedule->interval_days);
                     }
 
@@ -256,11 +256,11 @@ class MaintenanceHealthService
 
         // By machine
         $byMachine = $completedRecords->groupBy('machine_id')->map(function ($group) {
-            $machine = $group->first()->machine;
+            $machine = $group->first()?->machine;
 
             return [
-                'machine_id' => $machine->id,
-                'machine_name' => $machine->name,
+                'machine_id' => $machine?->id,
+                'machine_name' => $machine?->name,
                 'maintenance_count' => $group->count(),
                 'total_cost' => $group->sum('total_cost'),
             ];

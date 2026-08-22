@@ -6,6 +6,7 @@ use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Report;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -81,7 +82,7 @@ class Reports extends Component
      */
     public function getReports()
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::get()?->currentTeam;
 
         if (! $team) {
             return collect();
@@ -138,8 +139,8 @@ class Reports extends Component
             return;
         }
 
-        $team = Auth::user()->currentTeam;
-        $report = Report::where('team_id', $team->id)->find($reportId);
+        $team = CurrentUser::get()?->currentTeam;
+        $report = Report::where('team_id', $team?->id)->find($reportId);
 
         if (! $report) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
@@ -152,7 +153,7 @@ class Reports extends Component
             $this->authorize('delete', $report);
 
             // Delete associated files if they exist
-            if ($report->file_path && Storage::exists($report->file_path)) {
+            if (($report->file_path !== null && $report->file_path !== '' && $report->file_path !== '0') && Storage::exists($report->file_path)) {
                 Storage::delete($report->file_path);
             }
 
@@ -207,8 +208,8 @@ class Reports extends Component
             return null;
         }
 
-        $team = Auth::user()->currentTeam;
-        $report = Report::where('team_id', $team->id)->find($reportId);
+        $team = CurrentUser::get()?->currentTeam;
+        $report = Report::where('team_id', $team?->id)->find($reportId);
 
         if (! $report) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
@@ -225,7 +226,7 @@ class Reports extends Component
         }
 
         // Prevent path traversal attacks
-        if ($report->file_path && ! str_contains($report->file_path, '..')) {
+        if (($report->file_path !== null && $report->file_path !== '' && $report->file_path !== '0') && ! str_contains($report->file_path, '..')) {
             if (Storage::exists($report->file_path)) {
                 Log::info('User downloaded report', [
                     'user_id' => Auth::id(),
@@ -243,7 +244,7 @@ class Reports extends Component
 
     public function render(): View
     {
-        $team = Auth::user()->currentTeam;
+        $team = CurrentUser::get()?->currentTeam;
 
         $mineAreas = $team ? MineArea::where('team_id', $team->id)->get() : collect();
         $geofences = $team ? Geofence::where('team_id', $team->id)->get() : collect();

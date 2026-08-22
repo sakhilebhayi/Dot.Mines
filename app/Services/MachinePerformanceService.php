@@ -217,8 +217,8 @@ class MachinePerformanceService
     private function productionDay(Collection $dayRecords): array
     {
         return [
-            'loads' => (int) $dayRecords->sum(fn (ProductionRecord $record) => $this->productionService->recordLoads($record)),
-            'cycles' => (int) $dayRecords->sum(fn (ProductionRecord $record) => $this->productionService->recordCycles($record)),
+            'loads' => $dayRecords->sum(fn (ProductionRecord $record) => $this->productionService->recordLoads($record)),
+            'cycles' => $dayRecords->sum(fn (ProductionRecord $record) => $this->productionService->recordCycles($record)),
             'tonnes' => (float) $dayRecords->sum('quantity_produced'),
         ];
     }

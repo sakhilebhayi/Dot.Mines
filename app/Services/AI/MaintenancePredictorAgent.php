@@ -224,7 +224,7 @@ class MaintenancePredictorAgent
         $riskFactors['health'] = ((100 - $healthScore) / 100) * 0.25;
 
         // Factor 4: Age of machine (20% weight)
-        $machineAge = $machine->year_of_manufacture
+        $machineAge = ($machine->year_of_manufacture !== null && $machine->year_of_manufacture !== 0)
             ? now()->year - $machine->year_of_manufacture
             : 5;
         $riskFactors['age'] = min(($machineAge / 20) * 0.2, 0.2); // 20 years is max
@@ -267,7 +267,7 @@ class MaintenancePredictorAgent
             $factors[] = 'High utilization: '.round($highUsage, 1).' hours/day';
         }
 
-        if ($machine->year_of_manufacture && (now()->year - $machine->year_of_manufacture) > 10) {
+        if (($machine->year_of_manufacture !== null && $machine->year_of_manufacture !== 0) && (now()->year - $machine->year_of_manufacture) > 10) {
             $factors[] = 'Age: '.(now()->year - $machine->year_of_manufacture).' years';
         }
 

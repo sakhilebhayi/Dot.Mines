@@ -59,7 +59,7 @@ class SyncController extends Controller
         $user = $request->user();
         $teamId = (int) $user->current_team_id;
         $since = (int) ($validated['since'] ?? 0);
-        $pageSize = (int) config('sync.page_size', 500);
+        $pageSize = config('sync.page_size', 500);
         $startedAt = hrtime(true);
 
         $changes = [];
@@ -184,7 +184,7 @@ class SyncController extends Controller
                 'title' => $model->title,
                 'message' => $model->message,
                 'alert_level' => $model->alert_level,
-                'is_read' => (bool) $model->is_read,
+                'is_read' => $model->is_read,
                 'created_at' => $model->created_at?->toIso8601String(),
                 'sync_version' => $model->sync_version,
             ],

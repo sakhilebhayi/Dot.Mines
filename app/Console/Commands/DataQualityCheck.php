@@ -24,7 +24,7 @@ class DataQualityCheck extends Command
 
     public function handle(DataQualityService $service): int
     {
-        $teams = $this->argument('team')
+        $teams = ($this->argument('team') !== null && $this->argument('team') !== '' && $this->argument('team') !== '0')
             ? Team::where('id', $this->argument('team'))->get()
             : Team::all();
 

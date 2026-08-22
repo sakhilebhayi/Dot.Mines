@@ -351,7 +351,7 @@ class IntegrationService
         $deepSync = Cache::add(
             'integration_deep_sync_'.$integration->id,
             now()->toIso8601String(),
-            now()->addSeconds((int) config('integrations.jobs.deep_sync_interval', 3600))
+            now()->addSeconds(config('integrations.jobs.deep_sync_interval', 3600))
         );
 
         $synced = 0;
@@ -366,7 +366,7 @@ class IntegrationService
             // service since ManufacturerServiceInterface was written,
             // but nothing ever called it, so real fault/caution codes
             // never reached the Alert table for any provider.
-            if ($machine && $machine->manufacturer_id) {
+            if ($machine && ($machine->manufacturer_id !== null && $machine->manufacturer_id !== '' && $machine->manufacturer_id !== '0')) {
                 if ($deepSync) {
                     $this->syncMachineAlertsFromService($service, $machine);
 
@@ -439,7 +439,7 @@ class IntegrationService
                 continue;
             }
 
-            if ($location) {
+            if (($location !== null && $location !== [])) {
                 $locations[] = array_merge($location, ['manufacturer_id' => $manufacturerId]);
             }
         }
@@ -510,7 +510,7 @@ class IntegrationService
             // A successful location fetch is the only real connectivity
             // signal available through this interface -- there's no
             // dedicated "status" endpoint on ManufacturerServiceInterface.
-            if ($location) {
+            if (($location !== null && $location !== [])) {
                 $statuses[] = [
                     'manufacturer_id' => $manufacturerId,
                     'online' => true,
@@ -774,13 +774,13 @@ class IntegrationService
     {
         $manufacturerId = $machine->manufacturer_id;
 
-        if (! $manufacturerId) {
+        if (($manufacturerId === null || $manufacturerId === '' || $manufacturerId === '0')) {
             return;
         }
 
         try {
             $timezone = $integration->team?->timezone ?: config('app.timezone', 'UTC');
-            $backfillDays = max(1, (int) config('integrations.production_backfill_days', 14));
+            $backfillDays = max(1, config('integrations.production_backfill_days', 14));
 
             $latest = ProductionRecord::where('team_id', $integration->team_id)
                 ->where('machine_id', $machine->id)
@@ -971,14 +971,14 @@ class IntegrationService
                 ->whereDate('end_date', '>=', $date)
                 ->where(function ($query) use ($mineAreaId) {
                     $query->whereNull('mine_area_id');
-                    if ($mineAreaId) {
+                    if (($mineAreaId !== null && $mineAreaId !== 0)) {
                         $query->orWhere('mine_area_id', $mineAreaId);
                     }
                 })
                 ->orderByRaw('mine_area_id IS NULL')
                 ->first();
 
-            return $target?->target_quantity !== null ? (float) $target->target_quantity : null;
+            return $target?->target_quantity !== null ? (float) $target?->target_quantity : null;
         } catch (\Throwable) {
             return null;
         }

@@ -222,7 +222,7 @@ class FuelManagement extends Component
 
     private function hasActiveTanks(): bool
     {
-        return FuelTank::where('team_id', auth()->user()->current_team_id)
+        return FuelTank::where('team_id', auth()->user()?->current_team_id)
             ->where('status', 'active')
             ->exists();
     }
@@ -251,7 +251,7 @@ class FuelManagement extends Component
         ]);
 
         $user = Auth::user();
-        if (! $user instanceof User || ! $user->current_team_id) {
+        if (! $user instanceof User || ($user->current_team_id === null || $user->current_team_id === 0)) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'User session invalid']);
 
             return;
@@ -367,7 +367,7 @@ class FuelManagement extends Component
 
     public function performDeleteConfirmed(): void
     {
-        if ($this->confirmDeleteTankId) {
+        if (($this->confirmDeleteTankId !== null && $this->confirmDeleteTankId !== 0)) {
             $this->deleteTank($this->confirmDeleteTankId);
         }
         $this->closeDeleteConfirm();
@@ -382,7 +382,7 @@ class FuelManagement extends Component
     {
         $user = Auth::user();
 
-        if (! $user instanceof User || ! $user->current_team_id) {
+        if (! $user instanceof User || ($user->current_team_id === null || $user->current_team_id === 0)) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'Tank not found.']);
 
             return;
@@ -425,7 +425,7 @@ class FuelManagement extends Component
         ]);
 
         $user = Auth::user();
-        if (! $user instanceof User || ! $user->current_team_id) {
+        if (! $user instanceof User || ($user->current_team_id === null || $user->current_team_id === 0)) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'User session invalid']);
 
             return;
@@ -473,7 +473,7 @@ class FuelManagement extends Component
 
     public function render(): View
     {
-        $teamId = auth()->user()->current_team_id;
+        $teamId = auth()->user()?->current_team_id;
 
         // Get date range based on period
         $dateRange = $this->getDateRange();

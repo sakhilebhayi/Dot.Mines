@@ -48,7 +48,10 @@ class KomatsuService extends BaseManufacturerService
 
             $machines = [];
             if (! empty($response['machines'])) {
-                foreach ($response['machines'] as $machine) {
+                $rows22 = data_get($response, 'machines');
+                /** @var list<array<string, mixed>> $rows22 */
+                $rows22 = is_array($rows22) ? array_values(array_filter($rows22, 'is_array')) : [];
+                foreach ($rows22 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
             }
@@ -112,7 +115,7 @@ class KomatsuService extends BaseManufacturerService
             if (! empty($operatingHours['operatingHours'])) {
                 $metrics[] = [
                     'type' => 'operating_hours',
-                    'value' => $operatingHours['operatingHours']['total'] ?? 0,
+                    'value' => data_get($operatingHours, 'operatingHours.total') ?? 0,
                     'unit' => 'hours',
                     'timestamp' => $operatingHours['timestamp'] ?? now(),
                 ];
@@ -122,7 +125,7 @@ class KomatsuService extends BaseManufacturerService
             if (! empty($fuelConsumption['fuelConsumption'])) {
                 $metrics[] = [
                     'type' => 'fuel_consumption',
-                    'value' => $fuelConsumption['fuelConsumption']['total'] ?? 0,
+                    'value' => data_get($fuelConsumption, 'fuelConsumption.total') ?? 0,
                     'unit' => 'liters',
                     'timestamp' => $fuelConsumption['timestamp'] ?? now(),
                 ];
@@ -132,7 +135,7 @@ class KomatsuService extends BaseManufacturerService
             if (! empty($workingModes['workingModes'])) {
                 $metrics[] = [
                     'type' => 'working_mode',
-                    'value' => $workingModes['workingModes']['current'] ?? 'unknown',
+                    'value' => data_get($workingModes, 'workingModes.current') ?? 'unknown',
                     'timestamp' => $workingModes['timestamp'] ?? now(),
                 ];
             }
@@ -173,7 +176,10 @@ class KomatsuService extends BaseManufacturerService
 
             $alerts = [];
             if (! empty($response['cautions'])) {
-                foreach ($response['cautions'] as $caution) {
+                $rows23 = data_get($response, 'cautions');
+                /** @var list<array<string, mixed>> $rows23 */
+                $rows23 = is_array($rows23) ? array_values(array_filter($rows23, 'is_array')) : [];
+                foreach ($rows23 as $caution) {
                     $alerts[] = $this->parseAlert($caution);
                 }
             }
@@ -206,8 +212,8 @@ class KomatsuService extends BaseManufacturerService
             'name' => $data['name'] ?? $data['asset_name'] ?? 'Unknown Equipment',
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Komatsu',
-            'status' => $this->parseStatus($data['status'] ?? 'unknown'),
-            'location' => $this->parseLocation($data['position'] ?? []),
+            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'location' => $this->parseLocation(is_array($data['position'] ?? null) ? $data['position'] : []),
             'last_heartbeat' => $data['last_heartbeat'] ?? $data['last_update'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'heavy_equipment',
@@ -304,7 +310,9 @@ class KomatsuService extends BaseManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            return ($result['location'] ?? null) ?? null;
+            $location = $result['location'] ?? null;
+
+            return is_array($location) ? $location : null;
         } catch (Exception $e) {
             return null;
         }
@@ -322,7 +330,10 @@ class KomatsuService extends BaseManufacturerService
             // fetchMetrics() builds a list of {type, value, unit, timestamp}
             // readings, not the flat MachineMetric-column shape the sync
             // pipeline expects -- see normalizeMetricsForStorage().
-            return $this->normalizeMetricsForStorage($result['metrics'] ?? []);
+            /** @var list<array<string, mixed>> $readings */
+            $readings = array_values(array_filter((array) data_get($result, 'metrics', []), 'is_array'));
+
+            return $this->normalizeMetricsForStorage($readings);
         } catch (Exception $e) {
             return [];
         }
@@ -337,7 +348,9 @@ class KomatsuService extends BaseManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            return $result['alerts'] ?? [];
+            $items = $result['alerts'] ?? [];
+
+            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
         } catch (Exception $e) {
             return [];
         }

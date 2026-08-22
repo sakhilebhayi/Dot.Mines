@@ -48,14 +48,14 @@ class AIAnalytics extends Component
 
     public function render(): View
     {
-        $team = auth()->user()->currentTeam;
+        $team = auth()->user()?->currentTeam;
         $startDate = now()->subDays((int) $this->timeRange);
 
         // Get agents
         $agents = AIAgent::all();
 
         // Recommendations over time
-        $recommendationsTimeline = AIRecommendation::where('team_id', $team->id)
+        $recommendationsTimeline = AIRecommendation::where('team_id', $team?->id)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count, status')
             ->groupBy('date', 'status')

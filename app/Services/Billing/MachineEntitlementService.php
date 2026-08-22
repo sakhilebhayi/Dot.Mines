@@ -53,7 +53,7 @@ class MachineEntitlementService
         $purchased = $this->purchasedBalances($team);
         $trial = $purchased['adt'] === 0 && $purchased['heavy'] === 0 && ! $this->hasLedger($team);
         $occupied = $this->occupiedCounts($team);
-        $allowance = (int) config('billing.trial_machine_allowance', 2);
+        $allowance = config('billing.trial_machine_allowance', 2);
 
         if ($trial) {
             $availableTotal = $allowance - ($occupied['adt'] + $occupied['heavy']);
@@ -164,7 +164,7 @@ class MachineEntitlementService
             ->pluck('total', 'machine_type');
 
         foreach ($rows as $machineType => $total) {
-            if ($this->classFor((string) $machineType) === 'heavy') {
+            if ($this->classFor($machineType) === 'heavy') {
                 $counts['heavy'] += (int) $total;
             } else {
                 $counts['adt'] += (int) $total;

@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Alert;
 use App\Models\Machine;
+use App\Support\Geo;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -110,7 +111,7 @@ class MachineIdleMonitoringJob implements ShouldQueue
             // Check location change (if available)
             if (! is_null($metric->latitude) && ! is_null($metric->longitude)) {
                 if ($lastLocation) {
-                    $distance = $this->calculateDistance(
+                    $distance = Geo::distanceKm(
                         $lastLocation['lat'],
                         $lastLocation['lng'],
                         $metric->latitude,
@@ -173,25 +174,6 @@ class MachineIdleMonitoringJob implements ShouldQueue
             'idle_since' => $longestIdleStart,
             'last_location' => $lastLocation,
         ];
-    }
-
-    /**
-     * Calculate distance between two coordinates in kilometers
-     */
-    private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
-    {
-        $earthRadius = 6371; // km
-
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-
-        $a = sin($dLat / 2) * sin($dLat / 2) +
-            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($dLon / 2) * sin($dLon / 2);
-
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
-        return $earthRadius * $c;
     }
 
     /**

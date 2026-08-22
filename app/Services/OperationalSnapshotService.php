@@ -114,7 +114,7 @@ class OperationalSnapshotService
     private function snapshot(Machine $machine, ?ProductionRecord $baseline, ?ProductionRecord $todayRecord, int $staleAfter): array
     {
         $metric = $machine->latestMetric;
-        $raw = is_array($metric?->raw_data) ? $metric->raw_data : [];
+        $raw = is_array($metric?->raw_data) ? $metric?->raw_data : [];
 
         [$liveLoads, $liveTonnesKgValue, $liveUnits, $counterAt] = $this->freshestCounters($metric?->recorded_at, $raw, $todayRecord);
 
@@ -136,8 +136,8 @@ class OperationalSnapshotService
             'machine_id' => $machine->id,
             'name' => $machine->name,
             'status' => $machine->status,
-            'latitude' => $machine->last_location_latitude !== null ? (float) $machine->last_location_latitude : null,
-            'longitude' => $machine->last_location_longitude !== null ? (float) $machine->last_location_longitude : null,
+            'latitude' => $machine->last_location_latitude !== null ? $machine->last_location_latitude : null,
+            'longitude' => $machine->last_location_longitude !== null ? $machine->last_location_longitude : null,
             'speed' => $metric?->speed,
             'heading' => $metric?->heading,
             'fuel_level' => $metric?->fuel_level,

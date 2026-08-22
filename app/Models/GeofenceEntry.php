@@ -119,7 +119,7 @@ class GeofenceEntry extends Model
     public function getFormattedDuration(): string
     {
         $minutes = $this->getDurationMinutes();
-        if (! $minutes) {
+        if (($minutes === null || $minutes === 0)) {
             return 'Active';
         }
 
