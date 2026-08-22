@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\MaintenanceRecordController;
 use App\Http\Controllers\Api\MaintenanceScheduleController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\SyncController;
 use App\Models\Machine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,14 @@ use Illuminate\Support\Facades\Route;
  * Rate limiting: 60 requests per minute per user
  */
 Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(function () {
+
+    /**
+     * Incremental sync (hybrid architecture Slice 1): versioned deltas for
+     * the browser's local cache. GET /api/v1/sync?since=<cursor>&scopes=...
+     */
+    Route::prefix('v1')->group(function () {
+        Route::get('/sync', SyncController::class)->name('api.sync');
+    });
 
     /**
      * User & Auth endpoints

@@ -4,6 +4,7 @@ use App\Jobs\ArchiveOldMetricsJob;
 use App\Jobs\MachineIdleMonitoringJob;
 use App\Jobs\PurgeExpiredSoftDeletesJob;
 use App\Jobs\RouteSpeedMonitoringJob;
+use App\Services\Sync\SyncSequence;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -77,5 +78,13 @@ Schedule::job(new PurgeExpiredSoftDeletesJob)
     ->weekly()
     ->sundays()
     ->at('03:00')
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Nightly: prune the sync_versions sequence table (each row's id is a
+// handed-out version number; only the tail matters for SyncSequence::current).
+Schedule::call(fn () => SyncSequence::prune())
+    ->name('sync-sequence-prune')
+    ->dailyAt('02:30')
     ->withoutOverlapping()
     ->onOneServer();

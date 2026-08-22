@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasSyncVersion;
 use Carbon\Carbon;
 use Database\Factories\MineAreaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,11 +41,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static MineArea|null find(mixed $id, array $columns = ['*'])
  * @method static MineArea findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ *
+ * @property int|null $sync_version
  */
 class MineArea extends Model
 {
     /** @use HasFactory<MineAreaFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasSyncVersion, SoftDeletes;
 
     protected $fillable = [
         'team_id',
