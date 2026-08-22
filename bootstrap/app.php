@@ -25,6 +25,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // frontend, so Sanctum treats same-origin API requests as stateful.
         $middleware->statefulApi();
 
+        // Paystack webhooks authenticate by HMAC signature, not session --
+        // without this exemption every REAL webhook dies with 419 before
+        // WebhookController's signature check runs. Latent since the
+        // billing program: the test client skips CSRF, so only a live
+        // unsigned curl against production exposed it.
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/*',
+        ]);
+
         $middleware->alias([
             'ensure_team' => EnsureTeamContext::class,
             'cache.headers' => CacheControlHeaders::class,
