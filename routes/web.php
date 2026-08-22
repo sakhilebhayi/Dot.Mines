@@ -19,6 +19,7 @@ use App\Livewire\MineAreaDetail;
 use App\Livewire\OperatorFatigueTracker;
 use App\Livewire\ProductionDashboard;
 use App\Livewire\RoutePlanning;
+use App\Livewire\SystemHealth;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\Report;
@@ -63,6 +64,12 @@ Route::middleware([
     })->name('dashboard');
 
     // Fleet Management
+    // Admin system-health board (hybrid Slice 4): which layer is unhappy --
+    // DB, queue, Bell, broadcasting, sync backbone. Admin-only.
+    Route::middleware('admin')->group(function () {
+        Route::get('/system-health', SystemHealth::class)->name('system-health');
+    });
+
     Route::get('/fleet', function () {
         return view('fleet.index');
     })->name('fleet');

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Incremental sync endpoint (hybrid spec Slice 1): returns only rows whose
@@ -59,6 +60,7 @@ class SyncController extends Controller
         $teamId = (int) $user->current_team_id;
         $since = (int) ($validated['since'] ?? 0);
         $pageSize = (int) config('sync.page_size', 500);
+        $startedAt = hrtime(true);
 
         $changes = [];
         $truncatedCursors = [];
@@ -77,6 +79,25 @@ class SyncController extends Controller
         $version = $truncatedCursors === []
             ? max($since, SyncSequence::current())
             : min($truncatedCursors);
+
+        $durationMs = intdiv(hrtime(true) - $startedAt, 1_000_000);
+
+        // Observability (brief §32): only anomalies are logged -- slow pulls
+        // and oversized deltas -- never routine 60-second heartbeats, and
+        // never payload contents. Context is ids and counts only.
+        if ($durationMs > 1000 || $truncatedCursors !== []) {
+            Log::warning('sync.pull.slow_or_truncated', [
+                'team_id' => $teamId,
+                'user_id' => $user->id,
+                'scopes' => $scopes,
+                'since' => $since,
+                'version' => $version,
+                'duration_ms' => $durationMs,
+                'change_counts' => array_map('count', $changes),
+                'deleted_count' => count($deleted),
+                'has_more' => $truncatedCursors !== [],
+            ]);
+        }
 
         return response()->json([
             'version' => $version,
