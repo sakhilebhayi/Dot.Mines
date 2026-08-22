@@ -181,6 +181,47 @@
       <code><![CDATA[update]]></code>
     </PossiblyUnusedMethod>
   </file>
+  <file src="app/Console/Commands/AdjustMachineAllocation.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[AdjustMachineAllocation]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$team]]></code>
+      <code><![CDATA[$team->id]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$team]]></code>
+    </MixedAssignment>
+    <MixedPropertyFetch>
+      <code><![CDATA[$team->id]]></code>
+    </MixedPropertyFetch>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[AdjustMachineAllocation]]></code>
+      <code><![CDATA[AdjustMachineAllocation]]></code>
+      <code><![CDATA[AdjustMachineAllocation]]></code>
+      <code><![CDATA[AdjustMachineAllocation]]></code>
+      <code><![CDATA[AdjustMachineAllocation]]></code>
+    </PropertyNotSetInConstructor>
+    <RiskyCast>
+      <code><![CDATA[$this->argument('delta')]]></code>
+      <code><![CDATA[$this->argument('team')]]></code>
+      <code><![CDATA[$this->option('by')]]></code>
+    </RiskyCast>
+    <UndefinedMagicMethod>
+      <code><![CDATA[MachineAllocation::create([
+            'team_id' => $team->id,
+            'class' => $class,
+            'delta' => $delta,
+            'source' => 'admin',
+            'reason' => $reason,
+            'created_by' => $this->option('by') !== null ? (int) $this->option('by') : null,
+        ])]]></code>
+      <code><![CDATA[Team::find((int) $this->argument('team'))]]></code>
+    </UndefinedMagicMethod>
+    <UnusedClass>
+      <code><![CDATA[AdjustMachineAllocation]]></code>
+    </UnusedClass>
+  </file>
   <file src="app/Console/Commands/DataQualityCheck.php">
     <ClassMustBeFinal>
       <code><![CDATA[DataQualityCheck]]></code>
@@ -3759,6 +3800,16 @@
     <ClassMustBeFinal>
       <code><![CDATA[BillingPortal]]></code>
     </ClassMustBeFinal>
+    <InvalidTemplateParam>
+      <code><![CDATA[$rows
+            ->map(fn (MachineAllocation $row): array => [
+                'class' => $row->class,
+                'delta' => $row->delta,
+                'source' => $row->source,
+                'reason' => $row->reason,
+                'created_at' => $row->created_at->format('j M Y H:i'),
+            ])]]></code>
+    </InvalidTemplateParam>
     <MissingReturnType>
       <code><![CDATA[render]]></code>
     </MissingReturnType>
@@ -3780,6 +3831,9 @@
       <code><![CDATA[$this->totalPaid]]></code>
       <code><![CDATA[$this->totalPaidCurrency]]></code>
     </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[format]]></code>
+    </MixedMethodCall>
     <MixedPropertyFetch>
       <code><![CDATA[$team->currency]]></code>
       <code><![CDATA[$team->id]]></code>
@@ -3790,7 +3844,20 @@
       <code><![CDATA[$this->currentSubscription->id]]></code>
       <code><![CDATA[$this->currentSubscription->id]]></code>
     </MixedPropertyFetch>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[$rows
+            ->map(fn (MachineAllocation $row): array => [
+                'class' => $row->class,
+                'delta' => $row->delta,
+                'source' => $row->source,
+                'reason' => $row->reason,
+                'created_at' => $row->created_at->format('j M Y H:i'),
+            ])
+            ->all()]]></code>
+      <code><![CDATA[array<int, array{class: string, delta: int, source: string, reason: string|null, created_at: string}>]]></code>
+    </MixedReturnTypeCoercion>
     <NoInterfaceProperties>
+      <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
@@ -3809,11 +3876,13 @@
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
+      <code><![CDATA[Auth::user()->currentTeam]]></code>
     </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[cancelSubscription]]></code>
       <code><![CDATA[downloadInvoice]]></code>
       <code><![CDATA[getAdtPlanProperty]]></code>
+      <code><![CDATA[getAllocationHistoryProperty]]></code>
       <code><![CDATA[getAllocationSummaryProperty]]></code>
       <code><![CDATA[getHeavyPlanProperty]]></code>
       <code><![CDATA[getPurchaseTotalProperty]]></code>
@@ -3849,10 +3918,14 @@
     </UndefinedMagicMethod>
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$invoice->pdf_url]]></code>
+      <code><![CDATA[$row->created_at]]></code>
       <code><![CDATA[$this->currentSubscription->current_period_end]]></code>
       <code><![CDATA[$this->currentSubscription->plan]]></code>
       <code><![CDATA[$this->currentSubscription->plan]]></code>
     </UndefinedMagicPropertyFetch>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[\Illuminate\Database\Eloquent\Collection<int, MachineAllocation>]]></code>
+    </UnnecessaryVarAnnotation>
   </file>
   <file src="app/Livewire/Dashboard.php">
     <ClassMustBeFinal>
@@ -9255,7 +9328,6 @@
       <code><![CDATA[getStatusColorAttribute]]></code>
       <code><![CDATA[getStatusTextAttribute]]></code>
       <code><![CDATA[invoices]]></code>
-      <code><![CDATA[isActive]]></code>
       <code><![CDATA[isCanceled]]></code>
       <code><![CDATA[isExpired]]></code>
       <code><![CDATA[isPastDue]]></code>
@@ -10662,49 +10734,6 @@
       <code><![CDATA[MachineProvisioningService]]></code>
     </ClassMustBeFinal>
     <MixedReturnStatement>
-      <code><![CDATA[Cache::lock($this->lockName($team), 10)->block(5, function () use ($team, $machine): Machine {
-            return DB::transaction(function () use ($team, $machine): Machine {
-                $class = $this->entitlements->classFor($machine->machine_type);
-                $summary = $this->entitlements->summary($team);
-
-                if ($summary['available'][$class] <= 0) {
-                    $capacity = $summary['trial'] ? $summary['trial_allowance'] : $summary['purchased'][$class];
-
-                    throw new InsufficientAllocationException(
-                        occupied: $summary['occupied']['adt'] + $summary['occupied']['heavy'],
-                        capacity: $capacity,
-                        trial: $summary['trial'],
-                    );
-                }
-
-                $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_OCCUPYING])->save();
-
-                return $machine;
-            });
-        })]]></code>
-      <code><![CDATA[Cache::lock($this->lockName($team), 10)->block(5, function () use ($team, $machineType, $create): Machine {
-            return DB::transaction(function () use ($team, $machineType, $create): Machine {
-                $class = $this->entitlements->classFor($machineType);
-                $summary = $this->entitlements->summary($team);
-
-                if ($summary['available'][$class] <= 0) {
-                    $capacity = $summary['trial']
-                        ? $summary['trial_allowance']
-                        : $summary['purchased'][$class];
-
-                    throw new InsufficientAllocationException(
-                        occupied: $summary['occupied']['adt'] + $summary['occupied']['heavy'],
-                        capacity: $capacity,
-                        trial: $summary['trial'],
-                    );
-                }
-
-                $machine = $create();
-                $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_OCCUPYING])->save();
-
-                return $machine;
-            });
-        })]]></code>
       <code><![CDATA[DB::transaction(function () use ($team, $machine): Machine {
                 $class = $this->entitlements->classFor($machine->machine_type);
                 $summary = $this->entitlements->summary($team);
@@ -10723,31 +10752,9 @@
 
                 return $machine;
             })]]></code>
-      <code><![CDATA[DB::transaction(function () use ($team, $machineType, $create): Machine {
-                $class = $this->entitlements->classFor($machineType);
-                $summary = $this->entitlements->summary($team);
-
-                if ($summary['available'][$class] <= 0) {
-                    $capacity = $summary['trial']
-                        ? $summary['trial_allowance']
-                        : $summary['purchased'][$class];
-
-                    throw new InsufficientAllocationException(
-                        occupied: $summary['occupied']['adt'] + $summary['occupied']['heavy'],
-                        capacity: $capacity,
-                        trial: $summary['trial'],
-                    );
-                }
-
-                $machine = $create();
-                $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_OCCUPYING])->save();
-
-                return $machine;
-            })]]></code>
     </MixedReturnStatement>
     <PossiblyUnusedMethod>
       <code><![CDATA[__construct]]></code>
-      <code><![CDATA[activate]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="app/Services/DataQuality/DataQualityService.php">

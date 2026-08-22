@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $subscription_id
  * @property string|null $reason
  * @property int|null $created_by
+ * @property Carbon $created_at
  */
 class MachineAllocation extends Model
 {

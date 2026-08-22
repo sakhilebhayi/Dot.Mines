@@ -145,6 +145,26 @@
         @endif
     </div>
 
+    {{-- Allocation history (§18): the ledger itself, newest first. --}}
+    @php $history = $this->allocationHistory; @endphp
+    @if (count($history) > 0)
+        <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-display font-semibold text-[var(--stone)] mb-4">Allocation History</h2>
+            <div class="divide-y divide-[var(--line)]">
+                @foreach ($history as $row)
+                    <div class="py-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm" wire:key="alloc-history-{{ $loop->index }}">
+                        <span class="text-[var(--sand)] w-32 shrink-0">{{ $row['created_at'] }}</span>
+                        <span class="font-medium {{ $row['delta'] > 0 ? 'text-green-400' : 'text-red-400' }}">{{ $row['delta'] > 0 ? '+' : '' }}{{ $row['delta'] }} {{ $row['class'] === 'heavy' ? 'heavy' : 'ADT' }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs bg-white/5 text-[var(--sand)]">{{ str_replace('_', ' ', $row['source']) }}</span>
+                        @if ($row['reason'])
+                            <span class="text-[var(--sand)]/70 text-xs">{{ $row['reason'] }}</span>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- Recent payments --}}
     @if (count($recentPayments) > 0)
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-xl shadow-lg p-6">
