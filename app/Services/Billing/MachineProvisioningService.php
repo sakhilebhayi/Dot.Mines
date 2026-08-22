@@ -5,6 +5,7 @@ namespace App\Services\Billing;
 use App\Exceptions\InsufficientAllocationException;
 use App\Models\Machine;
 use App\Models\Team;
+use App\Services\NotificationService;
 use Closure;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,9 @@ class MachineProvisioningService
      */
     public function provision(Team $team, string $machineType, Closure $create): Machine
     {
+        /** @var Machine */
         return Cache::lock($this->lockName($team), 10)->block(5, function () use ($team, $machineType, $create): Machine {
+            /** @var Machine */
             return DB::transaction(function () use ($team, $machineType, $create): Machine {
                 $class = $this->entitlements->classFor($machineType);
                 $summary = $this->entitlements->summary($team);
@@ -53,6 +56,8 @@ class MachineProvisioningService
                 $machine = $create();
                 $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_OCCUPYING])->save();
 
+                $this->notifyIfCapacityTight($team, $class);
+
                 return $machine;
             });
         });
@@ -69,10 +74,23 @@ class MachineProvisioningService
     public function provisionOrPend(Team $team, string $machineType, Closure $create): Machine
     {
         try {
+            /** @var Machine */
             return $this->provision($team, $machineType, $create);
         } catch (InsufficientAllocationException) {
             $machine = $create();
             $machine->forceFill(['allocation_state' => MachineEntitlementService::STATE_PENDING])->save();
+
+            NotificationService::dispatch([
+                'team_id' => $team->id,
+                'type' => 'billing.machine_pending_allocation',
+                'title' => 'Machine discovered — allocation required',
+                'message' => sprintf(
+                    '"%s" was discovered by your integration but could not be activated: no machine allocation is available. Purchase an allocation, then activate it from the Fleet page.',
+                    $machine->name,
+                ),
+                'alert_level' => NotificationService::LEVEL_WARNING,
+                'action_url' => route('billing.index'),
+            ]);
 
             return $machine;
         }
@@ -81,6 +99,8 @@ class MachineProvisioningService
     /**
      * Activate a previously pending machine once capacity exists.
      *
+     * @psalm-suppress PossiblyUnusedReturnValue -- Livewire callers act on the model they already hold
+     *
      * @throws InsufficientAllocationException
      */
     public function activate(Machine $machine): Machine
@@ -88,6 +108,7 @@ class MachineProvisioningService
         /** @var Team $team */
         $team = $machine->team;
 
+        /** @var Machine */
         return Cache::lock($this->lockName($team), 10)->block(5, function () use ($team, $machine): Machine {
             return DB::transaction(function () use ($team, $machine): Machine {
                 $class = $this->entitlements->classFor($machine->machine_type);
@@ -108,6 +129,35 @@ class MachineProvisioningService
                 return $machine;
             });
         });
+    }
+
+    /**
+     * Brief §22: tell the team when they take the last-but-one and the
+     * last slot -- creations are rare enough that firing on each
+     * threshold crossing needs no extra dedupe machinery.
+     */
+    private function notifyIfCapacityTight(Team $team, string $class): void
+    {
+        $available = $this->entitlements->summary($team)['available'][$class];
+
+        if ($available === 1) {
+            NotificationService::dispatch([
+                'team_id' => $team->id,
+                'type' => 'billing.capacity_low',
+                'title' => 'Machine capacity almost full',
+                'message' => sprintf('You have 1 %s machine allocation remaining.', $class === 'heavy' ? 'heavy' : 'ADT'),
+                'action_url' => route('billing.index'),
+            ]);
+        } elseif ($available === 0) {
+            NotificationService::dispatch([
+                'team_id' => $team->id,
+                'type' => 'billing.capacity_full',
+                'title' => 'Machine capacity full',
+                'message' => sprintf('All of your %s machine allocations are now in use. Purchase more to add machines.', $class === 'heavy' ? 'heavy' : 'ADT'),
+                'alert_level' => NotificationService::LEVEL_WARNING,
+                'action_url' => route('billing.index'),
+            ]);
+        }
     }
 
     private function lockName(Team $team): string

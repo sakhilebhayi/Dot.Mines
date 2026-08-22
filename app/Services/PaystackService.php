@@ -493,6 +493,62 @@ class PaystackService
             'adt' => $adt,
             'heavy' => $heavy,
         ]);
+
+        NotificationService::dispatch([
+            'team_id' => $payment->team_id,
+            'type' => 'billing.allocation_granted',
+            'title' => 'Machine allocations added',
+            'message' => sprintf(
+                'Payment confirmed — %s now available. You can add your machine%s right away.',
+                collect(['ADT' => $adt, 'heavy machine' => $heavy])
+                    ->filter()
+                    ->map(fn (int $qty, string $label): string => "{$qty} {$label} allocation".($qty === 1 ? '' : 's'))
+                    ->implode(' and '),
+                ($adt + $heavy) === 1 ? '' : 's',
+            ),
+            'action_url' => route('fleet'),
+        ]);
+    }
+
+    /**
+     * A failed charge/renewal grants nothing (brief §9) -- but the
+     * customer must hear about it in-app, not discover it when a machine
+     * refuses to activate.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    public function handlePaymentFailed(array $data): void
+    {
+        /** @var array<string, mixed> $inner */
+        $inner = is_array($data['data'] ?? null) ? $data['data'] : [];
+
+        /** @var array<string, mixed> $metadata */
+        $metadata = is_array($inner['metadata'] ?? null) ? $inner['metadata'] : [];
+        $teamId = (int) ($metadata['team_id'] ?? 0);
+
+        if ($teamId === 0) {
+            /** @var array<string, mixed> $subscriptionInfo */
+            $subscriptionInfo = is_array($inner['subscription'] ?? null) ? $inner['subscription'] : [];
+
+            /** @var mixed $code */
+            $code = $subscriptionInfo['subscription_code'] ?? null;
+            $teamId = is_string($code)
+                ? (int) (Subscription::query()->where('paystack_subscription_code', $code)->value('team_id') ?? 0)
+                : 0;
+        }
+
+        if ($teamId === 0) {
+            return;
+        }
+
+        NotificationService::dispatch([
+            'team_id' => $teamId,
+            'type' => 'billing.payment_failed',
+            'title' => 'Payment unsuccessful',
+            'message' => 'Your payment could not be processed, so no machine allocation was added. Please try again or use another payment method.',
+            'alert_level' => NotificationService::LEVEL_WARNING,
+            'action_url' => route('billing.index'),
+        ]);
     }
 
     /**

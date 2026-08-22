@@ -224,6 +224,39 @@ class Fleet extends Component
         $this->closeModal();
     }
 
+    /**
+     * Activate a machine an integration discovered while no allocation was
+     * available (brief §23). Consumes one allocation; fails with the same
+     * honest message as any other capacity miss.
+     */
+    public function activateMachine(Machine $machine): void
+    {
+        $this->authorize('update', $machine);
+
+        try {
+            app(MachineProvisioningService::class)->activate($machine);
+            $this->dispatch('notify', ['message' => "Machine '{$machine->name}' activated", 'type' => 'success']);
+        } catch (InsufficientAllocationException $e) {
+            $this->addError('allocation', $e->getMessage());
+        }
+    }
+
+    /**
+     * Decommission: release the machine's allocation WITHOUT deleting its
+     * history (brief §13 replacement flow -- free the slot, keep the
+     * record, add the replacement without buying another allocation).
+     */
+    public function decommissionMachine(Machine $machine): void
+    {
+        $this->authorize('update', $machine);
+
+        $machine->forceFill([
+            'allocation_state' => MachineEntitlementService::STATE_RELEASED,
+        ])->save();
+
+        $this->dispatch('notify', ['message' => "Machine '{$machine->name}' decommissioned — its allocation is available again", 'type' => 'success']);
+    }
+
     public function deleteMachine(Machine $machine): void
     {
         $this->authorize('delete', $machine);
@@ -430,7 +463,7 @@ class Fleet extends Component
      * Entitlement numbers for the page banner -- computed so the banner
      * stays current after every create/delete without extra wiring.
      *
-     * @return array{purchased: array{adt: int, heavy: int}, occupied: array{adt: int, heavy: int}, available: array{adt: int, heavy: int}, trial: bool, trial_allowance: int, over_allocated: bool}
+     * @return array{purchased: array{adt: int, heavy: int}, occupied: array{adt: int, heavy: int}, available: array{adt: int, heavy: int}, trial: bool, trial_allowance: int, over_allocated: bool, suspended: bool}
      */
     public function getAllocationSummaryProperty(): array
     {

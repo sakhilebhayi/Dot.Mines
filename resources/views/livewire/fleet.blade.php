@@ -24,7 +24,15 @@
             <a href="{{ route('billing.index') }}" class="inline-flex items-center mt-3 px-4 py-2 bg-[var(--gold)] text-[var(--ink)] rounded-lg text-sm font-semibold hover:bg-[var(--gold-soft)]">Purchase Machine Allocation</a>
         </div>
     @enderror
-    @if ($alloc['over_allocated'])
+    @if ($alloc['suspended'] ?? false)
+        <div class="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl p-4 mb-6" role="alert">
+            <p class="font-semibold">Machine allocations unavailable</p>
+            <p class="text-sm mt-1 text-red-300">
+                Your subscription has lapsed, so your purchased allocations are unavailable. Existing machines keep running; adding machines requires renewing your subscription.
+            </p>
+            <a href="{{ route('billing.index') }}" class="inline-flex items-center mt-3 px-4 py-2 bg-[var(--gold)] text-[var(--ink)] rounded-lg text-sm font-semibold hover:bg-[var(--gold-soft)]">Renew Subscription</a>
+        </div>
+    @elseif ($alloc['over_allocated'])
         <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl p-4 mb-6" role="alert">
             <p class="font-semibold">Allocation review required</p>
             <p class="text-sm mt-1 text-amber-300">
@@ -506,9 +514,19 @@
                                 <x-freshness :timestamp="$machine->latestMetric?->recorded_at" :stale-after="1800" />
                             </div>
                             @if ($machine->allocation_state === 'pending_activation')
-                                <div class="flex justify-center mt-1">
+                                <div class="flex justify-center items-center gap-2 mt-1">
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/15 text-amber-400" title="Discovered by an integration; activation requires an available machine allocation.">
                                         Awaiting allocation
+                                    </span>
+                                    <button wire:click="activateMachine({{ $machine->id }})" wire:loading.attr="disabled" wire:target="activateMachine({{ $machine->id }})"
+                                        class="text-[10px] px-2 py-0.5 rounded-full bg-[var(--gold)] text-[var(--ink)] font-semibold hover:bg-[var(--gold-soft)] disabled:opacity-50">
+                                        Activate
+                                    </button>
+                                </div>
+                            @elseif ($machine->allocation_state === 'released')
+                                <div class="flex justify-center mt-1">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-500/15 text-[var(--sand)]" title="Decommissioned — no longer consumes a machine allocation.">
+                                        Decommissioned
                                     </span>
                                 </div>
                             @endif

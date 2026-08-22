@@ -25,7 +25,12 @@
             @endif
         </div>
 
-        @if ($alloc['over_allocated'])
+        @if ($alloc['suspended'] ?? false)
+            <div class="bg-red-500/10 border border-red-500/30 text-red-300 rounded-lg p-3 mb-4 text-sm" role="alert">
+                <span class="font-semibold text-red-400">Allocations unavailable.</span>
+                Your subscription has lapsed. Existing machines keep running, but purchased allocations only count while the subscription is active — renew below to restore your capacity.
+            </div>
+        @elseif ($alloc['over_allocated'])
             <div class="bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-lg p-3 mb-4 text-sm" role="alert">
                 <span class="font-semibold text-amber-400">Allocation review required.</span>
                 This account runs more machines than its current entitlement. Existing machines keep working; adding machines requires purchasing allocations below.

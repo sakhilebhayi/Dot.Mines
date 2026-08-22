@@ -3,6 +3,7 @@
 namespace App\Services\Billing;
 
 use App\Models\MachineAllocation;
+use App\Models\Subscription;
 use App\Models\Team;
 use Illuminate\Support\Facades\DB;
 
@@ -45,7 +46,7 @@ class MachineEntitlementService
     }
 
     /**
-     * @return array{purchased: array{adt: int, heavy: int}, occupied: array{adt: int, heavy: int}, available: array{adt: int, heavy: int}, trial: bool, trial_allowance: int, over_allocated: bool}
+     * @return array{purchased: array{adt: int, heavy: int}, occupied: array{adt: int, heavy: int}, available: array{adt: int, heavy: int}, trial: bool, trial_allowance: int, over_allocated: bool, suspended: bool}
      */
     public function summary(Team $team): array
     {
@@ -66,13 +67,22 @@ class MachineEntitlementService
                 'trial' => true,
                 'trial_allowance' => $allowance,
                 'over_allocated' => $availableTotal < 0,
+                'suspended' => false,
             ];
         }
 
-        $available = [
-            'adt' => $purchased['adt'] - $occupied['adt'],
-            'heavy' => $purchased['heavy'] - $occupied['heavy'],
-        ];
+        // Brief §11: a lapsed subscription makes PURCHASED allocations
+        // unavailable -- machines are never touched, the ledger is never
+        // rewritten, and renewal restores capacity with no data movement.
+        // Canceled-but-paid stays entitled until the period actually ends.
+        $suspended = ! $this->subscriptionEntitled($team);
+
+        $available = $suspended
+            ? ['adt' => 0, 'heavy' => 0]
+            : [
+                'adt' => $purchased['adt'] - $occupied['adt'],
+                'heavy' => $purchased['heavy'] - $occupied['heavy'],
+            ];
 
         return [
             'purchased' => $purchased,
@@ -80,8 +90,38 @@ class MachineEntitlementService
             'available' => $available,
             'trial' => false,
             'trial_allowance' => $allowance,
-            'over_allocated' => $available['adt'] < 0 || $available['heavy'] < 0,
+            'over_allocated' => $suspended
+                ? ($occupied['adt'] + $occupied['heavy']) > 0
+                : ($available['adt'] < 0 || $available['heavy'] < 0),
+            'suspended' => $suspended,
         ];
+    }
+
+    /**
+     * Whether the team's purchased balances currently count. Ledger rows
+     * with no subscription row at all stay entitled -- admin adjustments
+     * and grandfathered grants must not require a Paystack subscription;
+     * Paystack purchases always create one via the subscription webhook,
+     * which is when lapse-gating engages.
+     */
+    private function subscriptionEntitled(Team $team): bool
+    {
+        $subscription = Subscription::query()
+            ->where('team_id', $team->id)
+            ->latest('id')
+            ->first();
+
+        if ($subscription === null) {
+            return true;
+        }
+
+        if ($subscription->isActive() || $subscription->onTrial()) {
+            return true;
+        }
+
+        // Canceled or lapsed, but the paid period hasn't ended yet.
+        return $subscription->current_period_end !== null
+            && $subscription->current_period_end->isFuture();
     }
 
     public function hasCapacityFor(Team $team, string $class): bool
