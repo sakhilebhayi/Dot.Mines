@@ -25,7 +25,8 @@ class CopyDatabaseEngine extends Command
         {--from= : Source connection name (read-only throughout)}
         {--to= : Target connection name}
         {--fresh : Wipe the target schema first (migrate:fresh)}
-        {--verify-only : Skip migration and copy; only compare source and target}';
+        {--verify-only : Skip migration and copy; only compare source and target}
+        {--skip-missing : Copy only columns the target schema has, loudly listing every exclusion (for sources with legacy drift)}';
 
     protected $description = 'Copy all application data between database connections with per-table verification';
 
@@ -68,7 +69,13 @@ class CopyDatabaseEngine extends Command
                 return self::FAILURE;
             }
 
-            $this->copyTables($from, $to, $tables);
+            try {
+                $this->copyTables($from, $to, $tables);
+            } catch (\RuntimeException $exception) {
+                $this->error($exception->getMessage());
+
+                return self::FAILURE;
+            }
         }
 
         return $this->verify($from, $to, $tables) ? self::SUCCESS : self::FAILURE;
@@ -134,9 +141,26 @@ class CopyDatabaseEngine extends Command
         try {
             foreach ($tables as $table) {
                 if (! Schema::connection($to)->hasTable($table)) {
-                    $this->warn("Skipping [{$table}]: not present on target (dropped by a later migration?).");
+                    $this->warn("Skipping table [{$table}]: not present on target (legacy schema drift?).");
 
                     continue;
+                }
+
+                $sourceColumns = Schema::connection($from)->getColumnListing($table);
+                $targetColumns = Schema::connection($to)->getColumnListing($table);
+                $sharedColumns = array_values(array_intersect($sourceColumns, $targetColumns));
+                $extraColumns = array_values(array_diff($sourceColumns, $targetColumns));
+
+                if ($extraColumns !== []) {
+                    if ($this->option('skip-missing') !== true) {
+                        throw new \RuntimeException(
+                            "Source table [{$table}] has columns the target lacks: "
+                            .implode(', ', $extraColumns)
+                            .'. Re-run with --skip-missing to exclude them, or reconcile the schema.',
+                        );
+                    }
+
+                    $this->warn("  [{$table}] excluding source-only columns: ".implode(', ', $extraColumns));
                 }
 
                 // Migration-seeded rows (e.g. subscription_plans) must not
@@ -144,11 +168,9 @@ class CopyDatabaseEngine extends Command
                 DB::connection($to)->table($table)->delete();
 
                 $copied = 0;
-                $orderColumn = Schema::connection($from)->hasColumn($table, 'id')
-                    ? 'id'
-                    : (Schema::connection($from)->getColumnListing($table)[0] ?? 'rowid');
+                $orderColumn = in_array('id', $sharedColumns, true) ? 'id' : ($sharedColumns[0] ?? 'rowid');
 
-                DB::connection($from)->table($table)->orderBy($orderColumn)->chunk(
+                DB::connection($from)->table($table)->select($sharedColumns)->orderBy($orderColumn)->chunk(
                     self::CHUNK_SIZE,
                     function ($rows) use ($to, $table, &$copied): void {
                         $payload = $rows->map(fn (object $row): array => (array) $row)->all();

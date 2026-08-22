@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -81,6 +82,29 @@ class CopyDatabaseEngineTest extends TestCase
         ])->assertSuccessful();
 
         $this->assertSame(0, DB::connection('engine_target')->table('cache')->count());
+    }
+
+    public function test_source_only_columns_fail_strict_and_copy_with_skip_missing(): void
+    {
+        Schema::table('users', function ($table): void {
+            $table->string('legacy_junk')->nullable();
+        });
+        User::factory()->withPersonalTeam()->create();
+        DB::table('users')->update(['legacy_junk' => 'old-world']);
+
+        $options = ['--from' => config('database.default'), '--to' => 'engine_target'];
+
+        // Strict default: schema drift is an error, not a silent data drop.
+        $this->artisan('db:engine-copy', $options)->assertFailed();
+
+        $this->artisan('db:engine-copy', $options + ['--fresh' => true, '--skip-missing' => true])
+            ->expectsOutputToContain('excluding source-only columns: legacy_junk')
+            ->assertSuccessful();
+
+        $this->assertSame(1, DB::connection('engine_target')->table('users')->count());
+        $this->assertFalse(
+            Schema::connection('engine_target')->hasColumn('users', 'legacy_junk'),
+        );
     }
 
     public function test_rejects_missing_or_identical_connections(): void
