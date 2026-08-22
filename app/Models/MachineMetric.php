@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Services\Sync\SyncSequence;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 /**
  * MachineMetric Model
@@ -54,6 +56,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class MachineMetric extends Model
 {
     use HasFactory, HasTeamFilters;
+
+    /**
+     * New telemetry advances the parent machine's sync cursor so the fleet
+     * scope of the incremental sync API picks the machine up: clients cache
+     * one denormalized fleet row per machine (identity + latest telemetry),
+     * so a metric insert IS a fleet-state change. Direct DB update on
+     * purpose -- no model events, no touched timestamps.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (MachineMetric $metric): void {
+            DB::table('machines')
+                ->where('id', $metric->machine_id)
+                ->update(['sync_version' => SyncSequence::next()]);
+        });
+    }
 
     protected $fillable = [
         'team_id',

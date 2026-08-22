@@ -2169,6 +2169,29 @@
       <code><![CDATA[$validated]]></code>
     </UnusedVariable>
   </file>
+  <file src="app/Http/Controllers/Api/SyncController.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[SyncController]]></code>
+    </ClassMustBeFinal>
+    <DocblockTypeContradiction>
+      <code><![CDATA[$model->created_at]]></code>
+    </DocblockTypeContradiction>
+    <InvalidTemplateParam>
+      <code><![CDATA[$models->map(fn (Model $model): array => $this->serialize($model))]]></code>
+      <code><![CDATA[$tombstones
+            ->map(fn (SyncTombstone $tombstone): array => [
+                'entity_type' => $tombstone->entity_type,
+                'entity_id' => $tombstone->entity_id,
+                'sync_version' => $tombstone->sync_version,
+            ])]]></code>
+    </InvalidTemplateParam>
+    <MixedArgument>
+      <code><![CDATA[$validated['scopes']]]></code>
+    </MixedArgument>
+    <RedundantCastGivenDocblockType>
+      <code><![CDATA[(bool) $model->is_read]]></code>
+    </RedundantCastGivenDocblockType>
+  </file>
   <file src="app/Http/Controllers/GdprController.php">
     <ClassMustBeFinal>
       <code><![CDATA[GdprController]]></code>
@@ -8480,6 +8503,9 @@
     <LessSpecificImplementedReturnType>
       <code><![CDATA[\Illuminate\Database\Eloquent\Collection]]></code>
     </LessSpecificImplementedReturnType>
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected static function booted(): void]]></code>
+    </MissingOverrideAttribute>
     <MissingTemplateParam>
       <code><![CDATA[HasFactory]]></code>
     </MissingTemplateParam>
@@ -9380,6 +9406,11 @@
       <code><![CDATA[! $this->yearly_price]]></code>
       <code><![CDATA[$this->yearly_price]]></code>
     </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="app/Models/SyncTombstone.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[SyncTombstone]]></code>
+    </ClassMustBeFinal>
   </file>
   <file src="app/Models/Team.php">
     <ClassMustBeFinal>
@@ -14431,6 +14462,11 @@
       <code><![CDATA[$r->qty]]></code>
     </UndefinedMagicPropertyFetch>
   </file>
+  <file src="app/Services/Sync/SyncSequence.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[SyncSequence]]></code>
+    </ClassMustBeFinal>
+  </file>
   <file src="app/Services/TeamRoleProvisioner.php">
     <ClassMustBeFinal>
       <code><![CDATA[TeamRoleProvisioner]]></code>
@@ -14475,6 +14511,26 @@
     <ClassMustBeFinal>
       <code><![CDATA[Currency]]></code>
     </ClassMustBeFinal>
+  </file>
+  <file src="app/Traits/HasSyncVersion.php">
+    <MixedAssignment>
+      <code><![CDATA[$teamId]]></code>
+    </MixedAssignment>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[bootHasSyncVersion]]></code>
+      <code><![CDATA[bootHasSyncVersion]]></code>
+      <code><![CDATA[bootHasSyncVersion]]></code>
+      <code><![CDATA[bootHasSyncVersion]]></code>
+    </PossiblyUnusedMethod>
+    <UndefinedMagicMethod>
+      <code><![CDATA[SyncTombstone::create([
+                'team_id' => $teamId,
+                'entity_type' => $model->getTable(),
+                'entity_id' => $model->getKey(),
+                'sync_version' => SyncSequence::next(),
+                'created_at' => now(),
+            ])]]></code>
+    </UndefinedMagicMethod>
   </file>
   <file src="app/Traits/HasTeamFilters.php">
     <InvalidArgument>

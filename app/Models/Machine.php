@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\QueryCacheService;
+use App\Traits\HasSyncVersion;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Database\Factories\MachineFactory;
@@ -64,11 +65,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @method static Machine findOrFail(mixed $id, array<string> $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection<int,Machine> all(array<string> $columns = ['*'])
  * @method static \Illuminate\Pagination\Paginator paginate(int $perPage = 15, array<string> $columns = ['*'], string $pageName = 'page', int $page = null)
+ *
+ * @property int|null $sync_version
  */
 class Machine extends Model
 {
     /** @use HasFactory<MachineFactory> */
-    use HasFactory, HasTeamFilters;
+    use HasFactory, HasSyncVersion, HasTeamFilters;
 
     protected $fillable = [
         'team_id',

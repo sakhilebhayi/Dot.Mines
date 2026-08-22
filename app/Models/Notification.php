@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasSyncVersion;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,10 +31,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @method static Notification|null find(mixed $id, array $columns = ['*'])
  * @method static Notification findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ *
+ * @property int|null $sync_version
  */
 class Notification extends Model
 {
     use HasFactory;
+    use HasSyncVersion;
 
     protected $fillable = [
         'team_id',

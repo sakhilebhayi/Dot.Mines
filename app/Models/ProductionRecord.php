@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasSyncVersion;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,9 +35,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static ProductionRecord|null find(mixed $id, array $columns = ['*'])
  * @method static ProductionRecord findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ *
+ * @property int|null $sync_version
  */
 class ProductionRecord extends Model
 {
+    use HasSyncVersion;
     use SoftDeletes;
 
     protected $fillable = [
