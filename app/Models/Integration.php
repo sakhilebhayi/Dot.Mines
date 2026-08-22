@@ -135,7 +135,7 @@ class Integration extends Model
     /**
      * Mark integration as synced
      */
-    public function markSynced()
+    public function markSynced(): bool
     {
         return $this->update([
             'last_sync_at' => now(),
@@ -147,7 +147,7 @@ class Integration extends Model
     /**
      * Mark integration as errored
      */
-    public function markError($error)
+    public function markError(?string $error): bool
     {
         return $this->update([
             'last_error' => $error,

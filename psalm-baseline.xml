@@ -790,37 +790,14 @@
       <code><![CDATA[broadcastAs]]></code>
       <code><![CDATA[broadcastWith]]></code>
     </PossiblyUnusedMethod>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$this->violation->compliance_audit_id]]></code>
-    </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Events/GeofenceEntryDetected.php">
     <ClassMustBeFinal>
       <code><![CDATA[GeofenceEntryDetected]]></code>
     </ClassMustBeFinal>
-    <InvalidOperand>
-      <code><![CDATA[$geofence->id]]></code>
-      <code><![CDATA[$geofence->team_id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-    </InvalidOperand>
     <MissingOverrideAttribute>
       <code><![CDATA[public function broadcastOn(): array]]></code>
     </MissingOverrideAttribute>
-    <PossiblyNullOperand>
-      <code><![CDATA[$geofence->id]]></code>
-      <code><![CDATA[$geofence->team_id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-    </PossiblyNullOperand>
-    <PossiblyNullPropertyFetch>
-      <code><![CDATA[$geofence->id]]></code>
-      <code><![CDATA[$geofence->id]]></code>
-      <code><![CDATA[$geofence->name]]></code>
-      <code><![CDATA[$geofence->team_id]]></code>
-      <code><![CDATA[$geofence->team_id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-      <code><![CDATA[$machine->name]]></code>
-    </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[broadcastAs]]></code>
       <code><![CDATA[broadcastWith]]></code>
@@ -830,29 +807,9 @@
     <ClassMustBeFinal>
       <code><![CDATA[GeofenceExitDetected]]></code>
     </ClassMustBeFinal>
-    <InvalidOperand>
-      <code><![CDATA[$geofence->id]]></code>
-      <code><![CDATA[$geofence->team_id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-    </InvalidOperand>
     <MissingOverrideAttribute>
       <code><![CDATA[public function broadcastOn(): array]]></code>
     </MissingOverrideAttribute>
-    <PossiblyNullOperand>
-      <code><![CDATA[$geofence->id]]></code>
-      <code><![CDATA[$geofence->team_id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-    </PossiblyNullOperand>
-    <PossiblyNullPropertyFetch>
-      <code><![CDATA[$geofence->id]]></code>
-      <code><![CDATA[$geofence->id]]></code>
-      <code><![CDATA[$geofence->name]]></code>
-      <code><![CDATA[$geofence->team_id]]></code>
-      <code><![CDATA[$geofence->team_id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-      <code><![CDATA[$machine->name]]></code>
-    </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[broadcastAs]]></code>
       <code><![CDATA[broadcastWith]]></code>
@@ -862,9 +819,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[MachineLocationUpdated]]></code>
     </ClassMustBeFinal>
-    <InvalidPropertyAssignmentValue>
-      <code><![CDATA[now()]]></code>
-    </InvalidPropertyAssignmentValue>
     <MissingOverrideAttribute>
       <code><![CDATA[public function broadcastOn(): array]]></code>
     </MissingOverrideAttribute>
@@ -926,11 +880,6 @@
       <code><![CDATA[broadcastAs]]></code>
       <code><![CDATA[broadcastWith]]></code>
     </PossiblyUnusedMethod>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$this->sensor->id]]></code>
-      <code><![CDATA[$this->sensor->name]]></code>
-      <code><![CDATA[$this->sensor->sensor_type]]></code>
-    </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Events/SensorStatusChanged.php">
     <ClassMustBeFinal>
@@ -943,10 +892,6 @@
       <code><![CDATA[broadcastAs]]></code>
       <code><![CDATA[broadcastWith]]></code>
     </PossiblyUnusedMethod>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$this->sensor->id]]></code>
-      <code><![CDATA[$this->sensor->name]]></code>
-    </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Exceptions/InsufficientAllocationException.php">
     <ClassMustBeFinal>
@@ -976,6 +921,8 @@
     </MissingReturnType>
     <MixedArgument>
       <code><![CDATA[$perPage]]></code>
+      <code><![CDATA[auth()->id()]]></code>
+      <code><![CDATA[auth()->id()]]></code>
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$alert]]></code>
@@ -1442,7 +1389,6 @@
     </ClassMustBeFinal>
     <MissingClosureParamType>
       <code><![CDATA[$entries]]></code>
-      <code><![CDATA[$machine]]></code>
     </MissingClosureParamType>
     <MissingReturnType>
       <code><![CDATA[activeMachines]]></code>
@@ -1455,6 +1401,8 @@
       <code><![CDATA[update]]></code>
     </MissingReturnType>
     <MixedArgument>
+      <code><![CDATA[$dateFrom]]></code>
+      <code><![CDATA[$dateTo]]></code>
       <code><![CDATA[$perPage]]></code>
       <code><![CDATA[$request->input('coordinates')]]></code>
       <code><![CDATA[$tonnageByMachine->toArray()]]></code>
@@ -1464,25 +1412,20 @@
       <code><![CDATA[$validated]]></code>
     </MixedArgumentTypeCoercion>
     <MixedAssignment>
-      <code><![CDATA[$activeMachines]]></code>
       <code><![CDATA[$dateFrom]]></code>
       <code><![CDATA[$dateTo]]></code>
       <code><![CDATA[$entries]]></code>
       <code><![CDATA[$entries]]></code>
       <code><![CDATA[$geofence]]></code>
       <code><![CDATA[$limit]]></code>
-      <code><![CDATA[$machines]]></code>
       <code><![CDATA[$perPage]]></code>
       <code><![CDATA[$search]]></code>
       <code><![CDATA[$tonnageByMachine]]></code>
-      <code><![CDATA[$totalTonnage]]></code>
       <code><![CDATA[$validated['coordinates']]]></code>
       <code><![CDATA[$validated['coordinates']]]></code>
       <code><![CDATA[$validated['team_id']]]></code>
     </MixedAssignment>
     <MixedMethodCall>
-      <code><![CDATA[count]]></code>
-      <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[first]]></code>
@@ -1492,17 +1435,18 @@
       <code><![CDATA[groupBy]]></code>
       <code><![CDATA[limit]]></code>
       <code><![CDATA[map]]></code>
-      <code><![CDATA[map]]></code>
       <code><![CDATA[sum]]></code>
       <code><![CDATA[toArray]]></code>
     </MixedMethodCall>
     <MixedPropertyFetch>
       <code><![CDATA[$entries->first()->machine]]></code>
       <code><![CDATA[$entries->first()->machine_id]]></code>
+    </MixedPropertyFetch>
+    <PossiblyNullPropertyFetch>
       <code><![CDATA[$machine->id]]></code>
       <code><![CDATA[$machine->name]]></code>
       <code><![CDATA[$machine->registration_number]]></code>
-    </MixedPropertyFetch>
+    </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[activeMachines]]></code>
       <code><![CDATA[destroy]]></code>
@@ -1648,8 +1592,6 @@
       <code><![CDATA[orderBy]]></code>
       <code><![CDATA[paginate]]></code>
       <code><![CDATA[where]]></code>
-      <code><![CDATA[whereDate]]></code>
-      <code><![CDATA[whereDate]]></code>
     </MixedMethodCall>
     <MixedPropertyFetch>
       <code><![CDATA[$reading->quality_score]]></code>
@@ -1657,9 +1599,10 @@
       <code><![CDATA[$reading->unit]]></code>
       <code><![CDATA[$reading->value]]></code>
     </MixedPropertyFetch>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$sensor->id]]></code>
-    </UndefinedMagicPropertyFetch>
+    <UndefinedMagicMethod>
+      <code><![CDATA[whereDate]]></code>
+      <code><![CDATA[whereDate]]></code>
+    </UndefinedMagicMethod>
     <UndefinedMethod>
       <code><![CDATA[recordReading]]></code>
     </UndefinedMethod>
@@ -2583,7 +2526,6 @@
     </InvalidOperand>
     <MixedArgument>
       <code><![CDATA[$alert]]></code>
-      <code><![CDATA[$alertData]]></code>
       <code><![CDATA[$fuelPercentage]]></code>
       <code><![CDATA[$fuelPercentage]]></code>
       <code><![CDATA[$metrics->engine_temperature]]></code>
@@ -2592,7 +2534,6 @@
     <MixedAssignment>
       <code><![CDATA[$alert]]></code>
       <code><![CDATA[$alert]]></code>
-      <code><![CDATA[$alertData]]></code>
       <code><![CDATA[$existingAlert]]></code>
       <code><![CDATA[$fuelPercentage]]></code>
     </MixedAssignment>
@@ -2766,9 +2707,6 @@
     <ImplicitToStringCast>
       <code><![CDATA[Str::uuid()]]></code>
     </ImplicitToStringCast>
-    <PossiblyFalseArgument>
-      <code><![CDATA[file_get_contents($localPath)]]></code>
-    </PossiblyFalseArgument>
     <PossiblyFalseOperand>
       <code><![CDATA[tempnam(sys_get_temp_dir(), 'report_')]]></code>
     </PossiblyFalseOperand>
@@ -2782,6 +2720,9 @@
     <PossiblyUnusedProperty>
       <code><![CDATA[$tries]]></code>
     </PossiblyUnusedProperty>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[filesize($localPath)]]></code>
+    </RiskyTruthyFalsyComparison>
   </file>
   <file src="app/Jobs/GeofenceCrossingDetectionJob.php">
     <ArgumentTypeCoercion>
@@ -2791,64 +2732,31 @@
       <code><![CDATA[GeofenceCrossingDetectionJob]]></code>
     </ClassMustBeFinal>
     <MixedArgument>
-      <code><![CDATA[$geofence->coordinates]]></code>
       <code><![CDATA[$lastEntry]]></code>
-      <code><![CDATA[$machine]]></code>
     </MixedArgument>
     <MixedArrayAccess>
       <code><![CDATA[$polygon[$i % count($polygon)][0]]]></code>
       <code><![CDATA[$polygon[$i % count($polygon)][1]]]></code>
-      <code><![CDATA[$polygon[0][0]]]></code>
-      <code><![CDATA[$polygon[0][1]]]></code>
     </MixedArrayAccess>
     <MixedAssignment>
       <code><![CDATA[$entry]]></code>
       <code><![CDATA[$lastEntry]]></code>
-      <code><![CDATA[$machine]]></code>
-      <code><![CDATA[$machines]]></code>
-      <code><![CDATA[$p1Lat]]></code>
-      <code><![CDATA[$p1Lat]]></code>
-      <code><![CDATA[$p1Lon]]></code>
-      <code><![CDATA[$p1Lon]]></code>
-      <code><![CDATA[$p2Lat]]></code>
-      <code><![CDATA[$p2Lon]]></code>
-      <code><![CDATA[$xinters]]></code>
     </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[first]]></code>
       <code><![CDATA[get]]></code>
-      <code><![CDATA[isEmpty]]></code>
       <code><![CDATA[latest]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[whereNotNull]]></code>
     </MixedMethodCall>
-    <MixedOperand>
-      <code><![CDATA[$lat - $p1Lat]]></code>
-      <code><![CDATA[$p1Lat]]></code>
-      <code><![CDATA[$p2Lat]]></code>
-      <code><![CDATA[$p2Lon]]></code>
-      <code><![CDATA[($lat - $p1Lat) * ($p2Lon - $p1Lon)]]></code>
-    </MixedOperand>
     <MixedPropertyFetch>
       <code><![CDATA[$entry->id]]></code>
       <code><![CDATA[$lastEntry->exited_at]]></code>
       <code><![CDATA[$lastEntry->exited_at]]></code>
-      <code><![CDATA[$machine->id]]></code>
-      <code><![CDATA[$machine->last_location_latitude]]></code>
-      <code><![CDATA[$machine->last_location_longitude]]></code>
     </MixedPropertyFetch>
     <MixedReturnStatement>
       <code><![CDATA[$entry]]></code>
     </MixedReturnStatement>
-    <PossiblyNullArgument>
-      <code><![CDATA[$machine->last_location_latitude]]></code>
-      <code><![CDATA[$machine->last_location_longitude]]></code>
-    </PossiblyNullArgument>
-    <PossiblyNullPropertyFetch>
-      <code><![CDATA[$machine->id]]></code>
-      <code><![CDATA[$machine->last_location_latitude]]></code>
-      <code><![CDATA[$machine->last_location_longitude]]></code>
-    </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[failed]]></code>
       <code><![CDATA[handle]]></code>
@@ -2990,9 +2898,6 @@
       <code><![CDATA[toArray]]></code>
       <code><![CDATA[where]]></code>
     </MixedMethodCall>
-    <PossiblyNullReference>
-      <code><![CDATA[diffInMinutes]]></code>
-    </PossiblyNullReference>
     <PossiblyUnusedMethod>
       <code><![CDATA[failed]]></code>
       <code><![CDATA[handle]]></code>
@@ -3095,13 +3000,11 @@
       <code><![CDATA[$dLon / 2]]></code>
       <code><![CDATA[$dLon / 2]]></code>
       <code><![CDATA[$earthRadius * $c]]></code>
+      <code><![CDATA[$route->machine_id]]></code>
       <code><![CDATA[$route->speed_limit * 1.5]]></code>
       <code><![CDATA[1 - $a]]></code>
       <code><![CDATA[2 * atan2(sqrt($a), sqrt(1 - $a))]]></code>
     </InvalidOperand>
-    <MissingParamType>
-      <code><![CDATA[$metric]]></code>
-    </MissingParamType>
     <MixedArgument>
       <code><![CDATA[$metric->latitude]]></code>
       <code><![CDATA[$metric->longitude]]></code>
@@ -3128,23 +3031,16 @@
       <code><![CDATA[with]]></code>
     </MixedMethodCall>
     <MixedPropertyFetch>
-      <code><![CDATA[$metric->created_at]]></code>
-      <code><![CDATA[$metric->latitude]]></code>
-      <code><![CDATA[$metric->longitude]]></code>
-      <code><![CDATA[$metric->speed]]></code>
       <code><![CDATA[$route->machine]]></code>
       <code><![CDATA[$route->machine_id]]></code>
     </MixedPropertyFetch>
     <PossiblyNullArgument>
-      <code><![CDATA[$route->machine->name]]></code>
       <code><![CDATA[$route->speed_limit]]></code>
     </PossiblyNullArgument>
     <PossiblyNullOperand>
+      <code><![CDATA[$route->machine_id]]></code>
       <code><![CDATA[$route->speed_limit]]></code>
     </PossiblyNullOperand>
-    <PossiblyNullPropertyFetch>
-      <code><![CDATA[$route->machine->name]]></code>
-    </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[handle]]></code>
     </PossiblyUnusedMethod>
@@ -3160,7 +3056,7 @@
             'title' => 'Speed Limit Exceeded',
             'description' => sprintf(
                 'Machine %s exceeded the speed limit of %d km/h on route "%s". Current speed: %d km/h.',
-                $route->machine->name,
+                $route->machine?->name ?? ('Machine #'.$route->machine_id),
                 $route->speed_limit,
                 $route->name,
                 (int) $metric->speed
@@ -3260,12 +3156,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[SyncMachineMetricsJob]]></code>
     </ClassMustBeFinal>
-    <PossiblyNullArgument>
-      <code><![CDATA[$this->machine->manufacturer_id]]></code>
-    </PossiblyNullArgument>
-    <PossiblyNullReference>
-      <code><![CDATA[integrations]]></code>
-    </PossiblyNullReference>
     <PossiblyUnusedMethod>
       <code><![CDATA[handle]]></code>
     </PossiblyUnusedMethod>
@@ -3464,8 +3354,6 @@
     <MissingClosureReturnType>
       <code><![CDATA[fn ($q) => $q->where('user_id', auth()->id())]]></code>
       <code><![CDATA[fn ($q) => $q->where('user_id', auth()->id())]]></code>
-      <code><![CDATA[fn (Alert $a) => $a->acknowledge(auth()->id())]]></code>
-      <code><![CDATA[fn (Notification $n) => $n->markAsRead(auth()->id())]]></code>
       <code><![CDATA[fn (array $n) => $n['created_at']]]></code>
       <code><![CDATA[fn (array $n) => $user->wantsInAppAlert($n['severity'])]]></code>
     </MissingClosureReturnType>
@@ -3478,6 +3366,8 @@
     <MixedArgument>
       <code><![CDATA[$minSeverity]]></code>
       <code><![CDATA[$n['severity']]]></code>
+      <code><![CDATA[auth()->id()]]></code>
+      <code><![CDATA[auth()->id()]]></code>
     </MixedArgument>
     <MixedArrayAccess>
       <code><![CDATA[$user->notification_preferences['min_severity']]]></code>
@@ -7372,9 +7262,6 @@
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyInvalidMethodCall>
-      <code><![CDATA[diffInMilliseconds]]></code>
-    </PossiblyInvalidMethodCall>
     <PossiblyUnusedMethod>
       <code><![CDATA[aiAgent]]></code>
       <code><![CDATA[markAsCompleted]]></code>
@@ -7382,9 +7269,6 @@
       <code><![CDATA[team]]></code>
       <code><![CDATA[user]]></code>
     </PossiblyUnusedMethod>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[$this->started_at]]></code>
-    </RiskyTruthyFalsyComparison>
   </file>
   <file src="app/Models/AIInsight.php">
     <ClassMustBeFinal>
@@ -7464,9 +7348,6 @@
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyNullReference>
-      <code><![CDATA[updateAccuracy]]></code>
-    </PossiblyNullReference>
     <PossiblyUnusedMethod>
       <code><![CDATA[acknowledge]]></code>
       <code><![CDATA[acknowledger]]></code>
@@ -7524,9 +7405,12 @@
     <ClassMustBeFinal>
       <code><![CDATA[ActivityLog]]></code>
     </ClassMustBeFinal>
-    <MissingReturnType>
-      <code><![CDATA[user]]></code>
-    </MissingReturnType>
+    <InvalidDocblock>
+      <code><![CDATA[public function user(): BelongsTo]]></code>
+    </InvalidDocblock>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->belongsTo(User::class)]]></code>
+    </MixedReturnStatement>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
@@ -7560,27 +7444,21 @@
       <code><![CDATA[Alert]]></code>
     </ClassMustBeFinal>
     <InvalidDocblock>
+      <code><![CDATA[public function acknowledgedBy(): BelongsTo]]></code>
       <code><![CDATA[public function machine(): BelongsTo]]></code>
       <code><![CDATA[public function mineArea(): BelongsTo]]></code>
+      <code><![CDATA[public function resolvedBy(): BelongsTo]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
     <MissingOverrideAttribute>
       <code><![CDATA[protected static function booted(): void]]></code>
     </MissingOverrideAttribute>
-    <MissingParamType>
-      <code><![CDATA[$userId]]></code>
-      <code><![CDATA[$userId]]></code>
-    </MissingParamType>
-    <MissingReturnType>
-      <code><![CDATA[acknowledge]]></code>
-      <code><![CDATA[acknowledgedBy]]></code>
-      <code><![CDATA[resolve]]></code>
-      <code><![CDATA[resolvedBy]]></code>
-    </MissingReturnType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Machine::class)]]></code>
       <code><![CDATA[$this->belongsTo(MineArea::class)]]></code>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
+      <code><![CDATA[$this->belongsTo(User::class, 'acknowledged_by')]]></code>
+      <code><![CDATA[$this->belongsTo(User::class, 'resolved_by')]]></code>
     </MixedReturnStatement>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$casts]]></code>
@@ -7595,6 +7473,9 @@
       <code><![CDATA[scopeCritical]]></code>
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
     <UndefinedInterfaceMethod>
       <code><![CDATA[id]]></code>
       <code><![CDATA[id]]></code>
@@ -7604,9 +7485,12 @@
     <ClassMustBeFinal>
       <code><![CDATA[ComplianceReport]]></code>
     </ClassMustBeFinal>
-    <MissingReturnType>
-      <code><![CDATA[generator]]></code>
-    </MissingReturnType>
+    <InvalidDocblock>
+      <code><![CDATA[public function generator(): BelongsTo]]></code>
+    </InvalidDocblock>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->belongsTo(User::class, 'generated_by')]]></code>
+    </MixedReturnStatement>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
@@ -7861,9 +7745,6 @@
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyFalseArgument>
-      <code><![CDATA[mktime(0, 0, 0, $this->month, 1, $this->year)]]></code>
-    </PossiblyFalseArgument>
     <PossiblyNullOperand>
       <code><![CDATA[$this->allocated_liters]]></code>
       <code><![CDATA[$this->allocated_liters]]></code>
@@ -7882,13 +7763,13 @@
       <code><![CDATA[mineArea]]></code>
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[mktime(0, 0, 0, $this->month, 1, $this->year)]]></code>
+    </RiskyTruthyFalsyComparison>
     <UndefinedMagicMethod>
       <code><![CDATA[sum]]></code>
       <code><![CDATA[sum]]></code>
     </UndefinedMagicMethod>
-    <UndefinedThisPropertyAssignment>
-      <code><![CDATA[$this->remaining_budget_zar]]></code>
-    </UndefinedThisPropertyAssignment>
   </file>
   <file src="app/Models/FuelTank.php">
     <ClassMustBeFinal>
@@ -7901,7 +7782,7 @@
       <code><![CDATA[public function transactions(): HasMany]]></code>
     </InvalidDocblock>
     <InvalidOperand>
-      <code><![CDATA[($this->current_level_liters / $this->capacity_liters) * 100]]></code>
+      <code><![CDATA[((float) $this->current_level_liters / (float) $this->capacity_liters) * 100]]></code>
     </InvalidOperand>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(MineArea::class, 'mine_area_id')]]></code>
@@ -7913,12 +7794,6 @@
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyInvalidOperand>
-      <code><![CDATA[$this->capacity_liters]]></code>
-      <code><![CDATA[$this->capacity_liters]]></code>
-      <code><![CDATA[$this->current_level_liters]]></code>
-      <code><![CDATA[$this->current_level_liters]]></code>
-    </PossiblyInvalidOperand>
     <PossiblyUnusedMethod>
       <code><![CDATA[alerts]]></code>
       <code><![CDATA[getAvailableCapacityAttribute]]></code>
@@ -7947,10 +7822,6 @@
     <InvalidOperand>
       <code><![CDATA[$this->total_cost / $this->quantity_liters]]></code>
     </InvalidOperand>
-    <MissingParamType>
-      <code><![CDATA[$endDate]]></code>
-      <code><![CDATA[$startDate]]></code>
-    </MissingParamType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(FuelTank::class)]]></code>
       <code><![CDATA[$this->belongsTo(FuelTank::class, 'from_tank_id')]]></code>
@@ -8015,17 +7886,10 @@
       <code><![CDATA[public function mineArea(): BelongsTo]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingParamType>
-      <code><![CDATA[$endDate]]></code>
-      <code><![CDATA[$startDate]]></code>
-    </MissingParamType>
-    <MissingReturnType>
-      <code><![CDATA[activeMachines]]></code>
-      <code><![CDATA[getTodayEntries]]></code>
-      <code><![CDATA[getTonnageForDateRange]]></code>
-    </MissingReturnType>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$query->get()]]></code>
+    </LessSpecificReturnStatement>
     <MixedMethodCall>
-      <code><![CDATA[get]]></code>
       <code><![CDATA[sum]]></code>
     </MixedMethodCall>
     <MixedReturnStatement>
@@ -8033,6 +7897,17 @@
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
       <code><![CDATA[$this->hasMany(GeofenceEntry::class)]]></code>
     </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[$this->entries()
+            ->where('exit_time', null)
+            ->with('machine')
+            ->get()
+            ->pluck('machine')]]></code>
+      <code><![CDATA[Collection<int, Machine|null>]]></code>
+    </MixedReturnTypeCoercion>
+    <MoreSpecificReturnType>
+      <code><![CDATA[\Illuminate\Database\Eloquent\Collection<int, GeofenceEntry>]]></code>
+    </MoreSpecificReturnType>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
@@ -8056,22 +7931,6 @@
       <code><![CDATA[public function machine(): BelongsTo]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingReturnType>
-      <code><![CDATA[getDurationMinutes]]></code>
-      <code><![CDATA[getFormattedDuration]]></code>
-    </MissingReturnType>
-    <MixedArgument>
-      <code><![CDATA[$mins]]></code>
-      <code><![CDATA[$minutes / 60]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$mins]]></code>
-      <code><![CDATA[$minutes]]></code>
-    </MixedAssignment>
-    <MixedOperand>
-      <code><![CDATA[$minutes]]></code>
-      <code><![CDATA[$minutes]]></code>
-    </MixedOperand>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Geofence::class)]]></code>
       <code><![CDATA[$this->belongsTo(Machine::class)]]></code>
@@ -8087,6 +7946,9 @@
       <code><![CDATA[machine]]></code>
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[! $minutes]]></code>
+    </RiskyTruthyFalsyComparison>
   </file>
   <file src="app/Models/HealthMetric.php">
     <ClassMustBeFinal>
@@ -8141,13 +8003,6 @@
       <code><![CDATA[public function machines(): HasMany]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingParamType>
-      <code><![CDATA[$error]]></code>
-    </MissingParamType>
-    <MissingReturnType>
-      <code><![CDATA[markError]]></code>
-      <code><![CDATA[markSynced]]></code>
-    </MissingReturnType>
     <MixedArgument>
       <code><![CDATA[$this->capabilities ?? []]]></code>
     </MixedArgument>
@@ -8211,21 +8066,17 @@
       <code><![CDATA[IoTSensor]]></code>
     </ClassMustBeFinal>
     <InvalidDocblock>
+      <code><![CDATA[public function readings(): HasMany]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingReturnType>
-      <code><![CDATA[readings]]></code>
-    </MissingReturnType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
+      <code><![CDATA[$this->hasMany(SensorReading::class)]]></code>
     </MixedReturnStatement>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyInvalidMethodCall>
-      <code><![CDATA[isAfter]]></code>
-    </PossiblyInvalidMethodCall>
     <PossiblyUnusedMethod>
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
@@ -8342,9 +8193,6 @@
       <code><![CDATA[public function mineArea(): BelongsTo]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingParamType>
-      <code><![CDATA[$teamId]]></code>
-    </MissingParamType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Machine::class)]]></code>
       <code><![CDATA[$this->belongsTo(MineArea::class)]]></code>
@@ -8519,9 +8367,6 @@
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyInvalidMethodCall>
-      <code><![CDATA[diffInHours]]></code>
-    </PossiblyInvalidMethodCall>
     <PossiblyUnusedMethod>
       <code><![CDATA[assignedTo]]></code>
       <code><![CDATA[completedBy]]></code>
@@ -8532,10 +8377,6 @@
       <code><![CDATA[scopeInProgress]]></code>
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[! $this->completed_at]]></code>
-      <code><![CDATA[! $this->started_at]]></code>
-    </RiskyTruthyFalsyComparison>
   </file>
   <file src="app/Models/MaintenanceSchedule.php">
     <ClassMustBeFinal>
@@ -8561,21 +8402,12 @@
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyInvalidMethodCall>
-      <code><![CDATA[addDays]]></code>
-    </PossiblyInvalidMethodCall>
-    <PossiblyNullArgument>
-      <code><![CDATA[$this->next_service_date]]></code>
-    </PossiblyNullArgument>
     <PossiblyNullOperand>
       <code><![CDATA[$this->interval_hours]]></code>
       <code><![CDATA[$this->interval_km]]></code>
       <code><![CDATA[$this->next_service_hours]]></code>
       <code><![CDATA[$this->next_service_km]]></code>
     </PossiblyNullOperand>
-    <PossiblyNullReference>
-      <code><![CDATA[addDays]]></code>
-    </PossiblyNullReference>
     <PossiblyUnusedMethod>
       <code><![CDATA[isDue]]></code>
       <code><![CDATA[isOverdue]]></code>
@@ -8616,10 +8448,6 @@
       <code><![CDATA[public function routes(): HasMany]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingParamType>
-      <code><![CDATA[$status]]></code>
-      <code><![CDATA[$teamId]]></code>
-    </MissingParamType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
       <code><![CDATA[$this->hasMany(Alert::class)]]></code>
@@ -8663,10 +8491,6 @@
     <InvalidOperand>
       <code><![CDATA[$bytes]]></code>
     </InvalidOperand>
-    <MissingParamType>
-      <code><![CDATA[$teamId]]></code>
-      <code><![CDATA[$type]]></code>
-    </MissingParamType>
     <MixedAssignment>
       <code><![CDATA[$disk]]></code>
     </MixedAssignment>
@@ -8679,10 +8503,6 @@
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyInvalidMethodCall>
-      <code><![CDATA[isFuture]]></code>
-      <code><![CDATA[isPast]]></code>
-    </PossiblyInvalidMethodCall>
     <PossiblyNullOperand>
       <code><![CDATA[$bytes]]></code>
     </PossiblyNullOperand>
@@ -8698,10 +8518,6 @@
       <code><![CDATA[team]]></code>
       <code><![CDATA[uploader]]></code>
     </PossiblyUnusedMethod>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[$this->effective_date]]></code>
-      <code><![CDATA[$this->expiry_date]]></code>
-    </RiskyTruthyFalsyComparison>
   </file>
   <file src="app/Models/Notification.php">
     <ClassMustBeFinal>
@@ -8711,12 +8527,6 @@
       <code><![CDATA[public function readBy(): BelongsToMany]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingParamType>
-      <code><![CDATA[$userId]]></code>
-    </MissingParamType>
-    <MissingReturnType>
-      <code><![CDATA[markAsRead]]></code>
-    </MissingReturnType>
     <MixedMethodCall>
       <code><![CDATA[withPivot]]></code>
     </MixedMethodCall>
@@ -8818,13 +8628,12 @@
       <code><![CDATA[Permission]]></code>
     </ClassMustBeFinal>
     <InvalidDocblock>
+      <code><![CDATA[public function roles(): BelongsToMany]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingReturnType>
-      <code><![CDATA[roles]]></code>
-    </MissingReturnType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
+      <code><![CDATA[$this->belongsToMany(Role::class)]]></code>
     </MixedReturnStatement>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$casts]]></code>
@@ -8843,11 +8652,6 @@
       <code><![CDATA[public function mineArea(): BelongsTo]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingParamType>
-      <code><![CDATA[$date]]></code>
-      <code><![CDATA[$teamId]]></code>
-      <code><![CDATA[$threshold]]></code>
-    </MissingParamType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(MineArea::class)]]></code>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
@@ -8917,15 +8721,8 @@
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
     <InvalidOperand>
-      <code><![CDATA[(($this->quantity_produced - $this->target_quantity) / $this->target_quantity) * 100]]></code>
+      <code><![CDATA[(((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100]]></code>
     </InvalidOperand>
-    <MissingParamType>
-      <code><![CDATA[$endDate]]></code>
-      <code><![CDATA[$mineAreaId]]></code>
-      <code><![CDATA[$startDate]]></code>
-      <code><![CDATA[$status]]></code>
-      <code><![CDATA[$teamId]]></code>
-    </MissingParamType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Machine::class)]]></code>
       <code><![CDATA[$this->belongsTo(MineArea::class)]]></code>
@@ -8935,11 +8732,6 @@
       <code><![CDATA[$casts]]></code>
       <code><![CDATA[$fillable]]></code>
     </NonInvariantDocblockPropertyType>
-    <PossiblyInvalidOperand>
-      <code><![CDATA[$this->quantity_produced]]></code>
-      <code><![CDATA[$this->target_quantity]]></code>
-      <code><![CDATA[$this->target_quantity]]></code>
-    </PossiblyInvalidOperand>
     <PossiblyUnusedMethod>
       <code><![CDATA[getIsAboveTargetAttribute]]></code>
       <code><![CDATA[getVariancePercentageAttribute]]></code>
@@ -8960,10 +8752,6 @@
       <code><![CDATA[public function mineArea(): BelongsTo]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingParamType>
-      <code><![CDATA[$periodType]]></code>
-      <code><![CDATA[$teamId]]></code>
-    </MissingParamType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(MineArea::class)]]></code>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
@@ -8985,20 +8773,12 @@
       <code><![CDATA[Report]]></code>
     </ClassMustBeFinal>
     <InvalidDocblock>
+      <code><![CDATA[public function generatedBy(): BelongsTo]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
     <MissingClosureReturnType>
       <code><![CDATA[fn ($user) => $user->wantsEmailReports()]]></code>
     </MissingClosureReturnType>
-    <MissingParamType>
-      <code><![CDATA[$filePath]]></code>
-      <code><![CDATA[$fileSize]]></code>
-    </MissingParamType>
-    <MissingReturnType>
-      <code><![CDATA[generatedBy]]></code>
-      <code><![CDATA[markCompleted]]></code>
-      <code><![CDATA[markFailed]]></code>
-    </MissingReturnType>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[fn ($user) => $user->wantsEmailReports()]]></code>
     </MixedArgumentTypeCoercion>
@@ -9007,6 +8787,7 @@
     </MixedMethodCall>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
+      <code><![CDATA[$this->belongsTo(User::class, 'generated_by')]]></code>
     </MixedReturnStatement>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$casts]]></code>
@@ -9016,27 +8797,22 @@
       <code><![CDATA[generatedBy]]></code>
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
   </file>
   <file src="app/Models/Role.php">
     <ClassMustBeFinal>
       <code><![CDATA[Role]]></code>
     </ClassMustBeFinal>
     <InvalidDocblock>
+      <code><![CDATA[public function permissions(): BelongsToMany]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <MissingParamType>
-      <code><![CDATA[$permission]]></code>
-    </MissingParamType>
-    <MissingReturnType>
-      <code><![CDATA[hasPermission]]></code>
-      <code><![CDATA[permissions]]></code>
-    </MissingReturnType>
-    <MixedMethodCall>
-      <code><![CDATA[exists]]></code>
-      <code><![CDATA[where]]></code>
-    </MixedMethodCall>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
+      <code><![CDATA[$this->belongsToMany(Permission::class)]]></code>
+      <code><![CDATA[$this->permissions()->where('name', $permission)->exists()]]></code>
     </MixedReturnStatement>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$casts]]></code>
@@ -9046,6 +8822,9 @@
       <code><![CDATA[hasPermission]]></code>
       <code><![CDATA[team]]></code>
     </PossiblyUnusedMethod>
+    <UndefinedMagicMethod>
+      <code><![CDATA[exists]]></code>
+    </UndefinedMagicMethod>
   </file>
   <file src="app/Models/Route.php">
     <ClassMustBeFinal>
@@ -9069,14 +8848,17 @@
       <code><![CDATA[1 - $a]]></code>
       <code><![CDATA[2 * atan2(sqrt($a), sqrt(1 - $a))]]></code>
     </InvalidOperand>
+    <MixedAssignment>
+      <code><![CDATA[$relation]]></code>
+    </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[orderBy]]></code>
     </MixedMethodCall>
     <MixedReturnStatement>
+      <code><![CDATA[$relation]]></code>
       <code><![CDATA[$this->belongsTo(Machine::class)]]></code>
       <code><![CDATA[$this->belongsTo(MineArea::class)]]></code>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
-      <code><![CDATA[$this->hasMany(Waypoint::class)->orderBy('sequence_order')]]></code>
     </MixedReturnStatement>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$casts]]></code>
@@ -9130,14 +8912,6 @@
       <code><![CDATA[public function plan(): BelongsTo]]></code>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </InvalidDocblock>
-    <InvalidReturnStatement>
-      <code><![CDATA[max(0, now()->diffInDays($this->current_period_end, false))]]></code>
-      <code><![CDATA[max(0, now()->diffInDays($this->trial_ends_at, false))]]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[int]]></code>
-      <code><![CDATA[int]]></code>
-    </InvalidReturnType>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id')]]></code>
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
@@ -9208,9 +8982,11 @@
       <code><![CDATA[Team]]></code>
     </ClassMustBeFinal>
     <InvalidDocblock>
+      <code><![CDATA[public function alerts(): HasMany]]></code>
       <code><![CDATA[public function geofences(): HasMany]]></code>
       <code><![CDATA[public function integrations(): HasMany]]></code>
       <code><![CDATA[public function machines(): HasMany]]></code>
+      <code><![CDATA[public function owner()]]></code>
       <code><![CDATA[public function permissions(): HasMany]]></code>
       <code><![CDATA[public function roles(): HasMany]]></code>
     </InvalidDocblock>
@@ -9218,14 +8994,9 @@
       <code><![CDATA[protected function casts(): array]]></code>
       <code><![CDATA[public function owner()]]></code>
     </MissingOverrideAttribute>
-    <MissingReturnType>
-      <code><![CDATA[alerts]]></code>
-    </MissingReturnType>
-    <MissingTemplateParam>
-      <code><![CDATA[BelongsTo<User>]]></code>
-    </MissingTemplateParam>
     <MixedReturnStatement>
       <code><![CDATA[$this->belongsTo(User::class, 'user_id')]]></code>
+      <code><![CDATA[$this->hasMany(Alert::class)]]></code>
       <code><![CDATA[$this->hasMany(Geofence::class)]]></code>
       <code><![CDATA[$this->hasMany(Integration::class)]]></code>
       <code><![CDATA[$this->hasMany(Machine::class)]]></code>
@@ -9239,17 +9010,17 @@
     </PossiblyUnusedMethod>
   </file>
   <file src="app/Models/TeamInvitation.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[Jetstream::teamModel()]]></code>
-    </ArgumentTypeCoercion>
     <ClassMustBeFinal>
       <code><![CDATA[TeamInvitation]]></code>
     </ClassMustBeFinal>
+    <InvalidDocblock>
+      <code><![CDATA[public function team(): BelongsTo]]></code>
+    </InvalidDocblock>
     <MissingOverrideAttribute>
       <code><![CDATA[public function team(): BelongsTo]]></code>
     </MissingOverrideAttribute>
     <MixedReturnStatement>
-      <code><![CDATA[$this->belongsTo(Jetstream::teamModel())]]></code>
+      <code><![CDATA[$this->belongsTo($teamModel)]]></code>
     </MixedReturnStatement>
     <UnusedClass>
       <code><![CDATA[TeamInvitation]]></code>
@@ -12412,30 +12183,22 @@
       <code><![CDATA[$values]]></code>
     </MixedArgument>
     <MixedAssignment>
-      <code><![CDATA[$latestReading]]></code>
       <code><![CDATA[$readings]]></code>
       <code><![CDATA[$values]]></code>
     </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[diffInMinutes]]></code>
       <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
       <code><![CDATA[get]]></code>
       <code><![CDATA[isEmpty]]></code>
       <code><![CDATA[last]]></code>
-      <code><![CDATA[latest]]></code>
       <code><![CDATA[map]]></code>
       <code><![CDATA[orderBy]]></code>
       <code><![CDATA[pluck]]></code>
       <code><![CDATA[toArray]]></code>
       <code><![CDATA[toArray]]></code>
-      <code><![CDATA[whereDate]]></code>
     </MixedMethodCall>
     <MixedPropertyFetch>
-      <code><![CDATA[$latestReading->timestamp]]></code>
-      <code><![CDATA[$latestReading?->timestamp]]></code>
-      <code><![CDATA[$latestReading?->timestamp]]></code>
-      <code><![CDATA[$latestReading?->value]]></code>
       <code><![CDATA[$r->quality_score]]></code>
       <code><![CDATA[$r->timestamp]]></code>
       <code><![CDATA[$r->value]]></code>
@@ -12454,6 +12217,15 @@
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[$latestReading?->timestamp]]></code>
     </RiskyTruthyFalsyComparison>
+    <UndefinedMagicMethod>
+      <code><![CDATA[whereDate]]></code>
+    </UndefinedMagicMethod>
+    <UndefinedMagicPropertyFetch>
+      <code><![CDATA[$latestReading->timestamp]]></code>
+      <code><![CDATA[$latestReading?->timestamp]]></code>
+      <code><![CDATA[$latestReading?->timestamp]]></code>
+      <code><![CDATA[$latestReading?->value]]></code>
+    </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Services/MachinePerformanceService.php">
     <ClassMustBeFinal>
@@ -13552,12 +13324,6 @@
       <code><![CDATA[Notification::whereIn('id', $notificationIds)]]></code>
       <code><![CDATA[toDateString]]></code>
     </UndefinedMagicMethod>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$sensor->id]]></code>
-      <code><![CDATA[$sensor->id]]></code>
-      <code><![CDATA[$sensor->name]]></code>
-      <code><![CDATA[$sensor->name]]></code>
-    </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Services/RealtimeEventScheduler.php">
     <ClassMustBeFinal>

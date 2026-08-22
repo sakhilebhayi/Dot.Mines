@@ -133,7 +133,9 @@ class FuelBudget extends Model
      */
     public function scopeExceeded($query)
     {
-        return $query->whereRaw('actual_spent > budgeted_amount');
+        $query->whereRaw('actual_spent > budgeted_amount');
+
+        return $query;
     }
 
     /**

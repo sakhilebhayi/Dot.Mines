@@ -66,7 +66,7 @@ class ProductionTarget extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam($query, int $teamId)
     {
         return $query->where('team_id', $teamId);
     }
@@ -84,7 +84,7 @@ class ProductionTarget extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeByPeriod($query, $periodType)
+    public function scopeByPeriod($query, string $periodType)
     {
         return $query->where('period_type', $periodType);
     }

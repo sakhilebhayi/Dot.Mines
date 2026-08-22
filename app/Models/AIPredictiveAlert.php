@@ -104,6 +104,6 @@ class AIPredictiveAlert extends Model
     public function recordAccuracy(bool $wasAccurate): void
     {
         $this->update(['was_accurate' => $wasAccurate]);
-        $this->aiAgent->updateAccuracy($wasAccurate);
+        $this->aiAgent?->updateAccuracy($wasAccurate);
     }
 }

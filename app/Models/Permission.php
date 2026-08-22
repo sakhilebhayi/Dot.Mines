@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Permission Model
@@ -51,7 +52,8 @@ class Permission extends Model
     /**
      * Get all roles with this permission
      */
-    public function roles()
+    /** @return BelongsToMany<Role, $this> */
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
     }

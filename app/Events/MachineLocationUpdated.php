@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Machine;
+use Carbon\CarbonInterface;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -21,19 +22,20 @@ class MachineLocationUpdated implements ShouldBroadcast
 
     /**
      * The location data (latitude, longitude, accuracy, etc.)
+     *
+     * @var array<string, mixed>
      */
     public array $location;
 
     /**
      * Timestamp of the location update.
-     *
-     * @var \DateTime
      */
-    public $timestamp;
+    public CarbonInterface $timestamp;
 
     /**
      * Create a new event instance.
      */
+    /** @param array<string, mixed> $location */
     public function __construct(Machine $machine, array $location)
     {
         $this->machine = $machine;
@@ -59,6 +61,8 @@ class MachineLocationUpdated implements ShouldBroadcast
 
     /**
      * Get the data to broadcast.
+     *
+     * @return array<string, mixed>
      */
     public function broadcastWith(): array
     {

@@ -154,7 +154,7 @@ class Subscription extends Model
             return 0;
         }
 
-        return max(0, now()->diffInDays($this->trial_ends_at, false));
+        return (int) max(0, now()->diffInDays($this->trial_ends_at, false));
     }
 
     /**
@@ -166,7 +166,7 @@ class Subscription extends Model
             return 0;
         }
 
-        return max(0, now()->diffInDays($this->current_period_end, false));
+        return (int) max(0, now()->diffInDays($this->current_period_end, false));
     }
 
     /**
@@ -208,7 +208,9 @@ class Subscription extends Model
      */
     public function scopeActive($query)
     {
-        return $query->whereIn('status', ['trial', 'active']);
+        $query->whereIn('status', ['trial', 'active']);
+
+        return $query;
     }
 
     /**

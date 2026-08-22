@@ -103,7 +103,7 @@ class GeofenceEntry extends Model
     /**
      * Calculate duration in minutes
      */
-    public function getDurationMinutes()
+    public function getDurationMinutes(): ?int
     {
         if (! $this->exit_time) {
             return null;
@@ -116,7 +116,7 @@ class GeofenceEntry extends Model
     /**
      * Get duration formatted as HH:MM
      */
-    public function getFormattedDuration()
+    public function getFormattedDuration(): string
     {
         $minutes = $this->getDurationMinutes();
         if (! $minutes) {

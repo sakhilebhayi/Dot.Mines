@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * Geofence Model
@@ -97,7 +98,8 @@ class Geofence extends Model
     /**
      * Get all active machines currently in this geofence
      */
-    public function activeMachines()
+    /** @return Collection<int, Machine|null> */
+    public function activeMachines(): Collection
     {
         return $this->entries()
             ->where('exit_time', null)
@@ -109,19 +111,21 @@ class Geofence extends Model
     /**
      * Get today's entry records
      */
-    public function getTodayEntries()
+    /** @return \Illuminate\Database\Eloquent\Collection<int, GeofenceEntry> */
+    public function getTodayEntries(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->entries()
-            ->whereDate('entry_time', today())
-            ->get();
+        $query = $this->entries();
+        $query->whereDate('entry_time', today());
+
+        return $query->get();
     }
 
     /**
      * Calculate total tonnage for a date range
      */
-    public function getTonnageForDateRange($startDate, $endDate)
+    public function getTonnageForDateRange(string|\DateTimeInterface $startDate, string|\DateTimeInterface $endDate): float
     {
-        return $this->entries()
+        return (float) $this->entries()
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('tonnage_loaded');
     }

@@ -77,6 +77,8 @@ class MachineIdleMonitoringJob implements ShouldQueue
 
     /**
      * Check if machine has been idle/stationary
+     *
+     * @return array<string, mixed>
      */
     private function checkMachineIdleStatus(Machine $machine): array
     {
@@ -194,6 +196,8 @@ class MachineIdleMonitoringJob implements ShouldQueue
 
     /**
      * Create idle machine alert
+     *
+     * @param  array<string, mixed>  $idleStatus
      */
     private function createIdleAlert(Machine $machine, array $idleStatus): void
     {

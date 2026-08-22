@@ -37,6 +37,12 @@ class GeofenceEntryDetected implements ShouldBroadcast
         $geofence = $this->entry->geofence;
         $machine = $this->entry->machine;
 
+        if ($geofence === null || $machine === null) {
+            // FK-guaranteed at dispatch time; if a parent vanished mid-queue,
+            // broadcast nowhere rather than crash the worker.
+            return [];
+        }
+
         return [
             // Broadcast to team channel
             new PrivateChannel('team.'.$geofence->team_id),
@@ -51,11 +57,17 @@ class GeofenceEntryDetected implements ShouldBroadcast
 
     /**
      * Get the data to broadcast.
+     *
+     * @return array<string, mixed>
      */
     public function broadcastWith(): array
     {
         $geofence = $this->entry->geofence;
         $machine = $this->entry->machine;
+
+        if ($geofence === null || $machine === null) {
+            return [];
+        }
 
         return [
             'id' => $this->entry->id,

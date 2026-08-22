@@ -181,6 +181,8 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
     /**
      * Determine if location has meaningfully changed.
      * Prevents unnecessary broadcasts if machine hasn't moved significantly.
+     *
+     * @param  array<string, mixed>  $newLocation
      */
     private function hasLocationChanged(Machine $machine, array $newLocation): bool
     {
@@ -201,7 +203,8 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
         $significantDistance = $distance > 0.005; // ~5 meters
 
         // Also check if it's been more than 5 minutes since last update
-        $significantTime = $machine->last_location_update->diffInMinutes(now()) >= 5;
+        $lastUpdate = $machine->last_location_update;
+        $significantTime = $lastUpdate === null || $lastUpdate->diffInMinutes(now()) >= 5;
 
         return $significantDistance || $significantTime;
     }

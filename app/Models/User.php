@@ -121,13 +121,15 @@ class User extends Authenticatable implements MustVerifyEmail
         // Return a query builder for permissions granted to this user via their roles.
         // We join through permission_role -> roles -> role_user so callers can further
         // scope by team or permission name.
-        return Permission::query()
-            ->select('permissions.*')
+        $query = Permission::query();
+        $query->select('permissions.*')
             ->join('permission_role', 'permissions.id', '=', 'permission_role.permission_id')
             ->join('roles', 'permission_role.role_id', '=', 'roles.id')
             ->join('role_user', 'roles.id', '=', 'role_user.role_id')
             ->where('role_user.user_id', $this->id)
             ->where('roles.team_id', $this->current_team_id);
+
+        return $query;
     }
 
     /**

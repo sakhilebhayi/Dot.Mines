@@ -67,7 +67,7 @@ class Notification extends Model
             ->withPivot('read_at');
     }
 
-    public function markAsRead($userId)
+    public function markAsRead(int $userId): void
     {
         $this->readBy()->attach($userId);
         $this->update(['is_read' => true, 'read_at' => now()]);

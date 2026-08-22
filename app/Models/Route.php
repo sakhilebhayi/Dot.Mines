@@ -120,7 +120,10 @@ class Route extends Model
      */
     public function waypoints(): HasMany
     {
-        return $this->hasMany(Waypoint::class)->orderBy('sequence_order');
+        $relation = $this->hasMany(Waypoint::class);
+        $relation->orderBy('sequence_order');
+
+        return $relation;
     }
 
     /**
@@ -183,6 +186,10 @@ class Route extends Model
     /**
      * Scope query to active routes only
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
@@ -190,6 +197,10 @@ class Route extends Model
 
     /**
      * Scope query to draft routes only
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeDraft(Builder $query): Builder
     {

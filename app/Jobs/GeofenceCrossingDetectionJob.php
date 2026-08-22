@@ -10,6 +10,7 @@ use App\Models\Machine;
 use App\Models\Team;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -65,6 +66,7 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
             }
 
             // Get all machines with recent locations
+            /** @var Collection<int, Machine> $machines */
             $machines = $this->team->machines()
                 ->where('status', '!=', 'offline')
                 ->whereNotNull('last_location_latitude')
@@ -83,9 +85,9 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
             foreach ($machines as $machine) {
                 foreach ($geofences as $geofence) {
                     $isInside = $this->isPointInPolygon(
-                        $machine->last_location_latitude,
-                        $machine->last_location_longitude,
-                        $geofence->coordinates
+                        (float) $machine->last_location_latitude,
+                        (float) $machine->last_location_longitude,
+                        (array) $geofence->coordinates
                     );
 
                     // Check last known state
@@ -131,7 +133,7 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
      *
      * @param  float  $lat  Point latitude
      * @param  float  $lon  Point longitude
-     * @param  array  $polygon  Array of coordinates [[lat, lon], [lat, lon], ...]
+     * @param  array<int|string, mixed>  $polygon  Array of coordinates [[lat, lon], [lat, lon], ...]
      */
     private function isPointInPolygon(float $lat, float $lon, array $polygon): bool
     {
@@ -140,12 +142,12 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
         }
 
         $inside = false;
-        $p1Lat = $polygon[0][0];
-        $p1Lon = $polygon[0][1];
+        $p1Lat = (float) data_get($polygon, '0.0');
+        $p1Lon = (float) data_get($polygon, '0.1');
 
         for ($i = 1; $i <= count($polygon); $i++) {
-            $p2Lat = $polygon[$i % count($polygon)][0];
-            $p2Lon = $polygon[$i % count($polygon)][1];
+            $p2Lat = (float) $polygon[$i % count($polygon)][0];
+            $p2Lon = (float) $polygon[$i % count($polygon)][1];
 
             if ($lat > min($p1Lat, $p2Lat)) {
                 if ($lat <= max($p1Lat, $p2Lat)) {
@@ -194,6 +196,14 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
     private function recordGeofenceExit(GeofenceEntry $entry): void
     {
         $machine = $entry->machine;
+
+        if ($machine === null) {
+            // FK-guaranteed in practice; a machine deleted mid-run just
+            // closes the entry without exit coordinates.
+            $entry->update(['exit_time' => now()]);
+
+            return;
+        }
 
         $entry->update([
             'exit_time' => now(),

@@ -167,9 +167,11 @@ class RouteSpeedMonitoringJob implements ShouldQueue
     }
 
     /**
-     * Create speed violation alert
+     * Create speed violation alert.
+     *
+     * @param  \stdClass  $metric  raw machine_metrics row from the query builder (speed/latitude/longitude/created_at)
      */
-    private function createSpeedViolationAlert(Route $route, $metric): void
+    private function createSpeedViolationAlert(Route $route, \stdClass $metric): void
     {
         // Check if there's already a recent active alert for this violation
         $existingAlert = Alert::where('machine_id', $route->machine_id)
@@ -191,7 +193,7 @@ class RouteSpeedMonitoringJob implements ShouldQueue
             'title' => 'Speed Limit Exceeded',
             'description' => sprintf(
                 'Machine %s exceeded the speed limit of %d km/h on route "%s". Current speed: %d km/h.',
-                $route->machine->name,
+                $route->machine?->name ?? ('Machine #'.$route->machine_id),
                 $route->speed_limit,
                 $route->name,
                 (int) $metric->speed

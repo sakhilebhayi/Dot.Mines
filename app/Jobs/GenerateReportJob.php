@@ -49,8 +49,14 @@ class GenerateReportJob implements ShouldQueue
             };
 
             $storagePath = "reports/{$this->report->team_id}/".Str::uuid().'.'.$this->report->format;
-            Storage::put($storagePath, file_get_contents($localPath));
-            $fileSize = filesize($localPath);
+            $contents = file_get_contents($localPath);
+
+            if ($contents === false) {
+                throw new \RuntimeException("Report file vanished before upload: {$localPath}");
+            }
+
+            Storage::put($storagePath, $contents);
+            $fileSize = filesize($localPath) ?: null;
             @unlink($localPath);
 
             $this->report->markCompleted($storagePath, $fileSize);
