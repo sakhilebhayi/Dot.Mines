@@ -222,6 +222,25 @@
       <code><![CDATA[AdjustMachineAllocation]]></code>
     </UnusedClass>
   </file>
+  <file src="app/Console/Commands/CopyDatabaseEngine.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[CopyDatabaseEngine]]></code>
+    </ClassMustBeFinal>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[CopyDatabaseEngine]]></code>
+      <code><![CDATA[CopyDatabaseEngine]]></code>
+      <code><![CDATA[CopyDatabaseEngine]]></code>
+      <code><![CDATA[CopyDatabaseEngine]]></code>
+      <code><![CDATA[CopyDatabaseEngine]]></code>
+    </PropertyNotSetInConstructor>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[! $this->option('verify-only')]]></code>
+      <code><![CDATA[$this->option('fresh')]]></code>
+    </RiskyTruthyFalsyComparison>
+    <UnusedClass>
+      <code><![CDATA[CopyDatabaseEngine]]></code>
+    </UnusedClass>
+  </file>
   <file src="app/Console/Commands/DataQualityCheck.php">
     <ClassMustBeFinal>
       <code><![CDATA[DataQualityCheck]]></code>
@@ -3831,9 +3850,6 @@
       <code><![CDATA[$this->totalPaid]]></code>
       <code><![CDATA[$this->totalPaidCurrency]]></code>
     </MixedAssignment>
-    <MixedMethodCall>
-      <code><![CDATA[format]]></code>
-    </MixedMethodCall>
     <MixedPropertyFetch>
       <code><![CDATA[$team->currency]]></code>
       <code><![CDATA[$team->id]]></code>
@@ -3844,18 +3860,6 @@
       <code><![CDATA[$this->currentSubscription->id]]></code>
       <code><![CDATA[$this->currentSubscription->id]]></code>
     </MixedPropertyFetch>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[$rows
-            ->map(fn (MachineAllocation $row): array => [
-                'class' => $row->class,
-                'delta' => $row->delta,
-                'source' => $row->source,
-                'reason' => $row->reason,
-                'created_at' => $row->created_at->format('j M Y H:i'),
-            ])
-            ->all()]]></code>
-      <code><![CDATA[array<int, array{class: string, delta: int, source: string, reason: string|null, created_at: string}>]]></code>
-    </MixedReturnTypeCoercion>
     <NoInterfaceProperties>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
       <code><![CDATA[Auth::user()->currentTeam]]></code>
@@ -3918,14 +3922,10 @@
     </UndefinedMagicMethod>
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$invoice->pdf_url]]></code>
-      <code><![CDATA[$row->created_at]]></code>
       <code><![CDATA[$this->currentSubscription->current_period_end]]></code>
       <code><![CDATA[$this->currentSubscription->plan]]></code>
       <code><![CDATA[$this->currentSubscription->plan]]></code>
     </UndefinedMagicPropertyFetch>
-    <UnnecessaryVarAnnotation>
-      <code><![CDATA[\Illuminate\Database\Eloquent\Collection<int, MachineAllocation>]]></code>
-    </UnnecessaryVarAnnotation>
   </file>
   <file src="app/Livewire/Dashboard.php">
     <ClassMustBeFinal>

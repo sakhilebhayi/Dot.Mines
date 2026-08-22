@@ -44,14 +44,21 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
+        /*
+         * Dedicated MYSQL_* keys (with DB_* fallback) so this connection can
+         * coexist with the live sqlite connection in one .env during the
+         * engine migration: sqlite reads DB_DATABASE as a file path, mysql
+         * reads it as a schema name -- sharing the key makes rehearsal and
+         * cutover impossible.
+         */
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => env('MYSQL_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('MYSQL_PORT', env('DB_PORT', '3306')),
+            'database' => env('MYSQL_DATABASE', env('DB_DATABASE', 'laravel')),
+            'username' => env('MYSQL_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('MYSQL_PASSWORD', env('DB_PASSWORD', '')),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
