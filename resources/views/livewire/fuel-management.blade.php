@@ -91,7 +91,7 @@
 
     <!-- Refuel Modal -->
     @if($showRefuelModal)
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeRefuelModal">
+    <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto" wire:click="closeRefuelModal">
         <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-lg w-full mx-4 border border-[var(--line)] shadow-lg" x-on:click.stop>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold">Refuel Tank</h3>
@@ -131,7 +131,7 @@
 
     <!-- Delete Confirmation Modal -->
     @if($showDeleteConfirm)
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeDeleteConfirm">
+    <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto" wire:click="closeDeleteConfirm">
         <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-md w-full mx-4 border border-[var(--line)] shadow-lg" x-on:click.stop>
             <h3 class="text-lg font-bold mb-2">Confirm Delete</h3>
             <p class="mb-4 text-[var(--sand)]">Are you sure you want to delete the tank "{{ $tanks->firstWhere('id', $confirmDeleteTankId)?->name ?? 'Selected Tank' }}"? This action cannot be undone.</p>
@@ -558,7 +558,7 @@
 
     <!-- Unified Manage Modal -->
     @if($showManageModal)
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" wire:click="closeManageModal">
+    <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto" wire:click="closeManageModal">
         <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-[var(--line)] shadow-lg" x-on:click.stop>
             @if(session('success'))
                 <div class="alert alert-success mb-4">

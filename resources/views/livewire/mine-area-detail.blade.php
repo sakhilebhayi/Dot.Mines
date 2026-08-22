@@ -703,7 +703,7 @@
 
     <!-- Assign Machine Modal -->
     @if($showAssignModal)
-        <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)] text-[var(--stone)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Assign Machine to {{ $mineArea->name }}</h2>
@@ -740,7 +740,7 @@
 
     <!-- Production Record Modal -->
     @if($showProductionModal)
-        <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Add Production Record</h2>
@@ -808,7 +808,7 @@
 
     <!-- Production Target Modal -->
     @if($showTargetModal)
-        <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Set Production Target</h2>
@@ -870,7 +870,7 @@
 
     <!-- Upload Mine Plan Modal -->
     @if($showUploadModal)
-        <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Upload Mine Plan</h2>
@@ -925,7 +925,7 @@
 
     <!-- Create Area Alert Modal -->
     @if($showAlertModal)
-        <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Create Area Alert</h2>
@@ -978,7 +978,7 @@
 
     <!-- Link Geofence Modal -->
     @if($showGeofenceModal)
-        <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Link Geofence to {{ $mineArea->name }}</h2>

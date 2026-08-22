@@ -193,7 +193,7 @@
 
     <!-- Add Integration Modal -->
     @if($showAddModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-xl max-w-md w-full mx-4">
                 <div class="p-6 border-b border-[var(--line)]">
                     <h3 class="text-xl font-bold text-[var(--stone)]">Add New Integration</h3>
@@ -332,7 +332,7 @@
 
     <!-- Connect Result Modal -->
     @if($showTestModal && $testResult)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="backdrop-filter: blur(4px);">
+        <div data-app-overlay class="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
             <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-xl max-w-md w-full mx-4">
                 <div class="p-6 text-center">
                     @if($testResult['success'])

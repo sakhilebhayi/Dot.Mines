@@ -443,3 +443,16 @@
     animation: scaleIn 0.4s ease-out forwards;
     opacity: 0;
 }
+
+/*
+ * Standard overlay (data-app-overlay): tall modals must stay reachable.
+ * Plain `align-items: center` pushes an overflowing panel's top edge above
+ * the scroll origin, where no amount of scrolling can reveal it (seen on
+ * mobile with the Add Machine form). `safe center` centers panels that fit
+ * and falls back to start-alignment -- fully scrollable -- when they don't.
+ * Unlayered on purpose so it outranks the layered Tailwind utility.
+ */
+[data-app-overlay] {
+    align-items: center;
+    align-items: safe center;
+}
