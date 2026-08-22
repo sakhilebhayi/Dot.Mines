@@ -96,31 +96,59 @@ class MaintenanceAlert extends Model
     /**
      * Scopes
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeCritical(Builder $query): Builder
     {
         return $query->where('severity', 'critical');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeUnacknowledged(Builder $query): Builder
     {
-        return $query->whereNull('acknowledged_at');
+        $query->whereNull('acknowledged_at');
+
+        return $query;
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeUnresolved(Builder $query): Builder
     {
-        return $query->whereNull('resolved_at');
+        $query->whereNull('resolved_at');
+
+        return $query;
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeAlertType(Builder $query, string $type): Builder
     {
         return $query->where('alert_type', $type);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeSeverity(Builder $query, string $severity): Builder
     {
         return $query->where('severity', $severity);

@@ -110,7 +110,9 @@ class AIRecommendation extends Model
      */
     public function scopeHighPriority($query)
     {
-        return $query->whereIn('priority', ['critical', 'high']);
+        $query->whereIn('priority', ['critical', 'high']);
+
+        return $query;
     }
 
     /**

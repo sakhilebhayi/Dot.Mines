@@ -81,7 +81,7 @@ class ProductionRecord extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam($query, int $teamId)
     {
         return $query->where('team_id', $teamId);
     }
@@ -90,7 +90,7 @@ class ProductionRecord extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeByStatus($query, $status)
+    public function scopeByStatus($query, string $status)
     {
         return $query->where('status', $status);
     }
@@ -99,16 +99,18 @@ class ProductionRecord extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeBetweenDates($query, $startDate, $endDate)
+    public function scopeBetweenDates($query, string|\DateTimeInterface $startDate, string|\DateTimeInterface $endDate)
     {
-        return $query->whereBetween('record_date', [$startDate, $endDate]);
+        $query->whereBetween('record_date', [$startDate, $endDate]);
+
+        return $query;
     }
 
     /**
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeForMineArea($query, $mineAreaId)
+    public function scopeForMineArea($query, int $mineAreaId)
     {
         return $query->where('mine_area_id', $mineAreaId);
     }
@@ -119,7 +121,7 @@ class ProductionRecord extends Model
             return 0;
         }
 
-        return (($this->quantity_produced - $this->target_quantity) / $this->target_quantity) * 100;
+        return (((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100;
     }
 
     public function getIsAboveTargetAttribute(): bool

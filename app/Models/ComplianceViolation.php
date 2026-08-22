@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<string, mixed>|null $metadata
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property int|null $compliance_audit_id
  */
 class ComplianceViolation extends Model
 {

@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\URL;
  * @property string|null $file_type
  * @property int|null $file_size
  * @property string|null $file_path
- * @property Carbon|string|null $expiry_date
- * @property Carbon|string|null $effective_date
+ * @property Carbon|null $expiry_date
+ * @property Carbon|null $effective_date
  */
 class MinePlanUpload extends Model
 {
@@ -92,7 +92,7 @@ class MinePlanUpload extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam($query, int $teamId)
     {
         return $query->where('team_id', $teamId);
     }
@@ -110,7 +110,7 @@ class MinePlanUpload extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeByType($query, $type)
+    public function scopeByType($query, string $type)
     {
         return $query->where('file_type', $type);
     }

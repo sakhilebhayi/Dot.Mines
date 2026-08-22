@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ComplianceReport extends Model
 {
@@ -27,7 +28,8 @@ class ComplianceReport extends Model
         'compliance_score' => 'float',
     ];
 
-    public function generator()
+    /** @return BelongsTo<User, $this> */
+    public function generator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');
     }

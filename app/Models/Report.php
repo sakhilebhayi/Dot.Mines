@@ -73,7 +73,8 @@ class Report extends Model
     /**
      * Get the user who generated this report
      */
-    public function generatedBy()
+    /** @return BelongsTo<User, $this> */
+    public function generatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'generated_by');
     }
@@ -97,7 +98,7 @@ class Report extends Model
     /**
      * Mark report as completed
      */
-    public function markCompleted($filePath, $fileSize = null)
+    public function markCompleted(string $filePath, ?int $fileSize = null): static
     {
         $this->update([
             'status' => 'completed',
@@ -134,7 +135,7 @@ class Report extends Model
     /**
      * Mark report as failed
      */
-    public function markFailed(?string $errorMessage = null)
+    public function markFailed(?string $errorMessage = null): bool
     {
         return $this->update([
             'status' => 'failed',

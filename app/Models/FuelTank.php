@@ -109,7 +109,7 @@ class FuelTank extends Model
             return 0;
         }
 
-        return round(($this->current_level_liters / $this->capacity_liters) * 100, 2);
+        return round(((float) $this->current_level_liters / (float) $this->capacity_liters) * 100, 2);
     }
 
     /**
@@ -133,7 +133,7 @@ class FuelTank extends Model
      */
     public function getAvailableCapacityAttribute(): float
     {
-        return $this->capacity_liters - $this->current_level_liters;
+        return (float) $this->capacity_liters - (float) $this->current_level_liters;
     }
 
     /**
@@ -157,7 +157,9 @@ class FuelTank extends Model
      */
     public function scopeLowFuel($query)
     {
-        return $query->whereRaw('current_level_liters < minimum_level_liters');
+        $query->whereRaw('current_level_liters < minimum_level_liters');
+
+        return $query;
     }
 
     /**
@@ -169,6 +171,8 @@ class FuelTank extends Model
      */
     public function scopeCritical($query)
     {
-        return $query->whereRaw('(current_level_liters / capacity_liters) < 0.1');
+        $query->whereRaw('(current_level_liters / capacity_liters) < 0.1');
+
+        return $query;
     }
 }

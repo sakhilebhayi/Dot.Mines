@@ -80,7 +80,7 @@ class Team extends JetstreamTeam
     /**
      * Get the owner of the team.
      *
-     * @return BelongsTo<User>
+     * @return BelongsTo<User, $this>
      */
     public function owner()
     {
@@ -117,7 +117,8 @@ class Team extends JetstreamTeam
     /**
      * Get the alerts for this team.
      */
-    public function alerts()
+    /** @return HasMany<Alert, $this> */
+    public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
     }

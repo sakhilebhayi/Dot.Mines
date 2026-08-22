@@ -58,7 +58,7 @@ class ProductionForecast extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeForTeam($query, $teamId)
+    public function scopeForTeam($query, int $teamId)
     {
         return $query->where('team_id', $teamId);
     }
@@ -67,7 +67,7 @@ class ProductionForecast extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeForDate($query, $date)
+    public function scopeForDate($query, string|\DateTimeInterface $date)
     {
         return $query->where('forecast_date', $date);
     }
@@ -76,7 +76,7 @@ class ProductionForecast extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeHighConfidence($query, $threshold = 80)
+    public function scopeHighConfidence($query, float $threshold = 80)
     {
         return $query->where('confidence_level', '>=', $threshold);
     }

@@ -77,6 +77,8 @@ class AlertGenerationJob implements ShouldQueue
 
     /**
      * Generate alerts for a specific machine based on its current state.
+     *
+     * @return list<array<string, mixed>>
      */
     private function generateAlertsForMachine(Machine $machine): array
     {
@@ -229,6 +231,8 @@ class AlertGenerationJob implements ShouldQueue
 
     /**
      * Create or update an alert in the database and broadcast it.
+     *
+     * @param  array<string, mixed>  $alertData
      */
     private function createOrUpdateAlert(Machine $machine, array $alertData): Alert
     {
@@ -284,7 +288,7 @@ class AlertGenerationJob implements ShouldQueue
     /**
      * Calculate hours until next maintenance based on machine type and hours.
      */
-    private function getHoursUntilMaintenance(Machine $machine): ?float
+    private function getHoursUntilMaintenance(Machine $machine): ?int
     {
         // Maintenance schedules based on machine type
         $maintenanceSchedule = [

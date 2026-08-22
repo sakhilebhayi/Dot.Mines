@@ -106,7 +106,7 @@ class MaintenanceSchedule extends Model
         return match ($this->schedule_type) {
             'hours' => $machine->operating_hours >= $this->next_service_hours,
             'kilometers' => $machine->odometer >= $this->next_service_km,
-            'calendar' => now()->gte($this->next_service_date),
+            'calendar' => $this->next_service_date !== null && now()->gte($this->next_service_date),
             default => false,
         };
     }
@@ -119,7 +119,7 @@ class MaintenanceSchedule extends Model
         return match ($this->schedule_type) {
             'hours' => $machine->operating_hours > ($this->next_service_hours + ($this->interval_hours * 0.1)),
             'kilometers' => $machine->odometer > ($this->next_service_km + ($this->interval_km * 0.1)),
-            'calendar' => now()->gt($this->next_service_date->addDays(7)),
+            'calendar' => $this->next_service_date instanceof Carbon && now()->gt($this->next_service_date->clone()->addDays(7)),
             default => false,
         };
     }

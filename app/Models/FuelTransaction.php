@@ -156,9 +156,11 @@ class FuelTransaction extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeDateRange($query, $startDate, $endDate)
+    public function scopeDateRange($query, string|\DateTimeInterface $startDate, string|\DateTimeInterface $endDate)
     {
-        return $query->whereBetween('transaction_date', [$startDate, $endDate]);
+        $query->whereBetween('transaction_date', [$startDate, $endDate]);
+
+        return $query;
     }
 
     /**

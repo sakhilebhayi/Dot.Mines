@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $month
  * @property int|null $year
  * @property-read float $consumption_percentage
- * @property-read float $remaining_budget_zar
+ * @property float|numeric-string $remaining_budget_zar
  */
 class FuelMonthlyAllocation extends Model
 {
@@ -79,7 +79,7 @@ class FuelMonthlyAllocation extends Model
      */
     public function getPeriodNameAttribute(): string
     {
-        return date('F Y', mktime(0, 0, 0, $this->month, 1, $this->year));
+        return date('F Y', mktime(0, 0, 0, $this->month, 1, $this->year) ?: null);
     }
 
     /**

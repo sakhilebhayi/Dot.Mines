@@ -50,8 +50,14 @@ class SyncMachineMetricsJob implements ShouldQueue
             // Ensure model queries are scoped to the machine's team in queue context
             app()->instance('current_team_id', $this->machine->team_id);
 
+            $team = $this->machine->team;
+
+            if ($team === null) {
+                return;
+            }
+
             // Get the integration for this machine
-            $integration = $this->machine->team->integrations()
+            $integration = $team->integrations()
                 ->where('provider', $this->machine->manufacturer)
                 ->first();
 
@@ -71,7 +77,13 @@ class SyncMachineMetricsJob implements ShouldQueue
 
             // Machine has no 'external_id' column -- 'manufacturer_id' is the
             // real fillable field for "ID from manufacturer system".
-            $metrics = $service->fetchMachineMetrics($this->machine->manufacturer_id);
+            $manufacturerId = $this->machine->manufacturer_id;
+
+            if ($manufacturerId === null || $manufacturerId === '') {
+                return;
+            }
+
+            $metrics = $service->fetchMachineMetrics($manufacturerId);
 
             if (! empty($metrics)) {
                 // team_id is NOT NULL on machine_metrics and isn't filled

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * ActivityLog Model
@@ -26,7 +27,8 @@ class ActivityLog extends Model
         'created_at',
     ];
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

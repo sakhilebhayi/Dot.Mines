@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property Carbon|string|null $completed_at
- * @property Carbon|string|null $started_at
+ * @property Carbon|null $completed_at
+ * @property Carbon|null $started_at
  */
 class MaintenanceRecord extends Model
 {

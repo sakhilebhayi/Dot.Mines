@@ -124,6 +124,8 @@ class FuelAlert extends Model
      */
     public function scopeUnacknowledged($query)
     {
-        return $query->whereNull('acknowledged_at');
+        $query->whereNull('acknowledged_at');
+
+        return $query;
     }
 }

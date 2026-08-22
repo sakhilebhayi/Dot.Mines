@@ -7,10 +7,14 @@ use Database\Factories\IoTSensorFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property Carbon|string|null $last_reading_at
+ * @property Carbon|null $last_reading_at
  * @property string|null $status
+ * @property int $id
+ * @property string $name
+ * @property string $sensor_type
  */
 class IoTSensor extends Model
 {
@@ -47,7 +51,8 @@ class IoTSensor extends Model
         return $this->belongsTo(Team::class);
     }
 
-    public function readings()
+    /** @return HasMany<SensorReading, $this> */
+    public function readings(): HasMany
     {
         return $this->hasMany(SensorReading::class);
     }

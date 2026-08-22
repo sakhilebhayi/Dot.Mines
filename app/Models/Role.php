@@ -7,6 +7,7 @@ use Database\Factories\RoleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Role Model
@@ -54,7 +55,8 @@ class Role extends Model
     /**
      * Get all permissions for this role
      */
-    public function permissions()
+    /** @return BelongsToMany<Permission, $this> */
+    public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class);
     }
@@ -62,7 +64,7 @@ class Role extends Model
     /**
      * Check if role has a permission
      */
-    public function hasPermission($permission)
+    public function hasPermission(string $permission): bool
     {
         return $this->permissions()->where('name', $permission)->exists();
     }

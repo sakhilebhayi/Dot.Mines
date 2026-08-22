@@ -58,6 +58,7 @@ class AIAnalysisSession extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** @param array<string, mixed> $results */
     public function markAsCompleted(array $results, int $recommendationsGenerated): void
     {
         // Carbon 3 diffs are signed floats: now()->diffInMilliseconds($past)
@@ -68,7 +69,7 @@ class AIAnalysisSession extends Model
             'results' => $results,
             'recommendations_generated' => $recommendationsGenerated,
             'completed_at' => now(),
-            'processing_time_ms' => $this->started_at ? (int) $this->started_at->diffInMilliseconds(now()) : null,
+            'processing_time_ms' => $this->started_at instanceof Carbon ? (int) $this->started_at->diffInMilliseconds(now()) : null,
         ]);
     }
 

@@ -135,7 +135,8 @@ class Alert extends Model
     /**
      * Get the user who acknowledged this alert
      */
-    public function acknowledgedBy()
+    /** @return BelongsTo<User, $this> */
+    public function acknowledgedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
@@ -143,7 +144,8 @@ class Alert extends Model
     /**
      * Get the user who resolved this alert
      */
-    public function resolvedBy()
+    /** @return BelongsTo<User, $this> */
+    public function resolvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');
     }
@@ -151,7 +153,7 @@ class Alert extends Model
     /**
      * Acknowledge this alert
      */
-    public function acknowledge($userId = null)
+    public function acknowledge(?int $userId = null): bool
     {
         return $this->update([
             'status' => 'acknowledged',
@@ -163,7 +165,7 @@ class Alert extends Model
     /**
      * Resolve this alert
      */
-    public function resolve($userId = null)
+    public function resolve(?int $userId = null): bool
     {
         return $this->update([
             'status' => 'resolved',

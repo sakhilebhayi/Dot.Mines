@@ -27,11 +27,13 @@ class MachineOffline implements ShouldBroadcast
     /**
      * Last known location.
      */
+    /** @var array<string, mixed>|null */
     public ?array $lastLocation;
 
     /**
      * Create a new event instance.
      */
+    /** @param array<string, mixed>|null $lastLocation */
     public function __construct(Machine $machine, ?string $reason = null, ?array $lastLocation = null)
     {
         $this->machine = $machine;
@@ -57,6 +59,8 @@ class MachineOffline implements ShouldBroadcast
 
     /**
      * Get the data to broadcast.
+     *
+     * @return array<string, mixed>
      */
     public function broadcastWith(): array
     {
