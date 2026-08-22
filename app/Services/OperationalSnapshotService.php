@@ -57,6 +57,25 @@ class OperationalSnapshotService
     }
 
     /**
+     * Snapshot for a single machine (Machine Detail's deepest-truth view).
+     *
+     * @return array<string, mixed>
+     */
+    public function forMachine(Machine $machine): array
+    {
+        $team = $machine->team;
+        $timezone = $team?->timezone ?: config('app.timezone', 'UTC');
+        $today = Carbon::now($timezone)->toDateString();
+
+        return $this->snapshot(
+            $machine->loadMissing('latestMetric'),
+            $this->closingBaselines($machine->team_id, [$machine->id], $today)->get($machine->id),
+            $this->todayTelemetryRecords($machine->team_id, [$machine->id], $today)->get($machine->id),
+            $this->staleAfterSeconds($machine->team_id)
+        );
+    }
+
+    /**
      * The newest telemetry timestamp across the whole fleet -- what a page
      * header's freshness badge should show.
      */

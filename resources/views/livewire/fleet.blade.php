@@ -572,6 +572,20 @@
                                     @endif
                                 </span>
                             </div>
+                            @php $snap = $snapshots->get($machine->id); @endphp
+                            <div class="flex items-center gap-2 text-sm text-[var(--sand)]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                <span class="font-medium">Loads Today:</span>
+                                <span class="ml-auto text-[var(--stone)] font-semibold">
+                                    @if (($snap['loads_today'] ?? null) !== null)
+                                        {{ $snap['loads_today'] }}@if (($snap['tonnes_today'] ?? null) !== null) <span class="text-[var(--sand)] font-normal">·</span> {{ number_format($snap['tonnes_today'], 1) }} t @endif
+                                    @else
+                                        <span class="text-[var(--sand)] font-normal" title="Bell has not reported a cumulative load counter baseline for this machine yet">awaiting API data</span>
+                                    @endif
+                                </span>
+                            </div>
                             <div class="flex items-center gap-2 text-sm text-[var(--sand)]">
                                 @if ($machine->excavator)
                                     <span class="font-medium">Excavator:</span> {{ $machine->excavator->name }}

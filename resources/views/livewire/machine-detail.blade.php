@@ -52,10 +52,15 @@
             </p>
         </div>
 
-        <!-- Last Updated Card -->
+        <!-- Last Telemetry Card: the DATA's own age (Bell reading time),
+             not the row's updated_at -- a machine that stopped reporting
+             must visibly age (brief §15 data freshness). -->
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6">
-            <p class="text-[var(--sand)] text-sm">Last Updated</p>
-            <p class="text-xl font-semibold text-[var(--stone)] mt-2">{{ $machine->updated_at?->diffForHumans() ?? 'Never' }}</p>
+            <p class="text-[var(--sand)] text-sm">Last Telemetry</p>
+            <p class="text-xl font-semibold text-[var(--stone)] mt-2">{{ $snapshot['last_telemetry_at']?->diffForHumans() ?? 'Never' }}</p>
+            <div class="mt-1">
+                <x-freshness :timestamp="$snapshot['last_telemetry_at']" :stale-after="$snapshot['stale_after_seconds']" label="Reported" />
+            </div>
         </div>
     </div>
 
@@ -83,6 +88,50 @@
             </p>
         </div>
     @endif
+
+    <!-- Production Today: pure counter arithmetic from the operational
+         snapshot (freshest Bell cumulative reading minus yesterday's stored
+         close). Missing inputs render as awaiting data, never a guess. -->
+    <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-6 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h3 class="text-lg font-semibold text-[var(--stone)]">Production Today</h3>
+            <x-freshness :timestamp="$snapshot['counter_reading_at']" :stale-after="$snapshot['stale_after_seconds']" label="Counter read" />
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <p class="text-[var(--sand)] text-sm">Loads Today</p>
+                <p class="text-xl font-semibold text-[var(--stone)] mt-1">
+                    @if ($snapshot['loads_today'] !== null){{ $snapshot['loads_today'] }}@else<span class="text-[var(--sand)] text-sm font-normal">Awaiting API data</span>@endif
+                </p>
+            </div>
+            <div>
+                <p class="text-[var(--sand)] text-sm">Cycles Today</p>
+                <p class="text-xl font-semibold text-[var(--stone)] mt-1">
+                    @if ($snapshot['cycles_today'] !== null){{ $snapshot['cycles_today'] }}@else<span class="text-[var(--sand)] text-sm font-normal">Awaiting API data</span>@endif
+                </p>
+            </div>
+            <div>
+                <p class="text-[var(--sand)] text-sm">Hauled Today</p>
+                <p class="text-xl font-semibold text-[var(--stone)] mt-1">
+                    @if ($snapshot['tonnes_today'] !== null){{ number_format($snapshot['tonnes_today'], 1) }} t @else<span class="text-[var(--sand)] text-sm font-normal">Awaiting API data</span>@endif
+                </p>
+            </div>
+            <div>
+                <p class="text-[var(--sand)] text-sm">Lifetime</p>
+                <p class="text-xl font-semibold text-[var(--stone)] mt-1">
+                    @if ($snapshot['lifetime_loads'] !== null)
+                        {{ number_format($snapshot['lifetime_loads']) }} loads
+                        @if ($snapshot['lifetime_tonnes'] !== null)<span class="block text-sm text-[var(--sand)] font-normal">{{ number_format($snapshot['lifetime_tonnes']) }} t hauled</span>@endif
+                    @else
+                        <span class="text-[var(--sand)] text-sm font-normal">Awaiting API data</span>
+                    @endif
+                </p>
+            </div>
+        </div>
+        @if ($snapshot['baseline_date'] !== null)
+            <p class="text-xs text-[var(--sand)]/70 mt-4">Measured against the counter close of {{ $snapshot['baseline_date'] }}.</p>
+        @endif
+    </div>
 
     <!-- Production Loss Accountability -->
     @livewire('production-loss-panel', ['machine' => $machine], key('loss-panel-'.$machine->id))
