@@ -79,22 +79,31 @@ XML;
         $dayOne = now()->subDays(2)->toDateString();
         $dayTwo = now()->subDay()->toDateString();
 
+        // Element-style bodies copied from Bell's REAL responses (captured
+        // live 2026-08-22): a lowercase `datetime` attribute with the value
+        // in child elements, plus the pagination <Links> blocks. The old
+        // fixtures here used an invented attribute-style <Reading .../>
+        // shape Bell never sends -- the tests passed while production
+        // parsed zero readings from every real response.
         $loadXml ??= <<<XML
-<CumulativeLoadCountTimeSeries>
-  <Reading ReadingUTC="{$dayOne}T06:00:00Z" Value="13000"/>
-  <Reading ReadingUTC="{$dayOne}T18:00:00Z" Value="13050"/>
-  <Reading ReadingUTC="{$dayTwo}T06:00:00Z" Value="13120"/>
-  <Reading ReadingUTC="{$dayTwo}T18:00:00Z" Value="13200"/>
-</CumulativeLoadCountTimeSeries>
+<CumulativeLoadCountMessages xmlns="http://standards.iso.org/iso/15143/-3">
+  <Links><rel>self</rel><href>/Fleet/Equipment/X/CumulativeLoadCount/a/b/1</href></Links>
+  <Links><rel>first</rel><href>/Fleet/Equipment/X/CumulativeLoadCount/a/b/1</href></Links>
+  <CumulativeLoadCount datetime="{$dayOne}T06:00:00Z"><Count>13000</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayOne}T18:00:00Z"><Count>13050</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayTwo}T06:00:00Z"><Count>13120</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayTwo}T18:00:00Z"><Count>13200</Count></CumulativeLoadCount>
+</CumulativeLoadCountMessages>
 XML;
 
         $payloadXml ??= <<<XML
-<CumulativePayloadTotalsTimeSeries>
-  <Reading ReadingUTC="{$dayOne}T06:00:00Z" Value="540000000" PayloadUnits="kilogram"/>
-  <Reading ReadingUTC="{$dayOne}T18:00:00Z" Value="540250000" PayloadUnits="kilogram"/>
-  <Reading ReadingUTC="{$dayTwo}T06:00:00Z" Value="540600000" PayloadUnits="kilogram"/>
-  <Reading ReadingUTC="{$dayTwo}T18:00:00Z" Value="541000000" PayloadUnits="kilogram"/>
-</CumulativePayloadTotalsTimeSeries>
+<CumulativePayloadTotalMessages xmlns="http://standards.iso.org/iso/15143/-3">
+  <Links><rel>self</rel><href>/Fleet/Equipment/X/CumulativePayloadTotals/a/b/1</href></Links>
+  <CumulativePayloadTotals datetime="{$dayOne}T06:00:00Z"><PayloadUnits>kilogram</PayloadUnits><Payload>540000000.00</Payload></CumulativePayloadTotals>
+  <CumulativePayloadTotals datetime="{$dayOne}T18:00:00Z"><PayloadUnits>kilogram</PayloadUnits><Payload>540250000.00</Payload></CumulativePayloadTotals>
+  <CumulativePayloadTotals datetime="{$dayTwo}T06:00:00Z"><PayloadUnits>kilogram</PayloadUnits><Payload>540600000.00</Payload></CumulativePayloadTotals>
+  <CumulativePayloadTotals datetime="{$dayTwo}T18:00:00Z"><PayloadUnits>kilogram</PayloadUnits><Payload>541000000.00</Payload></CumulativePayloadTotals>
+</CumulativePayloadTotalMessages>
 XML;
 
         $this->loadXml = $loadXml;
@@ -141,6 +150,30 @@ XML;
         $this->assertCount(4, $result['payload_readings']);
         $this->assertSame(13000.0, $result['load_count_readings'][0]['value']);
         $this->assertSame('kilogram', $result['payload_readings'][0]['units']);
+    }
+
+    public function test_attribute_style_readings_still_parse(): void
+    {
+        // Locations and caution codes really do use attribute-style
+        // readings -- extending extraction to Bell's element-style
+        // production series must not break the original shape.
+        $dayOne = now()->subDay()->toDateString();
+        $this->fakeBellApi(
+            <<<XML
+<CumulativeLoadCountTimeSeries>
+  <Reading ReadingUTC="{$dayOne}T06:00:00Z" Value="13000"/>
+  <Reading ReadingUTC="{$dayOne}T18:00:00Z" Value="13050"/>
+</CumulativeLoadCountTimeSeries>
+XML,
+            '<CumulativePayloadTotalMessages xmlns="http://standards.iso.org/iso/15143/-3"/>'
+        );
+
+        $service = new BellService($this->credentials());
+        $result = $service->fetchMachineProduction('ASA B50E#9086', now()->subDays(3), now());
+
+        $this->assertTrue($result['success']);
+        $this->assertCount(2, $result['load_count_readings']);
+        $this->assertSame(13000.0, $result['load_count_readings'][0]['value']);
     }
 
     public function test_syncing_a_bell_integration_creates_daily_production_records(): void
@@ -220,17 +253,17 @@ XML;
         $dayOne = now()->subDays(2)->toDateString();
         $this->fakeBellApi(
             <<<XML
-<CumulativeLoadCountTimeSeries>
-  <Reading ReadingUTC="{$dayOne}T18:00:00Z" Value="13050"/>
-  <Reading ReadingUTC="{$dayTwoDate}T06:00:00Z" Value="13120"/>
-  <Reading ReadingUTC="{$dayTwoDate}T21:00:00Z" Value="13260"/>
-</CumulativeLoadCountTimeSeries>
+<CumulativeLoadCountMessages xmlns="http://standards.iso.org/iso/15143/-3">
+  <CumulativeLoadCount datetime="{$dayOne}T18:00:00Z"><Count>13050</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayTwoDate}T06:00:00Z"><Count>13120</Count></CumulativeLoadCount>
+  <CumulativeLoadCount datetime="{$dayTwoDate}T21:00:00Z"><Count>13260</Count></CumulativeLoadCount>
+</CumulativeLoadCountMessages>
 XML,
             <<<XML
-<CumulativePayloadTotalsTimeSeries>
-  <Reading ReadingUTC="{$dayOne}T18:00:00Z" Value="540250000" PayloadUnits="kilogram"/>
-  <Reading ReadingUTC="{$dayTwoDate}T21:00:00Z" Value="541500000" PayloadUnits="kilogram"/>
-</CumulativePayloadTotalsTimeSeries>
+<CumulativePayloadTotalMessages xmlns="http://standards.iso.org/iso/15143/-3">
+  <CumulativePayloadTotals datetime="{$dayOne}T18:00:00Z"><PayloadUnits>kilogram</PayloadUnits><Payload>540250000.00</Payload></CumulativePayloadTotals>
+  <CumulativePayloadTotals datetime="{$dayTwoDate}T21:00:00Z"><PayloadUnits>kilogram</PayloadUnits><Payload>541500000.00</Payload></CumulativePayloadTotals>
+</CumulativePayloadTotalMessages>
 XML
         );
 

@@ -155,6 +155,19 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
             // Dispatch speed monitoring job after location updates
             RouteSpeedMonitoringJob::dispatch();
 
+            // A fully successful run clears any earlier failure message --
+            // otherwise last_error from a transient outage sticks forever
+            // next to status=connected (observed live: a stale "Location
+            // update failed" from days earlier shadowing a healthy sync)
+            // and the Integration Manager keeps telling the admin the API
+            // is broken while data flows normally.
+            if ($this->integration->last_error !== null) {
+                $this->integration->update([
+                    'last_error' => null,
+                    'last_error_at' => null,
+                ]);
+            }
+
             Log::info('Location update job completed', [
                 'integration_id' => $this->integration->id,
                 'machines_updated' => $broadcastCount,
