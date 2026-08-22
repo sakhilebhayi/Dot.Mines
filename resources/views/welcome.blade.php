@@ -71,6 +71,19 @@
             .hero-scrim-horizontal { background: linear-gradient(90deg, #211a14 0%, rgba(33,26,20,0.55) 38%, transparent 68%); }
             .cta-photo { background-image: url('https://images.unsplash.com/photo-1709489662983-3674d790b224?q=80&w=2400&auto=format&fit=crop'); }
             .cta-scrim { background: linear-gradient(180deg, #211a14 0%, rgba(33,26,20,0.82) 50%, #211a14 100%); }
+
+            /* ThreeUI-inspired depth, kept cheap: CSS perspective + a 2D-canvas
+               wireframe. No WebGL, no libraries, zero bundle impact. */
+            .tilt-wrap { perspective: 900px; }
+            .tilt { transform-style: preserve-3d; will-change: transform; transition: transform 300ms var(--ease-out); }
+            @media (prefers-reduced-motion: reduce) {
+                .tilt { transform: none !important; transition: none; }
+            }
+            .pit-frame {
+                background:
+                    radial-gradient(120% 90% at 70% 20%, rgba(217, 158, 43, 0.08) 0%, transparent 55%),
+                    var(--ink);
+            }
         </style>
     </head>
     <body class="antialiased">
@@ -90,6 +103,7 @@
                 <div class="hidden md:flex items-center gap-8 font-mono text-[13px] tracking-wide uppercase text-[var(--sand)]">
                     <a href="#capabilities" class="link-underline hover:text-[var(--stone)] pb-0.5">Product</a>
                     <a href="#features" class="link-underline hover:text-[var(--stone)] pb-0.5">Features</a>
+                    <a href="#realtime" class="link-underline hover:text-[var(--stone)] pb-0.5">Real-time</a>
                     <a href="{{ route('pricing') }}" class="link-underline hover:text-[var(--stone)] pb-0.5">Pricing</a>
                 </div>
 
@@ -220,12 +234,52 @@
                         ];
                     @endphp
                     @foreach ($features as $i => $f)
-                        <div class="row-hover border-b border-[var(--line)] {{ $i % 2 === 0 ? 'md:border-r' : '' }} px-1 py-8 sm:py-10 transition-colors reveal" data-reveal>
+                        <div class="tilt-wrap row-hover border-b border-[var(--line)] {{ $i % 2 === 0 ? 'md:border-r' : '' }} px-1 py-8 sm:py-10 transition-colors reveal" data-reveal data-tilt>
                             <p class="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--gold)] mb-3">{{ $f['tag'] }}</p>
                             <h3 class="font-display font-semibold text-xl text-[var(--stone)] mb-2.5">{{ $f['title'] }}</h3>
                             <p class="text-[var(--sand)] leading-relaxed max-w-md">{{ $f['body'] }}</p>
                         </div>
                     @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- Real-time operations: ThreeUI-inspired wireframe pit. The canvas
+             is decorative illustration (aria-hidden, stylised); the CLAIMS in
+             the copy are the platform's real, shipped capabilities. -->
+        <section id="realtime" class="py-24 sm:py-28 px-5 sm:px-8">
+            <div class="max-w-[1400px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div class="reveal" data-reveal>
+                    <p class="font-mono text-xs tracking-[0.18em] uppercase text-[var(--gold)] mb-4">Real-time operations</p>
+                    <h2 class="font-display font-semibold text-3xl sm:text-4xl text-[var(--stone)] leading-tight mb-5">
+                        Watch the pit move, live
+                    </h2>
+                    <p class="text-[var(--sand)] leading-relaxed max-w-md mb-8">
+                        Dot.Mines reads your OEM telemetry directly — positions, engine state, fuel,
+                        and the machines' own cumulative load counters — and turns it into a live
+                        operational picture that never pretends to know more than the data does.
+                    </p>
+                    <ul class="space-y-4 max-w-md">
+                        <li class="flex gap-3">
+                            <span class="mt-1.5 size-1.5 rounded-full bg-[var(--gold)] shrink-0" aria-hidden="true"></span>
+                            <p class="text-[var(--sand)] leading-relaxed"><span class="text-[var(--stone)] font-medium">Production from the source.</span> Loads, cycles, and tonnes derived from each machine's cumulative counters — per truck, per day, reconciled.</p>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="mt-1.5 size-1.5 rounded-full bg-[var(--gold)] shrink-0" aria-hidden="true"></span>
+                            <p class="text-[var(--sand)] leading-relaxed"><span class="text-[var(--stone)] font-medium">Roads your fleet actually drove.</span> Travelled-path trails and zone suggestions come from recorded GPS history, never from guesswork.</p>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="mt-1.5 size-1.5 rounded-full bg-[var(--gold)] shrink-0" aria-hidden="true"></span>
+                            <p class="text-[var(--sand)] leading-relaxed"><span class="text-[var(--stone)] font-medium">Honest freshness.</span> Every operational view shows how old its data is — stale never masquerades as live.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="reveal" data-reveal>
+                    <div class="pit-frame relative rounded-2xl border border-[var(--line)] overflow-hidden aspect-[4/3]">
+                        <canvas id="pit-canvas" class="absolute inset-0 w-full h-full" aria-hidden="true"></canvas>
+                        <p class="absolute bottom-3 right-4 font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--sand)]/50 select-none">Stylised illustration</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -312,6 +366,174 @@
         </footer>
 
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+            (function () {
+                // Wireframe open pit: isometric 2D-canvas drawing, ThreeUI in
+                // spirit but a few KB in practice. Initialised only when the
+                // section approaches the viewport; the animation loop runs
+                // only while visible; prefers-reduced-motion gets one static
+                // frame and no loop at all.
+                const canvas = document.getElementById('pit-canvas');
+                if (!canvas || !('IntersectionObserver' in window)) return;
+
+                const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                let ctx = null;
+                let running = false;
+                let rafId = 0;
+                let last = 0;
+                let angle = 0;
+
+                const BENCHES = 6;
+                const TRUCKS = [
+                    { ring: 1, t: 0.15, speed: 0.055 },
+                    { ring: 3, t: 0.62, speed: -0.042 },
+                    { ring: 5, t: 0.35, speed: 0.07 },
+                ];
+
+                function sizeCanvas() {
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = Math.round(rect.width * dpr);
+                    canvas.height = Math.round(rect.height * dpr);
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                    return rect;
+                }
+
+                function project(x, y, z, w, h) {
+                    const cos = Math.cos(angle), sin = Math.sin(angle);
+                    const rx = x * cos - y * sin;
+                    const ry = x * sin + y * cos;
+                    return [
+                        w / 2 + (rx - ry) * 0.86,
+                        h / 2.45 + (rx + ry) * 0.5 - z,
+                    ];
+                }
+
+                function ringPoint(ring, t, w, h) {
+                    const scale = Math.min(w, h) * 0.44;
+                    const r = scale * (1 - ring * 0.13);
+                    const z = -ring * scale * 0.14 + scale * 0.36;
+                    const a = t * Math.PI * 2;
+                    return project(Math.cos(a) * r, Math.sin(a) * r, z, w, h);
+                }
+
+                function draw(rect) {
+                    const w = rect.width, h = rect.height;
+                    ctx.clearRect(0, 0, w, h);
+
+                    for (let ring = 0; ring <= BENCHES; ring++) {
+                        ctx.beginPath();
+                        for (let s = 0; s <= 90; s++) {
+                            const [px, py] = ringPoint(ring, s / 90, w, h);
+                            s === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                        }
+                        ctx.strokeStyle = ring === 0 ? 'rgba(244,239,228,0.35)' : 'rgba(244,239,228,' + (0.28 - ring * 0.033) + ')';
+                        ctx.lineWidth = ring === 0 ? 1.4 : 1;
+                        ctx.stroke();
+                    }
+
+                    // Haul ramp: a spiral from rim to floor.
+                    ctx.beginPath();
+                    for (let s = 0; s <= 160; s++) {
+                        const progress = s / 160;
+                        const [px, py] = ringPoint(progress * BENCHES, progress * 1.65 + 0.08, w, h);
+                        s === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                    }
+                    ctx.strokeStyle = 'rgba(217,158,43,0.5)';
+                    ctx.lineWidth = 1.6;
+                    ctx.stroke();
+
+                    // Radial bench connectors.
+                    for (let k = 0; k < 4; k++) {
+                        ctx.beginPath();
+                        for (let ring = 0; ring <= BENCHES; ring++) {
+                            const [px, py] = ringPoint(ring, k / 4 + 0.125, w, h);
+                            ring === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                        }
+                        ctx.strokeStyle = 'rgba(244,239,228,0.10)';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+
+                    // Trucks: gold points running the benches.
+                    TRUCKS.forEach((truck) => {
+                        const [px, py] = ringPoint(truck.ring, truck.t, w, h);
+                        ctx.beginPath();
+                        ctx.arc(px, py, 3.2, 0, Math.PI * 2);
+                        ctx.fillStyle = '#d99e2b';
+                        ctx.shadowColor = 'rgba(217,158,43,0.9)';
+                        ctx.shadowBlur = 8;
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    });
+                }
+
+                function frame(now) {
+                    if (!running) return;
+                    rafId = requestAnimationFrame(frame);
+                    if (now - last < 33) return; // ~30fps is plenty for ambience
+                    const dt = Math.min((now - last) / 1000, 0.1);
+                    last = now;
+                    angle += dt * 0.12;
+                    TRUCKS.forEach((truck) => { truck.t = (truck.t + dt * truck.speed + 1) % 1; });
+                    draw(canvas.getBoundingClientRect());
+                }
+
+                function start() {
+                    if (running || reduceMotion) return;
+                    running = true;
+                    last = performance.now();
+                    rafId = requestAnimationFrame(frame);
+                }
+
+                function stop() {
+                    running = false;
+                    cancelAnimationFrame(rafId);
+                }
+
+                const init = () => {
+                    ctx = canvas.getContext('2d');
+                    const rect = sizeCanvas();
+                    angle = 0.5;
+                    draw(rect);
+                    if (reduceMotion) return; // one honest static frame
+
+                    new IntersectionObserver((entries) => {
+                        entries[0].isIntersecting ? start() : stop();
+                    }, { threshold: 0.1 }).observe(canvas);
+
+                    document.addEventListener('visibilitychange', () => {
+                        document.hidden ? stop() : undefined;
+                    });
+                    window.addEventListener('resize', () => { sizeCanvas(); draw(canvas.getBoundingClientRect()); });
+                };
+
+                new IntersectionObserver((entries, io) => {
+                    if (!entries[0].isIntersecting) return;
+                    io.disconnect();
+                    ('requestIdleCallback' in window) ? requestIdleCallback(init, { timeout: 800 }) : setTimeout(init, 1);
+                }, { rootMargin: '400px' }).observe(canvas);
+            })();
+
+            (function () {
+                // ThreeUI-style pointer tilt on the feature cards: hover-capable
+                // pointers only, and never under prefers-reduced-motion.
+                if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+                document.querySelectorAll('[data-tilt]').forEach((card) => {
+                    card.classList.add('tilt');
+                    card.addEventListener('pointermove', (event) => {
+                        const rect = card.getBoundingClientRect();
+                        const dx = (event.clientX - rect.left) / rect.width - 0.5;
+                        const dy = (event.clientY - rect.top) / rect.height - 0.5;
+                        card.style.transform = 'rotateX(' + (-dy * 4) + 'deg) rotateY(' + (dx * 5) + 'deg) translateZ(0)';
+                    });
+                    card.addEventListener('pointerleave', () => {
+                        card.style.transform = '';
+                    });
+                });
+            })();
+
             if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
                 const io = new IntersectionObserver((entries) => {
                     entries.forEach((entry) => {
