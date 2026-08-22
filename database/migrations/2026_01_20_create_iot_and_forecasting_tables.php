@@ -56,7 +56,9 @@ return new class extends Migration
 
             $table->index('mine_area_id');
             $table->index('forecast_date');
-            $table->unique(['mine_area_id', 'forecast_date', 'material_name']);
+            // Explicit name: the auto-generated one is 68 chars and MySQL caps
+            // identifiers at 64 (surfaced by the engine-copy rehearsal).
+            $table->unique(['mine_area_id', 'forecast_date', 'material_name'], 'pf_area_date_material_unique');
         });
 
         Schema::create('compliance_reports', function (Blueprint $table) {
