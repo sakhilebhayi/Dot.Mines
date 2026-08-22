@@ -22,14 +22,22 @@ class RouteAdvisorAgentTest extends TestCase
             'start_longitude' => 28.0473,
             'end_latitude' => -26.1052,
             'end_longitude' => 28.0567,
+            // The direct distance for these coordinates is ~11 km; the agent
+            // recommends only when the detour exceeds 25% of direct (>15%
+            // improvement after the 10% grace). The factory randomises
+            // total_distance 5-100 km, which made this test skip whenever
+            // the draw landed under ~13.8 km -- pin a distance that always
+            // crosses the threshold instead.
+            'total_distance' => 60.0,
         ]);
 
         $agent = app(RouteAdvisorAgent::class);
         $result = $agent->analyze($team);
 
-        if (count($result['recommendations']) === 0) {
-            $this->markTestSkipped('Route efficiency fixture did not cross the 15% improvement threshold; not this test\'s concern to fabricate route geometry.');
-        }
+        $this->assertNotEmpty(
+            $result['recommendations'],
+            'A 60 km route over an 11 km direct path must always cross the 15% improvement threshold.',
+        );
 
         $recommendation = $result['recommendations'][0];
         $this->assertArrayHasKey('proposed_action', $recommendation);
