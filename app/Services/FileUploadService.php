@@ -10,6 +10,7 @@ use Symfony\Component\Process\Process;
 
 class FileUploadService
 {
+    /** @var list<string> */
     protected array $allowedExtensions = [
         'pdf', 'dwg', 'dxf', 'kml', 'kmz', 'shp', 'zip', 'gz', 'tar',
         'png', 'jpg', 'jpeg', 'gif', 'tif', 'tiff',
@@ -20,7 +21,7 @@ class FileUploadService
         $name = pathinfo($originalName, PATHINFO_FILENAME);
         $ext = pathinfo($originalName, PATHINFO_EXTENSION);
         // Remove non-alphanumeric, keep dots, dashes and underscores
-        $safe = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $name);
+        $safe = (string) preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $name);
         $safe = Str::limit($safe, 120, '');
         $hash = Str::random(8);
 
@@ -117,6 +118,13 @@ class FileUploadService
                     for ($i = 0; $i < $zip->numFiles; $i++) {
                         $name = $zip->getNameIndex($i);
 
+                        if ($name === false) {
+                            // An unreadable entry name is indistinguishable
+                            // from a crafted one: reject the archive.
+                            $zip->close();
+                            throw new \Exception('Archive contains unreadable entries.');
+                        }
+
                         // Reject path traversal or absolute paths
                         if (strpos($name, '..') !== false || str_starts_with($name, '/') || str_starts_with($name, '\\')) {
                             $zip->close();
@@ -169,6 +177,11 @@ class FileUploadService
                             if ($probe !== false && strlen($probe) > 0) {
                                 $finfo = new \finfo(FILEINFO_MIME_TYPE);
                                 $mime = $finfo->buffer($probe);
+
+                                if ($mime === false) {
+                                    $zip->close();
+                                    throw new \Exception('Archive contains unreadable entries.');
+                                }
                                 // If the declared extension is an image but MIME is text or php-like, reject
                                 $imageExts = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'tiff'];
                                 if (in_array($entryExt, $imageExts, true) && str_starts_with($mime, 'text/')) {
@@ -395,7 +408,7 @@ class FileUploadService
             }
             // On Windows check PATHEXT
             if (DIRECTORY_SEPARATOR !== '/') {
-                $exts = array_filter(array_map('strtolower', preg_split('/;/', getenv('PATHEXT') ?: '.EXE')));
+                $exts = array_filter(array_map('strtolower', preg_split('/;/', getenv('PATHEXT') ?: '.EXE') ?: []));
                 foreach ($exts as $ext) {
                     if (is_executable($candidate.$ext)) {
                         return true;

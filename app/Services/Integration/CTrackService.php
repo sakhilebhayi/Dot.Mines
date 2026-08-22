@@ -145,9 +145,7 @@ class CTrackService extends BaseManufacturerService
     public function fetchMachineDetails(string $machineId): array
     {
         try {
-            $response = $this->makeRequest('GET', "/v3/vehicles/{$machineId}");
-
-            return $response ?? [];
+            return $this->makeRequest('GET', "/v3/vehicles/{$machineId}");
         } catch (Exception $e) {
             $this->logError('Failed to fetch machine details', $e);
 

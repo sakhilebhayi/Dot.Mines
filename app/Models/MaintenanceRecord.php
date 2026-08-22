@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property Carbon|null $completed_at
+ * @property int|null $machine_id
  * @property Carbon|null $started_at
  */
 class MaintenanceRecord extends Model
@@ -36,6 +37,7 @@ class MaintenanceRecord extends Model
      * @property Carbon $scheduled_date
      * @property Carbon|null $started_at
      * @property Carbon|null $completed_at
+     * @property int|null $machine_id
      * @property int|null $assigned_to
      * @property int|null $completed_by
      * @property string|float $labor_hours

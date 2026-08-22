@@ -243,12 +243,15 @@ class MaintenancePredictorAgent
     /**
      * @return array<string, mixed>
      */
+    /** @return list<string> */
     protected function getContributingFactors(Machine $machine): array
     {
         $factors = [];
 
-        if ($machine->healthStatus?->overall_health_score < 60) {
-            $factors[] = 'Low health score: '.$machine->healthStatus->overall_health_score;
+        $healthScore = $machine->healthStatus?->overall_health_score;
+
+        if ($healthScore !== null && $healthScore < 60) {
+            $factors[] = 'Low health score: '.$healthScore;
         }
 
         $lastMaintenance = $machine->maintenanceRecords()->latest('completed_at')->first();

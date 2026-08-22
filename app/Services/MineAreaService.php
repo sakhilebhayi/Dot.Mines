@@ -62,7 +62,7 @@ class MineAreaService
             }
 
             // If not available, try to compute from coordinates (json string or array)
-            if (($centerLat === null || $centerLng === null) && array_key_exists('coordinates', $data)) {
+            if (($centerLat === null || $centerLng === null) && isset($data['coordinates'])) {
                 $coords = $data['coordinates'];
                 if (is_string($coords)) {
                     $decoded = json_decode($coords, true);
@@ -109,7 +109,7 @@ class MineAreaService
     {
         $mineArea->update($data);
 
-        return $mineArea->fresh();
+        return $mineArea->refresh();
     }
 
     /**
@@ -117,7 +117,7 @@ class MineAreaService
      */
     public function delete(MineArea $mineArea): bool
     {
-        return $mineArea->delete();
+        return (bool) $mineArea->delete();
     }
 
     /**

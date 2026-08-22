@@ -679,7 +679,13 @@ class IntegrationService
     private function syncMachineAlertsFromService(ManufacturerServiceInterface $service, Machine $machine): void
     {
         try {
-            $alerts = $service->fetchMachineAlerts($machine->manufacturer_id);
+            $manufacturerId = $machine->manufacturer_id;
+
+            if ($manufacturerId === null || $manufacturerId === '') {
+                return;
+            }
+
+            $alerts = $service->fetchMachineAlerts($manufacturerId);
 
             if (! empty($alerts)) {
                 $this->syncMachineAlerts($machine, $alerts);

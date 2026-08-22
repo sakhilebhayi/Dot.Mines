@@ -138,8 +138,9 @@ class RoutePlanningService
     /**
      * Sample waypoints from route geometry to avoid too many points
      *
-     * @param  array<string, mixed>  $routeCoordinates
-     * @return array<string, mixed>
+     * @param  array<int, mixed>  $routeCoordinates
+     * @param  Collection<array-key, mixed>  $geofences
+     * @return list<array<string, mixed>>
      */
     protected function sampleRouteWaypoints(array $routeCoordinates, Collection $geofences): array
     {
@@ -210,7 +211,8 @@ class RoutePlanningService
     /**
      * Generate waypoints avoiding restricted geofences
      *
-     * @return array<string, mixed>
+     * @param  Collection<array-key, mixed>  $geofences
+     * @return list<array<string, mixed>>
      */
     protected function generateWaypoints(
         float $startLat,

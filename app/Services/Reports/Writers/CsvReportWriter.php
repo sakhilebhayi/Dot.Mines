@@ -11,6 +11,10 @@ class CsvReportWriter
     {
         $handle = fopen($localPath, 'w');
 
+        if ($handle === false) {
+            throw new \RuntimeException("Cannot open report file for writing: {$localPath}");
+        }
+
         fputcsv($handle, $data['headers']);
         foreach ($data['rows'] as $row) {
             fputcsv($handle, $row);

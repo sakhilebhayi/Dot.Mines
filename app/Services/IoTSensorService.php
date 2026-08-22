@@ -30,6 +30,10 @@ class IoTSensorService
 
         $values = $readings->pluck('value')->toArray();
 
+        if ($values === []) {
+            return ['count' => 0];
+        }
+
         return [
             'count' => count($values),
             'average' => array_sum($values) / count($values),

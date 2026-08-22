@@ -8,6 +8,7 @@ use App\Events\MaintenanceAlertTriggered;
 use App\Events\SensorReadingRecorded;
 use App\Events\SensorStatusChanged;
 use App\Models\Alert;
+use App\Models\ComplianceViolation;
 use App\Models\IoTSensor;
 use App\Models\Machine;
 use App\Models\Notification;
@@ -76,7 +77,7 @@ class RealTimeAlertService
     /**
      * Dispatch compliance violation alert
      *
-     * @param  array<string, mixed>|\stdClass|object  $violation
+     * @param  array<string, mixed>|ComplianceViolation  $violation
      */
     public function dispatchComplianceAlert($violation, int $teamId): void
     {
@@ -89,11 +90,20 @@ class RealTimeAlertService
 
         // Support both array and object
         $isArray = is_array($violation);
-        $violationType = $isArray ? ($violation['type'] ?? 'unknown') : $violation->violation_type;
-        $description = $isArray ? ($violation['description'] ?? '') : $violation->description;
-        $severity = $isArray ? ($violation['severity'] ?? 'medium') : $violation->severity;
-        $deadline = $isArray ? ($violation['deadline'] ?? null) : $violation->remediation_deadline;
-        $violationId = $isArray ? ($violation['id'] ?? null) : $violation->id;
+
+        if ($isArray) {
+            $violationType = $violation['type'] ?? 'unknown';
+            $description = $violation['description'] ?? '';
+            $severity = $violation['severity'] ?? 'medium';
+            $deadline = $violation['deadline'] ?? null;
+            $violationId = $violation['id'] ?? null;
+        } else {
+            $violationType = $violation->violation_type;
+            $description = $violation->description;
+            $severity = $violation->severity;
+            $deadline = $violation->remediation_deadline;
+            $violationId = $violation->id;
+        }
 
         // Compliance is an admin concern -- admins get emailed (preference
         // gated), the team sees it in the bell.
@@ -153,7 +163,7 @@ class RealTimeAlertService
                 'operator_fatigue_id' => $fatigue->id,
                 'user_id' => $fatigue->user_id,
                 'fatigue_score' => $fatigue->fatigue_score,
-                'shift_date' => optional($fatigue->shift_date)->toDateString(),
+                'shift_date' => $fatigue->shift_date instanceof Carbon ? $fatigue->shift_date->toDateString() : null,
                 'shift_type' => $fatigue->shift_type,
             ],
         ]);
