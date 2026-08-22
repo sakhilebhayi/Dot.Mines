@@ -15,7 +15,7 @@ use App\Models\Team;
 class MaintenancePredictorAgent
 {
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     public function analyze(Team $team): array
     {
@@ -38,7 +38,7 @@ class MaintenancePredictorAgent
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     protected function predictMaintenanceNeeds(Team $team): array
     {
@@ -61,7 +61,7 @@ class MaintenancePredictorAgent
                     'category' => 'maintenance',
                     'priority' => 'critical',
                     'title' => "High Breakdown Risk: {$machine->name}",
-                    'description' => 'AI predicts '.round($riskScore * 100)."% probability of breakdown within {$daysUntilBreakdown} days for {$machine->name}. Immediate inspection recommended.",
+                    'description' => 'AI predicts '.round($riskScore * 100.0)."% probability of breakdown within {$daysUntilBreakdown} days for {$machine->name}. Immediate inspection recommended.",
                     'confidence_score' => $riskScore,
                     'estimated_savings' => 150000, // Average breakdown cost
                     'related_machine_id' => $machine->id,
@@ -95,7 +95,7 @@ class MaintenancePredictorAgent
                     'description' => "Machine {$machine->name} showing concerning patterns",
                     'data' => [
                         'machine_id' => $machine->id,
-                        'risk_score' => round($riskScore * 100, 2),
+                        'risk_score' => round($riskScore * 100.0, 2),
                     ],
                 ];
             } elseif ($riskScore > 0.4) {
@@ -139,7 +139,7 @@ class MaintenancePredictorAgent
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>}
      */
     protected function optimizeMaintenanceSchedules(Team $team): array
     {
@@ -214,7 +214,7 @@ class MaintenancePredictorAgent
             // Carbon 3: now()->diffInDays($past) is negative, which made this
             // factor SUBTRACT from the risk score instead of adding to it.
             $daysSinceLastMaintenance = $lastMaintenance->completed_at->diffInDays(now());
-            $riskFactors['maintenance'] = min(($daysSinceLastMaintenance / 180) * 0.25, 0.25);
+            $riskFactors['maintenance'] = min(($daysSinceLastMaintenance / 180.0) * 0.25, 0.25);
         } else {
             $riskFactors['maintenance'] = 0.25; // No maintenance history = max risk
         }
@@ -227,7 +227,7 @@ class MaintenancePredictorAgent
         $machineAge = ($machine->year_of_manufacture !== null && $machine->year_of_manufacture !== 0)
             ? now()->year - $machine->year_of_manufacture
             : 5;
-        $riskFactors['age'] = min(($machineAge / 20) * 0.2, 0.2); // 20 years is max
+        $riskFactors['age'] = min(($machineAge / 20.0) * 0.2, 0.2); // 20 years is max
 
         return array_sum($riskFactors);
     }
@@ -237,7 +237,7 @@ class MaintenancePredictorAgent
         // Higher risk = fewer days until breakdown
         $baseDays = 90;
 
-        return max(7, (int) ($baseDays * (1 - $riskScore)));
+        return max(7, (int) ($baseDays * (1.0 - $riskScore)));
     }
 
     /**

@@ -79,8 +79,8 @@ class ReportDataService
             $r->unit,
         ])->all();
 
-        $totalProduced = $records->sum('quantity_produced');
-        $totalTarget = $records->sum('target_quantity');
+        $totalProduced = (float) $records->sum('quantity_produced');
+        $totalTarget = (float) $records->sum('target_quantity');
 
         return [
             'headers' => ['Date', 'Mine Area', 'Machine', 'Shift', 'Quantity Produced', 'Target', 'Unit'],
@@ -89,7 +89,7 @@ class ReportDataService
                 'Records' => $records->count(),
                 'Total Produced' => round($totalProduced, 2),
                 'Total Target' => round($totalTarget, 2),
-                'Achievement' => $totalTarget > 0 ? round(($totalProduced / $totalTarget) * 100, 1).'%' : 'N/A',
+                'Achievement' => $totalTarget > 0 ? round(($totalProduced / $totalTarget) * 100.0, 1).'%' : 'N/A',
             ],
         ];
     }
@@ -133,7 +133,7 @@ class ReportDataService
             // before the +1 or the availability denominator doubles.
             $daysInRange = max(1, (int) $start->diffInDays($end) + 1);
             $utilizationPercent = $hoursInRange !== null
-                ? round(($hoursInRange / ($daysInRange * 24)) * 100, 1)
+                ? round(($hoursInRange / ($daysInRange * 24.0)) * 100, 1)
                 : null;
             $totalHours += $hoursInRange ?? 0.0;
 
@@ -292,7 +292,7 @@ class ReportDataService
         $records = $query->orderBy('completed_at')->get();
 
         $rows = $records->map(function ($r) {
-            $downtimeHours = round($r->started_at->diffInMinutes($r->completed_at) / 60, 2);
+            $downtimeHours = round($r->started_at->diffInMinutes($r->completed_at) / 60.0, 2);
 
             return [
                 $r->machine?->name ?? '—',
@@ -304,7 +304,7 @@ class ReportDataService
             ];
         })->all();
 
-        $totalDowntimeHours = $records->sum(fn ($r) => $r->started_at->diffInMinutes($r->completed_at) / 60);
+        $totalDowntimeHours = $records->sum(fn ($r) => $r->started_at->diffInMinutes($r->completed_at) / 60.0);
 
         return [
             'headers' => ['Machine', 'Reason', 'Type', 'Started', 'Completed', 'Downtime (hrs)'],

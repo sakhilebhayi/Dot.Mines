@@ -264,7 +264,7 @@ class IntegrationService
                 $integration->update([
                     'last_sync_stats' => [
                         'finished_at' => now()->toIso8601String(),
-                        'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+                        'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000.0),
                         'failed' => true,
                         'reason' => (string) ($machines['error'] ?? 'Failed to fetch machines'),
                     ],
@@ -288,7 +288,7 @@ class IntegrationService
                 'last_sync_at' => now(),
                 'last_sync_stats' => [
                     'finished_at' => now()->toIso8601String(),
-                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000.0),
                     'machines_received' => count($machines['machines'] ?? []),
                     'machines_synced' => (int) ($result['count'] ?? 0),
                     'production_records_total' => $productionRecordsAfter,
@@ -307,7 +307,7 @@ class IntegrationService
             $integration->update([
                 'last_sync_stats' => [
                     'finished_at' => now()->toIso8601String(),
-                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000.0),
                     'failed' => true,
                 ],
             ]);

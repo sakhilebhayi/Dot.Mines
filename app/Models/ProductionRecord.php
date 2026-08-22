@@ -121,7 +121,7 @@ class ProductionRecord extends Model
             return 0;
         }
 
-        return (((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100;
+        return (((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100.0;
     }
 
     protected function getIsAboveTargetAttribute(): bool

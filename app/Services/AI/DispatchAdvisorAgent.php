@@ -32,7 +32,7 @@ class DispatchAdvisorAgent
     private const DWELL_HISTORY_DAYS = 7;
 
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     public function analyze(Team $team): array
     {

@@ -319,7 +319,7 @@ class Machine extends Model
     {
         return $this->hasOne(MachineMetric::class)->ofMany(
             ['created_at' => 'max', 'id' => 'max'],
-            fn ($query) => $query->whereNotNull('operating_hours')
+            fn ($query): mixed => $query->whereNotNull('operating_hours')
         );
     }
 

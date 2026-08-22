@@ -11,7 +11,7 @@ use App\Models\Team;
 class AnomalyDetectorAgent
 {
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     public function analyze(Team $team): array
     {

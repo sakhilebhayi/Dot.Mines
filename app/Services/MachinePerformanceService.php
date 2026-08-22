@@ -49,7 +49,7 @@ class MachinePerformanceService
      * telemetry or production data in the trend window. Machines with no
      * data at all are excluded rather than shown with invented zeroes.
      *
-     * @return list<array<string, mixed>>
+     * @return list<array{machine_id: int, machine_name: string, machine_type: string|null, manufacturer: string|null, status: string, period: string, engine_hours_lifetime: float|null, fuel_level: float|null, engine_running: mixed, operating_hours_today: float|null, idle_hours_today: float|null, utilisation_today: float|null, fuel_lph_today: float|null, loads_today: int, cycles_today: int, tonnes_today: float, avg_payload_tonnes: float|null, avg_cycle_seconds: float|null, utilisation_trend: string|null, loads_trend: string|null}>
      */
     public function dailyPerformanceForTeam(int $teamId): array
     {
@@ -114,7 +114,7 @@ class MachinePerformanceService
                 // Lifetime / latest-state values (labelled as such in the UI).
                 'engine_hours_lifetime' => $this->latestValue($metrics, fn (MachineMetric $m) => $m->operating_hours),
                 'fuel_level' => $this->latestValue($metrics, fn (MachineMetric $m) => $m->fuel_level),
-                'engine_running' => $this->latestValue($metrics, fn (MachineMetric $m) => data_get($m->raw_data, 'engine_running')),
+                'engine_running' => $this->latestValue($metrics, fn (MachineMetric $m): mixed => data_get($m->raw_data, 'engine_running')),
 
                 // Today's derived values (null = insufficient data).
                 'operating_hours_today' => $todayTelemetry['operating_hours'],
@@ -128,7 +128,7 @@ class MachinePerformanceService
                     ? $todayProduction['tonnes'] / $todayProduction['loads']
                     : null,
                 'avg_cycle_seconds' => $workingHours !== null && $workingHours > 0 && $todayProduction['cycles'] > 0
-                    ? ($workingHours * 3600) / $todayProduction['cycles']
+                    ? ($workingHours * 3600.0) / $todayProduction['cycles']
                     : null,
 
                 // Trends against the prior days in the window (null =
@@ -159,7 +159,7 @@ class MachinePerformanceService
         return [
             'operating_hours' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => $m->operating_hours, boundedByElapsedTime: true),
             'idle_hours' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => $m->idle_hours, boundedByElapsedTime: true),
-            'fuel_consumed' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => data_get($m->raw_data, 'fuel_consumed_cumulative')),
+            'fuel_consumed' => $this->dayDelta($dayMetrics, fn (MachineMetric $m): mixed => data_get($m->raw_data, 'fuel_consumed_cumulative')),
         ];
     }
 
@@ -232,7 +232,7 @@ class MachinePerformanceService
             return null;
         }
 
-        return max(0.0, min(100.0, (($operatingHours - $idleHours) / $operatingHours) * 100));
+        return max(0.0, min(100.0, (($operatingHours - $idleHours) / $operatingHours) * 100.0));
     }
 
     private function fuelPerHour(?float $fuelConsumed, ?float $operatingHours): ?float

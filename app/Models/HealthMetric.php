@@ -132,7 +132,7 @@ class HealthMetric extends Model
             return null;
         }
 
-        $normalMid = ($this->normal_min + $this->normal_max) / 2;
+        $normalMid = ($this->normal_min + $this->normal_max) / 2.0;
 
         return $this->value - $normalMid;
     }
@@ -153,6 +153,6 @@ class HealthMetric extends Model
 
         $deviation = abs($this->deviation);
 
-        return ($deviation / $normalRange) * 100;
+        return ($deviation / $normalRange) * 100.0;
     }
 }

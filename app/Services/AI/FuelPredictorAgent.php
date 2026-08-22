@@ -14,7 +14,7 @@ use App\Models\Team;
 class FuelPredictorAgent
 {
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     public function analyze(Team $team): array
     {
@@ -41,7 +41,7 @@ class FuelPredictorAgent
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     protected function analyzeFuelConsumption(Team $team): array
     {
@@ -67,9 +67,9 @@ class FuelPredictorAgent
                 continue;
             }
 
-            $totalLiters = $machineTransactions->sum('quantity_liters');
-            $totalCost = $machineTransactions->sum('total_cost');
-            $avgDailyConsumption = $totalLiters / 30;
+            $totalLiters = (float) $machineTransactions->sum('quantity_liters');
+            $totalCost = (float) $machineTransactions->sum('total_cost');
+            $avgDailyConsumption = $totalLiters / 30.0;
             // This machine's own actual price paid over the period, rather
             // than a hardcoded guess -- falls back to the team's broader
             // recent average only if this machine has no cost data at all.
@@ -77,11 +77,11 @@ class FuelPredictorAgent
 
             // Check for high consumption
             $expectedConsumption = $this->getExpectedConsumption($machine->machine_type);
-            $deviationPercent = (($avgDailyConsumption - $expectedConsumption) / $expectedConsumption) * 100;
+            $deviationPercent = (($avgDailyConsumption - $expectedConsumption) / $expectedConsumption) * 100.0;
 
             if ($deviationPercent > 20) {
                 $monthlyCostImpact = $pricePerLiter !== null
-                    ? ($avgDailyConsumption - $expectedConsumption) * 30 * $pricePerLiter
+                    ? ($avgDailyConsumption - $expectedConsumption) * 30.0 * $pricePerLiter
                     : null;
 
                 $recommendations[] = [
@@ -152,7 +152,7 @@ class FuelPredictorAgent
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>}
      */
     protected function predictFuelNeeds(Team $team): array
     {
@@ -164,9 +164,9 @@ class FuelPredictorAgent
             ->where('transaction_type', 'dispensing')
             ->sum('quantity_liters');
 
-        $avgDailyConsumption = $last30Days / 30;
-        $predicted7Days = $avgDailyConsumption * 7;
-        $predicted30Days = $avgDailyConsumption * 30;
+        $avgDailyConsumption = $last30Days / 30.0;
+        $predicted7Days = $avgDailyConsumption * 7.0;
+        $predicted30Days = $avgDailyConsumption * 30.0;
 
         // Check current inventory
         $currentInventory = FuelTank::where('team_id', $team->id)
@@ -235,7 +235,7 @@ class FuelPredictorAgent
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>}
      */
     protected function analyzeTankLevels(Team $team): array
     {

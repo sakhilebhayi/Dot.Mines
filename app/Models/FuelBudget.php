@@ -73,7 +73,7 @@ class FuelBudget extends Model
             return 0;
         }
 
-        return round(($this->actual_spent / $this->budgeted_amount) * 100, 2);
+        return round(($this->actual_spent / $this->budgeted_amount) * 100.0, 2);
     }
 
     /**
@@ -93,7 +93,7 @@ class FuelBudget extends Model
             return null;
         }
 
-        return round(($this->actual_liters / $this->budgeted_liters) * 100, 2);
+        return round(($this->actual_liters / $this->budgeted_liters) * 100.0, 2);
     }
 
     /**

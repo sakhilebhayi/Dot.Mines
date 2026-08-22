@@ -187,7 +187,7 @@ class FleetOptimizerAgent
         $idleCount = (int) ($statusCounts['idle'] ?? 0);
 
         if ($totalMachines > 0 && $idleCount > $totalMachines * self::IDLE_FLEET_RATIO) {
-            $idlePercentage = ($idleCount / $totalMachines) * 100;
+            $idlePercentage = ($idleCount / $totalMachines) * 100.0;
 
             $recommendations[] = [
                 'category' => 'fleet',

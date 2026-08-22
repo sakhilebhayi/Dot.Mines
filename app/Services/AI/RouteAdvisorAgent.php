@@ -19,7 +19,7 @@ class RouteAdvisorAgent
     ) {}
 
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     public function analyze(Team $team): array
     {
@@ -60,7 +60,7 @@ class RouteAdvisorAgent
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{direct_distance: float, actual_distance: float, detour_percent: float, improvement_possible: float, time_savings: float, fuel_savings: float}
      */
     protected function analyzeRouteEfficiency(Route $route): array
     {
@@ -72,9 +72,9 @@ class RouteAdvisorAgent
         );
 
         $actualDistance = $route->total_distance;
-        $detourPercent = (($actualDistance - $directDistance) / $directDistance) * 100;
+        $detourPercent = (($actualDistance - $directDistance) / $directDistance) * 100.0;
 
-        $improvementPossible = max(0, $detourPercent - 10); // 10% detour is acceptable
+        $improvementPossible = max(0, $detourPercent - 10.0); // 10% detour is acceptable
         $timeSavings = $improvementPossible * 0.5; // minutes
         $fuelSavings = $improvementPossible * 0.3; // liters
 

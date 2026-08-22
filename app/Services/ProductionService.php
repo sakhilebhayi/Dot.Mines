@@ -22,8 +22,8 @@ class ProductionService
             ->betweenDates($startDate, $endDate)
             ->get();
 
-        $totalProduced = $records->sum('quantity_produced');
-        $totalTarget = $records->sum('target_quantity');
+        $totalProduced = (float) $records->sum('quantity_produced');
+        $totalTarget = (float) $records->sum('target_quantity');
         $recordCount = $records->count();
         $avgProduction = $recordCount > 0 ? $totalProduced / $recordCount : 0;
         $completedCount = $records->where('status', 'completed')->count();
@@ -33,7 +33,7 @@ class ProductionService
             'total_target' => $totalTarget,
             'total_loads' => $records->sum(fn (ProductionRecord $record) => $this->recordLoads($record)),
             'total_cycles' => $records->sum(fn (ProductionRecord $record) => $this->recordCycles($record)),
-            'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100 : 0,
+            'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100.0 : 0,
             'average_daily_production' => $avgProduction,
             'total_records' => $recordCount,
             'completed_records' => $completedCount,
@@ -165,15 +165,15 @@ class ProductionService
 
         return $records->groupBy('machine_id')->map(function ($machineRecords) {
             $machine = $machineRecords->first()?->machine;
-            $totalProduced = $machineRecords->sum('quantity_produced');
-            $totalTarget = $machineRecords->sum('target_quantity');
+            $totalProduced = (float) $machineRecords->sum('quantity_produced');
+            $totalTarget = (float) $machineRecords->sum('target_quantity');
 
             return [
                 'machine_id' => $machine?->id,
                 'machine_name' => $machine?->name ?? 'Unknown',
                 'total_produced' => $totalProduced,
                 'total_target' => $totalTarget,
-                'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100 : null,
+                'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100.0 : null,
                 'record_count' => $machineRecords->count(),
                 'average_per_record' => $machineRecords->count() > 0 ? $totalProduced / $machineRecords->count() : 0,
             ];

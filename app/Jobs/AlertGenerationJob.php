@@ -95,7 +95,7 @@ class AlertGenerationJob implements ShouldQueue
 
         // Check fuel level
         if ($machine->fuel_capacity && ($metrics->fuel_level !== null && $metrics->fuel_level !== 0.0)) {
-            $fuelPercentage = ($metrics->fuel_level / $machine->fuel_capacity) * 100;
+            $fuelPercentage = ($metrics->fuel_level / $machine->fuel_capacity) * 100.0;
 
             if ($fuelPercentage <= 10) {
                 $alerts[] = [

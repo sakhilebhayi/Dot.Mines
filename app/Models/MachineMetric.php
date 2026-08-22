@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\DB;
  * @property float|null $tire_pressure_rear_left
  * @property float|null $tire_pressure_rear_right
  * @property array<string, mixed>|null $raw_data
- * @property Carbon $recorded_at
+ * @property Carbon|null $recorded_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */

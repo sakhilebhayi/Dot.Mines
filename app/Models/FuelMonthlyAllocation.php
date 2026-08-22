@@ -101,7 +101,7 @@ class FuelMonthlyAllocation extends Model
             return 0;
         }
 
-        return round(($this->consumed_liters / $this->allocated_liters) * 100, 2);
+        return round(($this->consumed_liters / $this->allocated_liters) * 100.0, 2);
     }
 
     /**
@@ -113,7 +113,7 @@ class FuelMonthlyAllocation extends Model
             return 0;
         }
 
-        return round(($this->spent_zar / $this->total_budget_zar) * 100, 2);
+        return round(($this->spent_zar / $this->total_budget_zar) * 100.0, 2);
     }
 
     /**
