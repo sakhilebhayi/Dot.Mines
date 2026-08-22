@@ -22,6 +22,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Test connection to CAT VisionLink API
      */
+    #[\Override]
     public function testConnection(): bool
     {
         try {
@@ -40,6 +41,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
      * Fetch machines from CAT VisionLink API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         try {
@@ -194,6 +196,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
      */
     /** @param array<string, mixed> $data
      * @return array<string, mixed> */
+    #[\Override]
     protected function parseMachineData(array $data): array
     {
         return [
@@ -220,6 +223,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     protected function parseLocation(array $data): array
     {
         return [
@@ -254,9 +258,14 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Parse alert data from CAT format
      */
+    #[\Override]
     protected function parseAlert(array $data): array
     {
         return [
+            // Missing statuses default to 'active', never the legacy 'new'
+            // (not in the alerts.status enum) -- same invariant as the Base
+            // normaliser, pinned by ManufacturerAlertsShapeTest.
+            'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? $data['alert_id'] ?? null,
             'type' => $this->mapAlertType($data['type'] ?? $data['code'] ?? 'unknown'),
             'priority' => $this->mapAlertPriority($data['severity'] ?? $data['priority'] ?? 'medium'),
@@ -270,6 +279,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Map CAT status to standard status
      */
+    #[\Override]
     protected function parseStatus(string $status): string
     {
         $statusMap = [
@@ -291,6 +301,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
      * Fetch machine details from CAT API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
@@ -305,6 +316,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Fetch machine location
      */
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
@@ -319,6 +331,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Fetch machine metrics
      */
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
@@ -336,6 +349,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     /**
      * Fetch machine alerts
      */
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
@@ -348,29 +362,9 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
     }
 
     /**
-     * Fetch comprehensive machine data
-     */
-    public function fetchMachineData(string $machineId): array
-    {
-        return [
-            'details' => $this->fetchMachineDetails($machineId),
-            'location' => $this->fetchMachineLocation($machineId),
-            'metrics' => $this->fetchMachineMetrics($machineId),
-            'alerts' => $this->fetchMachineAlerts($machineId),
-        ];
-    }
-
-    /**
-     * Get the manufacturer name
-     */
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
-    /**
      * Get API error if any occurred
      */
+    #[\Override]
     public function getLastError(): ?string
     {
         return $this->lastError;

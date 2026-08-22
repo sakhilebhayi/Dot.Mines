@@ -94,6 +94,7 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -106,7 +107,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get roles for current team
      */
-    /** @return BelongsToMany<Role, $this> */
+    /** @return BelongsToMany<Role,$this> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user');
@@ -315,7 +316,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->roles()->detach($role->id);
     }
 
-    /** @return HasMany<Team, $this> */
+    /** @return HasMany<Team,$this> */
     public function ownedTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'user_id');
@@ -329,7 +330,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * got a hard null instead of their own team. Restored to match the
      * trait's real behavior.
      */
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function currentTeam(): BelongsTo
     {
         if (is_null($this->current_team_id) && $this->id) {

@@ -55,43 +55,43 @@ class AIRecommendation extends Model
         'implemented_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<AIAgent, $this> */
+    /** @return BelongsTo<AIAgent,$this> */
     public function aiAgent(): BelongsTo
     {
         return $this->belongsTo(AIAgent::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class, 'related_machine_id');
     }
 
-    /** @return BelongsTo<Route, $this> */
+    /** @return BelongsTo<Route,$this> */
     public function route(): BelongsTo
     {
         return $this->belongsTo(Route::class, 'related_route_id');
     }
 
-    /** @return BelongsTo<MineArea, $this> */
+    /** @return BelongsTo<MineArea,$this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class, 'related_mine_area_id');
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function implementer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'implemented_by');

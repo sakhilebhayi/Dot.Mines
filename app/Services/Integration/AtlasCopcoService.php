@@ -8,6 +8,7 @@ class AtlasCopcoService extends BaseManufacturerService implements ManufacturerS
 {
     protected string $manufacturer = 'atlas_copco';
 
+    #[\Override]
     public function testConnection(): bool
     {
         // No real Atlas Copco API integration has been built yet -- this
@@ -20,6 +21,7 @@ class AtlasCopcoService extends BaseManufacturerService implements ManufacturerS
     }
 
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         // Implement Atlas Copco API fetch logic
@@ -27,41 +29,35 @@ class AtlasCopcoService extends BaseManufacturerService implements ManufacturerS
     }
 
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement Atlas Copco API fetch machine details
         return [];
     }
 
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         // Implement Atlas Copco API fetch machine location
         return null;
     }
 
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         // Implement Atlas Copco API fetch machine metrics
         return [];
     }
 
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         // Implement Atlas Copco API fetch machine alerts
         return [];
     }
 
-    public function fetchMachineData(string $machineId): array
-    {
-        // Implement Atlas Copco API fetch comprehensive machine data
-        return [];
-    }
-
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
+    #[\Override]
     public function getLastError(): ?string
     {
         // Return last error if any

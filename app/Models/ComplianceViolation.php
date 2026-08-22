@@ -58,7 +58,7 @@ class ComplianceViolation extends Model
     /**
      * Get the team that owns the violation.
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -68,7 +68,7 @@ class ComplianceViolation extends Model
     /**
      * Get the user who resolved the violation.
      *
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<User,$this>
      */
     public function resolver(): BelongsTo
     {

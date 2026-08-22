@@ -21,6 +21,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Test connection to Volvo CareTrack API
      */
+    #[\Override]
     public function testConnection(): bool
     {
         try {
@@ -39,6 +40,7 @@ class VolvoService extends BaseManufacturerService
      * Fetch machines from Volvo CareTrack API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         try {
@@ -200,6 +202,7 @@ class VolvoService extends BaseManufacturerService
      */
     /** @param array<string, mixed> $data
      * @return array<string, mixed> */
+    #[\Override]
     protected function parseMachineData(array $data): array
     {
         return [
@@ -226,6 +229,7 @@ class VolvoService extends BaseManufacturerService
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     protected function parseLocation(array $data): array
     {
         return [
@@ -260,9 +264,14 @@ class VolvoService extends BaseManufacturerService
     /**
      * Parse alert/fault data from Volvo format
      */
+    #[\Override]
     protected function parseAlert(array $data): array
     {
         return [
+            // Missing statuses default to 'active', never the legacy 'new'
+            // (not in the alerts.status enum) -- same invariant as the Base
+            // normaliser, pinned by ManufacturerAlertsShapeTest.
+            'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? $data['fault_id'] ?? null,
             'type' => $this->mapAlertType($data['fault_code'] ?? $data['type'] ?? 'unknown'),
             'priority' => $this->mapAlertPriority($data['priority'] ?? $data['severity'] ?? 'medium'),
@@ -276,6 +285,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Map Volvo equipment status to standard status
      */
+    #[\Override]
     protected function parseStatus(string $status): string
     {
         $statusMap = [
@@ -299,6 +309,7 @@ class VolvoService extends BaseManufacturerService
      * Fetch machine details from Volvo API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
@@ -313,6 +324,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Fetch machine location
      */
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
@@ -327,6 +339,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Fetch machine metrics
      */
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
@@ -344,6 +357,7 @@ class VolvoService extends BaseManufacturerService
     /**
      * Fetch machine alerts
      */
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
@@ -356,29 +370,9 @@ class VolvoService extends BaseManufacturerService
     }
 
     /**
-     * Fetch comprehensive machine data
-     */
-    public function fetchMachineData(string $machineId): array
-    {
-        return [
-            'details' => $this->fetchMachineDetails($machineId),
-            'location' => $this->fetchMachineLocation($machineId),
-            'metrics' => $this->fetchMachineMetrics($machineId),
-            'alerts' => $this->fetchMachineAlerts($machineId),
-        ];
-    }
-
-    /**
-     * Get the manufacturer name
-     */
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
-    /**
      * Get API error if any occurred
      */
+    #[\Override]
     public function getLastError(): ?string
     {
         return $this->lastError;

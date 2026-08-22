@@ -78,7 +78,7 @@ class SubscriptionPlan extends Model
     /**
      * Get subscriptions for this plan.
      *
-     * @return HasMany<Subscription, $this>
+     * @return HasMany<Subscription,$this>
      */
     public function subscriptions(): HasMany
     {
@@ -88,7 +88,7 @@ class SubscriptionPlan extends Model
     /**
      * Calculate yearly savings percentage
      */
-    public function getYearlySavingsPercentageAttribute(): int
+    protected function getYearlySavingsPercentageAttribute(): int
     {
         if (! $this->yearly_price || $this->price <= 0) {
             return 0;
@@ -103,7 +103,7 @@ class SubscriptionPlan extends Model
     /**
      * Get monthly price for display
      */
-    public function getMonthlyPriceAttribute(): string
+    protected function getMonthlyPriceAttribute(): string
     {
         return number_format($this->price, 2);
     }
@@ -111,7 +111,7 @@ class SubscriptionPlan extends Model
     /**
      * Get yearly price for display
      */
-    public function getYearlyPriceDisplayAttribute(): string
+    protected function getYearlyPriceDisplayAttribute(): string
     {
         return $this->yearly_price ? number_format($this->yearly_price, 2) : '0.00';
     }

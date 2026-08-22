@@ -57,25 +57,25 @@ class AIPredictiveAlert extends Model
         'was_accurate' => 'boolean',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<AIAgent, $this> */
+    /** @return BelongsTo<AIAgent,$this> */
     public function aiAgent(): BelongsTo
     {
         return $this->belongsTo(AIAgent::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class, 'related_machine_id');
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function acknowledger(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');

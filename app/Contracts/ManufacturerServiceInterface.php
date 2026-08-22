@@ -47,13 +47,6 @@ interface ManufacturerServiceInterface
     public function fetchMachineAlerts(string $machineId): array;
 
     /**
-     * Fetch all data for a machine (comprehensive sync)
-     *
-     * @return array<mixed>
-     */
-    public function fetchMachineData(string $machineId): array;
-
-    /**
      * Fetch cumulative production counter readings (load counts, payload
      * totals) for a machine over a time window. Providers without a real
      * production data source keep BaseManufacturerService's default, which
@@ -63,11 +56,6 @@ interface ManufacturerServiceInterface
      * @return array{success: bool, load_count_readings: list<array{timestamp: string, value: float, units: ?string}>, payload_readings: list<array{timestamp: string, value: float, units: ?string}>}
      */
     public function fetchMachineProduction(string $machineId, Carbon $start, Carbon $end): array;
-
-    /**
-     * Get the manufacturer name
-     */
-    public function getManufacturer(): string;
 
     /**
      * Get API error if any occurred

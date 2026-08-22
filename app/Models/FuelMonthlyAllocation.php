@@ -62,13 +62,13 @@ class FuelMonthlyAllocation extends Model
         'updated_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return HasMany<FuelTransaction, $this> */
+    /** @return HasMany<FuelTransaction,$this> */
     public function transactions(): HasMany
     {
         return $this->hasMany(FuelTransaction::class, 'monthly_allocation_id');
@@ -77,7 +77,7 @@ class FuelMonthlyAllocation extends Model
     /**
      * Get the period name (e.g., "January 2026")
      */
-    public function getPeriodNameAttribute(): string
+    protected function getPeriodNameAttribute(): string
     {
         return date('F Y', mktime(0, 0, 0, $this->month, 1, $this->year) ?: null);
     }
@@ -85,7 +85,7 @@ class FuelMonthlyAllocation extends Model
     /**
      * Get the mine area associated with this allocation.
      *
-     * @return BelongsTo<MineArea, $this>
+     * @return BelongsTo<MineArea,$this>
      */
     public function mineArea(): BelongsTo
     {
@@ -95,7 +95,7 @@ class FuelMonthlyAllocation extends Model
     /**
      * Get consumption percentage
      */
-    public function getConsumptionPercentageAttribute(): float
+    protected function getConsumptionPercentageAttribute(): float
     {
         if ($this->allocated_liters == 0) {
             return 0;
@@ -107,7 +107,7 @@ class FuelMonthlyAllocation extends Model
     /**
      * Get budget spent percentage
      */
-    public function getBudgetSpentPercentageAttribute(): float
+    protected function getBudgetSpentPercentageAttribute(): float
     {
         if ($this->total_budget_zar == 0) {
             return 0;

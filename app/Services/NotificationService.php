@@ -163,34 +163,6 @@ class NotificationService
     }
 
     /**
-     * Notify all users with any of the given roles in the team.
-     *
-     * @param  array<string>  $roles
-     * @param  array<string, mixed>  $data
-     */
-    public static function notifyRoles(
-        int $teamId,
-        array $roles,
-        string $type,
-        string $title,
-        string $message,
-        string $alertLevel = self::LEVEL_INFO,
-        array $data = [],
-        ?string $actionUrl = null,
-    ): ?Notification {
-        return static::dispatch([
-            'team_id' => $teamId,
-            'type' => $type,
-            'title' => $title,
-            'message' => $message,
-            'alert_level' => $alertLevel,
-            'data' => $data,
-            'action_url' => $actionUrl,
-            'notify_roles' => $roles,
-        ]);
-    }
-
-    /**
      * Resolve the list of user IDs to notify from payload.
      *
      * @param  array<string, mixed>  $payload

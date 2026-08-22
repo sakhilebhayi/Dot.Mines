@@ -108,6 +108,7 @@ class Machine extends Model
     /**
      * The "booted" method of the model.
      */
+    #[\Override]
     protected static function booted(): void
     {
         // Invalidate cache when machine is created, updated, or deleted
@@ -125,7 +126,7 @@ class Machine extends Model
     /**
      * Get the team that owns this machine
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -135,7 +136,7 @@ class Machine extends Model
     /**
      * Get the integration this machine belongs to
      *
-     * @return BelongsTo<Integration, $this>
+     * @return BelongsTo<Integration,$this>
      */
     public function integration(): BelongsTo
     {
@@ -145,7 +146,7 @@ class Machine extends Model
     /**
      * Get all metrics for this machine
      *
-     * @return HasMany<MachineMetric, $this>
+     * @return HasMany<MachineMetric,$this>
      */
     public function metrics(): HasMany
     {
@@ -155,7 +156,7 @@ class Machine extends Model
     /**
      * Get all alerts for this machine
      *
-     * @return HasMany<Alert, $this>
+     * @return HasMany<Alert,$this>
      */
     public function alerts(): HasMany
     {
@@ -165,7 +166,7 @@ class Machine extends Model
     /**
      * Get all geofence entries for this machine
      *
-     * @return HasMany<GeofenceEntry, $this>
+     * @return HasMany<GeofenceEntry,$this>
      */
     public function geofenceEntries(): HasMany
     {
@@ -175,7 +176,7 @@ class Machine extends Model
     /**
      * Get the mine area this machine is assigned to
      *
-     * @return BelongsTo<MineArea, $this>
+     * @return BelongsTo<MineArea,$this>
      */
     public function mineArea(): BelongsTo
     {
@@ -185,7 +186,7 @@ class Machine extends Model
     /**
      * Get assignment history for this machine
      *
-     * @return HasMany<MachineAreaAssignment, $this>
+     * @return HasMany<MachineAreaAssignment,$this>
      */
     public function areaAssignments(): HasMany
     {
@@ -195,7 +196,7 @@ class Machine extends Model
     /**
      * Get the excavator this machine is assigned to
      *
-     * @return BelongsTo<Machine, $this>
+     * @return BelongsTo<Machine,$this>
      */
     public function excavator(): BelongsTo
     {
@@ -205,7 +206,7 @@ class Machine extends Model
     /**
      * Get all machines assigned to this excavator
      *
-     * @return HasMany<Machine, $this>
+     * @return HasMany<Machine,$this>
      */
     public function assignedMachines(): HasMany
     {
@@ -215,7 +216,7 @@ class Machine extends Model
     /**
      * Get all maintenance records for this machine
      *
-     * @return HasMany<MaintenanceRecord, $this>
+     * @return HasMany<MaintenanceRecord,$this>
      */
     public function maintenanceRecords(): HasMany
     {
@@ -225,7 +226,7 @@ class Machine extends Model
     /**
      * Get all production records for this machine
      *
-     * @return HasMany<ProductionRecord, $this>
+     * @return HasMany<ProductionRecord,$this>
      */
     public function productionRecords(): HasMany
     {
@@ -235,7 +236,7 @@ class Machine extends Model
     /**
      * Get all production loss events for this machine
      *
-     * @return HasMany<ProductionLossEvent, $this>
+     * @return HasMany<ProductionLossEvent,$this>
      */
     public function lossEvents(): HasMany
     {
@@ -245,7 +246,7 @@ class Machine extends Model
     /**
      * Get the health status for this machine
      *
-     * @return HasOne<MachineHealthStatus, $this>
+     * @return HasOne<MachineHealthStatus,$this>
      */
     public function healthStatus(): HasOne
     {
@@ -312,7 +313,7 @@ class Machine extends Model
      * fuel-only -- the fleet card wants the latest AVAILABLE reading, as
      * an eager-loadable relationship so listing pages avoid an N+1.
      *
-     * @return HasOne<MachineMetric, $this>
+     * @return HasOne<MachineMetric,$this>
      */
     public function latestEngineHoursMetric(): HasOne
     {
@@ -336,7 +337,7 @@ class Machine extends Model
      * @psalm-suppress MixedReturnStatement
      * @psalm-suppress MixedMethodCall
      *
-     * @return HasOne<MachineMetric, $this>
+     * @return HasOne<MachineMetric,$this>
      */
     public function latestMetric(): HasOne
     {

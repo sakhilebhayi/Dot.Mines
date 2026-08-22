@@ -21,6 +21,7 @@ class AIOptimizationService
      */
     protected array $agents = [];
 
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(
         protected FleetOptimizerAgent $fleetOptimizer,
         protected RouteAdvisorAgent $routeAdvisor,
@@ -133,7 +134,10 @@ class AIOptimizationService
     /**
      * Get recommendations for a specific category
      *
-     * @return Collection<int, mixed>
+     * @return Collection<int, AIRecommendation>
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- exercised only by its test today; kept as covered public API
+     * @psalm-suppress InvalidReturnType, InvalidReturnStatement -- psalm's invariant Collection templates cannot express the `AIRecommendation&static` intersection its Laravel plugin infers from Model::create(); the declared type is what phpstan verifies
      */
     public function getRecommendationsForCategory(Team $team, string $category, ?User $user = null): Collection
     {

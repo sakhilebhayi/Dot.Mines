@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
  */
 class MachineProvisioningService
 {
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(private MachineEntitlementService $entitlements) {}
 
     /**

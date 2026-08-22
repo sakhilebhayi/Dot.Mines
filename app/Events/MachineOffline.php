@@ -46,6 +46,7 @@ class MachineOffline implements ShouldBroadcast
      *
      * @return array<int, Channel>
      */
+    #[\Override]
     public function broadcastOn(): array
     {
         return [

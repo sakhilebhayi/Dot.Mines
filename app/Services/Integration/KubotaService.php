@@ -15,6 +15,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
 {
     protected string $manufacturer = 'kubota';
 
+    #[\Override]
     public function testConnection(): bool
     {
         try {
@@ -31,6 +32,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
     }
 
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         try {
@@ -143,6 +145,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
         }
     }
 
+    #[\Override]
     public function getLastError(): ?string
     {
         return $this->lastError;
@@ -152,6 +155,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
      * Fetch machine details from Kubota API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
@@ -166,6 +170,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
     /**
      * Fetch machine location
      */
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
@@ -180,6 +185,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
     /**
      * Fetch machine metrics
      */
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
@@ -194,6 +200,7 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
     /**
      * Fetch machine alerts
      */
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
@@ -203,26 +210,5 @@ class KubotaService extends BaseManufacturerService implements ManufacturerServi
         } catch (Exception $e) {
             return [];
         }
-    }
-
-    /**
-     * Fetch comprehensive machine data
-     */
-    public function fetchMachineData(string $machineId): array
-    {
-        return [
-            'details' => $this->fetchMachineDetails($machineId),
-            'location' => $this->fetchMachineLocation($machineId),
-            'metrics' => $this->fetchMachineMetrics($machineId),
-            'alerts' => $this->fetchMachineAlerts($machineId),
-        ];
-    }
-
-    /**
-     * Get the manufacturer name
-     */
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
     }
 }

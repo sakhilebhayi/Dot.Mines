@@ -27,6 +27,7 @@ class ProductionReconciliationService
      */
     private const LOAD_SKEW_TOLERANCE = 5;
 
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(
         private TelemetryProductionCalculator $calculator,
         private OperationalSnapshotService $snapshots,

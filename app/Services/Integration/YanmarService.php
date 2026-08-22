@@ -8,6 +8,7 @@ class YanmarService extends BaseManufacturerService implements ManufacturerServi
 {
     protected string $manufacturer = 'yanmar';
 
+    #[\Override]
     public function testConnection(): bool
     {
         // No real Yanmar API integration has been built yet -- this
@@ -20,6 +21,7 @@ class YanmarService extends BaseManufacturerService implements ManufacturerServi
     }
 
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         // Implement Yanmar API fetch logic
@@ -27,41 +29,35 @@ class YanmarService extends BaseManufacturerService implements ManufacturerServi
     }
 
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Implement Yanmar API fetch machine details
         return [];
     }
 
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         // Implement Yanmar API fetch machine location
         return null;
     }
 
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         // Implement Yanmar API fetch machine metrics
         return [];
     }
 
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         // Implement Yanmar API fetch machine alerts
         return [];
     }
 
-    public function fetchMachineData(string $machineId): array
-    {
-        // Implement Yanmar API fetch comprehensive machine data
-        return [];
-    }
-
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
+    #[\Override]
     public function getLastError(): ?string
     {
         // Return last error if any

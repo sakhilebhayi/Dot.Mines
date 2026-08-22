@@ -61,6 +61,7 @@ class Team extends JetstreamTeam
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -71,7 +72,7 @@ class Team extends JetstreamTeam
     /**
      * Get the roles for this team.
      */
-    /** @return HasMany<Role, $this> */
+    /** @return HasMany<Role,$this> */
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
@@ -80,8 +81,9 @@ class Team extends JetstreamTeam
     /**
      * Get the owner of the team.
      *
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<User,$this>
      */
+    #[\Override]
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -90,7 +92,7 @@ class Team extends JetstreamTeam
     /**
      * Get the permissions for this team.
      */
-    /** @return HasMany<Permission, $this> */
+    /** @return HasMany<Permission,$this> */
     public function permissions(): HasMany
     {
         return $this->hasMany(Permission::class);
@@ -99,7 +101,7 @@ class Team extends JetstreamTeam
     /**
      * Get the machines for this team.
      */
-    /** @return HasMany<Machine, $this> */
+    /** @return HasMany<Machine,$this> */
     public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
@@ -108,7 +110,7 @@ class Team extends JetstreamTeam
     /**
      * Get the geofences for this team.
      */
-    /** @return HasMany<Geofence, $this> */
+    /** @return HasMany<Geofence,$this> */
     public function geofences(): HasMany
     {
         return $this->hasMany(Geofence::class);
@@ -117,7 +119,7 @@ class Team extends JetstreamTeam
     /**
      * Get the alerts for this team.
      */
-    /** @return HasMany<Alert, $this> */
+    /** @return HasMany<Alert,$this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);
@@ -126,7 +128,7 @@ class Team extends JetstreamTeam
     /**
      * Get the integrations for this team.
      */
-    /** @return HasMany<Integration, $this> */
+    /** @return HasMany<Integration,$this> */
     public function integrations(): HasMany
     {
         return $this->hasMany(Integration::class);

@@ -72,25 +72,25 @@ class AIAgent extends Model
 
     const TYPE_DISPATCH_ADVISOR = 'dispatch_advisor';
 
-    /** @return HasMany<AIRecommendation, $this> */
+    /** @return HasMany<AIRecommendation,$this> */
     public function recommendations(): HasMany
     {
         return $this->hasMany(AIRecommendation::class);
     }
 
-    /** @return HasMany<AIAnalysisSession, $this> */
+    /** @return HasMany<AIAnalysisSession,$this> */
     public function analysisSessions(): HasMany
     {
         return $this->hasMany(AIAnalysisSession::class);
     }
 
-    /** @return HasMany<AILearningData, $this> */
+    /** @return HasMany<AILearningData,$this> */
     public function learningData(): HasMany
     {
         return $this->hasMany(AILearningData::class);
     }
 
-    /** @return HasMany<AIPredictiveAlert, $this> */
+    /** @return HasMany<AIPredictiveAlert,$this> */
     public function predictiveAlerts(): HasMany
     {
         return $this->hasMany(AIPredictiveAlert::class);

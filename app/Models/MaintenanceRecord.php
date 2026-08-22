@@ -115,6 +115,7 @@ class MaintenanceRecord extends Model
         'updated_at' => 'datetime',
     ];
 
+    #[\Override]
     protected static function boot()
     {
         parent::boot();
@@ -126,31 +127,31 @@ class MaintenanceRecord extends Model
         });
     }
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return BelongsTo<MaintenanceSchedule, $this> */
+    /** @return BelongsTo<MaintenanceSchedule,$this> */
     public function maintenanceSchedule(): BelongsTo
     {
         return $this->belongsTo(MaintenanceSchedule::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function completedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'completed_by');
@@ -159,7 +160,7 @@ class MaintenanceRecord extends Model
     /**
      * Get duration in hours
      */
-    public function getDurationAttribute(): ?float
+    protected function getDurationAttribute(): ?float
     {
         if (! $this->started_at || ! $this->completed_at) {
             return null;

@@ -56,7 +56,7 @@ class Waypoint extends Model
     /**
      * Get the route that owns the waypoint.
      *
-     * @return BelongsTo<Route, $this>
+     * @return BelongsTo<Route,$this>
      */
     public function route(): BelongsTo
     {
@@ -66,7 +66,7 @@ class Waypoint extends Model
     /**
      * Get icon for waypoint type
      */
-    public function getIconAttribute(): string
+    protected function getIconAttribute(): string
     {
         return match ($this->waypoint_type) {
             'fuel_station' => '⛽',
@@ -80,7 +80,7 @@ class Waypoint extends Model
     /**
      * Get color for waypoint type
      */
-    public function getColorAttribute(): string
+    protected function getColorAttribute(): string
     {
         return match ($this->waypoint_type) {
             'fuel_station' => 'yellow',

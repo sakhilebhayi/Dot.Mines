@@ -38,7 +38,7 @@ class SensorReading extends Model
         'timestamp' => 'datetime',
     ];
 
-    /** @return BelongsTo<IoTSensor, $this> */
+    /** @return BelongsTo<IoTSensor,$this> */
     public function sensor(): BelongsTo
     {
         return $this->belongsTo(IoTSensor::class);

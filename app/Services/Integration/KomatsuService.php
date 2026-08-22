@@ -21,6 +21,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Test connection to Komatsu KOMTRAX API
      */
+    #[\Override]
     public function testConnection(): bool
     {
         try {
@@ -39,6 +40,7 @@ class KomatsuService extends BaseManufacturerService
      * Fetch machines from Komatsu KOMTRAX API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachines(): array
     {
         try {
@@ -196,6 +198,7 @@ class KomatsuService extends BaseManufacturerService
      */
     /** @param array<string, mixed> $data
      * @return array<string, mixed> */
+    #[\Override]
     protected function parseMachineData(array $data): array
     {
         return [
@@ -222,6 +225,7 @@ class KomatsuService extends BaseManufacturerService
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     protected function parseLocation(array $data): array
     {
         return [
@@ -234,31 +238,16 @@ class KomatsuService extends BaseManufacturerService
     }
 
     /**
-     * Parse performance/metric data from Komatsu format
-     *
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    protected function parseMetric(array $data): array
-    {
-        return [
-            'type' => $data['metric'] ?? $data['parameter'] ?? 'unknown',
-            'value' => $data['value'] ?? $data['reading'] ?? 0,
-            'unit' => $data['unit'] ?? '',
-            'timestamp' => $data['recorded_at'] ?? $data['timestamp'] ?? now()->toIso8601String(),
-            'tags' => [
-                'category' => $data['category'] ?? null,
-                'source' => $data['source'] ?? null,
-            ],
-        ];
-    }
-
-    /**
      * Parse alert/notification data from Komatsu format
      */
+    #[\Override]
     protected function parseAlert(array $data): array
     {
         return [
+            // Missing statuses default to 'active', never the legacy 'new'
+            // (not in the alerts.status enum) -- same invariant as the Base
+            // normaliser, pinned by ManufacturerAlertsShapeTest.
+            'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? $data['notification_id'] ?? null,
             'type' => $this->mapAlertType($data['type'] ?? $data['category'] ?? 'unknown'),
             'priority' => $this->mapAlertPriority($data['level'] ?? $data['priority'] ?? 'medium'),
@@ -272,6 +261,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Map Komatsu status to standard status
      */
+    #[\Override]
     protected function parseStatus(string $status): string
     {
         $statusMap = [
@@ -293,6 +283,7 @@ class KomatsuService extends BaseManufacturerService
      * Fetch machine details from Komatsu API
      */
     /** @return array<string, mixed> */
+    #[\Override]
     public function fetchMachineDetails(string $machineId): array
     {
         // Return location and metrics as a composite detail view
@@ -307,6 +298,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Fetch machine location
      */
+    #[\Override]
     public function fetchMachineLocation(string $machineId): ?array
     {
         try {
@@ -321,6 +313,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Fetch machine metrics
      */
+    #[\Override]
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
@@ -338,6 +331,7 @@ class KomatsuService extends BaseManufacturerService
     /**
      * Fetch machine alerts
      */
+    #[\Override]
     public function fetchMachineAlerts(string $machineId): array
     {
         try {
@@ -350,29 +344,9 @@ class KomatsuService extends BaseManufacturerService
     }
 
     /**
-     * Fetch comprehensive machine data
-     */
-    public function fetchMachineData(string $machineId): array
-    {
-        return [
-            'details' => $this->fetchMachineDetails($machineId),
-            'location' => $this->fetchMachineLocation($machineId),
-            'metrics' => $this->fetchMachineMetrics($machineId),
-            'alerts' => $this->fetchMachineAlerts($machineId),
-        ];
-    }
-
-    /**
-     * Get the manufacturer name
-     */
-    public function getManufacturer(): string
-    {
-        return $this->manufacturer;
-    }
-
-    /**
      * Get API error if any occurred
      */
+    #[\Override]
     public function getLastError(): ?string
     {
         return $this->lastError;

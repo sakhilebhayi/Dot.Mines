@@ -74,7 +74,7 @@ class MineArea extends Model
     /**
      * Get the team this mine area belongs to
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -84,7 +84,7 @@ class MineArea extends Model
     /**
      * Get machines assigned to this mine area
      *
-     * @return HasMany<Machine, $this>
+     * @return HasMany<Machine,$this>
      */
     public function machines(): HasMany
     {
@@ -94,7 +94,7 @@ class MineArea extends Model
     /**
      * Get geofences in this mine area
      *
-     * @return HasMany<Geofence, $this>
+     * @return HasMany<Geofence,$this>
      */
     public function geofences(): HasMany
     {
@@ -104,7 +104,7 @@ class MineArea extends Model
     /**
      * Get alerts for this mine area
      *
-     * @return HasMany<Alert, $this>
+     * @return HasMany<Alert,$this>
      */
     public function alerts(): HasMany
     {
@@ -114,7 +114,7 @@ class MineArea extends Model
     /**
      * Get production records for this mine area
      *
-     * @return HasMany<ProductionRecord, $this>
+     * @return HasMany<ProductionRecord,$this>
      */
     public function productionRecords(): HasMany
     {
@@ -124,7 +124,7 @@ class MineArea extends Model
     /**
      * Get production targets for this mine area
      *
-     * @return HasMany<ProductionTarget, $this>
+     * @return HasMany<ProductionTarget,$this>
      */
     public function productionTargets(): HasMany
     {
@@ -134,7 +134,7 @@ class MineArea extends Model
     /**
      * Get production forecasts for this mine area
      *
-     * @return HasMany<ProductionForecast, $this>
+     * @return HasMany<ProductionForecast,$this>
      */
     public function productionForecasts(): HasMany
     {
@@ -144,7 +144,7 @@ class MineArea extends Model
     /**
      * Get mine plan uploads for this mine area
      *
-     * @return HasMany<MinePlanUpload, $this>
+     * @return HasMany<MinePlanUpload,$this>
      */
     public function minePlanUploads(): HasMany
     {
@@ -154,7 +154,7 @@ class MineArea extends Model
     /**
      * Get routes in this mine area
      *
-     * @return HasMany<Route, $this>
+     * @return HasMany<Route,$this>
      */
     public function routes(): HasMany
     {
@@ -164,7 +164,7 @@ class MineArea extends Model
     /**
      * Get assignment history for this mine area
      *
-     * @return HasMany<MachineAreaAssignment, $this>
+     * @return HasMany<MachineAreaAssignment,$this>
      */
     public function machineAssignments(): HasMany
     {

@@ -45,7 +45,7 @@ class Role extends Model
     /**
      * Get the team that owns this role
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -55,7 +55,7 @@ class Role extends Model
     /**
      * Get all permissions for this role
      */
-    /** @return BelongsToMany<Permission, $this> */
+    /** @return BelongsToMany<Permission,$this> */
     public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class);

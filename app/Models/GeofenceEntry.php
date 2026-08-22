@@ -73,7 +73,7 @@ class GeofenceEntry extends Model
     /**
      * Get the machine for this entry
      *
-     * @return BelongsTo<Machine, $this>
+     * @return BelongsTo<Machine,$this>
      */
     public function machine(): BelongsTo
     {
@@ -83,7 +83,7 @@ class GeofenceEntry extends Model
     /**
      * Get the geofence for this entry
      *
-     * @return BelongsTo<Geofence, $this>
+     * @return BelongsTo<Geofence,$this>
      */
     public function geofence(): BelongsTo
     {
@@ -93,7 +93,7 @@ class GeofenceEntry extends Model
     /**
      * Get the team for this entry
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {

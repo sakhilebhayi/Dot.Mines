@@ -68,7 +68,7 @@ class Geofence extends Model
     /**
      * Get the team that owns this geofence
      *
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -78,7 +78,7 @@ class Geofence extends Model
     /**
      * Get the mine area this geofence belongs to
      *
-     * @return BelongsTo<MineArea, $this>
+     * @return BelongsTo<MineArea,$this>
      */
     public function mineArea(): BelongsTo
     {
@@ -88,7 +88,7 @@ class Geofence extends Model
     /**
      * Get all entry/exit records for this geofence
      *
-     * @return HasMany<GeofenceEntry, $this>
+     * @return HasMany<GeofenceEntry,$this>
      */
     public function entries(): HasMany
     {

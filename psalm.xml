@@ -6,18 +6,81 @@
     findUnusedBaselineEntry="false"
 >
   <projectFiles>
-    <directory name="app" />
-    <directory name="routes" />
+    <directory name="app"/>
+    <directory name="routes"/>
     <ignoreFiles>
-      <directory name="vendor" />
+      <directory name="vendor"/>
     </ignoreFiles>
   </projectFiles>
 
   <issueHandlers>
     <!-- Suppress issues that are known false positives in Laravel -->
-    <MissingReturnType severity="info" />
-    <MissingParamType severity="info" />
-    <PropertyNotSetInConstructor severity="info" />
-    <UnusedVariable severity="info" />
+    <MissingReturnType severity="info"/>
+    <MissingParamType severity="info"/>
+    <PropertyNotSetInConstructor severity="info"/>
+    <UnusedVariable severity="info"/>
+
+    <!-- Policy: this codebase keeps classes extendable by convention
+         (documented on the Livewire components); "must be final" is a
+         style opinion, not a defect class. -->
+    <ClassMustBeFinal errorLevel="suppress"/>
+
+    <!-- Dead-code detection stays ON (it has found real dead code), but
+         framework-invoked classes are exempt: Blade templates, routes,
+         the scheduler and the notification system call these, and psalm
+         cannot see any of those callers. -->
+    <PossiblyUnusedMethod>
+      <errorLevel type="suppress">
+        <!-- Models/Traits: relations, scopes and accessors are invoked
+             through Eloquent magic and Blade. Events: broadcast lifecycle
+             methods are called by the framework. Actions: registered with
+             Fortify/Jetstream at boot. -->
+        <directory name="app/Models"/>
+        <directory name="app/Traits"/>
+        <directory name="app/Events"/>
+        <directory name="app/Actions"/>
+        <directory name="app/Livewire"/>
+        <directory name="app/Console/Commands"/>
+        <directory name="app/Jobs"/>
+        <directory name="app/Listeners"/>
+        <directory name="app/Mail"/>
+        <directory name="app/Notifications"/>
+        <directory name="app/Policies"/>
+        <directory name="app/View"/>
+        <directory name="app/Http"/>
+      </errorLevel>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedProperty>
+      <errorLevel type="suppress">
+        <!-- Jobs: $tries/$timeout/$backoff are read by the queue worker.
+             Exceptions: payload properties are part of the throwing
+             contract even when a given catch site reads only some. -->
+        <directory name="app/Jobs"/>
+        <directory name="app/Exceptions"/>
+        <directory name="app/Events"/>
+        <directory name="app/Livewire"/>
+        <directory name="app/Mail"/>
+        <directory name="app/Notifications"/>
+        <directory name="app/Http"/>
+      </errorLevel>
+    </PossiblyUnusedProperty>
+    <UnusedClass>
+      <errorLevel type="suppress">
+        <directory name="app/Livewire"/>
+        <directory name="app/Console/Commands"/>
+        <directory name="app/Jobs"/>
+        <directory name="app/Listeners"/>
+        <directory name="app/Mail"/>
+        <directory name="app/Notifications"/>
+        <directory name="app/Policies"/>
+        <directory name="app/View"/>
+        <directory name="app/Http"/>
+        <directory name="app/Providers"/>
+      </errorLevel>
+    </UnusedClass>
   </issueHandlers>
+
+  <plugins>
+    <pluginClass class="Psalm\LaravelPlugin\Plugin"/>
+  </plugins>
 </psalm>

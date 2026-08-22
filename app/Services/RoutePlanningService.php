@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Geofence;
 use App\Models\Route;
-use App\Models\Waypoint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -209,53 +208,6 @@ class RoutePlanningService
     }
 
     /**
-     * Generate waypoints avoiding restricted geofences
-     *
-     * @param  Collection<array-key, mixed>  $geofences
-     * @return list<array<string, mixed>>
-     */
-    protected function generateWaypoints(
-        float $startLat,
-        float $startLon,
-        float $endLat,
-        float $endLon,
-        Collection $geofences
-    ): array {
-        $waypoints = [];
-
-        // Get restricted geofences
-        $restrictedGeofences = $geofences->filter(function ($geofence) {
-            return $geofence->geofence_type === 'restricted';
-        });
-
-        // Simple implementation: check if direct path intersects with restricted zones
-        // If yes, add waypoints to go around them
-        if ($restrictedGeofences->isEmpty()) {
-            // Direct route is fine
-            return $waypoints;
-        }
-
-        // For each restricted geofence, check if path intersects
-        foreach ($restrictedGeofences as $geofence) {
-            if ($this->pathIntersectsGeofence($startLat, $startLon, $endLat, $endLon, $geofence)) {
-                // Add waypoint to avoid this geofence
-                $avoidancePoint = $this->calculateAvoidancePoint($startLat, $startLon, $endLat, $endLon, $geofence);
-
-                if ($avoidancePoint) {
-                    $waypoints[] = [
-                        'latitude' => $avoidancePoint['lat'],
-                        'longitude' => $avoidancePoint['lon'],
-                        'type' => 'geofence',
-                        'name' => "Avoid: {$geofence->name}",
-                    ];
-                }
-            }
-        }
-
-        return $waypoints;
-    }
-
-    /**
      * Check if path intersects with geofence
      */
     protected function pathIntersectsGeofence(
@@ -359,40 +311,5 @@ class RoutePlanningService
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadius * $c;
-    }
-
-    /**
-     * Calculate bearing between two coordinates
-     */
-    public function calculateBearing(
-        float $lat1,
-        float $lon1,
-        float $lat2,
-        float $lon2
-    ): float {
-        $dLon = deg2rad($lon2 - $lon1);
-        $lat1Rad = deg2rad($lat1);
-        $lat2Rad = deg2rad($lat2);
-
-        $y = sin($dLon) * cos($lat2Rad);
-        $x = cos($lat1Rad) * sin($lat2Rad) -
-             sin($lat1Rad) * cos($lat2Rad) * cos($dLon);
-
-        $bearing = rad2deg(atan2($y, $x));
-
-        return fmod(($bearing + 360), 360);
-    }
-
-    /**
-     * Find nearest fuel stations along route
-     *
-     * @param  array<string, mixed>  $waypoints
-     * @return array<string, mixed>
-     */
-    public function findNearbyFuelStations(array $waypoints, float $maxDetourKm = 5): array
-    {
-        // This would query a fuel_stations table if we had one
-        // For now, return empty array
-        return [];
     }
 }

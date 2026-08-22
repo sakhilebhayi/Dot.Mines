@@ -39,6 +39,7 @@ class MachineAllocation extends Model
         'created_by',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -47,7 +48,7 @@ class MachineAllocation extends Model
     }
 
     /**
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -55,7 +56,7 @@ class MachineAllocation extends Model
     }
 
     /**
-     * @return BelongsTo<Payment, $this>
+     * @return BelongsTo<Payment,$this>
      */
     public function payment(): BelongsTo
     {

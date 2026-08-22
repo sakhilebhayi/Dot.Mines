@@ -91,6 +91,7 @@ class ProductionLossEvent extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -103,7 +104,7 @@ class ProductionLossEvent extends Model
     }
 
     /**
-     * @return BelongsTo<Machine, $this>
+     * @return BelongsTo<Machine,$this>
      */
     public function machine(): BelongsTo
     {
@@ -111,7 +112,7 @@ class ProductionLossEvent extends Model
     }
 
     /**
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Team,$this>
      */
     public function team(): BelongsTo
     {
@@ -119,7 +120,7 @@ class ProductionLossEvent extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<User,$this>
      */
     public function creator(): BelongsTo
     {
@@ -127,7 +128,7 @@ class ProductionLossEvent extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<User,$this>
      */
     public function classifier(): BelongsTo
     {

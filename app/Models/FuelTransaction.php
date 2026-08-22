@@ -103,37 +103,37 @@ class FuelTransaction extends Model
         'updated_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<FuelTank, $this> */
+    /** @return BelongsTo<FuelTank,$this> */
     public function fuelTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /** @return BelongsTo<FuelTank, $this> */
+    /** @return BelongsTo<FuelTank,$this> */
     public function fromTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class, 'from_tank_id');
     }
 
-    /** @return BelongsTo<FuelTank, $this> */
+    /** @return BelongsTo<FuelTank,$this> */
     public function toTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class, 'to_tank_id');
@@ -142,7 +142,7 @@ class FuelTransaction extends Model
     /**
      * Get transaction cost per liter
      */
-    public function getCostPerLiterAttribute(): ?float
+    protected function getCostPerLiterAttribute(): ?float
     {
         if ($this->quantity_liters == 0 || ! $this->total_cost) {
             return null;

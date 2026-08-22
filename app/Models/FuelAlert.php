@@ -62,31 +62,31 @@ class FuelAlert extends Model
         'updated_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<FuelTank, $this> */
+    /** @return BelongsTo<FuelTank,$this> */
     public function fuelTank(): BelongsTo
     {
         return $this->belongsTo(FuelTank::class);
     }
 
-    /** @return BelongsTo<Machine, $this> */
+    /** @return BelongsTo<Machine,$this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function acknowledgedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User,$this> */
     public function resolvedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'resolved_by');

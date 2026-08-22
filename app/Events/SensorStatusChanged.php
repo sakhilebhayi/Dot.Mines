@@ -20,6 +20,7 @@ class SensorStatusChanged implements ShouldBroadcast
         public int $teamId,
     ) {}
 
+    #[\Override]
     public function broadcastOn(): PrivateChannel
     {
         return new PrivateChannel("team.{$this->teamId}.alerts");

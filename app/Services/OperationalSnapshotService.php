@@ -26,6 +26,7 @@ use Illuminate\Support\Collection;
  */
 class OperationalSnapshotService
 {
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(private TelemetryProductionCalculator $calculator) {}
 
     /**

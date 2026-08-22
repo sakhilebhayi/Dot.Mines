@@ -46,6 +46,7 @@ class FleetOptimizerAgent
      */
     private const IDLE_FLEET_RATIO = 0.2;
 
+    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(private MachinePerformanceService $performanceService) {}
 
     /**

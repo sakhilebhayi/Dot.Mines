@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Jetstream\Jetstream;
 use Laravel\Jetstream\TeamInvitation as JetstreamTeamInvitation;
 
+/** @psalm-suppress UnusedClass -- registered via Jetstream::useTeamInvitationModel() / config strings */
 class TeamInvitation extends JetstreamTeamInvitation
 {
     /**
@@ -21,7 +22,8 @@ class TeamInvitation extends JetstreamTeamInvitation
     /**
      * Get the team that the invitation belongs to.
      */
-    /** @return BelongsTo<Team, $this> */
+    /** @return BelongsTo<Team,$this> */
+    #[\Override]
     public function team(): BelongsTo
     {
         /** @var class-string<Team> $teamModel */
