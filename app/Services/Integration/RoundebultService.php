@@ -48,9 +48,7 @@ class RoundebultService extends BaseManufacturerService
 
             $machines = [];
             if (! empty($response['data']['machines'])) {
-                $rows28 = data_get($response, 'data.machines');
-                /** @var list<array<string, mixed>> $rows28 */
-                $rows28 = is_array($rows28) ? array_values(array_filter($rows28, 'is_array')) : [];
+                $rows28 = self::rowsOf(data_get($response, 'data.machines'));
                 foreach ($rows28 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
@@ -84,7 +82,7 @@ class RoundebultService extends BaseManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
+                'location' => $this->parseLocation(self::payloadArray($response['data'] ?? null)),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -111,8 +109,8 @@ class RoundebultService extends BaseManufacturerService
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $allMetrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics(is_array($metrics['data'] ?? null) ? $metrics['data'] : []),
-                $this->parseMetrics(is_array($operations['data'] ?? null) ? $operations['data'] : [])
+                $this->parseMetrics(self::payloadArray($metrics['data'] ?? null)),
+                $this->parseMetrics(self::payloadArray($operations['data'] ?? null))
             );
 
             return [
@@ -141,9 +139,7 @@ class RoundebultService extends BaseManufacturerService
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                $rows29 = data_get($response, 'data.alerts');
-                /** @var list<array<string, mixed>> $rows29 */
-                $rows29 = is_array($rows29) ? array_values(array_filter($rows29, 'is_array')) : [];
+                $rows29 = self::rowsOf(data_get($response, 'data.alerts'));
                 foreach ($rows29 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
@@ -178,7 +174,7 @@ class RoundebultService extends BaseManufacturerService
             'model' => $data['model'] ?? 'Unknown Model',
             'manufacturer' => 'Roundebult',
             'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
-            'location' => $this->parseLocation(is_array($data['location'] ?? null) ? $data['location'] : []),
+            'location' => $this->parseLocation(self::payloadArray($data['location'] ?? null)),
             'last_heartbeat' => $data['last_heartbeat'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'mining_machine',
@@ -271,9 +267,7 @@ class RoundebultService extends BaseManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            $location = $result['location'] ?? null;
-
-            return is_array($location) ? $location : null;
+            return is_array($result['location'] ?? null) ? self::payloadArray($result['location']) : null;
         } catch (Exception $e) {
             return null;
         }
@@ -288,9 +282,7 @@ class RoundebultService extends BaseManufacturerService
         try {
             $result = $this->fetchMetrics($machineId);
 
-            $metrics = $result['metrics'] ?? [];
-
-            return is_array($metrics) ? $metrics : [];
+            return self::payloadArray($result['metrics'] ?? null);
         } catch (Exception $e) {
             return [];
         }
@@ -305,9 +297,7 @@ class RoundebultService extends BaseManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            $items = $result['alerts'] ?? [];
-
-            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
+            return self::rowsOf($result['alerts'] ?? null);
         } catch (Exception $e) {
             return [];
         }

@@ -40,9 +40,7 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
             $machines = [];
             if (! empty($response['data']['devices'])) {
-                $rows36 = data_get($response, 'data.devices');
-                /** @var list<array<string, mixed>> $rows36 */
-                $rows36 = is_array($rows36) ? array_values(array_filter($rows36, 'is_array')) : [];
+                $rows36 = self::rowsOf(data_get($response, 'data.devices'));
                 foreach ($rows36 as $device) {
                     $machines[] = $this->parseMachineData($device);
                 }
@@ -74,7 +72,7 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
+                'location' => $this->parseLocation(self::payloadArray($response['data'] ?? null)),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -99,9 +97,9 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics(is_array($status['data'] ?? null) ? $status['data'] : []),
-                $this->parseMetrics(is_array($parameters['data'] ?? null) ? $parameters['data'] : []),
-                $this->parseMetrics(is_array($workData['data'] ?? null) ? $workData['data'] : [])
+                $this->parseMetrics(self::payloadArray($status['data'] ?? null)),
+                $this->parseMetrics(self::payloadArray($parameters['data'] ?? null)),
+                $this->parseMetrics(self::payloadArray($workData['data'] ?? null))
             );
 
             return [
@@ -127,9 +125,7 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
 
             $alerts = [];
             if (! empty($response['data']['faults'])) {
-                $rows37 = data_get($response, 'data.faults');
-                /** @var list<array<string, mixed>> $rows37 */
-                $rows37 = is_array($rows37) ? array_values(array_filter($rows37, 'is_array')) : [];
+                $rows37 = self::rowsOf(data_get($response, 'data.faults'));
                 foreach ($rows37 as $fault) {
                     $alerts[] = $this->parseAlert($fault);
                 }
@@ -181,9 +177,7 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            $location = $result['location'] ?? null;
-
-            return is_array($location) ? $location : null;
+            return is_array($result['location'] ?? null) ? self::payloadArray($result['location']) : null;
         } catch (Exception $e) {
             return null;
         }
@@ -198,9 +192,7 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
         try {
             $result = $this->fetchMetrics($machineId);
 
-            $metrics = $result['metrics'] ?? [];
-
-            return is_array($metrics) ? $metrics : [];
+            return self::payloadArray($result['metrics'] ?? null);
         } catch (Exception $e) {
             return [];
         }
@@ -215,9 +207,7 @@ class XCMGService extends BaseManufacturerService implements ManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            $items = $result['alerts'] ?? [];
-
-            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
+            return self::rowsOf($result['alerts'] ?? null);
         } catch (Exception $e) {
             return [];
         }

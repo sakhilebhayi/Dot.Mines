@@ -31,10 +31,15 @@ class ReportDataService
             throw new \InvalidArgumentException('Report has no owning team.');
         }
 
-        $start = Carbon::parse($filters['start_date'] ?? now()->subDays(30))->startOfDay();
-        $end = Carbon::parse($filters['end_date'] ?? now())->endOfDay();
-        $machineIds = $filters['machine_ids'] ?? [];
-        $geofenceIds = $filters['geofence_ids'] ?? [];
+        /** @var mixed $startRaw */
+        $startRaw = $filters['start_date'] ?? null;
+        /** @var mixed $endRaw */
+        $endRaw = $filters['end_date'] ?? null;
+        $start = Carbon::parse(is_string($startRaw) ? $startRaw : now()->subDays(30))->startOfDay();
+        $end = Carbon::parse(is_string($endRaw) ? $endRaw : now())->endOfDay();
+
+        $machineIds = array_values(array_map('intval', array_filter((array) ($filters['machine_ids'] ?? []), 'is_numeric')));
+        $geofenceIds = array_values(array_map('intval', array_filter((array) ($filters['geofence_ids'] ?? []), 'is_numeric')));
 
         return match ($report->type) {
             'production' => $this->production($team->id, $start, $end, $machineIds),
@@ -49,7 +54,7 @@ class ReportDataService
     }
 
     /**
-     * @param  array<string, mixed>  $machineIds
+     * @param  list<int>  $machineIds
      * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function production(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
@@ -73,11 +78,11 @@ class ReportDataService
             $r->record_date?->format('Y-m-d'),
             $r->mineArea?->name ?? '—',
             $r->machine?->name ?? '—',
-            ucfirst($r->shift ?? '—'),
+            ucfirst($r->shift),
             (float) $r->quantity_produced,
             $r->target_quantity !== null ? (float) $r->target_quantity : null,
             $r->unit,
-        ])->all();
+        ])->values()->all();
 
         $totalProduced = (float) $records->sum('quantity_produced');
         $totalTarget = (float) $records->sum('target_quantity');
@@ -89,13 +94,13 @@ class ReportDataService
                 'Records' => $records->count(),
                 'Total Produced' => round($totalProduced, 2),
                 'Total Target' => round($totalTarget, 2),
-                'Achievement' => $totalTarget > 0 ? round(($totalProduced / $totalTarget) * 100.0, 1).'%' : 'N/A',
+                'Achievement' => $totalTarget > 0 ? (string) round(($totalProduced / $totalTarget) * 100.0, 1).'%' : 'N/A',
             ],
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $machineIds
+     * @param  list<int>  $machineIds
      * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function fleetUtilization(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
@@ -125,7 +130,7 @@ class ReportDataService
                 ->map(fn ($value) => (float) $value);
 
             $hoursInRange = $readings->count() >= 2
-                ? max(0.0, $readings->max() - $readings->min())
+                ? max(0.0, (float) $readings->max() - (float) $readings->min())
                 : null;
 
             // Whole inclusive calendar days: Carbon 3's diffInDays returns a
@@ -133,17 +138,17 @@ class ReportDataService
             // before the +1 or the availability denominator doubles.
             $daysInRange = max(1, (int) $start->diffInDays($end) + 1);
             $utilizationPercent = $hoursInRange !== null
-                ? round(($hoursInRange / ($daysInRange * 24.0)) * 100, 1)
+                ? round(($hoursInRange / ((float) $daysInRange * 24.0)) * 100.0, 1)
                 : null;
             $totalHours += $hoursInRange ?? 0.0;
 
             $rows[] = [
                 $machine->name,
                 $machine->machine_type,
-                ucfirst($machine->status ?? '—'),
+                ucfirst($machine->status),
                 $hoursInRange !== null ? round($hoursInRange, 2) : 'Insufficient data',
                 $metrics->count(),
-                $utilizationPercent !== null ? $utilizationPercent.'%' : '—',
+                $utilizationPercent !== null ? ((string) $utilizationPercent).'%' : '—',
             ];
         }
 
@@ -158,7 +163,7 @@ class ReportDataService
     }
 
     /**
-     * @param  array<string, mixed>  $machineIds
+     * @param  list<int>  $machineIds
      * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function maintenanceSchedule(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
@@ -180,12 +185,12 @@ class ReportDataService
             $r->work_order_number,
             $r->machine?->name ?? '—',
             $r->title,
-            ucfirst($r->maintenance_type ?? '—'),
+            ucfirst($r->maintenance_type),
             ucfirst($r->status),
-            $r->scheduled_date?->format('Y-m-d'),
+            $r->scheduled_date->format('Y-m-d'),
             $r->completed_at?->format('Y-m-d'),
             $r->total_cost !== null ? (float) $r->total_cost : null,
-        ])->all();
+        ])->values()->all();
 
         return [
             'headers' => ['Work Order', 'Machine', 'Title', 'Type', 'Status', 'Scheduled', 'Completed', 'Cost'],
@@ -194,13 +199,13 @@ class ReportDataService
                 'Records' => $records->count(),
                 'Completed' => $records->where('status', 'completed')->count(),
                 'Overdue/Open' => $records->whereIn('status', ['scheduled', 'in_progress'])->count(),
-                'Total Cost' => round($records->sum('total_cost'), 2),
+                'Total Cost' => round((float) $records->sum('total_cost'), 2),
             ],
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $machineIds
+     * @param  list<int>  $machineIds
      * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function fuelConsumption(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
@@ -222,7 +227,7 @@ class ReportDataService
             (float) $t->quantity_liters,
             $t->unit_price !== null ? (float) $t->unit_price : null,
             $t->total_cost !== null ? (float) $t->total_cost : null,
-        ])->all();
+        ])->values()->all();
 
         $dispensing = $transactions->where('transaction_type', 'dispensing');
 
@@ -231,14 +236,14 @@ class ReportDataService
             'rows' => $rows,
             'summary' => [
                 'Transactions' => $transactions->count(),
-                'Total Liters Dispensed' => round($dispensing->sum('quantity_liters'), 2),
-                'Total Cost' => round($transactions->sum('total_cost'), 2),
+                'Total Liters Dispensed' => round((float) $dispensing->sum('quantity_liters'), 2),
+                'Total Cost' => round((float) $transactions->sum('total_cost'), 2),
             ],
         ];
     }
 
     /**
-     * @param  array<string, mixed>  $geofenceIds
+     * @param  list<int>  $geofenceIds
      * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function materialTracking(int $teamId, Carbon $start, Carbon $end, array $geofenceIds): array
@@ -254,13 +259,13 @@ class ReportDataService
         $entries = $query->orderBy('entry_time')->get();
 
         $rows = $entries->map(fn ($e) => [
-            $e->entry_time?->format('Y-m-d H:i'),
+            $e->entry_time->format('Y-m-d H:i'),
             $e->geofence?->name ?? '—',
             $e->machine?->name ?? '—',
             $e->exit_time?->format('Y-m-d H:i') ?? 'Still inside',
             $e->tonnage_loaded !== null ? $e->tonnage_loaded : null,
             $e->material_type ?? '—',
-        ])->all();
+        ])->values()->all();
 
         return [
             'headers' => ['Entry Time', 'Geofence', 'Machine', 'Exit Time', 'Tonnage', 'Material'],
@@ -273,7 +278,7 @@ class ReportDataService
     }
 
     /**
-     * @param  array<string, mixed>  $machineIds
+     * @param  list<int>  $machineIds
      * @return array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}
      */
     private function downtimeAnalysis(int $teamId, Carbon $start, Carbon $end, array $machineIds): array
@@ -291,20 +296,24 @@ class ReportDataService
 
         $records = $query->orderBy('completed_at')->get();
 
-        $rows = $records->map(function ($r) {
-            $downtimeHours = round($r->started_at->diffInMinutes($r->completed_at) / 60.0, 2);
+        $rows = $records->map(function (MaintenanceRecord $r): array {
+            $downtimeHours = $r->started_at !== null && $r->completed_at !== null
+                ? round($r->started_at->diffInMinutes($r->completed_at) / 60.0, 2)
+                : null;
 
             return [
                 $r->machine?->name ?? '—',
                 $r->title,
-                ucfirst($r->maintenance_type ?? '—'),
-                $r->started_at->format('Y-m-d H:i'),
-                $r->completed_at->format('Y-m-d H:i'),
-                $downtimeHours,
+                ucfirst($r->maintenance_type),
+                $r->started_at?->format('Y-m-d H:i') ?? '—',
+                $r->completed_at?->format('Y-m-d H:i') ?? '—',
+                $downtimeHours ?? '—',
             ];
-        })->all();
+        })->values()->all();
 
-        $totalDowntimeHours = $records->sum(fn ($r) => $r->started_at->diffInMinutes($r->completed_at) / 60.0);
+        $totalDowntimeHours = $records->sum(fn (MaintenanceRecord $r): float => $r->started_at !== null && $r->completed_at !== null
+            ? $r->started_at->diffInMinutes($r->completed_at) / 60.0
+            : 0.0);
 
         return [
             'headers' => ['Machine', 'Reason', 'Type', 'Started', 'Completed', 'Downtime (hrs)'],
@@ -332,7 +341,7 @@ class ReportDataService
             ->get();
 
         $rows = $violations->map(fn (ComplianceViolation $v) => [
-            $v->detected_at?->format('Y-m-d H:i'),
+            $v->detected_at->format('Y-m-d H:i'),
             ucfirst(str_replace('_', ' ', $v->violation_type)),
             ucfirst($v->severity),
             $v->description,
@@ -340,7 +349,7 @@ class ReportDataService
             $v->resolved_at !== null
                 ? 'Resolved '.$v->resolved_at->format('Y-m-d')
                 : ($v->remediation_deadline && $v->remediation_deadline->isPast() ? 'Overdue' : 'Open'),
-        ])->all();
+        ])->values()->all();
 
         $resolvedCount = $violations->whereNotNull('resolved_at')->count();
         $overdueCount = $violations->filter(fn (ComplianceViolation $v) => $v->resolved_at === null

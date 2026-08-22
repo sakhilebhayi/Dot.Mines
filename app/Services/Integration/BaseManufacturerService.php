@@ -3,6 +3,7 @@
 namespace App\Services\Integration;
 
 use App\Contracts\ManufacturerServiceInterface;
+use App\Support\ApiPayload;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -516,5 +517,28 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
             'load_count_readings' => [],
             'payload_readings' => [],
         ];
+    }
+
+    /**
+     * Coerce an untyped API payload node into the assoc-array shape the
+     * parse helpers take -- one place, so every stub service's ingestion
+     * is provably typed for both analyzers.
+     *
+     * @return array<string, mixed>
+     */
+    protected static function payloadArray(mixed $value): array
+    {
+        return ApiPayload::assoc($value);
+    }
+
+    /**
+     * Coerce an untyped API list node into a clean list of assoc rows,
+     * dropping malformed entries.
+     *
+     * @return list<array<string, mixed>>
+     */
+    protected static function rowsOf(mixed $value): array
+    {
+        return ApiPayload::rows($value);
     }
 }

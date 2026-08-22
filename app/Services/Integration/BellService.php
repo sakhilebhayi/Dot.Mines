@@ -187,9 +187,7 @@ class BellService extends BaseManufacturerService
             return [];
         }
 
-        $rows1 = data_get($result, 'machines');
-        /** @var list<array<string, mixed>> $rows1 */
-        $rows1 = is_array($rows1) ? array_values(array_filter($rows1, 'is_array')) : [];
+        $rows1 = self::rowsOf(data_get($result, 'machines'));
         foreach ($rows1 as $machine) {
             if (($machine['external_id'] ?? null) === $machineId) {
                 return $machine;

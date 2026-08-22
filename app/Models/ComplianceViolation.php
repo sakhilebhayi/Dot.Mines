@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $description
  * @property string $severity
  * @property Carbon $detected_at
- * @property Carbon $remediation_deadline
+ * @property Carbon|null $remediation_deadline
  * @property Carbon|null $resolved_at
  * @property int|null $resolved_by
  * @property string|null $resolution_notes
