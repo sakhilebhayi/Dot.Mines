@@ -2,9 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Actions\MineAreas\AssignMachineToArea;
+use App\Actions\MineAreas\UnassignMachineFromArea;
 use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
 use App\Models\MineArea;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -49,8 +52,14 @@ class MachineAssignmentManager extends Component
 
     public function mount(MineArea $mineArea): void
     {
-        $team = Auth::user()->currentTeam;
-        abort_unless($team && $mineArea->team_id === $team->id, 404);
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
+        abort_unless($mineArea->team_id === $team->id, 404);
 
         $this->mineArea = $mineArea;
     }
@@ -94,7 +103,13 @@ class MachineAssignmentManager extends Component
             return;
         }
 
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
 
         if ($this->view === 'assign') {
             $this->selectedMachineIds = $this->assignableMachinesQuery($team)
@@ -126,7 +141,13 @@ class MachineAssignmentManager extends Component
 
     public function assignSingleMachine(int $machineId): void
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $machine = Machine::where('team_id', $team->id)->findOrFail($machineId);
         $this->authorize('update', $machine);
 
@@ -136,7 +157,13 @@ class MachineAssignmentManager extends Component
 
     public function assignSelectedMachines(): void
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $machines = Machine::where('team_id', $team->id)
             ->whereIn('id', $this->selectedMachineIds)
             ->get();
@@ -153,33 +180,40 @@ class MachineAssignmentManager extends Component
 
     private function assign(Machine $machine, ?string $notes): void
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
 
-        if ($machine->mine_area_id === $this->mineArea->id) {
-            return;
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
         }
 
-        $machine->update(['mine_area_id' => $this->mineArea->id]);
-
-        MachineAreaAssignment::create([
-            'team_id' => $team->id,
-            'machine_id' => $machine->id,
-            'mine_area_id' => $this->mineArea->id,
-            'assigned_by' => Auth::id(),
-            'assigned_at' => now(),
-            'notes' => $notes,
-        ]);
+        app(AssignMachineToArea::class)->execute(
+            $team,
+            $this->mineArea,
+            $machine,
+            $authUser->id,
+            null,
+            $notes,
+        );
     }
 
     public function unassignMachine(int $machineId): void
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $machine = Machine::where('team_id', $team->id)
             ->where('mine_area_id', $this->mineArea->id)
             ->findOrFail($machineId);
         $this->authorize('update', $machine);
 
-        if (! $this->moveToAnotherArea($machine, $team->id)) {
+        if (! $this->moveToAnotherArea($machine)) {
             $this->dispatch('notify', [
                 'message' => "Cannot unassign {$machine->name}; at least one active mine area must be set. Create another mine area first.",
                 'type' => 'error',
@@ -193,7 +227,13 @@ class MachineAssignmentManager extends Component
 
     public function unassignMultipleMachines(): void
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $machines = Machine::where('team_id', $team->id)
             ->where('mine_area_id', $this->mineArea->id)
             ->whereIn('id', $this->selectedMachineIds)
@@ -202,7 +242,7 @@ class MachineAssignmentManager extends Component
         $moved = 0;
         foreach ($machines as $machine) {
             $this->authorize('update', $machine);
-            if ($this->moveToAnotherArea($machine, $team->id)) {
+            if ($this->moveToAnotherArea($machine)) {
                 $moved++;
             }
         }
@@ -221,41 +261,32 @@ class MachineAssignmentManager extends Component
     /**
      * Machine::mine_area_id is NOT NULL, so a machine can never be truly
      * unassigned -- "removing" it from this area means moving it to another
-     * active area. Mirrors MineAreaDetail::unassignMachine().
+     * active area (shared with MineAreaDetail via the Action).
      */
-    private function moveToAnotherArea(Machine $machine, int $teamId): bool
+    private function moveToAnotherArea(Machine $machine): bool
     {
-        $otherArea = MineArea::where('team_id', $teamId)
-            ->where('status', 'active')
-            ->where('id', '!=', $this->mineArea->id)
-            ->first();
+        /** @var User $authUser */
+        $authUser = Auth::user();
 
-        if (! $otherArea) {
-            return false;
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
         }
 
-        MachineAreaAssignment::where('machine_id', $machine->id)
-            ->where('mine_area_id', $this->mineArea->id)
-            ->whereNull('unassigned_at')
-            ->update(['unassigned_at' => now()]);
-
-        $machine->update(['mine_area_id' => $otherArea->id]);
-
-        MachineAreaAssignment::create([
-            'team_id' => $teamId,
-            'machine_id' => $machine->id,
-            'mine_area_id' => $otherArea->id,
-            'assigned_by' => Auth::id(),
-            'assigned_at' => now(),
-            'reason' => 'Removed from '.$this->mineArea->name,
-        ]);
-
-        return true;
+        return app(UnassignMachineFromArea::class)
+            ->execute($team, $this->mineArea, $machine, $authUser->id) !== null;
     }
 
     public function exportAssignmentReport()
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
         $this->authorize('viewAny', Machine::class);
 
         $machines = Machine::where('team_id', $team->id)
@@ -287,7 +318,13 @@ class MachineAssignmentManager extends Component
 
     public function render()
     {
-        $team = Auth::user()->currentTeam;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $team = $authUser->currentTeam;
+
+        if ($team === null) {
+            abort(403);
+        }
 
         $totalMachines = Machine::where('team_id', $team->id)->count();
 

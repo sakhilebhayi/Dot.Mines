@@ -2,14 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Actions\Fuel\RecordFuelDispense;
+use App\Actions\Fuel\RefuelTank;
+use App\Exceptions\FuelDispenseException;
 use App\Models\FuelAlert;
 use App\Models\FuelMonthlyAllocation;
 use App\Models\FuelTank;
 use App\Models\FuelTransaction;
 use App\Models\Machine;
 use App\Models\MineArea;
+use App\Models\User;
 use App\Services\AI\FuelPredictorAgent;
-use App\Services\FuelManagementService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -104,111 +107,26 @@ class FuelManagement extends Component
             'transactionTankId' => 'required|exists:fuel_tanks,id',
             'transactionQuantity' => 'required|numeric|min:1',
         ]);
+
+        /** @var User|null $user */
         $user = Auth::user();
-        $teamId = $user?->current_team_id;
 
-        $tank = FuelTank::where('team_id', $teamId)->find($this->transactionTankId);
-        if (! $tank) {
-            $this->transactionError = 'Selected tank not found.';
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Selected tank not found.']);
-
-            return;
-        }
-
-        $year = now()->year;
-        $month = now()->month;
-
-        // Determine mine area for the transaction. Prefer the machine's assigned
-        // mine area (user selects a machine), otherwise fall back to the tank's
-        // mine area. This ensures allocations are looked up for the correct area.
-        $mineAreaId = null;
-        if (! empty($this->transactionMachineId)) {
-            $machine = Machine::where('team_id', $tank->team_id)->find($this->transactionMachineId);
-            // Ensure the referenced machine belongs to the same team as the tank
-            if ($machine) {
-                $mineAreaId = $machine->mine_area_id;
-            }
-        }
-        if (is_null($mineAreaId)) {
-            $mineAreaId = $tank->mine_area_id;
-        }
-
-        // Prefer an allocation scoped to the specific mine area, but fall back
-        // to a team-level (general) allocation when none exists for the area.
-        $allocation = null;
-        if (! is_null($mineAreaId)) {
-            $allocation = FuelMonthlyAllocation::where('team_id', $tank->team_id)
-                ->where('year', $year)
-                ->where('month', $month)
-                ->where('mine_area_id', $mineAreaId)
-                ->first();
-        }
-
-        if (! $allocation) {
-            // Try a team-level allocation (mine_area_id IS NULL)
-            $allocation = FuelMonthlyAllocation::where('team_id', $tank->team_id)
-                ->whereNull('mine_area_id')
-                ->where('year', $year)
-                ->where('month', $month)
-                ->first();
-
-            if ($allocation) {
-                Log::info('Falling back to team-level fuel allocation for dispense', [
-                    'team_id' => $tank->team_id,
-                    'requested_mine_area_id' => $mineAreaId,
-                    'allocation_id' => $allocation->id,
-                    'year' => $year,
-                    'month' => $month,
-                ]);
-            }
-        }
-
-        if (! $allocation) {
-            $this->transactionError = 'No monthly allocation set for this mine area.';
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'No monthly allocation set for this mine area.']);
-
-            return;
-        }
-
-        $remaining = $allocation->remaining_liters;
-        if ($this->transactionQuantity > $remaining) {
-            $this->transactionError = 'Dispensing this amount would exceed the monthly allocation for this mine area. Remaining: '.number_format($remaining, 2).'L.';
-            $this->dispatch('notify', ['type' => 'error', 'message' => $this->transactionError]);
-
-            return;
-        }
-
-        // Build transaction payload and record via service
-        $unitPrice = $allocation->fuel_price_per_liter ?? 0;
-        $totalCost = round($unitPrice * $this->transactionQuantity, 2);
-
-        $service = new FuelManagementService;
         try {
-            $transaction = $service->recordTransaction([
-                'team_id' => $tank->team_id,
-                'fuel_tank_id' => $tank->id,
-                'machine_id' => $this->transactionMachineId ?: null,
-                'user_id' => auth()->id(),
-                'transaction_type' => 'dispensing',
-                'quantity_liters' => $this->transactionQuantity,
-                'unit_price' => $unitPrice,
-                'total_cost' => $totalCost,
-                'fuel_type' => $tank->fuel_type,
-                'transaction_date' => now(),
-                'monthly_allocation_id' => $allocation->id ?? null,
-                'notes' => null,
-            ]);
-
-            // Refresh allocation consumption
-            if ($allocation) {
-                $allocation->updateConsumption();
-            }
+            app(RecordFuelDispense::class)->execute(
+                (int) $user?->current_team_id,
+                (int) $this->transactionTankId,
+                (float) $this->transactionQuantity,
+                $this->transactionMachineId ? (int) $this->transactionMachineId : null,
+                $user?->id,
+            );
 
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Dispensing transaction recorded.']);
             $this->reset(['transactionTankId', 'transactionQuantity', 'transactionMachineId']);
             // Show the result of what was just dispensed.
             $this->goToStep(4);
-
+        } catch (FuelDispenseException $e) {
+            $this->transactionError = $e->getMessage();
+            $this->dispatch('notify', ['type' => 'error', 'message' => $e->getMessage()]);
         } catch (\Throwable $e) {
             Log::error('Failed to record dispensing transaction', ['error' => $e->getMessage()]);
             $this->transactionError = "We couldn't record this transaction. Please try again.";
@@ -308,7 +226,10 @@ class FuelManagement extends Component
 
     private function hasCurrentAllocation(): bool
     {
-        return FuelMonthlyAllocation::where('team_id', auth()->user()->current_team_id)
+        /** @var User|null $authUser */
+        $authUser = auth()->user();
+
+        return FuelMonthlyAllocation::query()->where('team_id', $authUser?->current_team_id)
             ->where('year', now()->year)
             ->where('month', now()->month)
             ->exists();
@@ -381,56 +302,31 @@ class FuelManagement extends Component
             'refuelUnitPrice' => 'nullable|numeric|min:0',
         ]);
 
+        /** @var User|null $user */
         $user = Auth::user();
-        $teamId = $user?->current_team_id;
 
-        $tank = FuelTank::where('team_id', $teamId)->find($this->refuelTankId);
-        if (! $tank) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Selected tank not found.']);
-
-            return;
-        }
-
-        $quantity = (float) $this->refuelQuantity;
-        $unitPrice = $this->refuelUnitPrice ?? 0;
-
-        $service = new FuelManagementService;
         try {
-            $transaction = $service->recordTransaction([
-                'team_id' => $tank->team_id,
-                'fuel_tank_id' => $tank->id,
-                'machine_id' => null,
-                'user_id' => auth()->id(),
-                'transaction_type' => 'refill',
-                'quantity_liters' => $quantity,
-                'unit_price' => $unitPrice,
-                'total_cost' => round($unitPrice * $quantity, 2),
-                'fuel_type' => $tank->fuel_type,
-                'transaction_date' => now(),
-                'monthly_allocation_id' => null,
-                'notes' => $this->refuelNotes ? strip_tags($this->refuelNotes) : null,
-            ]);
+            $result = app(RefuelTank::class)->execute(
+                (int) $user?->current_team_id,
+                (int) $this->refuelTankId,
+                (float) $this->refuelQuantity,
+                (float) ($this->refuelUnitPrice ?? 0),
+                $this->refuelNotes ? strip_tags($this->refuelNotes) : null,
+                $user?->id,
+            );
 
-            // Increase tank level but do not exceed capacity
-            $newLevel = $tank->current_level_liters + $quantity;
-            $overflow = 0;
-            if ($newLevel > $tank->capacity_liters) {
-                $overflow = $newLevel - $tank->capacity_liters;
-                $newLevel = $tank->capacity_liters;
-            }
+            $message = 'Tank refueled successfully. Current level: '
+                .number_format((float) $result['tank']->current_level_liters, 2).'L.';
 
-            $tank->current_level_liters = $newLevel;
-            $tank->save();
-
-            $message = 'Tank refueled successfully. Current level: '.number_format($tank->current_level_liters, 2).'L.';
-            if ($overflow > 0) {
-                $message .= ' ('.number_format($overflow, 2).'L overflow was ignored)';
+            if ($result['overflow'] > 0) {
+                $message .= ' ('.number_format($result['overflow'], 2).'L overflow was ignored)';
             }
 
             $this->dispatch('notify', ['type' => 'success', 'message' => $message]);
             $this->reset(['refuelTankId', 'refuelQuantity', 'refuelUnitPrice', 'refuelNotes']);
-
-        } catch (\Exception $e) {
+        } catch (FuelDispenseException $e) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => $e->getMessage()]);
+        } catch (\Throwable $e) {
             Log::error('Failed to record refuel transaction', ['error' => $e->getMessage()]);
             $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to record refuel transaction.']);
         }
@@ -565,7 +461,7 @@ class FuelManagement extends Component
         $dateRange = $this->getDateRange();
 
         // Get current month allocation
-        $currentAllocation = FuelMonthlyAllocation::where('team_id', $teamId)
+        $currentAllocation = FuelMonthlyAllocation::query()->where('team_id', $teamId)
             ->where('year', now()->year)
             ->where('month', now()->month)
             ->with('mineArea')
@@ -591,7 +487,7 @@ class FuelManagement extends Component
         // 88%)" recommendation -- alarming noise about a fuel system that
         // does not exist yet.
         $hasFuelData = $tanks->isNotEmpty()
-            || FuelTransaction::where('team_id', $teamId)->exists();
+            || FuelTransaction::query()->where('team_id', $teamId)->exists();
 
         $aiRecommendations = collect();
         $aiInsights = collect();
@@ -660,7 +556,12 @@ class FuelManagement extends Component
             ->get();
 
         // Top consumers
-        $topConsumers = FuelTransaction::where('team_id', $teamId)
+        /**
+         * @psalm-suppress InvalidTemplateParam, UndefinedMagicPropertyFetch
+         * selectRaw() aggregate pseudo-columns (total_consumed/total_cost)
+         * exist only on this query's row objects, not on the model.
+         */
+        $topConsumers = FuelTransaction::query()->where('team_id', $teamId)
             ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
             ->where('transaction_type', 'dispensing')
             ->whereNotNull('machine_id')
@@ -674,7 +575,7 @@ class FuelManagement extends Component
             // created until the guided workflow shipped -- the first real
             // dispense crashed the page.
             ->map(function ($item) use ($teamId) {
-                $machine = Machine::where('team_id', $teamId)->find($item->machine_id);
+                $machine = Machine::query()->where('team_id', $teamId)->find($item->machine_id);
 
                 return [
                     'machine' => $machine,
@@ -690,8 +591,11 @@ class FuelManagement extends Component
         // people) shown separately from the machine's own telemetry fuel
         // level, never blended.
         $monthStart = now()->startOfMonth();
+        /**
+         * @psalm-suppress InvalidTemplateParam -- map() to plain arrays off an Eloquent collection
+         */
         $machineFuelActivity = $machines->map(function (Machine $machine) use ($teamId, $dateRange, $monthStart) {
-            $base = FuelTransaction::where('team_id', $teamId)
+            $base = FuelTransaction::query()->where('team_id', $teamId)
                 ->where('machine_id', $machine->id)
                 ->where('transaction_type', 'dispensing');
 

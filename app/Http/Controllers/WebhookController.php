@@ -33,9 +33,13 @@ class WebhookController extends Controller
             return response()->json(['error' => 'Invalid signature'], 400);
         }
 
-        $event = json_decode($payload, true);
+        /** @var mixed $decoded */
+        $decoded = json_decode($payload, true);
 
-        if (! is_array($event) || empty($event['event'])) {
+        /** @var array<string, mixed> $event */
+        $event = is_array($decoded) ? $decoded : [];
+
+        if ($event === [] || empty($event['event'])) {
             return response()->json(['error' => 'Invalid payload'], 400);
         }
 

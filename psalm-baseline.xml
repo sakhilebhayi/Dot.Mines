@@ -2371,12 +2371,6 @@
     <MixedArgument>
       <code><![CDATA[$secret]]></code>
     </MixedArgument>
-    <MixedArgumentTypeCoercion>
-      <code><![CDATA[$event]]></code>
-      <code><![CDATA[$event]]></code>
-      <code><![CDATA[$event]]></code>
-      <code><![CDATA[$event]]></code>
-    </MixedArgumentTypeCoercion>
     <MixedArrayAccess>
       <code><![CDATA[$data['reference']]]></code>
       <code><![CDATA[$data['subscription']]]></code>
@@ -4605,43 +4599,7 @@
     <ClassMustBeFinal>
       <code><![CDATA[FuelManagement]]></code>
     </ClassMustBeFinal>
-    <InvalidOperand>
-      <code><![CDATA[$unitPrice * $quantity]]></code>
-    </InvalidOperand>
-    <InvalidTemplateParam>
-      <code><![CDATA[$machines->map(function (Machine $machine) use ($teamId, $dateRange, $monthStart) {
-            $base = FuelTransaction::where('team_id', $teamId)
-                ->where('machine_id', $machine->id)
-                ->where('transaction_type', 'dispensing');
-
-            $periodDispensed = (clone $base)
-                ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
-                ->sum('quantity_liters');
-            $monthDispensed = (clone $base)
-                ->where('transaction_date', '>=', $monthStart)
-                ->sum('quantity_liters');
-            $lastDispense = (clone $base)->with('fuelTank')->latest('transaction_date')->first();
-
-            $latestFuelMetric = $machine->metrics()
-                ->whereNotNull('fuel_level')
-                ->latest('recorded_at')
-                ->first();
-
-            return [
-                'machine' => $machine,
-                'period_dispensed' => (float) $periodDispensed,
-                'month_dispensed' => (float) $monthDispensed,
-                'event_count' => (clone $base)
-                    ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
-                    ->count(),
-                'last_dispense' => $lastDispense,
-                'telemetry_fuel_level' => $latestFuelMetric?->fuel_level,
-                'telemetry_recorded_at' => $latestFuelMetric?->recorded_at,
-            ];
-        })]]></code>
-    </InvalidTemplateParam>
     <MissingClosureParamType>
-      <code><![CDATA[$item]]></code>
       <code><![CDATA[$q]]></code>
       <code><![CDATA[$q]]></code>
       <code><![CDATA[$t]]></code>
@@ -4679,10 +4637,6 @@
     <MixedArgument>
       <code><![CDATA[$aiAnalysis['insights'] ?? []]]></code>
       <code><![CDATA[$aiAnalysis['recommendations'] ?? []]]></code>
-      <code><![CDATA[$overflow]]></code>
-      <code><![CDATA[$remaining]]></code>
-      <code><![CDATA[$tank->current_level_liters]]></code>
-      <code><![CDATA[$unitPrice * $this->transactionQuantity]]></code>
       <code><![CDATA[auth()->user()->currentTeam]]></code>
     </MixedArgument>
     <MixedArrayAccess>
@@ -4712,25 +4666,15 @@
     <MixedAssignment>
       <code><![CDATA[$activeAlerts]]></code>
       <code><![CDATA[$allocation]]></code>
-      <code><![CDATA[$base]]></code>
       <code><![CDATA[$canSeeInactive]]></code>
       <code><![CDATA[$currentUser]]></code>
       <code><![CDATA[$dateRange]]></code>
-      <code><![CDATA[$lastDispense]]></code>
       <code><![CDATA[$latestFuelMetric]]></code>
-      <code><![CDATA[$mineAreaId]]></code>
-      <code><![CDATA[$mineAreaId]]></code>
       <code><![CDATA[$monthDispensed]]></code>
-      <code><![CDATA[$newLevel]]></code>
-      <code><![CDATA[$newLevel]]></code>
-      <code><![CDATA[$overflow]]></code>
       <code><![CDATA[$periodDispensed]]></code>
       <code><![CDATA[$recentTransactions]]></code>
-      <code><![CDATA[$remaining]]></code>
       <code><![CDATA[$tank]]></code>
       <code><![CDATA[$tanks]]></code>
-      <code><![CDATA[$teamId]]></code>
-      <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$teamId]]></code>
@@ -4739,32 +4683,19 @@
       <code><![CDATA[$this->refuelTankId]]></code>
       <code><![CDATA[$this->selectedTankId]]></code>
       <code><![CDATA[$this->transactionTankId]]></code>
-      <code><![CDATA[$topConsumers]]></code>
-      <code><![CDATA[$unitPrice]]></code>
     </MixedAssignment>
-    <MixedClone>
-      <code><![CDATA[clone $base]]></code>
-      <code><![CDATA[clone $base]]></code>
-      <code><![CDATA[clone $base]]></code>
-      <code><![CDATA[clone $base]]></code>
-    </MixedClone>
     <MixedMethodCall>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[count]]></code>
-      <code><![CDATA[count]]></code>
-      <code><![CDATA[exists]]></code>
       <code><![CDATA[filter]]></code>
       <code><![CDATA[filter]]></code>
       <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
       <code><![CDATA[get]]></code>
       <code><![CDATA[get]]></code>
       <code><![CDATA[get]]></code>
-      <code><![CDATA[get]]></code>
-      <code><![CDATA[groupBy]]></code>
       <code><![CDATA[hasRole]]></code>
       <code><![CDATA[isBelowMinimum]]></code>
       <code><![CDATA[isCritical]]></code>
@@ -4772,16 +4703,9 @@
       <code><![CDATA[latest]]></code>
       <code><![CDATA[latest]]></code>
       <code><![CDATA[latest]]></code>
-      <code><![CDATA[latest]]></code>
-      <code><![CDATA[limit]]></code>
       <code><![CDATA[limit]]></code>
       <code><![CDATA[limit]]></code>
       <code><![CDATA[lowFuel]]></code>
-      <code><![CDATA[map]]></code>
-      <code><![CDATA[orderByDesc]]></code>
-      <code><![CDATA[selectRaw]]></code>
-      <code><![CDATA[sum]]></code>
-      <code><![CDATA[sum]]></code>
       <code><![CDATA[sum]]></code>
       <code><![CDATA[sum]]></code>
       <code><![CDATA[sum]]></code>
@@ -4797,13 +4721,6 @@
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[whereBetween]]></code>
-      <code><![CDATA[whereBetween]]></code>
-      <code><![CDATA[whereBetween]]></code>
       <code><![CDATA[whereBetween]]></code>
       <code><![CDATA[whereBetween]]></code>
       <code><![CDATA[whereBetween]]></code>
@@ -4814,20 +4731,10 @@
       <code><![CDATA[whereBetween]]></code>
       <code><![CDATA[whereIn]]></code>
       <code><![CDATA[whereIn]]></code>
-      <code><![CDATA[whereNotNull]]></code>
-      <code><![CDATA[with]]></code>
       <code><![CDATA[with]]></code>
       <code><![CDATA[with]]></code>
     </MixedMethodCall>
-    <MixedOperand>
-      <code><![CDATA[$newLevel]]></code>
-      <code><![CDATA[$tank->current_level_liters]]></code>
-      <code><![CDATA[$unitPrice]]></code>
-    </MixedOperand>
     <MixedPropertyFetch>
-      <code><![CDATA[$item->machine_id]]></code>
-      <code><![CDATA[$item->total_consumed]]></code>
-      <code><![CDATA[$item->total_cost]]></code>
       <code><![CDATA[$latestFuelMetric?->fuel_level]]></code>
       <code><![CDATA[$latestFuelMetric?->recorded_at]]></code>
       <code><![CDATA[$tank->id]]></code>
@@ -4839,13 +4746,9 @@
       <code><![CDATA[$user->id]]></code>
       <code><![CDATA[$user->id]]></code>
       <code><![CDATA[$user?->current_team_id]]></code>
-      <code><![CDATA[$user?->current_team_id]]></code>
-      <code><![CDATA[$user?->current_team_id]]></code>
       <code><![CDATA[now()->month]]></code>
       <code><![CDATA[now()->month]]></code>
       <code><![CDATA[now()->month]]></code>
-      <code><![CDATA[now()->month]]></code>
-      <code><![CDATA[now()->year]]></code>
       <code><![CDATA[now()->year]]></code>
       <code><![CDATA[now()->year]]></code>
       <code><![CDATA[now()->year]]></code>
@@ -4877,16 +4780,11 @@
       <code><![CDATA[$tankMineAreaId]]></code>
       <code><![CDATA[$transactionType]]></code>
     </PossiblyUnusedProperty>
-    <RedundantConditionGivenDocblockType>
-      <code><![CDATA[$allocation]]></code>
-    </RedundantConditionGivenDocblockType>
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[! $canSeeInactive]]></code>
       <code><![CDATA[$this->confirmDeleteTankId]]></code>
     </RiskyTruthyFalsyComparison>
     <UndefinedInterfaceMethod>
-      <code><![CDATA[id]]></code>
-      <code><![CDATA[id]]></code>
       <code><![CDATA[user]]></code>
       <code><![CDATA[user]]></code>
       <code><![CDATA[user]]></code>
@@ -4932,50 +4830,14 @@
       <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
       <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
       <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
-      <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
-      <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
-      <code><![CDATA[FuelTransaction::where('team_id', $teamId)]]></code>
       <code><![CDATA[active]]></code>
       <code><![CDATA[delete]]></code>
       <code><![CDATA[find]]></code>
-      <code><![CDATA[find]]></code>
-      <code><![CDATA[find]]></code>
-      <code><![CDATA[find]]></code>
-      <code><![CDATA[find]]></code>
       <code><![CDATA[orderBy]]></code>
-      <code><![CDATA[updateConsumption]]></code>
       <code><![CDATA[when]]></code>
       <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
       <code><![CDATA[whereNotNull]]></code>
-      <code><![CDATA[whereNull]]></code>
     </UndefinedMagicMethod>
-    <UndefinedMagicPropertyAssignment>
-      <code><![CDATA[$tank->current_level_liters]]></code>
-    </UndefinedMagicPropertyAssignment>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$allocation->id]]></code>
-      <code><![CDATA[$allocation->remaining_liters]]></code>
-      <code><![CDATA[$machine->mine_area_id]]></code>
-      <code><![CDATA[$tank->capacity_liters]]></code>
-      <code><![CDATA[$tank->current_level_liters]]></code>
-      <code><![CDATA[$tank->fuel_type]]></code>
-      <code><![CDATA[$tank->fuel_type]]></code>
-      <code><![CDATA[$tank->id]]></code>
-      <code><![CDATA[$tank->id]]></code>
-      <code><![CDATA[$tank->mine_area_id]]></code>
-      <code><![CDATA[$tank->team_id]]></code>
-      <code><![CDATA[$tank->team_id]]></code>
-      <code><![CDATA[$tank->team_id]]></code>
-      <code><![CDATA[$tank->team_id]]></code>
-      <code><![CDATA[$tank->team_id]]></code>
-    </UndefinedMagicPropertyFetch>
-    <UnusedVariable>
-      <code><![CDATA[$transaction]]></code>
-      <code><![CDATA[$transaction]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Livewire/GeofenceDetail.php">
     <ClassMustBeFinal>
@@ -5494,21 +5356,10 @@
       <code><![CDATA[$machine->model]]></code>
       <code><![CDATA[$machine->name]]></code>
       <code><![CDATA[$machine->status]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$assignedMachines]]></code>
       <code><![CDATA[$machines]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
       <code><![CDATA[$this->selectedMachineIds]]></code>
       <code><![CDATA[$this->selectedMachineIds]]></code>
     </MixedAssignment>
@@ -5536,38 +5387,7 @@
     </MixedMethodCall>
     <MixedPropertyFetch>
       <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
     </MixedPropertyFetch>
-    <NoInterfaceProperties>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-    </NoInterfaceProperties>
-    <PossiblyNullPropertyFetch>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-    </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[assignSelectedMachines]]></code>
       <code><![CDATA[assignSingleMachine]]></code>
@@ -5590,27 +5410,9 @@
       <code><![CDATA[$this->selectedMachineId]]></code>
     </RiskyTruthyFalsyComparison>
     <UndefinedMagicMethod>
-      <code><![CDATA[MachineAreaAssignment::create([
-            'team_id' => $team->id,
-            'machine_id' => $machine->id,
-            'mine_area_id' => $this->mineArea->id,
-            'assigned_by' => Auth::id(),
-            'assigned_at' => now(),
-            'notes' => $notes,
-        ])]]></code>
-      <code><![CDATA[MachineAreaAssignment::create([
-            'team_id' => $teamId,
-            'machine_id' => $machine->id,
-            'mine_area_id' => $otherArea->id,
-            'assigned_by' => Auth::id(),
-            'assigned_at' => now(),
-            'reason' => 'Removed from '.$this->mineArea->name,
-        ])]]></code>
       <code><![CDATA[count]]></code>
       <code><![CDATA[find]]></code>
       <code><![CDATA[findOrFail]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
@@ -5628,7 +5430,6 @@
       <code><![CDATA[$machine->name]]></code>
       <code><![CDATA[$machine->name]]></code>
       <code><![CDATA[$machine->status]]></code>
-      <code><![CDATA[$otherArea->id]]></code>
     </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Livewire/MachineDetail.php">
@@ -5961,8 +5762,6 @@
     <MixedArgument>
       <code><![CDATA[$disk]]></code>
       <code><![CDATA[$plan->file_path]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
       <code><![CDATA[($monthProduction / $targetValue) * 100]]></code>
     </MixedArgument>
     <MixedAssignment>
@@ -5973,21 +5772,6 @@
       <code><![CDATA[$plan]]></code>
       <code><![CDATA[$plan]]></code>
       <code><![CDATA[$targetValue]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
-      <code><![CDATA[$team]]></code>
       <code><![CDATA[$todayProduction]]></code>
       <code><![CDATA[$weekProduction]]></code>
     </MixedAssignment>
@@ -6011,61 +5795,14 @@
     <MixedPropertyFetch>
       <code><![CDATA[$plan->file_path]]></code>
       <code><![CDATA[$plan->metadata]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
-      <code><![CDATA[$team->id]]></code>
     </MixedPropertyFetch>
     <NoInterfaceProperties>
       <code><![CDATA[$now->month]]></code>
       <code><![CDATA[$now->year]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
     </NoInterfaceProperties>
     <PossiblyNullArgument>
       <code><![CDATA[$file]]></code>
     </PossiblyNullArgument>
-    <PossiblyNullPropertyFetch>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-      <code><![CDATA[Auth::user()->currentTeam]]></code>
-    </PossiblyNullPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[acknowledgeAlert]]></code>
       <code><![CDATA[activateMinePlan]]></code>
@@ -6121,14 +5858,6 @@
                 'mine_area_name' => $this->mineArea->name,
             ],
         ])]]></code>
-      <code><![CDATA[MachineAreaAssignment::create([
-            'team_id' => $team->id,
-            'machine_id' => $machine->id,
-            'mine_area_id' => $this->mineArea->id,
-            'assigned_by' => Auth::id(),
-            'assigned_at' => now(),
-            'reason' => $this->assignmentReason ?: null,
-        ])]]></code>
       <code><![CDATA[MinePlanUpload::create([
                 'team_id' => $team->id,
                 'mine_area_id' => $this->mineArea->id,
@@ -6176,11 +5905,7 @@
       <code><![CDATA[findOrFail]]></code>
       <code><![CDATA[findOrFail]]></code>
       <code><![CDATA[findOrFail]]></code>
-      <code><![CDATA[findOrFail]]></code>
-      <code><![CDATA[findOrFail]]></code>
       <code><![CDATA[resolve]]></code>
-      <code><![CDATA[where]]></code>
-      <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
       <code><![CDATA[where]]></code>
@@ -6199,14 +5924,7 @@
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$geofence->name]]></code>
       <code><![CDATA[$geofence->name]]></code>
-      <code><![CDATA[$machine->id]]></code>
-      <code><![CDATA[$machine->id]]></code>
-      <code><![CDATA[$machine->name]]></code>
-      <code><![CDATA[$machine->name]]></code>
-      <code><![CDATA[$machine->name]]></code>
       <code><![CDATA[$monthTarget->target_quantity]]></code>
-      <code><![CDATA[$otherArea->id]]></code>
-      <code><![CDATA[$otherArea->name]]></code>
     </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Livewire/MineAreaManager.php">
@@ -7856,9 +7574,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[FuelMonthlyAllocation]]></code>
     </ClassMustBeFinal>
-    <LessSpecificImplementedReturnType>
-      <code><![CDATA[\Illuminate\Database\Eloquent\Collection]]></code>
-    </LessSpecificImplementedReturnType>
     <MissingTemplateParam>
       <code><![CDATA[HasFactory]]></code>
     </MissingTemplateParam>
@@ -7880,9 +7595,6 @@
       <code><![CDATA[$this->belongsTo(Team::class)]]></code>
       <code><![CDATA[$this->hasMany(FuelTransaction::class, 'monthly_allocation_id')]]></code>
     </MixedReturnStatement>
-    <MoreSpecificImplementedParamType>
-      <code><![CDATA[static \Illuminate\Database\Eloquent\Builder|FuelMonthlyAllocation where(string $column, mixed $operator = null, mixed $value = null)]]></code>
-    </MoreSpecificImplementedParamType>
     <PossiblyFalseArgument>
       <code><![CDATA[mktime(0, 0, 0, $this->month, 1, $this->year)]]></code>
     </PossiblyFalseArgument>
@@ -7894,7 +7606,6 @@
       <code><![CDATA[isNearingLimit]]></code>
       <code><![CDATA[mineArea]]></code>
       <code><![CDATA[team]]></code>
-      <code><![CDATA[updateConsumption]]></code>
     </PossiblyUnusedMethod>
     <UndefinedMagicMethod>
       <code><![CDATA[sum]]></code>
@@ -7903,7 +7614,6 @@
     <UndefinedThisPropertyAssignment>
       <code><![CDATA[$this->consumed_liters]]></code>
       <code><![CDATA[$this->remaining_budget_zar]]></code>
-      <code><![CDATA[$this->remaining_liters]]></code>
       <code><![CDATA[$this->spent_zar]]></code>
       <code><![CDATA[$this->status]]></code>
       <code><![CDATA[$this->status]]></code>
@@ -9709,16 +9419,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[NotificationPolicy]]></code>
     </ClassMustBeFinal>
-    <MixedAssignment>
-      <code><![CDATA[$teamId]]></code>
-      <code><![CDATA[$teamId]]></code>
-      <code><![CDATA[$teamId]]></code>
-    </MixedAssignment>
-    <MixedPropertyFetch>
-      <code><![CDATA[$user->currentTeam->id]]></code>
-      <code><![CDATA[$user->currentTeam->id]]></code>
-      <code><![CDATA[$user->currentTeam->id]]></code>
-    </MixedPropertyFetch>
     <PossiblyUnusedMethod>
       <code><![CDATA[delete]]></code>
       <code><![CDATA[update]]></code>
@@ -9728,11 +9428,6 @@
     <PossiblyUnusedParam>
       <code><![CDATA[$user]]></code>
     </PossiblyUnusedParam>
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$user->currentTeam]]></code>
-      <code><![CDATA[$user->currentTeam]]></code>
-      <code><![CDATA[$user->currentTeam]]></code>
-    </UndefinedMagicPropertyFetch>
   </file>
   <file src="app/Policies/ReportPolicy.php">
     <ClassMustBeFinal>
@@ -13135,77 +12830,17 @@
       <code><![CDATA[($billingCycle === 'yearly' ? $plan->yearly_price : $plan->price) * 100]]></code>
     </InvalidOperand>
     <MixedArgument>
-      <code><![CDATA[$charge['currency'] ?? 'ZAR']]></code>
-      <code><![CDATA[$invoiceData['currency'] ?? 'ZAR']]></code>
-      <code><![CDATA[$metadata]]></code>
-      <code><![CDATA[$payment]]></code>
-      <code><![CDATA[$subscriptionData['status'] ?? 'active']]></code>
       <code><![CDATA[config('services.paystack.secret', '')]]></code>
     </MixedArgument>
     <MixedArrayAccess>
-      <code><![CDATA[$charge['amount']]]></code>
-      <code><![CDATA[$charge['channel']]]></code>
-      <code><![CDATA[$charge['currency']]]></code>
-      <code><![CDATA[$charge['metadata']]]></code>
-      <code><![CDATA[$charge['reference']]]></code>
-      <code><![CDATA[$invoiceData['amount']]]></code>
-      <code><![CDATA[$invoiceData['amount']]]></code>
-      <code><![CDATA[$invoiceData['created_at']]]></code>
-      <code><![CDATA[$invoiceData['currency']]]></code>
-      <code><![CDATA[$invoiceData['invoice_code']]]></code>
-      <code><![CDATA[$invoiceData['invoice_code']]]></code>
-      <code><![CDATA[$invoiceData['paid']]]></code>
-      <code><![CDATA[$invoiceData['paid']]]></code>
-      <code><![CDATA[$invoiceData['subscription']]]></code>
-      <code><![CDATA[$invoiceData['subscription']['subscription_code']]]></code>
-      <code><![CDATA[$invoiceData['transaction']]]></code>
-      <code><![CDATA[$invoiceData['transaction']['reference']]]></code>
-      <code><![CDATA[$metadata['plan_id']]]></code>
-      <code><![CDATA[$metadata['team_id']]]></code>
-      <code><![CDATA[$metadata['team_id']]]></code>
       <code><![CDATA[$response['data']['authorization_url']]]></code>
       <code><![CDATA[$response['data']['authorization_url']]]></code>
       <code><![CDATA[$response['data']['reference']]]></code>
       <code><![CDATA[$response['data']['reference']]]></code>
-      <code><![CDATA[$subscriptionData['customer']]]></code>
-      <code><![CDATA[$subscriptionData['customer']['customer_code']]]></code>
-      <code><![CDATA[$subscriptionData['email_token']]]></code>
-      <code><![CDATA[$subscriptionData['metadata']]]></code>
-      <code><![CDATA[$subscriptionData['next_payment_date']]]></code>
-      <code><![CDATA[$subscriptionData['plan']]]></code>
-      <code><![CDATA[$subscriptionData['plan']['plan_code']]]></code>
-      <code><![CDATA[$subscriptionData['status']]]></code>
-      <code><![CDATA[$subscriptionData['subscription_code']]]></code>
-      <code><![CDATA[$subscriptionData['subscription_code']]]></code>
-      <code><![CDATA[$subscriptionData['subscription_code']]]></code>
-      <code><![CDATA[$subscriptionData['subscription_code']]]></code>
     </MixedArrayAccess>
     <MixedAssignment>
-      <code><![CDATA[$charge]]></code>
-      <code><![CDATA[$invoiceData]]></code>
-      <code><![CDATA[$metadata]]></code>
-      <code><![CDATA[$metadata]]></code>
-      <code><![CDATA[$payment]]></code>
-      <code><![CDATA[$planCode]]></code>
-      <code><![CDATA[$planId]]></code>
-      <code><![CDATA[$planId]]></code>
-      <code><![CDATA[$subscriptionCode]]></code>
-      <code><![CDATA[$subscriptionData]]></code>
-      <code><![CDATA[$subscriptionData]]></code>
-      <code><![CDATA[$teamId]]></code>
-      <code><![CDATA[$teamId]]></code>
       <code><![CDATA[$this->secretKey]]></code>
-      <code><![CDATA[$txReference]]></code>
     </MixedAssignment>
-    <MixedMethodCall>
-      <code><![CDATA[exists]]></code>
-      <code><![CDATA[where]]></code>
-    </MixedMethodCall>
-    <MixedOperand>
-      <code><![CDATA[$charge['amount'] ?? 0]]></code>
-      <code><![CDATA[$invoiceData['amount'] ?? 0]]></code>
-      <code><![CDATA[$invoiceData['amount'] ?? 0]]></code>
-    </MixedOperand>
     <MixedReturnStatement>
       <code><![CDATA[$response->json() ?? []]]></code>
       <code><![CDATA[$response->json() ?? []]]></code>
@@ -13251,90 +12886,18 @@
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[! $customerCode]]></code>
       <code><![CDATA[! $planCode]]></code>
-      <code><![CDATA[! $planId]]></code>
       <code><![CDATA[! $subscription->paystack_email_token]]></code>
       <code><![CDATA[! $subscription->paystack_email_token]]></code>
       <code><![CDATA[! $subscription->paystack_subscription_code]]></code>
       <code><![CDATA[! $subscription->paystack_subscription_code]]></code>
       <code><![CDATA[! $subscription->paystack_subscription_code]]></code>
-      <code><![CDATA[! $teamId]]></code>
-      <code><![CDATA[! $teamId]]></code>
-      <code><![CDATA[$invoiceData['paid'] ?? false]]></code>
-      <code><![CDATA[$invoiceData['paid'] ?? false]]></code>
-      <code><![CDATA[$planCode]]></code>
       <code><![CDATA[$subscription?->paystack_customer_code]]></code>
-      <code><![CDATA[$txReference]]></code>
     </RiskyTruthyFalsyComparison>
     <UndefinedMagicMethod>
-      <code><![CDATA[Invoice::updateOrCreate(
-                ['paystack_invoice_code' => $invoiceData['invoice_code']],
-                [
-                    'team_id' => $subscription->team_id,
-                    'subscription_id' => $subscription->id,
-                    'payment_id' => $payment?->id,
-                    'invoice_number' => $invoiceData['invoice_code'],
-                    'subtotal' => ($invoiceData['amount'] ?? 0) / 100,
-                    'tax' => 0,
-                    'total' => ($invoiceData['amount'] ?? 0) / 100,
-                    'currency' => strtoupper($invoiceData['currency'] ?? 'ZAR'),
-                    'status' => ($invoiceData['paid'] ?? false) ? 'paid' : 'open',
-                    'issued_at' => isset($invoiceData['created_at'])
-                        ? date('Y-m-d H:i:s', (int) strtotime((string) $invoiceData['created_at']))
-                        : now()->toDateTimeString(),
-                    'paid_at' => ($invoiceData['paid'] ?? false) ? now()->toDateTimeString() : null,
-                    'pdf_url' => null,
-                    'line_items' => [$invoiceData],
-                ]
-            )]]></code>
-      <code><![CDATA[MachineAllocation::create([
-                    'team_id' => $payment->team_id,
-                    'class' => $class,
-                    'delta' => $quantity,
-                    'source' => 'purchase',
-                    'payment_id' => $payment->id,
-                    'subscription_id' => $payment->subscription_id,
-                ])]]></code>
-      <code><![CDATA[MachineAllocation::withoutGlobalScopes()]]></code>
-      <code><![CDATA[Payment::firstOrCreate(
-                ['paystack_reference' => $charge['reference']],
-                [
-                    'team_id' => $teamId,
-                    'subscription_id' => $subscription?->id,
-                    'paystack_invoice_id' => null,
-                    'amount' => ($charge['amount'] ?? 0) / 100,
-                    'currency' => strtoupper($charge['currency'] ?? 'ZAR'),
-                    'status' => 'succeeded',
-                    'payment_method' => $charge['channel'] ?? 'card',
-                    'paid_at' => now(),
-                    'metadata' => $metadata,
-                ]
-            )]]></code>
-      <code><![CDATA[Subscription::updateOrCreate(
-                ['paystack_subscription_code' => $subscriptionData['subscription_code']],
-                [
-                    'team_id' => $teamId,
-                    'subscription_plan_id' => $planId,
-                    'paystack_customer_code' => $subscriptionData['customer']['customer_code'] ?? null,
-                    'paystack_email_token' => $subscriptionData['email_token'] ?? null,
-                    'status' => $this->mapPaystackStatus($subscriptionData['status'] ?? 'active'),
-                    'current_period_start' => now()->toDateTimeString(),
-                    'current_period_end' => $nextPaymentDate,
-                ]
-            )]]></code>
       <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[first]]></code>
-      <code><![CDATA[orWhere]]></code>
     </UndefinedMagicMethod>
     <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$payment?->id]]></code>
-      <code><![CDATA[$subscription->current_period_end]]></code>
-      <code><![CDATA[$subscription->id]]></code>
       <code><![CDATA[$subscription->paystack_customer_code]]></code>
-      <code><![CDATA[$subscription->team_id]]></code>
-      <code><![CDATA[$subscription?->id]]></code>
       <code><![CDATA[$subscription?->paystack_customer_code]]></code>
     </UndefinedMagicPropertyFetch>
   </file>

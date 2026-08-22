@@ -18,6 +18,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static FuelMonthlyAllocation findOrFail(mixed $id, array $columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
+/**
+ * @property int $id
+ * @property int $team_id
+ * @property int|null $mine_area_id
+ * @property numeric-string|float $remaining_liters
+ * @property numeric-string|float|null $fuel_price_per_liter
+ */
 class FuelMonthlyAllocation extends Model
 {
     use HasFactory, HasTeamFilters;
