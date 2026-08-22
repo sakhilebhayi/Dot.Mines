@@ -259,6 +259,17 @@ class IntegrationService
             // type hint. Never caught because nothing had ever synced real
             // data through it before.
             if (! ($machines['success'] ?? false)) {
+                // A rejected fetch is exactly what the API-health panel
+                // exists to show -- record it like the exception path does.
+                $integration->update([
+                    'last_sync_stats' => [
+                        'finished_at' => now()->toIso8601String(),
+                        'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+                        'failed' => true,
+                        'reason' => (string) ($machines['error'] ?? 'Failed to fetch machines'),
+                    ],
+                ]);
+
                 return [
                     'success' => false,
                     'error' => $machines['error'] ?? 'Failed to fetch machines',
