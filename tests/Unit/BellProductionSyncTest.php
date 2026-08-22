@@ -512,4 +512,27 @@ XML,
         $this->assertSame(2, $stats['production_records_total']);
         $this->assertSame(2, $stats['production_records_delta']);
     }
+
+    public function test_a_rejected_fetch_records_failure_statistics(): void
+    {
+        Http::fake([
+            self::TOKEN_URL => Http::response([
+                'access_token' => 'fake-access-token',
+                'token_type' => 'Bearer',
+                'expires_in' => 18000,
+            ], 200),
+            self::FLEET_URL => Http::response('nope', 405),
+        ]);
+
+        $team = Team::factory()->create();
+        $integration = $this->connectedBellIntegration($team);
+
+        $result = app(IntegrationService::class)->syncMachines($integration);
+
+        $this->assertFalse($result['success']);
+        $stats = $integration->fresh()->last_sync_stats;
+        $this->assertTrue($stats['failed']);
+        $this->assertArrayHasKey('duration_ms', $stats);
+        $this->assertNotSame('', $stats['reason']);
+    }
 }
