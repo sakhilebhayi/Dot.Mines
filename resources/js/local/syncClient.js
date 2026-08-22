@@ -18,12 +18,29 @@ const SCOPE_STORES = { fleet: 'fleet', production: 'production', notifications: 
 const TOMBSTONE_STORES = { machines: 'fleet', production_records: 'production', notifications: 'notifications', mine_areas: 'reference' };
 
 const INTERVAL_MS = 60000;
+// With a live websocket the poller is only a heartbeat (brief §15):
+// events trigger catch-up pulls, so frequent polling would be waste.
+const REALTIME_INTERVAL_MS = 300000;
 const BACKOFF_MS = [5000, 15000, 60000];
 const MAX_PAGES_PER_RUN = 10;
 
 let failures = 0;
 let timer = null;
 let stopped = false;
+let realtimeConnected = false;
+
+function interval() {
+	return realtimeConnected ? REALTIME_INTERVAL_MS : INTERVAL_MS;
+}
+
+export function setRealtimeConnected(connected) {
+	realtimeConnected = connected;
+}
+
+/** One immediate pull (debounced by callers); used for realtime catch-up. */
+export function requestCatchUp() {
+	if (!stopped) run();
+}
 
 async function ensureContext(context) {
 	const stored = await localData.getMeta('context');
@@ -81,7 +98,7 @@ async function pullOnce() {
 
 async function run() {
 	if (stopped || document.hidden || !navigator.onLine) {
-		schedule(INTERVAL_MS);
+		schedule(interval());
 		if (!navigator.onLine) connectivity.set('offline');
 		return;
 	}
@@ -92,7 +109,7 @@ async function run() {
 		await pullOnce();
 		failures = 0;
 		connectivity.set('live', { syncedAt: Date.now() });
-		schedule(INTERVAL_MS);
+		schedule(interval());
 	} catch (error) {
 		if (stopped) return;
 		failures++;
