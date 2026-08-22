@@ -55,7 +55,7 @@ class BillingPortal extends Component
     }
 
     /**
-     * @return array{purchased: array{adt: int, heavy: int}, occupied: array{adt: int, heavy: int}, available: array{adt: int, heavy: int}, trial: bool, trial_allowance: int, over_allocated: bool}
+     * @return array{purchased: array{adt: int, heavy: int}, occupied: array{adt: int, heavy: int}, available: array{adt: int, heavy: int}, trial: bool, trial_allowance: int, over_allocated: bool, suspended: bool}
      */
     public function getAllocationSummaryProperty(): array
     {

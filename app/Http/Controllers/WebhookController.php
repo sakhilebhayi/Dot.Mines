@@ -86,6 +86,7 @@ class WebhookController extends Controller
                     Log::warning('Paystack invoice payment failed', [
                         'reference' => $reference ?? 'unknown',
                     ]);
+                    $paystackService->handlePaymentFailed($event);
                     break;
 
                 default:
