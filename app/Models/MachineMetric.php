@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\Sync\SyncSequence;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\MachineMetricFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,20 +42,14 @@ use Illuminate\Support\Facades\DB;
  * @property float|null $tire_pressure_front_right
  * @property float|null $tire_pressure_rear_left
  * @property float|null $tire_pressure_rear_right
- * @property array|null $raw_data
+ * @property array<string, mixed>|null $raw_data
  * @property Carbon $recorded_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MachineMetric where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MachineMetric whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MachineMetric orderBy(string $column, string $direction = 'asc')
- * @method static MachineMetric|null find(mixed $id, array $columns = ['*'])
- * @method static MachineMetric findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class MachineMetric extends Model
 {
+    /** @use HasFactory<MachineMetricFactory> */
     use HasFactory, HasTeamFilters;
 
     /**
@@ -73,6 +68,7 @@ class MachineMetric extends Model
         });
     }
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -102,6 +98,7 @@ class MachineMetric extends Model
         'recorded_at',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'latitude' => 'float',
         'longitude' => 'float',
@@ -133,6 +130,8 @@ class MachineMetric extends Model
 
     /**
      * Get the machine this metric belongs to
+     *
+     * @return BelongsTo<Machine, $this>
      */
     public function machine(): BelongsTo
     {
@@ -141,6 +140,8 @@ class MachineMetric extends Model
 
     /**
      * Get the team this metric belongs to
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {

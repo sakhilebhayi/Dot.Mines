@@ -23,6 +23,7 @@ class SendNotificationEmailJob implements ShouldQueue
     public int $timeout = 60;
 
     /** @var array<int> */
+    /** @var list<int> */
     public array $backoff = [30, 120, 300];
 
     /**

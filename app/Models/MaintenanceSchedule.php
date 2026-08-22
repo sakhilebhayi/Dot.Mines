@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -32,23 +32,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $status
  * @property string|float|null $estimated_cost
  * @property float|null $estimated_duration_hours
- * @property array|null $required_parts
- * @property array|null $required_tools
+ * @property array<string, mixed>|null $required_parts
+ * @property array<string, mixed>|null $required_tools
  * @property bool $auto_generate_work_order
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceSchedule where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceSchedule whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MaintenanceSchedule orderBy(string $column, string $direction = 'asc')
- * @method static MaintenanceSchedule|null find(mixed $id, array $columns = ['*'])
- * @method static MaintenanceSchedule findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class MaintenanceSchedule extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -74,6 +68,7 @@ class MaintenanceSchedule extends Model
         'auto_generate_work_order',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'last_service_date' => 'date',
         'next_service_date' => 'date',
@@ -85,16 +80,19 @@ class MaintenanceSchedule extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
+    /** @return HasMany<MaintenanceRecord, $this> */
     public function maintenanceRecords(): HasMany
     {
         return $this->hasMany(MaintenanceRecord::class);
@@ -129,6 +127,10 @@ class MaintenanceSchedule extends Model
     /**
      * Scope for due schedules
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeDue($query)
     {
         return $query->where('status', 'due');
@@ -136,6 +138,10 @@ class MaintenanceSchedule extends Model
 
     /**
      * Scope for overdue schedules
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeOverdue($query)
     {

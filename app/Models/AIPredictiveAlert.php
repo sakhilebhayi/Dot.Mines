@@ -3,16 +3,23 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Database\Factories\AIPredictiveAlertFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read AIAgent|null $aiAgent
+ */
 class AIPredictiveAlert extends Model
 {
+    /** @use HasFactory<AIPredictiveAlertFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $table = 'ai_predictive_alerts';
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'ai_agent_id',
@@ -32,6 +39,7 @@ class AIPredictiveAlert extends Model
         'was_accurate',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'predictions' => 'array',
         'probability' => 'float',
@@ -42,31 +50,43 @@ class AIPredictiveAlert extends Model
         'was_accurate' => 'boolean',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<AIAgent, $this> */
     public function aiAgent(): BelongsTo
     {
         return $this->belongsTo(AIAgent::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class, 'related_machine_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function acknowledger(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeUnacknowledged($query)
     {
         return $query->where('is_acknowledged', false);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeCritical($query)
     {
         return $query->where('severity', 'critical');

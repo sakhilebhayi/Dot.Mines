@@ -3,16 +3,23 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Database\Factories\AIRecommendationFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string|null $status
+ */
 class AIRecommendation extends Model
 {
+    /** @use HasFactory<AIRecommendationFactory> */
     use HasFactory, HasTeamFilters;
 
     protected $table = 'ai_recommendations';
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'ai_agent_id',
@@ -36,6 +43,7 @@ class AIRecommendation extends Model
         'implementation_notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'data' => 'array',
         'impact_analysis' => 'array',
@@ -45,51 +53,70 @@ class AIRecommendation extends Model
         'implemented_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<AIAgent, $this> */
     public function aiAgent(): BelongsTo
     {
         return $this->belongsTo(AIAgent::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class, 'related_machine_id');
     }
 
+    /** @return BelongsTo<Route, $this> */
     public function route(): BelongsTo
     {
         return $this->belongsTo(Route::class, 'related_route_id');
     }
 
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class, 'related_mine_area_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function implementer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'implemented_by');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeHighPriority($query)
     {
         return $query->whereIn('priority', ['critical', 'high']);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeByCategory($query, string $category)
     {
         return $query->where('category', $category);

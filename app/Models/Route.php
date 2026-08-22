@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\RouteFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,24 +33,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $route_type
  * @property int|null $speed_limit
  * @property string $status
- * @property array|null $metadata
- * @property array|null $route_geometry
+ * @property array<string, mixed>|null $metadata
+ * @property array<string, mixed>|null $route_geometry
  * @property float $fuel_savings
  * @property int $time_savings
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Route where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Route whereIn(string $column, array<string|int> $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Route orderBy(string $column, string $direction = 'asc')
- * @method static Route|null find(mixed $id, array<string> $columns = ['*'])
- * @method static Route findOrFail(mixed $id, array<string> $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection<int,Route> all(array<string> $columns = ['*'])
+ * @property-read Machine|null $machine
  */
 class Route extends Model
 {
+    /** @use HasFactory<RouteFactory> */
     use HasFactory, HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -70,6 +67,7 @@ class Route extends Model
         'route_geometry',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'start_latitude' => 'float',
         'start_longitude' => 'float',
@@ -87,6 +85,8 @@ class Route extends Model
 
     /**
      * Get the team that owns the route.
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -95,6 +95,8 @@ class Route extends Model
 
     /**
      * Get the machine this route is planned for.
+     *
+     * @return BelongsTo<Machine, $this>
      */
     public function machine(): BelongsTo
     {
@@ -103,6 +105,8 @@ class Route extends Model
 
     /**
      * Get the mine area this route belongs to.
+     *
+     * @return BelongsTo<MineArea, $this>
      */
     public function mineArea(): BelongsTo
     {
@@ -111,6 +115,8 @@ class Route extends Model
 
     /**
      * Get the waypoints for this route.
+     *
+     * @return HasMany<Waypoint, $this>
      */
     public function waypoints(): HasMany
     {

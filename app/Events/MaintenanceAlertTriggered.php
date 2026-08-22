@@ -2,43 +2,37 @@
 
 namespace App\Events;
 
+use App\Models\Machine;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 
 class MaintenanceAlertTriggered implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $machine;
+    public function __construct(
+        public Machine $machine,
+        public float $probability,
+        public Carbon $predictedDate,
+        public int $teamId,
+    ) {}
 
-    public $probability;
-
-    public $predictedDate;
-
-    public $teamId;
-
-    public function __construct($machine, $probability, $predictedDate, $teamId)
-    {
-        $this->machine = $machine;
-        $this->probability = $probability;
-        $this->predictedDate = $predictedDate;
-        $this->teamId = $teamId;
-    }
-
-    public function broadcastOn()
+    public function broadcastOn(): PrivateChannel
     {
         return new PrivateChannel("team.{$this->teamId}.alerts");
     }
 
-    public function broadcastAs()
+    public function broadcastAs(): string
     {
         return 'maintenance.alert';
     }
 
-    public function broadcastWith()
+    /** @return array<string, mixed> */
+    public function broadcastWith(): array
     {
         return [
             'machine_id' => $this->machine->id,

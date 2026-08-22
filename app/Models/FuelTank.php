@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Database\Factories\FuelTankFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,18 +34,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float $available_capacity
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|FuelTank where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelTank whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|FuelTank orderBy(string $column, string $direction = 'asc')
- * @method static FuelTank|null find(mixed $id, array $columns = ['*'])
- * @method static FuelTank findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class FuelTank extends Model
 {
+    /** @use HasFactory<FuelTankFactory> */
     use HasFactory, HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -62,6 +59,7 @@ class FuelTank extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'capacity_liters' => 'decimal:2',
         'current_level_liters' => 'decimal:2',
@@ -74,16 +72,19 @@ class FuelTank extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return HasMany<FuelTransaction, $this> */
     public function transactions(): HasMany
     {
         return $this->hasMany(FuelTransaction::class);
     }
 
+    /** @return HasMany<FuelAlert, $this> */
     public function alerts(): HasMany
     {
         return $this->hasMany(FuelAlert::class);
@@ -91,6 +92,8 @@ class FuelTank extends Model
 
     /**
      * Belongs to a mine area (optional)
+     *
+     * @return BelongsTo<MineArea, $this>
      */
     public function mineArea(): BelongsTo
     {
@@ -136,6 +139,10 @@ class FuelTank extends Model
     /**
      * Scope for active tanks
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -144,6 +151,10 @@ class FuelTank extends Model
     /**
      * Scope for low fuel tanks
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeLowFuel($query)
     {
         return $query->whereRaw('current_level_liters < minimum_level_liters');
@@ -151,6 +162,10 @@ class FuelTank extends Model
 
     /**
      * Scope for critical fuel tanks
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCritical($query)
     {

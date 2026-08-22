@@ -25,6 +25,7 @@ class SyncMachineMetricsJob implements ShouldQueue
     // MachineLocationUpdateJob, MachineStatusMonitoringJob), which all
     // already had an explicit backoff -- this one didn't, so its 2 retries
     // fired back-to-back instead of giving a transient failure time to clear.
+    /** @var list<int> */
     public array $backoff = [30, 120]; // 30s, 2 mins
 
     /**

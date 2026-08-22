@@ -3,14 +3,22 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property mixed|null $km_at_replacement
+ * @property mixed|null $hours_at_replacement
+ * @property int|null $expected_lifespan_km
+ * @property int|null $expected_lifespan_hours
+ * @property mixed|null $warranty_expiry
+ */
 class ComponentReplacement extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -31,6 +39,7 @@ class ComponentReplacement extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'replaced_at' => 'datetime',
         'hours_at_replacement' => 'integer',
@@ -43,17 +52,21 @@ class ComponentReplacement extends Model
 
     /**
      * Relationships
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
+    /** @return BelongsTo<MaintenanceRecord, $this> */
     public function maintenanceRecord(): BelongsTo
     {
         return $this->belongsTo(MaintenanceRecord::class);
@@ -62,16 +75,28 @@ class ComponentReplacement extends Model
     /**
      * Scopes
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeComponent($query, string $component)
     {
         return $query->where('component_name', $component);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeRecentReplacements($query, int $days = 30)
     {
         return $query->where('replaced_at', '>=', now()->subDays($days));
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeUnderWarranty($query)
     {
         return $query->where('warranty_expiry', '>=', now());

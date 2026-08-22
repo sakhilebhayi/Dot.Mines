@@ -3,16 +3,20 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property Carbon|string|null $started_at
+ */
 class AIAnalysisSession extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
     protected $table = 'ai_analysis_sessions';
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'ai_agent_id',
@@ -28,6 +32,7 @@ class AIAnalysisSession extends Model
         'error_message',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'input_parameters' => 'array',
         'results' => 'array',
@@ -35,16 +40,19 @@ class AIAnalysisSession extends Model
         'completed_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<AIAgent, $this> */
     public function aiAgent(): BelongsTo
     {
         return $this->belongsTo(AIAgent::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

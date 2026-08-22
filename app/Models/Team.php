@@ -7,6 +7,7 @@ use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
@@ -70,7 +71,8 @@ class Team extends JetstreamTeam
     /**
      * Get the roles for this team.
      */
-    public function roles()
+    /** @return HasMany<Role, $this> */
+    public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
     }
@@ -88,7 +90,8 @@ class Team extends JetstreamTeam
     /**
      * Get the permissions for this team.
      */
-    public function permissions()
+    /** @return HasMany<Permission, $this> */
+    public function permissions(): HasMany
     {
         return $this->hasMany(Permission::class);
     }
@@ -96,7 +99,8 @@ class Team extends JetstreamTeam
     /**
      * Get the machines for this team.
      */
-    public function machines()
+    /** @return HasMany<Machine, $this> */
+    public function machines(): HasMany
     {
         return $this->hasMany(Machine::class);
     }
@@ -104,7 +108,8 @@ class Team extends JetstreamTeam
     /**
      * Get the geofences for this team.
      */
-    public function geofences()
+    /** @return HasMany<Geofence, $this> */
+    public function geofences(): HasMany
     {
         return $this->hasMany(Geofence::class);
     }
@@ -120,7 +125,8 @@ class Team extends JetstreamTeam
     /**
      * Get the integrations for this team.
      */
-    public function integrations()
+    /** @return HasMany<Integration, $this> */
+    public function integrations(): HasMany
     {
         return $this->hasMany(Integration::class);
     }

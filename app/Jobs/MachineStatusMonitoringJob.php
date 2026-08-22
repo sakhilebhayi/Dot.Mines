@@ -24,6 +24,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
 
     public int $timeout = 60;
 
+    /** @var list<int> */
     public array $backoff = [30, 120]; // 30s, 2 mins
 
     /**

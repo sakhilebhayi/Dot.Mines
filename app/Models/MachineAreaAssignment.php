@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,18 +21,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MachineAreaAssignment where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MachineAreaAssignment whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MachineAreaAssignment orderBy(string $column, string $direction = 'asc')
- * @method static MachineAreaAssignment|null find(mixed $id, array $columns = ['*'])
- * @method static MachineAreaAssignment findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class MachineAreaAssignment extends Model
 {
     protected $table = 'machine_mine_area_assignments';
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -43,36 +38,49 @@ class MachineAreaAssignment extends Model
         'notes',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'assigned_at' => 'datetime',
         'unassigned_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function assignedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_by');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive($query)
     {
         return $query->whereNull('unassigned_at');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam($query, $teamId)
     {
         return $query->where('team_id', $teamId);

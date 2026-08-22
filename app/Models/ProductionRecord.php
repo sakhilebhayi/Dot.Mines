@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasSyncVersion;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,20 +23,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|float $target_quantity
  * @property string|null $notes
  * @property string $status
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property float $variance_percentage
  * @property bool $is_above_target
  * @property Carbon|null $deleted_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionRecord where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionRecord whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|ProductionRecord orderBy(string $column, string $direction = 'asc')
- * @method static ProductionRecord|null find(mixed $id, array $columns = ['*'])
- * @method static ProductionRecord findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
- *
  * @property int|null $sync_version
  */
 class ProductionRecord extends Model
@@ -43,6 +36,7 @@ class ProductionRecord extends Model
     use HasSyncVersion;
     use SoftDeletes;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -57,6 +51,7 @@ class ProductionRecord extends Model
         'metadata',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'quantity_produced' => 'decimal:2',
         'target_quantity' => 'decimal:2',
@@ -64,36 +59,55 @@ class ProductionRecord extends Model
         'metadata' => 'array',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<MineArea, $this> */
     public function mineArea(): BelongsTo
     {
         return $this->belongsTo(MineArea::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam($query, $teamId)
     {
         return $query->where('team_id', $teamId);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeByStatus($query, $status)
     {
         return $query->where('status', $status);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeBetweenDates($query, $startDate, $endDate)
     {
         return $query->whereBetween('record_date', [$startDate, $endDate]);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForMineArea($query, $mineAreaId)
     {
         return $query->where('mine_area_id', $mineAreaId);

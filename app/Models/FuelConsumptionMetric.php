@@ -3,14 +3,20 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property float|numeric-string|null $fuel_consumed_liters
+ * @property float|numeric-string|null $distance_traveled_km
+ * @property float|numeric-string|null $idle_fuel_consumed
+ * @property float|numeric-string|null $operating_hours
+ */
 class FuelConsumptionMetric extends Model
 {
-    use HasFactory, HasTeamFilters;
+    use HasTeamFilters;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -27,6 +33,7 @@ class FuelConsumptionMetric extends Model
         'metadata',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'date' => 'date',
         'fuel_consumed_liters' => 'decimal:2',
@@ -42,11 +49,13 @@ class FuelConsumptionMetric extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /** @return BelongsTo<Machine, $this> */
     public function machine(): BelongsTo
     {
         return $this->belongsTo(Machine::class);

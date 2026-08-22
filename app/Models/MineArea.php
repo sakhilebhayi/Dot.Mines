@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasSyncVersion;
 use Carbon\Carbon;
 use Database\Factories\MineAreaFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $name
  * @property string|null $description
  * @property string|null $location
- * @property array|null $coordinates
+ * @property array<string, mixed>|null $coordinates
  * @property float|null $center_latitude
  * @property float|null $center_longitude
  * @property float|null $latitude
@@ -30,18 +31,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $status
  * @property string|null $manager_name
  * @property string|null $manager_contact
- * @property array|null $metadata
+ * @property array<string, mixed>|null $metadata
  * @property Carbon|null $deleted_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|MineArea where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|MineArea whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|MineArea orderBy(string $column, string $direction = 'asc')
- * @method static MineArea|null find(mixed $id, array $columns = ['*'])
- * @method static MineArea findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
- *
  * @property int|null $sync_version
  */
 class MineArea extends Model
@@ -49,6 +42,7 @@ class MineArea extends Model
     /** @use HasFactory<MineAreaFactory> */
     use HasFactory, HasSyncVersion, SoftDeletes;
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'name',
@@ -66,6 +60,7 @@ class MineArea extends Model
         'metadata',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'latitude' => 'float',
         'longitude' => 'float',
@@ -77,6 +72,8 @@ class MineArea extends Model
 
     /**
      * Get the team this mine area belongs to
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -85,6 +82,8 @@ class MineArea extends Model
 
     /**
      * Get machines assigned to this mine area
+     *
+     * @return HasMany<Machine, $this>
      */
     public function machines(): HasMany
     {
@@ -93,6 +92,8 @@ class MineArea extends Model
 
     /**
      * Get geofences in this mine area
+     *
+     * @return HasMany<Geofence, $this>
      */
     public function geofences(): HasMany
     {
@@ -101,6 +102,8 @@ class MineArea extends Model
 
     /**
      * Get alerts for this mine area
+     *
+     * @return HasMany<Alert, $this>
      */
     public function alerts(): HasMany
     {
@@ -109,6 +112,8 @@ class MineArea extends Model
 
     /**
      * Get production records for this mine area
+     *
+     * @return HasMany<ProductionRecord, $this>
      */
     public function productionRecords(): HasMany
     {
@@ -117,6 +122,8 @@ class MineArea extends Model
 
     /**
      * Get production targets for this mine area
+     *
+     * @return HasMany<ProductionTarget, $this>
      */
     public function productionTargets(): HasMany
     {
@@ -125,6 +132,8 @@ class MineArea extends Model
 
     /**
      * Get production forecasts for this mine area
+     *
+     * @return HasMany<ProductionForecast, $this>
      */
     public function productionForecasts(): HasMany
     {
@@ -133,6 +142,8 @@ class MineArea extends Model
 
     /**
      * Get mine plan uploads for this mine area
+     *
+     * @return HasMany<MinePlanUpload, $this>
      */
     public function minePlanUploads(): HasMany
     {
@@ -141,6 +152,8 @@ class MineArea extends Model
 
     /**
      * Get routes in this mine area
+     *
+     * @return HasMany<Route, $this>
      */
     public function routes(): HasMany
     {
@@ -149,6 +162,8 @@ class MineArea extends Model
 
     /**
      * Get assignment history for this mine area
+     *
+     * @return HasMany<MachineAreaAssignment, $this>
      */
     public function machineAssignments(): HasMany
     {
@@ -158,6 +173,10 @@ class MineArea extends Model
     /**
      * Scope to filter by team
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeForTeam($query, $teamId)
     {
         return $query->where('team_id', $teamId);
@@ -165,6 +184,10 @@ class MineArea extends Model
 
     /**
      * Scope to filter by status
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeByStatus($query, $status)
     {

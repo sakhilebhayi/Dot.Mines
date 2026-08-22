@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -28,21 +28,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon|null $due_at
  * @property Carbon|null $paid_at
  * @property string|null $pdf_url
- * @property array|null $line_items
+ * @property array<string, mixed>|null $line_items
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Invoice where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Invoice whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Invoice orderBy(string $column, string $direction = 'asc')
- * @method static Invoice|null find(mixed $id, array $columns = ['*'])
- * @method static Invoice findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class Invoice extends Model
 {
-    use HasFactory;
-
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'subscription_id',
@@ -61,6 +53,7 @@ class Invoice extends Model
         'line_items',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'subtotal' => 'float',
         'tax' => 'float',
@@ -75,6 +68,8 @@ class Invoice extends Model
 
     /**
      * Get the team that owns the invoice.
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -83,6 +78,8 @@ class Invoice extends Model
 
     /**
      * Get the subscription for this invoice.
+     *
+     * @return BelongsTo<Subscription, $this>
      */
     public function subscription(): BelongsTo
     {
@@ -91,6 +88,8 @@ class Invoice extends Model
 
     /**
      * Get the payment for this invoice.
+     *
+     * @return BelongsTo<Payment, $this>
      */
     public function payment(): BelongsTo
     {
@@ -133,6 +132,10 @@ class Invoice extends Model
     /**
      * Scope query to paid invoices
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopePaid($query)
     {
         return $query->where('status', 'paid');
@@ -140,6 +143,10 @@ class Invoice extends Model
 
     /**
      * Scope query to unpaid invoices
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeUnpaid($query)
     {

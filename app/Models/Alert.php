@@ -6,6 +6,7 @@ use App\Services\QueryCacheService;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Database\Factories\AlertFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,13 +39,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Team|null $team
  * @property-read User|null $acknowledgedBy
  * @property-read User|null $resolvedBy
- *
- * @method static \Illuminate\Database\Eloquent\Builder|Alert where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Alert whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|Alert orderBy(string $column, string $direction = 'asc')
- * @method static Alert|null find(mixed $id, array $columns = ['*'])
- * @method static Alert findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
+ * @property mixed|null $message
  */
 class Alert extends Model
 {
@@ -64,6 +59,7 @@ class Alert extends Model
         'dismissed_unresolved',
     ];
 
+    /** @var list<string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -81,6 +77,7 @@ class Alert extends Model
         'metadata', // JSON for rule details
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'triggered_at' => 'datetime',
         'acknowledged_at' => 'datetime',
@@ -107,6 +104,8 @@ class Alert extends Model
 
     /**
      * Get the machine this alert is about
+     *
+     * @return BelongsTo<Machine, $this>
      */
     public function machine(): BelongsTo
     {
@@ -115,6 +114,8 @@ class Alert extends Model
 
     /**
      * Get the mine area this alert is about
+     *
+     * @return BelongsTo<MineArea, $this>
      */
     public function mineArea(): BelongsTo
     {
@@ -123,6 +124,8 @@ class Alert extends Model
 
     /**
      * Get the team this alert belongs to
+     *
+     * @return BelongsTo<Team, $this>
      */
     public function team(): BelongsTo
     {
@@ -172,6 +175,10 @@ class Alert extends Model
     /**
      * Scope to active alerts
      */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -179,6 +186,10 @@ class Alert extends Model
 
     /**
      * Scope to critical alerts
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeCritical($query)
     {

@@ -22,5 +22,6 @@ class SyncTombstone extends Model
 {
     public const UPDATED_AT = null;
 
+    /** @var list<string> */
     protected $guarded = [];
 }

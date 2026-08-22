@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float|null $yearly_price
  * @property string|null $paystack_plan_code
  * @property string|null $paystack_yearly_plan_code
- * @property array|null $features
+ * @property array<string, mixed>|null $features
  * @property int|null $max_machines
  * @property int|null $max_users
  * @property int|null $max_geofences
@@ -33,18 +33,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $sort_order
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder|SubscriptionPlan where(string $column, mixed $operator = null, mixed $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|SubscriptionPlan whereIn(string $column, array $values)
- * @method static \Illuminate\Database\Eloquent\Builder|SubscriptionPlan orderBy(string $column, string $direction = 'asc')
- * @method static SubscriptionPlan|null find(mixed $id, array $columns = ['*'])
- * @method static SubscriptionPlan findOrFail(mixed $id, array $columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
  */
 class SubscriptionPlan extends Model
 {
-    use HasFactory;
-
+    /** @var list<string> */
     protected $fillable = [
         'name',
         'slug',
@@ -65,6 +57,7 @@ class SubscriptionPlan extends Model
         'sort_order',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'price' => 'float',
         'yearly_price' => 'float',
@@ -84,6 +77,8 @@ class SubscriptionPlan extends Model
 
     /**
      * Get subscriptions for this plan.
+     *
+     * @return HasMany<Subscription, $this>
      */
     public function subscriptions(): HasMany
     {
@@ -123,6 +118,10 @@ class SubscriptionPlan extends Model
 
     /**
      * Scope query to active plans only
+     */
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeActive($query)
     {
