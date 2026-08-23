@@ -64,7 +64,74 @@ final class OpenApiGenerator
         }
 
         /** @var array<string, mixed> */
-        return Cache::remember('api.openapi.spec', now()->addHour(), fn (): array => $this->generate());
+        return Cache::remember($this->cacheKey('spec'), now()->addDay(), fn (): array => $this->generate());
+    }
+
+    /**
+     * The reference the documentation page renders, cached in production only.
+     *
+     * @return array<string, array{description: string, operations: list<array{method: string, path: string, summary: string, permission: string, path_params: list<string>, query_params: list<string>, body_params: list<string>}>}>
+     */
+    public function cachedReference(): array
+    {
+        if (! app()->isProduction()) {
+            return $this->reference();
+        }
+
+        /** @var array<string, array{description: string, operations: list<array{method: string, path: string, summary: string, permission: string, path_params: list<string>, query_params: list<string>, body_params: list<string>}>}> */
+        return Cache::remember($this->cacheKey('reference'), now()->addDay(), fn (): array => $this->reference());
+    }
+
+    /**
+     * A cache key that changes whenever the API it describes changes.
+     *
+     * Keying on time alone was a quiet way to publish a lie: a deploy that
+     * renamed a parameter kept serving the previous description until the TTL
+     * ran out, which is precisely the drift generating the docs exists to
+     * prevent. The key now carries a fingerprint of everything the spec is
+     * built from, so a changed route or a redeployed controller lands on a
+     * different key and regenerates immediately -- no cache-clearing step in
+     * the deploy that someone can forget to add.
+     */
+    public function cacheKey(string $kind): string
+    {
+        $parts = [];
+
+        foreach ($this->apiRoutes() as $route) {
+            $methods = ApiPayload::strings($route->methods());
+
+            $parts[] = implode(',', $methods).' '.$route->uri().' '.$route->getActionName();
+        }
+
+        foreach ($this->sourceFiles() as $file) {
+            // Deploying rewrites the file, so the timestamp moves even when a
+            // rename leaves the byte count identical.
+            $parts[] = $file.'@'.(string) filemtime($file);
+        }
+
+        return "api.openapi.{$kind}.".substr(hash('sha256', implode("\n", $parts)), 0, 16);
+    }
+
+    /**
+     * The distinct controller files the spec is reflected out of.
+     *
+     * @return list<string>
+     */
+    private function sourceFiles(): array
+    {
+        $files = [];
+
+        foreach ($this->apiRoutes() as $route) {
+            $file = $this->actionReflection($route)?->getFileName();
+
+            if (is_string($file) && ! in_array($file, $files, true) && file_exists($file)) {
+                $files[] = $file;
+            }
+        }
+
+        sort($files);
+
+        return $files;
     }
 
     /**
