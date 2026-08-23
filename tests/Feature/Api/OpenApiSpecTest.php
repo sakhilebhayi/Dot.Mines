@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use App\Http\Middleware\ApiVersion;
 use App\Http\Middleware\EnsureTokenAbility;
 use App\Services\OpenApiGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,14 +21,14 @@ class OpenApiSpecTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_every_api_route_appears_in_the_spec(): void
+    public function test_every_route_of_the_current_version_appears_in_the_spec(): void
     {
         $spec = app(OpenApiGenerator::class)->generate();
 
         $missing = [];
 
         foreach (Route::getRoutes() as $route) {
-            if (! str_starts_with($route->uri(), 'api/') || $route->getName() === 'api.openapi') {
+            if (! str_starts_with($route->uri(), 'api/'.ApiVersion::CURRENT.'/')) {
                 continue;
             }
 
@@ -45,6 +46,38 @@ class OpenApiSpecTest extends TestCase
         }
 
         $this->assertSame([], $missing, 'Every API route must appear in the generated spec.');
+    }
+
+    public function test_the_unversioned_aliases_are_deliberately_not_documented(): void
+    {
+        $spec = app(OpenApiGenerator::class)->generate();
+
+        // The bare paths work and are supported, but documenting both
+        // spellings would double the spec and duplicate every operationId.
+        // The description carries the alias rule instead.
+        foreach (array_keys($spec['paths']) as $path) {
+            $this->assertStringStartsWith(
+                '/api/'.ApiVersion::CURRENT.'/',
+                (string) $path,
+                'The spec documents the versioned paths only.'
+            );
+        }
+
+        $this->assertStringContainsString('/api/'.ApiVersion::CURRENT, $spec['info']['description']);
+        $this->assertStringContainsString('pinned', $spec['info']['description']);
+    }
+
+    public function test_the_server_url_and_paths_form_a_real_url(): void
+    {
+        $spec = app(OpenApiGenerator::class)->generate();
+
+        // A server URL ending in /api plus paths beginning /api sent every
+        // generated client to /api/api/machines.
+        $server = rtrim((string) $spec['servers'][0]['url'], '/');
+        $this->assertStringEndsNotWith('/api', $server);
+
+        $path = (string) array_key_first($spec['paths']);
+        $this->assertStringNotContainsString('/api/api/', $server.$path);
     }
 
     public function test_the_spec_is_publicly_reachable_and_valid_openapi(): void
@@ -92,17 +125,17 @@ class OpenApiSpecTest extends TestCase
         // Summaries come from controller docblocks.
         $this->assertSame(
             'List all machines for current team',
-            $spec['paths']['/api/machines']['get']['summary']
+            $spec['paths']['/api/v1/machines']['get']['summary']
         );
 
         // Query parameters come from the action's validation rules, including
         // the allowed values behind an `in:` rule.
-        $sort = collect($spec['paths']['/api/machines']['get']['parameters'])->firstWhere('name', 'sort');
+        $sort = collect($spec['paths']['/api/v1/machines']['get']['parameters'])->firstWhere('name', 'sort');
         $this->assertNotNull($sort, 'Query parameters must be derived from the validation rules.');
         $this->assertSame(['name', 'machine_type', 'status', 'created_at'], $sort['schema']['enum']);
 
         // Write endpoints describe their body, including which fields are required.
-        $body = $spec['paths']['/api/machines']['post']['requestBody']['content']['application/json']['schema'];
+        $body = $spec['paths']['/api/v1/machines']['post']['requestBody']['content']['application/json']['schema'];
         $this->assertContains('name', $body['required']);
         $this->assertArrayHasKey('machine_type', $body['properties']);
     }

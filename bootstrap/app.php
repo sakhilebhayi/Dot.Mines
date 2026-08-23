@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ApiVersion;
 use App\Http\Middleware\CacheControlHeaders;
 use App\Http\Middleware\EnforceDownloadRateLimit;
 use App\Http\Middleware\EnsureAdmin;
@@ -43,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.2fa' => EnsureAdminHasTwoFactor::class,
             'token.ability' => EnsureTokenAbility::class,
             'api.params' => NormalizeApiParameters::class,
+            'api.version' => ApiVersion::class,
         ]);
 
         // Force HTTPS, CSP and add security headers to all web requests

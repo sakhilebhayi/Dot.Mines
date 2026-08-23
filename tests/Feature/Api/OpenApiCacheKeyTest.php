@@ -42,7 +42,7 @@ class OpenApiCacheKeyTest extends TestCase
         $generator = app(OpenApiGenerator::class);
         $before = $generator->cacheKey('spec');
 
-        Route::get('api/cache-key-probe', [MachineController::class, 'index']);
+        Route::get('api/v1/cache-key-probe', [MachineController::class, 'index']);
 
         $this->assertNotSame(
             $before,

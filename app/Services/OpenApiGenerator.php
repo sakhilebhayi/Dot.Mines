@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Middleware\ApiVersion;
 use App\Http\Middleware\EnsureTokenAbility;
 use App\Support\ApiPayload;
 use Illuminate\Routing\Route as RoutingRoute;
@@ -44,7 +45,7 @@ final class OpenApiGenerator
         'assignments' => 'Which machines are assigned to which mine areas, and the assignment history.',
         'live-locations' => 'A lightweight snapshot of every machine with a known position.',
         'user' => 'The signed-in user and their current team.',
-        'v1' => 'Incremental sync for the browser cache. Versioned separately from the rest of the API.',
+        'sync' => 'Incremental deltas since a cursor, for keeping a local cache warm without re-fetching everything.',
     ];
 
     /**
@@ -168,8 +169,11 @@ final class OpenApiGenerator
                 'version' => '1.0.0',
                 'description' => $this->apiDescription(),
             ],
+            // The host only. Paths below already carry the full `/api/v1/...`,
+            // so a server URL ending in `/api` made every generated client
+            // call `/api/api/machines`.
             'servers' => [
-                ['url' => rtrim(ApiPayload::str(config('app.url')), '/').'/api', 'description' => 'This installation'],
+                ['url' => rtrim(ApiPayload::str(config('app.url')), '/'), 'description' => 'This installation'],
             ],
             'tags' => $this->tags($paths),
             'security' => [['bearerAuth' => []]],
@@ -259,21 +263,23 @@ final class OpenApiGenerator
     }
 
     /**
-     * Every registered API route, in a stable order.
+     * Every route of the current API version, in a stable order.
+     *
+     * Deliberately the versioned paths only. The same endpoints are also
+     * served bare at `/api/...` for older integrations, but documenting both
+     * would double the spec and give every operation a duplicate
+     * operationId -- so the description shows the version to build against
+     * and says plainly that the bare paths exist and what they resolve to.
      *
      * @return list<RoutingRoute>
      */
     public function apiRoutes(): array
     {
         $routes = [];
+        $prefix = 'api/'.ApiVersion::CURRENT.'/';
 
         foreach (Route::getRoutes()->getRoutes() as $route) {
-            if (! str_starts_with($route->uri(), 'api/')) {
-                continue;
-            }
-
-            // The spec route describes the API; it is not part of it.
-            if ($route->getName() === 'api.openapi') {
+            if (! str_starts_with($route->uri(), $prefix)) {
                 continue;
             }
 
@@ -593,11 +599,21 @@ final class OpenApiGenerator
         return implode('', array_slice($lines, $start, $length));
     }
 
+    /**
+     * The group an endpoint belongs to: the first real segment after
+     * `api/{version}/`, so the version itself never becomes a group.
+     */
     private function tagFor(RoutingRoute $route): string
     {
-        $segments = explode('/', $route->uri());
+        return $this->tagForPath('/'.ltrim($route->uri(), '/'));
+    }
 
-        return $segments[1] ?? 'api';
+    private function tagForPath(string $path): string
+    {
+        $segments = explode('/', ltrim($path, '/'));
+
+        // ['api', 'v1', 'machines', ...]
+        return $segments[2] ?? 'api';
     }
 
     private function operationId(RoutingRoute $route, string $method): string
@@ -638,8 +654,7 @@ final class OpenApiGenerator
         $names = [];
 
         foreach (array_keys($paths) as $path) {
-            $segments = explode('/', ltrim($path, '/'));
-            $names[] = $segments[1] ?? 'api';
+            $names[] = $this->tagForPath($path);
         }
 
         $names = array_values(array_unique($names));
@@ -746,8 +761,18 @@ final class OpenApiGenerator
 
     private function apiDescription(): string
     {
+        $current = ApiVersion::CURRENT;
+        $pinned = ApiVersion::PINNED_FOR_UNVERSIONED;
+
         return implode("\n\n", [
             'Fleet, fuel, maintenance and production data for your mine, over HTTP.',
+            "**Versioning.** Build against `/api/{$current}/...` -- the paths documented here. The same "
+                .'endpoints are also served without a version at `/api/...` for integrations written before '
+                ."versions existed; those are pinned to `{$pinned}` permanently and will not change under you "
+                .'when a newer version ships. Every response carries `X-API-Version`, and a response to an '
+                .'unversioned path also carries a `Link: <...>; rel="successor-version"` header naming the '
+                .'versioned URL for that endpoint. A new version means a new path -- nothing you already call '
+                .'changes shape.',
             '**Authentication.** Create a token under Settings > API Tokens and send it as '
                 .'`Authorization: Bearer <token>`. Permissions are enforced per request: a read-only token '
                 .'cannot modify anything.',
