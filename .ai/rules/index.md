@@ -10,7 +10,8 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/js/** | .ai/rules/js.md |
 | app/Mail/** | .ai/rules/mail.md |
 | app/Http/Middleware/NormalizeApiParameters.php | .ai/rules/middleware.md |
+| app/Http/Middleware/ApiVersion.php | .ai/rules/routes.md |
 | app/Http/Resources/** | .ai/rules/resources.md |
-| routes/api.php | .ai/rules/routes.md |
+| routes/api.php, routes/api_v1.php | .ai/rules/routes.md |
 | app/Services/OpenApiGenerator.php | .ai/rules/services.md |
 | resources/views/** | .ai/rules/views.md |

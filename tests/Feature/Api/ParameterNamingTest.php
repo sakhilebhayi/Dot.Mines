@@ -156,11 +156,11 @@ class ParameterNamingTest extends TestCase
     {
         $spec = app(OpenApiGenerator::class)->generate();
 
-        $machineParams = collect($spec['paths']['/api/machines']['get']['parameters'])->pluck('name');
+        $machineParams = collect($spec['paths']['/api/v1/machines']['get']['parameters'])->pluck('name');
         $this->assertTrue($machineParams->contains('status'), 'Docs must advertise the canonical filter name.');
         $this->assertFalse($machineParams->contains('filter_status'), 'Docs must not advertise a deprecated alias as current.');
 
-        $entryParams = collect($spec['paths']['/api/geofences/{geofence}/entries']['get']['parameters'])->pluck('name');
+        $entryParams = collect($spec['paths']['/api/v1/geofences/{geofence}/entries']['get']['parameters'])->pluck('name');
         $this->assertTrue($entryParams->contains('start_date'));
         $this->assertFalse($entryParams->contains('date_from'));
     }

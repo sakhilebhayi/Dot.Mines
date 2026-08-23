@@ -599,13 +599,24 @@
                     <div class="mockup-code">
                         <pre data-prefix="$"><code>curl -H "Authorization: Bearer REPLACE_WITH_YOUR_API_TOKEN" \</code></pre>
                         <pre data-prefix=""><code>     -H "Accept: application/json" \</code></pre>
-                        <pre data-prefix=""><code>     {{ config('app.url') }}/api/machines</code></pre>
+                        <pre data-prefix=""><code>     {{ config('app.url') }}/api/v1/machines</code></pre>
                     </div>
 
                     <h2>Base URL</h2>
                     <div class="mockup-code">
-                        <pre data-prefix=""><code>{{ config('app.url') }}/api</code></pre>
+                        <pre data-prefix=""><code>{{ config('app.url') }}/api/v1</code></pre>
                     </div>
+
+                    <h2>Versioning</h2>
+                    <p>Build against <code>/api/v1</code>. That is the version documented here and in the <a href="#" wire:click.prevent="setSection('api-reference')">API Reference</a>.</p>
+                    <p><strong>Already calling <code>/api/…</code> without a version?</strong> Keep doing it. Those paths serve exactly the same endpoints and are <strong>pinned to v1 permanently</strong> — they are not an alias for "latest", so a future version will never change them under you. Nothing you have built needs to move.</p>
+                    <p>When a breaking change is needed it arrives as a new path (<code>/api/v2/…</code>), which you adopt when you choose to. Existing paths keep their behaviour.</p>
+                    <p>Every response tells you which version answered:</p>
+                    <div class="mockup-code">
+                        <pre data-prefix=""><code>X-API-Version: v1</code></pre>
+                        <pre data-prefix=""><code>Link: &lt;{{ config('app.url') }}/api/v1/machines&gt;; rel="successor-version"</code></pre>
+                    </div>
+                    <p>The <code>Link</code> header appears only on unversioned responses, and names the versioned URL for that exact endpoint — so a client can log or follow it without anyone reading this page.</p>
 
                     <h2>List responses</h2>
                     <p>Every endpoint that returns a list uses the same envelope, so one handler works everywhere. Rows are always under <code>data</code>; paging information is always under <code>meta</code> and <code>links</code>.</p>
@@ -747,7 +758,7 @@
                     
                     <h3>Create Machine</h3>
                     <div class="mockup-code">
-                        <pre data-prefix="$"><code>curl -X POST {{ config('app.url') }}/api/machines \</code></pre>
+                        <pre data-prefix="$"><code>curl -X POST {{ config('app.url') }}/api/v1/machines \</code></pre>
                         <pre data-prefix=""><code>  -H "Authorization: Bearer REPLACE_WITH_YOUR_API_TOKEN" \</code></pre>
                         <pre data-prefix=""><code>  -H "Content-Type: application/json" \</code></pre>
                         <pre data-prefix=""><code>  -d '{</code></pre>
@@ -759,7 +770,7 @@
 
                     <h3>Record Fuel Transaction</h3>
                     <div class="mockup-code">
-                        <pre data-prefix="$"><code>curl -X POST {{ config('app.url') }}/api/fuel/transactions \</code></pre>
+                        <pre data-prefix="$"><code>curl -X POST {{ config('app.url') }}/api/v1/fuel/transactions \</code></pre>
                         <pre data-prefix=""><code>  -H "Authorization: Bearer REPLACE_WITH_YOUR_API_TOKEN" \</code></pre>
                         <pre data-prefix=""><code>  -H "Content-Type: application/json" \</code></pre>
                         <pre data-prefix=""><code>  -d '{</code></pre>
