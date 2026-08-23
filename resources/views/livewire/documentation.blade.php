@@ -591,6 +591,7 @@
                         <li>Select permissions</li>
                         <li>Copy the token (shown only once!)</li>
                     </ol>
+                    <p>Permissions are enforced per request: <strong>read</strong> covers all <code>GET</code> requests, <strong>create</strong> and <strong>update</strong> cover <code>POST</code> and <code>PUT</code>, and <strong>delete</strong> covers <code>DELETE</code>. A read-only token cannot modify anything — pick the write permissions only for tokens that need them.</p>
 
                     <h3>2. Authentication</h3>
                     <p>Include your token in the Authorization header:</p>

@@ -15,6 +15,11 @@ use Tests\TestCase;
  * carries its own belongsToTeam() gate (defense in depth); these tests
  * freeze the property at the endpoint level so neither layer can be
  * dropped silently.
+ *
+ * Tokens are granted ['*'] so these assert TEAM-MEMBERSHIP authorization,
+ * not token-ability scope (that is TokenAbilityEnforcementTest's job) --
+ * a bare actingAs() token now has no abilities and would 403 on this POST
+ * for the wrong reason.
  */
 class ApiTeamSwitchAuthorizationTest extends TestCase
 {
@@ -26,7 +31,7 @@ class ApiTeamSwitchAuthorizationTest extends TestCase
         $victim = User::factory()->withPersonalTeam()->create();
         $originalTeamId = $attacker->current_team_id;
 
-        Sanctum::actingAs($attacker);
+        Sanctum::actingAs($attacker, ['*']);
 
         $response = $this->postJson('/api/user/team/'.$victim->currentTeam->id);
 
@@ -38,7 +43,7 @@ class ApiTeamSwitchAuthorizationTest extends TestCase
     {
         $user = User::factory()->withPersonalTeam()->create();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->postJson('/api/user/team/'.$user->currentTeam->id);
 
@@ -51,7 +56,7 @@ class ApiTeamSwitchAuthorizationTest extends TestCase
         $user = User::factory()->withPersonalTeam()->create();
         $originalTeamId = $user->current_team_id;
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         // EnsureTeamContext validates the route's team_id before the closure
         // runs, so an unknown team is a 403 from the middleware layer.
