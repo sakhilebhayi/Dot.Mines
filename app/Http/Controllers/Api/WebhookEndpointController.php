@@ -12,6 +12,7 @@ use App\Services\Webhooks\WebhookSignature;
 use App\Services\Webhooks\WebhookUrlGuard;
 use App\Support\ApiPayload;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -45,7 +46,7 @@ class WebhookEndpointController extends Controller
         $query->orderByDesc('id');
 
         return ApiResponse::paginated(
-            $query->paginate(ApiPayload::int($validated['per_page'] ?? null, 15)),
+            $query->paginate(PageSize::from($request)),
             WebhookEndpointResource::class,
             ['events_available' => WebhookEvent::CATALOGUE],
         );
@@ -177,7 +178,7 @@ class WebhookEndpointController extends Controller
         }
 
         return ApiResponse::paginated(
-            $query->paginate(ApiPayload::int($validated['per_page'] ?? null, 15)),
+            $query->paginate(PageSize::from($request)),
             WebhookDeliveryResource::class,
         );
     }

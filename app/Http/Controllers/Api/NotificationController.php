@@ -7,6 +7,7 @@ use App\Http\Resources\NotificationResource;
 use App\Models\Notification;
 use App\Support\ApiPayload;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,11 @@ class NotificationController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $teamId = auth()->user()->current_team_id
             ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
 
@@ -39,7 +45,7 @@ class NotificationController extends Controller
             $query->where('is_read', false);
         }
 
-        $notifications = $query->latest()->paginate(20);
+        $notifications = $query->latest()->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($notifications, NotificationResource::class);
     }
@@ -50,6 +56,11 @@ class NotificationController extends Controller
     /** @psalm-suppress PossiblyUnusedParam -- route signature keeps Request for consistency */
     public function unread(Request $request): JsonResponse
     {
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $userId = auth()->user()?->id;
         $teamId = auth()->user()->current_team_id
             ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
@@ -57,7 +68,7 @@ class NotificationController extends Controller
         $unread = Notification::where('team_id', $teamId)
             ->where('is_read', false)
             ->latest()
-            ->paginate(20);
+            ->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($unread, NotificationResource::class);
     }

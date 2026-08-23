@@ -7,6 +7,7 @@ use App\Http\Resources\MachineResource;
 use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,11 @@ class MachineAssignmentController extends Controller
      */
     public function available(Request $request): JsonResponse
     {
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $team = auth()->user()?->currentTeam;
 
         // Machine has no mineAreas() belongsToMany -- assignment state
@@ -28,7 +34,7 @@ class MachineAssignmentController extends Controller
             ->whereDoesntHave('areaAssignments', function (Builder $query) {
                 $query->whereNull('unassigned_at');
             })
-            ->paginate(is_numeric($request->input('per_page')) ? (int) $request->input('per_page') : 15);
+            ->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($machines, MachineResource::class);
     }

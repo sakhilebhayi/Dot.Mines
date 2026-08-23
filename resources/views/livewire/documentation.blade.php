@@ -628,7 +628,17 @@
                         <pre data-prefix=""><code>             "per_page": 15, "last_page": 4, "total": 52 }</code></pre>
                         <pre data-prefix=""><code>}</code></pre>
                     </div>
-                    <p>Pass <code>?page=</code> and <code>?per_page=</code> to page through results. Endpoints that return a short, bounded list (for example a machine's recent alerts) omit <code>links</code> and return <code>meta.total</code> only.</p>
+                    <p>Pass <code>?page=</code> and <code>?per_page=</code> to page through results. <strong>Every</strong> list endpoint accepts both. The default page size is <strong>15</strong> and the maximum is <strong>100</strong> &mdash; ask for more and the request is rejected rather than quietly trimmed, so the number of rows you get is never a surprise. Endpoints that return a short, bounded list (for example a machine's recent alerts) omit <code>links</code> and return <code>meta.total</code> only.</p>
+
+                    <h2>When a request is rejected</h2>
+                    <p>Validation failures answer <code>422</code> with the same shape on every endpoint: <code>message</code> explains what went wrong, and <code>errors</code> names the fields that caused it.</p>
+                    <div class="mockup-code">
+                        <pre data-prefix=""><code>{</code></pre>
+                        <pre data-prefix=""><code>  "message": "The name field is required.",</code></pre>
+                        <pre data-prefix=""><code>  "errors": { "name": ["The name field is required."] }</code></pre>
+                        <pre data-prefix=""><code>}</code></pre>
+                    </div>
+                    <p>The status code is the only success/failure signal you need &mdash; there is no <code>success</code> flag to check as well.</p>
 
                     <h2>Parameter names</h2>
                     <p>The same idea has the same name everywhere. A time range is always <code>start_date</code> and <code>end_date</code>; a filter is always the bare field name, such as <code>status</code> or <code>type</code>.</p>

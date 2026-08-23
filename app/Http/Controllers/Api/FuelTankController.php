@@ -8,10 +8,10 @@ use App\Models\FuelTank;
 use App\Models\User;
 use App\Services\FuelManagementService;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class FuelTankController extends Controller
 {
@@ -24,6 +24,11 @@ class FuelTankController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $teamId = $this->currentTeamId($request);
 
         $query = FuelTank::where('team_id', $teamId)
@@ -50,7 +55,7 @@ class FuelTankController extends Controller
             $query->where('mine_area_id', $request->input('mine_area_id'));
         }
 
-        $tanks = $query->latest()->paginate(20);
+        $tanks = $query->latest()->paginate(PageSize::from($request));
 
         // Add calculated fields
         $tanks->getCollection()->transform(function ($tank) {
@@ -70,7 +75,7 @@ class FuelTankController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'tank_number' => 'nullable|string|max:100',
             'mine_area_id' => 'nullable|exists:mine_areas,id',
@@ -87,11 +92,7 @@ class FuelTankController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $data = $validator->validated();
+        $data = $validated;
         $data['team_id'] = $this->currentTeamId($request);
         /** @psalm-suppress MixedAssignment */
         $data['current_level_liters'] = $data['current_level_liters'] ?? 0;
@@ -134,7 +135,7 @@ class FuelTankController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'tank_number' => 'nullable|string|max:100',
             'mine_area_id' => 'nullable|exists:mine_areas,id',
@@ -150,11 +151,7 @@ class FuelTankController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $fuelTank->update($validator->validated());
+        $fuelTank->update($validated);
 
         return response()->json(FuelTankResource::make($fuelTank->load('mineArea')));
     }

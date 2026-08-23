@@ -9,12 +9,12 @@ use App\Models\User;
 use App\Services\FuelManagementService;
 use App\Support\ApiResponse;
 use App\Support\CurrentUser;
+use App\Support\PageSize;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FuelTransactionController extends Controller
@@ -28,6 +28,11 @@ class FuelTransactionController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $teamId = $this->currentTeamId($request);
 
         $query = FuelTransaction::where('team_id', $teamId)
@@ -61,7 +66,7 @@ class FuelTransactionController extends Controller
             $query->where('supplier', 'like', "%{$request->input('supplier')}%");
         }
 
-        $transactions = $query->latest('transaction_date')->paginate(50);
+        $transactions = $query->latest('transaction_date')->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($transactions, FuelTransactionResource::class);
     }
@@ -71,7 +76,7 @@ class FuelTransactionController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'fuel_tank_id' => 'nullable|exists:fuel_tanks,id',
             'machine_id' => 'nullable|exists:machines,id',
             'transaction_type' => 'required|in:refill,dispensing,delivery,transfer,adjustment,theft,spillage',
@@ -90,11 +95,7 @@ class FuelTransactionController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $data = $validator->validated();
+        $data = $validated;
         $data['team_id'] = $this->currentTeamId($request);
         $data['user_id'] = CurrentUser::get()?->id;
         /** @psalm-suppress MixedAssignment */
@@ -142,7 +143,7 @@ class FuelTransactionController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'unit_price' => 'nullable|numeric|min:0',
             'total_cost' => 'nullable|numeric|min:0',
             'transaction_date' => 'nullable|date',
@@ -153,11 +154,7 @@ class FuelTransactionController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $fuelTransaction->update($validator->validated());
+        $fuelTransaction->update($validated);
 
         return response()->json(FuelTransactionResource::make($fuelTransaction->load(['fuelTank', 'machine', 'user'])));
     }

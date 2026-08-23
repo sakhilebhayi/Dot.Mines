@@ -10,6 +10,7 @@ use App\Services\Billing\MachineProvisioningService;
 use App\Support\ApiPayload;
 use App\Support\ApiResponse;
 use App\Support\CurrentUser;
+use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -69,9 +70,7 @@ class MachineController extends Controller
         $query->with('integration');
 
         // Pagination
-        /** @psalm-suppress MixedAssignment */
-        $perPageRaw = $request->input('per_page');
-        $machines = $query->paginate(is_numeric($perPageRaw) ? (int) $perPageRaw : 15);
+        $machines = $query->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($machines, MachineResource::class);
     }

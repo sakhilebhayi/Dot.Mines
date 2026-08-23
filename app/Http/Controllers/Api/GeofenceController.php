@@ -7,6 +7,7 @@ use App\Http\Resources\MachineResource;
 use App\Models\Geofence;
 use App\Support\ApiPayload;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -45,10 +46,7 @@ class GeofenceController extends Controller
             $query->where('type', $request->input('type'));
         }
 
-        /** @psalm-suppress MixedAssignment */
-        $perPageRaw = $request->input('per_page');
-        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 15;
-        $geofences = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $geofences = $query->orderBy('created_at', 'desc')->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($geofences, GeofenceResource::class);
     }

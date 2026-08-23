@@ -8,11 +8,11 @@ use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 /**
  * Integration API Controller
@@ -80,20 +80,13 @@ class IntegrationController extends Controller
     {
         $this->authorize('create', Integration::class);
 
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'provider' => 'required|string|in:volvo,cat,komatsu,bell,ctrack',
             'name' => 'required|string|max:255',
             'credentials' => 'required|array',
             'credentials.api_key' => 'required|string',
             'credentials.api_secret' => 'required|string',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
 
         // Check if integration for this provider already exists
         if (Integration::where('team_id', auth()->user()?->current_team_id)
@@ -143,19 +136,12 @@ class IntegrationController extends Controller
     {
         $this->authorize('update', $integration);
 
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'sometimes|string|max:255',
             'credentials' => 'sometimes|array',
             'credentials.api_key' => 'string',
             'credentials.api_secret' => 'string',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
 
         try {
             /** @var array<string, mixed> $attributes */
@@ -261,13 +247,18 @@ class IntegrationController extends Controller
      *
      * GET /api/integrations/{id}/machines
      */
-    public function machines(Integration $integration): JsonResponse
+    public function machines(Request $request, Integration $integration): JsonResponse
     {
         $this->authorize('view', $integration);
 
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $machines = $integration->machines()
             ->select('id', 'name', 'model', 'status', 'manufacturer', 'latitude', 'longitude')
-            ->paginate(15);
+            ->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($machines, MachineResource::class, ['success' => true]);
     }
