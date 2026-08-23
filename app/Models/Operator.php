@@ -197,6 +197,14 @@ class Operator extends Model
     }
 
     /**
+     * @return HasMany<OperatorDocument,$this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(OperatorDocument::class);
+    }
+
+    /**
      * The machine this operator is on right now, if any.
      */
     public function currentAssignment(): ?OperatorMachineAssignment

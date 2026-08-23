@@ -247,6 +247,70 @@
         @endif
     </div>
 
+    {{-- Documents: private storage, audited downloads --}}
+    <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-5 mt-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-[var(--stone)] font-display font-semibold">Documents</h3>
+            @can('update', $operator)
+                <button wire:click="$set('showDocumentModal', true)" class="px-3 py-1.5 text-sm border border-[var(--line-strong)] text-[var(--sand)] hover:text-[var(--stone)] rounded transition">+ Upload</button>
+            @endcan
+        </div>
+        @forelse($this->visibleDocuments as $document)
+            <div wire:key="doc-{{ $document->id }}" class="flex items-center justify-between border-t border-[var(--line)] py-2.5">
+                <div>
+                    <span class="text-[var(--stone)]">{{ $document->title }}</span>
+                    <span class="block text-[var(--sand)] text-xs mt-0.5">
+                        {{ \App\Models\OperatorDocument::KINDS[$document->kind] ?? ucfirst($document->kind) }}
+                        · {{ $document->original_name }}
+                        · {{ number_format($document->size_bytes / 1024, 0) }} KB
+                        · {{ $document->created_at->format('d/m/Y') }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('operators.documents.download', $document) }}"
+                       class="px-3 py-1.5 text-sm border border-[var(--line-strong)] text-[var(--sand)] hover:text-[var(--stone)] rounded transition">Download</a>
+                    @can('update', $operator)
+                        <button wire:click="deleteDocument({{ $document->id }})" wire:confirm="Remove {{ $document->title }}?"
+                                class="px-2 py-1.5 text-sm text-red-300 hover:text-red-200 transition">✕</button>
+                    @endcan
+                </div>
+            </div>
+        @empty
+            <p class="text-[var(--sand)] text-sm">No documents uploaded. Downloads are logged; files are never publicly accessible.</p>
+        @endforelse
+    </div>
+
+    {{-- Upload document --}}
+    @if($showDocumentModal)
+        <x-dialog-modal wire:model.live="showDocumentModal">
+            <x-slot name="title">Upload a document</x-slot>
+            <x-slot name="content">
+                <label class="block text-sm text-[var(--stone)] mb-1">Title</label>
+                <input type="text" wire:model="documentTitle" placeholder="ADT licence — front" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                @error('documentTitle') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
+
+                <label class="block text-sm text-[var(--stone)] mb-1 mt-4">Type</label>
+                <select wire:model="documentKind" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                    @foreach(\App\Models\OperatorDocument::KINDS as $value => $label)
+                        @if($value !== 'medical' || $this->canManageMedical)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endif
+                    @endforeach
+                </select>
+
+                <label class="block text-sm text-[var(--stone)] mb-1 mt-4">File <span class="text-[var(--sand)]">(PDF, JPG or PNG · max 10 MB)</span></label>
+                <input type="file" wire:model="documentFile" accept=".pdf,.jpg,.jpeg,.png" class="w-full text-[var(--sand)]">
+                <div wire:loading wire:target="documentFile" class="text-[var(--sand)] text-xs mt-1">Uploading…</div>
+                @error('documentFile') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
+            </x-slot>
+            <x-slot name="footer">
+                <button wire:click="$set('showDocumentModal', false)" class="px-4 py-2 text-[var(--sand)] hover:text-[var(--stone)] transition">Cancel</button>
+                <button wire:click="uploadDocument" wire:loading.attr="disabled" wire:target="uploadDocument,documentFile"
+                        class="ml-3 px-5 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-semibold transition">Upload</button>
+            </x-slot>
+        </x-dialog-modal>
+    @endif
+
     {{-- Employment & contact --}}
     <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-5 mt-6">
         <h3 class="text-[var(--stone)] font-display font-semibold mb-3">Employment &amp; Contact</h3>

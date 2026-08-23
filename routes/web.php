@@ -4,6 +4,7 @@ use App\Http\Controllers\EmailUnsubscribeController;
 use App\Http\Controllers\GdprController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MinePlanDownloadController;
+use App\Http\Controllers\OperatorDocumentController;
 use App\Http\Controllers\RealtimeHealthController;
 use App\Http\Controllers\ReportDownloadController;
 use App\Http\Controllers\WebhookController;
@@ -191,6 +192,9 @@ Route::middleware([
     Route::get('/operators/{operator}', OperatorDetail::class)
         ->whereNumber('operator')
         ->name('operators.show');
+    Route::get('/operator-documents/{document}/download', OperatorDocumentController::class)
+        ->whereNumber('document')
+        ->name('operators.documents.download');
 
     // Integrations
     Route::get('/integrations', function () {
