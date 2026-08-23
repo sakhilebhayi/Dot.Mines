@@ -2,12 +2,35 @@
 
 namespace App\Support;
 
+use Carbon\CarbonInterface;
+
 /**
  * Typed coercion for untyped third-party API payload nodes -- the one
  * place mixed JSON becomes provably-shaped arrays for both analyzers.
  */
 final class ApiPayload
 {
+    /**
+     * A date column as ISO-8601, whatever shape it is stored in.
+     *
+     * Some columns are cast to Carbon and some are typed loosely as
+     * string|Carbon|null, so consumers would otherwise have to guess per
+     * field. Used by the API Resources (via FormatsTimestamps) and by the
+     * webhook payloads, so both speak the same format.
+     */
+    public static function iso(mixed $value): ?string
+    {
+        if ($value instanceof CarbonInterface) {
+            return $value->toIso8601String();
+        }
+
+        if (is_string($value) && $value !== '') {
+            return $value;
+        }
+
+        return null;
+    }
+
     /**
      * @return array<string, mixed>
      */

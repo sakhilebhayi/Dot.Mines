@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Concerns;
 
-use Carbon\CarbonInterface;
+use App\Support\ApiPayload;
 
 /**
  * One date format for the whole API.
@@ -16,14 +16,6 @@ trait FormatsTimestamps
 {
     protected function iso(mixed $value): ?string
     {
-        if ($value instanceof CarbonInterface) {
-            return $value->toIso8601String();
-        }
-
-        if (is_string($value) && $value !== '') {
-            return $value;
-        }
-
-        return null;
+        return ApiPayload::iso($value);
     }
 }

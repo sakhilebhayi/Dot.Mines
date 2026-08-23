@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\MaintenanceScheduleController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SyncController;
+use App\Http\Controllers\Api\WebhookEndpointController;
 use App\Models\Machine;
 use App\Models\Team;
 use App\Models\User;
@@ -231,6 +232,20 @@ Route::prefix('maintenance')->group(function () {
         Route::post('/{record}/complete', [MaintenanceRecordController::class, 'complete']);
         Route::delete('/{record}', [MaintenanceRecordController::class, 'destroy']);
     });
+});
+
+/**
+ * Outbound webhook endpoints: where this team wants events pushed.
+ */
+Route::prefix('webhooks')->group(function () {
+    Route::get('/', [WebhookEndpointController::class, 'index']);          // List endpoints
+    Route::post('/', [WebhookEndpointController::class, 'store']);         // Create (returns the secret once)
+    Route::get('/{webhook}', [WebhookEndpointController::class, 'show']);  // Get single
+    Route::put('/{webhook}', [WebhookEndpointController::class, 'update']); // Update
+    Route::delete('/{webhook}', [WebhookEndpointController::class, 'destroy']); // Delete
+
+    Route::get('/{webhook}/deliveries', [WebhookEndpointController::class, 'deliveries']); // Recent deliveries
+    Route::post('/{webhook}/test', [WebhookEndpointController::class, 'test']);            // Send a ping
 });
 
 /**

@@ -31,7 +31,7 @@ Schedule::job(new MachineIdleMonitoringJob)
 // drains only "default", and 996 location/status/monitoring jobs silently
 // piled up on 2026-08-21 while their queues went unserviced. Default
 // first: user-triggered work (syncs, reports) beats background polling.
-Schedule::command('queue:work --queue=default,locations,status,monitoring,alerts,geofences,notifications --stop-when-empty --max-time=50 --tries=1')
+Schedule::command('queue:work --queue=default,locations,status,monitoring,alerts,geofences,notifications,webhooks --stop-when-empty --max-time=50 --tries=1')
     ->everyMinute()
     ->withoutOverlapping()
     ->runInBackground()
