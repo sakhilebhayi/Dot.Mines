@@ -48,6 +48,15 @@ Schedule::command('integrations:sync-due')
     ->withoutOverlapping()
     ->onOneServer();
 
+// Daily operator-compliance sweep: warn admins 30/14/7 days before a
+// licence, medical or training certificate lapses, and once when it has.
+// The service dedupes on (credential, milestone), so running this daily --
+// or re-running it after a failure -- never repeats an alert.
+Schedule::command('operators:check-compliance')
+    ->dailyAt('05:30')
+    ->withoutOverlapping()
+    ->onOneServer();
+
 // Daily, after the previous day's telemetry is fully synced: raise
 // potential production-loss events (machine reporting but engine-hours
 // meter not moving) as pending_classification for human review on the
