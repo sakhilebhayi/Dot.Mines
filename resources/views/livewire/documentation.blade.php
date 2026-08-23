@@ -37,6 +37,7 @@
                 <ul>
                     <li><a wire:click="setSection('integrations-overview')" class="{{ $activeSection === 'integrations-overview' ? 'active' : '' }}">Overview</a></li>
                     <li><a wire:click="setSection('api-access')" class="{{ $activeSection === 'api-access' ? 'active' : '' }}">API Access</a></li>
+                    <li><a wire:click="setSection('api-reference')" class="{{ $activeSection === 'api-reference' ? 'active' : '' }}">API Reference</a></li>
                     <li><a wire:click="setSection('webhooks')" class="{{ $activeSection === 'webhooks' ? 'active' : '' }}">Webhooks</a></li>
                 </ul>
 
@@ -621,6 +622,11 @@
                     <h2>Field names are stable</h2>
                     <p>Responses are an explicit, versioned set of fields — not a dump of the underlying tables. Internal columns (replication counters, entitlement state, storage paths, provider credentials) are never returned, and a column added or renamed inside Mines will not change your payload. Timestamps are ISO-8601 everywhere, and a referenced person appears as <code>{ "id": 1, "name": "..." }</code> rather than a full user record.</p>
 
+                    <div class="alert alert-info not-prose my-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>A few common calls are shown below. For the complete list of every endpoint, its parameters and the permission it needs, see <a href="#" wire:click.prevent="setSection('api-reference')"><strong>API Reference</strong></a> &mdash; it is generated from the application, so it is never out of date.</span>
+                    </div>
+
                     <h2>Common Endpoints</h2>
                     
                     <h3>Machines</h3>
@@ -1145,6 +1151,10 @@
 
                     <p>Two-factor authentication is managed from your <strong>Profile</strong> page, not Settings.</p>
                 </div>
+            @endif
+
+            @if($activeSection === 'api-reference')
+                @include('livewire.documentation._api-reference')
             @endif
 
             @if($activeSection === 'engineering-reports')
