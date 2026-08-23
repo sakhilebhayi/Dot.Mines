@@ -61,7 +61,7 @@ class ProductionLossService
 
         $windowStart = $first->recorded_at ?? $first->created_at;
         $windowEnd = $last->recorded_at ?? $last->created_at;
-        $windowHours = $windowStart->diffInMinutes($windowEnd) / 60;
+        $windowHours = $windowStart->diffInMinutes($windowEnd) / 60.0;
 
         if ($windowHours < self::MIN_WINDOW_HOURS) {
             return null;
@@ -160,7 +160,7 @@ class ProductionLossService
             'machine_id' => $machine->id,
             'started_at' => $start,
             'ended_at' => $end,
-            'lost_hours' => round($start->diffInMinutes($end) / 60, 2),
+            'lost_hours' => round($start->diffInMinutes($end) / 60.0, 2),
             'source' => ProductionLossEvent::SOURCE_USER,
             'status' => ProductionLossEvent::STATUS_CONFIRMED,
             'category' => $data['category'],

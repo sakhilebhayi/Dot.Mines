@@ -734,7 +734,7 @@ class MineAreaDetail extends Component
             ->first();
 
         $targetValue = $monthTarget ? $monthTarget->target_quantity : 0;
-        $targetProgress = $targetValue > 0 ? round(($monthProduction / $targetValue) * 100, 1) : 0;
+        $targetProgress = $targetValue > 0 ? round(($monthProduction / $targetValue) * 100.0, 1) : 0;
 
         return [
             'today' => $todayProduction,

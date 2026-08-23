@@ -259,8 +259,8 @@ class MineAreaManager extends Component
         $this->boundaryCoordinates = $coordinates;
         // Calculate center and approximate area from polygon
         if (! empty($coordinates)) {
-            $latitudes = array_map(fn ($coord) => $coord['lat'], $coordinates);
-            $longitudes = array_map(fn ($coord) => $coord['lng'], $coordinates);
+            $latitudes = array_map(fn ($coord): mixed => $coord['lat'], $coordinates);
+            $longitudes = array_map(fn ($coord): mixed => $coord['lng'], $coordinates);
 
             $this->latitude = array_sum($latitudes) / count($latitudes);
             $this->longitude = array_sum($longitudes) / count($longitudes);

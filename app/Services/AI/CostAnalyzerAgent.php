@@ -12,7 +12,7 @@ use App\Models\Team;
 class CostAnalyzerAgent
 {
     /**
-     * @return array<string, mixed>
+     * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     public function analyze(Team $team): array
     {
@@ -30,7 +30,7 @@ class CostAnalyzerAgent
             ->sum('cost');
 
         $totalCosts = $fuelCosts + $maintenanceCosts;
-        $avgDailyCost = $totalCosts / 30;
+        $avgDailyCost = $totalCosts / 30.0;
 
         if ($avgDailyCost > 50000) {
             $recommendations[] = [

@@ -52,7 +52,7 @@ class RedactSensitiveData
             // normalize to lowercase for comparisons
             $sensitiveKeys = array_map('strtolower', $sensitiveKeys);
 
-            $redact = function ($value) use (&$redact, $sensitiveKeys) {
+            $redact = function ($value) use (&$redact, $sensitiveKeys): mixed {
                 if (is_array($value)) {
                     foreach ($value as $k => $v) {
                         // If key looks sensitive, replace with placeholder
@@ -111,7 +111,7 @@ class RedactSensitiveData
         ];
         $sensitiveKeys = array_map('strtolower', array_merge($defaults, $additionalKeys));
 
-        $redact = function ($v) use (&$redact, $sensitiveKeys) {
+        $redact = function ($v) use (&$redact, $sensitiveKeys): mixed {
             if (is_array($v)) {
                 foreach ($v as $k => $val) {
                     if (in_array(strtolower((string) $k), $sensitiveKeys, true)) {

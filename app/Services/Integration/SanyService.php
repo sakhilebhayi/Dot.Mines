@@ -40,9 +40,7 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
             $machines = [];
             if (! empty($response['data']['devices'])) {
-                $rows30 = data_get($response, 'data.devices');
-                /** @var list<array<string, mixed>> $rows30 */
-                $rows30 = is_array($rows30) ? array_values(array_filter($rows30, 'is_array')) : [];
+                $rows30 = self::rowsOf(data_get($response, 'data.devices'));
                 foreach ($rows30 as $device) {
                     $machines[] = $this->parseMachineData($device);
                 }
@@ -74,7 +72,7 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
+                'location' => $this->parseLocation(self::payloadArray($response['data'] ?? null)),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -99,9 +97,9 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics(is_array($realtimeData['data'] ?? null) ? $realtimeData['data'] : []),
-                $this->parseMetrics(is_array($workingHours['data'] ?? null) ? $workingHours['data'] : []),
-                $this->parseMetrics(is_array($statistics['data'] ?? null) ? $statistics['data'] : [])
+                $this->parseMetrics(self::payloadArray($realtimeData['data'] ?? null)),
+                $this->parseMetrics(self::payloadArray($workingHours['data'] ?? null)),
+                $this->parseMetrics(self::payloadArray($statistics['data'] ?? null))
             );
 
             return [
@@ -127,9 +125,7 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
 
             $alerts = [];
             if (! empty($response['data']['alarms'])) {
-                $rows31 = data_get($response, 'data.alarms');
-                /** @var list<array<string, mixed>> $rows31 */
-                $rows31 = is_array($rows31) ? array_values(array_filter($rows31, 'is_array')) : [];
+                $rows31 = self::rowsOf(data_get($response, 'data.alarms'));
                 foreach ($rows31 as $alarm) {
                     $alerts[] = $this->parseAlert($alarm);
                 }
@@ -181,9 +177,7 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            $location = $result['location'] ?? null;
-
-            return is_array($location) ? $location : null;
+            return is_array($result['location'] ?? null) ? self::payloadArray($result['location']) : null;
         } catch (Exception $e) {
             return null;
         }
@@ -198,9 +192,7 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
         try {
             $result = $this->fetchMetrics($machineId);
 
-            $metrics = $result['metrics'] ?? [];
-
-            return is_array($metrics) ? $metrics : [];
+            return self::payloadArray($result['metrics'] ?? null);
         } catch (Exception $e) {
             return [];
         }
@@ -215,9 +207,7 @@ class SanyService extends BaseManufacturerService implements ManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            $items = $result['alerts'] ?? [];
-
-            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
+            return self::rowsOf($result['alerts'] ?? null);
         } catch (Exception $e) {
             return [];
         }

@@ -491,9 +491,9 @@ class FuelManagement extends Component
 
         // Tanks overview: include inactive tanks for admins, otherwise only active tanks
         $tanks = FuelTank::where('team_id', $teamId)
-            ->when(! $canSeeInactive, fn ($q) => $q->where('status', 'active'))
+            ->when(! $canSeeInactive, fn ($q): mixed => $q->where('status', 'active'))
             ->with('mineArea')
-            ->when($this->showLowFuelOnly, fn ($q) => $q->lowFuel())
+            ->when($this->showLowFuelOnly, fn ($q): mixed => $q->lowFuel())
             ->get();
 
         // Machines for dispensing form

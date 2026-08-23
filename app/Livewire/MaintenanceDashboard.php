@@ -400,7 +400,7 @@ class MaintenanceDashboard extends Component
         // Health overview
         $healthStatuses = MachineHealthStatus::where('team_id', $teamId)
             ->with('machine')
-            ->when($this->showCriticalOnly, fn ($q) => $q->critical())
+            ->when($this->showCriticalOnly, fn ($q): mixed => $q->critical())
             ->latest('updated_at')
             ->get();
 

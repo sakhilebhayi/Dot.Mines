@@ -237,12 +237,12 @@ class MaintenanceHealthService
             ->get();
 
         // Costs
-        $totalCost = $completedRecords->sum('total_cost');
-        $laborCost = $completedRecords->sum('labor_cost');
-        $partsCost = $completedRecords->sum('parts_cost');
+        $totalCost = (float) $completedRecords->sum('total_cost');
+        $laborCost = (float) $completedRecords->sum('labor_cost');
+        $partsCost = (float) $completedRecords->sum('parts_cost');
 
         // Time metrics
-        $totalLaborHours = $completedRecords->sum('labor_hours');
+        $totalLaborHours = (float) $completedRecords->sum('labor_hours');
         $avgRepairTime = $completedRecords->avg('duration');
 
         // By type

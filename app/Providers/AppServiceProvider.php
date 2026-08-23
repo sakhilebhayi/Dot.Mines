@@ -6,6 +6,7 @@ use App\Console\Commands\ScanBladeUnescaped;
 use App\Listeners\NotifyOnJobFailed;
 use App\Livewire\AINotifications;
 use App\Mail\WelcomeMail;
+use App\Models\Team;
 use App\Models\User;
 use App\Services\RealtimeEventScheduler;
 use App\Services\TeamRoleProvisioner;
@@ -140,26 +141,36 @@ class AppServiceProvider extends ServiceProvider
         // TeamRoleProvisioner's catalog, so this is a direct 1:1 sync -- on
         // every add, invitation acceptance (same AddTeamMember action), and
         // role update.
-        Event::listen([TeamMemberAdded::class, TeamMemberUpdated::class], function ($event) {
-            $pivotRole = $event->team->users()->find($event->user->id)?->membership?->role;
+        Event::listen([TeamMemberAdded::class, TeamMemberUpdated::class], function (TeamMemberAdded|TeamMemberUpdated $event) {
+            // Jetstream's event classes carry untyped public properties --
+            // narrow them once so the sync below is fully typed.
+            $team = $event->team;
+            $user = $event->user;
 
-            if (! $pivotRole) {
+            if (! $team instanceof Team || ! $user instanceof User) {
+                return;
+            }
+
+            /** @var mixed $pivotRole */
+            $pivotRole = data_get($team->users()->find($user->id), 'membership.role');
+
+            if (! is_string($pivotRole) || $pivotRole === '') {
                 return;
             }
 
             try {
-                TeamRoleProvisioner::assignRole($event->user, $event->team, $pivotRole);
+                TeamRoleProvisioner::assignRole($user, $team, $pivotRole);
             } catch (\Throwable $e) {
                 Log::error('Failed to sync Jetstream team role into RBAC system', [
-                    'team_id' => $event->team->id,
-                    'user_id' => $event->user->id,
+                    'team_id' => $team->id,
+                    'user_id' => $user->id,
                     'error' => $e->getMessage(),
                 ]);
             }
         });
 
         // Listen for failed queue jobs and notify monitoring
-        Event::listen(JobFailed::class, function ($event) {
+        Event::listen(JobFailed::class, function (JobFailed $event) {
             try {
                 $listener = new NotifyOnJobFailed;
                 $listener->handle($event);
@@ -170,6 +181,13 @@ class AppServiceProvider extends ServiceProvider
 
         // Configure Sentry release/environment if present
         try {
+            /**
+             * Optional-package block: the Sentry SDK is not installed in this
+             * repo, so psalm resolves config('sentry.dsn') to null and every
+             * call below to an unknown class.
+             *
+             * @psalm-suppress TypeDoesNotContainType, MixedMethodCall, MissingClosureParamType, RiskyTruthyFalsyComparison, UndefinedFunction, MixedAssignment
+             */
             if (config('sentry.dsn')) {
                 if (function_exists('\Sentry\configureScope')) {
                     \Sentry\configureScope(function ($scope): void {
@@ -197,7 +215,7 @@ class AppServiceProvider extends ServiceProvider
         // API rate limiting - 60 requests per minute
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)
-                ->by($request->user()?->id ?: $request->ip())
+                ->by($request->user()?->id ?? $request->ip())
                 ->response(function () {
                     return response()->json([
                         'message' => 'Too many requests. Please try again later.',
@@ -228,7 +246,7 @@ class AppServiceProvider extends ServiceProvider
         // Reports generation - lower limit due to resource intensity (10 per minute)
         RateLimiter::for('reports', function (Request $request) {
             return Limit::perMinute(10)
-                ->by($request->user()?->id ?: $request->ip())
+                ->by($request->user()?->id ?? $request->ip())
                 ->response(function () {
                     return response()->json([
                         'message' => 'Report generation rate limit exceeded.',
@@ -240,7 +258,7 @@ class AppServiceProvider extends ServiceProvider
         // Signed downloads - protect large or sensitive file downloads
         RateLimiter::for('downloads', function (Request $request) {
             return Limit::perMinute(10)
-                ->by($request->user()?->id ?: $request->ip())
+                ->by($request->user()?->id ?? $request->ip())
                 ->response(function () {
                     return response()->json([
                         'message' => 'Download rate limit exceeded.',

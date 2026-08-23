@@ -51,9 +51,6 @@
     <MissingClosureParamType>
       <code><![CDATA[$query]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($query) => $query->whereBetween('recorded_at', []]></code>
-    </MissingClosureReturnType>
     <MixedMethodCall>
       <code><![CDATA[whereBetween]]></code>
     </MixedMethodCall>
@@ -108,11 +105,6 @@
       <code><![CDATA[$intervalSeconds]]></code>
     </MixedAssignment>
   </file>
-  <file src="app/Console/Commands/VerifyLivewireComponents.php">
-    <UnusedVariable>
-      <code><![CDATA[$livewireManager]]></code>
-    </UnusedVariable>
-  </file>
   <file src="app/Console/Commands/VerifyS3Storage.php">
     <PossiblyNullOperand>
       <code><![CDATA[now()->toIsoString()]]></code>
@@ -150,9 +142,6 @@
     <MixedAssignment>
       <code><![CDATA[$perPage]]></code>
     </MixedAssignment>
-    <UnusedVariable>
-      <code><![CDATA[$validated]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Http/Controllers/Api/FuelTankController.php">
     <MissingClosureParamType>
@@ -220,11 +209,6 @@
       <code><![CDATA[$validated['coordinates']]]></code>
       <code><![CDATA[$validated['coordinates']]]></code>
     </MixedAssignment>
-    <UnusedVariable>
-      <code><![CDATA[$validated]]></code>
-      <code><![CDATA[$validated]]></code>
-      <code><![CDATA[$validated]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Http/Controllers/Api/IntegrationController.php">
     <MixedArgumentTypeCoercion>
@@ -267,10 +251,6 @@
     <PossiblyNullArgument>
       <code><![CDATA[auth()->user()?->currentTeam]]></code>
     </PossiblyNullArgument>
-    <UnusedVariable>
-      <code><![CDATA[$validated]]></code>
-      <code><![CDATA[$validated]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Http/Controllers/Api/MaintenanceRecordController.php">
     <MixedArgumentTypeCoercion>
@@ -326,9 +306,6 @@
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[$validated['days_old'] ?? false]]></code>
     </RiskyTruthyFalsyComparison>
-    <UnusedVariable>
-      <code><![CDATA[$userId]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Http/Controllers/Api/ReportController.php">
     <DocblockTypeContradiction>
@@ -348,9 +325,6 @@
     <RedundantConditionGivenDocblockType>
       <code><![CDATA[Storage::disk($disk)->mimeType($relative)]]></code>
     </RedundantConditionGivenDocblockType>
-    <UnusedVariable>
-      <code><![CDATA[$validated]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Http/Controllers/Api/SyncController.php">
     <DocblockTypeContradiction>
@@ -493,23 +467,16 @@
     <MixedReturnStatement>
       <code><![CDATA[$next($request)]]></code>
     </MixedReturnStatement>
-    <UnusedVariable>
-      <code><![CDATA[$secureUrl]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Jobs/AlertGenerationJob.php">
     <InvalidOperand>
       <code><![CDATA[$machine->hours_meter % $interval]]></code>
-      <code><![CDATA[($metrics->fuel_level / $machine->fuel_capacity) * 100]]></code>
     </InvalidOperand>
   </file>
   <file src="app/Jobs/DeleteUserDataJob.php">
     <MissingClosureParamType>
       <code><![CDATA[$m]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($m) => $m->to($email)]]></code>
-    </MissingClosureReturnType>
     <MixedMethodCall>
       <code><![CDATA[from]]></code>
       <code><![CDATA[subject]]></code>
@@ -524,9 +491,6 @@
     <MissingClosureParamType>
       <code><![CDATA[$m]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($m) => $m->to($user->email)]]></code>
-    </MissingClosureReturnType>
     <MixedMethodCall>
       <code><![CDATA[from]]></code>
       <code><![CDATA[subject]]></code>
@@ -711,10 +675,6 @@
       <code><![CDATA[$q]]></code>
       <code><![CDATA[$q]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($q) => $q->where('user_id', auth()->id())]]></code>
-      <code><![CDATA[fn ($q) => $q->where('user_id', auth()->id())]]></code>
-    </MissingClosureReturnType>
     <MissingConstructor>
       <code><![CDATA[$notifications]]></code>
     </MissingConstructor>
@@ -829,10 +789,6 @@
       <code><![CDATA[$query]]></code>
       <code><![CDATA[$query]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[function ($query) {]]></code>
-      <code><![CDATA[function ($query) {]]></code>
-    </MissingClosureReturnType>
     <MixedArrayAccess>
       <code><![CDATA[$rec['related_machine_id']]]></code>
       <code><![CDATA[$rec['title']]]></code>
@@ -877,9 +833,6 @@
       <code><![CDATA[json_encode($rec)]]></code>
       <code><![CDATA[json_encode($rec)]]></code>
     </RiskyTruthyFalsyComparison>
-    <UnusedVariable>
-      <code><![CDATA[$action]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Livewire/FleetMovementReplay.php">
     <DocblockTypeContradiction>
@@ -928,6 +881,10 @@
     </RedundantConditionGivenDocblockType>
   </file>
   <file src="app/Livewire/FuelManagement.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[[]]]></code>
+      <code><![CDATA[[]]]></code>
+    </DocblockTypeContradiction>
     <InvalidPropertyAssignmentValue>
       <code><![CDATA[$tank->id]]></code>
       <code><![CDATA[$tank->id]]></code>
@@ -936,14 +893,6 @@
       <code><![CDATA[$q]]></code>
       <code><![CDATA[$q]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($q) => $q->lowFuel()]]></code>
-      <code><![CDATA[fn ($q) => $q->where('status', 'active')]]></code>
-    </MissingClosureReturnType>
-    <MixedAssignment>
-      <code><![CDATA[$insights]]></code>
-      <code><![CDATA[$recommendations]]></code>
-    </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[lowFuel]]></code>
       <code><![CDATA[where]]></code>
@@ -952,6 +901,10 @@
       <code><![CDATA[$this->allocatedLiters]]></code>
       <code><![CDATA[$this->fuelPricePerLiter]]></code>
     </PossiblyNullOperand>
+    <RedundantConditionGivenDocblockType>
+      <code><![CDATA[is_array($insights)]]></code>
+      <code><![CDATA[is_array($recommendations)]]></code>
+    </RedundantConditionGivenDocblockType>
     <UnnecessaryVarAnnotation>
       <code><![CDATA[User|null]]></code>
       <code><![CDATA[User|null]]></code>
@@ -977,9 +930,6 @@
     <MissingClosureParamType>
       <code><![CDATA[$query]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[function ($query) {]]></code>
-    </MissingClosureReturnType>
     <MixedAssignment>
       <code><![CDATA[$this->coordinates]]></code>
     </MixedAssignment>
@@ -1021,9 +971,6 @@
     <RedundantConditionGivenDocblockType>
       <code><![CDATA[$integration->machines_count]]></code>
     </RedundantConditionGivenDocblockType>
-    <UnusedVariable>
-      <code><![CDATA[$integration]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Livewire/LiveMap.php">
     <DocblockTypeContradiction>
@@ -1092,12 +1039,6 @@
       <code><![CDATA[$q]]></code>
       <code><![CDATA[$q]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($q) => $q->where('status', $this->filterStatus)]]></code>
-      <code><![CDATA[fn ($q) => $q->where(function ($q) {]]></code>
-      <code><![CDATA[fn ($q) => $q->where(function ($q) {]]></code>
-      <code><![CDATA[fn ($q) => $q->where(function ($q) {]]></code>
-    </MissingClosureReturnType>
     <MissingConstructor>
       <code><![CDATA[$mineArea]]></code>
     </MissingConstructor>
@@ -1121,7 +1062,7 @@
                 ->pluck('id')->map(fn ($id) => (string) $id)->toArray()]]></code>
       <code><![CDATA[Machine::where('team_id', $team->id)
                 ->where('mine_area_id', $this->mineArea->id)
-                ->when($this->searchTerm, fn ($q) => $q->where(function ($q) {
+                ->when($this->searchTerm, fn ($q): mixed => $q->where(function ($q) {
                     $q->where('name', 'like', "%{$this->searchTerm}%")
                         ->orWhere('model', 'like', "%{$this->searchTerm}%");
                 }))
@@ -1136,6 +1077,8 @@
   <file src="app/Livewire/MaintenanceDashboard.php">
     <DocblockTypeContradiction>
       <code><![CDATA[48]]></code>
+      <code><![CDATA[[]]]></code>
+      <code><![CDATA[[]]]></code>
     </DocblockTypeContradiction>
     <InvalidReturnStatement>
       <code><![CDATA[collect($delayedMachines)]]></code>
@@ -1147,9 +1090,6 @@
       <code><![CDATA[$q]]></code>
       <code><![CDATA[$query]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($q) => $q->critical()]]></code>
-    </MissingClosureReturnType>
     <MixedArgument>
       <code><![CDATA[$delayInfo['delay_hours']]]></code>
       <code><![CDATA[$delayInfo['delay_hours']]]></code>
@@ -1158,10 +1098,6 @@
       <code><![CDATA[$a['delay_hours']]]></code>
       <code><![CDATA[$b['delay_hours']]]></code>
     </MixedArrayAccess>
-    <MixedAssignment>
-      <code><![CDATA[$insights]]></code>
-      <code><![CDATA[$recommendations]]></code>
-    </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[critical]]></code>
       <code><![CDATA[latest]]></code>
@@ -1186,6 +1122,8 @@
       <code><![CDATA[$machine->updated_at]]></code>
       <code><![CDATA[$startTime]]></code>
       <code><![CDATA[$startTime instanceof Carbon]]></code>
+      <code><![CDATA[is_array($insights)]]></code>
+      <code><![CDATA[is_array($recommendations)]]></code>
     </RedundantConditionGivenDocblockType>
     <TypeDoesNotContainType>
       <code><![CDATA[0]]></code>
@@ -1200,7 +1138,7 @@
     <InvalidOperand>
       <code><![CDATA[$monthProduction / $targetValue]]></code>
       <code><![CDATA[$monthProduction / $targetValue]]></code>
-      <code><![CDATA[($monthProduction / $targetValue) * 100]]></code>
+      <code><![CDATA[($monthProduction / $targetValue) * 100.0]]></code>
     </InvalidOperand>
     <InvalidScalarArgument>
       <code><![CDATA[Auth::id()]]></code>
@@ -1241,10 +1179,6 @@
       <code><![CDATA[$q]]></code>
       <code><![CDATA[$q]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($coord) => $coord['lat']]]></code>
-      <code><![CDATA[fn ($coord) => $coord['lng']]]></code>
-    </MissingClosureReturnType>
     <MixedArgument>
       <code><![CDATA[$mineArea]]></code>
     </MixedArgument>
@@ -1375,9 +1309,6 @@
     <PossiblyNullPropertyAssignmentValue>
       <code><![CDATA[$record->notes]]></code>
     </PossiblyNullPropertyAssignmentValue>
-    <PossiblyNullReference>
-      <code><![CDATA[format]]></code>
-    </PossiblyNullReference>
     <RedundantConditionGivenDocblockType>
       <code><![CDATA[$area->status]]></code>
     </RedundantConditionGivenDocblockType>
@@ -1464,9 +1395,6 @@
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$geofence->geofence_type]]></code>
     </UndefinedMagicPropertyFetch>
-    <UnusedVariable>
-      <code><![CDATA[$team]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Livewire/Settings.php">
     <ArgumentTypeCoercion>
@@ -1503,9 +1431,6 @@
       <code><![CDATA[users]]></code>
       <code><![CDATA[users]]></code>
     </PossiblyNullReference>
-    <UnusedVariable>
-      <code><![CDATA[$user]]></code>
-    </UnusedVariable>
   </file>
   <file src="app/Livewire/SystemHealth.php">
     <LessSpecificReturnStatement>
@@ -1529,10 +1454,6 @@
       <code><![CDATA[$v]]></code>
       <code><![CDATA[$value]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[function ($v) use (&$redact, $sensitiveKeys) {]]></code>
-      <code><![CDATA[function ($value) use (&$redact, $sensitiveKeys) {]]></code>
-    </MissingClosureReturnType>
     <MixedAssignment>
       <code><![CDATA[$message]]></code>
       <code><![CDATA[$v]]></code>
@@ -1554,65 +1475,7 @@
       <code><![CDATA[bool]]></code>
     </PossiblyUnusedReturnValue>
   </file>
-  <file src="app/Models/ComplianceViolation.php">
-    <RedundantConditionGivenDocblockType>
-      <code><![CDATA[! $this->isResolved()
-            && $this->remediation_deadline]]></code>
-      <code><![CDATA[$this->remediation_deadline]]></code>
-    </RedundantConditionGivenDocblockType>
-  </file>
-  <file src="app/Models/ComponentReplacement.php">
-    <MixedAssignment>
-      <code><![CDATA[$hoursOnComponent]]></code>
-      <code><![CDATA[$hoursUsed]]></code>
-      <code><![CDATA[$kmOnComponent]]></code>
-      <code><![CDATA[$kmUsed]]></code>
-      <code><![CDATA[$percentage]]></code>
-      <code><![CDATA[$percentage]]></code>
-    </MixedAssignment>
-    <MixedOperand>
-      <code><![CDATA[$hoursUsed]]></code>
-      <code><![CDATA[$kmUsed]]></code>
-      <code><![CDATA[$this->expected_lifespan_hours - $hoursUsed]]></code>
-      <code><![CDATA[$this->expected_lifespan_km - $kmUsed]]></code>
-      <code><![CDATA[$this->hours_at_replacement]]></code>
-      <code><![CDATA[$this->hours_at_replacement]]></code>
-      <code><![CDATA[$this->hours_at_replacement]]></code>
-      <code><![CDATA[$this->km_at_replacement]]></code>
-      <code><![CDATA[$this->km_at_replacement]]></code>
-      <code><![CDATA[$this->km_at_replacement]]></code>
-      <code><![CDATA[($this->expected_lifespan_hours - $hoursUsed) / $this->expected_lifespan_hours]]></code>
-      <code><![CDATA[($this->expected_lifespan_km - $kmUsed) / $this->expected_lifespan_km]]></code>
-    </MixedOperand>
-    <MixedReturnStatement>
-      <code><![CDATA[$this->hours_at_replacement + $this->expected_lifespan_hours]]></code>
-      <code><![CDATA[$this->km_at_replacement + $this->expected_lifespan_km]]></code>
-      <code><![CDATA[max(0, min(100, $percentage))]]></code>
-      <code><![CDATA[max(0, min(100, $percentage))]]></code>
-      <code><![CDATA[max(0, min(100, $percentage))]]></code>
-      <code><![CDATA[max(0, min(100, $percentage))]]></code>
-    </MixedReturnStatement>
-    <PossiblyNullOperand>
-      <code><![CDATA[$this->hours_at_replacement]]></code>
-      <code><![CDATA[$this->hours_at_replacement]]></code>
-      <code><![CDATA[$this->hours_at_replacement]]></code>
-      <code><![CDATA[$this->km_at_replacement]]></code>
-      <code><![CDATA[$this->km_at_replacement]]></code>
-      <code><![CDATA[$this->km_at_replacement]]></code>
-    </PossiblyNullOperand>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[! $machine->operating_hours]]></code>
-      <code><![CDATA[! $machine->total_distance_km]]></code>
-      <code><![CDATA[$machine->operating_hours]]></code>
-      <code><![CDATA[$machine->total_distance_km]]></code>
-      <code><![CDATA[$this->warranty_expiry]]></code>
-    </RiskyTruthyFalsyComparison>
-  </file>
   <file src="app/Models/FuelBudget.php">
-    <InvalidOperand>
-      <code><![CDATA[($this->actual_liters / $this->budgeted_liters) * 100]]></code>
-      <code><![CDATA[($this->actual_spent / $this->budgeted_amount) * 100]]></code>
-    </InvalidOperand>
     <PossiblyNullOperand>
       <code><![CDATA[$this->actual_liters]]></code>
       <code><![CDATA[$this->actual_spent]]></code>
@@ -1624,7 +1487,7 @@
       <code><![CDATA[$this->fuel_consumed_liters / $this->distance_traveled_km]]></code>
       <code><![CDATA[$this->fuel_consumed_liters / $this->operating_hours]]></code>
       <code><![CDATA[$this->idle_fuel_consumed / $this->fuel_consumed_liters]]></code>
-      <code><![CDATA[($this->idle_fuel_consumed / $this->fuel_consumed_liters) * 100]]></code>
+      <code><![CDATA[($this->idle_fuel_consumed / $this->fuel_consumed_liters) * 100.0]]></code>
     </InvalidOperand>
     <PossiblyNullOperand>
       <code><![CDATA[$this->distance_traveled_km]]></code>
@@ -1646,8 +1509,8 @@
       <code><![CDATA[$this->spent_zar / $this->total_budget_zar]]></code>
       <code><![CDATA[$this->total_budget_zar - $this->spent_zar]]></code>
       <code><![CDATA[$this->total_budget_zar - $this->spent_zar]]></code>
-      <code><![CDATA[($this->consumed_liters / $this->allocated_liters) * 100]]></code>
-      <code><![CDATA[($this->spent_zar / $this->total_budget_zar) * 100]]></code>
+      <code><![CDATA[($this->consumed_liters / $this->allocated_liters) * 100.0]]></code>
+      <code><![CDATA[($this->spent_zar / $this->total_budget_zar) * 100.0]]></code>
     </InvalidOperand>
     <PossiblyNullOperand>
       <code><![CDATA[$this->allocated_liters]]></code>
@@ -1661,11 +1524,6 @@
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[mktime(0, 0, 0, $this->month, 1, $this->year)]]></code>
     </RiskyTruthyFalsyComparison>
-  </file>
-  <file src="app/Models/FuelTank.php">
-    <InvalidOperand>
-      <code><![CDATA[((float) $this->current_level_liters / (float) $this->capacity_liters) * 100]]></code>
-    </InvalidOperand>
   </file>
   <file src="app/Models/FuelTransaction.php">
     <InvalidOperand>
@@ -1688,8 +1546,6 @@
   <file src="app/Models/HealthMetric.php">
     <InvalidOperand>
       <code><![CDATA[$deviation / $normalRange]]></code>
-      <code><![CDATA[($deviation / $normalRange) * 100]]></code>
-      <code><![CDATA[($this->normal_min + $this->normal_max) / 2]]></code>
     </InvalidOperand>
     <MixedArgument>
       <code><![CDATA[$this->deviation]]></code>
@@ -1714,9 +1570,6 @@
     <MissingClosureParamType>
       <code><![CDATA[$query]]></code>
     </MissingClosureParamType>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($query) => $query->whereNotNull('operating_hours')]]></code>
-    </MissingClosureReturnType>
     <MixedMethodCall>
       <code><![CDATA[whereNotNull]]></code>
     </MixedMethodCall>
@@ -1789,16 +1642,14 @@
     </MissingTemplateParam>
   </file>
   <file src="app/Models/ProductionRecord.php">
-    <InvalidOperand>
-      <code><![CDATA[(((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100]]></code>
-    </InvalidOperand>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[! $this->target_quantity]]></code>
+      <code><![CDATA[! $this->target_quantity]]></code>
+    </RiskyTruthyFalsyComparison>
   </file>
   <file src="app/Models/Report.php">
-    <MissingClosureReturnType>
-      <code><![CDATA[fn ($user) => $user->wantsEmailReports()]]></code>
-    </MissingClosureReturnType>
     <MixedArgumentTypeCoercion>
-      <code><![CDATA[fn ($user) => $user->wantsEmailReports()]]></code>
+      <code><![CDATA[fn ($user): mixed => $user->wantsEmailReports()]]></code>
     </MixedArgumentTypeCoercion>
     <MixedMethodCall>
       <code><![CDATA[wantsEmailReports]]></code>
@@ -1817,15 +1668,8 @@
   </file>
   <file src="app/Models/Route.php">
     <InvalidOperand>
-      <code><![CDATA[$directDistance / 40]]></code>
       <code><![CDATA[$directTime - $this->estimated_time]]></code>
-      <code><![CDATA[($directDistance / 40) * 60]]></code>
-    </InvalidOperand>
-  </file>
-  <file src="app/Models/SubscriptionPlan.php">
-    <InvalidOperand>
-      <code><![CDATA[$this->price * 12]]></code>
-      <code><![CDATA[($savings / $monthlyTotal) * 100]]></code>
+      <code><![CDATA[($directDistance / 40.0) * 60]]></code>
     </InvalidOperand>
   </file>
   <file src="app/Models/User.php">
@@ -1867,46 +1711,6 @@
       <code><![CDATA[$user]]></code>
     </PossiblyUnusedParam>
   </file>
-  <file src="app/Providers/AppServiceProvider.php">
-    <MissingClosureParamType>
-      <code><![CDATA[$event]]></code>
-      <code><![CDATA[$event]]></code>
-      <code><![CDATA[$scope]]></code>
-    </MissingClosureParamType>
-    <MixedArgument>
-      <code><![CDATA[$event]]></code>
-      <code><![CDATA[$event->team]]></code>
-      <code><![CDATA[$event->user]]></code>
-      <code><![CDATA[$pivotRole]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$pivotRole]]></code>
-    </MixedAssignment>
-    <MixedMethodCall>
-      <code><![CDATA[find]]></code>
-      <code><![CDATA[setTag]]></code>
-      <code><![CDATA[setTag]]></code>
-      <code><![CDATA[users]]></code>
-    </MixedMethodCall>
-    <MixedPropertyFetch>
-      <code><![CDATA[$event->team]]></code>
-      <code><![CDATA[$event->team->id]]></code>
-      <code><![CDATA[$event->team->users()->find($event->user->id)?->membership]]></code>
-      <code><![CDATA[$event->user]]></code>
-      <code><![CDATA[$event->user->id]]></code>
-    </MixedPropertyFetch>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[! $pivotRole]]></code>
-      <code><![CDATA[$request->user()?->id]]></code>
-      <code><![CDATA[$request->user()?->id]]></code>
-      <code><![CDATA[$request->user()?->id]]></code>
-    </RiskyTruthyFalsyComparison>
-    <TypeDoesNotContainType>
-      <code><![CDATA[$release]]></code>
-      <code><![CDATA[$release]]></code>
-      <code><![CDATA[config('sentry.dsn')]]></code>
-    </TypeDoesNotContainType>
-  </file>
   <file src="app/Providers/BroadcastServiceProvider.php">
     <MissingClosureParamType>
       <code><![CDATA[$geofenceId]]></code>
@@ -1945,6 +1749,9 @@
     </UnusedClosureParam>
   </file>
   <file src="app/Services/AI/AIOptimizationService.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[[]]]></code>
+    </DocblockTypeContradiction>
     <InvalidReturnStatement>
       <code><![CDATA[collect([
             'recommendations' => $recommendations,
@@ -1955,38 +1762,6 @@
     <InvalidReturnType>
       <code><![CDATA[Collection<string, mixed>]]></code>
     </InvalidReturnType>
-    <MixedArgument>
-      <code><![CDATA[$result['recommendations']]]></code>
-    </MixedArgument>
-    <MixedArrayAccess>
-      <code><![CDATA[$ins['category']]]></code>
-      <code><![CDATA[$ins['data']]]></code>
-      <code><![CDATA[$ins['description']]]></code>
-      <code><![CDATA[$ins['severity']]]></code>
-      <code><![CDATA[$ins['title']]]></code>
-      <code><![CDATA[$ins['type']]]></code>
-      <code><![CDATA[$ins['valid_until']]]></code>
-      <code><![CDATA[$ins['visualization_data']]]></code>
-      <code><![CDATA[$rec['category']]]></code>
-      <code><![CDATA[$rec['confidence_score']]]></code>
-      <code><![CDATA[$rec['data']]]></code>
-      <code><![CDATA[$rec['description']]]></code>
-      <code><![CDATA[$rec['description']]]></code>
-      <code><![CDATA[$rec['estimated_efficiency_gain']]]></code>
-      <code><![CDATA[$rec['estimated_savings']]]></code>
-      <code><![CDATA[$rec['impact_analysis']]]></code>
-      <code><![CDATA[$rec['priority']]]></code>
-      <code><![CDATA[$rec['proposed_action']]]></code>
-      <code><![CDATA[$rec['related_machine_id']]]></code>
-      <code><![CDATA[$rec['related_mine_area_id']]]></code>
-      <code><![CDATA[$rec['related_route_id']]]></code>
-      <code><![CDATA[$rec['title']]]></code>
-    </MixedArrayAccess>
-    <MixedAssignment>
-      <code><![CDATA[$ins]]></code>
-      <code><![CDATA[$rawRecommendations]]></code>
-      <code><![CDATA[$rec]]></code>
-    </MixedAssignment>
     <PossiblyInvalidArgument>
       <code><![CDATA[$insights]]></code>
       <code><![CDATA[$recommendations]]></code>
@@ -2000,6 +1775,15 @@
       <code><![CDATA[$maintenancePredictor]]></code>
       <code><![CDATA[$routeAdvisor]]></code>
     </PossiblyUnusedProperty>
+    <RedundantConditionGivenDocblockType>
+      <code><![CDATA[is_array($rawRecommendations)]]></code>
+    </RedundantConditionGivenDocblockType>
+    <RedundantFunctionCallGivenDocblockType>
+      <code><![CDATA[array_values]]></code>
+    </RedundantFunctionCallGivenDocblockType>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[list<array<string, mixed>>]]></code>
+    </UnnecessaryVarAnnotation>
   </file>
   <file src="app/Services/AI/AnomalyDetectorAgent.php">
     <RedundantConditionGivenDocblockType>
@@ -2012,10 +1796,10 @@
   </file>
   <file src="app/Services/AI/CostAnalyzerAgent.php">
     <InvalidOperand>
-      <code><![CDATA[$avgDailyCost * 0.15]]></code>
+      <code><![CDATA[$avgDailyCost * 0.15 * 30]]></code>
       <code><![CDATA[$fuelCosts + $maintenanceCosts]]></code>
       <code><![CDATA[$fuelCosts + $maintenanceCosts]]></code>
-      <code><![CDATA[$totalCosts / 30]]></code>
+      <code><![CDATA[$totalCosts / 30.0]]></code>
     </InvalidOperand>
     <InvalidScalarArgument>
       <code><![CDATA[$fuelCosts]]></code>
@@ -2047,51 +1831,14 @@
       <code><![CDATA[$quietest['geofence']->name]]></code>
     </PossiblyNullPropertyFetch>
   </file>
-  <file src="app/Services/AI/FleetOptimizerAgent.php">
-    <InvalidOperand>
-      <code><![CDATA[$totalMachines * self::IDLE_FLEET_RATIO]]></code>
-      <code><![CDATA[($idleCount / $totalMachines) * 100]]></code>
-      <code><![CDATA[round($idleHours, 1)]]></code>
-      <code><![CDATA[round($idlePercentage)]]></code>
-      <code><![CDATA[round($operatingHours, 1)]]></code>
-      <code><![CDATA[round($operatingHours, 1)]]></code>
-      <code><![CDATA[round($operatingHours, 1)]]></code>
-      <code><![CDATA[round($utilisation)]]></code>
-      <code><![CDATA[round($utilisation)]]></code>
-    </InvalidOperand>
-    <MixedArgument>
-      <code><![CDATA[$idleHours]]></code>
-      <code><![CDATA[$idleHours]]></code>
-      <code><![CDATA[$idleHours]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$utilisation]]></code>
-      <code><![CDATA[$utilisation]]></code>
-      <code><![CDATA[$utilisation]]></code>
-      <code><![CDATA[$utilisation]]></code>
-      <code><![CDATA[$utilisation]]></code>
-      <code><![CDATA[$utilisation]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$idleHours]]></code>
-      <code><![CDATA[$name]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$utilisation]]></code>
-    </MixedAssignment>
-  </file>
   <file src="app/Services/AI/FuelPredictorAgent.php">
     <InvalidOperand>
-      <code><![CDATA[$avgDailyConsumption * 30]]></code>
-      <code><![CDATA[$avgDailyConsumption * 7]]></code>
+      <code><![CDATA[$avgDailyConsumption * 30.0]]></code>
+      <code><![CDATA[$avgDailyConsumption * 7.0]]></code>
       <code><![CDATA[$currentInventory / $avgDailyConsumption]]></code>
       <code><![CDATA[$currentInventory / $avgDailyConsumption]]></code>
-      <code><![CDATA[$last30Days / 30]]></code>
-      <code><![CDATA[$last30Days / 30]]></code>
-      <code><![CDATA[$predicted30Days * 1.2]]></code>
+      <code><![CDATA[$last30Days / 30.0]]></code>
+      <code><![CDATA[$last30Days / 30.0]]></code>
       <code><![CDATA[abs(round($deviationPercent))]]></code>
       <code><![CDATA[round($daysOfSupply)]]></code>
       <code><![CDATA[round($daysOfSupply, 1)]]></code>
@@ -2100,106 +1847,18 @@
     <InvalidScalarArgument>
       <code><![CDATA[$currentInventory]]></code>
     </InvalidScalarArgument>
-    <MixedArgument>
-      <code><![CDATA[$avgDailyConsumption]]></code>
-      <code><![CDATA[$avgDailyConsumption - $expectedConsumption]]></code>
-      <code><![CDATA[$consumptionAnalysis['insights']]]></code>
-      <code><![CDATA[$consumptionAnalysis['recommendations']]]></code>
-      <code><![CDATA[$deviationPercent]]></code>
-      <code><![CDATA[$deviationPercent]]></code>
-      <code><![CDATA[$deviationPercent]]></code>
-      <code><![CDATA[$deviationPercent]]></code>
-      <code><![CDATA[$monthlyCostImpact]]></code>
-      <code><![CDATA[$monthlyCostImpact]]></code>
-      <code><![CDATA[$predictionAnalysis['recommendations']]]></code>
-      <code><![CDATA[$tankAnalysis['recommendations']]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$avgDailyConsumption]]></code>
-      <code><![CDATA[$deviationPercent]]></code>
-      <code><![CDATA[$monthlyCostImpact]]></code>
-      <code><![CDATA[$pricePerLiter]]></code>
-      <code><![CDATA[$totalCost]]></code>
-      <code><![CDATA[$totalLiters]]></code>
-    </MixedAssignment>
-    <MixedOperand>
-      <code><![CDATA[$avgDailyConsumption]]></code>
-      <code><![CDATA[$avgDailyConsumption]]></code>
-      <code><![CDATA[$avgDailyConsumption]]></code>
-      <code><![CDATA[$totalCost]]></code>
-      <code><![CDATA[$totalLiters]]></code>
-      <code><![CDATA[($avgDailyConsumption - $expectedConsumption) * 30]]></code>
-      <code><![CDATA[($avgDailyConsumption - $expectedConsumption) / $expectedConsumption]]></code>
-    </MixedOperand>
     <PossiblyInvalidOperand>
       <code><![CDATA[$tank->capacity_liters]]></code>
       <code><![CDATA[$tank->capacity_liters]]></code>
       <code><![CDATA[$tank->current_level_liters]]></code>
       <code><![CDATA[$tank->current_level_liters]]></code>
     </PossiblyInvalidOperand>
-    <UnusedVariable>
-      <code><![CDATA[$predicted7Days]]></code>
-    </UnusedVariable>
-  </file>
-  <file src="app/Services/AI/MaintenancePredictorAgent.php">
-    <InvalidOperand>
-      <code><![CDATA[$baseDays * (1 - $riskScore)]]></code>
-      <code><![CDATA[$daysSinceLastMaintenance / 180]]></code>
-      <code><![CDATA[$operatingHours / 30]]></code>
-      <code><![CDATA[$riskScore * 100]]></code>
-      <code><![CDATA[$riskScore * 100]]></code>
-      <code><![CDATA[($machineAge / 20) * 0.2]]></code>
-      <code><![CDATA[1 - $riskScore]]></code>
-      <code><![CDATA[round($highUsage, 1)]]></code>
-      <code><![CDATA[round($riskScore * 100)]]></code>
-    </InvalidOperand>
-    <MixedArgument>
-      <code><![CDATA[$predictionAnalysis['insights']]]></code>
-      <code><![CDATA[$predictionAnalysis['recommendations']]]></code>
-      <code><![CDATA[$scheduleAnalysis['recommendations']]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$avgHoursPerDay]]></code>
-      <code><![CDATA[$healthScore]]></code>
-      <code><![CDATA[$healthScore]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$riskFactors['health']]]></code>
-      <code><![CDATA[$riskFactors['hours']]]></code>
-    </MixedAssignment>
-    <MixedOperand>
-      <code><![CDATA[$avgHoursPerDay]]></code>
-      <code><![CDATA[$healthScore]]></code>
-      <code><![CDATA[$healthScore]]></code>
-      <code><![CDATA[$operatingHours]]></code>
-      <code><![CDATA[$readings->max()]]></code>
-      <code><![CDATA[(100 - $healthScore) / 100]]></code>
-      <code><![CDATA[100 - $healthScore]]></code>
-    </MixedOperand>
-    <PossiblyNullArgument>
-      <code><![CDATA[$schedule->machine]]></code>
-    </PossiblyNullArgument>
-    <PossiblyNullOperand>
-      <code><![CDATA[$scheduledInterval]]></code>
-      <code><![CDATA[$scheduledInterval]]></code>
-    </PossiblyNullOperand>
-    <PossiblyNullReference>
-      <code><![CDATA[diffInDays]]></code>
-    </PossiblyNullReference>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$machine]]></code>
-      <code><![CDATA[$machine]]></code>
-    </PossiblyUnusedParam>
   </file>
   <file src="app/Services/AI/RouteAdvisorAgent.php">
     <InvalidOperand>
-      <code><![CDATA[$detourPercent - 10]]></code>
       <code><![CDATA[$improvementPossible * 0.3]]></code>
       <code><![CDATA[$improvementPossible * 0.5]]></code>
-      <code><![CDATA[(($actualDistance - $directDistance) / $directDistance) * 100]]></code>
     </InvalidOperand>
-    <MixedOperand>
-      <code><![CDATA[$efficiency['fuel_savings']]]></code>
-    </MixedOperand>
   </file>
   <file src="app/Services/Billing/MachineEntitlementService.php">
     <MixedAssignment>
@@ -2216,6 +1875,9 @@
     <PossiblyInvalidArgument>
       <code><![CDATA[$record]]></code>
     </PossiblyInvalidArgument>
+    <RedundantConditionGivenDocblockType>
+      <code><![CDATA[$record->record_date]]></code>
+    </RedundantConditionGivenDocblockType>
     <UndefinedMagicPropertyFetch>
       <code><![CDATA[$group->first_id]]></code>
       <code><![CDATA[$group->total]]></code>
@@ -2258,7 +1920,7 @@
       <code><![CDATA[$totalCost / $totalConsumed]]></code>
       <code><![CDATA[($theftLiters + $spillageLiters) / $totalConsumed]]></code>
       <code><![CDATA[($theftLiters + $spillageLiters) / $totalConsumed]]></code>
-      <code><![CDATA[(($theftLiters + $spillageLiters) / $totalConsumed) * 100]]></code>
+      <code><![CDATA[(($theftLiters + $spillageLiters) / $totalConsumed) * 100.0]]></code>
     </InvalidOperand>
     <InvalidScalarArgument>
       <code><![CDATA[$dispensedTotal]]></code>
@@ -2267,16 +1929,9 @@
     </InvalidScalarArgument>
     <MixedArgument>
       <code><![CDATA[$item->total_fuel]]></code>
-      <code><![CDATA[$totalFuel * 0.25]]></code>
-      <code><![CDATA[$totalFuel / $operatingHours]]></code>
     </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$totalFuel]]></code>
-    </MixedAssignment>
     <MixedOperand>
       <code><![CDATA[$readings->max()]]></code>
-      <code><![CDATA[$totalFuel]]></code>
-      <code><![CDATA[$totalFuel]]></code>
     </MixedOperand>
     <MixedReturnStatement>
       <code><![CDATA[$readings->count() >= 2
@@ -2332,132 +1987,24 @@
     </PossiblyNullReference>
   </file>
   <file src="app/Services/GeofenceSuggestionService.php">
-    <DocblockTypeContradiction>
-      <code><![CDATA[$metric->recorded_at]]></code>
-    </DocblockTypeContradiction>
     <InvalidOperand>
       <code><![CDATA[$cell['lat_sum'] / $cell['count']]]></code>
       <code><![CDATA[$cell['lng_sum'] / $cell['count']]]></code>
       <code><![CDATA[floor($lat / self::CELL_DEGREES)]]></code>
       <code><![CDATA[floor($lng / self::CELL_DEGREES)]]></code>
     </InvalidOperand>
-    <RedundantConditionGivenDocblockType>
-      <code><![CDATA[$metric->recorded_at?->toDateString()]]></code>
-    </RedundantConditionGivenDocblockType>
   </file>
   <file src="app/Services/Integration/BaseManufacturerService.php">
-    <MixedArgument>
-      <code><![CDATA[$key]]></code>
-      <code><![CDATA[is_string($rawData['status'] ?? null) ? $rawData['status'] : 'unknown']]></code>
-    </MixedArgument>
-    <MixedArrayOffset>
-      <code><![CDATA[$merged[$key]]]></code>
-    </MixedArrayOffset>
-    <MixedAssignment>
-      <code><![CDATA[$key]]></code>
-      <code><![CDATA[$merged[$key]]]></code>
-      <code><![CDATA[$rawData[]]]></code>
-      <code><![CDATA[$response]]></code>
-      <code><![CDATA[$set]]></code>
-      <code><![CDATA[$this->apiKey]]></code>
-      <code><![CDATA[$this->apiSecret]]></code>
-      <code><![CDATA[$this->baseUrl]]></code>
-      <code><![CDATA[$value]]></code>
-    </MixedAssignment>
-    <MixedMethodCall>
-      <code><![CDATA[body]]></code>
-      <code><![CDATA[json]]></code>
-      <code><![CDATA[status]]></code>
-      <code><![CDATA[status]]></code>
-      <code><![CDATA[successful]]></code>
-    </MixedMethodCall>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[$merged]]></code>
-      <code><![CDATA[array<string, mixed>]]></code>
-    </MixedReturnTypeCoercion>
     <PossiblyUnusedProperty>
       <code><![CDATA[$apiSecret]]></code>
     </PossiblyUnusedProperty>
-    <PropertyNotSetInConstructor>
-      <code><![CDATA[$manufacturer]]></code>
-    </PropertyNotSetInConstructor>
-    <UnusedVariable>
-      <code><![CDATA[$index]]></code>
-    </UnusedVariable>
-  </file>
-  <file src="app/Services/Integration/BellService.php">
-    <InvalidArrayOffset>
-      <code><![CDATA[$config['client_id']]]></code>
-    </InvalidArrayOffset>
-    <MixedArgument>
-      <code><![CDATA[$template]]></code>
-      <code><![CDATA[data_get($latest, 'attributes.Heading') ?? null]]></code>
-      <code><![CDATA[data_get($latest, 'attributes.Latitude') ?? null]]></code>
-      <code><![CDATA[data_get($latest, 'attributes.Longitude') ?? null]]></code>
-      <code><![CDATA[data_get($latest, 'attributes.Speed') ?? null]]></code>
-    </MixedArgument>
-    <MixedArgumentTypeCoercion>
-      <code><![CDATA[$credentials]]></code>
-    </MixedArgumentTypeCoercion>
-    <MixedArrayAccess>
-      <code><![CDATA[$data['access_token']]]></code>
-      <code><![CDATA[$data['expires_in']]]></code>
-    </MixedArrayAccess>
-    <MixedAssignment>
-      <code><![CDATA[$accessToken]]></code>
-      <code><![CDATA[$cached]]></code>
-      <code><![CDATA[$data]]></code>
-      <code><![CDATA[$rows1]]></code>
-      <code><![CDATA[$template]]></code>
-      <code><![CDATA[$this->baseUrl]]></code>
-      <code><![CDATA[$this->clientId]]></code>
-      <code><![CDATA[$this->clientSecret]]></code>
-      <code><![CDATA[$this->password]]></code>
-      <code><![CDATA[$this->scope]]></code>
-      <code><![CDATA[$this->tokenUrl]]></code>
-      <code><![CDATA[$this->username]]></code>
-    </MixedAssignment>
-    <MixedReturnStatement>
-      <code><![CDATA[$accessToken]]></code>
-      <code><![CDATA[$cached['access_token']]]></code>
-    </MixedReturnStatement>
-    <PossiblyNullOperand>
-      <code><![CDATA[$this->username]]></code>
-    </PossiblyNullOperand>
-    <RedundantPropertyInitializationCheck>
-      <code><![CDATA[$this->clientId]]></code>
-      <code><![CDATA[$this->clientId]]></code>
-      <code><![CDATA['']]></code>
-      <code><![CDATA['']]></code>
-    </RedundantPropertyInitializationCheck>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[! $accessToken]]></code>
-    </RiskyTruthyFalsyComparison>
-    <UnnecessaryVarAnnotation>
-      <code><![CDATA[Response]]></code>
-    </UnnecessaryVarAnnotation>
   </file>
   <file src="app/Services/Integration/CATService.php">
     <MixedArgument>
       <code><![CDATA[$data['severity'] ?? $data['priority'] ?? 'medium']]></code>
       <code><![CDATA[$data['type'] ?? $data['code'] ?? 'unknown']]></code>
-      <code><![CDATA[is_array($data['location'] ?? null) ? $data['location'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
       <code><![CDATA[is_string($data['status'] ?? null) ? $data['status'] : 'unknown']]></code>
     </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$rows2]]></code>
-      <code><![CDATA[$rows3]]></code>
-      <code><![CDATA[$rows4]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-    </MixedReturnTypeCoercion>
     <ParamNameMismatch>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$data]]></code>
@@ -2467,480 +2014,58 @@
     <MixedArgument>
       <code><![CDATA[$data['event_type'] ?? $data['type'] ?? 'unknown']]></code>
       <code><![CDATA[$data['severity'] ?? $data['priority'] ?? 'medium']]></code>
-      <code><![CDATA[is_array($data['position'] ?? null) ? $data['position'] : []]]></code>
-      <code><![CDATA[is_array($events['data'] ?? null) ? $events['data'] : []]]></code>
-      <code><![CDATA[is_array($history['data'] ?? null) ? $history['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
       <code><![CDATA[is_string($data['status'] ?? null) ? $data['status'] : 'unknown']]></code>
     </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$rows5]]></code>
-      <code><![CDATA[$rows6]]></code>
-    </MixedAssignment>
     <ParamNameMismatch>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$data]]></code>
     </ParamNameMismatch>
-  </file>
-  <file src="app/Services/Integration/DoosanService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($fuel['data'] ?? null) ? $fuel['data'] : []]]></code>
-      <code><![CDATA[is_array($maintenance['data'] ?? null) ? $maintenance['data'] : []]]></code>
-      <code><![CDATA[is_array($operation['data'] ?? null) ? $operation['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows7]]></code>
-      <code><![CDATA[$rows8]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="app/Services/Integration/EpirocService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($maintenance['data'] ?? null) ? $maintenance['data'] : []]]></code>
-      <code><![CDATA[is_array($performance['data'] ?? null) ? $performance['data'] : []]]></code>
-      <code><![CDATA[is_array($production['data'] ?? null) ? $production['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows10]]></code>
-      <code><![CDATA[$rows9]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="app/Services/Integration/HitachiService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($diagnostics['data'] ?? null) ? $diagnostics['data'] : []]]></code>
-      <code><![CDATA[is_array($operatingHours['data'] ?? null) ? $operatingHours['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-      <code><![CDATA[is_array($status['data'] ?? null) ? $status['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows11]]></code>
-      <code><![CDATA[$rows12]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="app/Services/Integration/HyundaiService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($engineData['data'] ?? null) ? $engineData['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-      <code><![CDATA[is_array($serviceInfo['data'] ?? null) ? $serviceInfo['data'] : []]]></code>
-      <code><![CDATA[is_array($workingInfo['data'] ?? null) ? $workingInfo['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows13]]></code>
-      <code><![CDATA[$rows14]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="app/Services/Integration/IntegrationService.php">
-    <DocblockTypeContradiction>
-      <code><![CDATA[$machine->mine_area_id]]></code>
-      <code><![CDATA[$this->dailyProductionTarget($integration->team_id, $existing->mine_area_id ?? $machine->mine_area_id, $date)]]></code>
-    </DocblockTypeContradiction>
-    <InvalidOperand>
-      <code><![CDATA[(microtime(true) - $startedAt) * 1000]]></code>
-      <code><![CDATA[(microtime(true) - $startedAt) * 1000]]></code>
-      <code><![CDATA[(microtime(true) - $startedAt) * 1000]]></code>
-    </InvalidOperand>
-    <MixedArgument>
-      <code><![CDATA[$machineData]]></code>
-      <code><![CDATA[$machineData['alerts']]]></code>
-      <code><![CDATA[$machineData['metrics']]]></code>
-      <code><![CDATA[$machineList]]></code>
-      <code><![CDATA[$machineList[0] ?? []]]></code>
-      <code><![CDATA[$machines['machines'] ?? []]]></code>
-      <code><![CDATA[$machines['machines'] ?? []]]></code>
-      <code><![CDATA[$syncResult['count'] ?? 0]]></code>
-    </MixedArgument>
-    <MixedArgumentTypeCoercion>
-      <code><![CDATA[$alerts]]></code>
-    </MixedArgumentTypeCoercion>
-    <MixedArrayAccess>
-      <code><![CDATA[$alertData['description']]]></code>
-      <code><![CDATA[$alertData['external_id']]]></code>
-      <code><![CDATA[$alertData['priority']]]></code>
-      <code><![CDATA[$alertData['status']]]></code>
-      <code><![CDATA[$alertData['title']]]></code>
-      <code><![CDATA[$alertData['type']]]></code>
-      <code><![CDATA[$machineList[0]]]></code>
-      <code><![CDATA[$metrics[$key]]]></code>
-      <code><![CDATA[$metrics[$key]]]></code>
-      <code><![CDATA[$metrics['raw_data']]]></code>
-      <code><![CDATA[$rawData[$key]]]></code>
-    </MixedArrayAccess>
-    <MixedAssignment>
-      <code><![CDATA[$alertData]]></code>
-      <code><![CDATA[$checks['data_retrieved']]]></code>
-      <code><![CDATA[$checks['data_storable']]]></code>
-      <code><![CDATA[$checks['tenant_associated']]]></code>
-      <code><![CDATA[$externalId]]></code>
-      <code><![CDATA[$externalId]]></code>
-      <code><![CDATA[$machineData]]></code>
-      <code><![CDATA[$machineList]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rawData]]></code>
-      <code><![CDATA[$recordedAt]]></code>
-      <code><![CDATA[$status]]></code>
-      <code><![CDATA[$value]]></code>
-    </MixedAssignment>
-    <PossiblyNullReference>
-      <code><![CDATA[toDateString]]></code>
-    </PossiblyNullReference>
-    <RedundantConditionGivenDocblockType>
-      <code><![CDATA[$existing->mine_area_id]]></code>
-      <code><![CDATA[$existing->target_quantity]]></code>
-    </RedundantConditionGivenDocblockType>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[! $checks['data_retrieved']]]></code>
-      <code><![CDATA[! $externalId]]></code>
-      <code><![CDATA[! $externalId]]></code>
-      <code><![CDATA[! ($machines['success'] ?? false)]]></code>
-      <code><![CDATA[$integration->team?->timezone]]></code>
-    </RiskyTruthyFalsyComparison>
-  </file>
-  <file src="app/Services/Integration/JCBService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-      <code><![CDATA[is_array($service['data'] ?? null) ? $service['data'] : []]]></code>
-      <code><![CDATA[is_array($telemetry['data'] ?? null) ? $telemetry['data'] : []]]></code>
-      <code><![CDATA[is_array($utilization['data'] ?? null) ? $utilization['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows15]]></code>
-      <code><![CDATA[$rows16]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
   </file>
   <file src="app/Services/Integration/KawasakiService.php">
     <MixedArgument>
       <code><![CDATA[$data['alert_code'] ?? $data['type'] ?? 'unknown']]></code>
       <code><![CDATA[$data['priority_level'] ?? $data['severity'] ?? 'medium']]></code>
-      <code><![CDATA[is_array($data['location'] ?? null) ? $data['location'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
       <code><![CDATA[is_string($data['status'] ?? null) ? $data['status'] : 'unknown']]></code>
     </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$rows17]]></code>
-      <code><![CDATA[$rows18]]></code>
-      <code><![CDATA[$rows19]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-    </MixedReturnTypeCoercion>
     <ParamNameMismatch>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$data]]></code>
     </ParamNameMismatch>
-  </file>
-  <file src="app/Services/Integration/KobelcoService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($operatingStatus['data'] ?? null) ? $operatingStatus['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-      <code><![CDATA[is_array($workRecords['data'] ?? null) ? $workRecords['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows20]]></code>
-      <code><![CDATA[$rows21]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
   </file>
   <file src="app/Services/Integration/KomatsuService.php">
     <MixedArgument>
       <code><![CDATA[$data['level'] ?? $data['priority'] ?? 'medium']]></code>
       <code><![CDATA[$data['type'] ?? $data['category'] ?? 'unknown']]></code>
-      <code><![CDATA[is_array($data['position'] ?? null) ? $data['position'] : []]]></code>
       <code><![CDATA[is_string($data['status'] ?? null) ? $data['status'] : 'unknown']]></code>
     </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$rows22]]></code>
-      <code><![CDATA[$rows23]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-    </MixedReturnTypeCoercion>
     <ParamNameMismatch>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$data]]></code>
     </ParamNameMismatch>
   </file>
-  <file src="app/Services/Integration/KubotaService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($diagnostics['data'] ?? null) ? $diagnostics['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-      <code><![CDATA[is_array($service['data'] ?? null) ? $service['data'] : []]]></code>
-      <code><![CDATA[is_array($telemetry['data'] ?? null) ? $telemetry['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows24]]></code>
-      <code><![CDATA[$rows25]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="app/Services/Integration/LiebherrService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($operatingData['data'] ?? null) ? $operatingData['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-      <code><![CDATA[is_array($serviceIntervals['data'] ?? null) ? $serviceIntervals['data'] : []]]></code>
-      <code><![CDATA[is_array($telemetry['data'] ?? null) ? $telemetry['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows26]]></code>
-      <code><![CDATA[$rows27]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
-  </file>
   <file src="app/Services/Integration/RoundebultService.php">
     <MixedArgument>
-      <code><![CDATA[is_array($data['location'] ?? null) ? $data['location'] : []]]></code>
-      <code><![CDATA[is_array($metrics['data'] ?? null) ? $metrics['data'] : []]]></code>
-      <code><![CDATA[is_array($operations['data'] ?? null) ? $operations['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
       <code><![CDATA[is_string($data['alert_type'] ?? null) ? $data['alert_type'] : 'unknown']]></code>
       <code><![CDATA[is_string($data['severity'] ?? null) ? $data['severity'] : 'medium']]></code>
       <code><![CDATA[is_string($data['status'] ?? null) ? $data['status'] : 'unknown']]></code>
     </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows28]]></code>
-      <code><![CDATA[$rows29]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
     <ParamNameMismatch>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$data]]></code>
     </ParamNameMismatch>
-  </file>
-  <file src="app/Services/Integration/SanyService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($realtimeData['data'] ?? null) ? $realtimeData['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-      <code><![CDATA[is_array($statistics['data'] ?? null) ? $statistics['data'] : []]]></code>
-      <code><![CDATA[is_array($workingHours['data'] ?? null) ? $workingHours['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows30]]></code>
-      <code><![CDATA[$rows31]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
   </file>
   <file src="app/Services/Integration/VolvoService.php">
     <MixedArgument>
       <code><![CDATA[$data['fault_code'] ?? $data['type'] ?? 'unknown']]></code>
       <code><![CDATA[$data['priority'] ?? $data['severity'] ?? 'medium']]></code>
-      <code><![CDATA[is_array($data['position'] ?? null) ? $data['position'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
       <code><![CDATA[is_string($data['status'] ?? null) ? $data['status'] : 'unknown']]></code>
     </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$rows32]]></code>
-      <code><![CDATA[$rows33]]></code>
-      <code><![CDATA[$rows34]]></code>
-      <code><![CDATA[$rows35]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-    </MixedReturnTypeCoercion>
     <ParamNameMismatch>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$data]]></code>
     </ParamNameMismatch>
   </file>
-  <file src="app/Services/Integration/XCMGService.php">
-    <MixedArgument>
-      <code><![CDATA[is_array($parameters['data'] ?? null) ? $parameters['data'] : []]]></code>
-      <code><![CDATA[is_array($response['data'] ?? null) ? $response['data'] : []]]></code>
-      <code><![CDATA[is_array($status['data'] ?? null) ? $status['data'] : []]]></code>
-      <code><![CDATA[is_array($workData['data'] ?? null) ? $workData['data'] : []]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$items]]></code>
-      <code><![CDATA[$location]]></code>
-      <code><![CDATA[$metrics]]></code>
-      <code><![CDATA[$rows36]]></code>
-      <code><![CDATA[$rows37]]></code>
-    </MixedAssignment>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[?array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[is_array($items) ? array_values(array_filter($items, 'is_array')) : []]]></code>
-      <code><![CDATA[is_array($location) ? $location : null]]></code>
-      <code><![CDATA[is_array($metrics) ? $metrics : []]]></code>
-    </MixedReturnTypeCoercion>
-  </file>
-  <file src="app/Services/MachinePerformanceService.php">
-    <DocblockTypeContradiction>
-      <code><![CDATA[$first === null]]></code>
-      <code><![CDATA[$firstReading->created_at]]></code>
-      <code><![CDATA[$last === null]]></code>
-      <code><![CDATA[$lastReading->created_at]]></code>
-      <code><![CDATA[$m->created_at]]></code>
-      <code><![CDATA[$m->created_at]]></code>
-      <code><![CDATA[$metric->created_at]]></code>
-    </DocblockTypeContradiction>
-    <InvalidArgument>
-      <code><![CDATA[$metricsByDay]]></code>
-      <code><![CDATA[$productionByDay]]></code>
-    </InvalidArgument>
-    <InvalidOperand>
-      <code><![CDATA[$elapsedHours * 1.1]]></code>
-      <code><![CDATA[$todayLoads - $average]]></code>
-      <code><![CDATA[$todayProduction['tonnes'] / $todayProduction['loads']]]></code>
-      <code><![CDATA[$todayUtilisation - $priorValues->avg()]]></code>
-      <code><![CDATA[$workingHours * 3600]]></code>
-      <code><![CDATA[($workingHours * 3600) / $todayProduction['cycles']]]></code>
-      <code><![CDATA[(($operatingHours - $idleHours) / $operatingHours) * 100]]></code>
-    </InvalidOperand>
-    <MissingClosureReturnType>
-      <code><![CDATA[fn (MachineMetric $m) => data_get($m->raw_data, 'engine_running')]]></code>
-      <code><![CDATA[fn (MachineMetric $m) => data_get($m->raw_data, 'fuel_consumed_cumulative')]]></code>
-    </MissingClosureReturnType>
-    <MixedAssignment>
-      <code><![CDATA[$value]]></code>
-    </MixedAssignment>
-    <PossiblyNullOperand>
-      <code><![CDATA[$priorValues->avg()]]></code>
-    </PossiblyNullOperand>
-    <RedundantConditionGivenDocblockType>
-      <code><![CDATA[$firstReading->recorded_at]]></code>
-      <code><![CDATA[$lastReading->recorded_at]]></code>
-      <code><![CDATA[$m->recorded_at]]></code>
-      <code><![CDATA[$m->recorded_at]]></code>
-      <code><![CDATA[$metric->recorded_at]]></code>
-    </RedundantConditionGivenDocblockType>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[Team::query()->find($teamId)?->timezone]]></code>
-    </RiskyTruthyFalsyComparison>
-  </file>
   <file src="app/Services/MaintenanceHealthService.php">
-    <MixedArgument>
-      <code><![CDATA[$laborCost]]></code>
-      <code><![CDATA[$partsCost]]></code>
-      <code><![CDATA[$totalCost]]></code>
-      <code><![CDATA[$totalLaborHours]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$laborCost]]></code>
-      <code><![CDATA[$partsCost]]></code>
-      <code><![CDATA[$totalCost]]></code>
-      <code><![CDATA[$totalLaborHours]]></code>
-    </MixedAssignment>
     <PossiblyNullArgument>
       <code><![CDATA[$avgRepairTime]]></code>
     </PossiblyNullArgument>
@@ -3096,14 +2221,6 @@
     </PossiblyNullPropertyAssignmentValue>
   </file>
   <file src="app/Services/ProductionLossService.php">
-    <DocblockTypeContradiction>
-      <code><![CDATA[$first->created_at]]></code>
-      <code><![CDATA[$last->created_at]]></code>
-    </DocblockTypeContradiction>
-    <InvalidOperand>
-      <code><![CDATA[$start->diffInMinutes($end) / 60]]></code>
-      <code><![CDATA[$windowStart->diffInMinutes($windowEnd) / 60]]></code>
-    </InvalidOperand>
     <InvalidTemplateParam>
       <code><![CDATA[$counted->whereNotNull('reason')
             ->groupBy('reason')
@@ -3127,10 +2244,6 @@
       <code><![CDATA[$operatingDelta]]></code>
       <code><![CDATA[$rate]]></code>
     </MixedOperand>
-    <RedundantConditionGivenDocblockType>
-      <code><![CDATA[$first->recorded_at]]></code>
-      <code><![CDATA[$last->recorded_at]]></code>
-    </RedundantConditionGivenDocblockType>
   </file>
   <file src="app/Services/ProductionReconciliationService.php">
     <InvalidOperand>
@@ -3145,6 +2258,10 @@
     </PossiblyNullOperand>
   </file>
   <file src="app/Services/ProductionService.php">
+    <InvalidOperand>
+      <code><![CDATA[$totalProduced / $machineRecords->count()]]></code>
+      <code><![CDATA[$totalProduced / $recordCount]]></code>
+    </InvalidOperand>
     <InvalidReturnStatement>
       <code><![CDATA[$records->map(function ($dayRecords) {
             return [
@@ -3160,20 +2277,9 @@
       <code><![CDATA[\Illuminate\Support\Collection<string, array<string, mixed>>]]></code>
     </InvalidReturnType>
     <MixedAssignment>
-      <code><![CDATA[$avgProduction]]></code>
       <code><![CDATA[$cycles]]></code>
       <code><![CDATA[$loads]]></code>
-      <code><![CDATA[$totalProduced]]></code>
-      <code><![CDATA[$totalProduced]]></code>
-      <code><![CDATA[$totalTarget]]></code>
-      <code><![CDATA[$totalTarget]]></code>
     </MixedAssignment>
-    <MixedOperand>
-      <code><![CDATA[$totalProduced]]></code>
-      <code><![CDATA[$totalProduced]]></code>
-      <code><![CDATA[$totalProduced]]></code>
-      <code><![CDATA[$totalProduced]]></code>
-    </MixedOperand>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[?bool]]></code>
       <code><![CDATA[ProductionRecord]]></code>
@@ -3208,141 +2314,10 @@
   </file>
   <file src="app/Services/Reports/ReportDataService.php">
     <DocblockTypeContradiction>
-      <code><![CDATA[$e->entry_time]]></code>
-      <code><![CDATA[$r->scheduled_date]]></code>
-      <code><![CDATA[$v->detected_at]]></code>
-      <code><![CDATA[$v->remediation_deadline]]></code>
-      <code><![CDATA['—']]></code>
-      <code><![CDATA['—']]></code>
-      <code><![CDATA['—']]></code>
-      <code><![CDATA['—']]></code>
-      <code><![CDATA[null]]></code>
+      <code><![CDATA[$r->record_date]]></code>
     </DocblockTypeContradiction>
-    <InvalidOperand>
-      <code><![CDATA[$hoursInRange / ($daysInRange * 24)]]></code>
-      <code><![CDATA[$r->started_at->diffInMinutes($r->completed_at) / 60]]></code>
-      <code><![CDATA[$r->started_at->diffInMinutes($r->completed_at) / 60]]></code>
-      <code><![CDATA[$utilizationPercent]]></code>
-      <code><![CDATA[round(($totalProduced / $totalTarget) * 100, 1)]]></code>
-    </InvalidOperand>
-    <LessSpecificReturnStatement>
-      <code><![CDATA[[
-            'headers' => ['Date', 'Machine', 'Type', 'Liters', 'Unit Price', 'Total Cost'],
-            'rows' => $rows,
-            'summary' => [
-                'Transactions' => $transactions->count(),
-                'Total Liters Dispensed' => round($dispensing->sum('quantity_liters'), 2),
-                'Total Cost' => round($transactions->sum('total_cost'), 2),
-            ],
-        ]]]></code>
-      <code><![CDATA[[
-            'headers' => ['Date', 'Mine Area', 'Machine', 'Shift', 'Quantity Produced', 'Target', 'Unit'],
-            'rows' => $rows,
-            'summary' => [
-                'Records' => $records->count(),
-                'Total Produced' => round($totalProduced, 2),
-                'Total Target' => round($totalTarget, 2),
-                'Achievement' => $totalTarget > 0 ? round(($totalProduced / $totalTarget) * 100, 1).'%' : 'N/A',
-            ],
-        ]]]></code>
-      <code><![CDATA[[
-            'headers' => ['Detected', 'Violation Type', 'Severity', 'Description', 'Remediation Deadline', 'Status'],
-            'rows' => $rows,
-            'summary' => [
-                'Total Violations' => $violations->count(),
-                'Resolved' => $resolvedCount,
-                'Overdue' => $overdueCount,
-                'Critical' => $criticalCount,
-                'Compliance Score' => max(0, min(100, $score)),
-            ],
-        ]]]></code>
-      <code><![CDATA[[
-            'headers' => ['Entry Time', 'Geofence', 'Machine', 'Exit Time', 'Tonnage', 'Material'],
-            'rows' => $rows,
-            'summary' => [
-                'Entries' => $entries->count(),
-                'Total Tonnage' => round($entries->sum('tonnage_loaded'), 2),
-            ],
-        ]]]></code>
-      <code><![CDATA[[
-            'headers' => ['Machine', 'Reason', 'Type', 'Started', 'Completed', 'Downtime (hrs)'],
-            'rows' => $rows,
-            'summary' => [
-                'Downtime Events' => $records->count(),
-                'Total Downtime Hours' => round($totalDowntimeHours, 2),
-            ],
-        ]]]></code>
-      <code><![CDATA[[
-            'headers' => ['Work Order', 'Machine', 'Title', 'Type', 'Status', 'Scheduled', 'Completed', 'Cost'],
-            'rows' => $rows,
-            'summary' => [
-                'Records' => $records->count(),
-                'Completed' => $records->where('status', 'completed')->count(),
-                'Overdue/Open' => $records->whereIn('status', ['scheduled', 'in_progress'])->count(),
-                'Total Cost' => round($records->sum('total_cost'), 2),
-            ],
-        ]]]></code>
-    </LessSpecificReturnStatement>
-    <MixedArgument>
-      <code><![CDATA[$dispensing->sum('quantity_liters')]]></code>
-      <code><![CDATA[$filters['end_date'] ?? now()]]></code>
-      <code><![CDATA[$filters['start_date'] ?? now()->subDays(30)]]></code>
-      <code><![CDATA[$geofenceIds]]></code>
-      <code><![CDATA[$hoursInRange]]></code>
-      <code><![CDATA[$machineIds]]></code>
-      <code><![CDATA[$machineIds]]></code>
-      <code><![CDATA[$machineIds]]></code>
-      <code><![CDATA[$machineIds]]></code>
-      <code><![CDATA[$machineIds]]></code>
-      <code><![CDATA[$records->sum('total_cost')]]></code>
-      <code><![CDATA[$totalHours]]></code>
-      <code><![CDATA[$totalProduced]]></code>
-      <code><![CDATA[$totalTarget]]></code>
-      <code><![CDATA[$transactions->sum('total_cost')]]></code>
-      <code><![CDATA[($hoursInRange / ($daysInRange * 24)) * 100]]></code>
-      <code><![CDATA[($totalProduced / $totalTarget) * 100]]></code>
-    </MixedArgument>
-    <MixedAssignment>
-      <code><![CDATA[$geofenceIds]]></code>
-      <code><![CDATA[$hoursInRange]]></code>
-      <code><![CDATA[$machineIds]]></code>
-      <code><![CDATA[$totalHours]]></code>
-      <code><![CDATA[$totalProduced]]></code>
-      <code><![CDATA[$totalTarget]]></code>
-    </MixedAssignment>
-    <MixedOperand>
-      <code><![CDATA[$hoursInRange]]></code>
-      <code><![CDATA[$hoursInRange ?? 0.0]]></code>
-      <code><![CDATA[$readings->max()]]></code>
-      <code><![CDATA[$totalProduced]]></code>
-    </MixedOperand>
-    <MoreSpecificReturnType>
-      <code><![CDATA[array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}]]></code>
-      <code><![CDATA[array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}]]></code>
-      <code><![CDATA[array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}]]></code>
-      <code><![CDATA[array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}]]></code>
-      <code><![CDATA[array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}]]></code>
-      <code><![CDATA[array{headers: list<string>, rows: list<array<int, mixed>>, summary: array<string, mixed>}]]></code>
-    </MoreSpecificReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[diffInMinutes]]></code>
-      <code><![CDATA[diffInMinutes]]></code>
-      <code><![CDATA[format]]></code>
-    </PossiblyNullReference>
     <RedundantConditionGivenDocblockType>
-      <code><![CDATA[$e->entry_time?->format('Y-m-d H:i')]]></code>
-      <code><![CDATA[$machine->status]]></code>
-      <code><![CDATA[$r->maintenance_type]]></code>
-      <code><![CDATA[$r->maintenance_type]]></code>
-      <code><![CDATA[$r->scheduled_date?->format('Y-m-d')]]></code>
-      <code><![CDATA[$r->shift]]></code>
-      <code><![CDATA[$r->target_quantity !== null]]></code>
-      <code><![CDATA[$v->detected_at?->format('Y-m-d H:i')]]></code>
-      <code><![CDATA[$v->remediation_deadline]]></code>
-      <code><![CDATA[$v->remediation_deadline !== null]]></code>
-      <code><![CDATA[$v->remediation_deadline?->format('Y-m-d')]]></code>
-      <code><![CDATA[$v->resolved_at === null
-            && $v->remediation_deadline !== null]]></code>
+      <code><![CDATA[$r->record_date?->format('Y-m-d')]]></code>
     </RedundantConditionGivenDocblockType>
   </file>
   <file src="app/Services/Reports/Writers/CsvReportWriter.php">
@@ -3370,6 +2345,9 @@
     </MixedAssignment>
   </file>
   <file src="app/Services/ShiftService.php">
+    <InvalidArrayOffset>
+      <code><![CDATA[[$r->mine_area_id => ['quantity' => (float) $r->qty, 'count' => $r->count]]]]></code>
+    </InvalidArrayOffset>
     <InvalidNullableReturnType>
       <code><![CDATA[Shift]]></code>
     </InvalidNullableReturnType>
@@ -3457,43 +2435,6 @@
     <MixedAssignment>
       <code><![CDATA[$teamId]]></code>
     </MixedAssignment>
-  </file>
-  <file src="app/Traits/HasTeamFilters.php">
-    <MixedAssignment>
-      <code><![CDATA[$teamId]]></code>
-    </MixedAssignment>
-    <MoreSpecificReturnType>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-      <code><![CDATA[Builder<static>]]></code>
-    </MoreSpecificReturnType>
-    <RiskyTruthyFalsyComparison>
-      <code><![CDATA[$teamId]]></code>
-    </RiskyTruthyFalsyComparison>
   </file>
   <file src="routes/api.php">
     <MissingClosureParamType>

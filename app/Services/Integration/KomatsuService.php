@@ -48,9 +48,7 @@ class KomatsuService extends BaseManufacturerService
 
             $machines = [];
             if (! empty($response['machines'])) {
-                $rows22 = data_get($response, 'machines');
-                /** @var list<array<string, mixed>> $rows22 */
-                $rows22 = is_array($rows22) ? array_values(array_filter($rows22, 'is_array')) : [];
+                $rows22 = self::rowsOf(data_get($response, 'machines'));
                 foreach ($rows22 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
@@ -176,9 +174,7 @@ class KomatsuService extends BaseManufacturerService
 
             $alerts = [];
             if (! empty($response['cautions'])) {
-                $rows23 = data_get($response, 'cautions');
-                /** @var list<array<string, mixed>> $rows23 */
-                $rows23 = is_array($rows23) ? array_values(array_filter($rows23, 'is_array')) : [];
+                $rows23 = self::rowsOf(data_get($response, 'cautions'));
                 foreach ($rows23 as $caution) {
                     $alerts[] = $this->parseAlert($caution);
                 }
@@ -213,7 +209,7 @@ class KomatsuService extends BaseManufacturerService
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Komatsu',
             'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
-            'location' => $this->parseLocation(is_array($data['position'] ?? null) ? $data['position'] : []),
+            'location' => $this->parseLocation(self::payloadArray($data['position'] ?? null)),
             'last_heartbeat' => $data['last_heartbeat'] ?? $data['last_update'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'heavy_equipment',
@@ -310,9 +306,7 @@ class KomatsuService extends BaseManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            $location = $result['location'] ?? null;
-
-            return is_array($location) ? $location : null;
+            return is_array($result['location'] ?? null) ? self::payloadArray($result['location']) : null;
         } catch (Exception $e) {
             return null;
         }
@@ -348,9 +342,7 @@ class KomatsuService extends BaseManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            $items = $result['alerts'] ?? [];
-
-            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
+            return self::rowsOf($result['alerts'] ?? null);
         } catch (Exception $e) {
             return [];
         }

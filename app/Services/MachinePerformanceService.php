@@ -21,6 +21,11 @@ use Illuminate\Support\Collection;
  * ProductionRecord rows the Production page reads. Days are bucketed in
  * the team's timezone.
  */
+/**
+ * @psalm-type MachineDayPerformance = array{machine_id: int, machine_name: string, machine_type: string|null, manufacturer: string|null, status: string, period: string, engine_hours_lifetime: float|null, fuel_level: float|null, engine_running: mixed, operating_hours_today: float|null, idle_hours_today: float|null, utilisation_today: float|null, fuel_lph_today: float|null, loads_today: int, cycles_today: int, tonnes_today: float, avg_payload_tonnes: float|null, avg_cycle_seconds: float|null, utilisation_trend: string|null, loads_trend: string|null}
+ *
+ * @phpstan-type MachineDayPerformance array{machine_id: int, machine_name: string, machine_type: string|null, manufacturer: string|null, status: string, period: string, engine_hours_lifetime: float|null, fuel_level: float|null, engine_running: mixed, operating_hours_today: float|null, idle_hours_today: float|null, utilisation_today: float|null, fuel_lph_today: float|null, loads_today: int, cycles_today: int, tonnes_today: float, avg_payload_tonnes: float|null, avg_cycle_seconds: float|null, utilisation_trend: string|null, loads_trend: string|null}
+ */
 class MachinePerformanceService
 {
     /**
@@ -49,11 +54,11 @@ class MachinePerformanceService
      * telemetry or production data in the trend window. Machines with no
      * data at all are excluded rather than shown with invented zeroes.
      *
-     * @return list<array<string, mixed>>
+     * @return list<MachineDayPerformance>
      */
     public function dailyPerformanceForTeam(int $teamId): array
     {
-        $timezone = Team::query()->find($teamId)?->timezone ?: config('app.timezone', 'UTC');
+        $timezone = Team::query()->find($teamId)?->timezone ?? 'UTC';
         $today = Carbon::now($timezone)->toDateString();
         $windowStart = Carbon::now($timezone)->subDays(self::TREND_WINDOW_DAYS)->startOfDay();
 
@@ -89,11 +94,13 @@ class MachinePerformanceService
 
             // ->toBase(): Eloquent collections override except() to work on
             // model keys, but these are keyed by date string.
+            /** @var Collection<string, Collection<int, MachineMetric>> $metricsByDay */
             $metricsByDay = $metrics->groupBy(
-                fn (MachineMetric $metric) => ($metric->recorded_at ?? $metric->created_at)->clone()->setTimezone($timezone)->toDateString()
+                fn (MachineMetric $metric): string => ($metric->recorded_at ?? $metric->created_at)->clone()->setTimezone($timezone)->toDateString()
             )->toBase();
+            /** @var Collection<string, Collection<int, ProductionRecord>> $productionByDay */
             $productionByDay = $production->groupBy(
-                fn (ProductionRecord $record) => Carbon::parse($record->record_date)->toDateString()
+                fn (ProductionRecord $record): string => Carbon::parse($record->record_date)->toDateString()
             )->toBase();
 
             $todayTelemetry = $this->telemetryDay($metricsByDay->get($today, collect()));
@@ -112,9 +119,9 @@ class MachinePerformanceService
                 'period' => $today,
 
                 // Lifetime / latest-state values (labelled as such in the UI).
-                'engine_hours_lifetime' => $this->latestValue($metrics, fn (MachineMetric $m) => $m->operating_hours),
-                'fuel_level' => $this->latestValue($metrics, fn (MachineMetric $m) => $m->fuel_level),
-                'engine_running' => $this->latestValue($metrics, fn (MachineMetric $m) => data_get($m->raw_data, 'engine_running')),
+                'engine_hours_lifetime' => self::floatOrNull($this->latestValue($metrics, fn (MachineMetric $m) => $m->operating_hours)),
+                'fuel_level' => self::floatOrNull($this->latestValue($metrics, fn (MachineMetric $m) => $m->fuel_level)),
+                'engine_running' => $this->latestValue($metrics, fn (MachineMetric $m): mixed => data_get($m->raw_data, 'engine_running')),
 
                 // Today's derived values (null = insufficient data).
                 'operating_hours_today' => $todayTelemetry['operating_hours'],
@@ -125,10 +132,10 @@ class MachinePerformanceService
                 'cycles_today' => $todayProduction['cycles'],
                 'tonnes_today' => $todayProduction['tonnes'],
                 'avg_payload_tonnes' => $todayProduction['loads'] > 0
-                    ? $todayProduction['tonnes'] / $todayProduction['loads']
+                    ? $todayProduction['tonnes'] / (float) $todayProduction['loads']
                     : null,
                 'avg_cycle_seconds' => $workingHours !== null && $workingHours > 0 && $todayProduction['cycles'] > 0
-                    ? ($workingHours * 3600) / $todayProduction['cycles']
+                    ? ($workingHours * 3600.0) / (float) $todayProduction['cycles']
                     : null,
 
                 // Trends against the prior days in the window (null =
@@ -159,7 +166,7 @@ class MachinePerformanceService
         return [
             'operating_hours' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => $m->operating_hours, boundedByElapsedTime: true),
             'idle_hours' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => $m->idle_hours, boundedByElapsedTime: true),
-            'fuel_consumed' => $this->dayDelta($dayMetrics, fn (MachineMetric $m) => data_get($m->raw_data, 'fuel_consumed_cumulative')),
+            'fuel_consumed' => $this->dayDelta($dayMetrics, fn (MachineMetric $m): mixed => data_get($m->raw_data, 'fuel_consumed_cumulative')),
         ];
     }
 
@@ -194,11 +201,7 @@ class MachinePerformanceService
             $first = $firstReading->recorded_at ?? $firstReading->created_at;
             $last = $lastReading->recorded_at ?? $lastReading->created_at;
 
-            if ($first === null || $last === null) {
-                return null;
-            }
-
-            $elapsedHours = abs($last->getTimestamp() - $first->getTimestamp()) / 3600;
+            $elapsedHours = (float) abs($last->getTimestamp() - $first->getTimestamp()) / 3600.0;
 
             // The margin absorbs device-vs-server clock skew on otherwise
             // plausible readings.
@@ -232,7 +235,7 @@ class MachinePerformanceService
             return null;
         }
 
-        return max(0.0, min(100.0, (($operatingHours - $idleHours) / $operatingHours) * 100));
+        return max(0.0, min(100.0, (($operatingHours - $idleHours) / $operatingHours) * 100.0));
     }
 
     private function fuelPerHour(?float $fuelConsumed, ?float $operatingHours): ?float
@@ -260,6 +263,7 @@ class MachinePerformanceService
             return null;
         }
 
+        /** @var mixed $value */
         $value = $extract($metric);
 
         // Booleans (engine_running) are not numeric and pass through as-is.
@@ -291,7 +295,7 @@ class MachinePerformanceService
             return null;
         }
 
-        $difference = $todayUtilisation - $priorValues->avg();
+        $difference = $todayUtilisation - (float) $priorValues->avg();
 
         return match (true) {
             $difference > self::UTILISATION_TREND_POINTS => 'improving',
@@ -320,12 +324,17 @@ class MachinePerformanceService
             return null;
         }
 
-        $ratio = ($todayLoads - $average) / $average;
+        $ratio = ((float) $todayLoads - $average) / $average;
 
         return match (true) {
             $ratio > self::LOADS_TREND_RATIO => 'improving',
             $ratio < -self::LOADS_TREND_RATIO => 'declining',
             default => 'steady',
         };
+    }
+
+    private static function floatOrNull(mixed $value): ?float
+    {
+        return is_numeric($value) ? (float) $value : null;
     }
 }

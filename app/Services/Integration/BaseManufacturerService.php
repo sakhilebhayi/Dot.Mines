@@ -3,6 +3,7 @@
 namespace App\Services\Integration;
 
 use App\Contracts\ManufacturerServiceInterface;
+use App\Support\ApiPayload;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -43,9 +44,9 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      */
     public function __construct(array $credentials = [])
     {
-        $this->baseUrl = $credentials['base_url'] ?? '';
-        $this->apiKey = $credentials['api_key'] ?? '';
-        $this->apiSecret = $credentials['api_secret'] ?? '';
+        $this->baseUrl = ApiPayload::str($credentials['base_url'] ?? null);
+        $this->apiKey = ApiPayload::str($credentials['api_key'] ?? null);
+        $this->apiSecret = ApiPayload::str($credentials['api_secret'] ?? null);
     }
 
     /**
@@ -68,10 +69,18 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
         while ($attempt < $this->retries) {
             try {
-                $response = Http::timeout($this->timeout)
+                $pending = Http::timeout($this->timeout)
                     ->withHeaders($this->getAuthHeaders($headers))
-                    ->retry($attempt, $this->retryDelay)
-                    ->{strtolower($method)}($url, $data);
+                    ->retry($attempt, $this->retryDelay);
+
+                $response = match (strtolower($method)) {
+                    'get' => $pending->get($url, $data),
+                    'post' => $pending->post($url, $data),
+                    'put' => $pending->put($url, $data),
+                    'patch' => $pending->patch($url, $data),
+                    'delete' => $pending->delete($url, $data),
+                    default => $pending->send(strtoupper($method), $url, ['json' => $data]),
+                };
 
                 if ($response->successful()) {
                     return [
@@ -176,7 +185,7 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
             'manufacturer' => $this->manufacturer,
             'model' => $rawData['model'] ?? 'Unknown',
             'serial_number' => $rawData['serial_number'] ?? null,
-            'status' => $this->parseStatus(is_string($rawData['status'] ?? null) ? $rawData['status'] : 'unknown'),
+            'status' => $this->parseStatus(ApiPayload::str($rawData['status'] ?? null, 'unknown')),
             'last_location' => [
                 'latitude' => $rawData['latitude'] ?? null,
                 'longitude' => $rawData['longitude'] ?? null,
@@ -247,23 +256,28 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
      * survived. This keeps the first non-null value found for each field
      * instead, and unions raw_data rather than letting later ones replace it.
      *
-     * @param  array<string, mixed>  $metricSets
+     * @param  array<string, mixed>  ...$metricSets
      * @return array<string, mixed>
      */
     protected function mergeMetricsPreferNonNull(array ...$metricSets): array
     {
+        /** @var array<string, mixed> $merged */
         $merged = [];
+        /** @var list<mixed> $rawData */
         $rawData = [];
 
-        foreach ($metricSets as $index => $set) {
+        foreach ($metricSets as $set) {
+            /** @var mixed $value */
             foreach ($set as $key => $value) {
                 if ($key === 'raw_data') {
+                    /** @psalm-suppress MixedAssignment */
                     $rawData[] = $value;
 
                     continue;
                 }
 
                 if (! array_key_exists($key, $merged) || $merged[$key] === null) {
+                    /** @psalm-suppress MixedAssignment */
                     $merged[$key] = $value;
                 }
             }
@@ -516,5 +530,28 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
             'load_count_readings' => [],
             'payload_readings' => [],
         ];
+    }
+
+    /**
+     * Coerce an untyped API payload node into the assoc-array shape the
+     * parse helpers take -- one place, so every stub service's ingestion
+     * is provably typed for both analyzers.
+     *
+     * @return array<string, mixed>
+     */
+    protected static function payloadArray(mixed $value): array
+    {
+        return ApiPayload::assoc($value);
+    }
+
+    /**
+     * Coerce an untyped API list node into a clean list of assoc rows,
+     * dropping malformed entries.
+     *
+     * @return list<array<string, mixed>>
+     */
+    protected static function rowsOf(mixed $value): array
+    {
+        return ApiPayload::rows($value);
     }
 }

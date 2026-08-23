@@ -12,6 +12,7 @@ use App\Models\MineArea;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use App\Services\Billing\MachineProvisioningService;
+use App\Support\ApiPayload;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -151,7 +152,7 @@ class IntegrationService
         }
 
         $fetchResult = $service->fetchMachines();
-        $checks['data_retrieved'] = $fetchResult['success'] ?? false;
+        $checks['data_retrieved'] = ($fetchResult['success'] ?? false) === true;
 
         if (! $checks['data_retrieved']) {
             return [
@@ -164,11 +165,11 @@ class IntegrationService
             ];
         }
 
-        $machineList = $fetchResult['machines'] ?? [];
+        $machineList = ApiPayload::rows($fetchResult['machines'] ?? null);
         $capabilities = $this->deriveCapabilities($machineList[0] ?? []);
 
         $syncResult = $this->persistMachines($integration, $service, $machineList);
-        $checks['data_storable'] = $syncResult['success'] ?? false;
+        $checks['data_storable'] = ($syncResult['success'] ?? false) === true;
 
         // syncMachine() always writes $integration->team_id onto every row
         // it creates/updates -- if persistence succeeded at all, tenant
@@ -186,7 +187,7 @@ class IntegrationService
             $checks['sync_dispatchable'] = false;
         }
 
-        $streams = $this->buildSyncStreams($capabilities, $syncResult['count'] ?? 0);
+        $streams = $this->buildSyncStreams($capabilities, (int) ($syncResult['count'] ?? 0));
 
         $integration->update([
             'status' => 'connected',
@@ -258,13 +259,13 @@ class IntegrationService
             // `success` value, fatalling instantly on syncMachine()'s array
             // type hint. Never caught because nothing had ever synced real
             // data through it before.
-            if (! ($machines['success'] ?? false)) {
+            if (($machines['success'] ?? false) !== true) {
                 // A rejected fetch is exactly what the API-health panel
                 // exists to show -- record it like the exception path does.
                 $integration->update([
                     'last_sync_stats' => [
                         'finished_at' => now()->toIso8601String(),
-                        'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+                        'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000.0),
                         'failed' => true,
                         'reason' => (string) ($machines['error'] ?? 'Failed to fetch machines'),
                     ],
@@ -276,7 +277,7 @@ class IntegrationService
                 ];
             }
 
-            $result = $this->persistMachines($integration, $service, $machines['machines'] ?? []);
+            $result = $this->persistMachines($integration, $service, ApiPayload::rows($machines['machines'] ?? null));
 
             $productionRecordsAfter = ProductionRecord::where('team_id', $integration->team_id)
                 ->where('metadata->source', 'telemetry')
@@ -288,8 +289,8 @@ class IntegrationService
                 'last_sync_at' => now(),
                 'last_sync_stats' => [
                     'finished_at' => now()->toIso8601String(),
-                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
-                    'machines_received' => count($machines['machines'] ?? []),
+                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000.0),
+                    'machines_received' => count(ApiPayload::rows($machines['machines'] ?? null)),
                     'machines_synced' => (int) ($result['count'] ?? 0),
                     'production_records_total' => $productionRecordsAfter,
                     'production_records_delta' => $productionRecordsAfter - $productionRecordsBefore,
@@ -307,7 +308,7 @@ class IntegrationService
             $integration->update([
                 'last_sync_stats' => [
                     'finished_at' => now()->toIso8601String(),
-                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+                    'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000.0),
                     'failed' => true,
                 ],
             ]);
@@ -326,7 +327,7 @@ class IntegrationService
      * second time against the live API (spec's "avoid unnecessary
      * duplicate API calls").
      *
-     * @param  array<string, mixed>  $machineList
+     * @param  list<array<string, mixed>>  $machineList
      * @return array<string, mixed>
      */
     public function persistMachines(Integration $integration, ManufacturerServiceInterface $service, array $machineList): array
@@ -530,9 +531,11 @@ class IntegrationService
     public function syncMachine(Integration $integration, array $machineData): ?Machine
     {
         try {
-            $externalId = $machineData['external_id'] ?? $machineData['id'] ?? null;
+            /** @var mixed $externalIdRaw */
+            $externalIdRaw = $machineData['external_id'] ?? $machineData['id'] ?? null;
+            $externalId = is_scalar($externalIdRaw) ? (string) $externalIdRaw : '';
 
-            if (! $externalId) {
+            if ($externalId === '' || $externalId === '0') {
                 return null;
             }
 
@@ -615,12 +618,12 @@ class IntegrationService
 
             // Sync metrics if available
             if (! empty($machineData['metrics'])) {
-                $this->syncMachineMetrics($machine, $machineData['metrics']);
+                $this->syncMachineMetrics($machine, ApiPayload::assoc($machineData['metrics']));
             }
 
             // Sync alerts if available
             if (! empty($machineData['alerts'])) {
-                $this->syncMachineAlerts($machine, $machineData['alerts']);
+                $this->syncMachineAlerts($machine, ApiPayload::rows($machineData['alerts']));
             }
 
             return $machine;
@@ -647,6 +650,7 @@ class IntegrationService
             // sync returns the same reading. Re-storing it created 78% of
             // all metric rows as exact duplicates (observed live) and made
             // GPS trails/dwell analysis lie about visit counts.
+            /** @var mixed $recordedAt */
             $recordedAt = $metrics['recorded_at'] ?? null;
 
             if ($recordedAt !== null && MachineMetric::where('machine_id', $machine->id)->where('recorded_at', $recordedAt)->exists()) {
@@ -668,15 +672,17 @@ class IntegrationService
     /**
      * Sync machine alerts
      *
-     * @param  array<string, mixed>  $alerts
+     * @param  list<array<string, mixed>>  $alerts
      */
     protected function syncMachineAlerts(Machine $machine, array $alerts): void
     {
         try {
             foreach ($alerts as $alertData) {
-                $externalId = $alertData['external_id'] ?? null;
+                /** @var mixed $externalIdRaw */
+                $externalIdRaw = $alertData['external_id'] ?? null;
+                $externalId = is_scalar($externalIdRaw) ? (string) $externalIdRaw : '';
 
-                if (! $externalId) {
+                if ($externalId === '' || $externalId === '0') {
                     continue;
                 }
 
@@ -695,7 +701,8 @@ class IntegrationService
                     // constraint on Postgres (SQLSTATE 23514) -- the old
                     // 'new' default meant every synced alert insert failed
                     // there while SQLite-backed tests stayed green.
-                    $status = $alertData['status'] ?? 'active';
+                    /** @var string $status */
+                    $status = is_string($alertData['status'] ?? null) ? $alertData['status'] : 'active';
 
                     if (! in_array($status, Alert::STATUSES, true)) {
                         $status = 'active';
@@ -741,8 +748,8 @@ class IntegrationService
 
             $alerts = $service->fetchMachineAlerts($manufacturerId);
 
-            if (! empty($alerts)) {
-                $this->syncMachineAlerts($machine, $alerts);
+            if ($alerts !== []) {
+                $this->syncMachineAlerts($machine, ApiPayload::rows($alerts));
             }
         } catch (\Throwable $e) {
             Log::warning('Failed to fetch machine alerts during sync', [
@@ -779,7 +786,7 @@ class IntegrationService
         }
 
         try {
-            $timezone = $integration->team?->timezone ?: config('app.timezone', 'UTC');
+            $timezone = $integration->team?->timezone ?? 'UTC';
             $backfillDays = max(1, config('integrations.production_backfill_days', 14));
 
             $latest = ProductionRecord::where('team_id', $integration->team_id)
@@ -865,6 +872,7 @@ class IntegrationService
             ->orderByDesc('record_date')
             ->first();
 
+        /** @var mixed $value */
         $value = data_get($record?->metadata, $metadataKey);
 
         return is_numeric($value) ? (float) $value : null;
@@ -1003,8 +1011,8 @@ class IntegrationService
         }
 
         $capabilities = ['fleet'];
-        $metrics = $sampleMachine['metrics'] ?? [];
-        $rawData = $metrics['raw_data'] ?? [];
+        $metrics = ApiPayload::assoc($sampleMachine['metrics'] ?? null);
+        $rawData = ApiPayload::assoc($metrics['raw_data'] ?? null);
 
         $telemetryKeys = [
             'fuel_level', 'engine_temperature', 'operating_hours', 'idle_hours',

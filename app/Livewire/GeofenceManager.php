@@ -214,7 +214,7 @@ class GeofenceManager extends Component
         $team = CurrentUser::team();
 
         $geofencesQuery = Geofence::where('team_id', $team->id)
-            ->when($this->search, function ($query) {
+            ->when($this->search, function ($query): mixed {
                 return $query->where('name', 'like', "%{$this->search}%")
                     ->orWhere('description', 'like', "%{$this->search}%");
             })

@@ -162,7 +162,7 @@ class Route extends Model
         );
 
         // Assume average speed of 40 km/h
-        $directTime = ($directDistance / 40) * 60; // in minutes
+        $directTime = ($directDistance / 40.0) * 60; // in minutes
 
         return max(0, (int) ($directTime - $this->estimated_time));
     }

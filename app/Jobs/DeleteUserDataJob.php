@@ -67,7 +67,7 @@ class DeleteUserDataJob implements ShouldQueue
 
             Mail::raw(
                 'Your account and personal data have been permanently deleted from '.config('app.name').' as requested.',
-                fn ($m) => $m->to($email)
+                fn ($m): mixed => $m->to($email)
                     ->from(
                         config('mail.addresses.privacy'),
                         config('app.name'),

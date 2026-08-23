@@ -14,13 +14,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $id
  * @property int $team_id
- * @property int $mine_area_id
+ * @property int|null $mine_area_id
  * @property int $machine_id
- * @property Carbon|null $record_date
+ * @property Carbon $record_date
  * @property string $shift
  * @property string|float $quantity_produced
  * @property string $unit
- * @property string|float $target_quantity
+ * @property string|float|null $target_quantity
  * @property string|null $notes
  * @property string $status
  * @property array<string, mixed>|null $metadata
@@ -121,7 +121,7 @@ class ProductionRecord extends Model
             return 0;
         }
 
-        return (((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100;
+        return (((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100.0;
     }
 
     protected function getIsAboveTargetAttribute(): bool

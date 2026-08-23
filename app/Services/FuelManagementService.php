@@ -273,7 +273,7 @@ class FuelManagementService
             ->whereBetween('transaction_date', [$startOfDay, $endOfDay])
             ->get();
 
-        $totalFuel = $transactions->sum('quantity_liters');
+        $totalFuel = (float) $transactions->sum('quantity_liters');
 
         // operating_hours / idle_hours on machine_metrics are cumulative
         // meters (MachinePerformanceService::dayDelta() semantics): the
@@ -383,7 +383,7 @@ class FuelManagementService
             // What share of everything removed from a tank was loss rather
             // than legitimate use -- 0 when nothing at all was recorded.
             'percent_of_total' => $totalConsumed > 0
-                ? round((($theftLiters + $spillageLiters) / $totalConsumed) * 100, 1)
+                ? round((($theftLiters + $spillageLiters) / $totalConsumed) * 100.0, 1)
                 : 0,
         ];
 

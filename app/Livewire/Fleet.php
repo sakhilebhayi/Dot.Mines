@@ -485,12 +485,12 @@ class Fleet extends Component
 
         $machinesQuery = Machine::where('team_id', $team->id)
             ->with(['excavator', 'latestEngineHoursMetric', 'latestMetric'])
-            ->when($this->search, function ($query) {
+            ->when($this->search, function ($query): mixed {
                 return $query->where('name', 'like', "%{$this->search}%")
                     ->orWhere('model', 'like', "%{$this->search}%")
                     ->orWhere('manufacturer', 'like', "%{$this->search}%");
             })
-            ->when($this->statusFilter, function ($query) {
+            ->when($this->statusFilter, function ($query): mixed {
                 return $query->where('status', $this->statusFilter);
             })
             ->orderBy($this->sortBy, $this->sortDirection)

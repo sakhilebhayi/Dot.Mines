@@ -49,9 +49,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
             $machines = [];
             if (! empty($response['assets'])) {
-                $rows2 = data_get($response, 'assets');
-                /** @var list<array<string, mixed>> $rows2 */
-                $rows2 = is_array($rows2) ? array_values(array_filter($rows2, 'is_array')) : [];
+                $rows2 = self::rowsOf(data_get($response, 'assets'));
                 foreach ($rows2 as $asset) {
                     $machines[] = $this->parseMachineData($asset);
                 }
@@ -85,7 +83,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
+                'location' => $this->parseLocation(self::payloadArray($response['data'] ?? null)),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -114,9 +112,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
             // Parse diagnostics
             if (! empty($diagnostics['diagnostics'])) {
-                $rows3 = data_get($diagnostics, 'diagnostics');
-                /** @var list<array<string, mixed>> $rows3 */
-                $rows3 = is_array($rows3) ? array_values(array_filter($rows3, 'is_array')) : [];
+                $rows3 = self::rowsOf(data_get($diagnostics, 'diagnostics'));
                 foreach ($rows3 as $diagnostic) {
                     $metrics[] = $this->parseMetric($diagnostic);
                 }
@@ -177,9 +173,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                $rows4 = data_get($response, 'data.alerts');
-                /** @var list<array<string, mixed>> $rows4 */
-                $rows4 = is_array($rows4) ? array_values(array_filter($rows4, 'is_array')) : [];
+                $rows4 = self::rowsOf(data_get($response, 'data.alerts'));
                 foreach ($rows4 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
@@ -214,7 +208,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Caterpillar',
             'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
-            'location' => $this->parseLocation(is_array($data['location'] ?? null) ? $data['location'] : []),
+            'location' => $this->parseLocation(self::payloadArray($data['location'] ?? null)),
             'last_heartbeat' => $data['last_heartbeat'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'heavy_equipment',
@@ -331,9 +325,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
         try {
             $result = $this->fetchLocation($machineId);
 
-            $location = $result['location'] ?? null;
-
-            return is_array($location) ? $location : null;
+            return is_array($result['location'] ?? null) ? self::payloadArray($result['location']) : null;
         } catch (Exception $e) {
             return null;
         }
@@ -369,9 +361,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
         try {
             $result = $this->fetchAlerts($machineId);
 
-            $items = $result['alerts'] ?? [];
-
-            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
+            return self::rowsOf($result['alerts'] ?? null);
         } catch (Exception $e) {
             return [];
         }

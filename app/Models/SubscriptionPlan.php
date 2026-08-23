@@ -94,10 +94,10 @@ class SubscriptionPlan extends Model
             return 0;
         }
 
-        $monthlyTotal = $this->price * 12;
+        $monthlyTotal = $this->price * 12.0;
         $savings = $monthlyTotal - $this->yearly_price;
 
-        return (int) round(($savings / $monthlyTotal) * 100);
+        return (int) round(($savings / $monthlyTotal) * 100.0);
     }
 
     /**

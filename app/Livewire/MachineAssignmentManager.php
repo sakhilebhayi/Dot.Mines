@@ -121,7 +121,7 @@ class MachineAssignmentManager extends Component
         } else {
             $this->selectedMachineIds = Machine::where('team_id', $team->id)
                 ->where('mine_area_id', $this->mineArea->id)
-                ->when($this->searchTerm, fn ($q) => $q->where(function ($q) {
+                ->when($this->searchTerm, fn ($q): mixed => $q->where(function ($q) {
                     $q->where('name', 'like', "%{$this->searchTerm}%")
                         ->orWhere('model', 'like', "%{$this->searchTerm}%");
                 }))
@@ -316,11 +316,11 @@ class MachineAssignmentManager extends Component
     {
         return Machine::where('team_id', $team->id)
             ->where('mine_area_id', '!=', $this->mineArea->id)
-            ->when($this->searchTerm, fn ($q) => $q->where(function ($q) {
+            ->when($this->searchTerm, fn ($q): mixed => $q->where(function ($q) {
                 $q->where('name', 'like', "%{$this->searchTerm}%")
                     ->orWhere('model', 'like', "%{$this->searchTerm}%");
             }))
-            ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus));
+            ->when($this->filterStatus, fn ($q): mixed => $q->where('status', $this->filterStatus));
     }
 
     public function render(): View
@@ -337,7 +337,7 @@ class MachineAssignmentManager extends Component
 
         $assignedMachines = Machine::where('team_id', $team->id)
             ->where('mine_area_id', $this->mineArea->id)
-            ->when($this->view === 'manage' && $this->searchTerm, fn ($q) => $q->where(function ($q) {
+            ->when($this->view === 'manage' && $this->searchTerm, fn ($q): mixed => $q->where(function ($q) {
                 $q->where('name', 'like', "%{$this->searchTerm}%")
                     ->orWhere('model', 'like', "%{$this->searchTerm}%");
             }))

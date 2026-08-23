@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration;
 
+use App\Support\ApiPayload;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
@@ -64,8 +65,9 @@ class BellService extends BaseManufacturerService
 
     /**
      * @param  array<string, mixed>  $credentials
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see
      */
-    /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(array $credentials = [])
     {
         parent::__construct($credentials);
@@ -74,13 +76,15 @@ class BellService extends BaseManufacturerService
 
         $config = config('integrations.manufacturers.bell', []);
 
-        $this->baseUrl = $credentials['base_url'] ?? $config['base_url'] ?? 'https://b-fleet03.bellequipment.com:8080';
-        $this->tokenUrl = $credentials['token_url'] ?? $config['token_url'] ?? 'https://sso.bellequipment.com/connect/token';
-        $this->username = $credentials['username'] ?? null;
-        $this->password = $credentials['password'] ?? null;
-        $this->clientId = $credentials['client_id'] ?? $config['client_id'] ?? 'ISO_Export_Service';
-        $this->clientSecret = $credentials['client_secret'] ?? null;
-        $this->scope = $credentials['scope'] ?? $config['scope'] ?? 'ISO_Exports';
+        $config = ApiPayload::assoc($config);
+
+        $this->baseUrl = self::credentialString($credentials['base_url'] ?? $config['base_url'] ?? null) ?? 'https://b-fleet03.bellequipment.com:8080';
+        $this->tokenUrl = self::credentialString($credentials['token_url'] ?? $config['token_url'] ?? null) ?? 'https://sso.bellequipment.com/connect/token';
+        $this->username = self::credentialString($credentials['username'] ?? null);
+        $this->password = self::credentialString($credentials['password'] ?? null);
+        $this->clientId = self::credentialString($credentials['client_id'] ?? $config['client_id'] ?? null) ?? 'ISO_Export_Service';
+        $this->clientSecret = self::credentialString($credentials['client_secret'] ?? null);
+        $this->scope = self::credentialString($credentials['scope'] ?? $config['scope'] ?? null) ?? 'ISO_Exports';
     }
 
     /**
@@ -187,9 +191,7 @@ class BellService extends BaseManufacturerService
             return [];
         }
 
-        $rows1 = data_get($result, 'machines');
-        /** @var list<array<string, mixed>> $rows1 */
-        $rows1 = is_array($rows1) ? array_values(array_filter($rows1, 'is_array')) : [];
+        $rows1 = self::rowsOf(data_get($result, 'machines'));
         foreach ($rows1 as $machine) {
             if (($machine['external_id'] ?? null) === $machineId) {
                 return $machine;
@@ -257,8 +259,8 @@ class BellService extends BaseManufacturerService
             }
 
             $latest = end($readings);
-            $latitude = $this->parser->toFloatOrNull(data_get($latest, 'attributes.Latitude') ?? null);
-            $longitude = $this->parser->toFloatOrNull(data_get($latest, 'attributes.Longitude') ?? null);
+            $latitude = $this->parser->toFloatOrNull($latest['attributes']['Latitude'] ?? null);
+            $longitude = $this->parser->toFloatOrNull($latest['attributes']['Longitude'] ?? null);
 
             if (! $this->parser->isValidCoordinate($latitude, $longitude)) {
                 return null;
@@ -269,8 +271,8 @@ class BellService extends BaseManufacturerService
                 'longitude' => $longitude,
                 'accuracy' => null,
                 'timestamp' => $latest['timestamp'],
-                'heading' => $this->parser->toFloatOrNull(data_get($latest, 'attributes.Heading') ?? null),
-                'speed' => $this->parser->toFloatOrNull(data_get($latest, 'attributes.Speed') ?? null),
+                'heading' => $this->parser->toFloatOrNull($latest['attributes']['Heading'] ?? null),
+                'speed' => $this->parser->toFloatOrNull($latest['attributes']['Speed'] ?? null),
             ];
         } catch (Throwable $e) {
             $this->logError('Failed to fetch Bell machine location', $e);
@@ -446,12 +448,12 @@ class BellService extends BaseManufacturerService
 
     private function pinMapCacheKey(): string
     {
-        return 'bell_equipment_pin_map_'.md5(($this->username ?? '').'|'.($this->clientId ?? ''));
+        return 'bell_equipment_pin_map_'.md5(($this->username ?? '').'|'.$this->clientId);
     }
 
     private function fleetSnapshotCacheKey(): string
     {
-        return 'bell_fleet_snapshot_'.md5(($this->username ?? '').'|'.($this->clientId ?? ''));
+        return 'bell_fleet_snapshot_'.md5(($this->username ?? '').'|'.$this->clientId);
     }
 
     /**
@@ -467,7 +469,7 @@ class BellService extends BaseManufacturerService
     {
         $template = config("integrations.manufacturers.bell.supported_endpoints.{$endpointKey}");
 
-        if (! $template) {
+        if (! is_string($template) || $template === '') {
             return [];
         }
 
@@ -548,7 +550,6 @@ class BellService extends BaseManufacturerService
 
         while ($attempt < $this->retries) {
             try {
-                /** @var Response $response */
                 $response = Http::withToken($token)
                     ->withHeaders(['Accept' => 'application/xml'])
                     ->timeout($this->timeout)
@@ -649,10 +650,13 @@ class BellService extends BaseManufacturerService
             return null;
         }
 
+        /** @var mixed $cached */
         $cached = Cache::get($this->tokenCacheKey());
+        /** @var mixed $cachedToken */
+        $cachedToken = is_array($cached) ? ($cached['access_token'] ?? null) : null;
 
-        if (is_array($cached) && ! empty($cached['access_token'])) {
-            return $cached['access_token'];
+        if (is_string($cachedToken) && $cachedToken !== '') {
+            return $cachedToken;
         }
 
         return $this->fetchNewToken();
@@ -682,16 +686,16 @@ class BellService extends BaseManufacturerService
                 return null;
             }
 
-            $data = $response->json();
+            $data = ApiPayload::assoc($response->json());
             $accessToken = $data['access_token'] ?? null;
 
-            if (! $accessToken) {
+            if (! is_string($accessToken) || $accessToken === '') {
                 $this->lastError = 'Bell SSO response did not include an access_token';
 
                 return null;
             }
 
-            $expiresIn = (int) ($data['expires_in'] ?? 300);
+            $expiresIn = is_numeric($data['expires_in'] ?? null) ? (int) $data['expires_in'] : 300;
             // Refresh a minute early so an in-flight sync never races the
             // token's real expiry.
             $ttl = max(30, $expiresIn - 60);
@@ -714,6 +718,11 @@ class BellService extends BaseManufacturerService
 
     private function tokenCacheKey(): string
     {
-        return 'bell_iso15143_token_'.md5($this->username.'|'.$this->clientId);
+        return 'bell_iso15143_token_'.md5(($this->username ?? '').'|'.$this->clientId);
+    }
+
+    private static function credentialString(mixed $value): ?string
+    {
+        return is_string($value) && $value !== '' ? $value : null;
     }
 }

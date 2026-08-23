@@ -15,10 +15,10 @@
 
   <issueHandlers>
     <!-- Suppress issues that are known false positives in Laravel -->
-    <MissingReturnType severity="info"/>
-    <MissingParamType severity="info"/>
-    <PropertyNotSetInConstructor severity="info"/>
-    <UnusedVariable severity="info"/>
+    <MissingReturnType errorLevel="info"/>
+    <MissingParamType errorLevel="info"/>
+    <PropertyNotSetInConstructor errorLevel="info"/>
+    <UnusedVariable errorLevel="info"/>
 
     <!-- Policy: this codebase keeps classes extendable by convention
          (documented on the Livewire components); "must be final" is a

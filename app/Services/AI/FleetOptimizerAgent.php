@@ -17,6 +17,11 @@ use App\Services\MachinePerformanceService;
  * and divided by 24, reporting "34976% capacity" for every machine), and
  * recommendations carry no fabricated savings or confidence figures.
  */
+/**
+ * @psalm-import-type MachineDayPerformance from \App\Services\MachinePerformanceService
+ *
+ * @phpstan-import-type MachineDayPerformance from \App\Services\MachinePerformanceService
+ */
 class FleetOptimizerAgent
 {
     /**
@@ -73,12 +78,7 @@ class FleetOptimizerAgent
     }
 
     /**
-     * Judge one machine's day from its derived telemetry. A machine whose
-     * telemetry cannot support today's utilisation figure (utilisation_today
-     * is null: fewer than two counter readings, or a counter reset) is
-     * skipped entirely -- insufficient data must not become a recommendation.
-     *
-     * @param  array<string, mixed>  $performance
+     * @param  MachineDayPerformance  $performance
      * @return array{recommendations: list<array<string, mixed>>, insights: list<array<string, mixed>>}
      */
     protected function analyzeMachineDay(array $performance): array
@@ -101,7 +101,7 @@ class FleetOptimizerAgent
                 'category' => 'fleet',
                 'priority' => $utilisation < self::CRITICAL_UTILISATION_PERCENT ? 'high' : 'medium',
                 'title' => "Low Utilization: {$name}",
-                'description' => "Machine {$name} spent only ".round($utilisation).'% of its '.round($operatingHours, 1).' engine hours working today ('.round($idleHours, 1).' hours idling). Consider reassigning it to a busier area or investigating queueing and dispatch delays.',
+                'description' => "Machine {$name} spent only ".((string) round($utilisation)).'% of its '.((string) round($operatingHours, 1)).' engine hours working today ('.((string) round($idleHours, 1)).' hours idling). Consider reassigning it to a busier area or investigating queueing and dispatch delays.',
                 'related_machine_id' => $performance['machine_id'],
                 'data' => [
                     'current_utilisation' => round($utilisation, 2),
@@ -121,7 +121,7 @@ class FleetOptimizerAgent
                 'category' => 'fleet',
                 'priority' => 'high',
                 'title' => "Sustained Operation: {$name}",
-                'description' => "Machine {$name} has run ".round($operatingHours, 1).' engine hours today, leaving no realistic window for inspection or maintenance. Extended running without breaks increases wear and breakdown risk.',
+                'description' => "Machine {$name} has run ".((string) round($operatingHours, 1)).' engine hours today, leaving no realistic window for inspection or maintenance. Extended running without breaks increases wear and breakdown risk.',
                 'related_machine_id' => $performance['machine_id'],
                 'data' => [
                     'operating_hours_today' => round($operatingHours, 2),
@@ -138,7 +138,7 @@ class FleetOptimizerAgent
                 'category' => 'fleet',
                 'severity' => 'warning',
                 'title' => 'High Machine Stress Detected',
-                'description' => "Machine {$name} has run ".round($operatingHours, 1).' engine hours today without a maintenance window',
+                'description' => "Machine {$name} has run ".((string) round($operatingHours, 1)).' engine hours today without a maintenance window',
                 'data' => [
                     'machine_id' => $performance['machine_id'],
                     'operating_hours_today' => round($operatingHours, 2),
@@ -153,7 +153,7 @@ class FleetOptimizerAgent
                 'category' => 'fleet',
                 'severity' => 'warning',
                 'title' => "Utilisation Declining: {$name}",
-                'description' => "Machine {$name}'s working share of engine time (".round($utilisation).'% today) is well below its recent daily average',
+                'description' => "Machine {$name}'s working share of engine time (".((string) round($utilisation)).'% today) is well below its recent daily average',
                 'data' => [
                     'machine_id' => $performance['machine_id'],
                     'utilisation_today' => round($utilisation, 2),
@@ -186,14 +186,14 @@ class FleetOptimizerAgent
         $totalMachines = (int) $statusCounts->sum();
         $idleCount = (int) ($statusCounts['idle'] ?? 0);
 
-        if ($totalMachines > 0 && $idleCount > $totalMachines * self::IDLE_FLEET_RATIO) {
-            $idlePercentage = ($idleCount / $totalMachines) * 100;
+        if ($totalMachines > 0 && (float) $idleCount > (float) $totalMachines * self::IDLE_FLEET_RATIO) {
+            $idlePercentage = ((float) $idleCount / (float) $totalMachines) * 100.0;
 
             $recommendations[] = [
                 'category' => 'fleet',
                 'priority' => 'high',
                 'title' => 'High Idle Fleet Percentage',
-                'description' => "{$idleCount} of {$totalMachines} machines (".round($idlePercentage).'%) are currently marked idle. This represents significant underutilization of assets.',
+                'description' => "{$idleCount} of {$totalMachines} machines (".((string) round($idlePercentage)).'%) are currently marked idle. This represents significant underutilization of assets.',
                 'data' => [
                     'idle_machines' => $idleCount,
                     'total_machines' => $totalMachines,

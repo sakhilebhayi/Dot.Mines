@@ -109,7 +109,7 @@ class FuelTank extends Model
             return 0;
         }
 
-        return round(((float) $this->current_level_liters / (float) $this->capacity_liters) * 100, 2);
+        return round(((float) $this->current_level_liters / (float) $this->capacity_liters) * 100.0, 2);
     }
 
     /**

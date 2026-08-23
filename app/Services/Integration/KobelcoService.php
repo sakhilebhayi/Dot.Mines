@@ -40,9 +40,7 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
             $machines = [];
             if (! empty($response['data']['machines'])) {
-                $rows20 = data_get($response, 'data.machines');
-                /** @var list<array<string, mixed>> $rows20 */
-                $rows20 = is_array($rows20) ? array_values(array_filter($rows20, 'is_array')) : [];
+                $rows20 = self::rowsOf(data_get($response, 'data.machines'));
                 foreach ($rows20 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
@@ -74,7 +72,7 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
+                'location' => $this->parseLocation(self::payloadArray($response['data'] ?? null)),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -98,8 +96,8 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
             // parseMetrics() always returns the same set of keys -- see
             // mergeMetricsPreferNonNull().
             $metrics = $this->mergeMetricsPreferNonNull(
-                $this->parseMetrics(is_array($operatingStatus['data'] ?? null) ? $operatingStatus['data'] : []),
-                $this->parseMetrics(is_array($workRecords['data'] ?? null) ? $workRecords['data'] : [])
+                $this->parseMetrics(self::payloadArray($operatingStatus['data'] ?? null)),
+                $this->parseMetrics(self::payloadArray($workRecords['data'] ?? null))
             );
 
             return [
@@ -125,9 +123,7 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                $rows21 = data_get($response, 'data.alerts');
-                /** @var list<array<string, mixed>> $rows21 */
-                $rows21 = is_array($rows21) ? array_values(array_filter($rows21, 'is_array')) : [];
+                $rows21 = self::rowsOf(data_get($response, 'data.alerts'));
                 foreach ($rows21 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
@@ -179,9 +175,7 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
         try {
             $result = $this->fetchLocation($machineId);
 
-            $location = $result['location'] ?? null;
-
-            return is_array($location) ? $location : null;
+            return is_array($result['location'] ?? null) ? self::payloadArray($result['location']) : null;
         } catch (Exception $e) {
             return null;
         }
@@ -196,9 +190,7 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
         try {
             $result = $this->fetchMetrics($machineId);
 
-            $metrics = $result['metrics'] ?? [];
-
-            return is_array($metrics) ? $metrics : [];
+            return self::payloadArray($result['metrics'] ?? null);
         } catch (Exception $e) {
             return [];
         }
@@ -213,9 +205,7 @@ class KobelcoService extends BaseManufacturerService implements ManufacturerServ
         try {
             $result = $this->fetchAlerts($machineId);
 
-            $items = $result['alerts'] ?? [];
-
-            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
+            return self::rowsOf($result['alerts'] ?? null);
         } catch (Exception $e) {
             return [];
         }

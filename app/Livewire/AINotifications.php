@@ -108,7 +108,7 @@ class AINotifications extends Component
             ]);
 
         $notificationAlerts = Notification::where('team_id', $team->id)
-            ->whereDoesntHave('readBy', fn ($q) => $q->where('user_id', auth()->id()))
+            ->whereDoesntHave('readBy', fn ($q): mixed => $q->where('user_id', auth()->id()))
             ->latest('created_at')
             ->limit(100)
             ->get()
@@ -223,7 +223,7 @@ class AINotifications extends Component
         ]);
 
         Notification::where('team_id', $team->id)
-            ->whereDoesntHave('readBy', fn ($q) => $q->where('user_id', auth()->id()))
+            ->whereDoesntHave('readBy', fn ($q): mixed => $q->where('user_id', auth()->id()))
             ->get()
             ->each(fn (Notification $n) => $n->markAsRead(auth()->id()));
 

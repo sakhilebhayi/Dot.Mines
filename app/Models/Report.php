@@ -117,7 +117,7 @@ class Report extends Model
                 // "Email Reports" was a real, saved preference that nothing
                 // ever read -- every team member got this regardless.
                 $emails = $this->team->allUsers()
-                    ->filter(fn ($user) => $user->wantsEmailReports())
+                    ->filter(fn ($user): mixed => $user->wantsEmailReports())
                     ->pluck('email')->filter()->unique()->toArray();
                 if (! empty($emails)) {
                     foreach (array_chunk($emails, 50) as $batch) {

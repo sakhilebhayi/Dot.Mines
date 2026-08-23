@@ -94,6 +94,6 @@ class FuelConsumptionMetric extends Model
             return null;
         }
 
-        return round(($this->idle_fuel_consumed / $this->fuel_consumed_liters) * 100, 2);
+        return round(($this->idle_fuel_consumed / $this->fuel_consumed_liters) * 100.0, 2);
     }
 }

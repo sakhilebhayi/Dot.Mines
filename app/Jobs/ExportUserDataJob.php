@@ -88,7 +88,7 @@ class ExportUserDataJob implements ShouldQueue
 
             Mail::raw(
                 'Your data export is ready. Download it within 7 days from your Privacy & Data page.',
-                fn ($m) => $m->to($user->email)
+                fn ($m): mixed => $m->to($user->email)
                     ->from(
                         config('mail.addresses.privacy'),
                         config('app.name'),

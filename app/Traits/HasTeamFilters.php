@@ -26,10 +26,12 @@ trait HasTeamFilters
 
             // Allow non-HTTP contexts (jobs/commands) to set the current team
             if (($teamId === null || $teamId === 0) && app()->has('current_team_id')) {
-                $teamId = app('current_team_id');
+                /** @var mixed $bound */
+                $bound = app('current_team_id');
+                $teamId = is_numeric($bound) ? (int) $bound : null;
             }
 
-            if ($teamId) {
+            if ($teamId !== null && $teamId !== 0) {
                 $builder->where('team_id', $teamId);
             }
         });
@@ -40,6 +42,8 @@ trait HasTeamFilters
      * Use with caution - only for admin operations
      *
      * @return Builder<static>
+     *
+     * @psalm-suppress MoreSpecificReturnType, LessSpecificReturnStatement -- withoutGlobalScope() loses the static generic for psalm; phpstan resolves it and downstream callers need Builder<static>
      */
     public static function withoutTeamFilter()
     {

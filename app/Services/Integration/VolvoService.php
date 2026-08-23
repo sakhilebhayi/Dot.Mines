@@ -48,9 +48,7 @@ class VolvoService extends BaseManufacturerService
 
             $machines = [];
             if (! empty($response['data'])) {
-                $rows32 = data_get($response, 'data');
-                /** @var list<array<string, mixed>> $rows32 */
-                $rows32 = is_array($rows32) ? array_values(array_filter($rows32, 'is_array')) : [];
+                $rows32 = self::rowsOf(data_get($response, 'data'));
                 foreach ($rows32 as $machine) {
                     $machines[] = $this->parseMachineData($machine);
                 }
@@ -84,7 +82,7 @@ class VolvoService extends BaseManufacturerService
 
             return [
                 'success' => true,
-                'location' => $this->parseLocation(is_array($response['data'] ?? null) ? $response['data'] : []),
+                'location' => $this->parseLocation(self::payloadArray($response['data'] ?? null)),
             ];
         } catch (Exception $e) {
             $this->logError('Failed to fetch location', $e);
@@ -113,9 +111,7 @@ class VolvoService extends BaseManufacturerService
 
             // Parse telemetry data
             if (! empty($telemetry['data'])) {
-                $rows33 = data_get($telemetry, 'data');
-                /** @var list<array<string, mixed>> $rows33 */
-                $rows33 = is_array($rows33) ? array_values(array_filter($rows33, 'is_array')) : [];
+                $rows33 = self::rowsOf(data_get($telemetry, 'data'));
                 foreach ($rows33 as $metric) {
                     $metrics[] = $this->parseMetric($metric);
                 }
@@ -176,9 +172,7 @@ class VolvoService extends BaseManufacturerService
 
             $alerts = [];
             if (! empty($response['data']['alerts'])) {
-                $rows34 = data_get($response, 'data.alerts');
-                /** @var list<array<string, mixed>> $rows34 */
-                $rows34 = is_array($rows34) ? array_values(array_filter($rows34, 'is_array')) : [];
+                $rows34 = self::rowsOf(data_get($response, 'data.alerts'));
                 foreach ($rows34 as $alert) {
                     $alerts[] = $this->parseAlert($alert);
                 }
@@ -186,9 +180,7 @@ class VolvoService extends BaseManufacturerService
 
             // Also check for faults/warnings
             if (! empty($response['data']['faults'])) {
-                $rows35 = data_get($response, 'data.faults');
-                /** @var list<array<string, mixed>> $rows35 */
-                $rows35 = is_array($rows35) ? array_values(array_filter($rows35, 'is_array')) : [];
+                $rows35 = self::rowsOf(data_get($response, 'data.faults'));
                 foreach ($rows35 as $fault) {
                     $alerts[] = $this->parseAlert($fault);
                 }
@@ -223,7 +215,7 @@ class VolvoService extends BaseManufacturerService
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Volvo',
             'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
-            'location' => $this->parseLocation(is_array($data['position'] ?? null) ? $data['position'] : []),
+            'location' => $this->parseLocation(self::payloadArray($data['position'] ?? null)),
             'last_heartbeat' => $data['last_update'] ?? $data['last_heartbeat'] ?? null,
             'specifications' => [
                 'type' => $data['type'] ?? 'heavy_equipment',
@@ -342,9 +334,7 @@ class VolvoService extends BaseManufacturerService
         try {
             $result = $this->fetchLocation($machineId);
 
-            $location = $result['location'] ?? null;
-
-            return is_array($location) ? $location : null;
+            return is_array($result['location'] ?? null) ? self::payloadArray($result['location']) : null;
         } catch (Exception $e) {
             return null;
         }
@@ -380,9 +370,7 @@ class VolvoService extends BaseManufacturerService
         try {
             $result = $this->fetchAlerts($machineId);
 
-            $items = $result['alerts'] ?? [];
-
-            return is_array($items) ? array_values(array_filter($items, 'is_array')) : [];
+            return self::rowsOf($result['alerts'] ?? null);
         } catch (Exception $e) {
             return [];
         }

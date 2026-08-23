@@ -42,7 +42,7 @@ class DetectProductionLosses extends Command
 
         Machine::query()
             ->where('status', 'active')
-            ->whereHas('metrics', fn ($query) => $query->whereBetween('recorded_at', [
+            ->whereHas('metrics', fn ($query): mixed => $query->whereBetween('recorded_at', [
                 $day->copy()->startOfDay(),
                 $day->copy()->endOfDay(),
             ]))
