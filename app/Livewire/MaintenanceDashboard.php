@@ -260,8 +260,19 @@ class MaintenanceDashboard extends Component
         }]);
         $machines = $machinesQuery->get();
 
+        // Overdue-scheduled lookups for ALL machines in one query -- this
+        // used to run once per machine inside calculateMachineDelay().
+        $overdueByMachine = MaintenanceRecord::where('team_id', $teamId)
+            ->whereIn('machine_id', $machines->pluck('id'))
+            ->where('status', 'scheduled')
+            ->where('scheduled_date', '<', now()->subHours(2))
+            ->orderBy('scheduled_date')
+            ->get()
+            ->unique('machine_id')
+            ->keyBy('machine_id');
+
         foreach ($machines as $machine) {
-            $delayInfo = $this->calculateMachineDelay($machine);
+            $delayInfo = $this->calculateMachineDelay($machine, $overdueByMachine->get($machine->id));
 
             if ($delayInfo['is_delayed']) {
                 $delayedMachines[] = [
@@ -286,7 +297,7 @@ class MaintenanceDashboard extends Component
     /**
      * @return array{is_delayed: bool, delay_hours: int|float, reason: string, expected_return: Carbon|null, maintenance_type: string|null}
      */
-    protected function calculateMachineDelay(Machine $machine): array
+    protected function calculateMachineDelay(Machine $machine, ?MaintenanceRecord $overdueMaintenance): array
     {
         $delayInfo = [
             'is_delayed' => false,
@@ -337,13 +348,8 @@ class MaintenanceDashboard extends Component
             $delayInfo['reason'] = 'Offline - System unavailable';
         }
 
-        // Check for overdue scheduled maintenance causing delays
-        $overdueMaintenance = MaintenanceRecord::where('machine_id', $machine->id)
-            ->where('team_id', $machine->team_id)
-            ->where('status', 'scheduled')
-            ->where('scheduled_date', '<', now()->subHours(2))
-            ->first();
-
+        // Check for overdue scheduled maintenance causing delays (prefetched
+        // for the whole fleet by the caller)
         if ($overdueMaintenance && ! $delayInfo['is_delayed']) {
             $delayInfo['is_delayed'] = true;
             $delayInfo['delay_hours'] = (int) $overdueMaintenance->scheduled_date->diffInHours(now());
@@ -527,6 +533,7 @@ class MaintenanceDashboard extends Component
             'activeAlerts' => $activeAlerts,
             'machinesNeedingAttention' => $machinesNeedingAttention,
             'machines' => $machines,
+            'machinesById' => $machines->keyBy('id'),
             'scheduledMaintenance' => $scheduledMaintenance,
             'inProgressMaintenance' => $inProgressMaintenance,
             'delayedMachines' => $delayedMachines,

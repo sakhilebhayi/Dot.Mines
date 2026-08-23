@@ -17,6 +17,7 @@ use App\Support\CurrentUser;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Lazy;
@@ -496,7 +497,7 @@ class FuelManagement extends Component
             ->get();
 
         // Machines for dispensing form
-        $machines = Machine::query()->where('team_id', $teamId)->get()->sortBy('name')->values();
+        $machines = Machine::query()->where('team_id', $teamId)->with('latestFuelMetric')->get()->sortBy('name')->values();
 
         // AI fuel insights only make sense once there is real fuel data to
         // analyse. With zero tanks and zero transactions the agent used to
@@ -609,35 +610,62 @@ class FuelManagement extends Component
         // people) shown separately from the machine's own telemetry fuel
         // level, never blended.
         $monthStart = now()->startOfMonth();
+
+        // Per-machine dispensing aggregates in ONE grouped query (this map
+        // used to run five queries per machine -- period sum, month sum,
+        // event count, last dispense, latest fuel metric -- an N+1 that put
+        // ~60 extra queries on every render of this page at fleet size).
+        /** @psalm-suppress InvalidTemplateParam, UndefinedMagicPropertyFetch -- selectRaw aggregate pseudo-columns */
+        $dispenseAggregates = FuelTransaction::query()->where('team_id', $teamId)
+            ->where('transaction_type', 'dispensing')
+            ->whereNotNull('machine_id')
+            ->selectRaw(
+                'machine_id, '
+                .'SUM(CASE WHEN transaction_date BETWEEN ? AND ? THEN quantity_liters ELSE 0 END) as period_dispensed, '
+                .'SUM(CASE WHEN transaction_date >= ? THEN quantity_liters ELSE 0 END) as month_dispensed, '
+                .'SUM(CASE WHEN transaction_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as event_count, '
+                .'MAX(transaction_date) as latest_dispense_date',
+                [$dateRange['start'], $dateRange['end'], $monthStart, $dateRange['start'], $dateRange['end']]
+            )
+            ->groupBy('machine_id')
+            ->get()
+            ->keyBy('machine_id');
+
+        // The newest dispense row (with its tank) per machine, matched on the
+        // MAX(transaction_date) pairs above -- ties resolved by unique(),
+        // same arbitrary-pick behaviour latest()->first() had.
+        /** @var Collection<int, FuelTransaction> $lastDispenses */
+        $lastDispenses = collect();
+        if ($dispenseAggregates->isNotEmpty()) {
+            $lastDispenses = FuelTransaction::query()->where('team_id', $teamId)
+                ->where('transaction_type', 'dispensing')
+                ->with('fuelTank')
+                ->where(function (Builder $query) use ($dispenseAggregates) {
+                    foreach ($dispenseAggregates as $machineId => $aggregate) {
+                        $query->orWhere(function (Builder $pair) use ($machineId, $aggregate) {
+                            $pair->where('machine_id', $machineId)
+                                ->where('transaction_date', data_get($aggregate, 'latest_dispense_date'));
+                        });
+                    }
+                })
+                ->get()
+                ->unique('machine_id')
+                ->keyBy('machine_id');
+        }
+
         /**
          * @psalm-suppress InvalidTemplateParam -- map() to plain arrays off an Eloquent collection
          */
-        $machineFuelActivity = $machines->map(function (Machine $machine) use ($teamId, $dateRange, $monthStart) {
-            $base = FuelTransaction::query()->where('team_id', $teamId)
-                ->where('machine_id', $machine->id)
-                ->where('transaction_type', 'dispensing');
-
-            $periodDispensed = (clone $base)
-                ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
-                ->sum('quantity_liters');
-            $monthDispensed = (clone $base)
-                ->where('transaction_date', '>=', $monthStart)
-                ->sum('quantity_liters');
-            $lastDispense = (clone $base)->with('fuelTank')->latest('transaction_date')->first();
-
-            $latestFuelMetric = $machine->metrics()
-                ->whereNotNull('fuel_level')
-                ->latest('recorded_at')
-                ->first();
+        $machineFuelActivity = $machines->map(function (Machine $machine) use ($dispenseAggregates, $lastDispenses) {
+            $aggregate = $dispenseAggregates->get($machine->id);
+            $latestFuelMetric = $machine->latestFuelMetric;
 
             return [
                 'machine' => $machine,
-                'period_dispensed' => (float) $periodDispensed,
-                'month_dispensed' => (float) $monthDispensed,
-                'event_count' => (clone $base)
-                    ->whereBetween('transaction_date', [$dateRange['start'], $dateRange['end']])
-                    ->count(),
-                'last_dispense' => $lastDispense,
+                'period_dispensed' => (float) data_get($aggregate, 'period_dispensed', 0),
+                'month_dispensed' => (float) data_get($aggregate, 'month_dispensed', 0),
+                'event_count' => (int) data_get($aggregate, 'event_count', 0),
+                'last_dispense' => $lastDispenses->get($machine->id),
                 'telemetry_fuel_level' => $latestFuelMetric?->fuel_level,
                 'telemetry_recorded_at' => $latestFuelMetric?->recorded_at,
             ];

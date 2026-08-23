@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\AIInsight;
 use App\Models\AIRecommendation;
 use App\Models\Geofence;
+use App\Models\GeofenceEntry;
 use App\Models\MineArea;
 use App\Models\User;
 use App\Services\GeofenceSuggestionService;
@@ -226,15 +227,22 @@ class GeofenceManager extends Component
             ->orderBy($this->sortBy, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10);
 
-        // Get entry/exit counts for each geofence
+        // Entry/exit counts for each geofence on this page -- one grouped
+        // query instead of two COUNT queries per geofence (2N round trips).
+        $pageIds = $geofencesQuery->getCollection()->pluck('id');
+        $entryCounts = GeofenceEntry::query()
+            ->whereIn('geofence_id', $pageIds)
+            ->selectRaw('geofence_id, COUNT(*) as entry_count, COUNT(DISTINCT machine_id) as machine_count')
+            ->groupBy('geofence_id')
+            ->get()
+            ->keyBy('geofence_id');
+
         $geofenceStats = [];
         foreach ($geofencesQuery as $geofence) {
+            $row = $entryCounts->get($geofence->id);
             $geofenceStats[$geofence->id] = [
-                'entries' => $geofence->entries()->count(),
-                'machines' => $geofence->entries()
-                    ->select('machine_id')
-                    ->distinct()
-                    ->count(),
+                'entries' => (int) data_get($row, 'entry_count', 0),
+                'machines' => (int) data_get($row, 'machine_count', 0),
             ];
         }
 
