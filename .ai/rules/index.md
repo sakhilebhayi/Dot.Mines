@@ -11,4 +11,5 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Mail/** | .ai/rules/mail.md |
 | app/Http/Resources/** | .ai/rules/resources.md |
 | routes/api.php | .ai/rules/routes.md |
+| app/Services/OpenApiGenerator.php | .ai/rules/services.md |
 | resources/views/** | .ai/rules/views.md |

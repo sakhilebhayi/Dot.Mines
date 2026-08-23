@@ -28,14 +28,28 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class EnsureTokenAbility
 {
-    public function handle(Request $request, Closure $next): Response
+    /**
+     * The abilities an HTTP verb requires. Any ONE of them is enough.
+     *
+     * Public and static so the generated API documentation states the same
+     * requirement this middleware enforces -- documented auth and actual
+     * auth cannot drift apart.
+     *
+     * @return list<string>
+     */
+    public static function abilitiesFor(string $method): array
     {
-        $required = match ($request->getMethod()) {
+        return match (strtoupper($method)) {
             'POST' => ['create', 'update'],
             'PUT', 'PATCH' => ['update'],
             'DELETE' => ['delete'],
             default => ['read'], // GET, HEAD, OPTIONS
         };
+    }
+
+    public function handle(Request $request, Closure $next): Response
+    {
+        $required = self::abilitiesFor($request->getMethod());
 
         $user = $request->user();
 

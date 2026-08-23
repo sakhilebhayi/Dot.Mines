@@ -16,12 +16,27 @@ use App\Http\Controllers\Api\SyncController;
 use App\Models\Machine;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\OpenApiGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /**
  * Public endpoints (no auth required)
  */
+
+/**
+ * The machine-readable description of this API, generated from the route
+ * table itself so it cannot drift from the code. Public on purpose: it is a
+ * schema, not data -- import it into Postman/Insomnia or generate a client.
+ */
+Route::get('/openapi.json', function (OpenApiGenerator $generator) {
+    return response()->json(
+        $generator->cached(),
+        200,
+        [],
+        JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+    );
+})->name('api.openapi');
 
 /**
  * Authenticated API endpoints
