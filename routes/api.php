@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Route;
  * All require: auth:sanctum + ensure_team middleware
  * Rate limiting: 60 requests per minute per user
  */
-Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(function () {
+Route::middleware(['auth:sanctum', 'token.ability', 'ensure_team', 'throttle:api'])->group(function () {
 
     /**
      * Incremental sync (hybrid architecture Slice 1): versioned deltas for
