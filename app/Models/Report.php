@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Mail;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Team|null $team
+ * @property string|null $error_message
  */
 class Report extends Model
 {

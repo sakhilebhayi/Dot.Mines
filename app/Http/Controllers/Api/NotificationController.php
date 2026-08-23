@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\NotificationResource;
 use App\Models\Notification;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +20,7 @@ class NotificationController extends Controller
             ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
 
         if (($teamId === null || $teamId === 0)) {
-            return ApiResponse::collection([]);
+            return ApiResponse::collection([], NotificationResource::class);
         }
 
         $query = Notification::where('team_id', $teamId);
@@ -38,7 +39,7 @@ class NotificationController extends Controller
 
         $notifications = $query->latest()->paginate(20);
 
-        return ApiResponse::paginated($notifications);
+        return ApiResponse::paginated($notifications, NotificationResource::class);
     }
 
     /**
@@ -56,7 +57,7 @@ class NotificationController extends Controller
             ->latest()
             ->paginate(20);
 
-        return ApiResponse::paginated($unread);
+        return ApiResponse::paginated($unread, NotificationResource::class);
     }
 
     /**

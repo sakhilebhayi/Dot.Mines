@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\GeofenceResource;
+use App\Http\Resources\MachineResource;
 use App\Models\Geofence;
 use App\Support\ApiPayload;
 use App\Support\ApiResponse;
@@ -48,7 +50,7 @@ class GeofenceController extends Controller
         $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 15;
         $geofences = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
-        return ApiResponse::paginated($geofences);
+        return ApiResponse::paginated($geofences, GeofenceResource::class);
     }
 
     /**
@@ -102,7 +104,7 @@ class GeofenceController extends Controller
         $geofence = Geofence::create($validated);
 
         return response()->json([
-            'data' => $geofence,
+            'data' => GeofenceResource::make($geofence),
             'message' => 'Geofence created successfully',
         ], Response::HTTP_CREATED);
     }
@@ -135,7 +137,7 @@ class GeofenceController extends Controller
         $geofence->update($validated);
 
         return response()->json([
-            'data' => $geofence,
+            'data' => GeofenceResource::make($geofence),
             'message' => 'Geofence updated successfully',
         ]);
     }
@@ -243,7 +245,7 @@ class GeofenceController extends Controller
         $machines = $geofence->activeMachines();
 
         return response()->json([
-            'data' => $machines,
+            'data' => MachineResource::collection($machines),
             'count' => $machines->count(),
         ]);
     }

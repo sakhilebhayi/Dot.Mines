@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\FuelTankResource;
 use App\Models\FuelTank;
 use App\Models\User;
 use App\Services\FuelManagementService;
@@ -61,7 +62,7 @@ class FuelTankController extends Controller
             return $tank;
         });
 
-        return ApiResponse::paginated($tanks);
+        return ApiResponse::paginated($tanks, FuelTankResource::class);
     }
 
     /**
@@ -97,7 +98,7 @@ class FuelTankController extends Controller
 
         $tank = FuelTank::create($data);
 
-        return response()->json($tank->load('mineArea'), 201);
+        return response()->json(FuelTankResource::make($tank->load('mineArea')), 201);
     }
 
     /**
@@ -120,7 +121,7 @@ class FuelTankController extends Controller
         $fuelTank->fill_percentage = $fuelTank->fill_percentage;
         $fuelTank->available_capacity = $fuelTank->available_capacity;
 
-        return response()->json($fuelTank);
+        return response()->json(FuelTankResource::make($fuelTank));
     }
 
     /**
@@ -155,7 +156,7 @@ class FuelTankController extends Controller
 
         $fuelTank->update($validator->validated());
 
-        return response()->json($fuelTank->load('mineArea'));
+        return response()->json(FuelTankResource::make($fuelTank->load('mineArea')));
     }
 
     /**

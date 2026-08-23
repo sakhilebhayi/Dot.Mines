@@ -618,6 +618,9 @@
                     </div>
                     <p>Pass <code>?page=</code> and <code>?per_page=</code> to page through results. Endpoints that return a short, bounded list (for example a machine's recent alerts) omit <code>links</code> and return <code>meta.total</code> only.</p>
 
+                    <h2>Field names are stable</h2>
+                    <p>Responses are an explicit, versioned set of fields — not a dump of the underlying tables. Internal columns (replication counters, entitlement state, storage paths, provider credentials) are never returned, and a column added or renamed inside Mines will not change your payload. Timestamps are ISO-8601 everywhere, and a referenced person appears as <code>{ "id": 1, "name": "..." }</code> rather than a full user record.</p>
+
                     <h2>Common Endpoints</h2>
                     
                     <h3>Machines</h3>

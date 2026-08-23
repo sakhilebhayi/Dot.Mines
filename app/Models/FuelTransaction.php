@@ -26,6 +26,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon|null $transaction_date
  * @property-read FuelTank|null $fuelTank
  * @property-read Machine|null $machine
+ * @property int $user_id
+ * @property string $fuel_type
+ * @property float|numeric-string|null $odometer_reading
+ * @property float|numeric-string|null $machine_hours
+ * @property string|null $supplier
+ * @property string|null $invoice_number
+ * @property string|null $notes
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class FuelTransaction extends Model
 {

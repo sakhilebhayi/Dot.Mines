@@ -34,6 +34,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float $available_capacity
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property float|numeric-string|null $current_price_per_liter
+ * @property string $currency
  */
 class FuelTank extends Model
 {

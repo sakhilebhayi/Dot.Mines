@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\IntegrationResource;
+use App\Http\Resources\MachineResource;
 use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
@@ -30,13 +32,16 @@ class IntegrationController extends Controller
     {
         $this->authorize('viewAny', Integration::class);
 
-        $integrations = Integration::where('team_id', auth()->user()?->current_team_id)
-            ->select('id', 'provider', 'name', 'status', 'last_sync_at', 'last_sync_status', 'machines_count', 'last_error')
-            ->get();
+        // No column whitelist here any more: IntegrationResource decides what
+        // ships. The old select() both omitted fields the resource exposes
+        // (capabilities, sync_streams, timestamps) and was the only thing
+        // keeping `credentials` out of the payload -- a remembered guard
+        // rather than a structural one.
+        $integrations = Integration::where('team_id', auth()->user()?->current_team_id)->get();
 
         return response()->json([
             'success' => true,
-            'data' => $integrations,
+            'data' => IntegrationResource::collection($integrations),
         ]);
     }
 
@@ -264,7 +269,7 @@ class IntegrationController extends Controller
             ->select('id', 'name', 'model', 'status', 'manufacturer', 'latitude', 'longitude')
             ->paginate(15);
 
-        return ApiResponse::paginated($machines, ['success' => true]);
+        return ApiResponse::paginated($machines, MachineResource::class, ['success' => true]);
     }
 
     /**

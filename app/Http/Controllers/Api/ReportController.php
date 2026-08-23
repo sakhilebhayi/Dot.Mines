@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\ReportResource;
 use App\Jobs\GenerateReportJob;
 use App\Models\Report;
 use App\Support\ApiPayload;
@@ -49,7 +50,7 @@ class ReportController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        return ApiResponse::paginated($reports);
+        return ApiResponse::paginated($reports, ReportResource::class);
     }
 
     /**
@@ -60,7 +61,7 @@ class ReportController extends Controller
     public function show(Report $report): JsonResponse
     {
         return response()->json([
-            'data' => $report->load('generatedBy'),
+            'data' => ReportResource::make($report->load('generatedBy')),
         ]);
     }
 
@@ -101,7 +102,7 @@ class ReportController extends Controller
         GenerateReportJob::dispatch($report);
 
         return response()->json([
-            'data' => $report,
+            'data' => ReportResource::make($report),
             'message' => 'Report generation started',
         ], Response::HTTP_CREATED);
     }

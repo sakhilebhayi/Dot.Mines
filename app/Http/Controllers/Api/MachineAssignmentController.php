@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MachineResource;
 use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
 use App\Support\ApiResponse;
@@ -29,7 +30,7 @@ class MachineAssignmentController extends Controller
             })
             ->paginate(is_numeric($request->input('per_page')) ? (int) $request->input('per_page') : 15);
 
-        return ApiResponse::paginated($machines);
+        return ApiResponse::paginated($machines, MachineResource::class);
     }
 
     /**

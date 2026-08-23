@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\FuelTransactionResource;
 use App\Models\FuelTransaction;
 use App\Models\User;
 use App\Services\FuelManagementService;
@@ -62,7 +63,7 @@ class FuelTransactionController extends Controller
 
         $transactions = $query->latest('transaction_date')->paginate(50);
 
-        return ApiResponse::paginated($transactions);
+        return ApiResponse::paginated($transactions, FuelTransactionResource::class);
     }
 
     /**
@@ -113,7 +114,7 @@ class FuelTransactionController extends Controller
         // Use service to record transaction (handles tank updates and alerts)
         $transaction = $this->fuelService->recordTransaction($data);
 
-        return response()->json($transaction, 201);
+        return response()->json(FuelTransactionResource::make($transaction), 201);
     }
 
     /**
@@ -128,7 +129,7 @@ class FuelTransactionController extends Controller
 
         $fuelTransaction->load(['fuelTank', 'machine', 'user', 'fromTank', 'toTank']);
 
-        return response()->json($fuelTransaction);
+        return response()->json(FuelTransactionResource::make($fuelTransaction));
     }
 
     /**
@@ -158,7 +159,7 @@ class FuelTransactionController extends Controller
 
         $fuelTransaction->update($validator->validated());
 
-        return response()->json($fuelTransaction->load(['fuelTank', 'machine', 'user']));
+        return response()->json(FuelTransactionResource::make($fuelTransaction->load(['fuelTank', 'machine', 'user'])));
     }
 
     /**
