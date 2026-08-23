@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureAdminHasTwoFactor;
 use App\Http\Middleware\EnsureTeamContext;
 use App\Http\Middleware\EnsureTokenAbility;
 use App\Http\Middleware\ForceHttps;
+use App\Http\Middleware\NormalizeApiParameters;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -41,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureAdmin::class,
             'admin.2fa' => EnsureAdminHasTwoFactor::class,
             'token.ability' => EnsureTokenAbility::class,
+            'api.params' => NormalizeApiParameters::class,
         ]);
 
         // Force HTTPS, CSP and add security headers to all web requests

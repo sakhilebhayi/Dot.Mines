@@ -689,6 +689,11 @@ final class OpenApiGenerator
             '**Lists.** All list endpoints return `{data, links, meta}` and accept `page` and `per_page`.',
             '**Field names are stable.** Responses are an explicit set of fields, not a dump of the '
                 .'database, so internal columns are never returned and a schema change will not alter your payload.',
+            '**Parameter names.** One vocabulary across the API: `start_date`/`end_date` bound a time range, '
+                .'and filters use the bare field name (`status`, `type`). The older spellings '
+                .'`date_from`/`date_to` and `filter_status`/`filter_type` are still accepted so existing '
+                .'integrations keep working, but they are deprecated -- prefer the names documented here. If you '
+                .'send both, the documented name wins.',
             '**Rate limit.** 60 requests per minute per user.',
         ]);
     }

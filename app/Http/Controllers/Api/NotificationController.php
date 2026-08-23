@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\NotificationResource;
 use App\Models\Notification;
+use App\Support\ApiPayload;
 use App\Support\ApiResponse;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -100,14 +102,22 @@ class NotificationController extends Controller
     {
         $teamId = auth()->user()->current_team_id
             ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
+        // start_date/end_date is the API-wide way to bound a time range;
+        // days is kept as a shorthand for "the last N days".
         /** @psalm-suppress MixedAssignment */
         $daysRaw = $request->input('days');
         $days = is_numeric($daysRaw) ? (int) $daysRaw : 7;
-        $fromDate = now()->subDays($days);
+        $fromDate = $request->filled('start_date')
+            ? Carbon::parse(ApiPayload::str($request->input('start_date')))
+            : now()->subDays($days);
 
-        $alerts = Notification::where('team_id', $teamId)
-            ->where('created_at', '>=', $fromDate)
-            ->get();
+        $query = Notification::where('team_id', $teamId)->where('created_at', '>=', $fromDate);
+
+        if ($request->filled('end_date')) {
+            $query->where('created_at', '<=', Carbon::parse(ApiPayload::str($request->input('end_date'))));
+        }
+
+        $alerts = $query->get();
 
         return response()->json([
             'total_notifications' => $alerts->count(),

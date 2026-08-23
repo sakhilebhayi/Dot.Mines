@@ -166,19 +166,19 @@ class GeofenceController extends Controller
     public function entries(Request $request, Geofence $geofence): JsonResponse
     {
         $validated = $request->validate([
-            'date_from' => 'nullable|date',
-            'date_to' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
             'limit' => 'nullable|integer|min:1|max:1000',
         ]);
 
         $query = $geofence->entries()->with('machine');
 
-        if ($request->filled('date_from')) {
-            $query->where('entry_time', '>=', $request->input('date_from'));
+        if ($request->filled('start_date')) {
+            $query->where('entry_time', '>=', $request->input('start_date'));
         }
 
-        if ($request->filled('date_to')) {
-            $query->where('entry_time', '<=', $request->input('date_to'));
+        if ($request->filled('end_date')) {
+            $query->where('entry_time', '<=', $request->input('end_date'));
         }
 
         /** @psalm-suppress MixedAssignment */
@@ -199,12 +199,12 @@ class GeofenceController extends Controller
     public function tonnageStats(Request $request, Geofence $geofence): JsonResponse
     {
         $validated = $request->validate([
-            'date_from' => 'required|date',
-            'date_to' => 'required|date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
         ]);
 
-        $dateFrom = ApiPayload::str($request->input('date_from'));
-        $dateTo = ApiPayload::str($request->input('date_to'));
+        $dateFrom = ApiPayload::str($request->input('start_date'));
+        $dateTo = ApiPayload::str($request->input('end_date'));
 
         $totalTonnage = $geofence->getTonnageForDateRange($dateFrom, $dateTo);
         $entries = $geofence->entries()
