@@ -83,8 +83,10 @@ class MachineAssignmentEndpointsTest extends TestCase
         $response = $this->actingAs($user)->getJson("/api/assignments/machines/{$machine->id}/history");
 
         $response->assertOk();
-        $rows = $response->json();
+        // Standard list envelope (App\Support\ApiResponse) -- rows live under `data`.
+        $rows = $response->json('data');
         $this->assertCount(1, $rows);
+        $this->assertSame(1, $response->json('meta.total'));
         $this->assertSame('North Pit', $rows[0]['name']);
         $this->assertSame('Wet-season rotation', $rows[0]['notes']);
         $this->assertNotNull($rows[0]['assigned_at']);

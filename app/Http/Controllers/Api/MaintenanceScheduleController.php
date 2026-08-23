@@ -7,6 +7,7 @@ use App\Models\Machine;
 use App\Models\MaintenanceSchedule;
 use App\Models\User;
 use App\Services\MaintenanceHealthService;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -54,7 +55,7 @@ class MaintenanceScheduleController extends Controller
 
         $schedules = $query->latest('next_service_date')->paginate(50);
 
-        return response()->json($schedules);
+        return ApiResponse::paginated($schedules);
     }
 
     /**

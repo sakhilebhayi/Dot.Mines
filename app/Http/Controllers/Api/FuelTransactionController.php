@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FuelTransaction;
 use App\Models\User;
 use App\Services\FuelManagementService;
+use App\Support\ApiResponse;
 use App\Support\CurrentUser;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -61,7 +62,7 @@ class FuelTransactionController extends Controller
 
         $transactions = $query->latest('transaction_date')->paginate(50);
 
-        return response()->json($transactions);
+        return ApiResponse::paginated($transactions);
     }
 
     /**

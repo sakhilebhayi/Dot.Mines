@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FuelTank;
 use App\Models\User;
 use App\Services\FuelManagementService;
+use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -60,7 +61,7 @@ class FuelTankController extends Controller
             return $tank;
         });
 
-        return response()->json($tanks);
+        return ApiResponse::paginated($tanks);
     }
 
     /**

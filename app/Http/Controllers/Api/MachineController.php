@@ -6,6 +6,7 @@ use App\Exceptions\InsufficientAllocationException;
 use App\Models\Machine;
 use App\Services\Billing\MachineProvisioningService;
 use App\Support\ApiPayload;
+use App\Support\ApiResponse;
 use App\Support\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,15 +71,7 @@ class MachineController extends Controller
         $perPageRaw = $request->input('per_page');
         $machines = $query->paginate(is_numeric($perPageRaw) ? (int) $perPageRaw : 15);
 
-        return response()->json([
-            'data' => $machines->items(),
-            'pagination' => [
-                'total' => $machines->total(),
-                'per_page' => $machines->perPage(),
-                'current_page' => $machines->currentPage(),
-                'last_page' => $machines->lastPage(),
-            ],
-        ]);
+        return ApiResponse::paginated($machines);
     }
 
     /**

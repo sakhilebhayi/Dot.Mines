@@ -4,6 +4,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 
 | Applies to | Rule file |
 | --- | --- |
+| app/Http/Controllers/Api/** | .ai/rules/api.md |
 | app/** | .ai/rules/app.md |
 | phpstan-baseline.neon | .ai/rules/general.md |
 | resources/js/** | .ai/rules/js.md |

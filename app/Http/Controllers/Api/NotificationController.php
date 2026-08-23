@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,7 @@ class NotificationController extends Controller
             ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
 
         if (($teamId === null || $teamId === 0)) {
-            return response()->json(['data' => [], 'meta' => ['total' => 0]]);
+            return ApiResponse::collection([]);
         }
 
         $query = Notification::where('team_id', $teamId);
@@ -37,15 +38,7 @@ class NotificationController extends Controller
 
         $notifications = $query->latest()->paginate(20);
 
-        return response()->json([
-            'data' => $notifications->items(),
-            'meta' => [
-                'current_page' => $notifications->currentPage(),
-                'last_page' => $notifications->lastPage(),
-                'total' => $notifications->total(),
-                'per_page' => $notifications->perPage(),
-            ],
-        ]);
+        return ApiResponse::paginated($notifications);
     }
 
     /**
@@ -63,15 +56,7 @@ class NotificationController extends Controller
             ->latest()
             ->paginate(20);
 
-        return response()->json([
-            'data' => $unread->items(),
-            'meta' => [
-                'current_page' => $unread->currentPage(),
-                'last_page' => $unread->lastPage(),
-                'total' => $unread->total(),
-                'per_page' => $unread->perPage(),
-            ],
-        ]);
+        return ApiResponse::paginated($unread);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Jobs\GenerateReportJob;
 use App\Models\Report;
 use App\Support\ApiPayload;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -48,15 +49,7 @@ class ReportController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        return response()->json([
-            'data' => $reports->items(),
-            'pagination' => [
-                'total' => $reports->total(),
-                'per_page' => $reports->perPage(),
-                'current_page' => $reports->currentPage(),
-                'last_page' => $reports->lastPage(),
-            ],
-        ]);
+        return ApiResponse::paginated($reports);
     }
 
     /**
