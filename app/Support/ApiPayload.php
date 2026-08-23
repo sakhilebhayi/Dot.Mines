@@ -18,6 +18,14 @@ final class ApiPayload
     }
 
     /**
+     * A string payload value, or the default when absent/mistyped.
+     */
+    public static function str(mixed $value, string $default = ''): string
+    {
+        return is_string($value) ? $value : $default;
+    }
+
+    /**
      * A clean list of assoc rows; malformed entries are dropped.
      *
      * @return list<array<string, mixed>>

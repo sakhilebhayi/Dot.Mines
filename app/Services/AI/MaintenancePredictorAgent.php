@@ -55,13 +55,13 @@ class MaintenancePredictorAgent
 
             if ($riskScore > 0.7) {
                 // High risk of breakdown
-                $daysUntilBreakdown = $this->estimateDaysUntilBreakdown($machine, $riskScore);
+                $daysUntilBreakdown = $this->estimateDaysUntilBreakdown($riskScore);
 
                 $recommendations[] = [
                     'category' => 'maintenance',
                     'priority' => 'critical',
                     'title' => "High Breakdown Risk: {$machine->name}",
-                    'description' => 'AI predicts '.round($riskScore * 100.0)."% probability of breakdown within {$daysUntilBreakdown} days for {$machine->name}. Immediate inspection recommended.",
+                    'description' => 'AI predicts '.((string) round($riskScore * 100.0))."% probability of breakdown within {$daysUntilBreakdown} days for {$machine->name}. Immediate inspection recommended.",
                     'confidence_score' => $riskScore,
                     'estimated_savings' => 150000, // Average breakdown cost
                     'related_machine_id' => $machine->id,
@@ -151,17 +151,23 @@ class MaintenancePredictorAgent
             ->get();
 
         foreach ($schedules as $schedule) {
+            $machine = $schedule->machine;
+
+            if ($machine === null || $schedule->interval_days === null) {
+                continue;
+            }
+
             // Check if schedule is optimal based on machine usage
-            $actualUsage = $this->getMachineUsageRate($schedule->machine);
+            $actualUsage = $this->getMachineUsageRate($machine);
             $scheduledInterval = $schedule->interval_days;
 
-            $optimalInterval = $this->calculateOptimalInterval($schedule->machine, $actualUsage);
+            $optimalInterval = $this->calculateOptimalInterval($actualUsage);
 
             if (abs($optimalInterval - $scheduledInterval) > 10) {
                 $recommendations[] = [
                     'category' => 'maintenance',
                     'priority' => 'medium',
-                    'title' => "Suboptimal Maintenance Schedule: {$schedule->machine->name}",
+                    'title' => "Suboptimal Maintenance Schedule: {$machine->name}",
                     'description' => "Current {$scheduledInterval}-day maintenance interval is not aligned with actual usage patterns. Recommend adjusting to {$optimalInterval} days.",
                     'confidence_score' => 0.75,
                     'estimated_savings' => abs($optimalInterval - $scheduledInterval) * 500, // R500 per day difference
@@ -199,45 +205,46 @@ class MaintenancePredictorAgent
             ->map(fn ($value) => (float) $value);
 
         $operatingHours = $readings->count() >= 2
-            ? max(0.0, $readings->max() - $readings->min())
+            ? max(0.0, (float) $readings->max() - (float) $readings->min())
             : 0.0;
-        $avgHoursPerDay = $operatingHours / 30;
-        $riskFactors['hours'] = min(($avgHoursPerDay / 20) * 0.3, 0.3); // 20h/day is high
+        $avgHoursPerDay = $operatingHours / 30.0;
+        $riskFactors['hours'] = min(($avgHoursPerDay / 20.0) * 0.3, 0.3); // 20h/day is high
 
         // Factor 2: Time since last maintenance (25% weight)
         $lastMaintenance = $machine->maintenanceRecords()
             ->where('status', 'completed')
+            ->whereNotNull('completed_at')
             ->orderByDesc('completed_at')
             ->first();
 
         if ($lastMaintenance) {
             // Carbon 3: now()->diffInDays($past) is negative, which made this
             // factor SUBTRACT from the risk score instead of adding to it.
-            $daysSinceLastMaintenance = $lastMaintenance->completed_at->diffInDays(now());
+            $daysSinceLastMaintenance = $lastMaintenance->completed_at?->diffInDays(now()) ?? 180.0;
             $riskFactors['maintenance'] = min(($daysSinceLastMaintenance / 180.0) * 0.25, 0.25);
         } else {
             $riskFactors['maintenance'] = 0.25; // No maintenance history = max risk
         }
 
         // Factor 3: Health score (25% weight)
-        $healthScore = $machine->healthStatus?->overall_health_score ?? 50;
-        $riskFactors['health'] = ((100 - $healthScore) / 100) * 0.25;
+        $healthScore = (float) ($machine->healthStatus?->overall_health_score ?? 50);
+        $riskFactors['health'] = ((100.0 - $healthScore) / 100.0) * 0.25;
 
         // Factor 4: Age of machine (20% weight)
         $machineAge = ($machine->year_of_manufacture !== null && $machine->year_of_manufacture !== 0)
             ? now()->year - $machine->year_of_manufacture
             : 5;
-        $riskFactors['age'] = min(($machineAge / 20.0) * 0.2, 0.2); // 20 years is max
+        $riskFactors['age'] = min(((float) $machineAge / 20.0) * 0.2, 0.2); // 20 years is max
 
         return array_sum($riskFactors);
     }
 
-    protected function estimateDaysUntilBreakdown(Machine $machine, float $riskScore): int
+    protected function estimateDaysUntilBreakdown(float $riskScore): int
     {
         // Higher risk = fewer days until breakdown
         $baseDays = 90;
 
-        return max(7, (int) ($baseDays * (1.0 - $riskScore)));
+        return max(7, (int) ((float) $baseDays * (1.0 - $riskScore)));
     }
 
     /**
@@ -248,10 +255,11 @@ class MaintenancePredictorAgent
     {
         $factors = [];
 
+        /** @var mixed $healthScore */
         $healthScore = $machine->healthStatus?->overall_health_score;
 
-        if ($healthScore !== null && $healthScore < 60) {
-            $factors[] = 'Low health score: '.$healthScore;
+        if (is_numeric($healthScore) && (float) $healthScore < 60.0) {
+            $factors[] = 'Low health score: '.((string) $healthScore);
         }
 
         $lastMaintenance = $machine->maintenanceRecords()->latest('completed_at')->first();
@@ -263,8 +271,8 @@ class MaintenancePredictorAgent
             ->whereDate('recorded_at', '>=', now()->subDays(7))
             ->avg('operating_hours');
 
-        if ($highUsage > 18) {
-            $factors[] = 'High utilization: '.round($highUsage, 1).' hours/day';
+        if (is_numeric($highUsage) && (float) $highUsage > 18.0) {
+            $factors[] = 'High utilization: '.((string) round((float) $highUsage, 1)).' hours/day';
         }
 
         if (($machine->year_of_manufacture !== null && $machine->year_of_manufacture !== 0) && (now()->year - $machine->year_of_manufacture) > 10) {
@@ -291,7 +299,7 @@ class MaintenancePredictorAgent
             ->avg('operating_hours') ?? 0;
     }
 
-    protected function calculateOptimalInterval(Machine $machine, float $usageRate): int
+    protected function calculateOptimalInterval(float $usageRate): int
     {
         // Higher usage = shorter intervals
         if ($usageRate > 16) {
