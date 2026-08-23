@@ -35,6 +35,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Team|null $team
+ * @property array<string, mixed>|null $capabilities
+ * @property array<string, mixed>|null $sync_streams
  */
 class Integration extends Model
 {

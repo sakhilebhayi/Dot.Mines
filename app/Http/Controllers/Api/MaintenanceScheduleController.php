@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MaintenanceScheduleResource;
 use App\Models\Machine;
 use App\Models\MaintenanceSchedule;
 use App\Models\User;
@@ -55,7 +56,7 @@ class MaintenanceScheduleController extends Controller
 
         $schedules = $query->latest('next_service_date')->paginate(50);
 
-        return ApiResponse::paginated($schedules);
+        return ApiResponse::paginated($schedules, MaintenanceScheduleResource::class);
     }
 
     /**
@@ -93,7 +94,7 @@ class MaintenanceScheduleController extends Controller
 
         return response()->json([
             'message' => 'Maintenance schedule created successfully',
-            'data' => $schedule->load('machine'),
+            'data' => MaintenanceScheduleResource::make($schedule->load('machine')),
         ], 201);
     }
 
@@ -138,7 +139,7 @@ class MaintenanceScheduleController extends Controller
 
         return response()->json([
             'message' => 'Maintenance schedule updated successfully',
-            'data' => $schedule->load('machine'),
+            'data' => MaintenanceScheduleResource::make($schedule->load('machine')),
         ]);
     }
 

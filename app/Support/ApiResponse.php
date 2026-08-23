@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * One list envelope for the whole API.
@@ -24,6 +25,11 @@ final class ApiResponse
     /**
      * Standard paginated list response.
      *
+     * Pass the API Resource class for the item type so rows are shaped by an
+     * explicit whitelist rather than dumped straight from the database --
+     * see App\Http\Resources. Omitting it serializes raw models and is only
+     * appropriate for payloads that are already hand-shaped arrays.
+     *
      * The paginator is generic over its item type: psalm's Collection and
      * paginator templates are INVARIANT, so a concrete
      * `LengthAwarePaginator<int, Machine>` is not accepted by a
@@ -33,12 +39,20 @@ final class ApiResponse
      * @template TItem
      *
      * @param  LengthAwarePaginator<int, TItem>  $paginator
+     * @param  class-string<JsonResource>|null  $resource
      * @param  array<string, mixed>  $extra  Additional top-level keys (e.g. summary stats)
      */
-    public static function paginated(LengthAwarePaginator $paginator, array $extra = []): JsonResponse
+    public static function paginated(LengthAwarePaginator $paginator, ?string $resource = null, array $extra = []): JsonResponse
     {
+        $items = $resource === null
+            ? $paginator->items()
+            : array_map(
+                static fn (mixed $item): array => $resource::make($item)->resolve(),
+                $paginator->items()
+            );
+
         return response()->json(array_merge([
-            'data' => $paginator->items(),
+            'data' => $items,
             'links' => [
                 'first' => $paginator->url(1),
                 'last' => $paginator->url($paginator->lastPage()),
@@ -62,11 +76,19 @@ final class ApiResponse
      * Same envelope so clients read `data` and `meta.total` everywhere.
      *
      * @param  array<array-key, mixed>  $items
+     * @param  class-string<JsonResource>|null  $resource
      * @param  array<string, mixed>  $extra
      */
-    public static function collection(array $items, array $extra = []): JsonResponse
+    public static function collection(array $items, ?string $resource = null, array $extra = []): JsonResponse
     {
         $values = array_values($items);
+
+        if ($resource !== null) {
+            $values = array_map(
+                static fn (mixed $item): array => $resource::make($item)->resolve(),
+                $values
+            );
+        }
 
         return response()->json(array_merge([
             'data' => $values,

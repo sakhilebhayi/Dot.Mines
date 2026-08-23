@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exceptions\InsufficientAllocationException;
+use App\Http\Resources\AlertResource;
+use App\Http\Resources\MachineResource;
 use App\Models\Machine;
 use App\Services\Billing\MachineProvisioningService;
 use App\Support\ApiPayload;
@@ -71,7 +73,7 @@ class MachineController extends Controller
         $perPageRaw = $request->input('per_page');
         $machines = $query->paginate(is_numeric($perPageRaw) ? (int) $perPageRaw : 15);
 
-        return ApiResponse::paginated($machines);
+        return ApiResponse::paginated($machines, MachineResource::class);
     }
 
     /**
@@ -82,7 +84,7 @@ class MachineController extends Controller
     public function show(Machine $machine): JsonResponse
     {
         return response()->json([
-            'data' => $machine->load('metrics', 'alerts', 'geofenceEntries', 'integration'),
+            'data' => MachineResource::make($machine->load('alerts', 'mineArea')),
         ]);
     }
 
@@ -126,7 +128,7 @@ class MachineController extends Controller
         }
 
         return response()->json([
-            'data' => $machine,
+            'data' => MachineResource::make($machine),
             'message' => 'Machine created successfully',
         ], Response::HTTP_CREATED);
     }
@@ -152,7 +154,7 @@ class MachineController extends Controller
         $machine->update($validated);
 
         return response()->json([
-            'data' => $machine,
+            'data' => MachineResource::make($machine),
             'message' => 'Machine updated successfully',
         ]);
     }
@@ -218,7 +220,7 @@ class MachineController extends Controller
         $machine->updateLocation($validated['latitude'], $validated['longitude']);
 
         return response()->json([
-            'data' => $machine,
+            'data' => MachineResource::make($machine),
             'message' => 'Location updated successfully',
         ]);
     }
@@ -235,7 +237,7 @@ class MachineController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $alerts,
+            'data' => AlertResource::collection($alerts),
         ]);
     }
 }

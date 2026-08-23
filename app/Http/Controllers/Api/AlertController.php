@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\AlertResource;
 use App\Models\Alert;
 use App\Support\ApiResponse;
 use App\Support\CurrentUser;
@@ -57,7 +58,7 @@ class AlertController extends Controller
             ->orderBy('triggered_at', 'desc')
             ->paginate($perPage);
 
-        return ApiResponse::paginated($alerts);
+        return ApiResponse::paginated($alerts, AlertResource::class);
     }
 
     /**
@@ -68,7 +69,7 @@ class AlertController extends Controller
     public function show(Alert $alert): JsonResponse
     {
         return response()->json([
-            'data' => $alert->load('machine', 'acknowledgedBy', 'resolvedBy'),
+            'data' => AlertResource::make($alert->load('machine', 'acknowledgedBy', 'resolvedBy')),
         ]);
     }
 
@@ -96,7 +97,7 @@ class AlertController extends Controller
         $alert = Alert::create($validated);
 
         return response()->json([
-            'data' => $alert,
+            'data' => AlertResource::make($alert),
             'message' => 'Alert created successfully',
         ], Response::HTTP_CREATED);
     }
@@ -113,7 +114,7 @@ class AlertController extends Controller
         $alert->acknowledge(CurrentUser::get()?->id);
 
         return response()->json([
-            'data' => $alert,
+            'data' => AlertResource::make($alert),
             'message' => 'Alert acknowledged successfully',
         ]);
     }
@@ -130,7 +131,7 @@ class AlertController extends Controller
         $alert->resolve(CurrentUser::get()?->id);
 
         return response()->json([
-            'data' => $alert,
+            'data' => AlertResource::make($alert),
             'message' => 'Alert resolved successfully',
         ]);
     }
@@ -181,6 +182,6 @@ class AlertController extends Controller
 
         $alerts = $query->orderBy('triggered_at', 'desc')->limit(50)->get();
 
-        return ApiResponse::collection($alerts->all());
+        return ApiResponse::collection($alerts->all(), AlertResource::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MachineHealthResource;
 use App\Models\Machine;
 use App\Models\MachineHealthStatus;
 use App\Models\User;
@@ -50,7 +51,7 @@ class MachineHealthController extends Controller
 
         $healthStatuses = $query->latest('updated_at')->paginate(50);
 
-        return ApiResponse::paginated($healthStatuses);
+        return ApiResponse::paginated($healthStatuses, MachineHealthResource::class);
     }
 
     /**
@@ -89,7 +90,7 @@ class MachineHealthController extends Controller
 
         return response()->json([
             'message' => 'Health status updated successfully',
-            'data' => $healthStatus->load('machine'),
+            'data' => MachineHealthResource::make($healthStatus->load('machine')),
         ]);
     }
 
@@ -125,7 +126,7 @@ class MachineHealthController extends Controller
 
         return response()->json([
             'message' => 'Diagnostic scan completed',
-            'data' => $healthStatus,
+            'data' => MachineHealthResource::make($healthStatus),
         ]);
     }
 

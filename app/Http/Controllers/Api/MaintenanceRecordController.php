@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MaintenanceRecordResource;
 use App\Models\Machine;
 use App\Models\MaintenanceRecord;
 use App\Models\User;
@@ -56,7 +57,7 @@ class MaintenanceRecordController extends Controller
 
         $records = $query->latest('scheduled_at')->paginate(50);
 
-        return ApiResponse::paginated($records);
+        return ApiResponse::paginated($records, MaintenanceRecordResource::class);
     }
 
     /**
@@ -87,7 +88,7 @@ class MaintenanceRecordController extends Controller
 
         return response()->json([
             'message' => 'Work order created successfully',
-            'data' => $record->load(['machine', 'assignedTo']),
+            'data' => MaintenanceRecordResource::make($record->load(['machine', 'assignedTo'])),
         ], 201);
     }
 
@@ -130,7 +131,7 @@ class MaintenanceRecordController extends Controller
 
         return response()->json([
             'message' => 'Work order updated successfully',
-            'data' => $record->load(['machine', 'assignedTo']),
+            'data' => MaintenanceRecordResource::make($record->load(['machine', 'assignedTo'])),
         ]);
     }
 
@@ -160,7 +161,7 @@ class MaintenanceRecordController extends Controller
 
         return response()->json([
             'message' => 'Work order completed successfully',
-            'data' => $completedRecord->load(['machine', 'completedBy']),
+            'data' => MaintenanceRecordResource::make($completedRecord->load(['machine', 'completedBy'])),
         ]);
     }
 
