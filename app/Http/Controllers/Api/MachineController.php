@@ -34,8 +34,8 @@ class MachineController extends Controller
             'page' => 'nullable|integer|min:1',
             'per_page' => 'nullable|integer|min:1|max:100',
             'sort' => 'nullable|string|in:name,machine_type,status,created_at',
-            'filter_status' => 'nullable|string|in:active,idle,maintenance,offline',
-            'filter_type' => 'nullable|string',
+            'status' => 'nullable|string|in:active,idle,maintenance,offline',
+            'type' => 'nullable|string',
             'search' => 'nullable|string|max:100',
         ]);
 
@@ -52,13 +52,13 @@ class MachineController extends Controller
         }
 
         // Filter by status
-        if ($request->filled('filter_status')) {
-            $query->where('status', $request->input('filter_status'));
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
         }
 
         // Filter by type
-        if ($request->filled('filter_type')) {
-            $query->where('machine_type', $request->input('filter_type'));
+        if ($request->filled('type')) {
+            $query->where('machine_type', $request->input('type'));
         }
 
         // Sorting
@@ -184,13 +184,24 @@ class MachineController extends Controller
     {
         $validated = $request->validate([
             'limit' => 'nullable|integer|min:1|max:1000',
-            'hours_back' => 'nullable|integer|min:1|max:720', // up to 30 days
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'hours_back' => 'nullable|integer|min:1|max:720', // shorthand, up to 30 days
         ]);
 
         $query = $machine->metrics();
 
-        // Filter by hours back if specified
-        if ($request->filled('hours_back')) {
+        // start_date/end_date is the API-wide way to bound a time range;
+        // hours_back is kept as a shorthand for "the last N hours".
+        if ($request->filled('start_date')) {
+            $query->where('created_at', '>=', ApiPayload::str($request->input('start_date')));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->where('created_at', '<=', ApiPayload::str($request->input('end_date')));
+        }
+
+        if ($request->filled('hours_back') && ! $request->filled('start_date')) {
             /** @psalm-suppress MixedAssignment */
             $hoursBackRaw = $request->input('hours_back');
             $query->where('created_at', '>=', now()->subHours(is_numeric($hoursBackRaw) ? (int) $hoursBackRaw : 24));

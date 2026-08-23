@@ -619,6 +619,10 @@
                     </div>
                     <p>Pass <code>?page=</code> and <code>?per_page=</code> to page through results. Endpoints that return a short, bounded list (for example a machine's recent alerts) omit <code>links</code> and return <code>meta.total</code> only.</p>
 
+                    <h2>Parameter names</h2>
+                    <p>The same idea has the same name everywhere. A time range is always <code>start_date</code> and <code>end_date</code>; a filter is always the bare field name, such as <code>status</code> or <code>type</code>.</p>
+                    <p>Older integrations may be sending <code>date_from</code>/<code>date_to</code> or <code>filter_status</code>/<code>filter_type</code>. Those are still accepted and translated automatically, so nothing breaks &mdash; but they are deprecated, and new code should use the names above. If both are sent, the documented name wins.</p>
+
                     <h2>Field names are stable</h2>
                     <p>Responses are an explicit, versioned set of fields — not a dump of the underlying tables. Internal columns (replication counters, entitlement state, storage paths, provider credentials) are never returned, and a column added or renamed inside Mines will not change your payload. Timestamps are ISO-8601 everywhere, and a referenced person appears as <code>{ "id": 1, "name": "..." }</code> rather than a full user record.</p>
 
