@@ -531,6 +531,27 @@
                                 </div>
                             @endif
                             <div class="text-xs text-[var(--sand)] mt-1 text-center">{{ $machine->manufacturer ? $machine->manufacturer.' • ' : '' }}{{ $machine->model }}</div>
+                            @php $operatorAssignment = $machine->operatorAssignments->first(); @endphp
+                            <div class="flex items-center justify-center gap-1.5 mt-1.5">
+                                @if ($operatorAssignment?->operator)
+                                    <a href="{{ route('operators.show', $operatorAssignment->operator) }}"
+                                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--gold)]/15 text-[var(--gold)] hover:bg-[var(--gold)]/25 transition"
+                                       title="Operator — view profile">
+                                        👤 {{ $operatorAssignment->operator->name }}
+                                    </a>
+                                    @if ($this->canManageOperators)
+                                        <button wire:click="unassignOperator({{ $machine->id }})" wire:confirm="Unassign {{ $operatorAssignment->operator->name }} from {{ $machine->name }}?"
+                                                class="text-[10px] text-[var(--sand)] hover:text-[var(--stone)]" title="Unassign operator">✕</button>
+                                    @endif
+                                @elseif ($this->canManageOperators)
+                                    <button wire:click="openAssignOperator({{ $machine->id }})"
+                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-[var(--sand)] hover:text-[var(--stone)] border border-[var(--line)] transition">
+                                        + Assign Operator
+                                    </button>
+                                @else
+                                    <span class="text-[10px] text-[var(--sand)]">No operator assigned</span>
+                                @endif
+                            </div>
                         </div>
                         <div class="flex-1 flex flex-col justify-between p-4 gap-2">
                             <div class="flex items-center gap-2 mb-2">
@@ -995,4 +1016,59 @@
     opacity: 0;
 }
 </style>
+
+    {{-- Assign an operator: eligibility computed server-side, shown per person --}}
+    @if ($assignOperatorMachineId !== null)
+        <x-dialog-modal wire:model.live="assignOperatorMachineId">
+            <x-slot name="title">Assign an operator</x-slot>
+            <x-slot name="content">
+                <input type="search" wire:model.live.debounce.300ms="operatorSearch" placeholder="Search operators…"
+                       class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)] mb-3">
+
+                @if ($assignmentBlockers !== [])
+                    <div class="mb-3 px-3 py-2 bg-red-900/20 border border-red-900 rounded text-red-200 text-sm">
+                        <strong>Operator cannot be assigned</strong>
+                        <ul class="list-disc ml-4 mt-1">
+                            @foreach ($assignmentBlockers as $blocker)
+                                <li>{{ $blocker }}</li>
+                            @endforeach
+                        </ul>
+                        @can('create', \App\Models\Operator::class)
+                            <label class="block mt-2 text-[var(--sand)]">Compliance override — reason (audited):</label>
+                            <input type="text" wire:model="overrideReason" placeholder="e.g. Supervised training"
+                                   class="w-full mt-1 px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        @endcan
+                    </div>
+                @endif
+
+                <div class="space-y-2 max-h-80 overflow-y-auto">
+                    @forelse ($this->assignableOperators as $row)
+                        <div wire:key="assignable-{{ $row['operator']->id }}"
+                             class="flex items-center justify-between px-3 py-2 rounded border {{ $row['eligible'] ? 'border-[var(--line)]' : 'border-red-900/50 opacity-75' }}">
+                            <div>
+                                <span class="text-[var(--stone)] font-semibold">{{ $row['operator']->name }}</span>
+                                <span class="text-[var(--sand)] text-xs"> · {{ $row['operator']->employee_number }}</span>
+                                @if ($row['eligible'] && $row['warnings'] === [])
+                                    <span class="block text-green-300 text-xs mt-0.5">🟢 Eligible</span>
+                                @elseif ($row['eligible'])
+                                    <span class="block text-yellow-300 text-xs mt-0.5">🟡 {{ $row['warnings'][0] }}</span>
+                                @else
+                                    <span class="block text-red-300 text-xs mt-0.5">🔴 {{ $row['blockers'][0] }}</span>
+                                @endif
+                            </div>
+                            <button wire:click="assignOperator({{ $row['operator']->id }})" wire:loading.attr="disabled"
+                                    class="px-3 py-1.5 text-sm rounded transition {{ $row['eligible'] ? 'bg-[var(--gold)] text-[var(--ink)] font-semibold hover:bg-[var(--gold-soft)]' : 'border border-[var(--line-strong)] text-[var(--sand)] hover:text-[var(--stone)]' }}">
+                                {{ $row['eligible'] ? 'Assign' : 'Override…' }}
+                            </button>
+                        </div>
+                    @empty
+                        <p class="text-[var(--sand)] text-sm">No operators found. <a href="{{ route('operators.index') }}" class="underline">Add operators</a> first.</p>
+                    @endforelse
+                </div>
+            </x-slot>
+            <x-slot name="footer">
+                <button wire:click="closeAssignOperator" class="px-4 py-2 text-[var(--sand)] hover:text-[var(--stone)] transition">Close</button>
+            </x-slot>
+        </x-dialog-modal>
+    @endif
 </div>

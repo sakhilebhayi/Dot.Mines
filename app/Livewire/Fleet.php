@@ -2,22 +2,28 @@
 
 namespace App\Livewire;
 
+use App\Exceptions\IneligibleAssignmentException;
 use App\Exceptions\InsufficientAllocationException;
 use App\Models\ActivityLog;
 use App\Models\AIAgent;
 use App\Models\AiRecommendationAction;
 use App\Models\Machine;
 use App\Models\MineArea;
+use App\Models\Operator;
 use App\Models\User;
 use App\Services\AI\FleetOptimizerAgent;
 use App\Services\Billing\MachineEntitlementService;
 use App\Services\Billing\MachineProvisioningService;
 use App\Services\MachinePerformanceService;
 use App\Services\OperationalSnapshotService;
+use App\Services\Operators\AssignmentEligibility;
+use App\Services\Operators\OperatorAssignmentService;
 use App\Support\ApiPayload;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
@@ -485,13 +491,155 @@ class Fleet extends Component
         return app(MachineEntitlementService::class)->summary($team);
     }
 
+    /**
+     * Whether the current user may manage operator assignments, computed
+     * ONCE -- a per-card @can('update', $machine) is a role+permission query
+     * pair multiplied by the machine count, and the fleet page's query
+     * budget (rightly) refuses that. The machines listed are already
+     * team-scoped, so the tenancy half of the policy is satisfied by the
+     * query itself.
+     */
+    public function getCanManageOperatorsProperty(): bool
+    {
+        return CurrentUser::get()?->hasPermission('update_machines') ?? false;
+    }
+
+    /** Operator assignment picker state */
+    public ?int $assignOperatorMachineId = null;
+
+    public string $operatorSearch = '';
+
+    public string $overrideReason = '';
+
+    /** @var list<string> */
+    public array $assignmentBlockers = [];
+
+    /** @var list<string> */
+    public array $assignmentWarnings = [];
+
+    public function openAssignOperator(int $machineId): void
+    {
+        $this->authorize('update', Machine::query()->findOrFail($machineId));
+
+        $this->assignOperatorMachineId = $machineId;
+        $this->operatorSearch = '';
+        $this->overrideReason = '';
+        $this->assignmentBlockers = [];
+        $this->assignmentWarnings = [];
+    }
+
+    public function closeAssignOperator(): void
+    {
+        $this->assignOperatorMachineId = null;
+    }
+
+    /**
+     * Operators to offer for the machine being assigned, each with its
+     * eligibility verdict -- the picker shows WHY someone is not eligible
+     * instead of silently hiding them.
+     *
+     * @return list<array{operator: Operator, eligible: bool, blockers: list<string>, warnings: list<string>}>
+     */
+    public function getAssignableOperatorsProperty(): array
+    {
+        if ($this->assignOperatorMachineId === null) {
+            return [];
+        }
+
+        $machine = Machine::query()->find($this->assignOperatorMachineId);
+
+        if ($machine === null) {
+            return [];
+        }
+
+        $eligibility = app(AssignmentEligibility::class);
+
+        $query = Operator::query()->with(['qualifications', 'medicals', 'trainings']);
+
+        if ($this->operatorSearch !== '') {
+            $term = '%'.strtolower($this->operatorSearch).'%';
+            $query->where(function (\Illuminate\Contracts\Database\Query\Builder $q) use ($term): void {
+                $q->whereRaw('LOWER(first_name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(last_name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(employee_number) LIKE ?', [$term]);
+            });
+        }
+
+        $rows = [];
+
+        /**
+         * @var Collection<int, Operator> $operators
+         *
+         * @psalm-suppress UnnecessaryVarAnnotation -- phpstan loses the model
+         * generic through the where() closures; psalm keeps it.
+         */
+        $operators = $query->orderBy('last_name')->limit(25)->get();
+
+        foreach ($operators as $operator) {
+            $check = $eligibility->check($operator, $machine);
+            $rows[] = ['operator' => $operator, ...$check];
+        }
+
+        // Eligible first, so the default pick is a legal one.
+        usort($rows, static fn (array $a, array $b): int => (int) $b['eligible'] <=> (int) $a['eligible']);
+
+        return $rows;
+    }
+
+    public function assignOperator(int $operatorId): void
+    {
+        if ($this->assignOperatorMachineId === null) {
+            return;
+        }
+
+        $machine = Machine::query()->findOrFail($this->assignOperatorMachineId);
+        $this->authorize('update', $machine);
+
+        $operator = Operator::query()->findOrFail($operatorId);
+        $user = CurrentUser::get();
+
+        if ($user === null) {
+            return;
+        }
+
+        try {
+            app(OperatorAssignmentService::class)->assign(
+                $operator,
+                $machine,
+                $user,
+                $operator->default_shift,
+                $this->overrideReason !== '' ? $this->overrideReason : null,
+            );
+
+            $this->assignOperatorMachineId = null;
+            $this->assignmentBlockers = [];
+            $this->assignmentWarnings = [];
+        } catch (IneligibleAssignmentException $e) {
+            // Shown in the modal; assignment did not happen.
+            $this->assignmentBlockers = $e->blockers;
+        }
+    }
+
+    public function unassignOperator(int $machineId): void
+    {
+        $machine = Machine::query()->findOrFail($machineId);
+        $this->authorize('update', $machine);
+
+        $assignment = $machine->currentOperatorAssignment();
+        $user = CurrentUser::get();
+
+        if ($assignment !== null && $user !== null) {
+            app(OperatorAssignmentService::class)->unassign($assignment, $user);
+        }
+    }
+
     public function render(): View
     {
         $this->isLoading = true;
         $team = CurrentUser::team();
 
         $machinesQuery = Machine::where('team_id', $team->id)
-            ->with(['excavator', 'latestEngineHoursMetric', 'latestMetric'])
+            ->with(['excavator', 'latestEngineHoursMetric', 'latestMetric', 'operatorAssignments' => fn (Relation $q) => $q->whereNull('unassigned_at')->with('operator')])
             ->when($this->search, function (Builder $query): mixed {
                 return $query->where('name', 'like', "%{$this->search}%")
                     ->orWhere('model', 'like', "%{$this->search}%")
