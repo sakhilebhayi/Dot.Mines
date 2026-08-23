@@ -48,6 +48,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read string $name
  * @property-read Collection<int, OperatorQualification> $qualifications
  * @property-read Collection<int, OperatorMedical> $medicals
  * @property-read Collection<int, OperatorTraining> $trainings
@@ -185,6 +186,22 @@ class Operator extends Model
     public function trainings(): HasMany
     {
         return $this->hasMany(OperatorTraining::class);
+    }
+
+    /**
+     * @return HasMany<OperatorMachineAssignment,$this>
+     */
+    public function machineAssignments(): HasMany
+    {
+        return $this->hasMany(OperatorMachineAssignment::class);
+    }
+
+    /**
+     * The machine this operator is on right now, if any.
+     */
+    public function currentAssignment(): ?OperatorMachineAssignment
+    {
+        return $this->machineAssignments()->whereNull('unassigned_at')->with('machine')->first();
     }
 
     /**

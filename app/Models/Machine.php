@@ -196,6 +196,24 @@ class Machine extends Model
     }
 
     /**
+     * Operator assignment history for this machine.
+     *
+     * @return HasMany<OperatorMachineAssignment,$this>
+     */
+    public function operatorAssignments(): HasMany
+    {
+        return $this->hasMany(OperatorMachineAssignment::class);
+    }
+
+    /**
+     * Who is on this machine right now, if anyone.
+     */
+    public function currentOperatorAssignment(): ?OperatorMachineAssignment
+    {
+        return $this->operatorAssignments()->whereNull('unassigned_at')->with('operator')->first();
+    }
+
+    /**
      * Get the excavator this machine is assigned to
      *
      * @return BelongsTo<Machine,$this>

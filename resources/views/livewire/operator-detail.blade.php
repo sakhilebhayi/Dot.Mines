@@ -9,6 +9,14 @@
                 @if($operator->mineArea) · {{ $operator->mineArea->name }} @endif
                 @if($operator->default_shift) · {{ ucfirst($operator->default_shift) }} shift @endif
             </p>
+            @php $current = $operator->currentAssignment(); @endphp
+            @if($current?->machine)
+                <p class="text-sm mt-1">
+                    <span class="text-[var(--sand)]">Currently operating</span>
+                    <a href="{{ route('fleet.show', $current->machine) }}" class="text-[var(--gold)] hover:underline font-semibold">{{ $current->machine->name }}</a>
+                    <span class="text-[var(--sand)]">since {{ $current->assigned_at->diffForHumans() }}@if($current->was_override) · <span class="text-yellow-300">compliance override</span>@endif</span>
+                </p>
+            @endif
         </div>
         <div class="flex items-center gap-3">
             @if($this->compliance['verdict'] === 'compliant')
@@ -193,6 +201,51 @@
             @endforelse
         </div>
     @endif
+
+    {{-- Machine assignment history --}}
+    <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-5 mt-6">
+        <h3 class="text-[var(--stone)] font-display font-semibold mb-3">Machine Assignment History</h3>
+        @if($this->assignmentHistory->isEmpty())
+            <p class="text-[var(--sand)] text-sm">Never assigned to a machine. Assignments are made from the <a href="{{ route('fleet') }}" class="underline">Fleet</a> page.</p>
+        @else
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-[var(--sand)] border-b border-[var(--line)]">
+                            <th class="text-left py-2">Machine</th>
+                            <th class="text-left py-2">Shift</th>
+                            <th class="text-left py-2">From</th>
+                            <th class="text-left py-2">Until</th>
+                            <th class="text-left py-2">Assigned by</th>
+                            <th class="text-left py-2">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($this->assignmentHistory as $assignment)
+                            <tr wire:key="assignment-{{ $assignment->id }}" class="border-b border-[var(--line)]">
+                                <td class="py-2">
+                                    @if($assignment->machine)
+                                        <a href="{{ route('fleet.show', $assignment->machine) }}" class="text-[var(--stone)] hover:text-[var(--gold)] hover:underline">{{ $assignment->machine->name }}</a>
+                                    @else — @endif
+                                </td>
+                                <td class="py-2 text-[var(--sand)]">{{ $assignment->shift ? ucfirst($assignment->shift) : '—' }}</td>
+                                <td class="py-2 text-[var(--sand)]">{{ $assignment->assigned_at->format('d/m/Y H:i') }}</td>
+                                <td class="py-2 text-[var(--sand)]">{{ $assignment->unassigned_at?->format('d/m/Y H:i') ?? 'Current' }}</td>
+                                <td class="py-2 text-[var(--sand)]">{{ $assignment->assignedBy?->name ?? '—' }}</td>
+                                <td class="py-2">
+                                    @if($assignment->was_override)
+                                        <span class="text-yellow-300 text-xs" title="{{ $assignment->override_reason }}">⚠ Override: {{ $assignment->override_reason }}</span>
+                                    @elseif($assignment->reason)
+                                        <span class="text-[var(--sand)] text-xs">{{ $assignment->reason }}</span>
+                                    @else — @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
 
     {{-- Employment & contact --}}
     <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-5 mt-6">

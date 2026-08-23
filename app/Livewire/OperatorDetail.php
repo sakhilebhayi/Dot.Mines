@@ -3,12 +3,14 @@
 namespace App\Livewire;
 
 use App\Models\Operator;
+use App\Models\OperatorMachineAssignment;
 use App\Models\OperatorMedical;
 use App\Models\OperatorQualification;
 use App\Models\OperatorTraining;
 use App\Services\Operators\OperatorCompliance;
 use App\Support\EquipmentType;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
@@ -108,6 +110,19 @@ class OperatorDetail extends Component
         }
 
         return $rows;
+    }
+
+    /**
+     * @return EloquentCollection<int, OperatorMachineAssignment>
+     */
+    public function getAssignmentHistoryProperty(): EloquentCollection
+    {
+        $query = $this->operator->machineAssignments();
+        $query->with(['machine', 'assignedBy', 'unassignedBy']);
+        $query->orderByDesc('assigned_at');
+        $query->limit(20);
+
+        return $query->get();
     }
 
     public function getCanViewMedicalProperty(): bool
