@@ -9,8 +9,10 @@ use App\Models\Machine;
 use App\Models\Notification;
 use App\Models\OperatorFatigue;
 use App\Models\Team;
+use App\Models\User;
 use App\Notifications\OperatorFatigueAlert;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class RealTimeAlertService
 {
@@ -83,14 +85,17 @@ class RealTimeAlertService
                 'operator_fatigue_id' => $fatigue->id,
                 'user_id' => $fatigue->user_id,
                 'fatigue_score' => $fatigue->fatigue_score,
-                'shift_date' => $fatigue->shift_date instanceof Carbon ? $fatigue->shift_date->toDateString() : null,
+                'shift_date' => $fatigue->shift_date->toDateString(),
                 'shift_type' => $fatigue->shift_type,
             ],
         ]);
 
         AlertTriggered::dispatch($alert);
 
-        foreach ($team->allUsers() as $member) {
+        /** @var Collection<int, User> $members */
+        $members = $team->allUsers();
+
+        foreach ($members as $member) {
             $member->notify(new OperatorFatigueAlert($fatigue));
         }
     }

@@ -7,8 +7,12 @@ use App\Models\Geofence;
 use App\Models\Machine;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
+/**
+ * @psalm-suppress MissingConstructor -- Livewire injects state via mount()
+ */
 class GeofenceDetail extends Component
 {
     public Geofence $geofence;

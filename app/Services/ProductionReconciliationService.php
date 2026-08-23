@@ -85,9 +85,11 @@ class ProductionReconciliationService
                 return false; // Load-only day: nothing to cross-check.
             }
 
+            /** @psalm-suppress MixedAssignment */
+            $unitsRaw = data_get($record->metadata, 'payload_units');
             $expected = $this->calculator->payloadToTonnes(
                 (float) $delta,
-                is_string(data_get($record->metadata, 'payload_units')) ? data_get($record->metadata, 'payload_units') : null
+                is_string($unitsRaw) ? $unitsRaw : null
             );
 
             return abs($expected - (float) $record->quantity_produced) > self::TONNES_TOLERANCE;
@@ -106,7 +108,7 @@ class ProductionReconciliationService
         return [
             'label' => 'Record consistency',
             'state' => 'error',
-            'detail' => $mismatched->count().' record(s) where stored tonnes disagree with the payload delta they were derived from (e.g. machine #'.$worst?->machine_id.' on '.$worst?->record_date?->toDateString().')',
+            'detail' => $mismatched->count().' record(s) where stored tonnes disagree with the payload delta they were derived from (e.g. machine #'.((string) ($worst?->machine_id ?? 0)).' on '.($worst?->record_date?->toDateString() ?? 'unknown').')',
         ];
     }
 

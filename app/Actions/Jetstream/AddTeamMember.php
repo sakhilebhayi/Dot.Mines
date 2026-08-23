@@ -25,6 +25,7 @@ class AddTeamMember implements AddsTeamMembers
         $this->validate($team, $email, $role);
 
         $newTeamMember = Jetstream::findUserByEmailOrFail($email);
+        assert($newTeamMember instanceof User);
 
         AddingTeamMember::dispatch($team, $newTeamMember);
 
@@ -70,11 +71,14 @@ class AddTeamMember implements AddsTeamMembers
      */
     protected function ensureUserIsNotAlreadyOnTeam(Team $team, string $email): Closure
     {
-        return function ($validator) use ($team, $email) {
+        return function (\Illuminate\Validation\Validator $validator) use ($team, $email) {
+            // Psalm types __() as string, phpstan as array|string|null; the
+            // is_string check is load-bearing for phpstan and array-valued keys.
+            /** @psalm-suppress RedundantCondition */
             $validator->errors()->addIf(
                 $team->hasUserWithEmail($email),
                 'email',
-                __('This user already belongs to the team.')
+                is_string($message = __('This user already belongs to the team.')) ? $message : 'This user already belongs to the team.'
             );
         };
     }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\InsufficientAllocationException;
 use App\Models\Machine;
 use App\Services\Billing\MachineProvisioningService;
+use App\Support\ApiPayload;
+use App\Support\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -38,7 +40,7 @@ class MachineController extends Controller
 
         // Search by name, registration number, or serial number
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $search = ApiPayload::str($request->input('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('registration_number', 'like', "%{$search}%")
@@ -57,15 +59,16 @@ class MachineController extends Controller
         }
 
         // Sorting
-        $sort = $request->input('sort', 'created_at');
+        $sort = ApiPayload::str($request->input('sort'), 'created_at');
         $query->orderBy($sort, 'desc');
 
         // Eager load relationships to prevent N+1 queries
         $query->with('integration');
 
         // Pagination
-        $perPage = $request->input('per_page', 15);
-        $machines = $query->paginate($perPage);
+        /** @psalm-suppress MixedAssignment */
+        $perPageRaw = $request->input('per_page');
+        $machines = $query->paginate(is_numeric($perPageRaw) ? (int) $perPageRaw : 15);
 
         return response()->json([
             'data' => $machines->items(),
@@ -118,7 +121,7 @@ class MachineController extends Controller
         // not a way around the allocation limit (brief §4).
         try {
             $machine = app(MachineProvisioningService::class)->provision(
-                auth()->user()?->currentTeam,
+                CurrentUser::team(),
                 $validated['machine_type'],
                 fn (): Machine => Machine::create($validated),
             );
@@ -193,12 +196,14 @@ class MachineController extends Controller
 
         // Filter by hours back if specified
         if ($request->filled('hours_back')) {
-            $hoursBack = $request->input('hours_back');
-            $query->where('created_at', '>=', now()->subHours($hoursBack));
+            /** @psalm-suppress MixedAssignment */
+            $hoursBackRaw = $request->input('hours_back');
+            $query->where('created_at', '>=', now()->subHours(is_numeric($hoursBackRaw) ? (int) $hoursBackRaw : 24));
         }
 
-        $limit = $request->input('limit', 100);
-        $metrics = $query->latest('created_at')->limit($limit)->get();
+        /** @psalm-suppress MixedAssignment */
+        $limitRaw = $request->input('limit');
+        $metrics = $query->latest('created_at')->limit(is_numeric($limitRaw) ? (int) $limitRaw : 100)->get();
 
         return response()->json([
             'data' => $metrics,

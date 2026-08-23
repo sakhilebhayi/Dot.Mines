@@ -6,6 +6,7 @@ use App\Models\Machine;
 use App\Models\ProductionLossEvent;
 use App\Models\User;
 use App\Services\ProductionLossService;
+use App\Support\ApiPayload;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -15,6 +16,8 @@ use Livewire\Component;
  * Production Loss Accountability panel on the Machine Details page: lost
  * hours, loss events (telemetry-detected and user-recorded), classification
  * of detected events, manual entry, and estimated production impact.
+ *
+ * @psalm-suppress MissingConstructor -- Livewire injects state via mount()
  */
 class ProductionLossPanel extends Component
 {
@@ -96,7 +99,7 @@ class ProductionLossPanel extends Component
             ]);
         } catch (ValidationException $e) {
             $this->setErrorBag($e->validator->errors());
-            $message = collect($e->errors())->flatten()->first();
+            $message = ApiPayload::str(collect($e->errors())->flatten()->first(), 'Validation failed');
             $this->dispatch('notify', ['type' => 'error', 'message' => $message]);
 
             return;
@@ -121,7 +124,7 @@ class ProductionLossPanel extends Component
         try {
             $service->classify($event, $this->currentUser(), $this->category, $this->reason, $this->notes ?: null);
         } catch (ValidationException $e) {
-            $message = collect($e->errors())->flatten()->first();
+            $message = ApiPayload::str(collect($e->errors())->flatten()->first(), 'Validation failed');
             $this->dispatch('notify', ['type' => 'error', 'message' => $message]);
 
             return;

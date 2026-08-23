@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Alert;
 use App\Models\Machine;
+use App\Models\MachineMetric;
 use App\Support\Geo;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -79,25 +80,29 @@ class MachineIdleMonitoringJob implements ShouldQueue
     /**
      * Check if machine has been idle/stationary
      *
-     * @return array<string, mixed>
+     * @return array{is_idle: bool, idle_duration: int|float, idle_since: Carbon|null, last_location: array{lat: float, lng: float}|null}
      */
     private function checkMachineIdleStatus(Machine $machine): array
     {
-        // Get metrics from last 30 minutes
-        $recentMetrics = DB::table('machine_metrics')
-            ->where('machine_id', $machine->id)
+        // Get metrics from last 30 minutes (model, not DB::table -- the
+        // casts are what give speed/latitude/created_at their real types)
+        $recentMetrics = MachineMetric::where('machine_id', $machine->id)
             ->where('created_at', '>=', now()->subMinutes(30))
             ->orderBy('created_at', 'desc')
             ->get();
 
         if ($recentMetrics->isEmpty()) {
-            return ['is_idle' => false, 'idle_duration' => 0];
+            return ['is_idle' => false, 'idle_duration' => 0, 'idle_since' => null, 'last_location' => null];
         }
 
         // Check if machine has been stationary
+        /** @var list<array{start: Carbon, end: Carbon}> $stationaryPeriods */
         $stationaryPeriods = [];
+        /** @var Carbon|null $currentStationaryStart */
         $currentStationaryStart = null;
+        /** @var array{lat: float, lng: float}|null $lastLocation */
         $lastLocation = null;
+        /** @var Carbon|null $lastTime */
         $lastTime = null;
 
         foreach ($recentMetrics->reverse() as $metric) {
@@ -109,8 +114,8 @@ class MachineIdleMonitoringJob implements ShouldQueue
             }
 
             // Check location change (if available)
-            if (! is_null($metric->latitude) && ! is_null($metric->longitude)) {
-                if ($lastLocation) {
+            if ($metric->latitude !== null && $metric->longitude !== null) {
+                if ($lastLocation !== null) {
                     $distance = Geo::distanceKm(
                         $lastLocation['lat'],
                         $lastLocation['lng'],
@@ -128,11 +133,11 @@ class MachineIdleMonitoringJob implements ShouldQueue
             }
 
             if ($isStationary) {
-                if (! $currentStationaryStart) {
+                if ($currentStationaryStart === null) {
                     $currentStationaryStart = $metric->created_at;
                 }
             } else {
-                if ($currentStationaryStart) {
+                if ($currentStationaryStart !== null) {
                     $stationaryPeriods[] = [
                         'start' => $currentStationaryStart,
                         'end' => $lastTime ?? $metric->created_at,
@@ -145,7 +150,7 @@ class MachineIdleMonitoringJob implements ShouldQueue
         }
 
         // If still stationary at end
-        if ($currentStationaryStart) {
+        if ($currentStationaryStart !== null) {
             $stationaryPeriods[] = [
                 'start' => $currentStationaryStart,
                 'end' => now(),
@@ -157,14 +162,11 @@ class MachineIdleMonitoringJob implements ShouldQueue
         $longestIdleStart = null;
 
         foreach ($stationaryPeriods as $period) {
-            $start = is_string($period['start']) ? Carbon::parse($period['start']) : $period['start'];
-            $end = is_string($period['end']) ? Carbon::parse($period['end']) : $period['end'];
-
-            $duration = $start->diffInMinutes($end);
+            $duration = $period['start']->diffInMinutes($period['end']);
 
             if ($duration > $longestIdleDuration) {
                 $longestIdleDuration = $duration;
-                $longestIdleStart = $start;
+                $longestIdleStart = $period['start'];
             }
         }
 
@@ -179,7 +181,7 @@ class MachineIdleMonitoringJob implements ShouldQueue
     /**
      * Create idle machine alert
      *
-     * @param  array<string, mixed>  $idleStatus
+     * @param  array{is_idle: bool, idle_duration: int|float, idle_since: Carbon|null, last_location: array{lat: float, lng: float}|null}  $idleStatus
      */
     private function createIdleAlert(Machine $machine, array $idleStatus): void
     {

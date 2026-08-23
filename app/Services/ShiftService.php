@@ -16,7 +16,7 @@ class ShiftService
      */
     public function performShiftChange(int $teamId, string $shiftType = 'day', ?int $defaultMineAreaId = null): Shift
     {
-        return DB::transaction(function () use ($teamId, $shiftType, $defaultMineAreaId) {
+        $shift = DB::transaction(function () use ($teamId, $shiftType, $defaultMineAreaId) {
             // Snapshot current machine assignments
             $machines = Machine::where('team_id', $teamId)->get();
 
@@ -46,12 +46,15 @@ class ShiftService
             ];
 
             // by mine area breakdown
-            $byArea = $productionQuery->selectRaw('mine_area_id, SUM(quantity_produced) as qty, COUNT(*) as count')
-                ->groupBy('mine_area_id')
-                ->get()
-                ->mapWithKeys(function ($r) {
-                    return [$r->mine_area_id => ['quantity' => (float) $r->qty, 'count' => $r->count]];
-                })->toArray();
+            // data_get() keeps this portable across the analyzers' disagreement
+            // about what selectRaw()->groupBy()->get() hydrates (runtime: models).
+            $byArea = [];
+            foreach ($productionQuery->selectRaw('mine_area_id, SUM(quantity_produced) as qty, COUNT(*) as count')->groupBy('mine_area_id')->get() as $row) {
+                $byArea[(int) data_get($row, 'mine_area_id')] = [
+                    'quantity' => (float) data_get($row, 'qty'),
+                    'count' => (int) data_get($row, 'count'),
+                ];
+            }
 
             $productivityMetrics['by_mine_area'] = $byArea;
 
@@ -89,5 +92,8 @@ class ShiftService
             // Return created shift
             return $shift->fresh();
         });
+        assert($shift instanceof Shift);
+
+        return $shift;
     }
 }

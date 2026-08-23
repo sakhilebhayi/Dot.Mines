@@ -182,7 +182,8 @@ class ReportGenerator extends Component
                 ->where('team_id', $team->id)
                 ->whereIn('id', $this->selectedGeofences)
                 ->pluck('id')
-                ->toArray();
+                ->values()
+                ->all();
             $this->selectedGeofences = $validGeofenceIds;
         }
 
@@ -217,7 +218,7 @@ class ReportGenerator extends Component
             GenerateReportJob::dispatch($report);
 
             Log::info('User generated report', [
-                'user_id' => $user->id,
+                'user_id' => $user?->id,
                 'report_id' => $report->id,
                 'report_type' => $this->reportType,
             ]);
@@ -231,7 +232,7 @@ class ReportGenerator extends Component
 
         } catch (\Exception $e) {
             Log::error('Failed to generate report', [
-                'user_id' => $user->id,
+                'user_id' => $user?->id,
                 'error' => $e->getMessage(),
             ]);
 

@@ -12,14 +12,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property mixed|null $overall_health_score
- * @property mixed|null $brakes_health
- * @property mixed|null $cooling_system_health
- * @property mixed|null $electrical_health
- * @property mixed|null $engine_health
- * @property mixed|null $fault_code_count
- * @property mixed|null $hydraulics_health
- * @property mixed|null $transmission_health
+ * @property int $overall_health_score
+ * @property int|null $brakes_health
+ * @property int|null $cooling_system_health
+ * @property int|null $electrical_health
+ * @property int|null $engine_health
+ * @property int $fault_code_count
+ * @property int|null $hydraulics_health
+ * @property int|null $transmission_health
  */
 class MachineHealthStatus extends Model
 {
@@ -57,7 +57,7 @@ class MachineHealthStatus extends Model
      * @method static MachineHealthStatus findOrFail(mixed $id, array $columns = ['*'])
      * @method static \Illuminate\Database\Eloquent\Collection all(array $columns = ['*'])
      */
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -117,13 +117,19 @@ class MachineHealthStatus extends Model
             $this->cooling_system_health,
         ];
 
-        $validComponents = array_filter($components, fn ($val) => ! is_null($val));
+        $validComponents = [];
 
-        if (empty($validComponents)) {
+        foreach ($components as $component) {
+            if ($component !== null) {
+                $validComponents[] = (float) $component;
+            }
+        }
+
+        if ($validComponents === []) {
             return 100;
         }
 
-        return (int) round(array_sum($validComponents) / count($validComponents));
+        return (int) round(array_sum($validComponents) / (float) count($validComponents));
     }
 
     /**

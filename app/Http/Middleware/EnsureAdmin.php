@@ -21,7 +21,6 @@ final class EnsureAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        /** @var User|null $user */
         $user = $request->user();
 
         abort_unless($user instanceof User && $user->hasRole('admin'), 403, 'Admin access required.');

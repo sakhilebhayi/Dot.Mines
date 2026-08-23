@@ -41,9 +41,10 @@ class XlsxReportWriter
             $sheet->getStyle("A{$summaryStartRow}")->getFont()->setBold(true);
 
             $row = $summaryStartRow + 1;
+            /** @psalm-suppress MixedAssignment */
             foreach ($data['summary'] as $label => $value) {
                 $sheet->setCellValue("A{$row}", $label);
-                $sheet->setCellValue("B{$row}", $value);
+                $sheet->setCellValue("B{$row}", is_scalar($value) || $value === null ? $value : json_encode($value));
                 $row++;
             }
         }

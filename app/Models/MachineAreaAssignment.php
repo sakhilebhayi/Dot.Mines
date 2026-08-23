@@ -20,13 +20,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $reason
  * @property string|null $notes
  * @property Carbon $created_at
+ * @property-read MineArea|null $mineArea
  * @property Carbon $updated_at
  */
 class MachineAreaAssignment extends Model
 {
     protected $table = 'machine_mine_area_assignments';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',

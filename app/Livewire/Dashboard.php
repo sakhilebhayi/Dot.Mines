@@ -109,13 +109,13 @@ class Dashboard extends Component
             ];
         });
 
-        $this->totalMachines = $stats['total_machines'];
-        $this->activeMachines = $stats['active_machines'];
+        $this->totalMachines = (int) (is_numeric($stats['total_machines'] ?? null) ? $stats['total_machines'] : 0);
+        $this->activeMachines = (int) (is_numeric($stats['active_machines'] ?? null) ? $stats['active_machines'] : 0);
         // Ensure active alerts count is accurate for the current team (bypass stale cache)
         $this->activeAlerts = Alert::where('team_id', $team->id)
             ->where('status', 'active')
             ->count();
-        $this->totalGeofences = $stats['total_geofences'];
+        $this->totalGeofences = (int) (is_numeric($stats['total_geofences'] ?? null) ? $stats['total_geofences'] : 0);
         $this->totalMineAreas = MineArea::where('team_id', $team->id)->count();
 
         // Recent Alerts (with eager loading)
@@ -145,9 +145,9 @@ class Dashboard extends Component
             ->get();
 
         $this->machineStatus = $machineStatuses
-            ->map(fn ($status) => [
+            ->map(fn (Machine $status): array => [
                 'status' => ucfirst($status->status),
-                'count' => $status->count,
+                'count' => (int) $status->getAttribute('count'),
             ])
             ->toArray();
 
@@ -157,8 +157,8 @@ class Dashboard extends Component
             ->latest('created_at')
             ->take(10)
             ->get()
-            ->map(fn ($log) => [
-                'user' => $log->user->name ?? 'System',
+            ->map(fn (ActivityLog $log): array => [
+                'user' => $log->user?->name ?? 'System',
                 'action' => $log->action,
                 'description' => $log->description,
                 'created_at' => $log->created_at->diffForHumans(),

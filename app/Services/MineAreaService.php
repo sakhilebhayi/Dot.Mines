@@ -14,61 +14,58 @@ class MineAreaService
     public function create(int $teamId, array $data): MineArea
     {
         $data['team_id'] = $teamId;
+
         // Ensure legacy columns expected by current schema are populated when possible
         if (! array_key_exists('coordinates', $data)) {
-            if (! empty($data['metadata']['boundary_coordinates'] ?? null)) {
-                $data['coordinates'] = json_encode($data['metadata']['boundary_coordinates']);
-            } else {
-                $data['coordinates'] = json_encode([]);
-            }
+            /** @psalm-suppress MixedAssignment */
+            $boundary = data_get($data, 'metadata.boundary_coordinates');
+            $data['coordinates'] = json_encode(is_array($boundary) ? $boundary : []);
         }
 
         // Try to ensure center_latitude/center_longitude are populated to avoid DB NOT NULL issues.
         if (! array_key_exists('center_latitude', $data) || ! array_key_exists('center_longitude', $data)) {
-            $centerLat = null;
-            $centerLng = null;
-
             // Prefer explicit latitude/longitude fields
-            if (array_key_exists('latitude', $data) && $data['latitude'] !== null) {
-                $centerLat = $data['latitude'];
-            }
-            if (array_key_exists('longitude', $data) && $data['longitude'] !== null) {
-                $centerLng = $data['longitude'];
-            }
+            $centerLat = isset($data['latitude']) && is_numeric($data['latitude']) ? (float) $data['latitude'] : null;
+            $centerLng = isset($data['longitude']) && is_numeric($data['longitude']) ? (float) $data['longitude'] : null;
 
             // If not available, try to compute from coordinates (json string or array)
             if (($centerLat === null || $centerLng === null) && isset($data['coordinates'])) {
+                /** @psalm-suppress MixedAssignment */
                 $coords = $data['coordinates'];
+
                 if (is_string($coords)) {
+                    /** @psalm-suppress MixedAssignment */
                     $decoded = json_decode($coords, true);
-                    if (json_last_error() === JSON_ERROR_NONE) {
-                        $coords = $decoded;
-                    }
+                    $coords = is_array($decoded) ? $decoded : null;
                 }
-                if (is_array($coords) && count($coords) > 0) {
+
+                if (is_array($coords) && $coords !== []) {
                     $latSum = 0.0;
                     $lngSum = 0.0;
                     $count = 0;
+
+                    /** @psalm-suppress MixedAssignment */
                     foreach ($coords as $c) {
-                        if (is_array($c) && isset($c['lat']) && isset($c['lng'])) {
+                        if (is_array($c) && is_numeric($c['lat'] ?? null) && is_numeric($c['lng'] ?? null)) {
                             $latSum += (float) $c['lat'];
                             $lngSum += (float) $c['lng'];
                             $count++;
                         }
                     }
+
                     if ($count > 0) {
-                        $centerLat = $centerLat ?? ($latSum / $count);
-                        $centerLng = $centerLng ?? ($lngSum / $count);
+                        $centerLat ??= $latSum / (float) $count;
+                        $centerLng ??= $lngSum / (float) $count;
                     }
                 }
             }
 
             // Final fallback to 0.0 to satisfy non-null DB columns
             if (! array_key_exists('center_latitude', $data)) {
-                $data['center_latitude'] = $centerLat !== null ? $centerLat : 0.0;
+                $data['center_latitude'] = $centerLat ?? 0.0;
             }
             if (! array_key_exists('center_longitude', $data)) {
-                $data['center_longitude'] = $centerLng !== null ? $centerLng : 0.0;
+                $data['center_longitude'] = $centerLng ?? 0.0;
             }
         }
 
@@ -114,7 +111,7 @@ class MineAreaService
         return [
             'total_areas' => $areas->count(),
             'active_areas' => $areas->where('status', 'active')->count(),
-            'total_area_hectares' => $areas->sum('area_size_hectares') ?? 0,
+            'total_area_hectares' => $areas->sum('area_size_hectares'),
             'areas_with_manager' => $areas->whereNotNull('manager_name')->count(),
         ];
     }

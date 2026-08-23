@@ -66,7 +66,7 @@ class GeofenceSuggestionService
 
             $lat = (float) $metric->latitude;
             $lng = (float) $metric->longitude;
-            $key = floor($lat / self::CELL_DEGREES).':'.floor($lng / self::CELL_DEGREES);
+            $key = ((string) floor($lat / self::CELL_DEGREES)).':'.((string) floor($lng / self::CELL_DEGREES));
 
             $cells[$key] ??= ['lat_sum' => 0.0, 'lng_sum' => 0.0, 'count' => 0, 'machines' => [], 'days' => []];
             $cells[$key]['lat_sum'] += $lat;
@@ -87,8 +87,8 @@ class GeofenceSuggestionService
                 continue;
             }
 
-            $centerLat = $cell['lat_sum'] / $cell['count'];
-            $centerLng = $cell['lng_sum'] / $cell['count'];
+            $centerLat = $cell['lat_sum'] / (float) $cell['count'];
+            $centerLng = $cell['lng_sum'] / (float) $cell['count'];
 
             $nearExisting = $existingCenters->contains(
                 fn (array $center): bool => abs($center[0] - $centerLat) < self::EXISTING_ZONE_CLEARANCE

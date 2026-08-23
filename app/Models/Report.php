@@ -7,6 +7,7 @@ use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\Mail;
  * @property string $status
  * @property string|null $file_path
  * @property int|null $file_size
- * @property string|null $format
+ * @property string $format
  * @property array<string, mixed>|null $filters
  * @property int|string|null $generated_by
  * @property Carbon|null $generated_at
@@ -35,7 +36,7 @@ class Report extends Model
 {
     use HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'title',
@@ -116,8 +117,10 @@ class Report extends Model
             if ($this->team) {
                 // "Email Reports" was a real, saved preference that nothing
                 // ever read -- every team member got this regardless.
-                $emails = $this->team->allUsers()
-                    ->filter(fn ($user): mixed => $user->wantsEmailReports())
+                /** @var Collection<int, User> $members */
+                $members = $this->team->allUsers();
+                $emails = $members
+                    ->filter(fn (User $user): bool => $user->wantsEmailReports())
                     ->pluck('email')->filter()->unique()->toArray();
                 if (! empty($emails)) {
                     foreach (array_chunk($emails, 50) as $batch) {

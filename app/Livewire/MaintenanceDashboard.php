@@ -11,6 +11,8 @@ use App\Services\AI\MaintenancePredictorAgent;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Lazy;
@@ -127,9 +129,9 @@ class MaintenanceDashboard extends Component
                 'scheduled_date' => $this->scheduled_date,
                 'status' => 'scheduled',
                 'priority' => $this->priority,
-                'labor_hours' => $this->estimated_duration_hours ?? 0,
-                'labor_cost' => $this->estimated_cost ?? 0,
-                'total_cost' => $this->estimated_cost ?? 0,
+                'labor_hours' => $this->estimated_duration_hours,
+                'labor_cost' => $this->estimated_cost,
+                'total_cost' => $this->estimated_cost,
                 'technician_notes' => strip_tags($this->technician_notes),
                 'parts_used' => $this->required_parts ? ['notes' => strip_tags($this->required_parts)] : null,
             ]);
@@ -145,7 +147,7 @@ class MaintenanceDashboard extends Component
 
         } catch (\Exception $e) {
             Log::error('Failed to schedule maintenance', [
-                'user_id' => $user->id,
+                'user_id' => $user?->id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -239,7 +241,7 @@ class MaintenanceDashboard extends Component
      * Get delayed machines with reasons and color codes
      */
     /**
-     * @return Collection<int, array<string, mixed>>
+     * @return Collection<int, array{machine: Machine, delay_hours: int|float, delay_reason: string, color_code: string, severity: string, expected_return: Carbon|null, maintenance_type: string|null}>
      */
     protected function getDelayedMachines(?int $teamId): Collection
     {
@@ -247,15 +249,16 @@ class MaintenanceDashboard extends Component
             return collect();
         }
 
+        /** @var list<array{machine: Machine, delay_hours: int|float, delay_reason: string, color_code: string, severity: string, expected_return: Carbon|null, maintenance_type: string|null}> $delayedMachines */
         $delayedMachines = [];
 
         // Get all machines
-        $machines = Machine::where('team_id', $teamId)
-            ->with(['maintenanceRecords' => function ($query) {
-                $query->whereIn('status', ['scheduled', 'in_progress'])
-                    ->latest('created_at');
-            }])
-            ->get();
+        $machinesQuery = Machine::query()->where('team_id', $teamId);
+        $machinesQuery->with(['maintenanceRecords' => function (Relation $query) {
+            $query->whereIn('status', ['scheduled', 'in_progress'])
+                ->latest('created_at');
+        }]);
+        $machines = $machinesQuery->get();
 
         foreach ($machines as $machine) {
             $delayInfo = $this->calculateMachineDelay($machine);
@@ -274,18 +277,14 @@ class MaintenanceDashboard extends Component
         }
 
         // Sort by delay severity (longest delays first)
-        usort($delayedMachines, function ($a, $b) {
-            return $b['delay_hours'] <=> $a['delay_hours'];
-        });
-
-        return collect($delayedMachines);
+        return collect($delayedMachines)->sortByDesc('delay_hours')->values();
     }
 
     /**
      * Calculate delay information for a machine
      */
     /**
-     * @return array<string, mixed>
+     * @return array{is_delayed: bool, delay_hours: int|float, reason: string, expected_return: Carbon|null, maintenance_type: string|null}
      */
     protected function calculateMachineDelay(Machine $machine): array
     {
@@ -305,21 +304,18 @@ class MaintenanceDashboard extends Component
                 ->first();
 
             if ($activeMaintenance) {
-                $startTime = $activeMaintenance->started_at ?? $activeMaintenance->scheduled_date;
-                if ($startTime) {
-                    $carbonStartTime = $startTime instanceof Carbon ? $startTime : Carbon::parse($startTime);
-                    // Carbon 3: now()->diffInHours($past) is negative -- diff
-                    // from the past timestamp forward for a positive elapsed.
-                    $delayHours = (int) $carbonStartTime->diffInHours(now());
-                    $estimatedHours = $activeMaintenance->labor_hours ?? 4;
-                    // Consider delayed if beyond estimated duration
-                    if ($delayHours > $estimatedHours) {
-                        $delayInfo['is_delayed'] = true;
-                        $delayInfo['delay_hours'] = $delayHours - $estimatedHours;
-                        $delayInfo['reason'] = $activeMaintenance->title.' (Extended maintenance)';
-                        $delayInfo['maintenance_type'] = $activeMaintenance->maintenance_type;
-                        $delayInfo['expected_return'] = $carbonStartTime->copy()->addHours($estimatedHours);
-                    }
+                $carbonStartTime = $activeMaintenance->started_at ?? $activeMaintenance->scheduled_date;
+                // Carbon 3: now()->diffInHours($past) is negative -- diff
+                // from the past timestamp forward for a positive elapsed.
+                $delayHours = (int) $carbonStartTime->diffInHours(now());
+                $estimatedHours = (float) ($activeMaintenance->labor_hours ?? 4);
+                // Consider delayed if beyond estimated duration
+                if ($delayHours > $estimatedHours) {
+                    $delayInfo['is_delayed'] = true;
+                    $delayInfo['delay_hours'] = (float) $delayHours - $estimatedHours;
+                    $delayInfo['reason'] = $activeMaintenance->title.' (Extended maintenance)';
+                    $delayInfo['maintenance_type'] = $activeMaintenance->maintenance_type;
+                    $delayInfo['expected_return'] = $carbonStartTime->copy()->addHours($estimatedHours);
                 }
             } else {
                 // In maintenance but no record found
@@ -329,7 +325,7 @@ class MaintenanceDashboard extends Component
             }
         } elseif ($machine->status === 'idle') {
             // Check if idle for extended period
-            if ($machine->updated_at && $machine->updated_at->diffInHours(now()) > 8) {
+            if ($machine->updated_at->diffInHours(now()) > 8) {
                 $delayInfo['is_delayed'] = true;
                 $delayInfo['delay_hours'] = (int) $machine->updated_at->diffInHours(now());
                 $delayInfo['reason'] = 'Idle - Not assigned to production';
@@ -337,7 +333,7 @@ class MaintenanceDashboard extends Component
         } elseif ($machine->status === 'offline') {
             // Offline machines are definitely delayed
             $delayInfo['is_delayed'] = true;
-            $delayInfo['delay_hours'] = $machine->updated_at ? (int) $machine->updated_at->diffInHours(now()) : 48;
+            $delayInfo['delay_hours'] = (int) $machine->updated_at->diffInHours(now());
             $delayInfo['reason'] = 'Offline - System unavailable';
         }
 
@@ -400,7 +396,7 @@ class MaintenanceDashboard extends Component
         // Health overview
         $healthStatuses = MachineHealthStatus::where('team_id', $teamId)
             ->with('machine')
-            ->when($this->showCriticalOnly, fn ($q): mixed => $q->critical())
+            ->when($this->showCriticalOnly, fn (Builder $q): mixed => $q->critical())
             ->latest('updated_at')
             ->get();
 
@@ -513,10 +509,8 @@ class MaintenanceDashboard extends Component
         $currentTeam = auth()->user()?->currentTeam;
         if ($currentTeam !== null) {
             $aiAnalysis = (new MaintenancePredictorAgent)->analyze($currentTeam);
-            $recommendations = $aiAnalysis['recommendations'] ?? [];
-            $insights = $aiAnalysis['insights'] ?? [];
-            $aiRecommendations = collect(is_array($recommendations) ? $recommendations : [])->take(5);
-            $aiInsights = collect(is_array($insights) ? $insights : [])->take(3);
+            $aiRecommendations = collect($aiAnalysis['recommendations'])->take(5);
+            $aiInsights = collect($aiAnalysis['insights'])->take(3);
         }
 
         return view('livewire.maintenance-dashboard', [

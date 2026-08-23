@@ -23,11 +23,14 @@ trait HasSyncVersion
         });
 
         static::deleted(function (Model $model): void {
+            /** @psalm-suppress MixedAssignment */
             $teamId = $model->getAttribute('team_id');
 
-            if ($teamId === null) {
+            if (! is_numeric($teamId)) {
                 return;
             }
+
+            $teamId = (int) $teamId;
 
             SyncTombstone::create([
                 'team_id' => $teamId,

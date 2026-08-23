@@ -31,7 +31,7 @@ class FuelBudget extends Model
 {
     use HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -73,7 +73,7 @@ class FuelBudget extends Model
             return 0;
         }
 
-        return round(($this->actual_spent / $this->budgeted_amount) * 100.0, 2);
+        return round((($this->actual_spent ?? 0.0) / $this->budgeted_amount) * 100.0, 2);
     }
 
     /**
@@ -81,7 +81,7 @@ class FuelBudget extends Model
      */
     protected function getRemainingBudgetAttribute(): float
     {
-        return $this->budgeted_amount - $this->actual_spent;
+        return $this->budgeted_amount - ($this->actual_spent ?? 0.0);
     }
 
     /**
@@ -93,7 +93,7 @@ class FuelBudget extends Model
             return null;
         }
 
-        return round(($this->actual_liters / $this->budgeted_liters) * 100.0, 2);
+        return round((($this->actual_liters ?? 0.0) / $this->budgeted_liters) * 100.0, 2);
     }
 
     /**

@@ -9,7 +9,6 @@ use App\Models\ProductionLossEvent;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -67,15 +66,18 @@ class ProductionLossService
             return null;
         }
 
-        $meter = $readings->pluck('operating_hours')
-            ->filter(fn ($value) => $value !== null)
-            ->map(fn ($value) => (float) $value);
+        $meter = [];
+        foreach ($readings as $reading) {
+            if ($reading->operating_hours !== null) {
+                $meter[] = $reading->operating_hours;
+            }
+        }
 
-        if ($meter->count() < 2) {
+        if (count($meter) < 2) {
             return null;
         }
 
-        $operatingDelta = max(0.0, $meter->max() - $meter->min());
+        $operatingDelta = max(0.0, max($meter) - min($meter));
 
         if ($operatingDelta > self::MAX_OPERATING_DELTA) {
             return null; // The machine genuinely worked.
@@ -228,9 +230,9 @@ class ProductionLossService
             ->where('machine_id', $machine->id)
             ->get();
 
-        $primary = $counted->whereNotNull('reason')
+        $primary = $counted->toBase()->whereNotNull('reason')
             ->groupBy('reason')
-            ->sortByDesc(fn (Collection $group) => $group->sum('lost_hours'))
+            ->sortByDesc(fn ($group) => $group->sum('lost_hours'))
             ->keys()
             ->first();
 
@@ -266,14 +268,17 @@ class ProductionLossService
             ->where('record_date', '>=', $since->toDateString())
             ->sum('quantity_produced');
 
-        $meter = $machine->metrics()
-            ->where('recorded_at', '>=', $since)
-            ->get()
-            ->pluck('operating_hours')
-            ->filter(fn ($value) => $value !== null)
-            ->map(fn ($value) => (float) $value);
+        $metricsRelation = $machine->metrics();
+        $metricsRelation->where('recorded_at', '>=', $since);
 
-        $hoursWorked = $meter->count() >= 2 ? max(0.0, $meter->max() - $meter->min()) : 0.0;
+        $meter = [];
+        foreach ($metricsRelation->get() as $metric) {
+            if ($metric->operating_hours !== null) {
+                $meter[] = $metric->operating_hours;
+            }
+        }
+
+        $hoursWorked = count($meter) >= 2 ? max(0.0, max($meter) - min($meter)) : 0.0;
 
         if ($tonnes <= 0 || $hoursWorked < 1.0) {
             return null;

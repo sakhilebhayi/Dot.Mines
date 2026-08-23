@@ -35,7 +35,7 @@ class VerifyS3Storage extends Command
         }
 
         $testPath = 'verify-s3/'.uniqid('verify_').'.txt';
-        $contents = 'This is a storage verification file. '.now()->toIsoString();
+        $contents = 'This is a storage verification file. '.((string) now()->toIsoString());
 
         try {
             Storage::disk($disk)->put($testPath, $contents);

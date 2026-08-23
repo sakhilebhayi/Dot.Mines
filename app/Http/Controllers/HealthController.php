@@ -33,7 +33,7 @@ class HealthController extends Controller
 
         // Cache check
         try {
-            $key = 'health:ping:'.now()->timestamp;
+            $key = 'health:ping:'.((string) now()->timestamp);
             Cache::put($key, 'pong', 10);
             $value = Cache::get($key);
             Cache::forget($key);

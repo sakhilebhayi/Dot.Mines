@@ -217,7 +217,7 @@ class ProductionDashboardPageTest extends TestCase
         $summary = $component->instance()->summary;
         $this->assertEqualsWithDelta(111.0, $summary['total_tonnage'], 0.01);
 
-        $chart = array_values($component->instance()->dailyChart);
+        $chart = $component->instance()->dailyChart->values()->all();
         $this->assertCount(1, $chart);
         $this->assertSame(Carbon::today()->format('Y-m-d'), $chart[0]['date']);
     }

@@ -20,6 +20,7 @@ class CacheControlHeaders
     public function handle(Request $request, Closure $next, string $duration = 'short'): Response
     {
         $response = $next($request);
+        assert($response instanceof Response);
 
         // Don't cache if not successful or if it's an error
         if ($response->getStatusCode() !== 200) {

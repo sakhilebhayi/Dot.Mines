@@ -2,8 +2,6 @@
 <psalm
     errorLevel="1"
     resolveFromConfigFile="true"
-    errorBaseline="psalm-baseline.xml"
-    findUnusedBaselineEntry="false"
 >
   <projectFiles>
     <directory name="app"/>
@@ -64,6 +62,25 @@
         <directory name="app/Http"/>
       </errorLevel>
     </PossiblyUnusedProperty>
+    <PossiblyUnusedParam>
+      <errorLevel type="suppress">
+        <!-- Controller actions, policy checks and notification builders
+             implement fixed framework signatures (Request, User, notifiable);
+             an unused parameter there is contract, not dead code. -->
+        <directory name="app/Http"/>
+        <directory name="app/Policies"/>
+        <directory name="app/Notifications"/>
+      </errorLevel>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <errorLevel type="suppress">
+        <!-- Service and model helpers return the affected entity by
+             convention (fluent create/update/delete APIs); callers are
+             free to ignore the return without that being dead code. -->
+        <directory name="app/Services"/>
+        <directory name="app/Models"/>
+      </errorLevel>
+    </PossiblyUnusedReturnValue>
     <UnusedClass>
       <errorLevel type="suppress">
         <directory name="app/Livewire"/>

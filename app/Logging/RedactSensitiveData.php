@@ -2,6 +2,7 @@
 
 namespace App\Logging;
 
+use App\Support\ApiPayload;
 use Illuminate\Log\Logger;
 use Monolog\LogRecord;
 
@@ -31,61 +32,19 @@ class RedactSensitiveData
         }
 
         $monolog->pushProcessor(function (LogRecord $record) {
-            $configured = config('logging_redaction.keys', []);
-            $defaults = [
-                'password', 'pass', 'pwd', 'secret', 'token', 'access_token', 'refresh_token',
-                'api_key', 'apikey', 'auth', 'authorization', 'ssn', 'credit_card',
-                'card_number', 'private_key', 'aws_secret', 'aws_secret_access_key', 'db_password',
-                // Additional common service keys
-                'sentry_auth_token', 'sentry_dsn', 'sentry_dsn_url', 'aws_access_key_id', 'aws_access_key',
-                'sentry_dsn_public', 'aws_session_token', 'aws_session',
-                'stripe_secret', 'stripe_token', 'stripe_key', 'stripe_api_key', 'stripe_publishable_key',
-                'paystack_secret', 'paystack_secret_key', 'paystack_key', 'paystack_token',
-                'pusher_key', 'pusher_secret', 'pusher_app_id', 'mailgun_api_key', 'sendgrid_api_key',
-                'twilio_auth_token', 'database_url',
-            ];
+            $configured = ApiPayload::strings(config('logging_redaction.keys'));
 
-            $sensitiveKeys = is_array($configured) && count($configured) > 0
-                ? array_merge($defaults, $configured)
-                : $defaults;
-
-            // normalize to lowercase for comparisons
-            $sensitiveKeys = array_map('strtolower', $sensitiveKeys);
-
-            $redact = function ($value) use (&$redact, $sensitiveKeys): mixed {
-                if (is_array($value)) {
-                    foreach ($value as $k => $v) {
-                        // If key looks sensitive, replace with placeholder
-                        if (in_array(strtolower((string) $k), $sensitiveKeys, true)) {
-                            $value[$k] = '[REDACTED]';
-                        } else {
-                            $value[$k] = $redact($v);
-                        }
-                    }
-
-                    return $value;
-                }
-
-                if (is_string($value)) {
-                    // redact common inline patterns
-                    $value = preg_replace('/(password|pwd|pass|api_key|apikey|token|access_token)=([^&\s,;]+)/i', '$1=[REDACTED]', $value) ?? $value;
-                    $value = preg_replace('/Authorization:\s*Bearer\s+([^\s,;]+)/i', 'Authorization: Bearer [REDACTED]', $value) ?? $value;
-
-                    return $value;
-                }
-
-                return $value;
-            };
-
-            $message = $record->message;
-            if ($message !== '') {
-                $message = $redact($message);
-            }
+            /** @psalm-suppress MixedAssignment */
+            $message = self::redactValue($record->message, $configured);
+            /** @psalm-suppress MixedAssignment */
+            $context = self::redactValue($record->context, $configured);
+            /** @psalm-suppress MixedAssignment */
+            $extra = self::redactValue($record->extra, $configured);
 
             return $record->with(
-                message: $message,
-                context: $redact($record->context),
-                extra: $redact($record->extra),
+                message: is_string($message) ? $message : $record->message,
+                context: is_array($context) ? $context : $record->context,
+                extra: is_array($extra) ? $extra : $record->extra,
             );
         });
     }
@@ -104,6 +63,7 @@ class RedactSensitiveData
             'api_key', 'apikey', 'auth', 'authorization', 'ssn', 'credit_card',
             'card_number', 'private_key', 'aws_secret', 'aws_secret_access_key', 'db_password',
             'sentry_auth_token', 'sentry_dsn', 'sentry_dsn_url', 'aws_access_key_id', 'aws_access_key',
+            'sentry_dsn_public', 'aws_session_token', 'aws_session',
             'stripe_secret', 'stripe_token', 'stripe_key', 'stripe_api_key', 'stripe_publishable_key',
             'paystack_secret', 'paystack_secret_key', 'paystack_key', 'paystack_token',
             'pusher_key', 'pusher_secret', 'pusher_app_id', 'mailgun_api_key', 'sendgrid_api_key',
@@ -111,8 +71,9 @@ class RedactSensitiveData
         ];
         $sensitiveKeys = array_map('strtolower', array_merge($defaults, $additionalKeys));
 
-        $redact = function ($v) use (&$redact, $sensitiveKeys): mixed {
+        $redact = function (mixed $v) use (&$redact, $sensitiveKeys): mixed {
             if (is_array($v)) {
+                /** @psalm-suppress MixedAssignment */
                 foreach ($v as $k => $val) {
                     if (in_array(strtolower((string) $k), $sensitiveKeys, true)) {
                         $v[$k] = '[REDACTED]';

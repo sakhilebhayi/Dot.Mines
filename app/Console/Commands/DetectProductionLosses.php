@@ -6,6 +6,7 @@ use App\Models\Machine;
 use App\Services\ProductionLossService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Scans every active machine's telemetry for the given day (default:
@@ -42,7 +43,7 @@ class DetectProductionLosses extends Command
 
         Machine::query()
             ->where('status', 'active')
-            ->whereHas('metrics', fn ($query): mixed => $query->whereBetween('recorded_at', [
+            ->whereHas('metrics', fn (Builder $query): mixed => $query->whereBetween('recorded_at', [
                 $day->copy()->startOfDay(),
                 $day->copy()->endOfDay(),
             ]))

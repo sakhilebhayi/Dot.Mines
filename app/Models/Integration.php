@@ -41,7 +41,7 @@ class Integration extends Model
     /** @use HasFactory<IntegrationFactory> */
     use HasFactory, HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'provider', // volvo, cat, komatsu, bell, c_track
@@ -63,7 +63,7 @@ class Integration extends Model
         'sync_streams', // JSON per-stream status: {status, last_synced_at, records} per capability key
     ];
 
-    /** @var list<string> */
+    /** @var array<string> */
     protected $hidden = [
         'api_key',
         'api_secret',
@@ -124,7 +124,11 @@ class Integration extends Model
      */
     public function streamStatus(string $key): ?array
     {
-        return ($this->sync_streams ?? [])[$key] ?? null;
+        /** @psalm-suppress MixedAssignment */
+        $stream = ($this->sync_streams ?? [])[$key] ?? null;
+
+        /** @var array{status: string, last_synced_at: ?string, records: int}|null */
+        return is_array($stream) ? $stream : null;
     }
 
     /**

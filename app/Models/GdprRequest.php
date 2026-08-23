@@ -34,7 +34,7 @@ class GdprRequest extends Model
 
     public const STATUS_FAILED = 'failed';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'user_id',
         'type',

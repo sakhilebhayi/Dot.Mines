@@ -39,7 +39,13 @@ class GenerateReportJob implements ShouldQueue
         try {
             $data = $dataService->build($this->report);
 
-            $localPath = tempnam(sys_get_temp_dir(), 'report_').'.'.$this->report->format;
+            $tempBase = tempnam(sys_get_temp_dir(), 'report_');
+
+            if ($tempBase === false) {
+                throw new \RuntimeException('Unable to allocate a temporary file for report generation.');
+            }
+
+            $localPath = $tempBase.'.'.$this->report->format;
 
             match ($this->report->format) {
                 'csv' => (new CsvReportWriter)->write($data, $localPath),
@@ -48,7 +54,7 @@ class GenerateReportJob implements ShouldQueue
                 default => throw new \InvalidArgumentException("Unsupported report format: {$this->report->format}"),
             };
 
-            $storagePath = "reports/{$this->report->team_id}/".Str::uuid().'.'.$this->report->format;
+            $storagePath = "reports/{$this->report->team_id}/".Str::uuid()->toString().'.'.$this->report->format;
             $contents = file_get_contents($localPath);
 
             if ($contents === false) {
@@ -56,7 +62,8 @@ class GenerateReportJob implements ShouldQueue
             }
 
             Storage::put($storagePath, $contents);
-            $fileSize = filesize($localPath) ?: null;
+            $sizeResult = filesize($localPath);
+            $fileSize = $sizeResult === false || $sizeResult === 0 ? null : $sizeResult;
             @unlink($localPath);
 
             $this->report->markCompleted($storagePath, $fileSize);

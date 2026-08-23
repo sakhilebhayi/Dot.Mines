@@ -152,7 +152,9 @@ class IntegrationController extends Controller
         }
 
         try {
-            $integration->update($request->only('name', 'credentials'));
+            /** @var array<string, mixed> $attributes */
+            $attributes = $request->only('name', 'credentials');
+            $integration->update($attributes);
 
             return response()->json([
                 'success' => true,

@@ -59,7 +59,7 @@ class Alert extends Model
         'dismissed_unresolved',
     ];
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',

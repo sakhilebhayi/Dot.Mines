@@ -40,7 +40,7 @@ class AlertTriggered implements ShouldBroadcast
             new PrivateChannel('alerts.team.'.$this->alert->team_id),
 
             // Also broadcast to the specific machine channel
-            new PrivateChannel('machine.'.$this->alert->machine_id),
+            new PrivateChannel('machine.'.((string) ($this->alert->machine_id ?? 0))),
         ];
     }
 

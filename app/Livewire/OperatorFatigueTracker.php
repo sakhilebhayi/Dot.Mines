@@ -13,9 +13,9 @@ use Livewire\Component;
 
 class OperatorFatigueTracker extends Component
 {
-    public int $operatorId;
+    public int $operatorId = 0;
 
-    public string $shiftDate;
+    public string $shiftDate = '';
 
     public string $shiftType = 'morning';
 
@@ -61,7 +61,16 @@ class OperatorFatigueTracker extends Component
      */
     public function getOperatorsProperty()
     {
-        return $this->resolveCurrentTeam()?->allUsers() ?? collect();
+        $team = $this->resolveCurrentTeam();
+
+        if ($team === null) {
+            return collect();
+        }
+
+        /** @var Collection<int, User> $operators */
+        $operators = $team->allUsers();
+
+        return $operators;
     }
 
     /**
@@ -93,6 +102,7 @@ class OperatorFatigueTracker extends Component
             return;
         }
 
+        /** @var array<string, mixed> $validated */
         $validated = $this->validate([
             'operatorId' => 'required|integer|exists:users,id',
             'shiftDate' => 'required|date',
@@ -106,7 +116,9 @@ class OperatorFatigueTracker extends Component
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $operator = $team->allUsers()->firstWhere('id', (int) $validated['operatorId']);
+        /** @var Collection<int, User> $teamUsers */
+        $teamUsers = $team->allUsers();
+        $operator = $teamUsers->firstWhere('id', (int) (is_numeric($validated['operatorId']) ? $validated['operatorId'] : 0));
 
         if (! $operator) {
             $this->addError('operatorId', 'That operator is not a member of this team.');
@@ -115,15 +127,15 @@ class OperatorFatigueTracker extends Component
         }
 
         $fatigue = $service->recordShift($operator, $team, [
-            'shift_date' => $validated['shiftDate'],
-            'shift_type' => $validated['shiftType'],
-            'shift_start' => $validated['shiftStart'],
-            'shift_end' => $validated['shiftEnd'],
-            'hours_worked' => $validated['hoursWorked'],
-            'consecutive_days' => $validated['consecutiveDays'],
-            'break_time_minutes' => $validated['breakTimeMinutes'],
-            'incidents_count' => $validated['incidentsCount'],
-            'notes' => $validated['notes'],
+            'shift_date' => $this->shiftDate,
+            'shift_type' => $this->shiftType,
+            'shift_start' => $this->shiftStart,
+            'shift_end' => $this->shiftEnd,
+            'hours_worked' => $this->hoursWorked,
+            'consecutive_days' => $this->consecutiveDays,
+            'break_time_minutes' => $this->breakTimeMinutes,
+            'incidents_count' => $this->incidentsCount,
+            'notes' => $this->notes !== '' ? $this->notes : null,
         ]);
 
         $this->dispatch('notify', ['type' => 'success', 'message' => "Fatigue score recorded: {$fatigue->fatigue_score}/100 ({$fatigue->alert_level})."]);

@@ -16,8 +16,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     protected string $apiKey;
 
-    protected string $apiSecret;
-
     protected ?string $lastError = null;
 
     protected int $timeout = 30;
@@ -46,7 +44,6 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     {
         $this->baseUrl = ApiPayload::str($credentials['base_url'] ?? null);
         $this->apiKey = ApiPayload::str($credentials['api_key'] ?? null);
-        $this->apiSecret = ApiPayload::str($credentials['api_secret'] ?? null);
     }
 
     /**
@@ -176,44 +173,44 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     /**
      * Parse machine data from API response to standard format
      */
-    /** @param array<string, mixed> $rawData
+    /** @param array<string, mixed> $data
      * @return array<string, mixed> */
-    protected function parseMachineData(array $rawData): array
+    protected function parseMachineData(array $data): array
     {
         return [
-            'external_id' => $rawData['id'] ?? null,
+            'external_id' => $data['id'] ?? null,
             'manufacturer' => $this->manufacturer,
-            'model' => $rawData['model'] ?? 'Unknown',
-            'serial_number' => $rawData['serial_number'] ?? null,
-            'status' => $this->parseStatus(ApiPayload::str($rawData['status'] ?? null, 'unknown')),
+            'model' => $data['model'] ?? 'Unknown',
+            'serial_number' => $data['serial_number'] ?? null,
+            'status' => $this->parseStatus(ApiPayload::str($data['status'] ?? null, 'unknown')),
             'last_location' => [
-                'latitude' => $rawData['latitude'] ?? null,
-                'longitude' => $rawData['longitude'] ?? null,
-                'timestamp' => $rawData['location_timestamp'] ?? now(),
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
+                'timestamp' => $data['location_timestamp'] ?? now(),
             ],
-            'metrics' => $rawData['metrics'] ?? [],
-            'alerts' => $rawData['alerts'] ?? [],
+            'metrics' => $data['metrics'] ?? [],
+            'alerts' => $data['alerts'] ?? [],
         ];
     }
 
     /**
      * Parse location data from API response
      */
-    /** @param array<string, mixed> $rawData
+    /** @param array<string, mixed> $data
      * @return array<string, mixed>|null */
-    protected function parseLocation(array $rawData): ?array
+    protected function parseLocation(array $data): ?array
     {
-        if (empty($rawData['latitude']) || empty($rawData['longitude'])) {
+        if (empty($data['latitude']) || empty($data['longitude'])) {
             return null;
         }
 
         return [
-            'latitude' => (float) $rawData['latitude'],
-            'longitude' => (float) $rawData['longitude'],
-            'accuracy' => $rawData['accuracy'] ?? null,
-            'timestamp' => $rawData['timestamp'] ?? now(),
-            'heading' => $rawData['heading'] ?? null,
-            'speed' => $rawData['speed'] ?? null,
+            'latitude' => (float) $data['latitude'],
+            'longitude' => (float) $data['longitude'],
+            'accuracy' => $data['accuracy'] ?? null,
+            'timestamp' => $data['timestamp'] ?? now(),
+            'heading' => $data['heading'] ?? null,
+            'speed' => $data['speed'] ?? null,
         ];
     }
 
@@ -553,5 +550,14 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     protected static function rowsOf(mixed $value): array
     {
         return ApiPayload::rows($value);
+    }
+
+    /**
+     * Coerce an untyped API scalar into a string, falling back when the
+     * node is absent or not string-like.
+     */
+    protected static function str(mixed $value, string $default = ''): string
+    {
+        return ApiPayload::str($value, $default);
     }
 }

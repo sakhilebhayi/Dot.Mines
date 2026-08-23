@@ -13,8 +13,10 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\User;
 use App\Services\AI\FuelPredictorAgent;
+use App\Support\CurrentUser;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Lazy;
@@ -109,8 +111,7 @@ class FuelManagement extends Component
             'transactionQuantity' => 'required|numeric|min:1',
         ]);
 
-        /** @var User|null $user */
-        $user = Auth::user();
+        $user = CurrentUser::get();
 
         try {
             app(RecordFuelDispense::class)->execute(
@@ -229,8 +230,7 @@ class FuelManagement extends Component
 
     private function hasCurrentAllocation(): bool
     {
-        /** @var User|null $authUser */
-        $authUser = auth()->user();
+        $authUser = CurrentUser::get();
 
         return FuelMonthlyAllocation::query()->where('team_id', $authUser?->current_team_id)
             ->where('year', now()->year)
@@ -274,8 +274,8 @@ class FuelManagement extends Component
             ]);
 
             // Ensure the newly created tank is immediately selected in the dispense dropdown
-            $this->transactionTankId = $tank->id;
-            $this->selectedTankId = $tank->id;
+            $this->transactionTankId = (string) $tank->id;
+            $this->selectedTankId = (string) $tank->id;
 
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Fuel tank created successfully']);
             // Notify frontend and keep selection so new tank appears in dispense dropdown
@@ -305,8 +305,7 @@ class FuelManagement extends Component
             'refuelUnitPrice' => 'nullable|numeric|min:0',
         ]);
 
-        /** @var User|null $user */
-        $user = Auth::user();
+        $user = CurrentUser::get();
 
         try {
             $result = app(RefuelTank::class)->execute(
@@ -434,7 +433,7 @@ class FuelManagement extends Component
         $teamId = $user->current_team_id;
 
         try {
-            $totalBudget = $this->allocatedLiters * $this->fuelPricePerLiter;
+            $totalBudget = ($this->allocatedLiters ?? 0.0) * ($this->fuelPricePerLiter ?? 0.0);
 
             $allocation = FuelMonthlyAllocation::updateOrCreate(
                 [
@@ -491,9 +490,9 @@ class FuelManagement extends Component
 
         // Tanks overview: include inactive tanks for admins, otherwise only active tanks
         $tanks = FuelTank::where('team_id', $teamId)
-            ->when(! $canSeeInactive, fn ($q): mixed => $q->where('status', 'active'))
+            ->when(! $canSeeInactive, fn (Builder $q): mixed => $q->where('status', 'active'))
             ->with('mineArea')
-            ->when($this->showLowFuelOnly, fn ($q): mixed => $q->lowFuel())
+            ->when($this->showLowFuelOnly, fn (Builder $q): mixed => $q->lowFuel())
             ->get();
 
         // Machines for dispensing form
@@ -512,10 +511,8 @@ class FuelManagement extends Component
         $currentTeam = auth()->user()?->currentTeam;
         if ($hasFuelData && $currentTeam !== null) {
             $aiAnalysis = (new FuelPredictorAgent)->analyze($currentTeam);
-            $recommendations = $aiAnalysis['recommendations'] ?? [];
-            $insights = $aiAnalysis['insights'] ?? [];
-            $aiRecommendations = collect(is_array($recommendations) ? $recommendations : [])->take(5);
-            $aiInsights = collect(is_array($insights) ? $insights : [])->take(3);
+            $aiRecommendations = collect($aiAnalysis['recommendations'])->take(5);
+            $aiInsights = collect($aiAnalysis['insights'])->take(3);
         }
 
         $tankStats = [

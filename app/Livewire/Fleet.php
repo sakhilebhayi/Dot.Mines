@@ -14,8 +14,10 @@ use App\Services\Billing\MachineEntitlementService;
 use App\Services\Billing\MachineProvisioningService;
 use App\Services\MachinePerformanceService;
 use App\Services\OperationalSnapshotService;
+use App\Support\ApiPayload;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
@@ -44,6 +46,7 @@ class Fleet extends Component
 
     // AI recommendation interaction state
     /** @var array<int|string, mixed> */
+    /** @var list<array<string, mixed>> */
     public array $lastAiRecommendations = [];
 
     public ?int $pendingRecommendationIndex = null;
@@ -100,7 +103,11 @@ class Fleet extends Component
 
     public float $longitude = 0;
 
-    /** @var array<string, string> */
+    /**
+     * @var array<string>
+     *
+     * @psalm-suppress NonInvariantDocblockPropertyType -- Livewire's HandlesEvents leaves $listeners untyped (mixed)
+     */
     protected $listeners = ['machineCreated' => 'machineCreated', 'machineDeleted' => 'machineDeleted'];
 
     public function updatedSearch(): void
@@ -153,14 +160,14 @@ class Fleet extends Component
     {
         $this->editingMachineId = $machine->id;
         $this->name = $machine->name;
-        $this->model = $machine->model;
+        $this->model = ApiPayload::str($machine->model, '');
         $this->manufacturer = $machine->manufacturer ?? '';
         $this->machineType = $machine->machine_type;
         $this->status = $machine->status;
         $this->serialNumber = $machine->serial_number ?? '';
         $this->capacity = $machine->capacity ?? 0;
-        $this->latitude = $machine->latitude ?? 0;
-        $this->longitude = $machine->longitude ?? 0;
+        $this->latitude = $machine->last_location_latitude ?? 0;
+        $this->longitude = $machine->last_location_longitude ?? 0;
         $this->showCreateModal = true;
     }
 
@@ -192,8 +199,8 @@ class Fleet extends Component
                 'status' => $this->status,
                 'serial_number' => $this->serialNumber,
                 'capacity' => $this->capacity ?: null,
-                'latitude' => $this->latitude ?: null,
-                'longitude' => $this->longitude ?: null,
+                'last_location_latitude' => $this->latitude ?: null,
+                'last_location_longitude' => $this->longitude ?: null,
             ]);
             $this->dispatch('notify', ['message' => 'Machine updated successfully', 'type' => 'success']);
         } else {
@@ -212,8 +219,8 @@ class Fleet extends Component
                         'status' => $this->status,
                         'serial_number' => $this->serialNumber,
                         'capacity' => $this->capacity ?: null,
-                        'latitude' => $this->latitude ?: null,
-                        'longitude' => $this->longitude ?: null,
+                        'last_location_latitude' => $this->latitude ?: null,
+                        'last_location_longitude' => $this->longitude ?: null,
                     ]),
                 );
             } catch (InsufficientAllocationException $e) {
@@ -294,8 +301,8 @@ class Fleet extends Component
                 ->where('excavator_id', $machine->id)
                 ->where('machine_type', 'adt')
                 ->pluck('id')
-                ->map(fn ($id) => $id)
-                ->toArray();
+                ->values()
+                ->all();
         } else {
             // For ADTs and other machines, allow selecting a single excavator
             if (($machine->excavator_id !== null && $machine->excavator_id !== 0)) {
@@ -485,15 +492,15 @@ class Fleet extends Component
 
         $machinesQuery = Machine::where('team_id', $team->id)
             ->with(['excavator', 'latestEngineHoursMetric', 'latestMetric'])
-            ->when($this->search, function ($query): mixed {
+            ->when($this->search, function (Builder $query): mixed {
                 return $query->where('name', 'like', "%{$this->search}%")
                     ->orWhere('model', 'like', "%{$this->search}%")
                     ->orWhere('manufacturer', 'like', "%{$this->search}%");
             })
-            ->when($this->statusFilter, function ($query): mixed {
+            ->when($this->statusFilter, function (Builder $query): mixed {
                 return $query->where('status', $this->statusFilter);
             })
-            ->orderBy($this->sortBy, $this->sortDirection)
+            ->orderBy($this->sortBy, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10);
 
         // Get all excavators for assignment dropdown
@@ -538,8 +545,8 @@ class Fleet extends Component
             ->latest('created_at')
             ->take(10)
             ->get()
-            ->map(fn ($log) => [
-                'user' => $log->user->name ?? 'System',
+            ->map(fn (ActivityLog $log): array => [
+                'user' => $log->user?->name ?? 'System',
                 'action' => $log->action,
                 'description' => $log->description,
                 'created_at' => $log->created_at->diffForHumans(),
@@ -553,7 +560,7 @@ class Fleet extends Component
         $aiInsights = collect($aiAnalysis['insights'])->take(3);
 
         // Keep a serializable copy to reference in action handlers (Livewire methods)
-        $this->lastAiRecommendations = $aiRecommendations->values()->map(fn ($r) => $r)->toArray();
+        $this->lastAiRecommendations = array_values($aiRecommendations->all());
 
         $this->isLoading = false;
 
@@ -580,14 +587,15 @@ class Fleet extends Component
 
         $team = CurrentUser::team();
         $rec = $this->lastAiRecommendations[$index] ?? null;
-        if (! $rec) {
+        if ($rec === null || $rec === []) {
             $this->dispatch('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
 
             return;
         }
 
         // Compute a stable hash for the recommendation
-        $hash = md5(json_encode($rec) ?: '');
+        $encoded = json_encode($rec);
+        $hash = md5($encoded === false ? '' : $encoded);
 
         // Create action record
         $action = AiRecommendationAction::create([
@@ -599,15 +607,18 @@ class Fleet extends Component
             'actioned_at' => now(),
         ]);
 
+        $title = ApiPayload::str($rec['title'] ?? null, 'Untitled');
+        $relatedMachineId = (int) (is_numeric($rec['related_machine_id'] ?? null) ? $rec['related_machine_id'] : 0);
+
         // Apply operational adjustment (best-effort): if recommendation references a machine, create an activity log and tag machine
-        if (! empty($rec['related_machine_id'])) {
-            $machine = Machine::where('team_id', $team->id)->find($rec['related_machine_id']);
+        if ($relatedMachineId !== 0) {
+            $machine = Machine::where('team_id', $team->id)->find($relatedMachineId);
             if ($machine) {
                 ActivityLog::create([
                     'team_id' => $team->id,
                     'user_id' => Auth::id(),
                     'action' => 'ai_recommendation_implemented',
-                    'description' => "Implemented AI recommendation: {$rec['title']} for machine {$machine->name}",
+                    'description' => "Implemented AI recommendation: {$title} for machine {$machine->name}",
                 ]);
             }
         } else {
@@ -615,7 +626,7 @@ class Fleet extends Component
                 'team_id' => $team->id,
                 'user_id' => Auth::id(),
                 'action' => 'ai_recommendation_implemented',
-                'description' => "Implemented AI recommendation: {$rec['title']}",
+                'description' => "Implemented AI recommendation: {$title}",
             ]);
         }
 
@@ -660,15 +671,18 @@ class Fleet extends Component
         }
 
         $team = CurrentUser::team();
-        $rec = $this->lastAiRecommendations[$this->pendingRecommendationIndex] ?? null;
-        if (! $rec) {
+        $rec = $this->pendingRecommendationIndex !== null
+            ? ($this->lastAiRecommendations[$this->pendingRecommendationIndex] ?? null)
+            : null;
+        if ($rec === null || $rec === []) {
             $this->dispatch('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
             $this->showRejectRecommendationModal = false;
 
             return;
         }
 
-        $hash = md5(json_encode($rec) ?: '');
+        $encoded = json_encode($rec);
+        $hash = md5($encoded === false ? '' : $encoded);
 
         AiRecommendationAction::create([
             'team_id' => $team->id,
@@ -686,7 +700,7 @@ class Fleet extends Component
             'team_id' => $team->id,
             'user_id' => Auth::id(),
             'action' => 'ai_recommendation_rejected',
-            'description' => "Rejected AI recommendation: {$rec['title']} — Reason: {$this->rejectReason}",
+            'description' => 'Rejected AI recommendation: '.ApiPayload::str($rec['title'] ?? null, 'Untitled')." — Reason: {$this->rejectReason}",
         ]);
 
         $this->showRejectRecommendationModal = false;

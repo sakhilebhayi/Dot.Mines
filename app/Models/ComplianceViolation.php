@@ -31,7 +31,7 @@ class ComplianceViolation extends Model
     /** @use HasFactory<ComplianceViolationFactory> */
     use HasFactory;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'violation_type',

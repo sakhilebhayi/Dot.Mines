@@ -33,7 +33,7 @@ class AIAgent extends Model
 
     protected $table = 'ai_agents';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'name',
         'type',

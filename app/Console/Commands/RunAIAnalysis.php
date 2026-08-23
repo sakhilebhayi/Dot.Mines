@@ -30,7 +30,7 @@ class RunAIAnalysis extends Command
 
         $totalRecommendations = 0;
         $totalInsights = 0;
-        $totalSavings = 0;
+        $totalSavings = 0.0;
 
         foreach ($teams as $team) {
             $this->line("Analyzing: <fg=cyan>{$team->name}</>");
@@ -43,7 +43,7 @@ class RunAIAnalysis extends Command
 
                 $recommendations = $result['recommendations']->count();
                 $insights = $result['insights']->count();
-                $savings = $result['summary']['total_estimated_savings'] ?? 0;
+                $savings = (float) (is_numeric($result['summary']['total_estimated_savings'] ?? null) ? $result['summary']['total_estimated_savings'] : 0);
 
                 $totalRecommendations += $recommendations;
                 $totalInsights += $insights;

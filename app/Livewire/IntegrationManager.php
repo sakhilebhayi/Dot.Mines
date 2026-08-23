@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
+use App\Models\Team;
 use App\Services\Integration\IntegrationService;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
@@ -13,7 +14,7 @@ use Livewire\Component;
 
 class IntegrationManager extends Component
 {
-    public mixed $team = null;
+    public ?Team $team = null;
 
     /** @var array<int|string, mixed> */
     public array $integrations = [];
@@ -29,7 +30,7 @@ class IntegrationManager extends Component
 
     public mixed $testResult = null;
 
-    /** @var array<string, mixed> */
+    /** @var array{provider: string, name: string, endpoint: string, connection_type: string, sync_frequency: string, notification_email: string, credentials: array<string, string>} */
     public array $formData = [
         'provider' => '',
         'name' => '',
@@ -43,7 +44,11 @@ class IntegrationManager extends Component
         ],
     ];
 
-    /** @var array<string, string> */
+    /**
+     * @var array<string>
+     *
+     * @psalm-suppress NonInvariantDocblockPropertyType -- Livewire's HandlesEvents leaves $listeners untyped (mixed)
+     */
     protected $listeners = ['refresh' => '$refresh'];
 
     public function mount(): void
@@ -74,7 +79,7 @@ class IntegrationManager extends Component
                     'created_at' => $integration->created_at->format('M d, Y'),
                     'last_sync_at' => $integration->last_sync_at?->format('M d, Y H:i') ?? 'Never',
                     'last_sync_status' => $integration->last_sync_status ?? 'pending',
-                    'machines_count' => $integration->machines_count ?? 0,
+                    'machines_count' => $integration->machines_count,
                     'last_error' => $integration->last_error,
                     'capabilities' => $integration->capabilities ?? [],
                     'sync_streams' => $integration->sync_streams ?? [],
@@ -152,7 +157,7 @@ class IntegrationManager extends Component
         // Bell issues this same client_id to every ISO 15143-3 export
         // consumer -- default it so a user who doesn't touch that field
         // (it's optional in the form) still gets a working credential set.
-        if ($this->formData['provider'] === 'bell' && empty($this->formData['credentials']['client_id'])) {
+        if ($this->formData['provider'] === 'bell' && ($this->formData['credentials']['client_id'] ?? '') === '') {
             $this->formData['credentials']['client_id'] = 'ISO_Export_Service';
         }
 
@@ -230,7 +235,7 @@ class IntegrationManager extends Component
 
         $this->validate($rules);
 
-        if ($this->formData['provider'] === 'bell' && empty($this->formData['credentials']['client_id'])) {
+        if ($this->formData['provider'] === 'bell' && ($this->formData['credentials']['client_id'] ?? '') === '') {
             $this->formData['credentials']['client_id'] = 'ISO_Export_Service';
         }
 

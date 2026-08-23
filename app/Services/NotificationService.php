@@ -6,6 +6,8 @@ use App\Events\NotificationCreated;
 use App\Jobs\SendNotificationEmailJob;
 use App\Models\Notification;
 use App\Models\User;
+use App\Support\ApiPayload;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -140,6 +142,8 @@ class NotificationService
      * Notify admin role only for a team.
      *
      * @param  array<string, mixed>  $data
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- exercised only by its test today; kept as covered public API
      */
     public static function notifyAdmins(
         int $teamId,
@@ -172,17 +176,24 @@ class NotificationService
     {
         $userIds = [];
 
-        if (! empty($payload['notify_roles'])) {
-            $roleUsers = User::whereHas('roles', function ($q) use ($payload) {
-                $q->where('team_id', $payload['team_id'])
-                    ->whereIn('name', $payload['notify_roles']);
-            })->pluck('id')->toArray();
+        $roleNames = ApiPayload::strings($payload['notify_roles'] ?? null);
 
-            $userIds = array_merge($userIds, $roleUsers);
+        if ($roleNames !== []) {
+            $roleUsers = User::whereHas('roles', function (Builder $q) use ($payload, $roleNames) {
+                $q->where('team_id', $payload['team_id'])
+                    ->whereIn('name', $roleNames);
+            })->pluck('id')->all();
+
+            foreach ($roleUsers as $id) {
+                $userIds[] = $id;
+            }
         }
 
-        if (! empty($payload['notify_user_ids'])) {
-            $userIds = array_merge($userIds, $payload['notify_user_ids']);
+        /** @psalm-suppress MixedAssignment */
+        foreach ((array) ($payload['notify_user_ids'] ?? []) as $id) {
+            if (is_numeric($id)) {
+                $userIds[] = (int) $id;
+            }
         }
 
         return array_values(array_unique($userIds));

@@ -42,7 +42,7 @@ class DispatchAdvisorAgent
         $geofencesByAreaAndType = Geofence::where('team_id', $team->id)
             ->where('status', 'active')
             ->get()
-            ->groupBy(fn (Geofence $g) => $g->mine_area_id.'|'.$g->type);
+            ->groupBy(fn (Geofence $g) => ($g->mine_area_id ?? 0).'|'.$g->type);
 
         foreach ($geofencesByAreaAndType as $group) {
             if ($group->count() < 2) {
@@ -59,7 +59,14 @@ class DispatchAdvisorAgent
             $busiest = $stats->sortByDesc('queue')->first();
             $quietest = $stats->sortBy('queue')->first();
 
-            if ($busiest['geofence']?->id === $quietest['geofence']?->id) {
+            if ($busiest === null || $quietest === null) {
+                continue;
+            }
+
+            $busiestGeofence = $busiest['geofence'];
+            $quietestGeofence = $quietest['geofence'];
+
+            if ($busiestGeofence->id === $quietestGeofence->id) {
                 continue;
             }
 
@@ -69,23 +76,23 @@ class DispatchAdvisorAgent
                 $recommendations[] = [
                     'category' => 'dispatch',
                     'priority' => $gap >= self::MIN_QUEUE_GAP * 2 ? 'high' : 'medium',
-                    'title' => "Queue Imbalance: {$busiest['geofence']?->name} vs {$quietest['geofence']?->name}",
-                    'description' => "{$busiest['geofence']->name} currently has {$busiest['queue']} machines queued versus {$quietest['queue']} at {$quietest['geofence']->name}, both {$busiest['geofence']?->type} points in the same mine area.",
-                    'proposed_action' => "Reroute the next available machine from {$busiest['geofence']->name} to {$quietest['geofence']->name} to close the {$gap}-machine queue gap.",
+                    'title' => "Queue Imbalance: {$busiestGeofence->name} vs {$quietestGeofence->name}",
+                    'description' => "{$busiestGeofence->name} currently has {$busiest['queue']} machines queued versus {$quietest['queue']} at {$quietestGeofence->name}, both {$busiestGeofence->type} points in the same mine area.",
+                    'proposed_action' => "Reroute the next available machine from {$busiestGeofence->name} to {$quietestGeofence->name} to close the {$gap}-machine queue gap.",
                     'confidence_score' => 0.75,
                     'estimated_efficiency_gain' => min(50, $gap * 8),
-                    'related_mine_area_id' => $busiest['geofence']?->mine_area_id,
+                    'related_mine_area_id' => $busiestGeofence->mine_area_id,
                     'data' => [
-                        'busiest_geofence_id' => $busiest['geofence']->id,
+                        'busiest_geofence_id' => $busiestGeofence->id,
                         'busiest_queue' => $busiest['queue'],
                         'busiest_avg_dwell_minutes' => $busiest['avg_dwell_minutes'],
-                        'quietest_geofence_id' => $quietest['geofence']->id,
+                        'quietest_geofence_id' => $quietestGeofence->id,
                         'quietest_queue' => $quietest['queue'],
                         'quietest_avg_dwell_minutes' => $quietest['avg_dwell_minutes'],
                         'queue_gap' => $gap,
                     ],
                     'impact_analysis' => [
-                        'recommended_action' => "Send the next dispatched machine to {$quietest['geofence']->name} instead of {$busiest['geofence']->name}.",
+                        'recommended_action' => "Send the next dispatched machine to {$quietestGeofence->name} instead of {$busiestGeofence->name}.",
                     ],
                 ];
 
@@ -94,10 +101,10 @@ class DispatchAdvisorAgent
                         'type' => 'anomaly',
                         'category' => 'dispatch',
                         'severity' => $gap >= self::MIN_QUEUE_GAP * 2 ? 'warning' : 'info',
-                        'title' => "Queue Building at {$busiest['geofence']->name}",
-                        'description' => "{$busiest['queue']} machines currently queued, {$gap} more than {$quietest['geofence']->name}.",
+                        'title' => "Queue Building at {$busiestGeofence->name}",
+                        'description' => "{$busiest['queue']} machines currently queued, {$gap} more than {$quietestGeofence->name}.",
                         'data' => [
-                            'geofence_id' => $busiest['geofence']->id,
+                            'geofence_id' => $busiestGeofence->id,
                             'queue' => $busiest['queue'],
                             'avg_dwell_minutes' => $busiest['avg_dwell_minutes'],
                         ],
@@ -133,6 +140,6 @@ class DispatchAdvisorAgent
 
         $totalMinutes = $entries->sum(fn ($e) => $e->entry_time->diffInMinutes($e->exit_time));
 
-        return round($totalMinutes / $entries->count(), 2);
+        return round($totalMinutes / (float) $entries->count(), 2);
     }
 }

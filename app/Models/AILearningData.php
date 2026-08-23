@@ -12,7 +12,7 @@ class AILearningData extends Model
 
     protected $table = 'ai_learning_data';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'ai_agent_id',
         'team_id',

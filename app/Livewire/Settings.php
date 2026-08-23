@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Models\User;
 use App\Services\TeamRoleProvisioner;
+use App\Support\ApiPayload;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
@@ -80,14 +82,14 @@ class Settings extends Component
         $this->language = $team->language;
         $this->currency = $team->currency;
 
-        $preferences = auth()->user()->notification_preferences ?? [];
-        $this->emailAlerts = $preferences['email_alerts'] ?? true;
-        $this->emailReports = $preferences['email_reports'] ?? true;
-        $this->inAppAlerts = $preferences['in_app_alerts'] ?? true;
-        $this->quietHoursEnabled = $preferences['quiet_hours_enabled'] ?? false;
-        $this->quietHoursStart = $preferences['quiet_hours_start'] ?? '22:00';
-        $this->quietHoursEnd = $preferences['quiet_hours_end'] ?? '08:00';
-        $this->notificationMinSeverity = $preferences['min_severity'] ?? 'low';
+        $preferences = CurrentUser::get()?->notification_preferences ?? [];
+        $this->emailAlerts = (bool) ($preferences['email_alerts'] ?? true);
+        $this->emailReports = (bool) ($preferences['email_reports'] ?? true);
+        $this->inAppAlerts = (bool) ($preferences['in_app_alerts'] ?? true);
+        $this->quietHoursEnabled = (bool) ($preferences['quiet_hours_enabled'] ?? false);
+        $this->quietHoursStart = ApiPayload::str($preferences['quiet_hours_start'] ?? null, '22:00');
+        $this->quietHoursEnd = ApiPayload::str($preferences['quiet_hours_end'] ?? null, '08:00');
+        $this->notificationMinSeverity = ApiPayload::str($preferences['min_severity'] ?? null, 'low');
 
         $this->loadTeamMembers();
     }
@@ -113,7 +115,7 @@ class Settings extends Component
     {
         $this->validate();
 
-        $team = auth()->user()?->currentTeam;
+        $team = CurrentUser::team();
         $this->authorize('update', $team);
 
         $team->update([
@@ -131,17 +133,19 @@ class Settings extends Component
 
     public function loadTeamMembers(): void
     {
-        $team = auth()->user()?->currentTeam;
+        $team = CurrentUser::team();
         $this->teamMembers = $team->users()
             ->with('roles')
             ->get()
-            ->map(function ($user) {
+            ->map(function (User $user): array {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->roles->first()?->name ?? 'No Role',
-                    'joined_at' => isset($user->pivot) && isset($user->pivot->created_at) ? $user->pivot->created_at : 'N/A',
+                    // Jetstream aliases the membership pivot to 'membership',
+                    // so $user->pivot is never set on this relation.
+                    'joined_at' => data_get($user, 'membership.created_at') ?? 'N/A',
                 ];
             })
             ->toArray();
@@ -163,8 +167,14 @@ class Settings extends Component
             'selectedRole' => 'required|string',
         ]);
 
+        $inviter = CurrentUser::get();
+        $team = CurrentUser::team();
+
+        if ($inviter === null) {
+            return;
+        }
+
         try {
-            $team = auth()->user()?->currentTeam;
             $this->authorize('addTeamMember', $team);
 
             // Delegate to Jetstream's own invitation action (also used by
@@ -174,7 +184,7 @@ class Settings extends Component
             // with a hardcoded literal password and no email ever sent --
             // the invited person had no way to learn it or sign in.
             app(InvitesTeamMembers::class)->invite(
-                auth()->user(),
+                $inviter,
                 $team,
                 $this->inviteEmail,
                 $this->selectedRole
@@ -188,7 +198,7 @@ class Settings extends Component
         } catch (ValidationException $e) {
             $this->dispatch('notify', ['type' => 'error', 'message' => collect($e->errors())->flatten()->first() ?? 'Failed to invite user']);
         } catch (\Throwable $e) {
-            Log::error('Failed to invite team member', ['team_id' => $team->id ?? null, 'error' => $e->getMessage()]);
+            Log::error('Failed to invite team member', ['team_id' => $team->id, 'error' => $e->getMessage()]);
             $this->dispatch('notify', ['type' => 'error', 'message' => "We couldn't send that invitation. Please check the email address and try again."]);
         }
     }
@@ -199,9 +209,9 @@ class Settings extends Component
     public function removeUser($userId): void
     {
         try {
-            $team = auth()->user()?->currentTeam;
+            $team = CurrentUser::team();
             $this->authorize('removeTeamMember', $team);
-            $currentUser = auth()->user();
+            $currentUser = CurrentUser::get();
 
             // Prevent removing self
             if ((int) $userId === (int) $currentUser?->id) {
@@ -225,7 +235,7 @@ class Settings extends Component
     public function updateUserRole($userId, $newRole): void
     {
         try {
-            $team = auth()->user()?->currentTeam;
+            $team = CurrentUser::team();
             $this->authorize('updateTeamMember', $team);
 
             // Ensure the user is a member of this team
@@ -235,7 +245,6 @@ class Settings extends Component
                 return;
             }
 
-            $team = auth()->user()?->currentTeam;
             $user = $team->users()->findOrFail($userId);
 
             TeamRoleProvisioner::assignRole($user, $team, $newRole);
@@ -251,10 +260,15 @@ class Settings extends Component
 
     public function saveNotificationSettings(): void
     {
+        $user = CurrentUser::get();
+
+        if ($user === null) {
+            return;
+        }
+
         try {
             // Store in user preferences
-            $user = auth()->user();
-            auth()->user()->update([
+            $user->update([
                 'notification_preferences' => [
                     'email_alerts' => $this->emailAlerts,
                     'email_reports' => $this->emailReports,

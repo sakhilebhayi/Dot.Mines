@@ -7,6 +7,7 @@ use App\Models\AIPredictiveAlert;
 use App\Models\AIRecommendation;
 use App\Models\AiRecommendationAction;
 use App\Services\AI\AIOptimizationService;
+use App\Support\CurrentUser;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
@@ -67,7 +68,7 @@ class AIOptimizationDashboard extends Component
             ->latest()
             ->first();
 
-        if (! $lastRecommendation || $lastRecommendation->created_at->diffInHours(now()) > 24) {
+        if ($lastRecommendation === null || ($lastRecommendation->created_at?->diffInHours(now()) ?? 25) > 24) {
             $this->runAnalysis();
         }
     }
@@ -80,8 +81,8 @@ class AIOptimizationDashboard extends Component
             $aiService = $this->aiService;
             assert($aiService !== null);
             $aiService->runComprehensiveAnalysis(
-                auth()->user()?->currentTeam,
-                auth()->user()
+                CurrentUser::team(),
+                CurrentUser::get()
             );
 
             $this->dispatch('analysis-completed');
@@ -125,12 +126,18 @@ class AIOptimizationDashboard extends Component
      */
     public function implementRecommendation($recommendationId): void
     {
-        $team = auth()->user()?->currentTeam;
-        $recommendation = AIRecommendation::where('team_id', $team?->id)->findOrFail($recommendationId);
+        $team = CurrentUser::team();
+        $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
         try {
             $this->authorize('update', $recommendation);
 
-            $recommendation->markAsImplemented(auth()->user());
+            $actor = CurrentUser::get();
+
+            if ($actor === null) {
+                abort(403);
+            }
+
+            $recommendation->markAsImplemented($actor);
 
             AiRecommendationAction::create([
                 'team_id' => $team->id,
@@ -156,8 +163,8 @@ class AIOptimizationDashboard extends Component
      */
     public function rejectRecommendation($recommendationId, string $reason = ''): void
     {
-        $team = auth()->user()?->currentTeam;
-        $recommendation = AIRecommendation::where('team_id', $team?->id)->findOrFail($recommendationId);
+        $team = CurrentUser::team();
+        $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
 
         if (trim($reason) === '') {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'A rejection reason is required.']);
@@ -248,8 +255,8 @@ class AIOptimizationDashboard extends Component
      */
     public function markInsightAsRead($insightId): void
     {
-        $team = auth()->user()?->currentTeam;
-        $insight = AIInsight::where('team_id', $team?->id)->findOrFail($insightId);
+        $team = CurrentUser::team();
+        $insight = AIInsight::where('team_id', $team->id)->findOrFail($insightId);
         $this->authorize('update', $insight);
         $insight->markAsRead();
         $this->dispatch('notify', ['type' => 'success', 'message' => 'Insight marked as read.']);
@@ -257,7 +264,7 @@ class AIOptimizationDashboard extends Component
 
     public function render(): View
     {
-        $team = auth()->user()?->currentTeam;
+        $team = CurrentUser::team();
 
         // Get dashboard data
         $aiService = $this->aiService;

@@ -39,7 +39,7 @@ class OperatorFatigue extends Model
 {
     protected $table = 'operator_fatigue';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'user_id',
         'team_id',

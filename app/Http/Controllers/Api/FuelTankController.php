@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FuelTank;
 use App\Models\User;
 use App\Services\FuelManagementService;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -53,8 +54,8 @@ class FuelTankController extends Controller
         $tanks->getCollection()->transform(function ($tank) {
             $tank->fill_percentage = $tank->fill_percentage;
             $tank->available_capacity = $tank->available_capacity;
-            $tank->is_critical = $tank->isCritical();
-            $tank->is_below_minimum = $tank->isBelowMinimum();
+            $tank->setAttribute('is_critical', $tank->isCritical());
+            $tank->setAttribute('is_below_minimum', $tank->isBelowMinimum());
 
             return $tank;
         });
@@ -90,6 +91,7 @@ class FuelTankController extends Controller
 
         $data = $validator->validated();
         $data['team_id'] = $this->currentTeamId($request);
+        /** @psalm-suppress MixedAssignment */
         $data['current_level_liters'] = $data['current_level_liters'] ?? 0;
 
         $tank = FuelTank::create($data);
@@ -107,10 +109,10 @@ class FuelTankController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $fuelTank->load(['mineArea', 'transactions' => function ($query) {
+        $fuelTank->load(['mineArea', 'transactions' => function (Relation $query) {
             $query->latest()->limit(10);
-        }, 'alerts' => function ($query) {
-            $query->active()->latest()->limit(5);
+        }, 'alerts' => function (Relation $query) {
+            $query->where('status', 'active')->latest()->limit(5);
         }]);
 
         // Add calculated fields
@@ -180,7 +182,9 @@ class FuelTankController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        /** @psalm-suppress MixedAssignment */
         $startDate = $request->input('start_date', now()->subDays(30));
+        /** @psalm-suppress MixedAssignment */
         $endDate = $request->input('end_date', now());
 
         $transactions = $fuelTank->transactions()

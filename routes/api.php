@@ -45,7 +45,7 @@ Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(functi
         return $request->user();
     });
 
-    Route::post('/user/team/{team_id}', function (Request $request, $team_id) {
+    Route::post('/user/team/{team_id}', function (Request $request, string $team_id) {
         $user = $request->user();
 
         if (! $user instanceof User) {
@@ -233,7 +233,7 @@ Route::middleware(['auth:sanctum', 'ensure_team', 'throttle:api'])->group(functi
     /**
      * Live Location endpoint (real-time)
      */
-    Route::get('/live-locations', function (Request $request) {
+    Route::get('/live-locations', function () {
         $machines = Machine::select([
             'id', 'name', 'machine_type', 'status',
             'last_location_latitude', 'last_location_longitude', 'last_location_update',

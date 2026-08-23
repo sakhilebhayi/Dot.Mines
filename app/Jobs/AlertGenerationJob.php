@@ -307,7 +307,7 @@ class AlertGenerationJob implements ShouldQueue
 
         // Calculate based on some baseline (you'd store last maintenance time)
         // For now, use modulo to calculate next interval
-        $hoursIntoInterval = $machine->hours_meter % $interval;
+        $hoursIntoInterval = ((int) round($machine->hours_meter)) % $interval;
 
         return $interval - $hoursIntoInterval;
     }

@@ -9,6 +9,9 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
+/**
+ * @psalm-suppress MissingConstructor -- Livewire injects state via mount()
+ */
 #[Lazy]
 class MachineDetail extends Component
 {

@@ -5,6 +5,7 @@ namespace App\Services\Billing;
 use App\Models\MachineAllocation;
 use App\Models\Subscription;
 use App\Models\Team;
+use App\Support\ApiPayload;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -39,8 +40,7 @@ class MachineEntitlementService
         /** @var array<string, string> $map */
         $map = config('billing.machine_class_map', []);
 
-        /** @var string $fallback */
-        $fallback = config('billing.machine_class_fallback', 'adt');
+        $fallback = ApiPayload::str(config('billing.machine_class_fallback'), 'adt');
 
         return $map[$machineType] ?? $fallback;
     }
@@ -163,6 +163,7 @@ class MachineEntitlementService
             ->groupBy('machine_type')
             ->pluck('total', 'machine_type');
 
+        /** @psalm-suppress MixedAssignment */
         foreach ($rows as $machineType => $total) {
             if ($this->classFor($machineType) === 'heavy') {
                 $counts['heavy'] += (int) $total;

@@ -17,14 +17,18 @@ class CsvReportWriter
 
         fputcsv($handle, $data['headers']);
         foreach ($data['rows'] as $row) {
-            fputcsv($handle, $row);
+            fputcsv($handle, array_map(
+                static fn (mixed $cell) => is_scalar($cell) || $cell === null || $cell instanceof \Stringable ? $cell : json_encode($cell),
+                $row
+            ));
         }
 
-        if (is_array($data['summary'] ?? null) && $data['summary'] !== []) {
+        if ($data['summary'] !== []) {
             fputcsv($handle, []);
             fputcsv($handle, ['Summary']);
+            /** @psalm-suppress MixedAssignment */
             foreach ($data['summary'] as $label => $value) {
-                fputcsv($handle, [$label, $value]);
+                fputcsv($handle, [$label, is_scalar($value) || $value === null || $value instanceof \Stringable ? $value : json_encode($value)]);
             }
         }
 

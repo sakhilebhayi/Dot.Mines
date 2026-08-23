@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\ApiPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Redis;
 
@@ -88,11 +89,11 @@ class RealtimeHealthController extends Controller
         // those go through a reverse proxy this check should bypass.
         // "0.0.0.0" is a valid bind address but not a connectable one --
         // dial the loopback interface instead when that's what's configured.
-        $host = config('reverb.servers.reverb.host') ?: '127.0.0.1';
-        $host = $host === '0.0.0.0' ? '127.0.0.1' : $host;
-        $port = config('reverb.servers.reverb.port') ?: 8080;
+        $host = ApiPayload::str(config('reverb.servers.reverb.host'), '127.0.0.1');
+        $host = $host === '0.0.0.0' || $host === '' ? '127.0.0.1' : $host;
+        $port = ApiPayload::int(config('reverb.servers.reverb.port'), 8080);
 
-        $connection = @fsockopen($host, (int) $port, $errno, $errstr, 1.0);
+        $connection = @fsockopen($host, $port, $errno, $errstr, 1.0);
 
         if ($connection === false) {
             return [

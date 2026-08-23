@@ -169,7 +169,7 @@ class KawasakiService extends BaseManufacturerService
             'name' => $data['name'] ?? 'Unknown Machine',
             'model' => $data['model'] ?? 'Unknown Model',
             'manufacturer' => 'Kawasaki',
-            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'status' => $this->parseStatus(self::str($data['status'] ?? null, 'unknown')),
             'location' => $this->parseLocation(self::payloadArray($data['location'] ?? null)),
             'last_heartbeat' => $data['last_heartbeat'] ?? null,
             'specifications' => [
@@ -228,8 +228,8 @@ class KawasakiService extends BaseManufacturerService
             // normaliser, pinned by ManufacturerAlertsShapeTest.
             'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? null,
-            'type' => $this->mapAlertType($data['alert_code'] ?? $data['type'] ?? 'unknown'),
-            'priority' => $this->mapAlertPriority($data['priority_level'] ?? $data['severity'] ?? 'medium'),
+            'type' => $this->mapAlertType(self::str($data['alert_code'] ?? $data['type'] ?? null, 'unknown')),
+            'priority' => $this->mapAlertPriority(self::str($data['priority_level'] ?? $data['severity'] ?? null, 'medium')),
             'message' => $data['description'] ?? $data['message'] ?? 'Alert from Kawasaki',
             'timestamp' => $data['alert_time'] ?? $data['timestamp'] ?? now()->toIso8601String(),
             'acknowledged' => $data['is_acknowledged'] ?? $data['acknowledged'] ?? false,

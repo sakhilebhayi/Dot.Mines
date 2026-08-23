@@ -42,7 +42,7 @@ class MaintenanceSchedule extends Model
 {
     use HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -117,8 +117,8 @@ class MaintenanceSchedule extends Model
     public function isOverdue(Machine $machine): bool
     {
         return match ($this->schedule_type) {
-            'hours' => $machine->operating_hours > ($this->next_service_hours + ($this->interval_hours * 0.1)),
-            'kilometers' => $machine->odometer > ($this->next_service_km + ($this->interval_km * 0.1)),
+            'hours' => $machine->operating_hours > ((float) ($this->next_service_hours ?? 0) + ((float) ($this->interval_hours ?? 0) * 0.1)),
+            'kilometers' => $machine->odometer > ((float) ($this->next_service_km ?? 0) + ((float) ($this->interval_km ?? 0) * 0.1)),
             'calendar' => $this->next_service_date instanceof Carbon && now()->gt($this->next_service_date->clone()->addDays(7)),
             default => false,
         };

@@ -33,7 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Subscription extends Model
 {
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'subscription_plan_id',

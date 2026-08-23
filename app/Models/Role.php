@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
  * Role Model
@@ -28,7 +29,7 @@ class Role extends Model
     /** @use HasFactory<RoleFactory> */
     use HasFactory;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'name',
@@ -55,7 +56,7 @@ class Role extends Model
     /**
      * Get all permissions for this role
      */
-    /** @return BelongsToMany<Permission,$this> */
+    /** @return BelongsToMany<Permission,$this,Pivot,'pivot'> */
     public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class);
@@ -66,6 +67,9 @@ class Role extends Model
      */
     public function hasPermission(string $permission): bool
     {
-        return $this->permissions()->where('name', $permission)->exists();
+        $query = $this->permissions();
+        $query->where('name', $permission);
+
+        return (bool) $query->exists();
     }
 }

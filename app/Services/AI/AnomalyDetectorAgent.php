@@ -22,7 +22,7 @@ class AnomalyDetectorAgent
 
         foreach ($machines as $machine) {
             // Check for location anomalies
-            if ($machine->latitude && $machine->longitude) {
+            if ($machine->last_location_latitude !== null && $machine->last_location_longitude !== null) {
                 // Check if machine is outside designated areas
                 if ($machine->mine_area_id === null && $machine->status === 'active') {
                     $insights[] = [
@@ -40,7 +40,7 @@ class AnomalyDetectorAgent
             // Carbon 3: now()->diffInHours($past) is negative, so this
             // "stale data" anomaly could never fire.
             $lastUpdate = $machine->updated_at;
-            if ($lastUpdate && $lastUpdate->diffInHours(now()) > 24) {
+            if ($lastUpdate->diffInHours(now()) > 24) {
                 $insights[] = [
                     'type' => 'anomaly',
                     'category' => 'fleet',

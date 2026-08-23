@@ -57,7 +57,6 @@ class DispatchService
             // the newest-created row IS the newest reading in this
             // pipeline, and the old per-machine query was an N+1 running
             // 26 extra queries on every 30-second dispatch poll.
-            /** @var MachineMetric|null $metric */
             $metric = $machine->latestMetric;
 
             $recordedAt = $metric?->recorded_at ?? $metric?->created_at;
@@ -102,6 +101,7 @@ class DispatchService
         }
 
         $speed = (float) ($metric->speed ?? 0);
+        /** @psalm-suppress MixedAssignment */
         $engineRunning = data_get($metric->raw_data, 'engine_running');
 
         if ($engineRunning === false) {

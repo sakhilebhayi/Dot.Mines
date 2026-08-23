@@ -5,9 +5,11 @@ namespace App\Livewire;
 use App\Models\ActivityLog;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Support\ApiPayload;
 use App\Support\CurrentUser;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -62,7 +64,11 @@ class FleetMovementReplay extends Component
 
     public int $zoomLevel = 10;
 
-    /** @var array<string, string> */
+    /**
+     * @var array<string>
+     *
+     * @psalm-suppress NonInvariantDocblockPropertyType -- Livewire's HandlesEvents leaves $listeners untyped (mixed)
+     */
     protected $listeners = [
         'playback-stopped' => 'handlePlaybackStopped',
         'position-updated' => 'handlePositionUpdated',
@@ -86,8 +92,8 @@ class FleetMovementReplay extends Component
             ->latest('created_at')
             ->take(10)
             ->get()
-            ->map(fn ($log) => [
-                'user' => $log->user->name ?? 'System',
+            ->map(fn (ActivityLog $log): array => [
+                'user' => $log->user?->name ?? 'System',
                 'action' => $log->action,
                 'description' => $log->description,
                 'created_at' => $log->created_at->diffForHumans(),
@@ -194,14 +200,12 @@ class FleetMovementReplay extends Component
             // Get geofences for the team
             $geofences = Geofence::where('team_id', $team->id)
                 ->get()
-                ->map(function ($geofence) {
-                    $coordinates = $geofence->coordinates ?? [];
-
+                ->map(function (Geofence $geofence): array {
                     return [
                         'id' => $geofence->id,
                         'name' => $geofence->name,
                         'type' => $geofence->type,
-                        'coordinates' => $coordinates,
+                        'coordinates' => $geofence->coordinates,
                         'color' => $geofence->color ?? '#3b82f6',
                     ];
                 })
@@ -212,7 +216,7 @@ class FleetMovementReplay extends Component
                 ->leftJoin('waypoints', 'routes.id', '=', 'waypoints.route_id')
                 ->where('routes.team_id', $team->id)
                 ->where('routes.status', 'active')
-                ->where(function ($query) {
+                ->where(function (Builder $query) {
                     $query->where('routes.machine_id', $this->selectedMachine)
                         ->orWhereNull('routes.machine_id');
                 })
@@ -226,18 +230,19 @@ class FleetMovementReplay extends Component
             // Group waypoints by route
             $routesMap = [];
             foreach ($machineRoutes as $row) {
-                if (! isset($routesMap[$row->id])) {
-                    $routesMap[$row->id] = [
-                        'id' => $row->id,
+                $routeId = (int) $row->id;
+                if (! isset($routesMap[$routeId])) {
+                    $routesMap[$routeId] = [
+                        'id' => $routeId,
                         'name' => $row->name,
                         'waypoints' => [],
                         'color' => '#f59e0b',
-                        'start_location' => $row->start_latitude.', '.$row->start_longitude,
-                        'end_location' => $row->end_latitude.', '.$row->end_longitude,
+                        'start_location' => ((string) $row->start_latitude).', '.((string) $row->start_longitude),
+                        'end_location' => ((string) $row->end_latitude).', '.((string) $row->end_longitude),
                     ];
                 }
                 if (! is_null($row->latitude) && ! is_null($row->longitude)) {
-                    $routesMap[$row->id]['waypoints'][] = [$row->latitude, $row->longitude];
+                    $routesMap[$routeId]['waypoints'][] = [$row->latitude, $row->longitude];
                 }
             }
 
@@ -253,10 +258,10 @@ class FleetMovementReplay extends Component
             // shows real telemetry positions and real saved routes only.
 
             // Set map center to first position if available
-            if ($locationHistory->isNotEmpty()) {
-                $first = $locationHistory->first();
-                $this->centerLat = $first->latitude;
-                $this->centerLng = $first->longitude;
+            $first = $locationHistory->first();
+            if ($first !== null) {
+                $this->centerLat = (float) $first->latitude;
+                $this->centerLng = (float) $first->longitude;
                 $this->zoomLevel = 14; // Closer zoom for tracking
             }
         }
@@ -353,7 +358,7 @@ class FleetMovementReplay extends Component
      */
     public function handlePositionUpdated($data): void
     {
-        $this->currentPosition = $data['position'] ?? 0;
+        $this->currentPosition = (int) (is_numeric($data['position'] ?? null) ? $data['position'] : 0);
     }
 
     public function nextFrame(): void
@@ -436,11 +441,11 @@ class FleetMovementReplay extends Component
 
         foreach ($locationHistory as $location) {
             $csvData[] = [
-                Carbon::parse($location->created_at)->format('Y-m-d H:i:s'),
-                $location->latitude,
-                $location->longitude,
-                $location->speed ?? 0,
-                $location->heading ?? 0,
+                Carbon::parse(ApiPayload::str($location->created_at))->format('Y-m-d H:i:s'),
+                (float) $location->latitude,
+                (float) $location->longitude,
+                (float) ($location->speed ?? 0),
+                (float) ($location->heading ?? 0),
             ];
         }
 

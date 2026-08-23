@@ -25,7 +25,7 @@ class ProductionService
         $totalProduced = (float) $records->sum('quantity_produced');
         $totalTarget = (float) $records->sum('target_quantity');
         $recordCount = $records->count();
-        $avgProduction = $recordCount > 0 ? $totalProduced / $recordCount : 0;
+        $avgProduction = $recordCount > 0 ? $totalProduced / (float) $recordCount : 0.0;
         $completedCount = $records->where('status', 'completed')->count();
 
         return [
@@ -107,6 +107,7 @@ class ProductionService
             ->get()
             ->groupBy('record_date');
 
+        /** @var \Illuminate\Support\Collection<string, array<string, mixed>> */
         return $records->map(function ($dayRecords) {
             return [
                 'date' => $dayRecords->first()?->record_date->format('Y-m-d'),
@@ -115,7 +116,7 @@ class ProductionService
                 'count' => $dayRecords->count(),
                 'loads' => $dayRecords->sum(fn (ProductionRecord $record) => $this->recordLoads($record)),
             ];
-        });
+        })->toBase();
     }
 
     /**
@@ -125,6 +126,7 @@ class ProductionService
      */
     public function recordLoads(ProductionRecord $record): int
     {
+        /** @psalm-suppress MixedAssignment */
         $loads = data_get($record->metadata, 'loads');
 
         return is_numeric($loads) ? (int) $loads : 1;
@@ -136,6 +138,7 @@ class ProductionService
      */
     public function recordCycles(ProductionRecord $record): int
     {
+        /** @psalm-suppress MixedAssignment */
         $cycles = data_get($record->metadata, 'cycles');
 
         if (is_numeric($cycles)) {
@@ -154,6 +157,7 @@ class ProductionService
      * @return \Illuminate\Support\Collection<int, array<string, mixed>>
      *
      * @psalm-suppress PossiblyUnusedMethod -- exercised only by its test today; kept as covered public API
+     * @psalm-suppress InvalidReturnType, InvalidReturnStatement -- psalm's invariant Collection templates reject the narrower inferred row shape
      */
     public function getProductionByMachine(int $teamId): \Illuminate\Support\Collection
     {
@@ -175,7 +179,7 @@ class ProductionService
                 'total_target' => $totalTarget,
                 'achievement_rate' => $totalTarget > 0 ? ($totalProduced / $totalTarget) * 100.0 : null,
                 'record_count' => $machineRecords->count(),
-                'average_per_record' => $machineRecords->count() > 0 ? $totalProduced / $machineRecords->count() : 0,
+                'average_per_record' => $machineRecords->count() > 0 ? $totalProduced / (float) $machineRecords->count() : 0.0,
             ];
         })->sortByDesc('total_produced')->values();
     }

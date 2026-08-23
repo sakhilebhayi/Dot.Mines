@@ -36,7 +36,7 @@ class ProductionRecord extends Model
     use HasSyncVersion;
     use SoftDeletes;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -117,16 +117,18 @@ class ProductionRecord extends Model
 
     protected function getVariancePercentageAttribute(): float
     {
-        if (! $this->target_quantity || $this->target_quantity == 0) {
-            return 0;
+        $target = (float) ($this->target_quantity ?? 0);
+
+        if ($target === 0.0) {
+            return 0.0;
         }
 
-        return (((float) $this->quantity_produced - (float) $this->target_quantity) / (float) $this->target_quantity) * 100.0;
+        return (((float) $this->quantity_produced - $target) / $target) * 100.0;
     }
 
     protected function getIsAboveTargetAttribute(): bool
     {
-        if (! $this->target_quantity) {
+        if ((float) ($this->target_quantity ?? 0) === 0.0) {
             return false;
         }
 

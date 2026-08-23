@@ -12,7 +12,7 @@ class AiRecommendationAction extends Model
 
     protected $table = 'ai_recommendation_actions';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'ai_recommendation_id',

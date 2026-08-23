@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Database\Factories\AIRecommendationFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property string|null $status
+ * @property Carbon|null $created_at
  * @property int $team_id
+ * @property string $category
+ * @property string $priority
+ * @property string $title
+ * @property string $description
  * @property-read Team|null $team
  */
 class AIRecommendation extends Model
@@ -21,7 +27,7 @@ class AIRecommendation extends Model
 
     protected $table = 'ai_recommendations';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'ai_agent_id',

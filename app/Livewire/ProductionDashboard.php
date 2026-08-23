@@ -14,6 +14,7 @@ use App\Services\ProductionService;
 use App\Support\CurrentUser;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Lazy;
@@ -29,11 +30,11 @@ use Livewire\WithPagination;
  * @property-read array<string, mixed> $summary
  * @property-read \Illuminate\Database\Eloquent\Collection<int, MineArea> $mineAreas
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Machine> $machines
- * @property-read array{}|Collection<int, array<string, mixed>> $dailyChart
+ * @property-read Collection<int, array<string, mixed>> $dailyChart
  * @property-read array{} $materialBreakdown
  * @property-read array<int, array{operator_name: string, machine_name: string|null, shift_type: string, hours_worked: float, consecutive_days: float, fatigue_score: int, alert_level: string}> $fatigueData
  * @property-read array<string, int> $fatigueStats
- * @property-read array{}|Collection<int, array<string, mixed>> $areaPerformance
+ * @property-read Collection<int, array<string, mixed>> $areaPerformance
  */
 #[Lazy]
 class ProductionDashboard extends Component
@@ -202,7 +203,7 @@ class ProductionDashboard extends Component
         $query = ProductionRecord::forTeam($this->teamId);
 
         if ($this->search) {
-            $query->whereHas('mineArea', function ($q) {
+            $query->whereHas('mineArea', function (Builder $q) {
                 $q->where('name', 'like', "%{$this->search}%");
             })->orWhere('notes', 'like', "%{$this->search}%");
         }
@@ -294,8 +295,8 @@ class ProductionDashboard extends Component
             // records aggregating a whole day of loads existed.
             'total_loads' => $stats['total_loads'] ?? $stats['total_records'] ?? 0,
             'total_cycles' => $stats['total_cycles'] ?? $stats['completed_records'] ?? 0,
-            'total_tonnage' => round($stats['total_produced'] ?? 0, 2),
-            'total_bcm' => round($stats['total_produced'] ?? 0, 2),
+            'total_tonnage' => round((float) ($stats['total_produced'] ?? 0), 2),
+            'total_bcm' => round((float) ($stats['total_produced'] ?? 0), 2),
             'active_areas' => $activeAreas,
         ];
     }
@@ -317,22 +318,22 @@ class ProductionDashboard extends Component
     }
 
     /**
-     * @return array{}|Collection<int, array<string, mixed>>
+     * @return Collection<int, array<string, mixed>>
      */
-    public function getDailyChartProperty()
+    public function getDailyChartProperty(): Collection
     {
         $trend = $this->trend;
-        if (! $trend || $trend->isEmpty()) {
-            return [];
+        if ($trend->isEmpty()) {
+            return collect();
         }
 
-        return $trend->map(function ($day) {
+        return $trend->values()->map(function (array $day) {
             return [
                 'date' => $day['date'],
                 'tonnage' => $day['produced'] ?? 0,
                 'loads' => $day['loads'] ?? $day['count'] ?? 0,
             ];
-        })->toArray();
+        });
     }
 
     /**
@@ -404,16 +405,16 @@ class ProductionDashboard extends Component
     }
 
     /**
-     * @return array{}|Collection<int, array<string, mixed>>
+     * @return Collection<int, array<string, mixed>>
      */
-    public function getAreaPerformanceProperty()
+    public function getAreaPerformanceProperty(): Collection
     {
         $mineAreas = $this->mineAreas;
-        if (! $mineAreas || $mineAreas->isEmpty() || ! $this->hasDateRange()) {
-            return [];
+        if ($mineAreas->isEmpty() || ! $this->hasDateRange()) {
+            return collect();
         }
 
-        return $mineAreas->map(function ($area) {
+        return $mineAreas->map(function (MineArea $area): array {
             $records = ProductionRecord::where('team_id', $this->teamId)
                 ->where('mine_area_id', $area->id)
                 ->betweenDates(Carbon::parse($this->startDate), Carbon::parse($this->endDate))
@@ -421,15 +422,15 @@ class ProductionDashboard extends Component
 
             return [
                 'area_name' => $area->name,
-                'area_type' => $area->status ?? 'active',
+                'area_type' => $area->status,
                 'loads' => $records->sum(fn ($record) => $this->productionService()->recordLoads($record)),
                 'cycles' => $records->sum(fn ($record) => $this->productionService()->recordCycles($record)),
                 'tonnage' => $records->sum('quantity_produced') ?? 0,
                 'bcm' => $records->sum('quantity_produced') ?? 0, // Using quantity_produced as BCM proxy
             ];
-        })->filter(function ($area) {
-            return $area['loads'] > 0;
-        })->values()->toArray();
+        })->filter(function (array $area): bool {
+            return (float) $area['loads'] > 0;
+        })->values();
     }
 
     public function openCreateModal(): void
@@ -453,12 +454,12 @@ class ProductionDashboard extends Component
         $this->editingRecordId = (int) $id;
         $this->record_date = $record->record_date->format('Y-m-d');
         $this->shift = $record->shift;
-        $this->quantity_produced = $record->quantity_produced;
-        $this->target_quantity = $record->target_quantity;
+        $this->quantity_produced = (string) $record->quantity_produced;
+        $this->target_quantity = (string) ($record->target_quantity ?? '');
         $this->mine_area_id = $record->mine_area_id;
         $this->machine_id = $record->machine_id;
         $this->status = $record->status;
-        $this->notes = $record->notes;
+        $this->notes = $record->notes ?? '';
         $this->showEditModal = true;
     }
 
@@ -470,6 +471,7 @@ class ProductionDashboard extends Component
 
     public function saveRecord(): void
     {
+        /** @var array<string, mixed> $validated */
         $validated = $this->validate([
             'record_date' => 'required|date',
             'shift' => 'required|in:day,night,continuous',
@@ -481,7 +483,6 @@ class ProductionDashboard extends Component
         ]);
 
         if (($this->editingRecordId !== null && $this->editingRecordId !== 0)) {
-            /** @var ProductionRecord $record */
             $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($this->editingRecordId);
             $this->productionService()->updateProductionRecord($record, [
                 ...$validated,
@@ -505,7 +506,6 @@ class ProductionDashboard extends Component
      */
     public function deleteRecord($id): void
     {
-        /** @var ProductionRecord $record */
         $record = ProductionRecord::where('team_id', $this->teamId)->findOrFail($id);
         $this->productionService()->deleteProductionRecord($record);
     }

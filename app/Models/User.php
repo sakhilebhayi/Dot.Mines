@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\VerifyEmailNotification;
+use App\Support\ApiPayload;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
@@ -108,7 +110,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get roles for current team
      */
-    /** @return BelongsToMany<Role,$this> */
+    /** @return BelongsToMany<Role,$this,Pivot,'pivot'> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user');
@@ -139,17 +141,18 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasRole(string|Role $role): bool
     {
+        $query = $this->roles();
+        $query->where('team_id', $this->current_team_id);
+
         if (is_string($role)) {
-            return $this->roles()
-                ->where('team_id', $this->current_team_id)
-                ->where('name', $role)
-                ->exists();
+            $query->where('name', $role);
+        } else {
+            // Previously `whereIn('name', (array) $role)`, which cast the
+            // Role MODEL's object properties to an array -- never its name.
+            $query->where('roles.id', $role->id);
         }
 
-        return $this->roles()
-            ->where('team_id', $this->current_team_id)
-            ->whereIn('name', (array) $role)
-            ->exists();
+        return (bool) $query->exists();
     }
 
     /**
@@ -238,10 +241,10 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
-        $start = $preferences['quiet_hours_start'] ?? null;
-        $end = $preferences['quiet_hours_end'] ?? null;
+        $start = ApiPayload::str($preferences['quiet_hours_start'] ?? null);
+        $end = ApiPayload::str($preferences['quiet_hours_end'] ?? null);
 
-        if (! $start || ! $end) {
+        if ($start === '' || $end === '') {
             return false;
         }
 

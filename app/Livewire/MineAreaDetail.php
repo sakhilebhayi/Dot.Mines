@@ -14,6 +14,8 @@ use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use App\Models\User;
 use App\Services\FileUploadService;
+use App\Support\ApiPayload;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +25,9 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
+/**
+ * @psalm-suppress MissingConstructor -- Livewire injects $mineArea via mount()
+ */
 class MineAreaDetail extends Component
 {
     use WithFileUploads, WithPagination;
@@ -264,7 +269,7 @@ class MineAreaDetail extends Component
         ProductionRecord::create([
             'team_id' => $team->id,
             'mine_area_id' => $this->mineArea->id,
-            'machine_id' => $this->productionMachineId ?: null,
+            'machine_id' => $this->productionMachineId !== null && $this->productionMachineId !== 0 ? $this->productionMachineId : null,
             'record_date' => $this->productionDate,
             'shift' => $this->productionShift,
             'quantity_produced' => $this->quantityProduced,
@@ -425,8 +430,8 @@ class MineAreaDetail extends Component
             abort(403);
         }
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
-        $disk = data_get($plan->metadata, 'disk', 'public');
-        Storage::disk($disk)->delete($plan->file_path);
+        $disk = ApiPayload::str(data_get($plan->metadata, 'disk'), 'public');
+        Storage::disk($disk)->delete($plan->file_path ?? '');
         $plan->delete();
 
         $this->dispatch('notify', ['message' => 'Mine plan deleted', 'type' => 'success']);
@@ -530,7 +535,7 @@ class MineAreaDetail extends Component
         }
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
         $this->authorize('acknowledge', $alert);
-        $alert->acknowledge(Auth::id());
+        $alert->acknowledge(CurrentUser::get()?->id);
 
         $this->dispatch('notify', ['message' => 'Alert acknowledged', 'type' => 'success']);
     }
@@ -546,7 +551,7 @@ class MineAreaDetail extends Component
         }
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
         $this->authorize('resolve', $alert);
-        $alert->resolve(Auth::id());
+        $alert->resolve(CurrentUser::get()?->id);
 
         $this->dispatch('notify', ['message' => 'Alert resolved', 'type' => 'success']);
     }
@@ -733,8 +738,8 @@ class MineAreaDetail extends Component
             ->where('end_date', '>=', $now->toDateString())
             ->first();
 
-        $targetValue = $monthTarget ? $monthTarget->target_quantity : 0;
-        $targetProgress = $targetValue > 0 ? round(($monthProduction / $targetValue) * 100.0, 1) : 0;
+        $targetValue = $monthTarget !== null ? (float) $monthTarget->target_quantity : 0.0;
+        $targetProgress = $targetValue > 0.0 ? round(((float) $monthProduction / $targetValue) * 100.0, 1) : 0.0;
 
         return [
             'today' => $todayProduction,
@@ -742,7 +747,7 @@ class MineAreaDetail extends Component
             'month' => $monthProduction,
             'target' => $targetValue,
             'target_progress' => min($targetProgress, 100),
-            'target_unit' => $monthTarget->unit ?? 'tonnes',
+            'target_unit' => $monthTarget?->unit ?? 'tonnes',
         ];
     }
 }
