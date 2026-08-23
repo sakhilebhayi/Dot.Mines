@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Alert;
+use App\Support\ApiResponse;
 use App\Support\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,15 +57,7 @@ class AlertController extends Controller
             ->orderBy('triggered_at', 'desc')
             ->paginate($perPage);
 
-        return response()->json([
-            'data' => $alerts->items(),
-            'pagination' => [
-                'total' => $alerts->total(),
-                'per_page' => $alerts->perPage(),
-                'current_page' => $alerts->currentPage(),
-                'last_page' => $alerts->lastPage(),
-            ],
-        ]);
+        return ApiResponse::paginated($alerts);
     }
 
     /**
@@ -188,8 +181,6 @@ class AlertController extends Controller
 
         $alerts = $query->orderBy('triggered_at', 'desc')->limit(50)->get();
 
-        return response()->json([
-            'data' => $alerts,
-        ]);
+        return ApiResponse::collection($alerts->all());
     }
 }

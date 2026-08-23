@@ -606,6 +606,18 @@
                         <pre data-prefix=""><code>{{ config('app.url') }}/api</code></pre>
                     </div>
 
+                    <h2>List responses</h2>
+                    <p>Every endpoint that returns a list uses the same envelope, so one handler works everywhere. Rows are always under <code>data</code>; paging information is always under <code>meta</code> and <code>links</code>.</p>
+                    <div class="mockup-code">
+                        <pre data-prefix=""><code>{</code></pre>
+                        <pre data-prefix=""><code>  "data": [ ... ],</code></pre>
+                        <pre data-prefix=""><code>  "links": { "first": "...", "last": "...", "prev": null, "next": "..." },</code></pre>
+                        <pre data-prefix=""><code>  "meta":  { "current_page": 1, "from": 1, "to": 15,</code></pre>
+                        <pre data-prefix=""><code>             "per_page": 15, "last_page": 4, "total": 52 }</code></pre>
+                        <pre data-prefix=""><code>}</code></pre>
+                    </div>
+                    <p>Pass <code>?page=</code> and <code>?per_page=</code> to page through results. Endpoints that return a short, bounded list (for example a machine's recent alerts) omit <code>links</code> and return <code>meta.total</code> only.</p>
+
                     <h2>Common Endpoints</h2>
                     
                     <h3>Machines</h3>

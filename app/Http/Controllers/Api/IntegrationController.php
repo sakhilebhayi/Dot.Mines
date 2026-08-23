@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Jobs\SyncIntegrationMachinesJob;
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -263,10 +264,7 @@ class IntegrationController extends Controller
             ->select('id', 'name', 'model', 'status', 'manufacturer', 'latitude', 'longitude')
             ->paginate(15);
 
-        return response()->json([
-            'success' => true,
-            'data' => $machines,
-        ]);
+        return ApiResponse::paginated($machines, ['success' => true]);
     }
 
     /**

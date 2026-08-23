@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
+use App\Support\ApiResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ class MachineAssignmentController extends Controller
             })
             ->paginate(is_numeric($request->input('per_page')) ? (int) $request->input('per_page') : 15);
 
-        return response()->json($machines);
+        return ApiResponse::paginated($machines);
     }
 
     /**
@@ -50,6 +51,6 @@ class MachineAssignmentController extends Controller
             ])
             ->values();
 
-        return response()->json($history);
+        return ApiResponse::collection($history->all());
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Machine;
 use App\Models\MaintenanceRecord;
 use App\Models\User;
 use App\Services\MaintenanceHealthService;
+use App\Support\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -55,7 +56,7 @@ class MaintenanceRecordController extends Controller
 
         $records = $query->latest('scheduled_at')->paginate(50);
 
-        return response()->json($records);
+        return ApiResponse::paginated($records);
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Models\Machine;
 use App\Models\MachineHealthStatus;
 use App\Models\User;
 use App\Services\MaintenanceHealthService;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -49,7 +50,7 @@ class MachineHealthController extends Controller
 
         $healthStatuses = $query->latest('updated_at')->paginate(50);
 
-        return response()->json($healthStatuses);
+        return ApiResponse::paginated($healthStatuses);
     }
 
     /**

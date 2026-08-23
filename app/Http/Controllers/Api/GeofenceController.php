@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Geofence;
 use App\Support\ApiPayload;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -47,15 +48,7 @@ class GeofenceController extends Controller
         $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 15;
         $geofences = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
-        return response()->json([
-            'data' => $geofences->items(),
-            'pagination' => [
-                'total' => $geofences->total(),
-                'per_page' => $geofences->perPage(),
-                'current_page' => $geofences->currentPage(),
-                'last_page' => $geofences->lastPage(),
-            ],
-        ]);
+        return ApiResponse::paginated($geofences);
     }
 
     /**
