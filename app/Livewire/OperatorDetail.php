@@ -3,16 +3,20 @@
 namespace App\Livewire;
 
 use App\Models\Operator;
+use App\Models\OperatorDocument;
 use App\Models\OperatorMachineAssignment;
 use App\Models\OperatorMedical;
 use App\Models\OperatorQualification;
 use App\Models\OperatorTraining;
 use App\Services\Operators\OperatorCompliance;
+use App\Support\ApiPayload;
 use App\Support\EquipmentType;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 /**
  * One operator's complete operational and compliance profile.
@@ -26,6 +30,8 @@ use Livewire\Component;
  */
 class OperatorDetail extends Component
 {
+    use WithFileUploads;
+
     public Operator $operator;
 
     public string $activeTab = 'overview';
@@ -233,6 +239,97 @@ class OperatorDetail extends Component
 
         $this->operator->update(['employment_status' => $status]);
         $this->operator->refresh()->load(['qualifications', 'medicals', 'trainings']);
+    }
+
+    public bool $showDocumentModal = false;
+
+    public ?TemporaryUploadedFile $documentFile = null;
+
+    public string $documentKind = 'licence';
+
+    public string $documentTitle = '';
+
+    public function uploadDocument(): void
+    {
+        $this->authorize('update', $this->operator);
+
+        // A medical scan is medical information; storing one needs the same
+        // permission as typing the finding in.
+        if ($this->documentKind === OperatorDocument::KIND_MEDICAL) {
+            $this->authorize('manageMedical', $this->operator);
+        }
+
+        $this->validate([
+            'documentFile' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'documentKind' => ['required', Rule::in(array_keys(OperatorDocument::KINDS))],
+            'documentTitle' => 'required|string|max:255',
+        ]);
+
+        $file = $this->documentFile;
+
+        if ($file === null) {
+            return;
+        }
+
+        // Private disk, hashed filename -- the original name is display-only
+        // metadata, never a path component someone typed.
+        $stored = $file->store('operator-documents/'.$this->operator->team_id.'/'.$this->operator->id, 'local');
+
+        if ($stored === false) {
+            $this->addError('documentFile', 'The file could not be stored.');
+
+            return;
+        }
+
+        $this->operator->documents()->create([
+            'team_id' => $this->operator->team_id,
+            'kind' => $this->documentKind,
+            'title' => $this->documentTitle,
+            'disk' => 'local',
+            'path' => $stored,
+            'original_name' => $file->getClientOriginalName(),
+            'mime_type' => ApiPayload::str($file->getMimeType(), 'application/octet-stream'),
+            'size_bytes' => $file->getSize(),
+            'uploaded_by' => auth()->id(),
+        ]);
+
+        $this->showDocumentModal = false;
+        $this->reset(['documentFile', 'documentTitle']);
+        $this->documentKind = 'licence';
+        $this->operator->refresh()->load(['qualifications', 'medicals', 'trainings']);
+    }
+
+    public function deleteDocument(int $documentId): void
+    {
+        $this->authorize('update', $this->operator);
+
+        $document = $this->operator->documents()->whereKey($documentId)->firstOrFail();
+
+        if ($document->isMedical()) {
+            $this->authorize('manageMedical', $this->operator);
+        }
+
+        // Soft delete keeps the row for audit; the file stays on disk with it.
+        $document->delete();
+        $this->operator->refresh()->load(['qualifications', 'medicals', 'trainings']);
+    }
+
+    /**
+     * Documents this user may see: medical-kind rows only with the medical
+     * permission.
+     *
+     * @return EloquentCollection<int, OperatorDocument>
+     */
+    public function getVisibleDocumentsProperty(): EloquentCollection
+    {
+        $query = $this->operator->documents()->getQuery();
+        $query->orderByDesc('id');
+
+        if (! $this->getCanViewMedicalProperty()) {
+            $query->where('kind', '!=', OperatorDocument::KIND_MEDICAL);
+        }
+
+        return $query->get();
     }
 
     /**
