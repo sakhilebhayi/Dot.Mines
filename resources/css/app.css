@@ -96,6 +96,10 @@
 
 /* ==========================================
    SMOOTH ANIMATIONS & TRANSITIONS
+   (R7 dead-code pass: card-hover/stagger/skeleton/tooltip/modal/notification/
+   spinner/ripple/glass/transition-* classes and their keyframes deleted --
+   zero usages across views and JS; ripple is drawn inline by animations.js,
+   animate-shimmer's keyframes live in tailwind.config.js)
    ========================================== */
 
 @layer base {
@@ -123,14 +127,6 @@
         animation: pageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
-    /* Card hover effects */
-    .card-hover {
-        @apply transition-all duration-300 ease-out;
-        @apply hover:shadow-xl hover:shadow-blue-500/10;
-        @apply hover:-translate-y-1;
-        @apply hover:scale-[1.02];
-    }
-    
     /* Button animations */
     .btn-animate {
         @apply transition-all duration-200 ease-in-out;
@@ -152,118 +148,6 @@
         animation: fadeIn 0.5s ease-out forwards;
     }
     
-    .fade-in-up {
-        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    
-    .fade-in-down {
-        animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    
-    /* Stagger animations for lists */
-    .stagger-item {
-        opacity: 0;
-        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    
-    .stagger-item:nth-child(1) { animation-delay: 0.05s; }
-    .stagger-item:nth-child(2) { animation-delay: 0.1s; }
-    .stagger-item:nth-child(3) { animation-delay: 0.15s; }
-    .stagger-item:nth-child(4) { animation-delay: 0.2s; }
-    .stagger-item:nth-child(5) { animation-delay: 0.25s; }
-    .stagger-item:nth-child(6) { animation-delay: 0.3s; }
-    .stagger-item:nth-child(7) { animation-delay: 0.35s; }
-    .stagger-item:nth-child(8) { animation-delay: 0.4s; }
-    
-    /* Pulse effects */
-    .pulse-slow {
-        animation: pulseGlow 3s ease-in-out infinite;
-    }
-    
-    /* Skeleton loading */
-    .skeleton-loading {
-        @apply bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800;
-        @apply animate-shimmer;
-        background-size: 200% 100%;
-    }
-    
-    /* Tooltip animations */
-    .tooltip {
-        @apply transition-all duration-200;
-        @apply opacity-0 scale-95;
-        @apply hover:opacity-100 hover:scale-100;
-    }
-    
-    /* Modal animations */
-    .modal-backdrop {
-        @apply transition-all duration-300;
-        animation: fadeIn 0.3s ease-out;
-    }
-    
-    .modal-content {
-        animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    /* Notification slide in */
-    .notification {
-        animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    /* Loading spinner */
-    .spinner {
-        animation: spin 1s linear infinite;
-    }
-    
-    /* Bounce attention */
-    .bounce-attention {
-        animation: bounceAttention 2s ease-in-out infinite;
-    }
-    
-    /* Ripple effect */
-    .ripple {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .ripple::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
-    
-    .ripple:active::before {
-        width: 300px;
-        height: 300px;
-    }
-}
-
-@layer utilities {
-    /* Glass morphism effect */
-    .glass {
-        @apply bg-white/5 backdrop-blur-lg;
-        @apply border border-white/10;
-        @apply shadow-xl;
-    }
-    
-    /* Smooth transitions */
-    .transition-smooth {
-        @apply transition-all duration-300 ease-out;
-    }
-    
-    .transition-fast {
-        @apply transition-all duration-150 ease-out;
-    }
-    
-    .transition-slow {
-        @apply transition-all duration-500 ease-out;
-    }
 }
 
 /* ==========================================
@@ -279,28 +163,6 @@
     }
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 @keyframes pageSlideIn {
     from {
         opacity: 0;
@@ -309,66 +171,6 @@
     to {
         opacity: 1;
         transform: translateX(0);
-    }
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(100px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes pulseGlow {
-    0%, 100% {
-        opacity: 1;
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-    }
-    50% {
-        opacity: 0.8;
-        box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
-    }
-}
-
-@keyframes bounceAttention {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-    100% {
-        background-position: 200% 0;
     }
 }
 
@@ -404,11 +206,6 @@
 /* Dashboard entrance animations (moved from resources/views/livewire/dashboard.blade.php
    so they ship once in the compiled stylesheet instead of being re-rendered inline on
    every wire:poll update, which broke CSP since each Livewire response gets its own nonce) */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
 @keyframes slideDown {
     from {
         opacity: 0;

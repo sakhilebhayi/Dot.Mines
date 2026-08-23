@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/live-map.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/live-map.js', 'resources/js/fleet-movement-replay.js'],
             refresh: true,
         }),
         tailwindcss(),
