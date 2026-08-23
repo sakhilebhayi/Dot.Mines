@@ -74,6 +74,10 @@ class TeamRoleProvisioner
             ['name' => 'manage_users', 'display_name' => 'Manage Users', 'group' => 'settings', 'description' => 'Add/remove team members'],
             ['name' => 'manage_roles', 'display_name' => 'Manage Roles', 'group' => 'settings', 'description' => 'Assign roles to users'],
 
+            ['name' => 'view_operators', 'display_name' => 'View Operators', 'group' => 'operators', 'description' => 'See operators, their assignments and compliance status'],
+            ['name' => 'manage_operators', 'display_name' => 'Manage Operators', 'group' => 'operators', 'description' => 'Create and edit operators, qualifications and training'],
+            ['name' => 'view_operator_medicals', 'display_name' => 'View Operator Medicals', 'group' => 'operators', 'description' => 'See medical fitness details and restrictions'],
+            ['name' => 'manage_operator_medicals', 'display_name' => 'Manage Operator Medicals', 'group' => 'operators', 'description' => 'Record and edit medical fitness information'],
             ['name' => 'view_recommendations', 'display_name' => 'View AI Recommendations', 'group' => 'ai', 'description' => 'View AI-generated recommendations and insights'],
             ['name' => 'update_recommendations', 'display_name' => 'Act on AI Recommendations', 'group' => 'ai', 'description' => 'Implement or reject AI-generated recommendations'],
         ];
@@ -98,6 +102,7 @@ class TeamRoleProvisioner
                     'view_alerts', 'acknowledge_alerts', 'resolve_alerts',
                     'view_settings',
                     'view_recommendations', 'update_recommendations',
+                    'view_operators', 'manage_operators',
                 ],
             ],
             'operator' => [
@@ -111,6 +116,7 @@ class TeamRoleProvisioner
                     'view_mine_areas',
                     'view_alerts', 'acknowledge_alerts',
                     'view_recommendations',
+                    'view_operators',
                 ],
             ],
             'viewer' => [
