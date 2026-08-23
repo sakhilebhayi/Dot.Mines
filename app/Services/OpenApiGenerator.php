@@ -778,7 +778,9 @@ final class OpenApiGenerator
                 .'cannot modify anything.',
             '**Tenancy.** Every request is scoped to the token owner\'s current team. You will never see '
                 .'another team\'s records, and you do not pass a team id.',
-            '**Lists.** All list endpoints return `{data, links, meta}` and accept `page` and `per_page`.',
+            '**Lists.** All list endpoints return `{data, links, meta}` and accept `page` and `per_page`. '
+                .'The default page size is 15 and the maximum is 100; asking for more is rejected rather than '
+                .'silently trimmed, so you always know what you got.',
             '**Field names are stable.** Responses are an explicit set of fields, not a dump of the '
                 .'database, so internal columns are never returned and a schema change will not alter your payload.',
             '**Parameter names.** One vocabulary across the API: `start_date`/`end_date` bound a time range, '
@@ -786,6 +788,9 @@ final class OpenApiGenerator
                 .'`date_from`/`date_to` and `filter_status`/`filter_type` are still accepted so existing '
                 .'integrations keep working, but they are deprecated -- prefer the names documented here. If you '
                 .'send both, the documented name wins.',
+            '**Errors.** A rejected request answers with the same shape everywhere: `message` explains the failure and '
+                .'`errors` names the fields that caused it, keyed by field name. The status code is the only '
+                .'success/failure signal you need.',
             '**Rate limit.** 60 requests per minute per user.',
         ]);
     }

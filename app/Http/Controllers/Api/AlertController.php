@@ -6,6 +6,7 @@ use App\Http\Resources\AlertResource;
 use App\Models\Alert;
 use App\Support\ApiResponse;
 use App\Support\CurrentUser;
+use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -51,12 +52,9 @@ class AlertController extends Controller
             $query->where('machine_id', $request->input('machine_id'));
         }
 
-        /** @psalm-suppress MixedAssignment */
-        $perPageRaw = $request->input('per_page');
-        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 25;
         $alerts = $query->with('machine')
             ->orderBy('triggered_at', 'desc')
-            ->paginate($perPage);
+            ->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($alerts, AlertResource::class);
     }

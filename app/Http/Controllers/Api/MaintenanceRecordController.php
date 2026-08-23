@@ -9,6 +9,7 @@ use App\Models\MaintenanceRecord;
 use App\Models\User;
 use App\Services\MaintenanceHealthService;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,11 @@ class MaintenanceRecordController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $query = MaintenanceRecord::with(['machine', 'team', 'assignedTo', 'completedBy'])
             ->where('team_id', $this->currentTeamId($request));
 
@@ -55,7 +61,7 @@ class MaintenanceRecordController extends Controller
             $query->where('assigned_to', $request->input('assigned_to'));
         }
 
-        $records = $query->latest('scheduled_at')->paginate(50);
+        $records = $query->latest('scheduled_at')->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($records, MaintenanceRecordResource::class);
     }

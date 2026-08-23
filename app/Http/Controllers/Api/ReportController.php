@@ -7,6 +7,7 @@ use App\Jobs\GenerateReportJob;
 use App\Models\Report;
 use App\Support\ApiPayload;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -43,12 +44,9 @@ class ReportController extends Controller
             $query->where('type', $request->input('type'));
         }
 
-        /** @psalm-suppress MixedAssignment */
-        $perPageRaw = $request->input('per_page');
-        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 15;
         $reports = $query->with('generatedBy')
             ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+            ->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($reports, ReportResource::class);
     }

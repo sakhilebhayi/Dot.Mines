@@ -9,6 +9,7 @@ use App\Models\MachineHealthStatus;
 use App\Models\User;
 use App\Services\MaintenanceHealthService;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,11 @@ class MachineHealthController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $query = MachineHealthStatus::with(['machine', 'team'])
             ->where('team_id', $this->currentTeamId($request));
 
@@ -49,7 +55,7 @@ class MachineHealthController extends Controller
             $query->critical();
         }
 
-        $healthStatuses = $query->latest('updated_at')->paginate(50);
+        $healthStatuses = $query->latest('updated_at')->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($healthStatuses, MachineHealthResource::class);
     }

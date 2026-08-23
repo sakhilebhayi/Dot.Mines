@@ -9,6 +9,7 @@ use App\Models\MaintenanceSchedule;
 use App\Models\User;
 use App\Services\MaintenanceHealthService;
 use App\Support\ApiResponse;
+use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,11 @@ class MaintenanceScheduleController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $query = MaintenanceSchedule::with(['machine', 'team'])
             ->where('team_id', $this->currentTeamId($request));
 
@@ -54,7 +60,7 @@ class MaintenanceScheduleController extends Controller
             $query->overdue();
         }
 
-        $schedules = $query->latest('next_service_date')->paginate(50);
+        $schedules = $query->latest('next_service_date')->paginate(PageSize::from($request));
 
         return ApiResponse::paginated($schedules, MaintenanceScheduleResource::class);
     }
