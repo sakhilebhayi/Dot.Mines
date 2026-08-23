@@ -8,8 +8,8 @@ A new alert has been triggered that requires your attention.
 
 Alert: {{ $notification->title }}
 Level: {{ strtoupper($notification->alert_level ?? 'info') }}
-@if (!empty($notification->body))
-Details: {{ $notification->body }}
+@if (!empty($notification->message))
+Details: {{ $notification->message }}
 @endif
 Time: {{ $notification->created_at->format('D, d M Y H:i T') }}
 

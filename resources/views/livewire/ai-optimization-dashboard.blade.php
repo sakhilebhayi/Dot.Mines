@@ -293,12 +293,18 @@
                             </details>
                         @endif
 
-                        @if($recommendation->actionable_steps)
+                        @php
+                            // The agents publish their step lists inside impact_analysis;
+                            // ->actionable_steps was a phantom attribute (always null), so
+                            // this section had never rendered at all.
+                            $actionSteps = data_get($recommendation->impact_analysis, 'recommended_actions');
+                        @endphp
+                        @if(is_array($actionSteps) && count($actionSteps) > 0)
                             <div class="mt-4 pt-4 border-t border-[var(--line)]">
                                 <h4 class="text-sm font-semibold text-[var(--sand)] mb-2">Action Steps:</h4>
                                 <ul class="list-disc list-inside space-y-1 text-sm text-[var(--sand)]">
-                                    @foreach($recommendation->actionable_steps as $step)
-                                        <li>{{ $step }}</li>
+                                    @foreach($actionSteps as $step)
+                                        <li>{{ is_scalar($step) ? $step : json_encode($step) }}</li>
                                     @endforeach
                                 </ul>
                             </div>
@@ -369,7 +375,8 @@
                             </div>
                             <div class="flex-1">
                                 <h3 class="font-semibold text-[var(--stone)] mb-1">{{ $insight->title }}</h3>
-                                <p class="text-sm text-[var(--sand)] mb-2">{{ $insight->insight }}</p>
+                                {{-- description is the real content column; ->insight was a phantom attribute that rendered every card body empty --}}
+                                <p class="text-sm text-[var(--sand)] mb-2">{{ $insight->description }}</p>
                                 <div class="flex items-center gap-2 text-xs">
                                     <span class="px-2 py-1 bg-white/10 rounded-full text-[var(--sand)] capitalize">
                                         {{ $insight->category }}

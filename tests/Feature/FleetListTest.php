@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Fleet;
 use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\TeamRoleProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class FleetListTest extends TestCase
@@ -210,5 +213,36 @@ class FleetListTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSee('Other Team Excavator');
+    }
+
+    public function test_manually_entered_coordinates_persist_to_the_real_location_columns(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+        TeamRoleProvisioner::assignRole($user->fresh(), $team, 'admin');
+
+        $machine = Machine::factory()->create([
+            'team_id' => $team->id,
+            'model' => 'B45E',
+            'status' => 'active',
+            'last_location_latitude' => null,
+            'last_location_longitude' => null,
+        ]);
+
+        // The edit form wrote nonexistent latitude/longitude columns for its
+        // whole life -- mass assignment silently dropped the user's
+        // coordinates. This pins the fix to last_location_*.
+        Livewire::actingAs($user->fresh())
+            ->test(Fleet::class)
+            ->call('editMachine', $machine->id)
+            ->set('latitude', -26.1234)
+            ->set('longitude', 28.5678)
+            ->call('saveMachine')
+            ->assertHasNoErrors();
+
+        $machine->refresh();
+        $this->assertEqualsWithDelta(-26.1234, $machine->last_location_latitude, 0.0001);
+        $this->assertEqualsWithDelta(28.5678, $machine->last_location_longitude, 0.0001);
     }
 }

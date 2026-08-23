@@ -870,7 +870,7 @@
                     <select id="mineAreaSelect" wire:model="selectedMineAreaId" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] text-[var(--stone)] rounded-lg focus:ring-2 focus:ring-[var(--gold)] focus:border-[var(--gold)]">
                         <option value="">-- Choose Mine Area --</option>
                         @foreach ($mineAreas as $area)
-                            <option value="{{ $area->id }}">{{ $area->name }} ({{ ucfirst($area->type) }})</option>
+                            <option value="{{ $area->id }}">{{ $area->name }}</option>
                         @endforeach
                     </select>
                 </div>

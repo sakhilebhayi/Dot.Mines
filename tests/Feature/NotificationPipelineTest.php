@@ -169,4 +169,31 @@ class NotificationPipelineTest extends TestCase
         Queue::assertPushedOn('notifications', SendNotificationEmailJob::class);
         Event::assertDispatched(NotificationCreated::class);
     }
+
+    public function test_alert_mail_renders_the_message_in_both_html_and_plain_text(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $notification = Notification::factory()->create([
+            'team_id' => $user->currentTeam->id,
+            'title' => 'Pump 3 pressure drop',
+            'message' => 'Discharge pressure fell 40% in ten minutes.',
+            'alert_level' => 'critical',
+        ]);
+
+        $mail = new NotificationAlertMail($notification, $user);
+        $rendered = $mail->render();
+
+        $this->assertStringContainsString('Discharge pressure fell 40% in ten minutes.', $rendered);
+
+        // The plain-text part read a phantom ->body attribute (the column is
+        // `message`), so the Details line silently vanished from every
+        // text-format alert email.
+        $text = view('emails.text.notification-alert', [
+            'notification' => $notification,
+            'recipient' => $user,
+            'unsubscribeUrl' => 'https://example.test/unsubscribe',
+        ])->render();
+
+        $this->assertStringContainsString('Discharge pressure fell 40% in ten minutes.', $text);
+    }
 }

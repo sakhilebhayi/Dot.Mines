@@ -7,4 +7,5 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/** | .ai/rules/app.md |
 | phpstan-baseline.neon | .ai/rules/general.md |
 | resources/js/** | .ai/rules/js.md |
+| app/Mail/** | .ai/rules/mail.md |
 | resources/views/** | .ai/rules/views.md |
