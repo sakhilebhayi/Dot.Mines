@@ -26,6 +26,7 @@ trait HasTeamFilters
 
             // Allow non-HTTP contexts (jobs/commands) to set the current team
             if (($teamId === null || $teamId === 0) && app()->has('current_team_id')) {
+                /** @var mixed $bound */
                 $bound = app('current_team_id');
                 $teamId = is_numeric($bound) ? (int) $bound : null;
             }

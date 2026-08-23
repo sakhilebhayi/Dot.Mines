@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use App\Traits\HasTeamFilters;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property mixed|null $km_at_replacement
- * @property mixed|null $hours_at_replacement
+ * @property int|null $km_at_replacement
+ * @property int|null $hours_at_replacement
  * @property int|null $expected_lifespan_km
  * @property int|null $expected_lifespan_hours
- * @property mixed|null $warranty_expiry
+ * @property Carbon|null $warranty_expiry
  */
 class ComponentReplacement extends Model
 {
@@ -111,7 +112,7 @@ class ComponentReplacement extends Model
             return null;
         }
 
-        return $this->hours_at_replacement + $this->expected_lifespan_hours;
+        return ($this->hours_at_replacement ?? 0) + $this->expected_lifespan_hours;
     }
 
     /**
@@ -123,7 +124,7 @@ class ComponentReplacement extends Model
             return null;
         }
 
-        return $this->km_at_replacement + $this->expected_lifespan_km;
+        return ($this->km_at_replacement ?? 0) + $this->expected_lifespan_km;
     }
 
     /**
@@ -131,13 +132,16 @@ class ComponentReplacement extends Model
      */
     public function isDueByHours(Machine $machine): bool
     {
-        if (($this->expected_lifespan_hours === null || $this->expected_lifespan_hours === 0) || ! $machine->operating_hours) {
+        $lifespan = $this->expected_lifespan_hours;
+        $operating = $machine->operating_hours !== null ? (float) $machine->operating_hours : null;
+
+        if ($lifespan === null || $lifespan === 0 || $operating === null || $operating === 0.0) {
             return false;
         }
 
-        $hoursOnComponent = $machine->operating_hours - $this->hours_at_replacement;
+        $hoursOnComponent = $operating - (float) ($this->hours_at_replacement ?? 0);
 
-        return $hoursOnComponent >= $this->expected_lifespan_hours;
+        return $hoursOnComponent >= (float) $lifespan;
     }
 
     /**
@@ -145,13 +149,16 @@ class ComponentReplacement extends Model
      */
     public function isDueByKm(Machine $machine): bool
     {
-        if (($this->expected_lifespan_km === null || $this->expected_lifespan_km === 0) || ! $machine->total_distance_km) {
+        $lifespan = $this->expected_lifespan_km;
+        $distance = $machine->total_distance_km !== null ? (float) $machine->total_distance_km : null;
+
+        if ($lifespan === null || $lifespan === 0 || $distance === null || $distance === 0.0) {
             return false;
         }
 
-        $kmOnComponent = $machine->total_distance_km - $this->km_at_replacement;
+        $kmOnComponent = $distance - (float) ($this->km_at_replacement ?? 0);
 
-        return $kmOnComponent >= $this->expected_lifespan_km;
+        return $kmOnComponent >= (float) $lifespan;
     }
 
     /**
@@ -159,18 +166,24 @@ class ComponentReplacement extends Model
      */
     public function getRemainingLifespanPercentage(Machine $machine): ?float
     {
-        if (($this->expected_lifespan_hours !== null && $this->expected_lifespan_hours !== 0) && $machine->operating_hours) {
-            $hoursUsed = $machine->operating_hours - $this->hours_at_replacement;
-            $percentage = (($this->expected_lifespan_hours - $hoursUsed) / $this->expected_lifespan_hours) * 100;
+        $lifespanHours = $this->expected_lifespan_hours;
+        $operating = $machine->operating_hours !== null ? (float) $machine->operating_hours : null;
 
-            return max(0, min(100, $percentage));
+        if ($lifespanHours !== null && $lifespanHours !== 0 && $operating !== null && $operating !== 0.0) {
+            $hoursUsed = $operating - (float) ($this->hours_at_replacement ?? 0);
+            $percentage = (((float) $lifespanHours - $hoursUsed) / (float) $lifespanHours) * 100.0;
+
+            return max(0.0, min(100.0, $percentage));
         }
 
-        if (($this->expected_lifespan_km !== null && $this->expected_lifespan_km !== 0) && $machine->total_distance_km) {
-            $kmUsed = $machine->total_distance_km - $this->km_at_replacement;
-            $percentage = (($this->expected_lifespan_km - $kmUsed) / $this->expected_lifespan_km) * 100;
+        $lifespanKm = $this->expected_lifespan_km;
+        $distance = $machine->total_distance_km !== null ? (float) $machine->total_distance_km : null;
 
-            return max(0, min(100, $percentage));
+        if ($lifespanKm !== null && $lifespanKm !== 0 && $distance !== null && $distance !== 0.0) {
+            $kmUsed = $distance - (float) ($this->km_at_replacement ?? 0);
+            $percentage = (((float) $lifespanKm - $kmUsed) / (float) $lifespanKm) * 100.0;
+
+            return max(0.0, min(100.0, $percentage));
         }
 
         return null;
@@ -181,6 +194,6 @@ class ComponentReplacement extends Model
      */
     protected function getIsUnderWarrantyAttribute(): bool
     {
-        return $this->warranty_expiry && $this->warranty_expiry >= now();
+        return $this->warranty_expiry !== null && $this->warranty_expiry >= now();
     }
 }
