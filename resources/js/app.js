@@ -57,26 +57,12 @@ window.RealtimeMapManager = RealtimeMapManager;
 window.ToastNotificationService = ToastNotificationService;
 window.GeofenceVisualizationManager = GeofenceVisualizationManager;
 
-// Ensure Livewire-dispatched events are re-dispatched on `window` so
-// Alpine listeners using `@notify.window` receive them reliably.
-document.addEventListener('livewire:load', function () {
-	if (window.Livewire && typeof window.Livewire.hook === 'function') {
-		window.Livewire.hook('message.processed', (message, component) => {
-			try {
-				const dispatches = message?.response?.effects?.dispatches || [];
-				dispatches.forEach(d => {
-					const name = d.name;
-					// Livewire sends params as an array; we take the first element as payload
-					const payload = (d.params && d.params.length) ? d.params[0] : {};
-					window.dispatchEvent(new CustomEvent(name, { detail: payload, bubbles: true, composed: true }));
-				});
-			} catch (e) {
-				// swallow — non-critical
-				console.error('Livewire dispatch re-dispatch failed', e);
-			}
-		});
-	}
-});
+// (R7 dead-code pass) A Livewire v2-era block lived here that re-dispatched
+// component events onto window from a 'livewire:load' listener via the
+// 'message.processed' hook. Livewire v3 emits neither ('livewire:init' /
+// v3 hook names replaced them), so the listener never fired -- and v3
+// already dispatches component events as window CustomEvents natively,
+// which is why @notify.window has been working all along.
 
 // Body scroll lock for standardised overlays (`data-app-overlay`). These
 // modals mount/unmount via Blade @if, so DOM presence is the open signal.
