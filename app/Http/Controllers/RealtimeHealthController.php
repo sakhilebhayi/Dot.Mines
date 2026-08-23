@@ -91,8 +91,7 @@ class RealtimeHealthController extends Controller
         // dial the loopback interface instead when that's what's configured.
         $host = ApiPayload::str(config('reverb.servers.reverb.host'), '127.0.0.1');
         $host = $host === '0.0.0.0' || $host === '' ? '127.0.0.1' : $host;
-        $portRaw = config('reverb.servers.reverb.port');
-        $port = is_numeric($portRaw) ? (int) $portRaw : 8080;
+        $port = ApiPayload::int(config('reverb.servers.reverb.port'), 8080);
 
         $connection = @fsockopen($host, $port, $errno, $errstr, 1.0);
 
