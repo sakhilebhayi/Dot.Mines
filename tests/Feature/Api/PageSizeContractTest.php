@@ -11,6 +11,7 @@ use App\Services\TeamRoleProvisioner;
 use App\Support\PageSize;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -61,9 +62,7 @@ class PageSizeContractTest extends TestCase
         return $user->fresh();
     }
 
-    /**
-     * @dataProvider listEndpoints
-     */
+    #[DataProvider('listEndpoints')]
     public function test_every_list_endpoint_uses_the_same_default_page_size(string $endpoint): void
     {
         $this->actingUser();
@@ -77,9 +76,7 @@ class PageSizeContractTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider listEndpoints
-     */
+    #[DataProvider('listEndpoints')]
     public function test_every_list_endpoint_honours_per_page(string $endpoint): void
     {
         $this->actingUser();
@@ -93,9 +90,7 @@ class PageSizeContractTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider listEndpoints
-     */
+    #[DataProvider('listEndpoints')]
     public function test_no_list_endpoint_can_be_asked_for_an_unbounded_page(string $endpoint): void
     {
         $this->actingUser();
