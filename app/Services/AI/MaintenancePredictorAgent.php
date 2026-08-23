@@ -5,8 +5,10 @@ namespace App\Services\AI;
 use App\Models\AIAgent;
 use App\Models\AIPredictiveAlert;
 use App\Models\Machine;
+use App\Models\MachineMetric;
 use App\Models\MaintenanceSchedule;
 use App\Models\Team;
+use Illuminate\Support\Collection;
 
 /**
  * Maintenance Predictor AI Agent
@@ -49,9 +51,15 @@ class MaintenancePredictorAgent
             ->with(['healthStatus', 'maintenanceRecords'])
             ->get();
 
+        // Batch the per-machine metric aggregates (30-day counter window and
+        // 7-day average) into two grouped queries -- the per-machine helpers
+        // used to fire 4-5 queries EACH inside this loop.
+        $metricWindows30 = $this->metricWindowsForMachines($machines->pluck('id')->all(), 30);
+        $metricWindows7 = $this->metricWindowsForMachines($machines->pluck('id')->all(), 7);
+
         foreach ($machines as $machine) {
             // Calculate risk score based on multiple factors
-            $riskScore = $this->calculateBreakdownRisk($machine);
+            $riskScore = $this->calculateBreakdownRisk($machine, $metricWindows30->get($machine->id));
 
             if ($riskScore > 0.7) {
                 // High risk of breakdown
@@ -68,7 +76,7 @@ class MaintenancePredictorAgent
                     'data' => [
                         'risk_score' => round($riskScore, 2),
                         'estimated_days_until_breakdown' => $daysUntilBreakdown,
-                        'contributing_factors' => $this->getContributingFactors($machine),
+                        'contributing_factors' => $this->getContributingFactors($machine, $metricWindows7->get($machine->id)),
                         'last_maintenance' => $machine->maintenanceRecords->sortByDesc('completed_at')->first()?->completed_at?->format('Y-m-d'),
                     ],
                     'impact_analysis' => [
@@ -116,7 +124,7 @@ class MaintenancePredictorAgent
             }
 
             // Check for optimal maintenance timing
-            if ($riskScore < 0.3 && $this->isOptimalMaintenanceTime($machine)) {
+            if ($riskScore < 0.3 && $this->isOptimalMaintenanceTime($metricWindows7->get($machine->id))) {
                 $recommendations[] = [
                     'category' => 'maintenance',
                     'priority' => 'low',
@@ -150,6 +158,11 @@ class MaintenancePredictorAgent
             ->with('machine')
             ->get();
 
+        $usageWindows = $this->metricWindowsForMachines(
+            $schedules->pluck('machine_id')->filter()->unique()->values()->all(),
+            30
+        );
+
         foreach ($schedules as $schedule) {
             $machine = $schedule->machine;
 
@@ -158,7 +171,7 @@ class MaintenancePredictorAgent
             }
 
             // Check if schedule is optimal based on machine usage
-            $actualUsage = $this->getMachineUsageRate($machine);
+            $actualUsage = $usageWindows->get($machine->id)?->avgHours ?? 0.0;
             $scheduledInterval = $schedule->interval_days;
 
             $optimalInterval = $this->calculateOptimalInterval($actualUsage);
@@ -189,32 +202,28 @@ class MaintenancePredictorAgent
         return ['recommendations' => $recommendations];
     }
 
-    protected function calculateBreakdownRisk(Machine $machine): float
+    protected function calculateBreakdownRisk(Machine $machine, ?MachineMetricWindow $window30): float
     {
         $riskFactors = [];
 
         // Factor 1: Operating hours (30% weight). operating_hours is a
         // cumulative meter -- hours worked in the window is the counter
         // DELTA, not a sum of readings (summing pegged this factor at max
-        // for every machine with two or more readings).
-        $readings = $machine->metrics()
-            ->whereDate('recorded_at', '>=', now()->subDays(30))
-            ->get()
-            ->pluck('operating_hours')
-            ->filter(fn ($value) => $value !== null)
-            ->map(fn ($value) => (float) $value);
-
-        $operatingHours = $readings->count() >= 2
-            ? max(0.0, (float) $readings->max() - (float) $readings->min())
+        // for every machine with two or more readings). The window comes
+        // pre-aggregated (one grouped query for the whole fleet).
+        $operatingHours = ($window30 !== null && $window30->readingCount >= 2)
+            ? max(0.0, $window30->maxHours - $window30->minHours)
             : 0.0;
         $avgHoursPerDay = $operatingHours / 30.0;
         $riskFactors['hours'] = min(($avgHoursPerDay / 20.0) * 0.3, 0.3); // 20h/day is high
 
-        // Factor 2: Time since last maintenance (25% weight)
-        $lastMaintenance = $machine->maintenanceRecords()
+        // Factor 2: Time since last maintenance (25% weight) -- from the
+        // eager-loaded relation (maintenanceRecords() as a query here was
+        // one of the loop's per-machine round trips).
+        $lastMaintenance = $machine->maintenanceRecords
             ->where('status', 'completed')
             ->whereNotNull('completed_at')
-            ->orderByDesc('completed_at')
+            ->sortByDesc('completed_at')
             ->first();
 
         if ($lastMaintenance) {
@@ -251,7 +260,7 @@ class MaintenancePredictorAgent
      * @return array<string, mixed>
      */
     /** @return list<string> */
-    protected function getContributingFactors(Machine $machine): array
+    protected function getContributingFactors(Machine $machine, ?MachineMetricWindow $window7): array
     {
         $factors = [];
 
@@ -262,17 +271,15 @@ class MaintenancePredictorAgent
             $factors[] = 'Low health score: '.((string) $healthScore);
         }
 
-        $lastMaintenance = $machine->maintenanceRecords()->latest('completed_at')->first();
+        $lastMaintenance = $machine->maintenanceRecords->sortByDesc('completed_at')->first();
         if (! $lastMaintenance || $lastMaintenance->completed_at === null || $lastMaintenance->completed_at->diffInDays(now()) > 90) {
             $factors[] = 'Overdue maintenance';
         }
 
-        $highUsage = $machine->metrics()
-            ->whereDate('recorded_at', '>=', now()->subDays(7))
-            ->avg('operating_hours');
+        $highUsage = $window7?->avgHours;
 
-        if (is_numeric($highUsage) && (float) $highUsage > 18.0) {
-            $factors[] = 'High utilization: '.((string) round((float) $highUsage, 1)).' hours/day';
+        if ($highUsage !== null && $highUsage > 18.0) {
+            $factors[] = 'High utilization: '.((string) round($highUsage, 1)).' hours/day';
         }
 
         if (($machine->year_of_manufacture !== null && $machine->year_of_manufacture !== 0) && (now()->year - $machine->year_of_manufacture) > 10) {
@@ -282,21 +289,47 @@ class MaintenancePredictorAgent
         return $factors;
     }
 
-    protected function isOptimalMaintenanceTime(Machine $machine): bool
+    protected function isOptimalMaintenanceTime(?MachineMetricWindow $window7): bool
     {
-        // Check if machine is in low-demand period
-        $recentHours = $machine->metrics()
-            ->whereDate('recorded_at', '>=', now()->subDays(7))
-            ->avg('operating_hours');
-
-        return $recentHours < 12; // Less than 12 hours/day = low demand
+        // Check if machine is in low-demand period. No readings at all keeps
+        // the old avg()=null < 12 behaviour: counts as low demand.
+        return ($window7?->avgHours ?? 0.0) < 12; // Less than 12 hours/day = low demand
     }
 
-    protected function getMachineUsageRate(Machine $machine): float
+    /**
+     * One grouped query per window: max/min/avg/count of operating_hours per
+     * machine over the trailing N days. Same whereDate bucketing and
+     * non-null filtering the old per-machine queries used.
+     *
+     * @param  list<int>  $machineIds
+     * @return Collection<int, MachineMetricWindow>
+     */
+    protected function metricWindowsForMachines(array $machineIds, int $days): Collection
     {
-        return $machine->metrics()
-            ->whereDate('recorded_at', '>=', now()->subDays(30))
-            ->avg('operating_hours') ?? 0;
+        if ($machineIds === []) {
+            return collect();
+        }
+
+        $rows = MachineMetric::query()
+            ->whereIn('machine_id', $machineIds)
+            ->whereDate('recorded_at', '>=', now()->subDays($days))
+            ->whereNotNull('operating_hours')
+            ->selectRaw('machine_id, MAX(operating_hours) as max_hours, MIN(operating_hours) as min_hours, AVG(operating_hours) as avg_hours, COUNT(*) as reading_count')
+            ->groupBy('machine_id')
+            ->get();
+
+        $windows = collect();
+
+        foreach ($rows as $row) {
+            $windows->put((int) data_get($row, 'machine_id'), new MachineMetricWindow(
+                maxHours: (float) data_get($row, 'max_hours'),
+                minHours: (float) data_get($row, 'min_hours'),
+                avgHours: (float) data_get($row, 'avg_hours'),
+                readingCount: (int) data_get($row, 'reading_count'),
+            ));
+        }
+
+        return $windows;
     }
 
     protected function calculateOptimalInterval(float $usageRate): int

@@ -274,7 +274,8 @@
                                     </div>
                                     @if(isset($recommendation['related_machine_id']))
                                         @php
-                                            $machine = \App\Models\Machine::find($recommendation['related_machine_id']);
+                                            // Keyed off the already-loaded fleet list; a Machine::find() here ran one query per recommendation.
+                                            $machine = $machinesById->get($recommendation['related_machine_id']);
                                         @endphp
                                         @if($machine)
                                             <div class="text-xs text-[var(--sand)] mb-2">

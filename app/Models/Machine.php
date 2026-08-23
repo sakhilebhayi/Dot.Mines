@@ -50,6 +50,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Team|null $team
  * @property-read Integration|null $integration
  * @property-read MineArea|null $mineArea
+ * @property-read MachineMetric|null $latestFuelMetric
  * @property-read Machine|null $excavator
  * @property-read MachineHealthStatus|null $healthStatus
  * @property-read Collection<int, Alert> $alerts
@@ -328,6 +329,20 @@ class Machine extends Model
         return $this->hasOne(MachineMetric::class)->ofMany(
             ['created_at' => 'max', 'id' => 'max'],
             fn (Builder $query): mixed => $query->whereNotNull('operating_hours')
+        );
+    }
+
+    /**
+     * The newest metric carrying a fuel-level reading -- eager-loadable so
+     * Fuel Management's per-machine activity table avoids an N+1.
+     *
+     * @return HasOne<MachineMetric,$this>
+     */
+    public function latestFuelMetric(): HasOne
+    {
+        return $this->hasOne(MachineMetric::class)->ofMany(
+            ['recorded_at' => 'max', 'id' => 'max'],
+            fn (Builder $query): mixed => $query->whereNotNull('fuel_level')
         );
     }
 
