@@ -6,12 +6,20 @@
                 <h2 class="text-3xl font-display font-semibold text-[var(--stone)]">Integrations</h2>
                 <p class="text-[var(--sand)] mt-2">Manage your equipment manufacturer connections</p>
             </div>
-            <button
-                wire:click="openAddModal"
-                class="px-6 py-3 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-display font-semibold transition"
-            >
-                + Add Integration
-            </button>
+            <div class="flex items-center gap-3">
+                <a
+                    href="{{ route('integrations.webhooks') }}"
+                    class="px-5 py-3 border border-[var(--line-strong)] text-[var(--sand)] hover:text-[var(--stone)] rounded-lg font-display transition"
+                >
+                    Webhooks
+                </a>
+                <button
+                    wire:click="openAddModal"
+                    class="px-6 py-3 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-display font-semibold transition"
+                >
+                    + Add Integration
+                </button>
+            </div>
         </div>
 
         <div class="mt-4 p-4 bg-[var(--gold)]/10 border border-[var(--gold)]/20 rounded-lg text-[var(--sand)] text-sm">

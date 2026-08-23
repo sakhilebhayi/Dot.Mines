@@ -21,6 +21,7 @@ use App\Livewire\OperatorFatigueTracker;
 use App\Livewire\ProductionDashboard;
 use App\Livewire\RoutePlanning;
 use App\Livewire\SystemHealth;
+use App\Livewire\WebhookManager;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\Report;
@@ -186,6 +187,11 @@ Route::middleware([
     Route::get('/integrations', function () {
         return view('integrations.index');
     })->name('integrations');
+
+    // Outbound webhooks. Registered before /integrations/{integration} so the
+    // literal segment is not swallowed by the wildcard.
+    Route::get('/integrations/webhooks', WebhookManager::class)
+        ->name('integrations.webhooks');
 
     Route::get('/integrations/{integration}', function () {
         return view('integrations.show');
