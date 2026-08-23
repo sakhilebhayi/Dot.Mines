@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\TeamRoleProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -71,9 +72,7 @@ class ListEnvelopeContractTest extends TestCase
         return $user;
     }
 
-    /**
-     * @dataProvider paginatedListEndpoints
-     */
+    #[DataProvider('paginatedListEndpoints')]
     public function test_paginated_list_endpoint_uses_the_standard_envelope(string $endpoint): void
     {
         $this->actingUser();

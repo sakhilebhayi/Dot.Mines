@@ -17,6 +17,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -119,9 +120,7 @@ class PageQueryBudgetTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider pageBudgets
-     */
+    #[DataProvider('pageBudgets')]
     public function test_page_stays_within_its_query_budget(string $page, int $budget): void
     {
         $user = $this->seedRealisticTeam();

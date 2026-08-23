@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\TeamRoleProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -53,9 +54,7 @@ class ValidationErrorShapeTest extends TestCase
         return $user->fresh();
     }
 
-    /**
-     * @dataProvider writeEndpoints
-     */
+    #[DataProvider('writeEndpoints')]
     public function test_an_invalid_body_is_rejected_in_one_shape(string $endpoint): void
     {
         $this->actingAdmin();
@@ -74,9 +73,7 @@ class ValidationErrorShapeTest extends TestCase
         $this->assertArrayNotHasKey('success', $body, "{$endpoint} must not add a second way to detect failure.");
     }
 
-    /**
-     * @dataProvider writeEndpoints
-     */
+    #[DataProvider('writeEndpoints')]
     public function test_the_errors_are_keyed_by_field_name(string $endpoint): void
     {
         $this->actingAdmin();

@@ -4,6 +4,7 @@ namespace Tests\Feature\Webhooks;
 
 use App\Services\Webhooks\HostResolver;
 use App\Services\Webhooks\WebhookUrlGuard;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -60,9 +61,7 @@ class WebhookUrlGuardTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider internalAddresses
-     */
+    #[DataProvider('internalAddresses')]
     public function test_a_host_resolving_inside_the_network_is_refused(string $address, string $host): void
     {
         $guard = $this->guardResolving($address);
