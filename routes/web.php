@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EmailUnsubscribeController;
 use App\Http\Controllers\GdprController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MinePlanDownloadController;
@@ -39,6 +40,13 @@ Route::get('/', function () {
 // Cookie Policy — Jetstream's termsAndPrivacyPolicy feature covers terms.show/policy.show
 // natively. There's no Jetstream equivalent for a Cookie Policy, so this one is wired by hand,
 // following the exact same Markdown-source convention.
+// Signed one-click unsubscribe linked from outbound notification emails.
+// Public on purpose (the recipient clicks from their inbox, possibly with no
+// session); the URL signature is the authorization.
+Route::get('/email/unsubscribe/{user}/{type}', EmailUnsubscribeController::class)
+    ->middleware('signed')
+    ->name('email.unsubscribe');
+
 Route::get('/cookies', function () {
     $path = Jetstream::localizedMarkdownPath('cookies.md');
     $markdown = is_string($path) ? file_get_contents($path) : false;

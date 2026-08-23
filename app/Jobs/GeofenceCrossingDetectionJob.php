@@ -144,17 +144,35 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
      */
     private function isPointInPolygon(float $lat, float $lon, array $polygon): bool
     {
-        if (empty($polygon) || count($polygon) < 3) {
+        // Normalise both vertex shapes the app stores: {lat: x, lng: y}
+        // objects (the Geofence Manager map and confirmed zone suggestions
+        // both write these) and [lat, lng] indexed pairs (the factory and
+        // legacy imports). The frontend has tolerated both all along; this
+        // check only read indexed pairs, so crossings inside object-shaped
+        // zones -- every zone the app itself creates -- could never fire.
+        $vertices = [];
+
+        /** @psalm-suppress MixedAssignment */
+        foreach ($polygon as $vertex) {
+            $vLat = data_get($vertex, 'lat') ?? data_get($vertex, 0);
+            $vLon = data_get($vertex, 'lng') ?? data_get($vertex, 1);
+
+            if (is_numeric($vLat) && is_numeric($vLon)) {
+                $vertices[] = [(float) $vLat, (float) $vLon];
+            }
+        }
+
+        if (count($vertices) < 3) {
             return false;
         }
 
         $inside = false;
-        $p1Lat = (float) data_get($polygon, '0.0');
-        $p1Lon = (float) data_get($polygon, '0.1');
+        $p1Lat = $vertices[0][0];
+        $p1Lon = $vertices[0][1];
 
-        for ($i = 1; $i <= count($polygon); $i++) {
-            $p2Lat = (float) data_get($polygon, ($i % count($polygon)).'.0');
-            $p2Lon = (float) data_get($polygon, ($i % count($polygon)).'.1');
+        for ($i = 1; $i <= count($vertices); $i++) {
+            $p2Lat = $vertices[$i % count($vertices)][0];
+            $p2Lon = $vertices[$i % count($vertices)][1];
 
             if ($lat > min($p1Lat, $p2Lat)) {
                 if ($lat <= max($p1Lat, $p2Lat)) {

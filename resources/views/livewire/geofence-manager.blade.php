@@ -383,7 +383,7 @@
                         >
                             <option value="">Select a mine area...</option>
                             @foreach($mineAreas as $area)
-                                <option value="{{ $area->id }}">{{ $area->name }} ({{ ucfirst($area->type) }})</option>
+                                <option value="{{ $area->id }}">{{ $area->name }}</option>
                             @endforeach
                         </select>
                         @error('mineAreaId') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
