@@ -7,7 +7,7 @@ use App\Models\Geofence;
 use App\Models\User;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -86,21 +86,21 @@ class Alerts extends Component
         $team = CurrentUser::team();
 
         return Alert::where('team_id', $team->id)
-            ->when($this->search, function ($query) {
+            ->when($this->search, function (Builder $query) {
                 $query->where('title', 'like', "%{$this->search}%")
                     ->orWhere('description', 'like', "%{$this->search}%");
             })
-            ->when($this->selectedPriority !== 'all', function ($query) {
+            ->when($this->selectedPriority !== 'all', function (Builder $query) {
                 $query->where('priority', $this->selectedPriority);
             })
-            ->when($this->selectedStatus !== 'all', function ($query) {
+            ->when($this->selectedStatus !== 'all', function (Builder $query) {
                 $query->where('status', $this->selectedStatus);
             })
-            ->when($this->selectedType !== 'all', function ($query) {
+            ->when($this->selectedType !== 'all', function (Builder $query) {
                 $query->where('type', $this->selectedType);
             })
             ->with('machine')
-            ->orderBy($this->sortBy, $this->sortDirection)
+            ->orderBy($this->sortBy, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(15);
     }
 
@@ -275,10 +275,10 @@ class Alerts extends Component
                 ->find($this->selectedAlertId);
 
             // If geofence id was stored in metadata, attach the geofence relation for convenience
-            if ($alert && is_array($alert->metadata ?? [])) {
-                $meta = $alert->metadata;
-                $geofenceId = $meta['geofence_id'] ?? null;
-                if ($geofenceId) {
+            if ($alert !== null) {
+                /** @psalm-suppress MixedAssignment */
+                $geofenceId = data_get($alert->metadata, 'geofence_id');
+                if (is_numeric($geofenceId)) {
                     $geofence = Geofence::where('team_id', $team->id)->find($geofenceId);
                     if ($geofence) {
                         $alert->setRelation('geofence', $geofence);
@@ -305,7 +305,6 @@ class Alerts extends Component
         }
 
         $team = CurrentUser::team();
-        /** @var Collection<int, User> $candidates */
         $candidates = $team->users()->with('roles')->get();
 
         $managers = $candidates->filter(function (User $user): bool {

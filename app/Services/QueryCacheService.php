@@ -20,10 +20,12 @@ class QueryCacheService
     /**
      * Cache dashboard statistics
      *
+     * @param  \Closure(): array<string, mixed>  $callback
      * @return array<string, mixed>
      */
     public static function dashboardStats(int $teamId, \Closure $callback): array
     {
+        /** @var array<string, mixed> */
         return Cache::remember(
             "dashboard_stats_{$teamId}",
             self::DEFAULT_TTL,

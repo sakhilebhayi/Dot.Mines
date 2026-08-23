@@ -58,8 +58,10 @@ class SyncDueIntegrations extends Command
             return true; // Never synced -- always due.
         }
 
-        $intervalSeconds = config("integrations.manufacturers.{$integration->provider}.sync_interval")
+        /** @psalm-suppress MixedAssignment */
+        $intervalRaw = config("integrations.manufacturers.{$integration->provider}.sync_interval")
             ?? config('integrations.jobs.machines_sync_interval', 300);
+        $intervalSeconds = is_numeric($intervalRaw) ? (int) $intervalRaw : 300;
 
         return $integration->last_sync_at->addSeconds($intervalSeconds)->isPast();
     }

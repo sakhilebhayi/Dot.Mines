@@ -9,7 +9,6 @@ use App\Models\MaintenanceAlert;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class MaintenanceHealthService
@@ -156,8 +155,9 @@ class MaintenanceHealthService
             $record = MaintenanceRecord::create($data);
 
             // If linked to schedule, update schedule status
-            if ($record->maintenance_schedule_id) {
-                $schedule = MaintenanceSchedule::find($record->maintenance_schedule_id);
+            $scheduleId = $record->maintenance_schedule_id;
+            if ($scheduleId !== null && $scheduleId !== 0) {
+                $schedule = MaintenanceSchedule::find($scheduleId);
                 if ($schedule) {
                     $schedule->status = 'completed';
                     $schedule->last_service_date = $record->completed_at ?? now();
@@ -166,10 +166,10 @@ class MaintenanceHealthService
 
                     // Calculate next service
                     if ($schedule->schedule_type === 'hours' && ($schedule->interval_hours !== null && $schedule->interval_hours !== 0)) {
-                        $schedule->next_service_hours = $record->hour_meter_reading + $schedule->interval_hours;
+                        $schedule->next_service_hours = ($record->hour_meter_reading ?? 0) + $schedule->interval_hours;
                     }
                     if ($schedule->schedule_type === 'kilometers' && ($schedule->interval_km !== null && $schedule->interval_km !== 0)) {
-                        $schedule->next_service_km = $record->odometer_reading + $schedule->interval_km;
+                        $schedule->next_service_km = ($record->odometer_reading ?? 0) + $schedule->interval_km;
                     }
                     if ($schedule->schedule_type === 'calendar' && ($schedule->interval_days !== null && $schedule->interval_days !== 0)) {
                         $schedule->next_service_date = now()->addDays($schedule->interval_days);
@@ -205,9 +205,7 @@ class MaintenanceHealthService
         if (! empty($data['fault_codes_cleared'])) {
             $health = MachineHealthStatus::where('machine_id', $record->machine_id)->first();
             if ($health) {
-                /** @var Collection<array-key, mixed> $clearedCodes */
                 $clearedCodes = collect(is_array($data['fault_codes_cleared']) ? $data['fault_codes_cleared'] : []);
-                /** @var Collection<array-key, mixed> $activeCodes */
                 $activeCodes = collect(is_array($health->active_fault_codes ?? null) ? $health->active_fault_codes : []);
 
                 $remainingCodes = $activeCodes->filter(function ($code) use ($clearedCodes) {
@@ -243,7 +241,7 @@ class MaintenanceHealthService
 
         // Time metrics
         $totalLaborHours = (float) $completedRecords->sum('labor_hours');
-        $avgRepairTime = $completedRecords->avg('duration');
+        $avgRepairTime = (float) ($completedRecords->avg('duration') ?? 0);
 
         // By type
         $byType = $completedRecords->groupBy('maintenance_type')->map(function ($group) {

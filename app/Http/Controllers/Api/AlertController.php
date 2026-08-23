@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Alert;
+use App\Support\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -48,7 +49,9 @@ class AlertController extends Controller
             $query->where('machine_id', $request->input('machine_id'));
         }
 
-        $perPage = $request->input('per_page', 25);
+        /** @psalm-suppress MixedAssignment */
+        $perPageRaw = $request->input('per_page');
+        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 25;
         $alerts = $query->with('machine')
             ->orderBy('triggered_at', 'desc')
             ->paginate($perPage);
@@ -114,7 +117,7 @@ class AlertController extends Controller
     {
         $this->authorize('acknowledge', $alert);
 
-        $alert->acknowledge(auth()->id());
+        $alert->acknowledge(CurrentUser::get()?->id);
 
         return response()->json([
             'data' => $alert,
@@ -131,7 +134,7 @@ class AlertController extends Controller
     {
         $this->authorize('resolve', $alert);
 
-        $alert->resolve(auth()->id());
+        $alert->resolve(CurrentUser::get()?->id);
 
         return response()->json([
             'data' => $alert,

@@ -49,7 +49,7 @@ class Route extends Model
     /** @use HasFactory<RouteFactory> */
     use HasFactory, HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -162,9 +162,9 @@ class Route extends Model
         );
 
         // Assume average speed of 40 km/h
-        $directTime = ($directDistance / 40.0) * 60; // in minutes
+        $directTime = ($directDistance / 40.0) * 60.0; // in minutes
 
-        return max(0, (int) ($directTime - $this->estimated_time));
+        return max(0, (int) ($directTime - (float) $this->estimated_time));
     }
 
     /**

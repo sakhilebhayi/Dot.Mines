@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\GeofenceSuggestionService;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -49,7 +50,11 @@ class GeofenceManager extends Component
     /** @var array<int|string, mixed> */
     public array $coordinates = [];
 
-    /** @var array<string, string> */
+    /**
+     * @var array<string>
+     *
+     * @psalm-suppress NonInvariantDocblockPropertyType -- Livewire's HandlesEvents leaves $listeners untyped (mixed)
+     */
     protected $listeners = ['geofenceCreated' => 'geofenceCreated'];
 
     public function updatedSearch(): void
@@ -156,7 +161,7 @@ class GeofenceManager extends Component
         $this->type = $geofence->type;
         $this->centerLatitude = $geofence->center_latitude;
         $this->centerLongitude = $geofence->center_longitude;
-        $this->coordinates = is_string($geofence->coordinates) ? json_decode($geofence->coordinates, true) : $geofence->coordinates ?? [];
+        $this->coordinates = $geofence->coordinates;
         $this->showCreateModal = true;
     }
 
@@ -214,11 +219,11 @@ class GeofenceManager extends Component
         $team = CurrentUser::team();
 
         $geofencesQuery = Geofence::where('team_id', $team->id)
-            ->when($this->search, function ($query): mixed {
+            ->when($this->search, function (Builder $query): mixed {
                 return $query->where('name', 'like', "%{$this->search}%")
                     ->orWhere('description', 'like', "%{$this->search}%");
             })
-            ->orderBy($this->sortBy, $this->sortDirection)
+            ->orderBy($this->sortBy, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10);
 
         // Get entry/exit counts for each geofence

@@ -69,7 +69,7 @@ class MachineMetric extends Model
         });
     }
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',

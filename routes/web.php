@@ -23,6 +23,7 @@ use App\Livewire\SystemHealth;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\Report;
+use App\Support\ApiPayload;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -190,7 +191,7 @@ Route::middleware([
         // Paystack redirects here with a ?reference (or legacy ?trxref) after
         // checkout. The subscription itself is activated by the webhook; this
         // route only acknowledges the redirect.
-        if ($request->query('reference') ?? $request->query('trxref')) {
+        if (ApiPayload::str($request->query('reference') ?? $request->query('trxref')) !== '') {
             return redirect()->route('billing.index')
                 ->with('success', 'Payment received! Your subscription will be activated shortly.');
         }

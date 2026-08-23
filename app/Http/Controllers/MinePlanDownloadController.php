@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\MinePlan;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class MinePlanDownloadController extends Controller
 {
@@ -18,7 +18,7 @@ class MinePlanDownloadController extends Controller
     /**
      * @param  int|string  $minePlanId
      */
-    public function __invoke(Request $request, $minePlanId): RedirectResponse
+    public function __invoke(Request $request, $minePlanId): Response
     {
         if (! $request->hasValidSignature()) {
             abort(403);
@@ -47,8 +47,10 @@ class MinePlanDownloadController extends Controller
 
         // Optional model-level authorization: if a MinePlan model exists, verify ownership
         if (class_exists(MinePlan::class)) {
+            /** @psalm-suppress MixedAssignment, MixedMethodCall */
             $minePlan = MinePlan::find($minePlanId);
-            if (! $minePlan || $minePlan->team_id !== auth()->user()?->current_team_id) {
+            /** @psalm-suppress MixedPropertyFetch */
+            if (! $minePlan || data_get($minePlan, 'team_id') !== auth()->user()?->current_team_id) {
                 abort(403);
             }
         }
@@ -59,7 +61,8 @@ class MinePlanDownloadController extends Controller
         }
 
         // For S3, redirect to a short-lived temporary URL; for local/private disks, use Storage::download
-        $mime = Storage::disk($disk)->mimeType($normalized) ?? 'application/octet-stream';
+        $mimeDetected = Storage::disk($disk)->mimeType($normalized);
+        $mime = $mimeDetected === false ? 'application/octet-stream' : $mimeDetected;
         $filename = basename($normalized);
 
         $securityHeaders = [

@@ -66,7 +66,11 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
             }
 
             // Get all machines with recent locations
-            /** @var Collection<int, Machine> $machines */
+            /**
+             * @phpstan-var Collection<int, Machine> $machines larastan loses the model through the where chain
+             *
+             * @psalm-suppress UnnecessaryVarAnnotation
+             */
             $machines = $this->team->machines()
                 ->where('status', '!=', 'offline')
                 ->whereNotNull('last_location_latitude')
@@ -97,14 +101,17 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
                         ->first();
 
                     // Detect entry
-                    if ($isInside && (! $lastEntry || $lastEntry->exited_at)) {
+                    // exit_time is the real column -- the old exited_at
+                    // check read a nonexistent attribute (always null), so
+                    // re-entries were never recorded and exits re-fired.
+                    if ($isInside && ($lastEntry === null || $lastEntry->exit_time !== null)) {
                         $entry = $this->recordGeofenceEntry($machine, $geofence);
                         $this->broadcastGeofenceEntry($entry);
                         $entryCount++;
                     }
 
                     // Detect exit
-                    if (! $isInside && $lastEntry && ! $lastEntry->exited_at) {
+                    if (! $isInside && $lastEntry !== null && $lastEntry->exit_time === null) {
                         $this->recordGeofenceExit($lastEntry);
                         $this->broadcastGeofenceExit($lastEntry);
                         $exitCount++;
@@ -146,8 +153,8 @@ class GeofenceCrossingDetectionJob implements ShouldQueue
         $p1Lon = (float) data_get($polygon, '0.1');
 
         for ($i = 1; $i <= count($polygon); $i++) {
-            $p2Lat = (float) $polygon[$i % count($polygon)][0];
-            $p2Lon = (float) $polygon[$i % count($polygon)][1];
+            $p2Lat = (float) data_get($polygon, ($i % count($polygon)).'.0');
+            $p2Lon = (float) data_get($polygon, ($i % count($polygon)).'.1');
 
             if ($lat > min($p1Lat, $p2Lat)) {
                 if ($lat <= max($p1Lat, $p2Lat)) {

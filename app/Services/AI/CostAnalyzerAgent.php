@@ -20,12 +20,12 @@ class CostAnalyzerAgent
         $insights = [];
 
         // Analyze fuel costs
-        $fuelCosts = FuelTransaction::where('team_id', $team->id)
+        $fuelCosts = (float) FuelTransaction::where('team_id', $team->id)
             ->whereDate('transaction_date', '>=', now()->subDays(30))
             ->sum('total_cost');
 
         // Analyze maintenance costs
-        $maintenanceCosts = MaintenanceRecord::where('team_id', $team->id)
+        $maintenanceCosts = (float) MaintenanceRecord::where('team_id', $team->id)
             ->whereDate('completed_at', '>=', now()->subDays(30))
             ->sum('cost');
 
@@ -39,7 +39,7 @@ class CostAnalyzerAgent
                 'title' => 'High Operational Costs',
                 'description' => 'Daily operational costs averaging R'.number_format($avgDailyCost, 2).'. Review efficiency measures.',
                 'confidence_score' => 0.85,
-                'estimated_savings' => $avgDailyCost * 0.15 * 30,
+                'estimated_savings' => $avgDailyCost * 0.15 * 30.0,
                 'data' => [
                     'total_monthly_cost' => round($totalCosts, 2),
                     'fuel_costs' => round($fuelCosts, 2),

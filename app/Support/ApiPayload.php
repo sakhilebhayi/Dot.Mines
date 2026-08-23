@@ -20,6 +20,32 @@ final class ApiPayload
     /**
      * A string payload value, or the default when absent/mistyped.
      */
+    /**
+     * Coerce an untyped value into a clean list of strings, dropping
+     * anything that is not a string. Also launders config values whose
+     * literal types psalm's Laravel plugin would otherwise fold into
+     * always-true/always-false guards.
+     *
+     * @return list<string>
+     */
+    public static function strings(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $out = [];
+
+        /** @psalm-suppress MixedAssignment */
+        foreach ($value as $item) {
+            if (is_string($item)) {
+                $out[] = $item;
+            }
+        }
+
+        return $out;
+    }
+
     public static function str(mixed $value, string $default = ''): string
     {
         return is_string($value) ? $value : $default;

@@ -6,6 +6,7 @@ use App\Events\MachineLocationUpdated;
 use App\Models\Integration;
 use App\Models\Machine;
 use App\Services\Integration\IntegrationService;
+use App\Support\ApiPayload;
 use App\Support\Geo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -89,7 +90,7 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
             // Fetch locations from the integration provider
             $locations = $integrationService->getMachineLocations(
                 $this->integration,
-                $machines->pluck('manufacturer_id')->toArray()
+                ApiPayload::strings($machines->pluck('manufacturer_id')->all())
             );
 
             if (empty($locations)) {
@@ -209,8 +210,8 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
         $distance = Geo::distanceKm(
             $machine->last_location_latitude,
             $machine->last_location_longitude,
-            $newLocation['latitude'] ?? 0,
-            $newLocation['longitude'] ?? 0
+            (float) (is_numeric($newLocation['latitude'] ?? null) ? $newLocation['latitude'] : 0),
+            (float) (is_numeric($newLocation['longitude'] ?? null) ? $newLocation['longitude'] : 0)
         );
 
         // Only broadcast if moved more than 5 meters

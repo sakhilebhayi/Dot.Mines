@@ -100,6 +100,7 @@ class RoutePlanningService
                 return null;
             }
 
+            /** @psalm-suppress MixedAssignment, MixedArrayAccess */
             $route = $data['routes'][0];
 
             if (! is_array($route)) {
@@ -108,15 +109,18 @@ class RoutePlanningService
 
             // Extract geometry coordinates from GeoJSON, converting each
             // [lon, lat] pair to [lat, lon] and dropping malformed entries.
+            /** @psalm-suppress MixedAssignment */
             $rawCoordinates = data_get($route, 'geometry.coordinates');
             $routeCoordinates = [];
 
+            /** @psalm-suppress MixedAssignment */
             foreach (is_array($rawCoordinates) ? $rawCoordinates : [] as $coord) {
                 if (is_array($coord) && is_numeric($coord[0] ?? null) && is_numeric($coord[1] ?? null)) {
                     $routeCoordinates[] = [(float) $coord[1], (float) $coord[0]];
                 }
             }
 
+            /** @psalm-suppress MixedAssignment */
             $steps = data_get($route, 'legs.0.steps');
 
             return [

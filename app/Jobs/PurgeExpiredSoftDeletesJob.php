@@ -43,10 +43,12 @@ class PurgeExpiredSoftDeletesJob implements ShouldQueue
         ];
 
         foreach ($models as $model) {
+            /** @psalm-suppress MixedAssignment */
             $count = $model::onlyTrashed()
                 ->where('deleted_at', '<', $cutoff)
                 ->forceDelete();
 
+            /** @psalm-suppress MixedAssignment */
             $totals[class_basename($model)] = $count;
         }
 

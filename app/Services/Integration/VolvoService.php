@@ -214,7 +214,7 @@ class VolvoService extends BaseManufacturerService
             'name' => $data['name'] ?? $data['equipment_name'] ?? 'Unknown Equipment',
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Volvo',
-            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'status' => $this->parseStatus(self::str($data['status'] ?? null, 'unknown')),
             'location' => $this->parseLocation(self::payloadArray($data['position'] ?? null)),
             'last_heartbeat' => $data['last_update'] ?? $data['last_heartbeat'] ?? null,
             'specifications' => [
@@ -277,8 +277,8 @@ class VolvoService extends BaseManufacturerService
             // normaliser, pinned by ManufacturerAlertsShapeTest.
             'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? $data['fault_id'] ?? null,
-            'type' => $this->mapAlertType($data['fault_code'] ?? $data['type'] ?? 'unknown'),
-            'priority' => $this->mapAlertPriority($data['priority'] ?? $data['severity'] ?? 'medium'),
+            'type' => $this->mapAlertType(self::str($data['fault_code'] ?? $data['type'] ?? null, 'unknown')),
+            'priority' => $this->mapAlertPriority(self::str($data['priority'] ?? $data['severity'] ?? null, 'medium')),
             'message' => $data['description'] ?? $data['message'] ?? 'Fault detected',
             'timestamp' => $data['timestamp'] ?? $data['fault_time'] ?? now()->toIso8601String(),
             'acknowledged' => $data['acknowledged'] ?? false,

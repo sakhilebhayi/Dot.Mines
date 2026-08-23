@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\TeamRoleProvisioner;
+use App\Support\ApiPayload;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +19,7 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * Create a newly registered user.
      *
-     * @param  array<string, string>  $input
+     * @param  array<array-key, mixed>  $input
      */
     #[\Override]
     public function create(array $input): User
@@ -32,9 +33,9 @@ class CreateNewUser implements CreatesNewUsers
 
         return DB::transaction(function () use ($input) {
             $user = User::create([
-                'name' => $input['name'],
-                'email' => $input['email'],
-                'password' => Hash::make($input['password']),
+                'name' => ApiPayload::str($input['name'] ?? null),
+                'email' => ApiPayload::str($input['email'] ?? null),
+                'password' => Hash::make(ApiPayload::str($input['password'] ?? null)),
             ]);
 
             $this->createTeam($user);

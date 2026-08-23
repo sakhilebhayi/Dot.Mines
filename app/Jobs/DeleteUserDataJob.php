@@ -6,6 +6,7 @@ use App\Models\GdprRequest;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -67,7 +68,7 @@ class DeleteUserDataJob implements ShouldQueue
 
             Mail::raw(
                 'Your account and personal data have been permanently deleted from '.config('app.name').' as requested.',
-                fn ($m): mixed => $m->to($email)
+                fn (Message $m) => $m->to($email)
                     ->from(
                         config('mail.addresses.privacy'),
                         config('app.name'),

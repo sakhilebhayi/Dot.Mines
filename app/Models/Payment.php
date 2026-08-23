@@ -31,7 +31,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Payment extends Model
 {
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'subscription_id',

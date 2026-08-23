@@ -16,7 +16,7 @@ class AIInsight extends Model
 
     protected $table = 'ai_insights';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'insight_type',

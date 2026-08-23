@@ -27,13 +27,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property mixed|null $deviation
+ * @property-read float|null $deviation
  */
 class HealthMetric extends Model
 {
     use HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -147,11 +147,11 @@ class HealthMetric extends Model
         }
 
         $normalRange = $this->normal_max - $this->normal_min;
-        if ($normalRange == 0) {
-            return 0;
+        if ($normalRange === 0.0) {
+            return 0.0;
         }
 
-        $deviation = abs($this->deviation);
+        $deviation = abs($this->deviation ?? 0.0);
 
         return ($deviation / $normalRange) * 100.0;
     }

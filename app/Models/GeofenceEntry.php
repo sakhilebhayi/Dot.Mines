@@ -34,14 +34,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property mixed|null $longitude
  * @property-read Machine|null $machine
  * @property-read Geofence|null $geofence
- * @property mixed|null $exited_at
  */
 class GeofenceEntry extends Model
 {
     /** @use HasFactory<GeofenceEntryFactory> */
     use HasFactory, HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'geofence_id',

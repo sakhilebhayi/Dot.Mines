@@ -22,6 +22,8 @@ interface ManufacturerServiceInterface
      * Fetch machine details from the manufacturer API
      *
      * @return array<mixed>
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- part of the manufacturer-service contract; implementations are exercised per provider
      */
     public function fetchMachineDetails(string $machineId): array;
 

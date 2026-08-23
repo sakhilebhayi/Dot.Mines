@@ -173,7 +173,7 @@ class RoundebultService extends BaseManufacturerService
             'name' => $data['name'] ?? 'Unknown Machine',
             'model' => $data['model'] ?? 'Unknown Model',
             'manufacturer' => 'Roundebult',
-            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'status' => $this->parseStatus(self::str($data['status'] ?? null, 'unknown')),
             'location' => $this->parseLocation(self::payloadArray($data['location'] ?? null)),
             'last_heartbeat' => $data['last_heartbeat'] ?? null,
             'specifications' => [
@@ -214,8 +214,8 @@ class RoundebultService extends BaseManufacturerService
             // normaliser, pinned by ManufacturerAlertsShapeTest.
             'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? null,
-            'type' => $this->mapAlertType(is_string($data['alert_type'] ?? null) ? $data['alert_type'] : 'unknown'),
-            'priority' => $this->mapAlertPriority(is_string($data['severity'] ?? null) ? $data['severity'] : 'medium'),
+            'type' => $this->mapAlertType(self::str($data['alert_type'] ?? null, 'unknown')),
+            'priority' => $this->mapAlertPriority(self::str($data['severity'] ?? null, 'medium')),
             'message' => $data['message'] ?? 'Alert from Roundebult',
             'timestamp' => $data['timestamp'] ?? now()->toIso8601String(),
             'acknowledged' => $data['acknowledged'] ?? false,

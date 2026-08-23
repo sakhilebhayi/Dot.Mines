@@ -74,7 +74,7 @@ class RouteAdvisorAgent
         $actualDistance = $route->total_distance;
         $detourPercent = (($actualDistance - $directDistance) / $directDistance) * 100.0;
 
-        $improvementPossible = max(0, $detourPercent - 10.0); // 10% detour is acceptable
+        $improvementPossible = max(0.0, $detourPercent - 10.0); // 10% detour is acceptable
         $timeSavings = $improvementPossible * 0.5; // minutes
         $fuelSavings = $improvementPossible * 0.3; // liters
 

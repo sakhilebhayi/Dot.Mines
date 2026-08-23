@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Integration;
 use App\Services\Integration\IntegrationService;
+use App\Support\ApiPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -69,9 +70,11 @@ class SyncIntegrationMachinesJob implements ShouldQueue
                 // connect() already confirmed was real.
                 $streams = $this->integration->sync_streams ?? [];
                 $now = now()->toIso8601String();
-                $count = $result['count'] ?? 0;
+                /** @psalm-suppress MixedAssignment, PossiblyUndefinedArrayOffset */
+                $countRaw = $result['count'] ?? null;
+                $count = (int) (is_numeric($countRaw) ? $countRaw : 0);
 
-                foreach ($this->integration->capabilities ?? [] as $capability) {
+                foreach (ApiPayload::strings($this->integration->capabilities ?? []) as $capability) {
                     $streams[$capability] = [
                         'status' => 'active',
                         'last_synced_at' => $now,

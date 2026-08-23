@@ -25,13 +25,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $team_id
  * @property string $name
  * @property string $machine_type
- * @property string $manufacturer
+ * @property string|null $manufacturer
+ * @property string|null $model
  * @property string $model
  * @property int|null $year_of_manufacture
  * @property string|null $registration_number
  * @property string|null $serial_number
  * @property string|null $manufacturer_id
- * @property float $capacity
+ * @property float|null $capacity
  * @property float $fuel_capacity
  * @property float $hours_meter
  * @property string $status
@@ -67,7 +68,7 @@ class Machine extends Model
     /** @use HasFactory<MachineFactory> */
     use HasFactory, HasSyncVersion, HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'name',
@@ -278,11 +279,18 @@ class Machine extends Model
     /**
      * Get active alerts for this machine
      *
-     * @return Builder<Alert>
+     *
+     * @phpstan-return HasMany<Alert,$this> the analyzers disagree on whether
+     * the declaring-model template survives the where() mutation.
+     *
+     * @psalm-return HasMany<Alert,Machine>
      */
-    public function activeAlerts(): Builder
+    public function activeAlerts(): HasMany
     {
-        return $this->alerts()->where('status', 'active');
+        $relation = $this->alerts();
+        $relation->where('status', 'active');
+
+        return $relation;
     }
 
     /**
@@ -319,7 +327,7 @@ class Machine extends Model
     {
         return $this->hasOne(MachineMetric::class)->ofMany(
             ['created_at' => 'max', 'id' => 'max'],
-            fn ($query): mixed => $query->whereNotNull('operating_hours')
+            fn (Builder $query): mixed => $query->whereNotNull('operating_hours')
         );
     }
 

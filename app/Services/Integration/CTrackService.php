@@ -183,7 +183,7 @@ class CTrackService extends BaseManufacturerService
             'name' => $data['name'] ?? $data['plate'] ?? 'Unknown Vehicle',
             'model' => $data['model'] ?? $data['vehicle_type'] ?? 'Unknown Model',
             'manufacturer' => 'C-Track',
-            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'status' => $this->parseStatus(self::str($data['status'] ?? null, 'unknown')),
             'location' => $this->parseLocation(self::payloadArray($data['position'] ?? null)),
             'last_heartbeat' => $data['last_gps'] ?? $data['last_update'] ?? null,
             'specifications' => [
@@ -229,8 +229,8 @@ class CTrackService extends BaseManufacturerService
             // normaliser, pinned by ManufacturerAlertsShapeTest.
             'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? $data['event_id'] ?? null,
-            'type' => $this->mapAlertType($data['event_type'] ?? $data['type'] ?? 'unknown'),
-            'priority' => $this->mapAlertPriority($data['severity'] ?? $data['priority'] ?? 'medium'),
+            'type' => $this->mapAlertType(self::str($data['event_type'] ?? $data['type'] ?? null, 'unknown')),
+            'priority' => $this->mapAlertPriority(self::str($data['severity'] ?? $data['priority'] ?? null, 'medium')),
             'message' => $data['description'] ?? $data['message'] ?? 'Event from C-Track',
             'timestamp' => $data['timestamp'] ?? $data['created_at'] ?? now()->toIso8601String(),
             'acknowledged' => $data['acknowledged'] ?? false,

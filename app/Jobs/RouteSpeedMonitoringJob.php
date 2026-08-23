@@ -74,12 +74,12 @@ class RouteSpeedMonitoringJob implements ShouldQueue
                 foreach ($recentMetrics as $metric) {
                     // Check if machine is near the route (within reasonable distance)
                     $isOnRoute = $this->isMachineOnRoute(
-                        $metric->latitude,
-                        $metric->longitude,
+                        (float) $metric->latitude,
+                        (float) $metric->longitude,
                         $route
                     );
 
-                    if ($isOnRoute && $metric->speed > $route->speed_limit) {
+                    if ($isOnRoute && (float) $metric->speed > (float) ($route->speed_limit ?? 0)) {
                         // Speed violation detected
                         $this->createSpeedViolationAlert($route, $metric);
                         $violationsDetected++;
@@ -136,8 +136,8 @@ class RouteSpeedMonitoringJob implements ShouldQueue
             $distanceFromWaypoint = Geo::distanceKm(
                 $lat,
                 $lon,
-                $waypoint->latitude,
-                $waypoint->longitude
+                (float) $waypoint->latitude,
+                (float) $waypoint->longitude
             );
 
             if ($distanceFromWaypoint <= 0.5) { // Within 500m of waypoint
@@ -175,12 +175,12 @@ class RouteSpeedMonitoringJob implements ShouldQueue
             'title' => 'Speed Limit Exceeded',
             'description' => sprintf(
                 'Machine %s exceeded the speed limit of %d km/h on route "%s". Current speed: %d km/h.',
-                $route->machine?->name ?? ('Machine #'.$route->machine_id),
-                $route->speed_limit,
+                $route->machine?->name ?? ('Machine #'.((string) ($route->machine_id ?? 0))),
+                $route->speed_limit ?? 0,
                 $route->name,
                 (int) $metric->speed
             ),
-            'priority' => $metric->speed > ($route->speed_limit * 1.5) ? 'high' : 'medium',
+            'priority' => (float) $metric->speed > ((float) ($route->speed_limit ?? 0) * 1.5) ? 'high' : 'medium',
             'status' => 'active',
             'triggered_at' => now(),
             'metadata' => [

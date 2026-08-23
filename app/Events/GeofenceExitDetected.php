@@ -79,7 +79,9 @@ class GeofenceExitDetected implements ShouldBroadcast
             'entry_type' => 'exit',
             'latitude' => $this->entry->latitude,
             'longitude' => $this->entry->longitude,
-            'exited_at' => $this->entry->exited_at,
+            // exit_time is the real column; the payload key stays 'exited_at'
+            // for the JS listeners (the old read hit a nonexistent attribute).
+            'exited_at' => $this->entry->exit_time?->toIso8601String(),
             'duration_in_geofence' => $this->entry->exit_time ? (int) $this->entry->entry_time->diffInSeconds($this->entry->exit_time) : null,
             'team_id' => $geofence->team_id,
         ];

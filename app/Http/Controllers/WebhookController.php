@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\PaystackService;
+use App\Support\ApiPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,9 +18,12 @@ class WebhookController extends Controller
         $payload = $request->getContent();
         $signature = $request->header('X-Paystack-Signature', '');
 
-        $secret = config('services.paystack.secret');
+        // ApiPayload::str keeps the type opaque: psalm's Laravel plugin
+        // otherwise folds this config key to its analysis-env value (null)
+        // and marks the whole verified path below as dead code.
+        $secret = ApiPayload::str(config('services.paystack.secret'));
 
-        if (empty($secret)) {
+        if ($secret === '') {
             Log::critical('Paystack secret is not configured. Set PAYSTACK_SECRET_KEY in the environment.');
 
             return response()->json(['error' => 'Webhook endpoint misconfigured'], 500);
@@ -27,7 +31,7 @@ class WebhookController extends Controller
 
         $expected = hash_hmac('sha512', $payload, $secret);
 
-        if (! hash_equals($expected, is_string($signature) ? $signature : '')) {
+        if (! hash_equals($expected, ApiPayload::str($signature))) {
             Log::error('Paystack webhook signature verification failed');
 
             return response()->json(['error' => 'Invalid signature'], 400);
@@ -44,7 +48,8 @@ class WebhookController extends Controller
         }
 
         // Replay protection: reject events older than 5 minutes
-        $eventTime = $event['data']['createdAt'] ?? ($event['data']['created_at'] ?? null);
+        /** @psalm-suppress MixedAssignment */
+        $eventTime = data_get($event, 'data.createdAt') ?? data_get($event, 'data.created_at');
         if ($eventTime !== null) {
             $parsedTime = strtotime((string) $eventTime);
             if ($parsedTime !== false && (time() - $parsedTime) > 300) {
@@ -62,20 +67,20 @@ class WebhookController extends Controller
         $paystackService = new PaystackService;
 
         try {
-            $data = $event['data'] ?? [];
-            $subscriptionCode = $data['subscription_code'] ?? ($data['subscription']['subscription_code'] ?? null);
-            $reference = $data['reference'] ?? null;
+            $data = ApiPayload::assoc($event['data'] ?? []);
+            $subscriptionCode = ApiPayload::str($data['subscription_code'] ?? data_get($data, 'subscription.subscription_code'), 'unknown');
+            $reference = ApiPayload::str($data['reference'] ?? null, 'unknown');
 
             switch ($event['event']) {
                 case 'subscription.create':
                     $paystackService->handleSubscriptionCreated($event);
-                    Log::info('Paystack subscription created', ['subscription_code' => $subscriptionCode ?? 'unknown']);
+                    Log::info('Paystack subscription created', ['subscription_code' => $subscriptionCode]);
                     break;
 
                 case 'subscription.disable':
                 case 'subscription.not_renew':
                     $paystackService->handleSubscriptionDisabled($event);
-                    Log::info('Paystack subscription disabled', ['subscription_code' => $subscriptionCode ?? 'unknown']);
+                    Log::info('Paystack subscription disabled', ['subscription_code' => $subscriptionCode]);
                     break;
 
                 case 'charge.success':
@@ -88,7 +93,7 @@ class WebhookController extends Controller
 
                 case 'invoice.payment_failed':
                     Log::warning('Paystack invoice payment failed', [
-                        'reference' => $reference ?? 'unknown',
+                        'reference' => $reference,
                     ]);
                     $paystackService->handlePaymentFailed($event);
                     break;

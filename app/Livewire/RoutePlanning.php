@@ -8,6 +8,7 @@ use App\Models\MineArea;
 use App\Models\Route;
 use App\Models\Waypoint;
 use App\Services\RoutePlanningService;
+use App\Support\ApiPayload;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +39,8 @@ class RoutePlanning extends Component
     public ?float $endLon = null;
 
     // Calculated route data
-    public mixed $calculatedRoute = null;
+    /** @var array<string, mixed>|null */
+    public ?array $calculatedRoute = null;
 
     public mixed $savedRoute = null;
 
@@ -101,19 +103,12 @@ class RoutePlanning extends Component
         // Convert geofences to plain array for safe JavaScript serialization
         $geofences = Geofence::where('team_id', $team->id)
             ->get()
-            ->map(function ($geofence) {
-                // Ensure coordinates are in the right format
-                $coordinates = $geofence->coordinates;
-                // If coordinates is a string, parse it; otherwise use as-is
-                if (is_string($coordinates)) {
-                    $coordinates = json_decode($coordinates, true);
-                }
-
+            ->map(function (Geofence $geofence): array {
                 return [
                     'id' => $geofence->id,
                     'name' => $geofence->name,
-                    'geofence_type' => $geofence->geofence_type,
-                    'coordinates' => $coordinates, // Already an array thanks to cast
+                    'geofence_type' => $geofence->type,
+                    'coordinates' => $geofence->coordinates,
                 ];
             })
             ->toArray();
@@ -170,7 +165,7 @@ class RoutePlanning extends Component
 
     public function saveRoute(): void
     {
-        if (! $this->calculatedRoute) {
+        if ($this->calculatedRoute === null || $this->calculatedRoute === []) {
             session()->flash('error', 'Please calculate a route first.');
 
             return;
@@ -178,9 +173,9 @@ class RoutePlanning extends Component
 
         $this->validate(['name' => 'required|min:3|max:255']);
 
-        try {
-            $team = CurrentUser::team();
+        $team = CurrentUser::team();
 
+        try {
             DB::beginTransaction();
 
             // Create the route
@@ -204,7 +199,7 @@ class RoutePlanning extends Component
             ]);
 
             // Create waypoints
-            foreach ($this->calculatedRoute['waypoints'] as $waypointData) {
+            foreach (ApiPayload::rows($this->calculatedRoute['waypoints'] ?? []) as $waypointData) {
                 Waypoint::create([
                     'route_id' => $route->id,
                     'sequence_order' => $waypointData['sequence_order'],
@@ -230,7 +225,7 @@ class RoutePlanning extends Component
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Failed to save route', ['team_id' => $team->id ?? null, 'error' => $e->getMessage()]);
+            Log::error('Failed to save route', ['team_id' => $team->id, 'error' => $e->getMessage()]);
             session()->flash('error', "We couldn't save this route. Please try again.");
         }
     }

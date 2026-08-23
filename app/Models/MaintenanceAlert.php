@@ -28,13 +28,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property mixed|null $age_hours
+ * @property-read float $age_hours
  */
 class MaintenanceAlert extends Model
 {
     use HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -210,10 +210,10 @@ class MaintenanceAlert extends Model
         };
 
         // Age weight (older = higher priority)
-        $score += min($this->age_hours, 48);
+        $score += (int) min($this->age_hours, 48.0);
 
         // Unacknowledged weight
-        if (! $this->acknowledged_at) {
+        if ($this->acknowledged_at === null) {
             $score += 30;
         }
 

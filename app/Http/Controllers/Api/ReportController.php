@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Jobs\GenerateReportJob;
 use App\Models\Report;
+use App\Support\ApiPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -40,7 +41,9 @@ class ReportController extends Controller
             $query->where('type', $request->input('type'));
         }
 
-        $perPage = $request->input('per_page', 15);
+        /** @psalm-suppress MixedAssignment */
+        $perPageRaw = $request->input('per_page');
+        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 15;
         $reports = $query->with('generatedBy')
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
@@ -87,7 +90,7 @@ class ReportController extends Controller
         $validated['team_id'] = auth()->user()?->current_team_id;
         $validated['status'] = 'pending';
         $validated['generated_by'] = auth()->id();
-        $validated['format'] = $request->input('format', 'pdf');
+        $validated['format'] = ApiPayload::str($request->input('format'), 'pdf');
 
         $report = Report::create($validated);
 
@@ -145,8 +148,9 @@ class ReportController extends Controller
         }
 
         // Authorize was already called earlier; use Storage::download to serve safely and add security headers.
-        $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $report->title).'.'.$report->format;
-        $mime = Storage::disk($disk)->mimeType($relative) ?? 'application/octet-stream';
+        $filename = ((string) preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $report->title)).'.'.$report->format;
+        $mimeDetected = Storage::disk($disk)->mimeType($relative);
+        $mime = $mimeDetected === false ? 'application/octet-stream' : $mimeDetected;
 
         $securityHeaders = [
             'Content-Security-Policy' => "default-src 'none';",

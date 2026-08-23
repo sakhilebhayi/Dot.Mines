@@ -7,6 +7,7 @@ use App\Models\AIAnalysisSession;
 use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
 use App\Models\AIRecommendation;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
@@ -48,14 +49,14 @@ class AIAnalytics extends Component
 
     public function render(): View
     {
-        $team = auth()->user()?->currentTeam;
+        $team = CurrentUser::team();
         $startDate = now()->subDays((int) $this->timeRange);
 
         // Get agents
         $agents = AIAgent::all();
 
         // Recommendations over time
-        $recommendationsTimeline = AIRecommendation::where('team_id', $team?->id)
+        $recommendationsTimeline = AIRecommendation::where('team_id', $team->id)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count, status')
             ->groupBy('date', 'status')
@@ -105,8 +106,10 @@ class AIAnalytics extends Component
             ->groupBy('date')
             ->orderBy('date')
             ->get()
-            ->map(function ($item) {
-                $item->rate = $item->total > 0 ? ($item->implemented / $item->total) * 100 : 0;
+            ->map(function (AIRecommendation $item): AIRecommendation {
+                $total = (int) $item->getAttribute('total');
+                $implemented = (int) $item->getAttribute('implemented');
+                $item->setAttribute('rate', $total > 0 ? ((float) $implemented / (float) $total) * 100.0 : 0.0);
 
                 return $item;
             });

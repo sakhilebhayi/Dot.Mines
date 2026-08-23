@@ -207,7 +207,7 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             'name' => $data['name'] ?? $data['asset_name'] ?? 'Unknown Machine',
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Caterpillar',
-            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'status' => $this->parseStatus(self::str($data['status'] ?? null, 'unknown')),
             'location' => $this->parseLocation(self::payloadArray($data['location'] ?? null)),
             'last_heartbeat' => $data['last_heartbeat'] ?? null,
             'specifications' => [
@@ -270,8 +270,8 @@ class CATService extends BaseManufacturerService implements ManufacturerServiceI
             // normaliser, pinned by ManufacturerAlertsShapeTest.
             'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? $data['alert_id'] ?? null,
-            'type' => $this->mapAlertType($data['type'] ?? $data['code'] ?? 'unknown'),
-            'priority' => $this->mapAlertPriority($data['severity'] ?? $data['priority'] ?? 'medium'),
+            'type' => $this->mapAlertType(self::str($data['type'] ?? $data['code'] ?? null, 'unknown')),
+            'priority' => $this->mapAlertPriority(self::str($data['severity'] ?? $data['priority'] ?? null, 'medium')),
             'message' => $data['message'] ?? $data['description'] ?? 'Alert from CAT',
             'timestamp' => $data['timestamp'] ?? $data['created_at'] ?? now()->toIso8601String(),
             'acknowledged' => $data['acknowledged'] ?? false,

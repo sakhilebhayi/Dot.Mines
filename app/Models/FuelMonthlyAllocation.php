@@ -30,7 +30,7 @@ class FuelMonthlyAllocation extends Model
 {
     use HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -79,7 +79,12 @@ class FuelMonthlyAllocation extends Model
      */
     protected function getPeriodNameAttribute(): string
     {
-        return date('F Y', mktime(0, 0, 0, $this->month, 1, $this->year) ?: null);
+        $timestamp = mktime(0, 0, 0, $this->month ?? 1, 1, $this->year ?? (int) date('Y'));
+
+        // Psalm's mktime stub says int for int args; phpstan (and PHP) say
+        // int|false, so the guard stays for the false case.
+        /** @psalm-suppress TypeDoesNotContainType, RedundantCondition */
+        return $timestamp === false ? '' : date('F Y', $timestamp);
     }
 
     /**
@@ -97,11 +102,13 @@ class FuelMonthlyAllocation extends Model
      */
     protected function getConsumptionPercentageAttribute(): float
     {
-        if ($this->allocated_liters == 0) {
-            return 0;
+        $allocated = (float) ($this->allocated_liters ?? 0);
+
+        if ($allocated === 0.0) {
+            return 0.0;
         }
 
-        return round(($this->consumed_liters / $this->allocated_liters) * 100.0, 2);
+        return round(((float) ($this->consumed_liters ?? 0) / $allocated) * 100.0, 2);
     }
 
     /**
@@ -109,11 +116,13 @@ class FuelMonthlyAllocation extends Model
      */
     protected function getBudgetSpentPercentageAttribute(): float
     {
-        if ($this->total_budget_zar == 0) {
-            return 0;
+        $budget = (float) ($this->total_budget_zar ?? 0);
+
+        if ($budget === 0.0) {
+            return 0.0;
         }
 
-        return round(($this->spent_zar / $this->total_budget_zar) * 100.0, 2);
+        return round(((float) ($this->spent_zar ?? 0) / $budget) * 100.0, 2);
     }
 
     /**
@@ -121,7 +130,7 @@ class FuelMonthlyAllocation extends Model
      */
     public function isExceeded(): bool
     {
-        return $this->consumed_liters > $this->allocated_liters;
+        return (float) ($this->consumed_liters ?? 0) > (float) ($this->allocated_liters ?? 0);
     }
 
     /**
@@ -137,21 +146,26 @@ class FuelMonthlyAllocation extends Model
      */
     public function updateConsumption(): void
     {
-        $this->consumed_liters = $this->transactions()
+        $consumed = (float) $this->transactions()
             ->where('transaction_type', 'dispensing')
             ->sum('quantity_liters');
 
-        $this->spent_zar = $this->transactions()
+        $spent = (float) $this->transactions()
             ->where('transaction_type', 'dispensing')
             ->sum('total_cost');
 
-        $this->remaining_liters = max(0, $this->allocated_liters - $this->consumed_liters);
-        $this->remaining_budget_zar = max(0, $this->total_budget_zar - $this->spent_zar);
+        $allocated = (float) ($this->allocated_liters ?? 0);
+        $budget = (float) ($this->total_budget_zar ?? 0);
+
+        $this->consumed_liters = $consumed;
+        $this->spent_zar = $spent;
+        $this->remaining_liters = max(0.0, $allocated - $consumed);
+        $this->remaining_budget_zar = max(0.0, $budget - $spent);
 
         // Update status
-        if ($this->consumed_liters > $this->allocated_liters) {
+        if ($consumed > $allocated) {
             $this->status = 'exceeded';
-        } elseif ($this->consumed_liters >= $this->allocated_liters * 0.95) {
+        } elseif ($consumed >= $allocated * 0.95) {
             $this->status = 'active';
         }
 

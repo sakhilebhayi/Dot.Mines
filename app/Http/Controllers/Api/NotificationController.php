@@ -31,7 +31,7 @@ class NotificationController extends Controller
             $query->whereIn('alert_level', (array) $request->input('alert_level'));
         }
 
-        if ($request->get('unread_only') === 'true') {
+        if ($request->input('unread_only') === 'true') {
             $query->where('is_read', false);
         }
 
@@ -51,6 +51,7 @@ class NotificationController extends Controller
     /**
      * Get unread notifications for user
      */
+    /** @psalm-suppress PossiblyUnusedParam -- route signature keeps Request for consistency */
     public function unread(Request $request): JsonResponse
     {
         $userId = auth()->user()?->id;
@@ -76,6 +77,7 @@ class NotificationController extends Controller
     /**
      * Mark notification as read
      */
+    /** @psalm-suppress PossiblyUnusedParam -- route signature keeps Request for consistency */
     public function markAsRead(Request $request, Notification $notification): JsonResponse
     {
         $this->authorize('view', $notification);
@@ -112,7 +114,9 @@ class NotificationController extends Controller
     {
         $teamId = auth()->user()->current_team_id
             ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
-        $days = $request->get('days', 7);
+        /** @psalm-suppress MixedAssignment */
+        $daysRaw = $request->input('days');
+        $days = is_numeric($daysRaw) ? (int) $daysRaw : 7;
         $fromDate = now()->subDays($days);
 
         $alerts = Notification::where('team_id', $teamId)
@@ -155,18 +159,22 @@ class NotificationController extends Controller
             ?? (auth()->user()?->currentTeam ? auth()->user()?->currentTeam?->id : null);
         $query = Notification::where('team_id', $teamId);
 
-        if (($validated['type'] ?? '') !== '') {
-            $query->where('type', $validated['type']);
+        $type = $validated['type'] ?? null;
+        if (is_string($type) && $type !== '') {
+            $query->where('type', $type);
         }
 
-        if (($validated['alert_level'] ?? '') !== '') {
-            $query->where('alert_level', $validated['alert_level']);
+        $alertLevel = $validated['alert_level'] ?? null;
+        if (is_string($alertLevel) && $alertLevel !== '') {
+            $query->where('alert_level', $alertLevel);
         }
 
-        if ($validated['days_old'] ?? false) {
-            $query->where('created_at', '<', now()->subDays($validated['days_old']));
+        $daysOld = $validated['days_old'] ?? null;
+        if (is_numeric($daysOld) && (int) $daysOld > 0) {
+            $query->where('created_at', '<', now()->subDays((int) $daysOld));
         }
 
+        /** @psalm-suppress MixedAssignment */
         $count = $query->delete();
 
         return response()->json([

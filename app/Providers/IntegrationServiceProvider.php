@@ -13,9 +13,7 @@ class IntegrationServiceProvider extends ServiceProvider
     #[\Override]
     public function register(): void
     {
-        $this->app->singleton(IntegrationService::class, function ($app) {
-            return new IntegrationService;
-        });
+        $this->app->singleton(IntegrationService::class, fn (): IntegrationService => new IntegrationService);
     }
 
     /**

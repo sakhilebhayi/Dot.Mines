@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
  * Notification Model
@@ -34,7 +35,7 @@ class Notification extends Model
 
     use HasSyncVersion;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'type',
@@ -60,7 +61,7 @@ class Notification extends Model
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsToMany<User,$this> */
+    /** @return BelongsToMany<User,$this,Pivot,'pivot'> */
     public function readBy(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'notification_read')

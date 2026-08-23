@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Integration;
 use App\Services\ProductionReconciliationService;
 use App\Services\Sync\SyncSequence;
+use App\Support\ApiPayload;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
@@ -119,7 +120,7 @@ class SystemHealth extends Component
     private function broadcastingCheck(): array
     {
         $driver = config('broadcasting.default');
-        $pusherKey = (string) config('broadcasting.connections.pusher.key');
+        $pusherKey = ApiPayload::str(config('broadcasting.connections.pusher.key'));
 
         if ($driver === 'pusher' && $pusherKey !== '') {
             return ['label' => 'Realtime push', 'state' => self::STATE_HEALTHY, 'detail' => 'Pusher configured — clients push-updated'];
@@ -162,16 +163,22 @@ class SystemHealth extends Component
      */
     public function getApiHealthProperty(): array
     {
-        /** @var Integration|null $integration -- withoutGlobalScopes() erases the builder generics */
+        /**
+         * @phpstan-var Integration|null $integration larastan loses the model through withoutGlobalScopes()
+         *
+         * @psalm-suppress UnnecessaryVarAnnotation
+         */
         $integration = Integration::query()
             ->withoutGlobalScopes()
             ->whereNotNull('last_sync_at')
             ->orderByDesc('last_sync_at')
             ->first();
 
+        $stats = $integration?->last_sync_stats;
+
         return [
             'integration' => $integration,
-            'stats' => is_array($integration?->last_sync_stats) ? $integration?->last_sync_stats : [],
+            'stats' => is_array($stats) ? $stats : [],
         ];
     }
 

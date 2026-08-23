@@ -88,7 +88,7 @@ class FuelPredictorAgent
                     'category' => 'fuel',
                     'priority' => 'high',
                     'title' => "High Fuel Consumption: {$machine->name}",
-                    'description' => "Machine {$machine->name} is consuming ".round($deviationPercent).'% more fuel than expected. This could indicate maintenance issues or operational inefficiencies.',
+                    'description' => "Machine {$machine->name} is consuming ".((string) round($deviationPercent)).'% more fuel than expected. This could indicate maintenance issues or operational inefficiencies.',
                     'confidence_score' => 0.82,
                     'estimated_savings' => $monthlyCostImpact,
                     'related_machine_id' => $machine->id,
@@ -136,7 +136,7 @@ class FuelPredictorAgent
                     'category' => 'fuel',
                     'severity' => 'success',
                     'title' => 'Excellent Fuel Efficiency',
-                    'description' => "{$machine->name} is operating ".abs(round($deviationPercent)).'% below expected fuel consumption',
+                    'description' => "{$machine->name} is operating ".((string) abs(round($deviationPercent))).'% below expected fuel consumption',
                     'data' => [
                         'machine_id' => $machine->id,
                         'efficiency_gain' => abs(round($deviationPercent, 2)),
@@ -159,7 +159,7 @@ class FuelPredictorAgent
         $recommendations = [];
 
         // Get historical consumption
-        $last30Days = FuelTransaction::where('team_id', $team->id)
+        $last30Days = (float) FuelTransaction::where('team_id', $team->id)
             ->whereDate('transaction_date', '>=', now()->subDays(30))
             ->where('transaction_type', 'dispensing')
             ->sum('quantity_liters');
@@ -169,7 +169,7 @@ class FuelPredictorAgent
         $predicted30Days = $avgDailyConsumption * 30.0;
 
         // Check current inventory
-        $currentInventory = FuelTank::where('team_id', $team->id)
+        $currentInventory = (float) FuelTank::where('team_id', $team->id)
             ->sum('current_level_liters');
 
         // No consumption history means there is no basis for a supply
@@ -188,7 +188,7 @@ class FuelPredictorAgent
                 'category' => 'fuel',
                 'priority' => $daysOfSupply < 3 ? 'critical' : 'high',
                 'title' => 'Low Fuel Inventory',
-                'description' => 'Current fuel inventory will last approximately '.round($daysOfSupply, 1).' days at current consumption rates. Immediate refueling recommended.',
+                'description' => 'Current fuel inventory will last approximately '.((string) round($daysOfSupply, 1)).' days at current consumption rates. Immediate refueling recommended.',
                 'confidence_score' => 0.88,
                 'estimated_savings' => null,
                 'data' => [
@@ -198,7 +198,7 @@ class FuelPredictorAgent
                     'recommended_order_liters' => round($predicted30Days, 2),
                 ],
                 'impact_analysis' => [
-                    'risk' => 'Operations may be affected in '.round($daysOfSupply).' days',
+                    'risk' => 'Operations may be affected in '.((string) round($daysOfSupply)).' days',
                     'recommended_action' => 'Order '.number_format($predicted30Days, 0).' liters immediately',
                 ],
             ];
@@ -259,7 +259,7 @@ class FuelPredictorAgent
                         'current_level' => $tank->current_level_liters,
                         'capacity' => $tank->capacity_liters,
                         'fill_percentage' => round($fillPercentage, 2),
-                        'required_liters' => $tank->capacity_liters - $tank->current_level_liters,
+                        'required_liters' => (float) $tank->capacity_liters - (float) $tank->current_level_liters,
                     ],
                 ];
             }
@@ -275,7 +275,7 @@ class FuelPredictorAgent
                     'data' => [
                         'tank_id' => $tank->id,
                         'current_level' => $tank->current_level_liters,
-                        'available_space' => $tank->capacity_liters - $tank->current_level_liters,
+                        'available_space' => (float) $tank->capacity_liters - (float) $tank->current_level_liters,
                     ],
                 ];
             }

@@ -45,7 +45,7 @@ class NotificationCreated implements ShouldBroadcast
             'message' => $this->notification->message,
             'alert_level' => $this->notification->alert_level,
             'action_url' => $this->notification->action_url,
-            'created_at' => $this->notification->created_at?->toIso8601String(),
+            'created_at' => $this->notification->created_at->toIso8601String(),
         ];
     }
 }

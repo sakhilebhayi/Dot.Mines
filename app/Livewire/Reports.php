@@ -8,6 +8,7 @@ use App\Models\MineArea;
 use App\Models\Report;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -91,26 +92,26 @@ class Reports extends Component
         $searchTerm = trim($this->search);
 
         return Report::where('team_id', $team->id)
-            ->when($searchTerm, function ($query) use ($searchTerm) {
+            ->when($searchTerm, function (Builder $query) use ($searchTerm) {
                 $query->where('title', 'like', '%'.$searchTerm.'%')
                     ->orWhere('description', 'like', '%'.$searchTerm.'%');
             })
-            ->when($this->selectedMineAreaId, function ($query) {
+            ->when($this->selectedMineAreaId, function (Builder $query) {
                 $query->where('filters->mine_area_id', $this->selectedMineAreaId);
             })
-            ->when($this->selectedGeofenceId, function ($query) {
+            ->when($this->selectedGeofenceId, function (Builder $query) {
                 $query->where('filters->geofence_id', $this->selectedGeofenceId);
             })
-            ->when($this->selectedMachineId, function ($query) {
+            ->when($this->selectedMachineId, function (Builder $query) {
                 $query->where('filters->machine_id', $this->selectedMachineId);
             })
-            ->when($this->selectedType !== 'all', function ($query) {
+            ->when($this->selectedType !== 'all', function (Builder $query) {
                 $query->where('type', $this->selectedType);
             })
-            ->when($this->selectedStatus !== 'all', function ($query) {
+            ->when($this->selectedStatus !== 'all', function (Builder $query) {
                 $query->where('status', $this->selectedStatus);
             })
-            ->orderBy($this->sortBy, $this->sortDirection)
+            ->orderBy($this->sortBy, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10);
     }
 
@@ -248,7 +249,8 @@ class Reports extends Component
 
         $mineAreas = $team ? MineArea::where('team_id', $team->id)->get() : collect();
         $geofences = $team ? Geofence::where('team_id', $team->id)->get() : collect();
-        $this->machinesList = $team ? Machine::where('team_id', $team->id)->select(['id', 'name'])->get() : collect();
+        /** @psalm-suppress InvalidPropertyAssignmentValue, PossiblyInvalidPropertyAssignmentValue -- psalm's invariant Collection templates reject Collection<int, Machine> for Collection<int, mixed> */
+        $this->machinesList = $team ? Machine::where('team_id', $team->id)->select(['id', 'name'])->get()->toBase() : collect();
 
         return view('livewire.reports', [
             'reports' => $this->getReports(),

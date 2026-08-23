@@ -7,6 +7,7 @@ use App\Models\Machine;
 use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Services\Integration\TelemetryProductionCalculator;
+use App\Support\ApiPayload;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -65,7 +66,7 @@ class OperationalSnapshotService
     public function forMachine(Machine $machine): array
     {
         $team = $machine->team;
-        $timezone = $team?->timezone ?: config('app.timezone', 'UTC');
+        $timezone = $team?->timezone ?? ApiPayload::str(config('app.timezone', 'UTC'), 'UTC');
         $today = Carbon::now($timezone)->toDateString();
 
         return $this->snapshot(
@@ -82,6 +83,7 @@ class OperationalSnapshotService
      */
     public function teamTelemetryFreshestAt(Team $team): ?Carbon
     {
+        /** @var Carbon|null $latest */
         $latest = Machine::where('team_id', $team->id)
             ->with('latestMetric')
             ->get()
@@ -89,7 +91,7 @@ class OperationalSnapshotService
             ->filter()
             ->max();
 
-        return $latest instanceof Carbon ? $latest : ($latest ? Carbon::parse($latest) : null);
+        return $latest;
     }
 
     /**
@@ -99,9 +101,9 @@ class OperationalSnapshotService
      */
     public function staleAfterSeconds(int $teamId): int
     {
-        $provider = Integration::where('team_id', $teamId)
+        $provider = ApiPayload::str(Integration::where('team_id', $teamId)
             ->where('status', 'connected')
-            ->value('provider');
+            ->value('provider'), 'unknown');
 
         $interval = (int) config("integrations.manufacturers.{$provider}.sync_interval", 300);
 
@@ -114,7 +116,8 @@ class OperationalSnapshotService
     private function snapshot(Machine $machine, ?ProductionRecord $baseline, ?ProductionRecord $todayRecord, int $staleAfter): array
     {
         $metric = $machine->latestMetric;
-        $raw = is_array($metric?->raw_data) ? $metric?->raw_data : [];
+        $rawData = $metric?->raw_data;
+        $raw = is_array($rawData) ? $rawData : [];
 
         [$liveLoads, $liveTonnesKgValue, $liveUnits, $counterAt] = $this->freshestCounters($metric?->recorded_at, $raw, $todayRecord);
 
@@ -177,11 +180,16 @@ class OperationalSnapshotService
     {
         $liveLoads = is_numeric($raw['load_count'] ?? null) ? (float) $raw['load_count'] : null;
         $livePayload = is_numeric($raw['cumulative_payload'] ?? null) ? (float) $raw['cumulative_payload'] : null;
-        $liveUnits = is_string($raw['payload_units'] ?? null) ? $raw['payload_units'] : null;
+        /** @psalm-suppress MixedAssignment */
+        $liveUnitsRaw = $raw['payload_units'] ?? null;
+        $liveUnits = is_string($liveUnitsRaw) ? $liveUnitsRaw : null;
 
         $recordLoads = $this->numericMeta($todayRecord, 'cumulative_load_count_end');
         $recordPayload = $this->numericMeta($todayRecord, 'cumulative_payload_end');
-        $recordUnits = is_string(data_get($todayRecord?->metadata, 'payload_units')) ? data_get($todayRecord?->metadata, 'payload_units') : null;
+        /** @psalm-suppress MixedAssignment */
+        $recordUnitsRaw = data_get($todayRecord?->metadata, 'payload_units');
+        $recordUnits = is_string($recordUnitsRaw) ? $recordUnitsRaw : null;
+        /** @psalm-suppress MixedAssignment */
         $recordAtRaw = data_get($todayRecord?->metadata, 'last_reading_utc');
         $recordAt = is_string($recordAtRaw) ? Carbon::parse($recordAtRaw) : null;
 
@@ -205,9 +213,12 @@ class OperationalSnapshotService
      * "today so far" subtracts from.
      *
      * @param  list<int>  $machineIds
-     * @return Collection<int, ProductionRecord>
+     * @return \Illuminate\Database\Eloquent\Collection<int, ProductionRecord>
+     *
+     * @psalm-suppress MoreSpecificReturnType, LessSpecificReturnStatement -- psalm's
+     * keyBy() stub adds a phantom Support\Collection<int, null> union arm
      */
-    private function closingBaselines(int $teamId, array $machineIds, string $today): Collection
+    private function closingBaselines(int $teamId, array $machineIds, string $today): \Illuminate\Database\Eloquent\Collection
     {
         return ProductionRecord::where('team_id', $teamId)
             ->whereIn('machine_id', $machineIds)
@@ -221,9 +232,12 @@ class OperationalSnapshotService
 
     /**
      * @param  list<int>  $machineIds
-     * @return Collection<int, ProductionRecord>
+     * @return \Illuminate\Database\Eloquent\Collection<int, ProductionRecord>
+     *
+     * @psalm-suppress MoreSpecificReturnType, LessSpecificReturnStatement -- psalm's
+     * keyBy() stub adds a phantom Support\Collection<int, null> union arm
      */
-    private function todayTelemetryRecords(int $teamId, array $machineIds, string $today): Collection
+    private function todayTelemetryRecords(int $teamId, array $machineIds, string $today): \Illuminate\Database\Eloquent\Collection
     {
         return ProductionRecord::where('team_id', $teamId)
             ->whereIn('machine_id', $machineIds)
@@ -235,6 +249,7 @@ class OperationalSnapshotService
 
     private function numericMeta(?ProductionRecord $record, string $key): ?float
     {
+        /** @psalm-suppress MixedAssignment */
         $value = data_get($record?->metadata, $key);
 
         return is_numeric($value) ? (float) $value : null;

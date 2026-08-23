@@ -9,6 +9,7 @@ use App\Models\MachineAreaAssignment;
 use App\Models\MineArea;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\ApiPayload;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +31,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * log -- the exact pattern MineAreaDetail::assignMachine()/unassignMachine()
  * already use. This rebuild follows that same pattern instead of the
  * phantom pivot the deleted class apparently never actually had either.
+ *
+ * @psalm-suppress MissingConstructor -- Livewire injects state via mount()
  */
 class MachineAssignmentManager extends Component
 {
@@ -117,15 +120,15 @@ class MachineAssignmentManager extends Component
 
         if ($this->view === 'assign') {
             $this->selectedMachineIds = $this->assignableMachinesQuery($team)
-                ->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+                ->pluck('id')->map(fn ($id): string => (string) $id)->values()->all();
         } else {
             $this->selectedMachineIds = Machine::where('team_id', $team->id)
                 ->where('mine_area_id', $this->mineArea->id)
-                ->when($this->searchTerm, fn ($q): mixed => $q->where(function ($q) {
+                ->when($this->searchTerm, fn (Builder $q): mixed => $q->where(function ($q) {
                     $q->where('name', 'like', "%{$this->searchTerm}%")
                         ->orWhere('model', 'like', "%{$this->searchTerm}%");
                 }))
-                ->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+                ->pluck('id')->map(fn ($id): string => (string) $id)->values()->all();
         }
     }
 
@@ -299,10 +302,10 @@ class MachineAssignmentManager extends Component
 
         $rows = ["Machine,Model,Status\n"];
         foreach ($machines as $machine) {
-            $rows[] = sprintf("%s,%s,%s\n", $machine->name, $machine->model, $machine->status);
+            $rows[] = sprintf("%s,%s,%s\n", $machine->name, ApiPayload::str($machine->model), $machine->status);
         }
 
-        $filename = str($this->mineArea->name)->slug().'-assignments-'.now()->format('Y-m-d').'.csv';
+        $filename = str($this->mineArea->name)->slug()->toString().'-assignments-'.now()->format('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($rows) {
             echo implode('', $rows);
@@ -316,11 +319,11 @@ class MachineAssignmentManager extends Component
     {
         return Machine::where('team_id', $team->id)
             ->where('mine_area_id', '!=', $this->mineArea->id)
-            ->when($this->searchTerm, fn ($q): mixed => $q->where(function ($q) {
+            ->when($this->searchTerm, fn (Builder $q): mixed => $q->where(function ($q) {
                 $q->where('name', 'like', "%{$this->searchTerm}%")
                     ->orWhere('model', 'like', "%{$this->searchTerm}%");
             }))
-            ->when($this->filterStatus, fn ($q): mixed => $q->where('status', $this->filterStatus));
+            ->when($this->filterStatus, fn (Builder $q): mixed => $q->where('status', $this->filterStatus));
     }
 
     public function render(): View
@@ -337,7 +340,7 @@ class MachineAssignmentManager extends Component
 
         $assignedMachines = Machine::where('team_id', $team->id)
             ->where('mine_area_id', $this->mineArea->id)
-            ->when($this->view === 'manage' && $this->searchTerm, fn ($q): mixed => $q->where(function ($q) {
+            ->when($this->view === 'manage' && $this->searchTerm, fn (Builder $q): mixed => $q->where(function ($q) {
                 $q->where('name', 'like', "%{$this->searchTerm}%")
                     ->orWhere('model', 'like', "%{$this->searchTerm}%");
             }))

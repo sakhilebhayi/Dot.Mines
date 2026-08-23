@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\FuelTransaction;
 use App\Models\User;
 use App\Services\FuelManagementService;
+use App\Support\CurrentUser;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -92,12 +94,13 @@ class FuelTransactionController extends Controller
 
         $data = $validator->validated();
         $data['team_id'] = $this->currentTeamId($request);
-        $data['user_id'] = $request->user()?->getAuthIdentifier();
+        $data['user_id'] = CurrentUser::get()?->id;
+        /** @psalm-suppress MixedAssignment */
         $data['transaction_date'] = $data['transaction_date'] ?? now();
 
         // Calculate total cost if not provided
         if (! isset($data['total_cost']) && isset($data['unit_price'])) {
-            $data['total_cost'] = $data['quantity_liters'] * $data['unit_price'];
+            $data['total_cost'] = (float) $data['quantity_liters'] * (float) $data['unit_price'];
         }
 
         // Handle receipt file upload
@@ -185,8 +188,12 @@ class FuelTransactionController extends Controller
     public function statistics(Request $request): JsonResponse
     {
         $teamId = $this->currentTeamId($request);
-        $startDate = $request->input('start_date', now()->subDays(30));
-        $endDate = $request->input('end_date', now());
+        /** @psalm-suppress MixedAssignment */
+        $startRaw = $request->input('start_date');
+        /** @psalm-suppress MixedAssignment */
+        $endRaw = $request->input('end_date');
+        $startDate = Carbon::parse(is_string($startRaw) ? $startRaw : now()->subDays(30)->toDateTimeString());
+        $endDate = Carbon::parse(is_string($endRaw) ? $endRaw : now()->toDateTimeString());
 
         $analytics = $this->fuelService->getTeamAnalytics($teamId, $startDate, $endDate);
 
@@ -235,10 +242,10 @@ class FuelTransactionController extends Controller
             // Data
             foreach ($transactions as $transaction) {
                 fputcsv($file, [
-                    $transaction->transaction_date->format('Y-m-d H:i:s'),
+                    $transaction->transaction_date?->format('Y-m-d H:i:s') ?? '',
                     $transaction->transaction_type,
-                    $transaction->fuelTank->name ?? 'N/A',
-                    $transaction->machine->name ?? 'N/A',
+                    $transaction->fuelTank?->name ?? 'N/A',
+                    $transaction->machine?->name ?? 'N/A',
                     $transaction->fuel_type,
                     $transaction->quantity_liters,
                     $transaction->unit_price,

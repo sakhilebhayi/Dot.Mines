@@ -208,7 +208,7 @@ class KomatsuService extends BaseManufacturerService
             'name' => $data['name'] ?? $data['asset_name'] ?? 'Unknown Equipment',
             'model' => $data['model'] ?? $data['model_name'] ?? 'Unknown Model',
             'manufacturer' => 'Komatsu',
-            'status' => $this->parseStatus(is_string($data['status'] ?? null) ? $data['status'] : 'unknown'),
+            'status' => $this->parseStatus(self::str($data['status'] ?? null, 'unknown')),
             'location' => $this->parseLocation(self::payloadArray($data['position'] ?? null)),
             'last_heartbeat' => $data['last_heartbeat'] ?? $data['last_update'] ?? null,
             'specifications' => [
@@ -251,8 +251,8 @@ class KomatsuService extends BaseManufacturerService
             // normaliser, pinned by ManufacturerAlertsShapeTest.
             'status' => $data['status'] ?? 'active',
             'external_id' => $data['id'] ?? $data['notification_id'] ?? null,
-            'type' => $this->mapAlertType($data['type'] ?? $data['category'] ?? 'unknown'),
-            'priority' => $this->mapAlertPriority($data['level'] ?? $data['priority'] ?? 'medium'),
+            'type' => $this->mapAlertType(self::str($data['type'] ?? $data['category'] ?? null, 'unknown')),
+            'priority' => $this->mapAlertPriority(self::str($data['level'] ?? $data['priority'] ?? null, 'medium')),
             'message' => $data['message'] ?? $data['description'] ?? 'Notification from Komatsu',
             'timestamp' => $data['timestamp'] ?? $data['created_at'] ?? now()->toIso8601String(),
             'acknowledged' => $data['acknowledged'] ?? false,

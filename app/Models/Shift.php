@@ -28,7 +28,7 @@ class Shift extends Model
 
     protected $table = 'shifts';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'shift_type',

@@ -23,13 +23,13 @@ class AIOptimizationService
 
     /** @psalm-suppress PossiblyUnusedMethod -- instantiated by the container (app()/DI), which psalm cannot see */
     public function __construct(
-        protected FleetOptimizerAgent $fleetOptimizer,
-        protected RouteAdvisorAgent $routeAdvisor,
-        protected FuelPredictorAgent $fuelPredictor,
-        protected MaintenancePredictorAgent $maintenancePredictor,
-        protected CostAnalyzerAgent $costAnalyzer,
-        protected AnomalyDetectorAgent $anomalyDetector,
-        protected DispatchAdvisorAgent $dispatchAdvisor
+        FleetOptimizerAgent $fleetOptimizer,
+        RouteAdvisorAgent $routeAdvisor,
+        FuelPredictorAgent $fuelPredictor,
+        MaintenancePredictorAgent $maintenancePredictor,
+        CostAnalyzerAgent $costAnalyzer,
+        AnomalyDetectorAgent $anomalyDetector,
+        DispatchAdvisorAgent $dispatchAdvisor
     ) {
         $this->agents = [
             AIAgent::TYPE_FLEET_OPTIMIZER => $fleetOptimizer,
@@ -45,11 +45,13 @@ class AIOptimizationService
     /**
      * Run comprehensive analysis across all AI agents
      *
-     * @return Collection<string, mixed>
+     * @return array{recommendations: Collection<int, AIRecommendation>, insights: Collection<int, AIInsight>, summary: array<string, mixed>}
      */
-    public function runComprehensiveAnalysis(Team $team, ?User $user = null): Collection
+    public function runComprehensiveAnalysis(Team $team, ?User $user = null): array
     {
+        /** @var Collection<int, AIRecommendation> $recommendations */
         $recommendations = collect();
+        /** @var Collection<int, AIInsight> $insights */
         $insights = collect();
 
         foreach ($this->agents as $type => $agent) {
@@ -124,11 +126,11 @@ class AIOptimizationService
             }
         }
 
-        return collect([
+        return [
             'recommendations' => $recommendations,
             'insights' => $insights,
             'summary' => $this->generateSummary($recommendations, $insights),
-        ]);
+        ];
     }
 
     /**
@@ -150,10 +152,7 @@ class AIOptimizationService
 
         $agentModel = $this->getOrCreateAgent($agentType);
         $result = $agent->analyze($team);
-        $rawRecommendations = $result['recommendations'] ?? [];
-
-        /** @var list<array<string, mixed>> $recommendationRows */
-        $recommendationRows = is_array($rawRecommendations) ? array_values($rawRecommendations) : [];
+        $recommendationRows = $result['recommendations'];
 
         return collect($recommendationRows)->map(function (array $rec) use ($team, $agentModel, $user): AIRecommendation {
             return AIRecommendation::create([
@@ -306,8 +305,8 @@ class AIOptimizationService
      * @return array<string, mixed>
      */
     /**
-     * @param  Collection<int|string, mixed>  $recommendations
-     * @param  Collection<int|string, mixed>  $insights
+     * @param  Collection<int, AIRecommendation>  $recommendations
+     * @param  Collection<int, AIInsight>  $insights
      * @return array<string, mixed>
      */
     protected function generateSummary(Collection $recommendations, Collection $insights): array

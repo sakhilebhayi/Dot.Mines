@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\ApiPayload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -130,7 +131,7 @@ class FileUploadService
 
                         // Detect symlink entries (external_attributes high bits indicate file mode on UNIX)
                         $stat = $zip->statIndex($i);
-                        if (isset($stat['external_attributes'])) {
+                        if (isset($stat['external_attributes']) && is_int($stat['external_attributes'])) {
                             $mode = ($stat['external_attributes'] >> 16) & 0xFFFF;
                             // 0xA000 is symlink in unix file mode
                             if (($mode & 0xF000) === 0xA000) {
@@ -350,8 +351,8 @@ class FileUploadService
         $safeName = $this->sanitizeFilename($file->getClientOriginalName());
 
         // Prefer S3 if configured, otherwise use local 'local' disk private path
-        $defaultDisk = config('filesystems.disks.s3.bucket') ? 's3' : 'local';
-        $disk = $disk ?: $defaultDisk;
+        $defaultDisk = ApiPayload::str(config('filesystems.disks.s3.bucket')) !== '' ? 's3' : 'local';
+        $disk = $disk !== null && $disk !== '' && $disk !== '0' ? $disk : $defaultDisk;
 
         // Whitelist configured disks only
         $configured = array_keys(config('filesystems.disks', []));
@@ -383,7 +384,8 @@ class FileUploadService
      */
     protected function commandExists(string $cmd): bool
     {
-        $paths = explode(PATH_SEPARATOR, getenv('PATH') ?: '');
+        $pathEnv = getenv('PATH');
+        $paths = explode(PATH_SEPARATOR, $pathEnv === false ? '' : $pathEnv);
         foreach ($paths as $p) {
             $candidate = $p.DIRECTORY_SEPARATOR.$cmd;
             if (is_executable($candidate)) {
@@ -391,7 +393,8 @@ class FileUploadService
             }
             // On Windows check PATHEXT
             if (DIRECTORY_SEPARATOR !== '/') {
-                $exts = array_filter(array_map('strtolower', preg_split('/;/', getenv('PATHEXT') ?: '.EXE') ?: []));
+                $pathExt = getenv('PATHEXT');
+                $exts = array_filter(array_map('strtolower', preg_split('/;/', $pathExt === false ? '.EXE' : $pathExt) ?: []));
                 foreach ($exts as $ext) {
                     if (is_executable($candidate.$ext)) {
                         return true;

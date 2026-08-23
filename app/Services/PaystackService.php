@@ -7,6 +7,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Team;
 use App\Services\Billing\PaystackWebhookProcessor;
+use App\Support\ApiPayload;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -54,11 +55,11 @@ class PaystackService
 
     public function __construct()
     {
-        $this->secretKey = config('services.paystack.secret', '');
+        $this->secretKey = ApiPayload::str(config('services.paystack.secret'));
     }
 
     /**
-     * @return array<mixed>
+     * @return array<string, mixed>
      */
     protected function get(string $endpoint): array
     {
@@ -78,12 +79,12 @@ class PaystackService
             return [];
         }
 
-        return $response->json() ?? [];
+        return ApiPayload::assoc($response->json());
     }
 
     /**
-     * @param  array<mixed>  $data
-     * @return array<mixed>
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     protected function post(string $endpoint, array $data = []): array
     {
@@ -103,7 +104,7 @@ class PaystackService
             return [];
         }
 
-        return $response->json() ?? [];
+        return ApiPayload::assoc($response->json());
     }
 
     /**
@@ -130,7 +131,10 @@ class PaystackService
             return null;
         }
 
-        return $response['data']['customer_code'] ?? null;
+        /** @psalm-suppress MixedAssignment */
+        $code = data_get($response, 'data.customer_code');
+
+        return is_string($code) ? $code : null;
     }
 
     /**
@@ -201,9 +205,20 @@ class PaystackService
             return null;
         }
 
+        /** @psalm-suppress MixedAssignment */
+        $authorizationUrl = data_get($response, 'data.authorization_url');
+        /** @psalm-suppress MixedAssignment */
+        $reference = data_get($response, 'data.reference');
+
+        if (! is_string($authorizationUrl) || ! is_string($reference)) {
+            Log::error('Paystack allocation checkout returned an unexpected payload shape', ['team_id' => $team->id]);
+
+            return null;
+        }
+
         return [
-            'authorization_url' => $response['data']['authorization_url'],
-            'reference' => $response['data']['reference'],
+            'authorization_url' => $authorizationUrl,
+            'reference' => $reference,
         ];
     }
 
@@ -271,7 +286,10 @@ class PaystackService
             return null;
         }
 
-        return $response['data']['link'];
+        /** @psalm-suppress MixedAssignment */
+        $link = data_get($response, 'data.link');
+
+        return is_string($link) ? $link : null;
     }
 
     /**

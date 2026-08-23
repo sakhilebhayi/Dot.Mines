@@ -225,7 +225,7 @@ class MaintenanceRecordController extends Controller
                     $record->machine?->name,
                     $record->maintenance_type,
                     $record->status,
-                    $record->scheduled_at->format('Y-m-d'),
+                    $record->scheduled_date->format('Y-m-d'),
                     $record->completed_at?->format('Y-m-d') ?? 'N/A',
                     $record->duration ?? 'N/A',
                     $record->labor_cost,

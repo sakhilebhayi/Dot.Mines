@@ -38,7 +38,7 @@ class Geofence extends Model
     /** @use HasFactory<GeofenceFactory> */
     use HasFactory, HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -128,8 +128,10 @@ class Geofence extends Model
      */
     public function getTonnageForDateRange(string|\DateTimeInterface $startDate, string|\DateTimeInterface $endDate): float
     {
-        return (float) $this->entries()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('tonnage_loaded');
+        $entriesQuery = $this->entries();
+        $entriesQuery->whereBetween('created_at', [$startDate, $endDate]);
+
+        /** @psalm-suppress RedundantCast -- phpstan types sum() as int|float */
+        return (float) $entriesQuery->sum('tonnage_loaded');
     }
 }

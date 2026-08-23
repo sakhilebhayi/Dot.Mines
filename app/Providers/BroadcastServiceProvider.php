@@ -34,7 +34,7 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     protected function requireChannels(): void
     {
-        Broadcast::channel('user.{id}', function (User $user, $id) {
+        Broadcast::channel('user.{id}', function (User $user, string $id) {
             $id = static::toId($id);
 
             return $id !== null && $user->id === $id;
@@ -49,7 +49,7 @@ class BroadcastServiceProvider extends ServiceProvider
          * exactly this case -- view_machines + view_live_map, but
          * deliberately not track_machines.
          */
-        Broadcast::channel('team.{teamId}', function (User $user, $teamId) {
+        Broadcast::channel('team.{teamId}', function (User $user, string $teamId) {
             return static::authorizeTeamChannel($user, $teamId, 'track_machines');
         });
 
@@ -58,7 +58,7 @@ class BroadcastServiceProvider extends ServiceProvider
          * track_machines gate as team.{teamId} above, since this is the
          * per-machine equivalent of the same live-location feed.
          */
-        Broadcast::channel('machine.{machineId}', function (User $user, $machineId) {
+        Broadcast::channel('machine.{machineId}', function (User $user, string $machineId) {
             $machineId = static::toId($machineId);
             $machine = $machineId !== null ? Machine::find($machineId) : null;
 
@@ -72,7 +72,7 @@ class BroadcastServiceProvider extends ServiceProvider
         /**
          * Geofence-specific channels
          */
-        Broadcast::channel('geofence.{geofenceId}', function (User $user, $geofenceId) {
+        Broadcast::channel('geofence.{geofenceId}', function (User $user, string $geofenceId) {
             $geofenceId = static::toId($geofenceId);
             $geofence = $geofenceId !== null ? Geofence::find($geofenceId) : null;
 
@@ -86,7 +86,7 @@ class BroadcastServiceProvider extends ServiceProvider
         /**
          * Alert-specific channels
          */
-        Broadcast::channel('alerts.team.{teamId}', function (User $user, $teamId) {
+        Broadcast::channel('alerts.team.{teamId}', function (User $user, string $teamId) {
             return static::authorizeTeamChannel($user, $teamId, 'view_alerts');
         });
 
@@ -94,14 +94,14 @@ class BroadcastServiceProvider extends ServiceProvider
          * Maintenance alert channel (App\Events\MaintenanceAlertTriggered
          * broadcasts here, not on alerts.team.{teamId} above).
          */
-        Broadcast::channel('team.{teamId}.alerts', function (User $user, $teamId) {
+        Broadcast::channel('team.{teamId}.alerts', function (User $user, string $teamId) {
             return static::authorizeTeamChannel($user, $teamId, 'view_alerts');
         });
 
         /**
          * Compliance violation channel (App\Events\ComplianceViolationDetected).
          */
-        Broadcast::channel('team.{teamId}.compliance', function (User $user, $teamId) {
+        Broadcast::channel('team.{teamId}.compliance', function (User $user, string $teamId) {
             return static::authorizeTeamChannel($user, $teamId, 'view_alerts');
         });
 
@@ -110,7 +110,7 @@ class BroadcastServiceProvider extends ServiceProvider
          * only -- every team member has a bell, and the payload is the same
          * in-app notification they can already read via the bell endpoint.
          */
-        Broadcast::channel('team.{teamId}.notifications', function (User $user, $teamId) {
+        Broadcast::channel('team.{teamId}.notifications', function (User $user, string $teamId) {
             if (! static::belongsToTeamId($user, $teamId)) {
                 return false;
             }
@@ -124,7 +124,7 @@ class BroadcastServiceProvider extends ServiceProvider
          * the way machine/alert/geofence feeds are, so no extra permission
          * gate here.
          */
-        Broadcast::channel('team.presence.{teamId}', function (User $user, $teamId) {
+        Broadcast::channel('team.presence.{teamId}', function (User $user, string $teamId) {
             if (! static::belongsToTeamId($user, $teamId)) {
                 return false;
             }

@@ -77,8 +77,8 @@ class LiveMap extends Component
             ->latest('created_at')
             ->take(10)
             ->get()
-            ->map(fn ($log) => [
-                'user' => $log->user->name ?? 'System',
+            ->map(fn (ActivityLog $log): array => [
+                'user' => $log->user?->name ?? 'System',
                 'action' => $log->action,
                 'description' => $log->description,
                 'created_at' => $log->created_at->diffForHumans(),
@@ -256,19 +256,24 @@ class LiveMap extends Component
     {
         $team = CurrentUser::get()?->currentTeam;
 
+        if ($team === null) {
+            return [];
+        }
+
         // Return active mine areas with coordinates decoded for client-side use
-        return MineArea::forTeam($team?->id)
+        return MineArea::forTeam($team->id)
             ->byStatus('active')
             ->orderBy('name')
             ->get()
-            ->map(function ($area) {
+            ->map(function (MineArea $area): array {
                 return [
                     'id' => $area->id,
                     'name' => $area->name,
-                    'coordinates' => is_string($area->coordinates) ? json_decode($area->coordinates, true) : $area->coordinates ?? [],
+                    'coordinates' => $area->coordinates ?? [],
                 ];
             })
-            ->toArray();
+            ->values()
+            ->all();
     }
 
     /**
@@ -286,23 +291,28 @@ class LiveMap extends Component
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     * @return \Illuminate\Support\Collection<int, array{id: int, name: string, center_latitude: float, center_longitude: float, coordinates: array<string, mixed>}>
      */
     public function getGeofences(): \Illuminate\Support\Collection
     {
         $team = CurrentUser::get()?->currentTeam;
 
-        return Geofence::where('team_id', $team?->id)
+        if ($team === null) {
+            return collect();
+        }
+
+        return Geofence::where('team_id', $team->id)
             ->get()
-            ->map(function ($geofence) {
+            ->map(function (Geofence $geofence): array {
                 return [
                     'id' => $geofence->id,
                     'name' => $geofence->name,
                     'center_latitude' => $geofence->center_latitude,
                     'center_longitude' => $geofence->center_longitude,
-                    'coordinates' => is_string($geofence->coordinates) ? json_decode($geofence->coordinates, true) : $geofence->coordinates ?? [],
+                    'coordinates' => $geofence->coordinates,
                 ];
-            });
+            })
+            ->values();
     }
 
     public function render(): View

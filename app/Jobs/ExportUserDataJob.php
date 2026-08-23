@@ -4,9 +4,11 @@ namespace App\Jobs;
 
 use App\Models\GdprRequest;
 use App\Models\OperatorFatigue;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -44,9 +46,9 @@ class ExportUserDataJob implements ShouldQueue
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'created_at' => $user->created_at?->toIso8601String(),
+                    'created_at' => $user->created_at->toIso8601String(),
                 ],
-                'teams' => $user->allTeams()->map(fn ($team) => [
+                'teams' => $user->allTeams()->map(fn (Team $team): array => [
                     'id' => $team->id,
                     'name' => $team->name,
                     'role' => $user->teamRole($team)?->key,
@@ -55,7 +57,7 @@ class ExportUserDataJob implements ShouldQueue
                     ->where('user_id', $user->id)
                     ->get()
                     ->map(fn (OperatorFatigue $fatigue) => [
-                        'shift_date' => $fatigue->shift_date?->toDateString(),
+                        'shift_date' => $fatigue->shift_date->toDateString(),
                         'shift_type' => $fatigue->shift_type,
                         'hours_worked' => $fatigue->hours_worked,
                         'consecutive_days' => $fatigue->consecutive_days,
@@ -88,7 +90,7 @@ class ExportUserDataJob implements ShouldQueue
 
             Mail::raw(
                 'Your data export is ready. Download it within 7 days from your Privacy & Data page.',
-                fn ($m): mixed => $m->to($user->email)
+                fn (Message $m) => $m->to($user->email)
                     ->from(
                         config('mail.addresses.privacy'),
                         config('app.name'),

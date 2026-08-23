@@ -36,6 +36,7 @@ class AdjustMachineAllocation extends Command
         }
 
         $classArg = $this->argument('class');
+        /** @psalm-suppress RedundantCondition, TypeDoesNotContainType -- phpstan types argument() as array|string|null */
         $class = is_string($classArg) ? $classArg : '';
 
         if (! in_array($class, ['adt', 'heavy'], true)) {

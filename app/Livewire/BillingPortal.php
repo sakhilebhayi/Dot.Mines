@@ -9,6 +9,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Services\Billing\MachineEntitlementService;
 use App\Services\PaystackService;
+use App\Support\ApiPayload;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -35,7 +36,7 @@ class BillingPortal extends Component
 
     public string $billingCycle = 'monthly';
 
-    public mixed $currentSubscription = null;
+    public ?Subscription $currentSubscription = null;
 
     public mixed $currentPlan = null;
 
@@ -179,7 +180,7 @@ class BillingPortal extends Component
 
         if ($this->currentSubscription) {
             $this->currentPlan = $this->currentSubscription->plan;
-            $this->nextBillingDate = $this->currentSubscription->current_period_end;
+            $this->nextBillingDate = $this->currentSubscription->current_period_end?->toDateString();
             $this->trialDaysRemaining = $this->currentSubscription->trialDaysRemaining();
         }
     }
@@ -192,8 +193,7 @@ class BillingPortal extends Component
             ->where('status', 'succeeded');
 
         $this->totalPaid = (clone $succeededPayments)->sum('amount');
-        $this->totalPaidCurrency = (clone $succeededPayments)->latest()->value('currency')
-            ?? $team->currency;
+        $this->totalPaidCurrency = ApiPayload::str((clone $succeededPayments)->latest()->value('currency'), $team->currency);
 
         $this->recentPayments = Payment::where('team_id', $team->id)
             ->latest()
@@ -258,7 +258,7 @@ class BillingPortal extends Component
                 session()->flash('error', 'Unable to cancel subscription. Please contact support.');
             }
         } catch (\Throwable $e) {
-            Log::error('Failed to cancel subscription', ['subscription_id' => $this->currentSubscription->id ?? null, 'error' => $e->getMessage()]);
+            Log::error('Failed to cancel subscription', ['subscription_id' => $this->currentSubscription?->id, 'error' => $e->getMessage()]);
             session()->flash('error', "We couldn't cancel your subscription. Please try again, or contact support if this keeps happening.");
         }
     }
@@ -283,7 +283,7 @@ class BillingPortal extends Component
                 session()->flash('error', 'Unable to resume subscription. Please contact support.');
             }
         } catch (\Throwable $e) {
-            Log::error('Failed to resume subscription', ['subscription_id' => $this->currentSubscription->id ?? null, 'error' => $e->getMessage()]);
+            Log::error('Failed to resume subscription', ['subscription_id' => $this->currentSubscription?->id, 'error' => $e->getMessage()]);
             session()->flash('error', "We couldn't resume your subscription. Please try again, or contact support if this keeps happening.");
         }
     }

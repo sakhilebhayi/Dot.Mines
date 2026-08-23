@@ -43,7 +43,7 @@ class MineArea extends Model
     /** @use HasFactory<MineAreaFactory> */
     use HasFactory, HasSyncVersion, SoftDeletes;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'name',

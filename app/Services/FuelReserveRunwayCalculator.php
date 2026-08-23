@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\FuelTank;
 use App\Models\FuelTransaction;
 use App\Models\Machine;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class FuelReserveRunwayCalculator
 {
@@ -31,11 +31,11 @@ class FuelReserveRunwayCalculator
             return $this->unavailable();
         }
 
-        $distinctDays = $dispensing->map(fn ($t) => $t->transaction_date->format('Y-m-d'))->unique()->count();
+        $distinctDays = $dispensing->map(fn (FuelTransaction $t) => $t->transaction_date?->format('Y-m-d'))->filter()->unique()->count();
         $daysSpanned = min(max(1, $distinctDays), self::TRAILING_DAYS);
 
         $totalDispensed = (float) $dispensing->sum('quantity_liters');
-        $dailyConsumption = $totalDispensed / $daysSpanned;
+        $dailyConsumption = $totalDispensed / (float) $daysSpanned;
 
         $hasNoRecentConsumption = $dailyConsumption <= 0;
         $days = $hasNoRecentConsumption ? null : (int) round($currentReserves / $dailyConsumption);
@@ -78,14 +78,14 @@ class FuelReserveRunwayCalculator
     }
 
     /**
-     * @param  Collection<array-key, mixed>  $dispensing
+     * @param  Collection<int, FuelTransaction>  $dispensing
      * @return array<string, mixed>|null
      */
-    private function computeWhatIf(Collection $dispensing, float $dailyConsumption, float $currentReserves, int $daysSpanned): ?array
+    private function computeWhatIf($dispensing, float $dailyConsumption, float $currentReserves, int $daysSpanned): ?array
     {
-        $topMachine = $dispensing->whereNotNull('machine_id')
+        $topMachine = $dispensing->toBase()->whereNotNull('machine_id')
             ->groupBy('machine_id')
-            ->map(fn ($group) => $group->sum('quantity_liters'))
+            ->map(fn ($group) => (float) $group->sum('quantity_liters'))
             ->sortDesc();
 
         if ($topMachine->isEmpty()) {
@@ -98,7 +98,7 @@ class FuelReserveRunwayCalculator
             return null;
         }
 
-        $machineDailyAvg = $topMachine->first() / $daysSpanned;
+        $machineDailyAvg = ((float) $topMachine->first()) / (float) $daysSpanned;
         $adjustedRate = $dailyConsumption - $machineDailyAvg;
 
         if ($adjustedRate <= 0) {

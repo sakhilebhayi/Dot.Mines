@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ApiPayload;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +24,7 @@ class MinePlanUpload extends Model
 {
     use SoftDeletes;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',
@@ -63,7 +64,7 @@ class MinePlanUpload extends Model
     public function signedDownloadUrl($expires = null): string
     {
         $expires = $expires ?? now()->addHours(24);
-        $disk = data_get($this->metadata, 'disk', config('filesystems.default'));
+        $disk = ApiPayload::str(data_get($this->metadata, 'disk'), ApiPayload::str(config('filesystems.default'), 'local'));
 
         return URL::temporarySignedRoute(
             'mineplans.signed-download',
@@ -129,7 +130,7 @@ class MinePlanUpload extends Model
             return number_format($bytes / 1024, 2).' KB';
         }
 
-        return $bytes.' bytes';
+        return ((string) ($bytes ?? 0)).' bytes';
     }
 
     /**

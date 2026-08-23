@@ -6,7 +6,10 @@ use App\Models\AIPredictiveAlert;
 use App\Models\Alert;
 use App\Models\FuelAlert;
 use App\Models\Notification;
+use App\Support\ApiPayload;
+use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -29,6 +32,9 @@ use Livewire\Component;
  * Each notification is a plain array, not a value object -- Livewire's
  * collection synthesizer expects Eloquent models (it calls getMorphClass()
  * on hydration) or plain arrays, and throws on stdClass/DTOs.
+ */
+/**
+ * @psalm-suppress MissingConstructor -- Livewire initializes public state in mount()/loadNotifications()
  */
 class AINotifications extends Component
 {
@@ -86,7 +92,7 @@ class AINotifications extends Component
                 'severity' => $a->priority,
                 'title' => $a->title,
                 'message' => $a->description,
-                'created_at' => $a->triggered_at ?? $a->created_at,
+                'created_at' => $a->triggered_at,
                 'location' => $a->machine?->name ?? $a->mineArea?->name,
             ]);
 
@@ -103,12 +109,12 @@ class AINotifications extends Component
                 'severity' => $a->severity,
                 'title' => $a->title,
                 'message' => $a->message,
-                'created_at' => $a->triggered_at ?? $a->created_at,
+                'created_at' => $a->triggered_at,
                 'location' => $a->machine?->name ?? $a->fuelTank?->name,
             ]);
 
         $notificationAlerts = Notification::where('team_id', $team->id)
-            ->whereDoesntHave('readBy', fn ($q): mixed => $q->where('user_id', auth()->id()))
+            ->whereDoesntHave('readBy', fn (Builder $q): mixed => $q->where('user_id', auth()->id()))
             ->latest('created_at')
             ->limit(100)
             ->get()
@@ -123,19 +129,33 @@ class AINotifications extends Component
                 'location' => null,
             ]);
 
-        $user = auth()->user();
-        $minSeverity = $user->notification_preferences['min_severity'] ?? 'low';
+        $user = CurrentUser::get();
 
-        /** @var Collection<int, array<string, mixed>> $visible */
+        if ($user === null) {
+            $this->notifications = collect();
+            $this->unreadCount = 0;
+
+            return;
+        }
+
+        $minSeverity = ApiPayload::str($user->notification_preferences['min_severity'] ?? null, 'low');
+
+        /**
+         * @var Collection<int, array<string, mixed>> $visible
+         *
+         * @psalm-suppress RedundantConditionGivenDocblockType, DocblockTypeContradiction
+         * Psalm infers severity as string from the map shapes above; phpstan
+         * sees array<string, mixed>, so the is_string check must stay.
+         */
         $visible = $aiAlerts
             ->concat($operationalAlerts)
             ->concat($fuelAlerts)
             ->concat($notificationAlerts)
-            ->filter(fn (array $n) => $this->meetsSeverityThreshold($n['severity'], $minSeverity))
+            ->filter(fn (array $n): bool => $this->meetsSeverityThreshold($n['severity'], $minSeverity))
             // "In-App Alerts" and quiet hours used to be stored preferences
             // that nothing ever read -- toggling either off in Settings had
             // no effect on what the bell showed.
-            ->filter(fn (array $n) => $user->wantsInAppAlert($n['severity']))
+            ->filter(fn (array $n): bool => $user->wantsInAppAlert(is_string($n['severity']) ? $n['severity'] : null))
             ->sortByDesc(fn (array $n) => $n['created_at']);
 
         // Badge = everything unread that passed the filters, not just the 10
@@ -150,7 +170,7 @@ class AINotifications extends Component
      * notification preference is a convenience filter, not a way to
      * accidentally hide something that genuinely needs immediate attention.
      */
-    private function meetsSeverityThreshold(?string $severity, string $minSeverity): bool
+    private function meetsSeverityThreshold(mixed $severity, string $minSeverity): bool
     {
         if ($severity === 'critical') {
             return true;
@@ -158,7 +178,9 @@ class AINotifications extends Component
 
         $rank = ['low' => 0, 'warning' => 1, 'medium' => 1, 'high' => 2, 'critical' => 3];
 
-        return ($rank[$severity] ?? 0) >= ($rank[$minSeverity] ?? 0);
+        $key = is_string($severity) ? $severity : '';
+
+        return ($rank[$key] ?? 0) >= ($rank[$minSeverity] ?? 0);
     }
 
     public function togglePanel(): void
@@ -174,20 +196,20 @@ class AINotifications extends Component
             'ai' => AIPredictiveAlert::where('team_id', $team?->id)->find($id)?->update([
                 'is_acknowledged' => true,
                 'acknowledged_at' => now(),
-                'acknowledged_by' => auth()->id(),
+                'acknowledged_by' => CurrentUser::get()?->id,
             ]),
-            'alert' => Alert::where('team_id', $team?->id)->find($id)?->acknowledge(auth()->id()),
+            'alert' => Alert::where('team_id', $team?->id)->find($id)?->acknowledge(CurrentUser::get()?->id),
             'fuel_alert' => FuelAlert::where('team_id', $team?->id)->find($id)?->update([
                 'status' => 'acknowledged',
                 'acknowledged_at' => now(),
-                'acknowledged_by' => auth()->id(),
+                'acknowledged_by' => CurrentUser::get()?->id,
             ]),
             // Notification's "read" tracking is per-user (readBy pivot),
             // not a single shared acknowledged/acknowledged_by pair like
             // the other three sources -- markAsRead() records this user
             // specifically, so the notification can still be unread for
             // teammates.
-            'notification' => Notification::where('team_id', $team?->id)->find($id)?->markAsRead(auth()->id()),
+            'notification' => Notification::where('team_id', $team?->id)->find($id)?->markAsRead((int) CurrentUser::get()?->id),
             default => null,
         };
 
@@ -209,23 +231,23 @@ class AINotifications extends Component
             ->update([
                 'is_acknowledged' => true,
                 'acknowledged_at' => now(),
-                'acknowledged_by' => auth()->id(),
+                'acknowledged_by' => CurrentUser::get()?->id,
             ]);
 
         Alert::where('team_id', $team->id)->active()->get()->each(
-            fn (Alert $a) => $a->acknowledge(auth()->id())
+            fn (Alert $a) => $a->acknowledge(CurrentUser::get()?->id)
         );
 
         FuelAlert::where('team_id', $team->id)->active()->update([
             'status' => 'acknowledged',
             'acknowledged_at' => now(),
-            'acknowledged_by' => auth()->id(),
+            'acknowledged_by' => CurrentUser::get()?->id,
         ]);
 
         Notification::where('team_id', $team->id)
-            ->whereDoesntHave('readBy', fn ($q): mixed => $q->where('user_id', auth()->id()))
+            ->whereDoesntHave('readBy', fn (Builder $q): mixed => $q->where('user_id', auth()->id()))
             ->get()
-            ->each(fn (Notification $n) => $n->markAsRead(auth()->id()));
+            ->each(fn (Notification $n) => $n->markAsRead((int) CurrentUser::get()?->id));
 
         $this->loadNotifications();
     }

@@ -6,6 +6,7 @@ use App\Events\MachineOffline;
 use App\Models\Integration;
 use App\Models\Machine;
 use App\Services\Integration\IntegrationService;
+use App\Support\ApiPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -89,7 +90,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
             // Fetch machine statuses from the integration provider
             $statuses = $integrationService->getMachineStatuses(
                 $this->integration,
-                $machines->pluck('manufacturer_id')->toArray()
+                ApiPayload::strings($machines->pluck('manufacturer_id')->all())
             );
 
             if (empty($statuses)) {
@@ -181,7 +182,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
             return 'offline';
         }
 
-        if (isset($status['status']) && strtolower($status['status']) === 'offline') {
+        if (is_string($status['status'] ?? null) && strtolower((string) $status['status']) === 'offline') {
             return 'offline';
         }
 
@@ -205,7 +206,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
                 'stopped' => 'idle',
             ];
 
-            $normalizedStatus = $statusMap[strtolower($status['status'])] ?? 'active';
+            $normalizedStatus = $statusMap[strtolower(ApiPayload::str($status['status'] ?? null))] ?? 'active';
 
             // Only mark as offline if specifically indicated
             if ($normalizedStatus !== 'offline') {
@@ -222,7 +223,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
             }
         }
 
-        return $machine->status ?? 'active';
+        return $machine->status;
     }
 
     /**

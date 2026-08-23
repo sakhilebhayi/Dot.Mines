@@ -16,7 +16,7 @@ class AIAnalysisSession extends Model
 
     protected $table = 'ai_analysis_sessions';
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'ai_agent_id',

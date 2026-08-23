@@ -75,7 +75,7 @@ class ReportDataService
         $records = $query->orderBy('record_date')->get();
 
         $rows = $records->map(fn ($r) => [
-            $r->record_date?->format('Y-m-d'),
+            $r->record_date->format('Y-m-d'),
             $r->mineArea?->name ?? '—',
             $r->machine?->name ?? '—',
             ucfirst($r->shift),

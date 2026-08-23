@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Support\ApiPayload;
 use Illuminate\Queue\Events\JobFailed;
 
 class NotifyOnJobFailed
@@ -13,8 +14,8 @@ class NotifyOnJobFailed
     {
         $payload = [
             'connection' => $event->connectionName,
-            'queue' => $event->job?->getQueue(),
-            'job' => $event->job?->resolveName() ?? $event->job?->getName() ?? 'unknown',
+            'queue' => $event->job->getQueue(),
+            'job' => $event->job->resolveName(),
             'exception' => $event->exception->getMessage(),
         ];
 
@@ -27,7 +28,7 @@ class NotifyOnJobFailed
 
         // Send to Sentry if available and configured
         try {
-            if (config('sentry.dsn') && class_exists('\\Sentry\\State\\HubInterface')) {
+            if (ApiPayload::str(config('sentry.dsn')) !== '' && class_exists('\\Sentry\\State\\HubInterface')) {
                 // safe-call Sentry capture if SDK is installed
                 if (function_exists('\\Sentry\\captureException')) {
                     \Sentry\captureException($event->exception);

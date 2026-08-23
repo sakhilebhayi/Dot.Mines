@@ -31,7 +31,8 @@ class EnsureTeamContext
         }
 
         // Get team_id from route or use user's current team
-        $teamId = $request->route('team_id') ?? $user->current_team_id;
+        $routeTeamId = $request->route('team_id');
+        $teamId = is_numeric($routeTeamId) ? (int) $routeTeamId : $user->current_team_id;
 
         // If no team_id, set to user's default team. $user->teams() is only
         // the team_user pivot (teams they were invited into) -- it misses a
@@ -42,15 +43,21 @@ class EnsureTeamContext
         // found nothing and bounced them to teams.create on their very
         // first authenticated request. Prefer their personal team, then any
         // other owned team, then any team they're a member of.
-        if (! $teamId) {
-            $teamId = ($user->personalTeam() ?? $user->ownedTeams()->first() ?? $user->teams()->first())?->id;
-            if ($teamId) {
+        if ($teamId === null || $teamId === 0) {
+            /**
+             * @psalm-suppress MixedAssignment, RedundantConditionGivenDocblockType, DocblockTypeContradiction
+             * Jetstream's personalTeam() is nullable at runtime despite the
+             * plugin's non-null docblock, and teams()->first() is untyped.
+             */
+            $fallbackId = ($user->personalTeam() ?? $user->ownedTeams()->first() ?? $user->teams()->first())?->id;
+            $teamId = is_numeric($fallbackId) ? (int) $fallbackId : null;
+            if ($teamId !== null) {
                 $user->update(['current_team_id' => $teamId]);
             }
         }
 
         // Verify user has access to the team
-        if ($teamId) {
+        if ($teamId !== null && $teamId !== 0) {
             $team = Team::find($teamId);
             if (! $team || ! $user->belongsToTeam($team)) {
                 abort(403, 'Unauthorized to access this team.');

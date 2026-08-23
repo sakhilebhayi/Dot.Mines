@@ -185,7 +185,7 @@ class SyncController extends Controller
                 'message' => $model->message,
                 'alert_level' => $model->alert_level,
                 'is_read' => $model->is_read,
-                'created_at' => $model->created_at?->toIso8601String(),
+                'created_at' => $model->created_at->toIso8601String(),
                 'sync_version' => $model->sync_version,
             ],
             $model instanceof MineArea => [

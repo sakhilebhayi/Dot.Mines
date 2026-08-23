@@ -40,7 +40,7 @@ class FuelTank extends Model
     /** @use HasFactory<FuelTankFactory> */
     use HasFactory, HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'mine_area_id',

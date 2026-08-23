@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
  * Permission Model
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Permission extends Model
 {
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'name',
@@ -52,7 +53,7 @@ class Permission extends Model
     /**
      * Get all roles with this permission
      */
-    /** @return BelongsToMany<Role,$this> */
+    /** @return BelongsToMany<Role,$this,Pivot,'pivot'> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);

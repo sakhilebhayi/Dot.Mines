@@ -51,13 +51,11 @@ class DataQualityService
             })
             ->get()
             ->each(function (ProductionRecord $record) use ($issues) {
-                if (is_null($record->quantity_produced)) {
-                    $issues->push($this->finding($record, 'missing_data', 'quantity_produced is null'));
-                } elseif ($record->quantity_produced < 0) {
-                    $issues->push($this->finding($record, 'impossible_value', "quantity_produced is negative ({$record->quantity_produced})"));
+                if ((float) $record->quantity_produced < 0) {
+                    $issues->push($this->finding($record, 'impossible_value', 'quantity_produced is negative ('.((string) $record->quantity_produced).')'));
                 }
 
-                if ($record->record_date && $record->record_date->greaterThan(now()->addDay())) {
+                if ($record->record_date->greaterThan(now()->addDay())) {
                     $issues->push($this->finding($record, 'invalid_timestamp', "record_date ({$record->record_date->toDateString()}) is in the future"));
                 }
             });
@@ -70,13 +68,13 @@ class DataQualityService
             ->groupBy('machine_id', 'record_date', 'shift')
             ->havingRaw('COUNT(*) > 1')
             ->get()
-            ->each(function ($group) use ($issues) {
-                $record = ProductionRecord::find($group->first_id);
+            ->each(function (ProductionRecord $group) use ($issues) {
+                $record = ProductionRecord::find((int) $group->getAttribute('first_id'));
                 if ($record) {
                     $issues->push($this->finding(
                         $record,
                         'duplicate',
-                        "{$group->total} production records exist for the same machine, date, and shift"
+                        ((string) $group->getAttribute('total')).' production records exist for the same machine, date, and shift'
                     ));
                 }
             });

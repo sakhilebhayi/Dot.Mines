@@ -88,6 +88,7 @@ class SyncMachineMetricsJob implements ShouldQueue
             if (! empty($metrics)) {
                 // §19 idempotency: skip when this provider reading is
                 // already stored (same machine, same recorded_at).
+                /** @psalm-suppress MixedAssignment */
                 $recordedAt = $metrics['recorded_at'] ?? null;
 
                 if ($recordedAt !== null && $this->machine->metrics()->where('recorded_at', $recordedAt)->exists()) {
@@ -96,9 +97,11 @@ class SyncMachineMetricsJob implements ShouldQueue
 
                 // team_id is NOT NULL on machine_metrics and isn't filled
                 // automatically by the relationship.
-                $this->machine->metrics()->create(array_merge($metrics, [
+                /** @var array<string, mixed> $attributes */
+                $attributes = array_merge($metrics, [
                     'team_id' => $this->machine->team_id,
-                ]));
+                ]);
+                $this->machine->metrics()->create($attributes);
 
                 Log::info('Machine metrics synced successfully', [
                     'machine_id' => $this->machine->id,

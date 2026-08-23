@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ActivityLog extends Model
 {
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'user_id',
         'team_id',

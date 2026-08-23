@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Geofence;
+use App\Support\ApiPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,7 +33,7 @@ class GeofenceController extends Controller
         $query = Geofence::query();
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $search = ApiPayload::str($request->input('search'));
             $query->where('name', 'like', "%{$search}%")
                 ->orWhere('description', 'like', "%{$search}%");
         }
@@ -41,7 +42,9 @@ class GeofenceController extends Controller
             $query->where('type', $request->input('type'));
         }
 
-        $perPage = $request->input('per_page', 15);
+        /** @psalm-suppress MixedAssignment */
+        $perPageRaw = $request->input('per_page');
+        $perPage = is_numeric($perPageRaw) ? (int) $perPageRaw : 15;
         $geofences = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return response()->json([
@@ -100,7 +103,8 @@ class GeofenceController extends Controller
 
         $validated['team_id'] = auth()->user()?->current_team_id;
         $validated['status'] = 'active';
-        $validated['coordinates'] = json_decode($request->input('coordinates'), true);
+        /** @psalm-suppress MixedAssignment */
+        $validated['coordinates'] = json_decode(ApiPayload::str($request->input('coordinates'), '[]'), true);
 
         $geofence = Geofence::create($validated);
 
@@ -131,7 +135,8 @@ class GeofenceController extends Controller
         ]);
 
         if (isset($validated['coordinates'])) {
-            $validated['coordinates'] = json_decode($validated['coordinates'], true);
+            /** @psalm-suppress MixedAssignment */
+            $validated['coordinates'] = json_decode(ApiPayload::str($validated['coordinates'], '[]'), true);
         }
 
         $geofence->update($validated);
@@ -181,7 +186,9 @@ class GeofenceController extends Controller
             $query->where('entry_time', '<=', $request->input('date_to'));
         }
 
-        $limit = $request->input('limit', 100);
+        /** @psalm-suppress MixedAssignment */
+        $limitRaw = $request->input('limit');
+        $limit = is_numeric($limitRaw) ? (int) $limitRaw : 100;
         $entries = $query->orderBy('entry_time', 'desc')->limit($limit)->get();
 
         return response()->json([
@@ -201,8 +208,8 @@ class GeofenceController extends Controller
             'date_to' => 'required|date',
         ]);
 
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
+        $dateFrom = ApiPayload::str($request->input('date_from'));
+        $dateTo = ApiPayload::str($request->input('date_to'));
 
         $totalTonnage = $geofence->getTonnageForDateRange($dateFrom, $dateTo);
         $entries = $geofence->entries()

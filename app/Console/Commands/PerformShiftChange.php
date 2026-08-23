@@ -15,6 +15,7 @@ class PerformShiftChange extends Command
     {
         $teamId = (int) $this->argument('team_id');
         $rawShiftType = $this->argument('shift_type');
+        /** @psalm-suppress RedundantCondition, TypeDoesNotContainType -- phpstan types argument() as array|string|null */
         $shiftType = is_string($rawShiftType) ? $rawShiftType : 'day';
         $defaultMineArea = $this->option('default-mine-area');
 

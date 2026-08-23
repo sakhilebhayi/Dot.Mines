@@ -17,8 +17,13 @@ class MaintenanceRecordFactory extends Factory
 
     public function definition(): array
     {
-        $scheduledDate = $this->faker->dateTimeBetween('-30 days', '+30 days');
         $status = $this->faker->randomElement(['scheduled', 'in_progress', 'completed', 'cancelled']);
+        // A completed record's schedule must be in the past, or the
+        // completed_at range below is inverted and faker throws (this was
+        // an intermittent one-in-many-runs suite flake).
+        $scheduledDate = $status === 'completed'
+            ? $this->faker->dateTimeBetween('-30 days', '-1 hour')
+            : $this->faker->dateTimeBetween('-30 days', '+30 days');
 
         return [
             'team_id' => Team::factory(),

@@ -16,7 +16,7 @@ class FuelConsumptionMetric extends Model
 {
     use HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'machine_id',
@@ -70,7 +70,7 @@ class FuelConsumptionMetric extends Model
             return null;
         }
 
-        return round($this->fuel_consumed_liters / $this->operating_hours, 4);
+        return round((float) ($this->fuel_consumed_liters ?? 0) / (float) $this->operating_hours, 4);
     }
 
     /**
@@ -78,11 +78,13 @@ class FuelConsumptionMetric extends Model
      */
     public function calculateLpkm(): ?float
     {
-        if ($this->distance_traveled_km == 0) {
+        $distance = (float) ($this->distance_traveled_km ?? 0);
+
+        if ($distance === 0.0) {
             return null;
         }
 
-        return round($this->fuel_consumed_liters / $this->distance_traveled_km, 4);
+        return round((float) ($this->fuel_consumed_liters ?? 0) / $distance, 4);
     }
 
     /**
@@ -90,10 +92,13 @@ class FuelConsumptionMetric extends Model
      */
     protected function getIdleFuelPercentageAttribute(): ?float
     {
-        if ($this->fuel_consumed_liters == 0 || ! $this->idle_fuel_consumed) {
+        $consumed = (float) ($this->fuel_consumed_liters ?? 0);
+        $idle = (float) ($this->idle_fuel_consumed ?? 0);
+
+        if ($consumed === 0.0 || $idle === 0.0) {
             return null;
         }
 
-        return round(($this->idle_fuel_consumed / $this->fuel_consumed_liters) * 100.0, 2);
+        return round(($idle / $consumed) * 100.0, 2);
     }
 }

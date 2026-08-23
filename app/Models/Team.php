@@ -7,6 +7,7 @@ use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
@@ -33,6 +34,26 @@ class Team extends JetstreamTeam
 {
     /** @use HasFactory<TeamFactory> */
     use HasFactory;
+
+    /**
+     * Same relation Jetstream's base Team builds dynamically, restated with
+     * the concrete models so both analyzers know members are Users.
+     *
+     *
+     * @phpstan-return BelongsToMany<User,$this> larastan's relation extension
+     * does not track using()/as(), so it is given the two-template form.
+     *
+     * @psalm-return BelongsToMany<User,$this,Membership,'membership'>
+     */
+    #[\Override]
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, Membership::class)
+            ->using(Membership::class)
+            ->as('membership')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
 
     /**
      * The attributes that are mass assignable.

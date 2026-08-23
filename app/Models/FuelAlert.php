@@ -34,7 +34,7 @@ class FuelAlert extends Model
 {
     use HasTeamFilters;
 
-    /** @var list<string> */
+    /** @var array<int, string> */
     protected $fillable = [
         'team_id',
         'fuel_tank_id',

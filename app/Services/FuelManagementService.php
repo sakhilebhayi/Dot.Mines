@@ -8,10 +8,11 @@ use App\Models\FuelConsumptionMetric;
 use App\Models\FuelTank;
 use App\Models\FuelTransaction;
 use App\Models\Machine;
+use App\Models\MachineMetric;
 use App\Models\Team;
 use App\Support\Currency;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class FuelManagementService
@@ -43,7 +44,7 @@ class FuelManagementService
             $this->checkAndCreateAlerts($transaction);
 
             // Update budget if applicable
-            if ($transaction->total_cost) {
+            if ((float) ($transaction->total_cost ?? 0) !== 0.0) {
                 $this->updateBudget($transaction);
             }
 
@@ -147,16 +148,17 @@ class FuelManagementService
      * different tank or machine, is exactly the kind of thing that must
      * never be silently suppressed.
      */
-    protected function createFuelLossAlert(FuelTransaction $transaction): FuelAlert
+    protected function createFuelLossAlert(FuelTransaction $transaction): void
     {
         $label = $transaction->transaction_type === 'theft' ? 'Theft' : 'Spillage';
         $location = $transaction->fuelTank?->name ?? $transaction->machine?->name ?? 'an unrecorded location';
         $quantity = number_format((float) $transaction->quantity_liters, 2);
-        $costSuffix = $transaction->total_cost
-            ? ' ('.Currency::format($transaction->total_cost, $transaction->currency ?? 'ZAR').')'
+        $cost = (float) ($transaction->total_cost ?? 0);
+        $costSuffix = $cost !== 0.0
+            ? ' ('.Currency::format($cost, $transaction->currency).')'
             : '';
 
-        return FuelAlert::create([
+        FuelAlert::create([
             'team_id' => $transaction->team_id,
             'fuel_tank_id' => $transaction->fuel_tank_id,
             'machine_id' => $transaction->machine_id,
@@ -191,7 +193,9 @@ class FuelManagementService
             ->where('date', '>=', now()->subDays(30))
             ->avg('fuel_consumed_liters');
 
-        if ($avgConsumption && $transaction->quantity_liters > ($avgConsumption * 1.5)) {
+        $avgConsumption = is_numeric($avgConsumption) ? (float) $avgConsumption : 0.0;
+
+        if ($avgConsumption > 0.0 && (float) $transaction->quantity_liters > $avgConsumption * 1.5) {
             $this->createFuelAlert([
                 'team_id' => $machine->team_id,
                 'machine_id' => $machine->id,
@@ -238,8 +242,8 @@ class FuelManagementService
             ->first();
 
         if ($budget) {
-            $budget->increment('actual_spent', $transaction->total_cost);
-            $budget->increment('actual_liters', $transaction->quantity_liters);
+            $budget->increment('actual_spent', (float) ($transaction->total_cost ?? 0));
+            $budget->increment('actual_liters', (float) $transaction->quantity_liters);
 
             // Update status if exceeded
             if ($budget->isExceeded() && $budget->status !== 'exceeded') {
@@ -285,9 +289,9 @@ class FuelManagementService
         // the real one), so idle figures were always null. Readings are
         // selected by recorded_at (telemetry time), not created_at (row
         // insert time, which lags the sync).
-        $dayMetrics = $machine->metrics()
-            ->whereBetween('recorded_at', [$startOfDay, $endOfDay])
-            ->get();
+        $metricsRelation = $machine->metrics();
+        $metricsRelation->whereBetween('recorded_at', [$startOfDay, $endOfDay]);
+        $dayMetrics = $metricsRelation->get();
 
         $operatingHours = $this->counterDelta($dayMetrics, 'operating_hours');
         $idleTime = $this->counterDelta($dayMetrics, 'idle_hours');
@@ -324,16 +328,23 @@ class FuelManagementService
      * Delta of a cumulative meter column across a set of readings; null when
      * fewer than two readings exist (one meter snapshot is not a duration).
      *
-     * @param  Collection<int, mixed>  $metrics
+     * @param  Collection<int, MachineMetric>  $metrics
      */
     private function counterDelta($metrics, string $column): ?float
     {
-        $readings = $metrics->pluck($column)
-            ->filter(fn ($value) => $value !== null)
-            ->map(fn ($value) => (float) $value);
+        $readings = [];
 
-        return $readings->count() >= 2
-            ? max(0.0, $readings->max() - $readings->min())
+        foreach ($metrics as $metric) {
+            /** @psalm-suppress MixedAssignment */
+            $value = $metric->getAttribute($column);
+
+            if (is_numeric($value)) {
+                $readings[] = (float) $value;
+            }
+        }
+
+        return count($readings) >= 2
+            ? max(0.0, max($readings) - min($readings))
             : null;
     }
 
@@ -348,7 +359,7 @@ class FuelManagementService
         // theft/spillage (loss). Kept as-is for anything relying on this
         // matching real tank drawdown; the loss portion used to be silently
         // lumped in here with no separate visibility at all.
-        $totalConsumed = FuelTransaction::where('team_id', $teamId)
+        $totalConsumed = (float) FuelTransaction::where('team_id', $teamId)
             ->whereIn('transaction_type', ['dispensing', 'spillage', 'theft'])
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->sum('quantity_liters');
@@ -357,7 +368,7 @@ class FuelManagementService
         // could not previously see "how much fuel did we actually lose to
         // theft/spillage this period" anywhere; it was invisible inside the
         // total above.
-        $dispensedTotal = FuelTransaction::where('team_id', $teamId)
+        $dispensedTotal = (float) FuelTransaction::where('team_id', $teamId)
             ->where('transaction_type', 'dispensing')
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->sum('quantity_liters');
@@ -388,7 +399,7 @@ class FuelManagementService
         ];
 
         // Total cost
-        $totalCost = FuelTransaction::where('team_id', $teamId)
+        $totalCost = (float) FuelTransaction::where('team_id', $teamId)
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->sum('total_cost');
 
@@ -404,11 +415,11 @@ class FuelManagementService
             ->groupBy('machine_id')
             ->with('machine:id,name')
             ->get()
-            ->map(function ($item) {
+            ->map(function (FuelTransaction $item): array {
                 return [
                     'machine_id' => $item->machine_id,
-                    'machine_name' => $item->machine->name ?? 'Unknown',
-                    'total_fuel' => round($item->total_fuel, 2),
+                    'machine_name' => $item->machine?->name ?? 'Unknown',
+                    'total_fuel' => round((float) $item->getAttribute('total_fuel'), 2),
                 ];
             });
 

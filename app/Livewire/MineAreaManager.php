@@ -6,6 +6,7 @@ use App\Models\MineArea;
 use App\Services\MineAreaService;
 use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -157,6 +158,8 @@ class MineAreaManager extends Component
             'manager_contact' => $this->manager_contact,
         ];
 
+        $mineArea = null;
+
         if (($this->editingMineAreaId !== null && $this->editingMineAreaId !== 0)) {
             $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
             if (! $mineArea) {
@@ -170,7 +173,7 @@ class MineAreaManager extends Component
         }
 
         try {
-            if (($this->editingMineAreaId !== null && $this->editingMineAreaId !== 0)) {
+            if ($mineArea !== null) {
                 $this->getService()->update($mineArea, $data);
                 $this->dispatch('notify', ['message' => 'Mine area updated successfully', 'type' => 'success']);
                 $this->showEditModal = false;
@@ -258,12 +261,20 @@ class MineAreaManager extends Component
     {
         $this->boundaryCoordinates = $coordinates;
         // Calculate center and approximate area from polygon
-        if (! empty($coordinates)) {
-            $latitudes = array_map(fn ($coord): mixed => $coord['lat'], $coordinates);
-            $longitudes = array_map(fn ($coord): mixed => $coord['lng'], $coordinates);
+        $latitudes = [];
+        $longitudes = [];
 
-            $this->latitude = array_sum($latitudes) / count($latitudes);
-            $this->longitude = array_sum($longitudes) / count($longitudes);
+        /** @psalm-suppress MixedAssignment */
+        foreach ($coordinates as $coord) {
+            if (is_array($coord) && is_numeric($coord['lat'] ?? null) && is_numeric($coord['lng'] ?? null)) {
+                $latitudes[] = (float) $coord['lat'];
+                $longitudes[] = (float) $coord['lng'];
+            }
+        }
+
+        if ($latitudes !== []) {
+            $this->latitude = array_sum($latitudes) / (float) count($latitudes);
+            $this->longitude = array_sum($longitudes) / (float) count($longitudes);
         }
     }
 
@@ -323,11 +334,11 @@ class MineAreaManager extends Component
         $team = CurrentUser::team();
 
         $query = MineArea::forTeam($team->id)
-            ->withCount(['machines', 'geofences', 'alerts' => function ($q) {
+            ->withCount(['machines', 'geofences', 'alerts' => function (Builder $q) {
                 $q->where('status', 'active');
-            }, 'productionRecords' => function ($q) {
+            }, 'productionRecords' => function (Builder $q) {
                 $q->where('record_date', today());
-            }, 'minePlanUploads' => function ($q) {
+            }, 'minePlanUploads' => function (Builder $q) {
                 $q->where('status', 'active');
             }]);
 
@@ -343,7 +354,7 @@ class MineAreaManager extends Component
             $query->where('status', $this->statusFilter);
         }
 
-        $mineAreas = $query->orderBy($this->sortBy, $this->sortDirection)
+        $mineAreas = $query->orderBy($this->sortBy, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(15);
 
         $stats = $this->getService()->getTeamStatistics($team->id);
