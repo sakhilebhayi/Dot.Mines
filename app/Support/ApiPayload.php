@@ -11,6 +11,32 @@ use Carbon\CarbonInterface;
 final class ApiPayload
 {
     /**
+     * A clean list of ints, dropping anything that is not numeric.
+     *
+     * Also launders config values, whose literal types psalm's Laravel plugin
+     * would otherwise fold into always-true/always-false guards.
+     *
+     * @return list<int>
+     */
+    public static function intList(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $out = [];
+
+        /** @psalm-suppress MixedAssignment */
+        foreach ($value as $item) {
+            if (is_numeric($item)) {
+                $out[] = (int) $item;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
      * A date column as ISO-8601, whatever shape it is stored in.
      *
      * Some columns are cast to Carbon and some are typed loosely as

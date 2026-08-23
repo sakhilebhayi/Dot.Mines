@@ -12,6 +12,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Http/Middleware/NormalizeApiParameters.php | .ai/rules/middleware.md |
 | app/Http/Middleware/ApiVersion.php | .ai/rules/routes.md |
 | app/Http/Resources/** | .ai/rules/resources.md |
+| app/Models/Operator*.php, app/Services/Operators/**, app/Livewire/Operator*.php | .ai/rules/operators.md |
 | app/Services/Webhooks/**, app/Jobs/DeliverWebhookJob.php, app/Models/Webhook*.php | .ai/rules/webhooks.md |
 | routes/api.php, routes/api_v1.php | .ai/rules/routes.md |
 | app/Services/OpenApiGenerator.php | .ai/rules/services.md |
