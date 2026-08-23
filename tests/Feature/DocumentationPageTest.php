@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Documentation;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -36,5 +38,18 @@ class DocumentationPageTest extends TestCase
         $response->assertOk();
         $response->assertSee('Welcome to Mines Fleet Manager');
         $response->assertSee('prose-invert', false);
+    }
+
+    public function test_engineering_reports_section_links_the_ledger_zero_report(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create(['user_id' => $user->id]);
+        $user->update(['current_team_id' => $team->id]);
+
+        Livewire::actingAs($user->fresh())
+            ->test(Documentation::class)
+            ->call('setSection', 'engineering-reports')
+            ->assertSee('Ledger Zero')
+            ->assertSee('https://claude.ai/code/artifact/9dc41690-1fb0-491c-a861-e2be4caf2a18', false);
     }
 }

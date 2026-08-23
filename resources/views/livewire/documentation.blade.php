@@ -46,6 +46,11 @@
                     <li><a wire:click="setSection('user-roles')" class="{{ $activeSection === 'user-roles' ? 'active' : '' }}">User Roles</a></li>
                     <li><a wire:click="setSection('settings')" class="{{ $activeSection === 'settings' ? 'active' : '' }}">Settings</a></li>
                 </ul>
+
+                <li class="menu-title mt-4">Engineering</li>
+                <ul>
+                    <li><a wire:click="setSection('engineering-reports')" class="{{ $activeSection === 'engineering-reports' ? 'active' : '' }}">Engineering Reports</a></li>
+                </ul>
             </div>
         </div>
 
@@ -1123,6 +1128,28 @@
                     </ul>
 
                     <p>Two-factor authentication is managed from your <strong>Profile</strong> page, not Settings.</p>
+                </div>
+            @endif
+
+            @if($activeSection === 'engineering-reports')
+                <div class="prose prose-invert max-w-none">
+                    <h1>Engineering Reports</h1>
+                    <p class="lead">Longer-form engineering write-ups about the platform itself — what was changed, what was measured, and which safeguards now hold it in place.</p>
+
+                    <div class="card bg-base-200 mt-6">
+                        <div class="card-body">
+                            <h3 class="card-title">Ledger Zero — refactor &amp; AI-readiness program (Aug 2026)</h3>
+                            <p>Completion report for the R0–R9 program: both static-analysis debt ledgers (phpstan 1,898 findings, psalm 7,754) burned to zero and their baselines deleted, ~45 latent bugs found and fixed along the way, per-page query budgets frozen in CI, and the full slice-by-slice log with carry-forward lessons.</p>
+                            <div class="card-actions justify-end mt-2">
+                                <a href="https://claude.ai/code/artifact/9dc41690-1fb0-491c-a861-e2be4caf2a18" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Read the report</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>The report is hosted as a private page. If it asks you to request access, the document owner can grant it from the page's share menu.</span>
+                    </div>
                 </div>
             @endif
         </div>
