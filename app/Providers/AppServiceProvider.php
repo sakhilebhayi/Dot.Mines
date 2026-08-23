@@ -4,14 +4,18 @@ namespace App\Providers;
 
 use App\Console\Commands\ScanBladeUnescaped;
 use App\Listeners\NotifyOnJobFailed;
+use App\Listeners\WebhookEventSubscriber;
 use App\Livewire\AINotifications;
 use App\Mail\WelcomeMail;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\RealtimeEventScheduler;
 use App\Services\TeamRoleProvisioner;
+use App\Services\Webhooks\HostResolver;
+use App\Services\Webhooks\WebhookUrlGuard;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Event;
@@ -33,6 +37,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->guardAgainstDebugModeInProduction();
+
+        // Bound explicitly rather than left to autowiring: this is the check
+        // that stops a user-supplied webhook URL from reaching inside the
+        // network, and the resolver behind it is the seam tests swap. Naming
+        // the wiring here keeps both visible in one place.
+        $this->app->singleton(
+            WebhookUrlGuard::class,
+            fn (Application $app): WebhookUrlGuard => new WebhookUrlGuard($app->make(HostResolver::class))
+        );
     }
 
     /**
@@ -168,6 +181,12 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         });
+
+        // Outbound webhooks ride the same domain events that drive the live
+        // UI, so an integrator is told what an operator sees, at the same
+        // moment. The subscriber only queues work; nothing here talks to a
+        // customer's server on the request that raised the event.
+        Event::subscribe(WebhookEventSubscriber::class);
 
         // Listen for failed queue jobs and notify monitoring
         Event::listen(JobFailed::class, function (JobFailed $event) {

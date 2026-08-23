@@ -48,6 +48,7 @@ class ListEnvelopeContractTest extends TestCase
             'maintenance schedules' => ['/api/maintenance/schedules'],
             'machine health' => ['/api/maintenance/health'],
             'assignments available' => ['/api/assignments/available'],
+            'webhooks' => ['/api/webhooks'],
         ];
     }
 

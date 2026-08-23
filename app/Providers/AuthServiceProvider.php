@@ -10,6 +10,7 @@ use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Notification;
 use App\Models\Report;
+use App\Models\WebhookEndpoint;
 use App\Policies\AIRecommendationPolicy;
 use App\Policies\AlertPolicy;
 use App\Policies\GeofencePolicy;
@@ -18,6 +19,7 @@ use App\Policies\MachinePolicy;
 use App\Policies\MineAreaPolicy;
 use App\Policies\NotificationPolicy;
 use App\Policies\ReportPolicy;
+use App\Policies\WebhookEndpointPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -36,6 +38,7 @@ class AuthServiceProvider extends ServiceProvider
         Report::class => ReportPolicy::class,
         Notification::class => NotificationPolicy::class,
         AIRecommendation::class => AIRecommendationPolicy::class,
+        WebhookEndpoint::class => WebhookEndpointPolicy::class,
     ];
 
     /**

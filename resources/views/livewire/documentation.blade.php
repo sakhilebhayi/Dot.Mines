@@ -835,9 +835,91 @@
             @if($activeSection === 'webhooks')
                 <div class="prose prose-invert max-w-none">
                     <h1>Webhooks</h1>
-                    <div class="alert alert-warning">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                        <span><strong>Not yet available.</strong> Outbound webhooks (Mines pushing event notifications to your own endpoint) aren't built yet. If you need to react to events in real time today, poll the relevant <a href="#" wire:click="setSection('api-access')">REST API</a> endpoint on an interval.</span>
+                    <p>Mines POSTs events to a URL you own, so you don't have to poll for things that have already happened.</p>
+
+                    <h2>Create an endpoint</h2>
+                    <div class="mockup-code">
+                        <pre data-prefix="$"><code>curl -X POST {{ config('app.url') }}/api/v1/webhooks \</code></pre>
+                        <pre data-prefix=""><code>  -H "Authorization: Bearer REPLACE_WITH_YOUR_API_TOKEN" \</code></pre>
+                        <pre data-prefix=""><code>  -H "Content-Type: application/json" \</code></pre>
+                        <pre data-prefix=""><code>  -d '{</code></pre>
+                        <pre data-prefix=""><code>    "url": "https://your-system.example.com/mines-events",</code></pre>
+                        <pre data-prefix=""><code>    "events": ["alert.triggered", "machine.offline"],</code></pre>
+                        <pre data-prefix=""><code>    "description": "Ops pager"</code></pre>
+                        <pre data-prefix=""><code>  }'</code></pre>
+                    </div>
+                    <p>The response contains a <code>secret</code>. <strong>It is shown once and never again</strong> — store it before you close the terminal. Use <code>"events": ["*"]</code> to receive everything, including events added later.</p>
+                    <p>Your URL must be <strong>https</strong> and must resolve to a public address. Endpoints pointing at private or loopback addresses are refused when you save them, and re-checked before every send.</p>
+
+                    <h2>Events</h2>
+                    <div class="overflow-x-auto">
+                        <table class="table table-compact">
+                            <thead><tr><th>Event</th><th>Sent when</th></tr></thead>
+                            <tbody>
+                                @foreach(\App\Services\Webhooks\WebhookEvent::CATALOGUE as $eventName => $eventDescription)
+                                    <tr>
+                                        <td><code>{{ $eventName }}</code></td>
+                                        <td>{{ $eventDescription }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>This list is read from the application itself, so it cannot advertise an event that nothing sends.</p>
+
+                    <h2>What arrives</h2>
+                    <p>The <code>data</code> object is the same shape, with the same field names, as the matching REST endpoint — one parser handles both.</p>
+                    <div class="mockup-code">
+                        <pre data-prefix=""><code>{</code></pre>
+                        <pre data-prefix=""><code>  "event": "alert.triggered",</code></pre>
+                        <pre data-prefix=""><code>  "occurred_at": "2026-08-23T14:05:31+00:00",</code></pre>
+                        <pre data-prefix=""><code>  "data": { "id": 4821, "type": "...", "priority": "high", ... }</code></pre>
+                        <pre data-prefix=""><code>}</code></pre>
+                    </div>
+                    <p>Alongside these headers:</p>
+                    <div class="mockup-code">
+                        <pre data-prefix=""><code>X-Mines-Event: alert.triggered</code></pre>
+                        <pre data-prefix=""><code>X-Mines-Delivery: 91827</code></pre>
+                        <pre data-prefix=""><code>X-Mines-Signature: t=1755950400,v1=9f86d081884c7d65...</code></pre>
+                    </div>
+
+                    <h2>Verify the signature</h2>
+                    <p>Anyone can POST to your URL. The signature proves the request came from Mines and that nobody altered it in transit. Sign over the timestamp and the <strong>raw body</strong> — parsing the JSON first and re-encoding it will not match.</p>
+                    <div class="mockup-code">
+                        <pre data-prefix=""><code>// $header is X-Mines-Signature, $body is the raw request body</code></pre>
+                        <pre data-prefix=""><code>parse_str(strtr($header, ',', '&amp;'), $parts);</code></pre>
+                        <pre data-prefix=""><code></code></pre>
+                        <pre data-prefix=""><code>// Reject anything older than five minutes, so a captured</code></pre>
+                        <pre data-prefix=""><code>// request cannot be replayed at you later.</code></pre>
+                        <pre data-prefix=""><code>if (abs(time() - (int) $parts['t']) > 300) { http_response_code(400); exit; }</code></pre>
+                        <pre data-prefix=""><code></code></pre>
+                        <pre data-prefix=""><code>$expected = hash_hmac('sha256', $parts['t'] . '.' . $body, $yourSecret);</code></pre>
+                        <pre data-prefix=""><code></code></pre>
+                        <pre data-prefix=""><code>if (! hash_equals($expected, $parts['v1'])) { http_response_code(403); exit; }</code></pre>
+                    </div>
+                    <p>Use a constant-time comparison (<code>hash_equals</code>, <code>crypto.timingSafeEqual</code>) rather than <code>==</code>.</p>
+
+                    <h2>Delivery and retries</h2>
+                    <ul>
+                        <li>Reply <strong>2xx</strong> to accept a delivery. Anything else counts as a failure.</li>
+                        <li>Reply quickly — queue the work on your side. Mines waits <strong>10 seconds</strong>, then treats the attempt as failed.</li>
+                        <li>Failures are retried <strong>5 times</strong>, backing off 1 minute, 5 minutes, 30 minutes, then 2 hours.</li>
+                        <li>Events are delivered <strong>within about a minute</strong> of occurring, not instantly — deliveries are queued and drained on a scheduled tick.</li>
+                        <li>Redirects are not followed, so point us at the final URL.</li>
+                        <li>Deliveries can arrive more than once if your endpoint accepted one but we could not read the reply. <strong>Use <code>X-Mines-Delivery</code> to make your handler idempotent.</strong></li>
+                        <li>An endpoint that fails every retry <strong>15 times in a row</strong> is switched off automatically, and the reason is recorded. Re-enable it with <code>PUT /api/v1/webhooks/&#123;id&#125;</code> once the receiver is healthy — that also resets the failure count.</li>
+                    </ul>
+
+                    <h2>Test and inspect</h2>
+                    <div class="mockup-code">
+                        <pre data-prefix="$"><code>curl -X POST {{ config('app.url') }}/api/v1/webhooks/1/test \</code></pre>
+                        <pre data-prefix=""><code>  -H "Authorization: Bearer REPLACE_WITH_YOUR_API_TOKEN"</code></pre>
+                    </div>
+                    <p>Sends a <code>ping</code> so you can verify your receiver before real events depend on it. <code>GET /api/v1/webhooks/&#123;id&#125;/deliveries</code> returns what we sent, the response we got, and the error if there was one — so a failure can be diagnosed without asking us.</p>
+
+                    <div class="alert alert-info not-prose my-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Every webhook management endpoint is listed with its parameters in <a href="#" wire:click.prevent="setSection('api-reference')"><strong>API Reference</strong></a>, under <strong>webhooks</strong>.</span>
                     </div>
                 </div>
             @endif
