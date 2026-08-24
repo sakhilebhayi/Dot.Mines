@@ -175,18 +175,96 @@
                                      too subtle on this theme to contain a zone, so the
                                      containment is a real surface with its own padding. --}}
                                 <div class="mt-4 bg-[var(--ink)]/70 border border-[var(--line)] rounded-lg p-4">
-                                    <div class="space-y-4">
+                                    <div class="space-y-5">
                                         @forelse($this->openComments as $comment)
-                                            <div wire:key="comment-{{ $comment->id }}" class="flex items-start justify-between gap-3">
-                                                <div class="min-w-0 text-sm">
-                                                    <div class="flex items-baseline gap-2">
-                                                        <span class="text-[var(--stone)] font-semibold">{{ $comment->user?->name ?? 'Team member' }}</span>
-                                                        <span class="text-[var(--sand)] text-xs">{{ $comment->created_at->diffForHumans() }}</span>
+                                            <div wire:key="comment-{{ $comment->id }}">
+                                                {{-- Root comment --}}
+                                                <div class="flex items-start justify-between gap-3">
+                                                    <div class="min-w-0 flex-1 text-sm">
+                                                        <div class="flex items-baseline gap-2">
+                                                            <span class="text-[var(--stone)] font-semibold">{{ $comment->user?->name ?? 'Team member' }}</span>
+                                                            <span class="text-[var(--sand)] text-xs">{{ $comment->created_at->diffForHumans() }}</span>
+                                                        </div>
+                                                        <p class="text-[var(--sand)] mt-1.5 leading-relaxed break-words">{{ $comment->body }}</p>
+
+                                                        {{-- Respond: like / acknowledge / reject / reply --}}
+                                                        <div class="flex items-center gap-2 mt-2.5">
+                                                            @foreach(\App\Models\FeedComment::REACTIONS as $emoji)
+                                                                @php
+                                                                    $rc = $comment->reactions->where('emoji', $emoji)->count();
+                                                                    $mineR = $comment->reactions->where('emoji', $emoji)->where('user_id', auth()->id())->isNotEmpty();
+                                                                @endphp
+                                                                @if($this->canComment || $rc > 0)
+                                                                    <button @if($this->canComment) wire:click="toggleCommentReaction({{ $comment->id }}, '{{ $emoji }}')" @endif
+                                                                            wire:key="creact-{{ $comment->id }}-{{ $loop->index }}"
+                                                                            class="px-2 py-0.5 rounded-full text-xs border transition {{ $mineR ? 'border-[var(--gold)] bg-[var(--gold)]/15 text-[var(--gold)]' : 'border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)]' }}">
+                                                                        {{ $emoji }}@if($rc > 0) {{ $rc }}@endif
+                                                                    </button>
+                                                                @endif
+                                                            @endforeach
+                                                            @if($this->canComment)
+                                                                <button wire:click="startReply({{ $comment->id }})"
+                                                                        class="text-xs font-medium transition {{ $replyingTo === $comment->id ? 'text-[var(--gold)]' : 'text-[var(--sand)] hover:text-[var(--stone)]' }}">
+                                                                    Reply
+                                                                </button>
+                                                            @endif
+                                                        </div>
                                                     </div>
-                                                    <p class="text-[var(--sand)] mt-1.5 leading-relaxed break-words">{{ $comment->body }}</p>
+                                                    @if($comment->user_id === auth()->id() || $this->canPin)
+                                                        <button wire:click="deleteComment({{ $comment->id }})" class="text-[var(--sand)] hover:text-red-300 text-xs shrink-0 px-1.5 py-1">✕</button>
+                                                    @endif
                                                 </div>
-                                                @if($comment->user_id === auth()->id() || $this->canPin)
-                                                    <button wire:click="deleteComment({{ $comment->id }})" class="text-[var(--sand)] hover:text-red-300 text-xs shrink-0 px-1.5 py-1">✕</button>
+
+                                                {{-- Replies, indented under the root --}}
+                                                @if($comment->replies->isNotEmpty())
+                                                    <div class="mt-3 ml-4 pl-3 border-l-2 border-[var(--line)] space-y-3">
+                                                        @foreach($comment->replies as $reply)
+                                                            <div wire:key="reply-{{ $reply->id }}" class="flex items-start justify-between gap-3">
+                                                                <div class="min-w-0 flex-1 text-sm">
+                                                                    <div class="flex items-baseline gap-2">
+                                                                        <span class="text-[var(--stone)] font-semibold">{{ $reply->user?->name ?? 'Team member' }}</span>
+                                                                        <span class="text-[var(--sand)] text-xs">{{ $reply->created_at->diffForHumans() }}</span>
+                                                                    </div>
+                                                                    <p class="text-[var(--sand)] mt-1 leading-relaxed break-words">{{ $reply->body }}</p>
+                                                                    <div class="flex items-center gap-2 mt-2">
+                                                                        @foreach(\App\Models\FeedComment::REACTIONS as $emoji)
+                                                                            @php
+                                                                                $rrc = $reply->reactions->where('emoji', $emoji)->count();
+                                                                                $mineRr = $reply->reactions->where('emoji', $emoji)->where('user_id', auth()->id())->isNotEmpty();
+                                                                            @endphp
+                                                                            @if($this->canComment || $rrc > 0)
+                                                                                <button @if($this->canComment) wire:click="toggleCommentReaction({{ $reply->id }}, '{{ $emoji }}')" @endif
+                                                                                        wire:key="rreact-{{ $reply->id }}-{{ $loop->index }}"
+                                                                                        class="px-2 py-0.5 rounded-full text-xs border transition {{ $mineRr ? 'border-[var(--gold)] bg-[var(--gold)]/15 text-[var(--gold)]' : 'border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)]' }}">
+                                                                                    {{ $emoji }}@if($rrc > 0) {{ $rrc }}@endif
+                                                                                </button>
+                                                                            @endif
+                                                                        @endforeach
+                                                                        @if($this->canComment)
+                                                                            <button wire:click="startReply({{ $reply->id }})"
+                                                                                    class="text-xs font-medium transition {{ $replyingTo === $reply->id ? 'text-[var(--gold)]' : 'text-[var(--sand)] hover:text-[var(--stone)]' }}">
+                                                                                Reply
+                                                                            </button>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                                @if($reply->user_id === auth()->id() || $this->canPin)
+                                                                    <button wire:click="deleteComment({{ $reply->id }})" class="text-[var(--sand)] hover:text-red-300 text-xs shrink-0 px-1.5 py-1">✕</button>
+                                                                @endif
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+
+                                                {{-- Inline reply composer --}}
+                                                @if($replyingTo === $comment->id || $comment->replies->contains('id', $replyingTo))
+                                                    <div class="mt-3 ml-4 pl-3 flex gap-2.5">
+                                                        <input type="text" wire:model="replyBody" wire:keydown.enter="addReply" placeholder="Reply…"
+                                                               class="flex-1 px-3.5 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
+                                                        <button wire:click="addReply" wire:loading.attr="disabled"
+                                                                class="px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg text-sm font-semibold transition">Reply</button>
+                                                    </div>
+                                                    @error('replyBody') <p class="text-red-300 text-xs mt-1.5 ml-7">{{ $message }}</p> @enderror
                                                 @endif
                                             </div>
                                         @empty
