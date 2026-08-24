@@ -45,14 +45,14 @@
 
     {{-- Filters --}}
     <div class="mb-8">
-        <div class="flex flex-wrap items-center gap-2 mb-3">
+        <div class="flex flex-wrap items-center gap-2.5 mb-4">
             <button wire:click="$set('category', '')"
-                    class="px-3.5 py-1.5 rounded-full text-xs font-medium transition {{ $category === '' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:text-[var(--stone)] border border-[var(--line)]' }}">
+                    class="px-4 py-2 rounded-full text-sm font-medium transition {{ $category === '' ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:text-[var(--stone)] border border-[var(--line)]' }}">
                 All
             </button>
             @foreach(\App\Models\FeedItem::CATEGORIES as $value => $label)
                 <button wire:click="$set('category', '{{ $value }}')" wire:key="cat-{{ $value }}"
-                        class="px-3.5 py-1.5 rounded-full text-xs font-medium transition {{ $category === $value ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:text-[var(--stone)] border border-[var(--line)]' }}">
+                        class="px-4 py-2 rounded-full text-sm font-medium transition {{ $category === $value ? 'bg-[var(--gold)] text-[var(--ink)]' : 'bg-white/5 text-[var(--sand)] hover:text-[var(--stone)] border border-[var(--line)]' }}">
                     {{ $label }}
                 </button>
             @endforeach
@@ -159,13 +159,13 @@
                                     @if($this->canComment || $reactionCount > 0)
                                         <button @if($this->canComment) wire:click="toggleReaction({{ $item->id }}, '{{ $emoji }}')" @endif
                                                 wire:key="react-{{ $item->id }}-{{ $loop->index }}"
-                                                class="px-2.5 py-1 rounded-full text-xs border transition {{ $mine ? 'border-[var(--gold)] bg-[var(--gold)]/15 text-[var(--gold)]' : 'border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)]' }}">
+                                                class="px-3 py-1.5 rounded-full text-sm border transition {{ $mine ? 'border-[var(--gold)] bg-[var(--gold)]/15 text-[var(--gold)]' : 'border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)]' }}">
                                             {{ $emoji }}@if($reactionCount > 0) {{ $reactionCount }}@endif
                                         </button>
                                     @endif
                                 @endforeach
                                 <button wire:click="toggleComments({{ $item->id }})"
-                                        class="px-2.5 py-1 rounded-full text-xs border border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)] transition">
+                                        class="px-3 py-1.5 rounded-full text-sm border border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)] transition">
                                     💬 {{ $item->comments_count ?? 0 }}
                                 </button>
                             </div>
