@@ -127,6 +127,86 @@ class FeedInteractionsTest extends TestCase
         $component->call('toggleReaction', $item->id, '🎉')->assertForbidden();
     }
 
+    public function test_a_reply_nests_under_its_comment_and_renders(): void
+    {
+        $user = $this->actingAs2FA('operator');
+        $item = $this->item($user->current_team_id);
+        $root = $item->comments()->create(['team_id' => $item->team_id, 'user_id' => $user->id, 'body' => 'Root comment']);
+
+        Livewire::test(OperationsFeed::class)
+            ->call('toggleComments', $item->id)
+            ->call('startReply', $root->id)
+            ->set('replyBody', 'Understood, on my way.')
+            ->call('addReply')
+            ->assertHasNoErrors()
+            ->assertSee('Understood, on my way.');
+
+        $this->assertDatabaseHas('feed_comments', [
+            'parent_id' => $root->id,
+            'body' => 'Understood, on my way.',
+        ]);
+    }
+
+    public function test_replying_to_a_reply_attaches_to_the_root_comment(): void
+    {
+        $user = $this->actingAs2FA('admin');
+        $item = $this->item($user->current_team_id);
+        $root = $item->comments()->create(['team_id' => $item->team_id, 'user_id' => $user->id, 'body' => 'Root']);
+        $reply = $item->comments()->create(['team_id' => $item->team_id, 'user_id' => $user->id, 'parent_id' => $root->id, 'body' => 'First reply']);
+
+        Livewire::test(OperationsFeed::class)
+            ->call('toggleComments', $item->id)
+            ->call('startReply', $reply->id)
+            ->set('replyBody', 'Second level flattens')
+            ->call('addReply');
+
+        // One level deep by design: the thread stays readable on a phone.
+        $this->assertDatabaseHas('feed_comments', [
+            'body' => 'Second level flattens',
+            'parent_id' => $root->id,
+        ]);
+    }
+
+    public function test_comment_reactions_toggle_with_a_closed_vocabulary_including_reject(): void
+    {
+        $user = $this->actingAs2FA('operator');
+        $item = $this->item($user->current_team_id);
+        $comment = $item->comments()->create(['team_id' => $item->team_id, 'user_id' => $user->id, 'body' => 'Take ADT-07 to the workshop']);
+
+        $component = Livewire::test(OperationsFeed::class)->call('toggleComments', $item->id);
+
+        // Reject is part of the comment vocabulary.
+        $component->call('toggleCommentReaction', $comment->id, '❌');
+        $this->assertSame(1, $comment->reactions()->where('emoji', '❌')->count());
+
+        // Toggle off.
+        $component->call('toggleCommentReaction', $comment->id, '❌');
+        $this->assertSame(0, $comment->reactions()->count());
+
+        // Outside the vocabulary: refused. (⚠️ belongs to items, not comments.)
+        $component->call('toggleCommentReaction', $comment->id, '⚠️')->assertForbidden();
+    }
+
+    public function test_a_viewer_cannot_reply_or_react_to_comments(): void
+    {
+        $user = $this->actingAs2FA('viewer');
+        $item = $this->item($user->current_team_id);
+        $comment = $item->comments()->create(['team_id' => $item->team_id, 'user_id' => $user->id, 'body' => 'x']);
+
+        Livewire::test(OperationsFeed::class)
+            ->call('startReply', $comment->id)
+            ->set('replyBody', 'nope')
+            ->call('addReply')
+            ->assertForbidden();
+
+        Livewire::test(OperationsFeed::class)
+            ->call('toggleCommentReaction', $comment->id, '👍')
+            ->assertForbidden();
+
+        $this->assertSame(0, $comment->reactions()->count());
+        $this->assertSame(0, $comment->replies()->count());
+    }
+
     public function test_comment_deletion_follows_the_same_rules_as_posts(): void
     {
         $admin = $this->actingAs2FA('admin');

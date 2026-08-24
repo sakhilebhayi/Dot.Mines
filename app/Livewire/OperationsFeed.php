@@ -9,6 +9,7 @@ use App\Services\Feed\FeedPublisher;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -195,6 +196,8 @@ class OperationsFeed extends Component
     {
         $this->openCommentsFor = $this->openCommentsFor === $itemId ? null : $itemId;
         $this->commentBody = '';
+        $this->replyingTo = null;
+        $this->replyBody = '';
     }
 
     /**
@@ -215,10 +218,24 @@ class OperationsFeed extends Component
         }
 
         $query = $item->comments()->getQuery();
-        $query->with('user');
+        $query->whereNull('parent_id');
+        $query->with(['user', 'reactions', 'replies' => function (Relation $q): void {
+            $q->getQuery()->orderBy('id');
+        }, 'replies.user', 'replies.reactions']);
         $query->orderBy('id');
 
         return $query->get();
+    }
+
+    /** The comment being replied to, if the composer is in reply mode. */
+    public ?int $replyingTo = null;
+
+    public string $replyBody = '';
+
+    public function startReply(int $commentId): void
+    {
+        $this->replyingTo = $this->replyingTo === $commentId ? null : $commentId;
+        $this->replyBody = '';
     }
 
     public function addComment(): void
@@ -240,6 +257,58 @@ class OperationsFeed extends Component
         ]);
 
         $this->commentBody = '';
+    }
+
+    public function addReply(): void
+    {
+        if (! $this->getCanCommentProperty() || $this->replyingTo === null) {
+            abort(403);
+        }
+
+        $this->validate(['replyBody' => 'required|string|max:2000']);
+
+        $parent = FeedComment::query()->findOrFail($this->replyingTo);
+
+        // One level deep by design: replying to a reply attaches to the
+        // root comment, which keeps the thread readable on a phone.
+        $rootId = $parent->parent_id ?? $parent->id;
+
+        FeedComment::create([
+            'team_id' => $parent->team_id,
+            'feed_item_id' => $parent->feed_item_id,
+            'parent_id' => $rootId,
+            'user_id' => auth()->id(),
+            'body' => $this->replyBody,
+        ]);
+
+        $this->replyingTo = null;
+        $this->replyBody = '';
+    }
+
+    public function toggleCommentReaction(int $commentId, string $emoji): void
+    {
+        if (! $this->getCanCommentProperty() || ! in_array($emoji, FeedComment::REACTIONS, true)) {
+            abort(403);
+        }
+
+        $comment = FeedComment::query()->findOrFail($commentId);
+
+        $existing = $comment->reactions()
+            ->where('user_id', auth()->id())
+            ->where('emoji', $emoji)
+            ->first();
+
+        if ($existing !== null) {
+            $existing->delete();
+
+            return;
+        }
+
+        $comment->reactions()->create([
+            'team_id' => $comment->team_id,
+            'user_id' => auth()->id(),
+            'emoji' => $emoji,
+        ]);
     }
 
     public function deleteComment(int $commentId): void
