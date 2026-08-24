@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\AIRecommendation;
 use App\Models\Alert;
+use App\Models\FeedItem;
 use App\Models\Geofence;
 use App\Models\Integration;
 use App\Models\Machine;
@@ -14,6 +15,7 @@ use App\Models\Report;
 use App\Models\WebhookEndpoint;
 use App\Policies\AIRecommendationPolicy;
 use App\Policies\AlertPolicy;
+use App\Policies\FeedItemPolicy;
 use App\Policies\GeofencePolicy;
 use App\Policies\IntegrationPolicy;
 use App\Policies\MachinePolicy;
@@ -40,6 +42,7 @@ class AuthServiceProvider extends ServiceProvider
         Report::class => ReportPolicy::class,
         Notification::class => NotificationPolicy::class,
         AIRecommendation::class => AIRecommendationPolicy::class,
+        FeedItem::class => FeedItemPolicy::class,
         Operator::class => OperatorPolicy::class,
         WebhookEndpoint::class => WebhookEndpointPolicy::class,
     ];

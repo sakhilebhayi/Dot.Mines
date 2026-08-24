@@ -4,10 +4,12 @@ namespace App\Services\Operators;
 
 use App\Exceptions\IneligibleAssignmentException;
 use App\Models\ActivityLog;
+use App\Models\FeedItem;
 use App\Models\Machine;
 use App\Models\Operator;
 use App\Models\OperatorMachineAssignment;
 use App\Models\User;
+use App\Services\Feed\FeedPublisher;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -81,6 +83,21 @@ class OperatorAssignmentService
                     .($isOverride ? ' — COMPLIANCE OVERRIDE: '.trim((string) $overrideReason) : ''),
             ]);
 
+            app(FeedPublisher::class)->publish([
+                'team_id' => $machine->team_id,
+                'category' => FeedItem::CATEGORY_OPERATORS,
+                'type' => $isOverride ? 'operator.assigned.override' : 'operator.assigned',
+                'title' => $operator->name.' assigned to '.$machine->name,
+                'body' => trim(
+                    ($shift !== null ? ucfirst($shift).' shift.' : '')
+                    .($isOverride ? ' Compliance override: '.trim((string) $overrideReason) : '')
+                ) ?: null,
+                'machine_id' => $machine->id,
+                'operator_id' => $operator->id,
+                'action_url' => route('operators.show', ['operator' => $operator->id]),
+                'dedupe_key' => 'assignment:'.$assignment->id,
+            ]);
+
             return $assignment;
         });
     }
@@ -107,6 +124,19 @@ class OperatorAssignmentService
             'description' => ($assignment->operator?->name ?? 'Operator')
                 .' unassigned from '.($assignment->machine?->name ?? 'machine')
                 .($reason !== null && $reason !== '' ? ' — '.$reason : ''),
+        ]);
+
+        app(FeedPublisher::class)->publish([
+            'team_id' => $assignment->team_id,
+            'category' => FeedItem::CATEGORY_OPERATORS,
+            'type' => 'operator.unassigned',
+            'title' => ($assignment->operator?->name ?? 'Operator')
+                .' unassigned from '.($assignment->machine?->name ?? 'machine'),
+            'body' => $reason !== null && $reason !== '' ? $reason : null,
+            'machine_id' => $assignment->machine_id,
+            'operator_id' => $assignment->operator_id,
+            'action_url' => route('operators.show', ['operator' => $assignment->operator_id]),
+            'dedupe_key' => 'unassignment:'.$assignment->id,
         ]);
 
         return $assignment->refresh();
