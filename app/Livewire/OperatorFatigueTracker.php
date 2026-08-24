@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\OperatorFatigue;
 use App\Models\Team;
 use App\Models\User;
@@ -13,6 +14,8 @@ use Livewire\Component;
 
 class OperatorFatigueTracker extends Component
 {
+    use NotifiesUser;
+
     public int $operatorId = 0;
 
     public string $shiftDate = '';
@@ -138,7 +141,7 @@ class OperatorFatigueTracker extends Component
             'notes' => $this->notes !== '' ? $this->notes : null,
         ]);
 
-        $this->dispatch('notify', ['type' => 'success', 'message' => "Fatigue score recorded: {$fatigue->fatigue_score}/100 ({$fatigue->alert_level})."]);
+        $this->notify("Fatigue score recorded: {$fatigue->fatigue_score}/100 ({$fatigue->alert_level}).", 'success');
 
         $this->reset(['incidentsCount', 'notes']);
         $this->breakTimeMinutes = 60;

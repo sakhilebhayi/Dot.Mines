@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\MineArea;
 use App\Services\MineAreaService;
 use App\Support\CurrentUser;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 
 class MineAreaManager extends Component
 {
+    use NotifiesUser;
     use WithPagination;
 
     protected ?MineAreaService $service = null;
@@ -163,7 +165,7 @@ class MineAreaManager extends Component
         if (($this->editingMineAreaId !== null && $this->editingMineAreaId !== 0)) {
             $mineArea = $this->getService()->getById($this->editingMineAreaId, $team->id);
             if (! $mineArea) {
-                $this->dispatch('notify', ['message' => 'Mine area not found', 'type' => 'error']);
+                $this->notify('Mine area not found', 'error');
 
                 return;
             }
@@ -175,21 +177,21 @@ class MineAreaManager extends Component
         try {
             if ($mineArea !== null) {
                 $this->getService()->update($mineArea, $data);
-                $this->dispatch('notify', ['message' => 'Mine area updated successfully', 'type' => 'success']);
+                $this->notify('Mine area updated successfully', 'success');
                 $this->showEditModal = false;
             } else {
                 // Ensure center coordinates are provided to satisfy non-null DB columns
                 $data['center_latitude'] = $this->latitude ?? null;
                 $data['center_longitude'] = $this->longitude ?? null;
                 $this->getService()->create($team->id, $data);
-                $this->dispatch('notify', ['message' => 'Mine area created successfully', 'type' => 'success']);
+                $this->notify('Mine area created successfully', 'success');
                 $this->showCreateModal = false;
             }
             $this->resetForm();
             $this->resetPage();
         } catch (\Throwable $e) {
             Log::error('Failed to save mine area', ['team_id' => $team?->id, 'error' => $e->getMessage()]);
-            $this->dispatch('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
+            $this->notify("We couldn't save this mine area. Please check the details and try again.", 'error');
         }
     }
 
@@ -203,11 +205,11 @@ class MineAreaManager extends Component
 
         try {
             $this->getService()->delete($mineArea);
-            $this->dispatch('notify', ['message' => 'Mine area deleted successfully', 'type' => 'success']);
+            $this->notify('Mine area deleted successfully', 'success');
             $this->resetPage();
         } catch (\Throwable $e) {
             Log::error('Failed to delete mine area', ['mine_area_id' => $mineArea->id, 'error' => $e->getMessage()]);
-            $this->dispatch('notify', ['message' => "We couldn't delete this mine area. Please try again.", 'type' => 'error']);
+            $this->notify("We couldn't delete this mine area. Please try again.", 'error');
         }
     }
 
@@ -292,7 +294,7 @@ class MineAreaManager extends Component
         $this->validate();
 
         if ($this->boundaryCoordinates === null || $this->boundaryCoordinates === []) {
-            $this->dispatch('notify', ['message' => 'Please draw a boundary on the map', 'type' => 'error']);
+            $this->notify('Please draw a boundary on the map', 'error');
 
             return;
         }
@@ -318,14 +320,14 @@ class MineAreaManager extends Component
             $data['center_latitude'] = $this->latitude ?? null;
             $data['center_longitude'] = $this->longitude ?? null;
             $this->getService()->create($team->id, $data);
-            $this->dispatch('notify', ['message' => 'Mine area created successfully', 'type' => 'success']);
+            $this->notify('Mine area created successfully', 'success');
             $this->isDrawing = false;
             $this->switchToListMode();
             $this->resetForm();
             $this->resetPage();
         } catch (\Throwable $e) {
             Log::error('Failed to save mine area boundary', ['team_id' => $team->id, 'error' => $e->getMessage()]);
-            $this->dispatch('notify', ['message' => "We couldn't save this mine area. Please check the details and try again.", 'type' => 'error']);
+            $this->notify("We couldn't save this mine area. Please check the details and try again.", 'error');
         }
     }
 

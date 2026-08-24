@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\AIInsight;
 use App\Models\AIPredictiveAlert;
 use App\Models\AIRecommendation;
@@ -18,6 +19,8 @@ use Livewire\WithPagination;
 #[Lazy]
 class AIOptimizationDashboard extends Component
 {
+    use NotifiesUser;
+
     /**
      * Skeleton shown while this page lazy-loads -- the page shell paints
      * immediately instead of blocking on mount()'s data queries.
@@ -86,7 +89,7 @@ class AIOptimizationDashboard extends Component
             );
 
             $this->dispatch('analysis-completed');
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'AI analysis completed successfully!']);
+            $this->notify('AI analysis completed successfully!', 'success');
         } catch (\Throwable $e) {
             // The raw exception message (which can include third-party API
             // responses, stack details, or internal identifiers) used to go
@@ -97,7 +100,7 @@ class AIOptimizationDashboard extends Component
                 'team_id' => auth()->user()?->current_team_id,
                 'error' => $e->getMessage(),
             ]);
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'AI analysis could not be completed right now. Please try again in a few minutes.']);
+            $this->notify('AI analysis could not be completed right now. Please try again in a few minutes.', 'error');
         }
 
         $this->analysisRunning = false;
@@ -149,10 +152,10 @@ class AIOptimizationDashboard extends Component
                 'actioned_at' => now(),
             ]);
 
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Recommendation marked as implemented!']);
+            $this->notify('Recommendation marked as implemented!', 'success');
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'implemented']);
         } catch (AuthorizationException $e) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'You are not authorized to implement this recommendation.']);
+            $this->notify('You are not authorized to implement this recommendation.', 'error');
 
             return;
         }
@@ -167,7 +170,7 @@ class AIOptimizationDashboard extends Component
         $recommendation = AIRecommendation::where('team_id', $team->id)->findOrFail($recommendationId);
 
         if (trim($reason) === '') {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'A rejection reason is required.']);
+            $this->notify('A rejection reason is required.', 'error');
 
             return;
         }
@@ -188,10 +191,10 @@ class AIOptimizationDashboard extends Component
                 'reject_reason' => $reason,
             ]);
 
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Recommendation rejected.']);
+            $this->notify('Recommendation rejected.', 'success');
             $this->dispatch('recommendation-updated', ['id' => $recommendation->id, 'status' => 'rejected']);
         } catch (AuthorizationException $e) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'You are not authorized to reject this recommendation.']);
+            $this->notify('You are not authorized to reject this recommendation.', 'error');
 
             return;
         }
@@ -259,7 +262,7 @@ class AIOptimizationDashboard extends Component
         $insight = AIInsight::where('team_id', $team->id)->findOrFail($insightId);
         $this->authorize('update', $insight);
         $insight->markAsRead();
-        $this->dispatch('notify', ['type' => 'success', 'message' => 'Insight marked as read.']);
+        $this->notify('Insight marked as read.', 'success');
     }
 
     public function render(): View

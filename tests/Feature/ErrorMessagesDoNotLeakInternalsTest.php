@@ -53,7 +53,8 @@ class ErrorMessagesDoNotLeakInternalsTest extends TestCase
             ->set('status', 'active')
             ->call('saveMineArea')
             ->assertDispatched('notify', function ($name, $params) {
-                $event = $params[0];
+                // Named-args dispatch: the payload IS the assoc array.
+                $event = $params;
 
                 return $event['type'] === 'error'
                     && ! str_contains($event['message'], 'SQLSTATE')
@@ -87,7 +88,8 @@ class ErrorMessagesDoNotLeakInternalsTest extends TestCase
             ->test(MineAreaManager::class)
             ->call('deleteMineArea', $mineArea)
             ->assertDispatched('notify', function ($name, $params) {
-                $event = $params[0];
+                // Named-args dispatch: the payload IS the assoc array.
+                $event = $params;
 
                 return $event['type'] === 'error'
                     && ! str_contains($event['message'], 'SQLSTATE')
@@ -115,7 +117,8 @@ class ErrorMessagesDoNotLeakInternalsTest extends TestCase
             ->set('selectedRole', 'operator')
             ->call('inviteUser')
             ->assertDispatched('notify', function ($name, $params) {
-                $event = $params[0];
+                // Named-args dispatch: the payload IS the assoc array.
+                $event = $params;
 
                 return $event['type'] === 'error'
                     && ! str_contains($event['message'], 'SQLSTATE')

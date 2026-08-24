@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Machine;
 use App\Models\MachineHealthStatus;
 use App\Models\MaintenanceAlert;
@@ -21,6 +22,8 @@ use Livewire\Component;
 #[Lazy]
 class MaintenanceDashboard extends Component
 {
+    use NotifiesUser;
+
     /**
      * Skeleton shown while this page lazy-loads -- the page shell paints
      * immediately instead of blocking on mount()'s data queries.
@@ -113,7 +116,7 @@ class MaintenanceDashboard extends Component
             ->first();
 
         if (! $machine) {
-            $this->dispatch('notify', ['message' => 'Invalid machine selected', 'type' => 'error']);
+            $this->notify('Invalid machine selected', 'error');
 
             return;
         }
@@ -142,7 +145,7 @@ class MaintenanceDashboard extends Component
                 'type' => $this->maintenance_type,
             ]);
 
-            $this->dispatch('notify', ['message' => 'Maintenance scheduled successfully', 'type' => 'success']);
+            $this->notify('Maintenance scheduled successfully', 'success');
             $this->closeBookingModal();
 
         } catch (\Exception $e) {
@@ -151,7 +154,7 @@ class MaintenanceDashboard extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ['message' => 'Failed to schedule maintenance', 'type' => 'error']);
+            $this->notify('Failed to schedule maintenance', 'error');
         }
     }
 
@@ -161,7 +164,7 @@ class MaintenanceDashboard extends Component
     public function completeScheduledMaintenance($recordId): void
     {
         if (! is_numeric($recordId)) {
-            $this->dispatch('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
+            $this->notify('Invalid record ID', 'error');
 
             return;
         }
@@ -170,7 +173,7 @@ class MaintenanceDashboard extends Component
             ->find($recordId);
 
         if (! $record) {
-            $this->dispatch('notify', ['message' => 'Record not found or access denied', 'type' => 'error']);
+            $this->notify('Record not found or access denied', 'error');
 
             return;
         }
@@ -187,14 +190,14 @@ class MaintenanceDashboard extends Component
                 'record_id' => $recordId,
             ]);
 
-            $this->dispatch('notify', ['message' => 'Maintenance marked as completed', 'type' => 'success']);
+            $this->notify('Maintenance marked as completed', 'success');
         } catch (\Exception $e) {
             Log::error('Failed to complete maintenance', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ['message' => 'Failed to update maintenance status', 'type' => 'error']);
+            $this->notify('Failed to update maintenance status', 'error');
         }
     }
 
@@ -204,7 +207,7 @@ class MaintenanceDashboard extends Component
     public function cancelScheduledMaintenance($recordId): void
     {
         if (! is_numeric($recordId)) {
-            $this->dispatch('notify', ['message' => 'Invalid record ID', 'type' => 'error']);
+            $this->notify('Invalid record ID', 'error');
 
             return;
         }
@@ -213,7 +216,7 @@ class MaintenanceDashboard extends Component
             ->find($recordId);
 
         if (! $record) {
-            $this->dispatch('notify', ['message' => 'Record not found or access denied', 'type' => 'error']);
+            $this->notify('Record not found or access denied', 'error');
 
             return;
         }
@@ -226,14 +229,14 @@ class MaintenanceDashboard extends Component
                 'record_id' => $recordId,
             ]);
 
-            $this->dispatch('notify', ['message' => 'Maintenance cancelled', 'type' => 'info']);
+            $this->notify('Maintenance cancelled', 'info');
         } catch (\Exception $e) {
             Log::error('Failed to cancel maintenance', [
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ['message' => 'Failed to cancel maintenance', 'type' => 'error']);
+            $this->notify('Failed to cancel maintenance', 'error');
         }
     }
 

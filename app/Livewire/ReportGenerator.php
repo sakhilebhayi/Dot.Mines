@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Jobs\GenerateReportJob;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Machine;
 use App\Models\Report;
 use App\Support\CurrentUser;
@@ -14,6 +15,8 @@ use Livewire\Component;
 
 class ReportGenerator extends Component
 {
+    use NotifiesUser;
+
     public int $step = 1;
 
     public string $reportName = '';
@@ -162,7 +165,7 @@ class ReportGenerator extends Component
         $team = $user?->currentTeam;
 
         if (! $team) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'No team selected']);
+            $this->notify('No team selected', 'error');
 
             return;
         }
@@ -236,7 +239,7 @@ class ReportGenerator extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to generate report']);
+            $this->notify('Failed to generate report', 'error');
         }
     }
 

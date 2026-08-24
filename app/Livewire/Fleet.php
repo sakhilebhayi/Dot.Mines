@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Exceptions\IneligibleAssignmentException;
 use App\Exceptions\InsufficientAllocationException;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\ActivityLog;
 use App\Models\AIAgent;
 use App\Models\AiRecommendationAction;
@@ -32,6 +33,8 @@ use Livewire\WithPagination;
 #[Lazy]
 class Fleet extends Component
 {
+    use NotifiesUser;
+
     /**
      * Skeleton shown while this page lazy-loads -- the page shell paints
      * immediately instead of blocking on mount()'s data queries.
@@ -208,7 +211,7 @@ class Fleet extends Component
                 'last_location_latitude' => $this->latitude ?: null,
                 'last_location_longitude' => $this->longitude ?: null,
             ]);
-            $this->dispatch('notify', ['message' => 'Machine updated successfully', 'type' => 'success']);
+            $this->notify('Machine updated successfully', 'success');
         } else {
             $this->authorize('create', Machine::class);
 
@@ -237,7 +240,7 @@ class Fleet extends Component
                 return;
             }
 
-            $this->dispatch('notify', ['message' => 'Machine created successfully', 'type' => 'success']);
+            $this->notify('Machine created successfully', 'success');
         }
 
         $this->closeModal();
@@ -254,7 +257,7 @@ class Fleet extends Component
 
         try {
             app(MachineProvisioningService::class)->activate($machine);
-            $this->dispatch('notify', ['message' => "Machine '{$machine->name}' activated", 'type' => 'success']);
+            $this->notify("Machine '{$machine->name}' activated", 'success');
         } catch (InsufficientAllocationException $e) {
             $this->addError('allocation', $e->getMessage());
         }
@@ -273,7 +276,7 @@ class Fleet extends Component
             'allocation_state' => MachineEntitlementService::STATE_RELEASED,
         ])->save();
 
-        $this->dispatch('notify', ['message' => "Machine '{$machine->name}' decommissioned — its allocation is available again", 'type' => 'success']);
+        $this->notify("Machine '{$machine->name}' decommissioned — its allocation is available again", 'success');
     }
 
     public function deleteMachine(Machine $machine): void
@@ -282,7 +285,7 @@ class Fleet extends Component
 
         $machineName = $machine->name;
         $machine->delete();
-        $this->dispatch('notify', ['message' => "Machine '{$machineName}' deleted successfully", 'type' => 'success']);
+        $this->notify("Machine '{$machineName}' deleted successfully", 'success');
     }
 
     public function openAssignModal(int $machineId): void
@@ -294,7 +297,7 @@ class Fleet extends Component
         $team = CurrentUser::team();
         $machine = Machine::where('team_id', $team->id)->find($machineId);
         if (! $machine) {
-            $this->dispatch('notify', ['message' => 'Machine not found', 'type' => 'error']);
+            $this->notify('Machine not found', 'error');
 
             return;
         }
@@ -339,7 +342,7 @@ class Fleet extends Component
         }
 
         if (($this->assigningMachineId === null || $this->assigningMachineId === 0) || ($this->selectedExcavatorId === null || $this->selectedExcavatorId === 0)) {
-            $this->dispatch('notify', ['message' => 'Please select an excavator', 'type' => 'error']);
+            $this->notify('Please select an excavator', 'error');
 
             return;
         }
@@ -357,7 +360,7 @@ class Fleet extends Component
 
         // Prevent assigning a machine to itself
         if ($machine->id === $excavator->id) {
-            $this->dispatch('notify', ['message' => 'Cannot assign a machine to itself', 'type' => 'error']);
+            $this->notify('Cannot assign a machine to itself', 'error');
 
             return;
         }
@@ -365,21 +368,21 @@ class Fleet extends Component
         // Prevent assigning big machines (excavator/dozer/loader/etc.) to another big machine
         $bigTypes = ['excavator', 'dozer', 'loader', 'grader', 'bulldozer'];
         if (in_array($machine->machine_type, $bigTypes) && in_array($excavator->machine_type, $bigTypes)) {
-            $this->dispatch('notify', ['message' => 'Cannot assign an excavator or big machine to another big machine', 'type' => 'error']);
+            $this->notify('Cannot assign an excavator or big machine to another big machine', 'error');
 
             return;
         }
 
         // Assign
         $machine->assignToExcavator($this->selectedExcavatorId);
-        $this->dispatch('notify', ['message' => "Machine '{$machine->name}' assigned to '{$excavator->name}'", 'type' => 'success']);
+        $this->notify("Machine '{$machine->name}' assigned to '{$excavator->name}'", 'success');
         $this->closeAssignModal();
     }
 
     public function assignAdtsToExcavator(): void
     {
         if (($this->assigningMachineId === null || $this->assigningMachineId === 0)) {
-            $this->dispatch('notify', ['message' => 'Excavator not specified', 'type' => 'error']);
+            $this->notify('Excavator not specified', 'error');
 
             return;
         }
@@ -408,7 +411,7 @@ class Fleet extends Component
         // Assign selected ADTs
         Machine::whereIn('id', $validAdts)->update(['excavator_id' => $excavator->id, 'assigned_to_excavator_at' => now()]);
 
-        $this->dispatch('notify', ['message' => 'Assigned ADTs updated successfully', 'type' => 'success']);
+        $this->notify('Assigned ADTs updated successfully', 'success');
         $this->closeAssignModal();
     }
 
@@ -425,7 +428,7 @@ class Fleet extends Component
         $machineName = $machine->name;
         $machine->unassignFromExcavator();
 
-        $this->dispatch('notify', ['message' => "Machine '{$machineName}' unassigned from excavator", 'type' => 'success']);
+        $this->notify("Machine '{$machineName}' unassigned from excavator", 'success');
     }
 
     public function openMineAreaAssignModal(int $machineId): void
@@ -445,7 +448,7 @@ class Fleet extends Component
     public function assignToMineArea(): void
     {
         if (($this->assigningMineAreaMachineId === null || $this->assigningMineAreaMachineId === 0) || ($this->selectedMineAreaId === null || $this->selectedMineAreaId === 0)) {
-            $this->dispatch('notify', ['message' => 'Please select a mine area', 'type' => 'error']);
+            $this->notify('Please select a mine area', 'error');
 
             return;
         }
@@ -466,7 +469,7 @@ class Fleet extends Component
         // Update machine's mine_area_id field
         $machine->update(['mine_area_id' => $this->selectedMineAreaId]);
 
-        $this->dispatch('notify', ['message' => "Machine '{$machine->name}' assigned to '{$mineArea->name}'", 'type' => 'success']);
+        $this->notify("Machine '{$machine->name}' assigned to '{$mineArea->name}'", 'success');
 
         $this->closeMineAreaAssignModal();
     }
@@ -748,7 +751,7 @@ class Fleet extends Component
         $team = CurrentUser::team();
         $rec = $this->lastAiRecommendations[$index] ?? null;
         if ($rec === null || $rec === []) {
-            $this->dispatch('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
+            $this->notify('Recommendation not found', 'error');
 
             return;
         }
@@ -792,7 +795,7 @@ class Fleet extends Component
 
         $this->recordRecommendationOutcome(true);
 
-        $this->dispatch('notify', ['message' => 'Recommendation implemented — Fleet Optimizer accuracy updated.', 'type' => 'success']);
+        $this->notify('Recommendation implemented — Fleet Optimizer accuracy updated.', 'success');
     }
 
     /**
@@ -825,7 +828,7 @@ class Fleet extends Component
         $this->authorizeRecommendationAction();
 
         if (empty(trim($this->rejectReason))) {
-            $this->dispatch('notify', ['message' => 'Please provide a reason for rejection', 'type' => 'error']);
+            $this->notify('Please provide a reason for rejection', 'error');
 
             return;
         }
@@ -835,7 +838,7 @@ class Fleet extends Component
             ? ($this->lastAiRecommendations[$this->pendingRecommendationIndex] ?? null)
             : null;
         if ($rec === null || $rec === []) {
-            $this->dispatch('notify', ['message' => 'Recommendation not found', 'type' => 'error']);
+            $this->notify('Recommendation not found', 'error');
             $this->showRejectRecommendationModal = false;
 
             return;
@@ -867,7 +870,7 @@ class Fleet extends Component
         $this->pendingRecommendationIndex = null;
         $this->rejectReason = '';
 
-        $this->dispatch('notify', ['message' => 'Recommendation rejected and logged', 'type' => 'success']);
+        $this->notify('Recommendation rejected and logged', 'success');
     }
 
     /**

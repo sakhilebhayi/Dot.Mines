@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\AIInsight;
 use App\Models\AIRecommendation;
 use App\Models\Geofence;
@@ -21,6 +22,7 @@ use Livewire\WithPagination;
  */
 class GeofenceManager extends Component
 {
+    use NotifiesUser;
     use WithPagination;
 
     public string $search = '';
@@ -195,12 +197,12 @@ class GeofenceManager extends Component
             $geofence = Geofence::where('team_id', $team->id)->findOrFail($this->editingGeofenceId);
             $this->authorize('update', $geofence);
             $geofence->update($data);
-            $this->dispatch('notify', ['message' => 'Geofence updated successfully', 'type' => 'success']);
+            $this->notify('Geofence updated successfully', 'success');
         } else {
             $this->authorize('create', Geofence::class);
             $data['team_id'] = $team->id;
             Geofence::create($data);
-            $this->dispatch('notify', ['message' => 'Geofence created successfully', 'type' => 'success']);
+            $this->notify('Geofence created successfully', 'success');
         }
 
         $this->closeModal();
@@ -212,7 +214,7 @@ class GeofenceManager extends Component
 
         $geofenceName = $geofence->name;
         $geofence->delete();
-        $this->dispatch('notify', ['message' => "Geofence '{$geofenceName}' deleted successfully", 'type' => 'success']);
+        $this->notify("Geofence '{$geofenceName}' deleted successfully", 'success');
     }
 
     public function render(): View
