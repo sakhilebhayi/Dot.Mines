@@ -171,10 +171,13 @@
                             </div>
 
                             @if($openCommentsFor === $item->id)
-                                <div class="mt-4 pt-4 border-t border-[var(--line)]">
+                                {{-- The thread lives in its own inset panel: hairlines are
+                                     too subtle on this theme to contain a zone, so the
+                                     containment is a real surface with its own padding. --}}
+                                <div class="mt-4 bg-[var(--ink)]/70 border border-[var(--line)] rounded-lg p-4">
                                     <div class="space-y-4">
                                         @forelse($this->openComments as $comment)
-                                            <div wire:key="comment-{{ $comment->id }}" class="flex items-start justify-between gap-3 pl-3 border-l-2 border-[var(--line)]">
+                                            <div wire:key="comment-{{ $comment->id }}" class="flex items-start justify-between gap-3">
                                                 <div class="min-w-0 text-sm">
                                                     <div class="flex items-baseline gap-2">
                                                         <span class="text-[var(--stone)] font-semibold">{{ $comment->user?->name ?? 'Team member' }}</span>
@@ -187,13 +190,13 @@
                                                 @endif
                                             </div>
                                         @empty
-                                            <p class="text-[var(--sand)] text-sm">No comments yet.</p>
+                                            <p class="text-[var(--sand)] text-sm">No comments yet — start the thread.</p>
                                         @endforelse
                                     </div>
                                     @if($this->canComment)
-                                        <div class="flex gap-2.5 mt-4">
+                                        <div class="flex gap-2.5 mt-4 pt-4 border-t border-[var(--line)]">
                                             <input type="text" wire:model="commentBody" wire:keydown.enter="addComment" placeholder="Add a comment…"
-                                                   class="flex-1 px-3.5 py-2.5 bg-[var(--ink)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
+                                                   class="flex-1 px-3.5 py-2.5 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                                             <button wire:click="addComment" wire:loading.attr="disabled"
                                                     class="px-4 py-2.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg text-sm font-semibold transition">Send</button>
                                         </div>
