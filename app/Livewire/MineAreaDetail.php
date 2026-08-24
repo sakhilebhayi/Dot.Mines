@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Actions\MineAreas\AssignMachineToArea;
 use App\Actions\MineAreas\UnassignMachineFromArea;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\Machine;
@@ -30,6 +31,7 @@ use Livewire\WithPagination;
  */
 class MineAreaDetail extends Component
 {
+    use NotifiesUser;
     use WithFileUploads, WithPagination;
 
     public MineArea $mineArea;
@@ -203,7 +205,7 @@ class MineAreaDetail extends Component
         );
 
         $this->closeAssignModal();
-        $this->dispatch('notify', ['message' => "{$machine->name} assigned to {$this->mineArea->name}", 'type' => 'success']);
+        $this->notify("{$machine->name} assigned to {$this->mineArea->name}", 'success');
     }
 
     public function unassignMachine(int $machineId): void
@@ -223,12 +225,12 @@ class MineAreaDetail extends Component
 
         if ($newArea === null) {
             // Machine::mine_area_id is NOT NULL -- refusing preserves the invariant.
-            $this->dispatch('notify', ['message' => "Cannot unassign {$machine->name}; at least one active mine area must be set. Assign to another area first.", 'type' => 'error']);
+            $this->notify("Cannot unassign {$machine->name}; at least one active mine area must be set. Assign to another area first.", 'error');
 
             return;
         }
 
-        $this->dispatch('notify', ['message' => "{$machine->name} reassigned to {$newArea->name} (cannot leave unassigned)", 'type' => 'success']);
+        $this->notify("{$machine->name} reassigned to {$newArea->name} (cannot leave unassigned)", 'success');
     }
 
     // === PRODUCTION TRACKING ===
@@ -280,7 +282,7 @@ class MineAreaDetail extends Component
         ]);
 
         $this->closeProductionModal();
-        $this->dispatch('notify', ['message' => 'Production record saved successfully', 'type' => 'success']);
+        $this->notify('Production record saved successfully', 'success');
     }
 
     public function openTargetModal(): void
@@ -326,7 +328,7 @@ class MineAreaDetail extends Component
         ]);
 
         $this->closeTargetModal();
-        $this->dispatch('notify', ['message' => 'Production target created successfully', 'type' => 'success']);
+        $this->notify('Production target created successfully', 'success');
     }
 
     // === MINE PLAN UPLOADS ===
@@ -410,11 +412,11 @@ class MineAreaDetail extends Component
             ]);
 
             $this->closeUploadModal();
-            $this->dispatch('notify', ['message' => 'Mine plan uploaded successfully', 'type' => 'success']);
+            $this->notify('Mine plan uploaded successfully', 'success');
 
         } catch (\Throwable $e) {
             Log::error('Failed to upload mine plan', ['error' => $e->getMessage()]);
-            $this->dispatch('notify', ['message' => "We couldn't upload that file. Check that it's a supported format and under the size limit, then try again.", 'type' => 'error']);
+            $this->notify("We couldn't upload that file. Check that it's a supported format and under the size limit, then try again.", 'error');
         }
     }
 
@@ -434,7 +436,7 @@ class MineAreaDetail extends Component
         Storage::disk($disk)->delete($plan->file_path ?? '');
         $plan->delete();
 
-        $this->dispatch('notify', ['message' => 'Mine plan deleted', 'type' => 'success']);
+        $this->notify('Mine plan deleted', 'success');
     }
 
     public function activateMinePlan(int $planId): void
@@ -451,7 +453,7 @@ class MineAreaDetail extends Component
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $plan->update(['status' => 'active']);
 
-        $this->dispatch('notify', ['message' => 'Mine plan activated', 'type' => 'success']);
+        $this->notify('Mine plan activated', 'success');
     }
 
     public function archiveMinePlan(int $planId): void
@@ -468,7 +470,7 @@ class MineAreaDetail extends Component
         $plan = MinePlanUpload::where('team_id', $team->id)->findOrFail($planId);
         $plan->update(['status' => 'archived']);
 
-        $this->dispatch('notify', ['message' => 'Mine plan archived', 'type' => 'success']);
+        $this->notify('Mine plan archived', 'success');
     }
 
     // === AREA-SPECIFIC ALERTS ===
@@ -521,7 +523,7 @@ class MineAreaDetail extends Component
         ]);
 
         $this->closeAlertModal();
-        $this->dispatch('notify', ['message' => 'Area alert created', 'type' => 'success']);
+        $this->notify('Area alert created', 'success');
     }
 
     public function acknowledgeAlert(int $alertId): void
@@ -537,7 +539,7 @@ class MineAreaDetail extends Component
         $this->authorize('acknowledge', $alert);
         $alert->acknowledge(CurrentUser::get()?->id);
 
-        $this->dispatch('notify', ['message' => 'Alert acknowledged', 'type' => 'success']);
+        $this->notify('Alert acknowledged', 'success');
     }
 
     public function resolveAlert(int $alertId): void
@@ -553,7 +555,7 @@ class MineAreaDetail extends Component
         $this->authorize('resolve', $alert);
         $alert->resolve(CurrentUser::get()?->id);
 
-        $this->dispatch('notify', ['message' => 'Alert resolved', 'type' => 'success']);
+        $this->notify('Alert resolved', 'success');
     }
 
     // === GEOFENCE INTEGRATION ===
@@ -587,7 +589,7 @@ class MineAreaDetail extends Component
         $geofence->update(['mine_area_id' => $this->mineArea->id]);
 
         $this->closeGeofenceModal();
-        $this->dispatch('notify', ['message' => "{$geofence->name} linked to {$this->mineArea->name}", 'type' => 'success']);
+        $this->notify("{$geofence->name} linked to {$this->mineArea->name}", 'success');
     }
 
     public function unlinkGeofence(int $geofenceId): void
@@ -603,7 +605,7 @@ class MineAreaDetail extends Component
         $this->authorize('update', $geofence);
         $geofence->update(['mine_area_id' => null]);
 
-        $this->dispatch('notify', ['message' => "{$geofence->name} unlinked from area", 'type' => 'success']);
+        $this->notify("{$geofence->name} unlinked from area", 'success');
     }
 
     // === RENDER ===

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Machine;
 use App\Models\ProductionLossEvent;
 use App\Models\User;
@@ -21,6 +22,8 @@ use Livewire\Component;
  */
 class ProductionLossPanel extends Component
 {
+    use NotifiesUser;
+
     public Machine $machine;
 
     public bool $showRecordModal = false;
@@ -100,17 +103,14 @@ class ProductionLossPanel extends Component
         } catch (ValidationException $e) {
             $this->setErrorBag($e->validator->errors());
             $message = ApiPayload::str(collect($e->errors())->flatten()->first(), 'Validation failed');
-            $this->dispatch('notify', ['type' => 'error', 'message' => $message]);
+            $this->notify($message, 'error');
 
             return;
         }
 
         $this->showRecordModal = false;
         $this->reset(['startTime', 'endTime', 'notes']);
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => "Recorded {$event->lost_hours}h production loss ({$event->reasonLabel()}).",
-        ]);
+        $this->notify("Recorded {$event->lost_hours}h production loss ({$event->reasonLabel()}).", 'success');
     }
 
     public function classifyEvent(ProductionLossService $service): void
@@ -125,14 +125,14 @@ class ProductionLossPanel extends Component
             $service->classify($event, $this->currentUser(), $this->category, $this->reason, $this->notes ?: null);
         } catch (ValidationException $e) {
             $message = ApiPayload::str(collect($e->errors())->flatten()->first(), 'Validation failed');
-            $this->dispatch('notify', ['type' => 'error', 'message' => $message]);
+            $this->notify($message, 'error');
 
             return;
         }
 
         $this->classifyingEventId = null;
         $this->reset(['notes']);
-        $this->dispatch('notify', ['type' => 'success', 'message' => 'Loss event classified.']);
+        $this->notify('Loss event classified.', 'success');
     }
 
     public function render(): View

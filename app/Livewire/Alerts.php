@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\User;
@@ -15,6 +16,7 @@ use Livewire\WithPagination;
 
 class Alerts extends Component
 {
+    use NotifiesUser;
     use WithPagination;
 
     public string $search = '';
@@ -133,7 +135,7 @@ class Alerts extends Component
                 'acknowledged_by' => Auth::id(),
                 'acknowledged_at' => now(),
             ]);
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Alert acknowledged']);
+            $this->notify('Alert acknowledged', 'success');
         }
     }
 
@@ -153,7 +155,7 @@ class Alerts extends Component
                 'resolved_by' => Auth::id(),
                 'resolved_at' => now(),
             ]);
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Alert resolved']);
+            $this->notify('Alert resolved', 'success');
 
             // If the resolved alert is currently selected in the details modal, close it
             if ($this->selectedAlertId === $alert->id) {
@@ -192,7 +194,7 @@ class Alerts extends Component
                 'dismissed_by' => Auth::id(),
                 'dismissed_at' => now(),
             ]);
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Alert dismissed']);
+            $this->notify('Alert dismissed', 'success');
         }
     }
 
@@ -220,7 +222,7 @@ class Alerts extends Component
                 'dismissed_by' => Auth::id(),
                 'dismissed_at' => now(),
             ]);
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Alert dismissed']);
+            $this->notify('Alert dismissed', 'success');
 
             $this->showDismissConfirm = false;
             $this->pendingDismissAlertId = null;
@@ -235,7 +237,7 @@ class Alerts extends Component
                 'dismissed_by' => Auth::id(),
                 'dismissed_at' => now(),
             ]);
-            $this->dispatch('notify', ['type' => 'warning', 'message' => 'Alert marked Dismissed - Unresolved']);
+            $this->notify('Alert marked Dismissed - Unresolved', 'warning');
             $this->recentlyDismissedUnresolved[] = $alert->id;
         }
 

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Jobs\SyncIntegrationMachinesJob;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Integration;
 use App\Models\Team;
 use App\Services\Integration\IntegrationService;
@@ -14,6 +15,8 @@ use Livewire\Component;
 
 class IntegrationManager extends Component
 {
+    use NotifiesUser;
+
     public ?Team $team = null;
 
     /** @var array<int|string, mixed> */
@@ -191,7 +194,7 @@ class IntegrationManager extends Component
                 ],
             ]);
 
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Integration created successfully!']);
+            $this->notify('Integration created successfully!', 'success');
             $this->closeAddModal();
             $this->loadIntegrations();
         } catch (\Throwable $e) {
@@ -357,7 +360,7 @@ class IntegrationManager extends Component
     public function syncMachines($integrationId): void
     {
         if (! $this->team) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'No team context available']);
+            $this->notify('No team context available', 'error');
 
             return;
         }
@@ -375,12 +378,12 @@ class IntegrationManager extends Component
             // owns last_sync_at/last_sync_status/sync_streams stamping.
             SyncIntegrationMachinesJob::dispatch($integration);
 
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Sync started in the background — machines will update as data arrives.']);
+            $this->notify('Sync started in the background — machines will update as data arrives.', 'success');
 
             $this->loadIntegrations();
         } catch (\Throwable $e) {
             Log::error('Sync machines failed', ['error' => $e->getMessage()]);
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Error starting sync']);
+            $this->notify('Error starting sync', 'error');
         }
     }
 
@@ -390,7 +393,7 @@ class IntegrationManager extends Component
     public function deleteIntegration($integrationId): void
     {
         if (! $this->team) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'No team context available']);
+            $this->notify('No team context available', 'error');
 
             return;
         }
@@ -401,11 +404,11 @@ class IntegrationManager extends Component
             $this->authorize('delete', $integration);
             $integration->delete();
 
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Integration deleted successfully!']);
+            $this->notify('Integration deleted successfully!', 'success');
             $this->loadIntegrations();
         } catch (\Throwable $e) {
             Log::error('Delete integration failed', ['error' => $e->getMessage()]);
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Error deleting integration']);
+            $this->notify('Error deleting integration', 'error');
         }
     }
 

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Actions\MineAreas\AssignMachineToArea;
 use App\Actions\MineAreas\UnassignMachineFromArea;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Machine;
 use App\Models\MachineAreaAssignment;
 use App\Models\MineArea;
@@ -36,6 +37,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class MachineAssignmentManager extends Component
 {
+    use NotifiesUser;
     use WithPagination;
 
     public MineArea $mineArea;
@@ -182,7 +184,7 @@ class MachineAssignmentManager extends Component
 
         $count = $machines->count();
         $this->resetSelection();
-        $this->dispatch('notify', ['message' => "{$count} machine(s) assigned to {$this->mineArea->name}", 'type' => 'success']);
+        $this->notify("{$count} machine(s) assigned to {$this->mineArea->name}", 'success');
     }
 
     private function assign(Machine $machine, ?string $notes): void
@@ -221,15 +223,12 @@ class MachineAssignmentManager extends Component
         $this->authorize('update', $machine);
 
         if (! $this->moveToAnotherArea($machine)) {
-            $this->dispatch('notify', [
-                'message' => "Cannot unassign {$machine->name}; at least one active mine area must be set. Create another mine area first.",
-                'type' => 'error',
-            ]);
+            $this->notify("Cannot unassign {$machine->name}; at least one active mine area must be set. Create another mine area first.", 'error');
 
             return;
         }
 
-        $this->dispatch('notify', ['message' => "{$machine->name} removed from {$this->mineArea->name}", 'type' => 'success']);
+        $this->notify("{$machine->name} removed from {$this->mineArea->name}", 'success');
     }
 
     public function unassignMultipleMachines(): void
@@ -257,12 +256,12 @@ class MachineAssignmentManager extends Component
         $this->resetSelection();
 
         if ($moved === 0) {
-            $this->dispatch('notify', ['message' => 'Cannot unassign; at least one active mine area must be set.', 'type' => 'error']);
+            $this->notify('Cannot unassign; at least one active mine area must be set.', 'error');
 
             return;
         }
 
-        $this->dispatch('notify', ['message' => "{$moved} machine(s) removed from {$this->mineArea->name}", 'type' => 'success']);
+        $this->notify("{$moved} machine(s) removed from {$this->mineArea->name}", 'success');
     }
 
     /**

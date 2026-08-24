@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Jobs\DeliverWebhookJob;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\WebhookDelivery;
 use App\Models\WebhookEndpoint;
 use App\Services\Webhooks\WebhookEvent;
@@ -21,6 +22,8 @@ use Livewire\Component;
  */
 class WebhookManager extends Component
 {
+    use NotifiesUser;
+
     public string $url = '';
 
     public string $description = '';
@@ -169,7 +172,7 @@ class WebhookManager extends Component
         DeliverWebhookJob::dispatch($delivery->id);
 
         $this->viewingDeliveriesFor = $endpoint->id;
-        $this->dispatch('notify', message: 'Test queued. It is sent within about a minute.');
+        $this->notify('Test queued. It is sent within about a minute.', 'info');
     }
 
     public function delete(int $endpointId): void

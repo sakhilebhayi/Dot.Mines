@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MineArea;
@@ -22,6 +23,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 #[Lazy]
 class Reports extends Component
 {
+    use NotifiesUser;
+
     /**
      * Skeleton shown while this page lazy-loads -- the page shell paints
      * immediately instead of blocking on mount()'s data queries.
@@ -135,7 +138,7 @@ class Reports extends Component
     {
         // Validate report ID
         if (! is_numeric($reportId)) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Invalid report ID']);
+            $this->notify('Invalid report ID', 'error');
 
             return;
         }
@@ -144,7 +147,7 @@ class Reports extends Component
         $report = Report::where('team_id', $team?->id)->find($reportId);
 
         if (! $report) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
+            $this->notify('Report not found or access denied', 'error');
             $this->showDeleteConfirm = false;
 
             return;
@@ -166,7 +169,7 @@ class Reports extends Component
                 'report_type' => $report->type,
             ]);
 
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Report deleted successfully']);
+            $this->notify('Report deleted successfully', 'success');
         } catch (\Exception $e) {
             Log::error('Failed to delete report', [
                 'user_id' => Auth::id(),
@@ -174,7 +177,7 @@ class Reports extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to delete report']);
+            $this->notify('Failed to delete report', 'error');
         }
 
         $this->showDeleteConfirm = false;
@@ -204,7 +207,7 @@ class Reports extends Component
     {
         // Validate report ID
         if (! is_numeric($reportId)) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Invalid report ID']);
+            $this->notify('Invalid report ID', 'error');
 
             return null;
         }
@@ -213,7 +216,7 @@ class Reports extends Component
         $report = Report::where('team_id', $team?->id)->find($reportId);
 
         if (! $report) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Report not found or access denied']);
+            $this->notify('Report not found or access denied', 'error');
 
             return null;
         }
@@ -221,7 +224,7 @@ class Reports extends Component
         $this->authorize('download', $report);
 
         if ($report->status !== 'completed') {
-            $this->dispatch('notify', ['type' => 'warning', 'message' => 'Report is not ready for download']);
+            $this->notify('Report is not ready for download', 'warning');
 
             return null;
         }
@@ -238,7 +241,7 @@ class Reports extends Component
             }
         }
 
-        $this->dispatch('notify', ['type' => 'error', 'message' => 'Report file not found']);
+        $this->notify('Report file not found', 'error');
 
         return null;
     }
