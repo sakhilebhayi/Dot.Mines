@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\FeedComment;
 use App\Models\FeedItem;
 use App\Models\Machine;
 use App\Services\Feed\FeedPublisher;
@@ -111,7 +112,8 @@ class OperationsFeed extends Component
         $this->applyFilters($query);
         $query->orderByDesc('occurred_at');
         $query->orderByDesc('id');
-        $query->with(['user', 'machine', 'operator']);
+        $query->with(['user', 'machine', 'operator', 'reactions']);
+        $query->withCount('comments');
         $query->limit($this->limit + 1);
 
         $items = $query->get();
@@ -177,6 +179,105 @@ class OperationsFeed extends Component
     public function getCanPinProperty(): bool
     {
         return auth()->user()?->hasPermission('pin_feed') ?? false;
+    }
+
+    /** Which item's comment thread is open, if any. */
+    public ?int $openCommentsFor = null;
+
+    public string $commentBody = '';
+
+    public function getCanCommentProperty(): bool
+    {
+        return auth()->user()?->hasPermission('comment_feed') ?? false;
+    }
+
+    public function toggleComments(int $itemId): void
+    {
+        $this->openCommentsFor = $this->openCommentsFor === $itemId ? null : $itemId;
+        $this->commentBody = '';
+    }
+
+    /**
+     * The open thread's comments, oldest first.
+     *
+     * @return Collection<int, FeedComment>
+     */
+    public function getOpenCommentsProperty(): Collection
+    {
+        if ($this->openCommentsFor === null) {
+            return new Collection;
+        }
+
+        $item = FeedItem::query()->find($this->openCommentsFor);
+
+        if ($item === null) {
+            return new Collection;
+        }
+
+        $query = $item->comments()->getQuery();
+        $query->with('user');
+        $query->orderBy('id');
+
+        return $query->get();
+    }
+
+    public function addComment(): void
+    {
+        if (! $this->getCanCommentProperty() || $this->openCommentsFor === null) {
+            abort(403);
+        }
+
+        $this->validate(['commentBody' => 'required|string|max:2000']);
+
+        // Team scope on the lookup: a foreign item id 404s before anything
+        // is written.
+        $item = FeedItem::query()->findOrFail($this->openCommentsFor);
+
+        $item->comments()->create([
+            'team_id' => $item->team_id,
+            'user_id' => auth()->id(),
+            'body' => $this->commentBody,
+        ]);
+
+        $this->commentBody = '';
+    }
+
+    public function deleteComment(int $commentId): void
+    {
+        $comment = FeedComment::query()->findOrFail($commentId);
+
+        // Your own comment, or a curator's clean-up.
+        if ($comment->user_id !== auth()->id() && ! $this->getCanPinProperty()) {
+            abort(403);
+        }
+
+        $comment->delete();
+    }
+
+    public function toggleReaction(int $itemId, string $emoji): void
+    {
+        if (! $this->getCanCommentProperty() || ! in_array($emoji, FeedItem::REACTIONS, true)) {
+            abort(403);
+        }
+
+        $item = FeedItem::query()->findOrFail($itemId);
+
+        $existing = $item->reactions()
+            ->where('user_id', auth()->id())
+            ->where('emoji', $emoji)
+            ->first();
+
+        if ($existing !== null) {
+            $existing->delete();
+
+            return;
+        }
+
+        $item->reactions()->create([
+            'team_id' => $item->team_id,
+            'user_id' => auth()->id(),
+            'emoji' => $emoji,
+        ]);
     }
 
     public function post(FeedPublisher $publisher): void

@@ -29,4 +29,10 @@ FeedItemPosted broadcasts '.feed.item.posted' on the EXISTING private team.{id} 
 ## Permissions
 view_feed (every role incl. viewer), post_feed (admin, fleet_manager), pin_feed (admin only). System items are undeletable by anyone; users delete their own posts, pin_feed holders any post. Pins expire via pinned_until (ceiling 2 weeks); expired pin = not pinned, no cleanup job needed.
 
+## Aggregation is a subtraction, never a recount
+FeedProductionAggregator (scheduled hourlyAt(5)) publishes "Fleet completed N loads in the last hour" as the delta of OperationalSnapshotService's own loads_today totals since its previous run (cache baseline per team). It is silent on: first run (baseline only), zero/negative delta (quiet hour or the midnight counter reset — the baseline moves, nothing is invented), stale telemetry (freshest older than the team's staleAfterSeconds), and a second run inside the same hour (dedupe key production:{team}:{Y-m-d-H}). Never re-derive loads in the feed; if the Production page changes how it counts, the feed follows automatically.
+
+## Interactions
+comment_feed (admin, fleet_manager, operator — NOT viewer) gates comments and reactions; reactions are a closed vocabulary (FeedItem::REACTIONS: seen/done/attention) with a DB unique toggle per (item,user,emoji). Comment deletion: author or pin_feed holder. Livewire computed props (getXProperty) are a Blade affordance — in PHP call the getter, $this->x is UndefinedThisPropertyFetch to psalm. Livewire test harness: after an action 403s, the component snapshot is spent (second call() throws Invalid snapshot) — use a fresh Livewire::test; findOrFail inside an action surfaces as ModelNotFoundException, not an HTTP 404.
+
 Frozen by tests/Feature/Feed/.

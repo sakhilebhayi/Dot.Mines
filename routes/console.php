@@ -4,6 +4,8 @@ use App\Jobs\ArchiveOldMetricsJob;
 use App\Jobs\MachineIdleMonitoringJob;
 use App\Jobs\PurgeExpiredSoftDeletesJob;
 use App\Jobs\RouteSpeedMonitoringJob;
+use App\Models\Team;
+use App\Services\Feed\FeedProductionAggregator;
 use App\Services\Sync\SyncSequence;
 use Illuminate\Support\Facades\Schedule;
 
@@ -45,6 +47,20 @@ Schedule::command('queue:work --queue=default,locations,status,monitoring,alerts
 // "Sync Now" click or a direct API call.
 Schedule::command('integrations:sync-due')
     ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
+// Hourly production line for the Mine Operations Feed: the delta of the
+// fleet's load counters since the previous run, computed by the SAME
+// snapshot service the Production page reads. Publishes nothing on quiet
+// hours, nothing across the midnight counter reset, and nothing when
+// telemetry is stale -- the aggregator itself enforces all three.
+Schedule::call(function (): void {
+    foreach (Team::query()->get() as $team) {
+        app(FeedProductionAggregator::class)->publishHourly($team);
+    }
+})->name('feed-production-hourly')
+    ->hourlyAt(5)
     ->withoutOverlapping()
     ->onOneServer();
 

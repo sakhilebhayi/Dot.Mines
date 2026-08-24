@@ -122,6 +122,55 @@
                                     <a href="{{ $item->action_url }}" class="text-[var(--gold)] text-xs hover:underline">View</a>
                                 @endif
                             </div>
+
+                            {{-- Reactions + comments --}}
+                            <div class="flex items-center gap-2 mt-2.5">
+                                @foreach(\App\Models\FeedItem::REACTIONS as $emoji)
+                                    @php
+                                        $reactionCount = $item->reactions->where('emoji', $emoji)->count();
+                                        $mine = $item->reactions->where('emoji', $emoji)->where('user_id', auth()->id())->isNotEmpty();
+                                    @endphp
+                                    @if($this->canComment || $reactionCount > 0)
+                                        <button @if($this->canComment) wire:click="toggleReaction({{ $item->id }}, '{{ $emoji }}')" @endif
+                                                wire:key="react-{{ $item->id }}-{{ $loop->index }}"
+                                                class="px-2 py-0.5 rounded-full text-xs border transition {{ $mine ? 'border-[var(--gold)] bg-[var(--gold)]/15 text-[var(--gold)]' : 'border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)]' }}">
+                                            {{ $emoji }}@if($reactionCount > 0) {{ $reactionCount }}@endif
+                                        </button>
+                                    @endif
+                                @endforeach
+                                <button wire:click="toggleComments({{ $item->id }})"
+                                        class="px-2 py-0.5 rounded-full text-xs border border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)] transition">
+                                    💬 {{ $item->comments_count ?? 0 }}
+                                </button>
+                            </div>
+
+                            @if($openCommentsFor === $item->id)
+                                <div class="mt-3 border-t border-[var(--line)] pt-3 space-y-2">
+                                    @forelse($this->openComments as $comment)
+                                        <div wire:key="comment-{{ $comment->id }}" class="flex items-start justify-between gap-2">
+                                            <p class="text-sm text-[var(--sand)]">
+                                                <span class="text-[var(--stone)] font-semibold">{{ $comment->user?->name ?? 'Team member' }}</span>
+                                                <span class="text-xs"> · {{ $comment->created_at->diffForHumans() }}</span><br>
+                                                {{ $comment->body }}
+                                            </p>
+                                            @if($comment->user_id === auth()->id() || $this->canPin)
+                                                <button wire:click="deleteComment({{ $comment->id }})" class="text-[var(--sand)] hover:text-red-300 text-xs shrink-0">✕</button>
+                                            @endif
+                                        </div>
+                                    @empty
+                                        <p class="text-[var(--sand)] text-xs">No comments yet.</p>
+                                    @endforelse
+                                    @if($this->canComment)
+                                        <div class="flex gap-2 pt-1">
+                                            <input type="text" wire:model="commentBody" wire:keydown.enter="addComment" placeholder="Add a comment…"
+                                                   class="flex-1 px-3 py-1.5 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)] text-sm">
+                                            <button wire:click="addComment" wire:loading.attr="disabled"
+                                                    class="px-3 py-1.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded text-sm font-semibold transition">Send</button>
+                                        </div>
+                                        @error('commentBody') <p class="text-red-300 text-xs">{{ $message }}</p> @enderror
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
                             @if($this->canPin && ! $item->isPinned())

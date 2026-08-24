@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -36,6 +38,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read User|null $user
  * @property-read Machine|null $machine
  * @property-read Operator|null $operator
+ * @property-read Collection<int, FeedComment> $comments
+ * @property-read Collection<int, FeedReaction> $reactions
  */
 class FeedItem extends Model
 {
@@ -58,6 +62,13 @@ class FeedItem extends Model
     public const CATEGORY_OPERATORS = 'operators';
 
     public const CATEGORY_ANNOUNCEMENT = 'announcement';
+
+    /**
+     * The closed reaction vocabulary: seen, done, needs attention.
+     *
+     * @var array<int, string>
+     */
+    public const REACTIONS = ['👍', '✅', '⚠️'];
 
     /**
      * Every category the feed understands, with its filter label.
@@ -128,6 +139,22 @@ class FeedItem extends Model
     public function operator(): BelongsTo
     {
         return $this->belongsTo(Operator::class);
+    }
+
+    /**
+     * @return HasMany<FeedComment,$this>
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(FeedComment::class);
+    }
+
+    /**
+     * @return HasMany<FeedReaction,$this>
+     */
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(FeedReaction::class);
     }
 
     public function isPinned(): bool

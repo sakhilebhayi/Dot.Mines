@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\ActivityLog;
 use App\Models\Alert;
+use App\Models\FeedItem;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MachineMetric;
@@ -14,6 +15,7 @@ use App\Services\DispatchService;
 use App\Services\QueryCacheService;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Lazy;
@@ -194,6 +196,29 @@ class Dashboard extends Component
      * and open geofence entries on every poll.
      *
      * @return array{machines: array<int, array<string, mixed>>, counts: array<string, int>, generated_at: CarbonInterface}
+     */
+    /**
+     * The five newest feed items, for the compact Mine Activity card.
+     * Empty when the user lacks view_feed -- the card then hides itself.
+     *
+     * @return Collection<int, FeedItem>
+     */
+    public function getRecentFeedProperty(): Collection
+    {
+        if (! (auth()->user()?->hasPermission('view_feed') ?? false)) {
+            return new Collection;
+        }
+
+        $query = FeedItem::query();
+        $query->orderByDesc('occurred_at');
+        $query->orderByDesc('id');
+        $query->limit(5);
+
+        return $query->get();
+    }
+
+    /**
+     * @return array<string, mixed>
      */
     public function getFleetDispatchProperty(): array
     {
