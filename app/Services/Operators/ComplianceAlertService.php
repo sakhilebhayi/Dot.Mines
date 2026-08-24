@@ -2,11 +2,13 @@
 
 namespace App\Services\Operators;
 
+use App\Models\FeedItem;
 use App\Models\Notification;
 use App\Models\Operator;
 use App\Models\OperatorMedical;
 use App\Models\OperatorQualification;
 use App\Models\OperatorTraining;
+use App\Services\Feed\FeedPublisher;
 use App\Services\NotificationService;
 use App\Support\ApiPayload;
 use Illuminate\Database\Eloquent\Model;
@@ -122,6 +124,26 @@ class ComplianceAlertService
             'action_url' => route('operators.show', ['operator' => $operator->id]),
             'notify_roles' => ['admin', 'fleet_manager'],
         ]);
+
+        // Licence and training compliance is operational news; the feed gets
+        // it too, reusing the SAME dedupe key so feed and notification can
+        // never disagree about whether a milestone fired. Medical alerts stay
+        // notification-only -- the feed's audience is wider than the roles
+        // that may see medical information.
+        if ($kind !== 'medical') {
+            app(FeedPublisher::class)->publish([
+                'team_id' => $operator->team_id,
+                'category' => FeedItem::CATEGORY_OPERATORS,
+                'type' => 'operator.compliance.'.$milestone,
+                'title' => $expired
+                    ? $operator->name."'s ".$label.' has expired'
+                    : $operator->name."'s ".$label.' expires in '.(string) $days.' days',
+                'body' => $expired ? 'They are no longer compliant.' : 'Renew before it lapses.',
+                'operator_id' => $operator->id,
+                'action_url' => route('operators.show', ['operator' => $operator->id]),
+                'dedupe_key' => 'compliance:'.$dedupeKey,
+            ]);
+        }
 
         return 1;
     }

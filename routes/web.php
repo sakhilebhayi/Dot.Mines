@@ -18,6 +18,7 @@ use App\Livewire\FuelManagement;
 use App\Livewire\MachineAssignmentManager;
 use App\Livewire\MaintenanceDashboard;
 use App\Livewire\MineAreaDetail;
+use App\Livewire\OperationsFeed;
 use App\Livewire\OperatorDetail;
 use App\Livewire\OperatorFatigueTracker;
 use App\Livewire\OperatorManager;
@@ -185,6 +186,10 @@ Route::middleware([
     // Documentation
     Route::get('/documentation', Documentation::class)
         ->name('documentation');
+
+    // Mine Operations Feed
+    Route::get('/feed', OperationsFeed::class)
+        ->name('feed');
 
     // Operator management
     Route::get('/operators', OperatorManager::class)

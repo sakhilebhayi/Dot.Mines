@@ -3,12 +3,18 @@
 namespace App\Providers;
 
 use App\Console\Commands\ScanBladeUnescaped;
+use App\Events\AlertTriggered;
+use App\Events\GeofenceEntryDetected;
+use App\Events\GeofenceExitDetected;
+use App\Events\MachineOffline;
+use App\Events\MaintenanceAlertTriggered;
 use App\Listeners\NotifyOnJobFailed;
 use App\Listeners\WebhookEventSubscriber;
 use App\Livewire\AINotifications;
 use App\Mail\WelcomeMail;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Feed\FeedEventNormaliser;
 use App\Services\RealtimeEventScheduler;
 use App\Services\TeamRoleProvisioner;
 use App\Services\Webhooks\HostResolver;
@@ -181,6 +187,19 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         });
+
+        // The Mine Operations Feed is a third consumer of the same domain
+        // events -- one set of operational events, several consumers, never
+        // a feed-side re-derivation.
+        foreach ([
+            AlertTriggered::class,
+            GeofenceEntryDetected::class,
+            GeofenceExitDetected::class,
+            MachineOffline::class,
+            MaintenanceAlertTriggered::class,
+        ] as $feedSource) {
+            Event::listen($feedSource, fn (object $event) => app(FeedEventNormaliser::class)->handle($event));
+        }
 
         // Outbound webhooks ride the same domain events that drive the live
         // UI, so an integrator is told what an operator sees, at the same
