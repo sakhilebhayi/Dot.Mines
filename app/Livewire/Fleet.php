@@ -517,6 +517,18 @@ class Fleet extends Component
     /** @var list<string> */
     public array $assignmentWarnings = [];
 
+    /**
+     * The picker's open-state is entangled with the modal's Alpine `show`;
+     * closing via backdrop or Escape writes `false`, which Livewire coerces
+     * to 0 on this ?int -- half-closed server state. Normalise to null.
+     */
+    public function updatedAssignOperatorMachineId(mixed $value): void
+    {
+        if (! $value) {
+            $this->assignOperatorMachineId = null;
+        }
+    }
+
     public function openAssignOperator(int $machineId): void
     {
         $this->authorize('update', Machine::query()->findOrFail($machineId));
