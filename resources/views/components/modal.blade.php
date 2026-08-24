@@ -30,7 +30,8 @@ $maxWidth = [
         <div class="absolute inset-0 bg-black/60"></div>
     </div>
 
-    <div x-show="show" class="mb-6 bg-[var(--ink-soft)] border border-[var(--line)] text-[var(--stone)] rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto"
+    <div class="relative flex min-h-full items-center justify-center">
+    <div x-show="show" class="my-6 w-full bg-[var(--ink-soft)] border border-[var(--line)] text-[var(--stone)] rounded-lg overflow-hidden shadow-xl transform transition-all {{ $maxWidth }} sm:mx-auto"
                     x-trap.inert.noscroll="show"
                     x-transition:enter="ease-out duration-300"
                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -39,5 +40,6 @@ $maxWidth = [
                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
         {{ $slot }}
+    </div>
     </div>
 </div>

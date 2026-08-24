@@ -69,6 +69,25 @@ class FleetOperatorUiTest extends TestCase
         $this->assertNull($machine->fresh()->currentOperatorAssignment());
     }
 
+    public function test_closing_the_picker_from_the_backdrop_fully_resets_its_state(): void
+    {
+        $user = $this->actingAdmin();
+        $area = MineArea::factory()->create(['team_id' => $user->current_team_id]);
+        $machine = Machine::factory()->create([
+            'team_id' => $user->current_team_id,
+            'mine_area_id' => $area->id,
+            'machine_type' => 'adt',
+        ]);
+
+        // Backdrop click / Escape entangle `false` into the ?int open-state,
+        // which Livewire coerces to 0 -- a half-closed modal. The updated
+        // hook must normalise it back to null.
+        Livewire::test('fleet')
+            ->call('openAssignOperator', $machine->id)
+            ->set('assignOperatorMachineId', false)
+            ->assertSet('assignOperatorMachineId', null);
+    }
+
     public function test_an_ineligible_pick_surfaces_blockers_in_the_modal_instead_of_assigning(): void
     {
         $user = $this->actingAdmin();

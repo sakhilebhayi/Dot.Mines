@@ -20,6 +20,7 @@
 let mobileNavOpen = false;
 
 function setMobileNavOpen(open) {
+	if (mobileNavOpen === open) return;
 	mobileNavOpen = open;
 	document.body.classList.toggle('overflow-hidden', open);
 	window.dispatchEvent(new CustomEvent('mobile-nav-changed', { detail: { open } }));
@@ -74,6 +75,14 @@ window.GeofenceVisualizationManager = GeofenceVisualizationManager;
 
 	const syncScrollLock = () => {
 		const open = document.querySelector('[data-app-overlay]') !== null;
+
+		// A modal over the open mobile drawer would stack two backdrops
+		// (drawer z-45 + overlay z-1100) and double-dim the page. The
+		// drawer has no business staying open under a modal.
+		if (open && window.mobileNav) {
+			window.mobileNav.close();
+		}
+
 		if (open === locked) return;
 		locked = open;
 		if (open) {
