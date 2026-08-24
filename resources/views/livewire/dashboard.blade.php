@@ -269,6 +269,25 @@
         @endif
     </div>
 
+    <!-- Mine Activity: compact feed, linking to the full stream -->
+    @if($this->recentFeed->isNotEmpty())
+        <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)] mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-display font-semibold text-[var(--stone)]">Mine Activity</h2>
+                <a href="{{ route('feed') }}" class="text-[var(--gold)] text-sm hover:underline">View All Activity</a>
+            </div>
+            <div class="space-y-2">
+                @foreach($this->recentFeed as $feedItem)
+                    <div wire:key="dash-feed-{{ $feedItem->id }}" class="flex items-baseline gap-3 text-sm">
+                        <span class="text-[var(--sand)] text-xs tabular-nums shrink-0" title="{{ $feedItem->occurred_at->toDayDateTimeString() }}">{{ $feedItem->occurred_at->format('H:i') }}</span>
+                        <span class="text-[var(--stone)] truncate">{{ $feedItem->title }}</span>
+                        <span class="text-[var(--sand)] text-xs shrink-0 ml-auto">{{ \App\Models\FeedItem::CATEGORIES[$feedItem->category] ?? ucfirst($feedItem->category) }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <!-- Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Recent Alerts -->

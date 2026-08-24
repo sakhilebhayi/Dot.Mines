@@ -77,6 +77,7 @@ class TeamRoleProvisioner
             ['name' => 'view_feed', 'display_name' => 'View Operations Feed', 'group' => 'feed', 'description' => 'See the mine operations feed'],
             ['name' => 'post_feed', 'display_name' => 'Post to Operations Feed', 'group' => 'feed', 'description' => 'Write operational announcements'],
             ['name' => 'pin_feed', 'display_name' => 'Pin Feed Announcements', 'group' => 'feed', 'description' => 'Pin and unpin important announcements'],
+            ['name' => 'comment_feed', 'display_name' => 'Comment on Feed', 'group' => 'feed', 'description' => 'Comment and react on feed items'],
             ['name' => 'view_operators', 'display_name' => 'View Operators', 'group' => 'operators', 'description' => 'See operators, their assignments and compliance status'],
             ['name' => 'manage_operators', 'display_name' => 'Manage Operators', 'group' => 'operators', 'description' => 'Create and edit operators, qualifications and training'],
             ['name' => 'view_operator_medicals', 'display_name' => 'View Operator Medicals', 'group' => 'operators', 'description' => 'See medical fitness details and restrictions'],
@@ -106,7 +107,7 @@ class TeamRoleProvisioner
                     'view_settings',
                     'view_recommendations', 'update_recommendations',
                     'view_operators', 'manage_operators',
-                    'view_feed', 'post_feed',
+                    'view_feed', 'post_feed', 'comment_feed',
                 ],
             ],
             'operator' => [
@@ -121,7 +122,7 @@ class TeamRoleProvisioner
                     'view_alerts', 'acknowledge_alerts',
                     'view_recommendations',
                     'view_operators',
-                    'view_feed',
+                    'view_feed', 'comment_feed',
                 ],
             ],
             'viewer' => [
