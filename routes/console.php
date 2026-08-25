@@ -6,6 +6,7 @@ use App\Jobs\PurgeExpiredSoftDeletesJob;
 use App\Jobs\RouteSpeedMonitoringJob;
 use App\Models\Team;
 use App\Services\Feed\FeedProductionAggregator;
+use App\Services\Guardian\SchedulerHeartbeat;
 use App\Services\Sync\SyncSequence;
 use Illuminate\Support\Facades\Schedule;
 
@@ -107,3 +108,12 @@ Schedule::call(fn () => SyncSequence::prune())
     ->dailyAt('02:30')
     ->withoutOverlapping()
     ->onOneServer();
+
+// Guardian scheduler heartbeat: proof that cron ticks are firing at all.
+// SchedulerCheck (served at /guardian/health) reads the beat's age; if it
+// goes stale the Dot.Brain guardian knows every scheduled sync above has
+// silently stopped, even though the web app still serves pages. Every
+// minute, no overlap guard needed -- a cache put is idempotent and cheap.
+Schedule::call(fn () => SchedulerHeartbeat::beat())
+    ->name('guardian-scheduler-heartbeat')
+    ->everyMinute();

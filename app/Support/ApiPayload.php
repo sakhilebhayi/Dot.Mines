@@ -112,6 +112,15 @@ final class ApiPayload
     }
 
     /**
+     * Coerce an untyped scalar into a float, falling back when the value
+     * is not numeric. Same config-opacity rationale as int().
+     */
+    public static function float(mixed $value, float $default = 0.0): float
+    {
+        return is_numeric($value) ? (float) $value : $default;
+    }
+
+    /**
      * A clean list of assoc rows; malformed entries are dropped.
      *
      * @return list<array<string, mixed>>

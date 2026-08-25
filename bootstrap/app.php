@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ApiVersion;
+use App\Http\Middleware\AuthenticateGuardian;
 use App\Http\Middleware\CacheControlHeaders;
 use App\Http\Middleware\EnforceDownloadRateLimit;
 use App\Http\Middleware\EnsureAdmin;
@@ -10,6 +11,7 @@ use App\Http\Middleware\EnsureTokenAbility;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\NormalizeApiParameters;
 use App\Http\Middleware\SecurityHeaders;
+use App\Services\Guardian\ErrorCounter;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -45,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'token.ability' => EnsureTokenAbility::class,
             'api.params' => NormalizeApiParameters::class,
             'api.version' => ApiVersion::class,
+            'guardian.token' => AuthenticateGuardian::class,
         ]);
 
         // Force HTTPS, CSP and add security headers to all web requests
@@ -55,5 +58,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Feed the guardian's hourly error counter from every reported
+        // throwable. ErrorCounter::record() swallows its own failures, so
+        // this hook can never break real error handling.
+        $exceptions->report(function (Throwable $e): void {
+            app(ErrorCounter::class)->record($e);
+        });
     })->create();
