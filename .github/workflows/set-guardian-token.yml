@@ -30,10 +30,13 @@ jobs:
           exit 1
 
       - name: Refuse an empty token secret
-        if: ${{ secrets.GUARDIAN_TOKEN == '' }}
+        env:
+          GUARDIAN_TOKEN: ${{ secrets.GUARDIAN_TOKEN }}
         run: |
-          echo '::error::Repository secret GUARDIAN_TOKEN is not set.'
-          exit 1
+          if [ -z "$GUARDIAN_TOKEN" ]; then
+            echo '::error::Repository secret GUARDIAN_TOKEN is not set.'
+            exit 1
+          fi
 
       - name: Set up SSH
         run: |
