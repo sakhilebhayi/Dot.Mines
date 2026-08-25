@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EmailUnsubscribeController;
 use App\Http\Controllers\GdprController;
+use App\Http\Controllers\GuardianHealthController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MinePlanDownloadController;
 use App\Http\Controllers\OperatorDocumentController;
@@ -279,6 +280,14 @@ Route::get('/up/realtime', [RealtimeHealthController::class, 'check'])
 //           the app boots, not that it can serve real requests).
 Route::get('/health', HealthController::class)->name('health');
 Route::get('/ready', [HealthController::class, 'ready'])->name('health.ready');
+
+// Guardian observability report for Dot.Brain (dot-guardian/v1 contract).
+// Unlike /health this exposes operational internals, so it authenticates
+// with a dedicated bearer token (guardian.token middleware) instead of
+// being public, and stays out of the versioned team API on purpose.
+Route::get('/guardian/health', GuardianHealthController::class)
+    ->middleware('guardian.token')
+    ->name('guardian.health');
 
 // XML sitemap: public marketing/legal pages ONLY -- authenticated app
 // routes must never appear here (they are noindex'd and robots-blocked).
