@@ -86,7 +86,7 @@ class LiveMapPositionsTest extends TestCase
     {
         Http::fake([
             'https://sso.bellequipment.com/connect/token' => Http::response(['access_token' => 't', 'expires_in' => 18000], 200),
-            'https://b-fleet03.bellequipment.com:8080/Fleet' => Http::response(<<<'XML'
+            'https://b-fleet03.bellequipment.com:8080/Fleet/1' => Http::response(<<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <Fleet version="1">
   <Equipment>

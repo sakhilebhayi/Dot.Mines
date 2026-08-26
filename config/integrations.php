@@ -101,6 +101,13 @@ return [
             'base_url' => env('BELL_API_BASE_URL', 'https://b-fleet03.bellequipment.com:8080'),
             'token_url' => env('BELL_TOKEN_URL', 'https://sso.bellequipment.com/connect/token'),
             'api_version' => null, // ISO 15143-3 itself is the versioning; no /v1 path segment.
+            // The fleet snapshot is PAGINATED: /Fleet/{page}, 1-based. Bare
+            // /Fleet answers 405 to every verb. This account returns its
+            // whole fleet on page 1 and answers 400 for page 2, so the
+            // default fetches one page -- each extra page costs a live
+            // request against a limiter that has throttled this server
+            // before (2026-08-21). Raise it if a fleet outgrows one page.
+            'max_fleet_pages' => (int) env('BELL_MAX_FLEET_PAGES', 1),
             'client_id_env' => 'BELL_CLIENT_ID', // Bell issues 'ISO_Export_Service' to every ISO export consumer.
             'scope' => 'ISO_Exports',
             'username_env' => 'BELL_USERNAME',

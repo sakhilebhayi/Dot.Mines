@@ -27,7 +27,14 @@ class BellServiceTest extends TestCase
 
     private const TOKEN_URL = 'https://sso.bellequipment.com/connect/token';
 
-    private const FLEET_URL = 'https://b-fleet03.bellequipment.com:8080/Fleet';
+    // ISO 15143-3 paginates the fleet snapshot: the real endpoint is
+    // /Fleet/{page}. Bare /Fleet answers 405 to every verb (confirmed
+    // against the live b-fleet03 gateway, 2026-08-26).
+    private const FLEET_URL = 'https://b-fleet03.bellequipment.com:8080/Fleet/1';
+
+    private const FLEET_PAGE_2_URL = 'https://b-fleet03.bellequipment.com:8080/Fleet/2';
+
+    private const FLEET_BARE_URL = 'https://b-fleet03.bellequipment.com:8080/Fleet';
 
     /**
      * @param  array<string, mixed>  $overrides
@@ -83,6 +90,60 @@ class BellServiceTest extends TestCase
   </Equipment>
 </Fleet>
 XML;
+    }
+
+    public function test_fleet_requests_target_the_paginated_page_path(): void
+    {
+        // Bare /Fleet answers 405 for GET, POST and OPTIONS alike on the
+        // live gateway; /Fleet/1 returns the real snapshot. The mock server
+        // used for earlier verification served bare /Fleet, mirroring this
+        // client's own wrong assumption, so no test ever caught it.
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response($this->fleetXml(), 200)]);
+
+        (new BellService($this->credentials()))->fetchMachines();
+
+        Http::assertSent(fn (Request $request): bool => ! str_starts_with($request->url(), self::FLEET_URL)
+            || $request->url() === self::FLEET_URL);
+        Http::assertNotSent(fn (Request $request): bool => $request->url() === self::FLEET_BARE_URL);
+    }
+
+    public function test_fleet_pagination_merges_pages_when_enabled(): void
+    {
+        config(['integrations.manufacturers.bell.max_fleet_pages' => 2]);
+
+        $this->fakeToken();
+        Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
+            self::FLEET_PAGE_2_URL => Http::response(str_replace('ASA B50E#9086', 'ASA B45E#7712', $this->fleetXml()), 200),
+        ]);
+
+        $result = (new BellService($this->credentials()))->fetchMachines();
+
+        $this->assertTrue($result['success']);
+        $this->assertCount(2, $result['machines']);
+        $this->assertSame(
+            ['ASA B50E#9086', 'ASA B45E#7712'],
+            array_column($result['machines'], 'external_id'),
+        );
+    }
+
+    public function test_pagination_stops_cleanly_when_a_later_page_is_rejected(): void
+    {
+        // The live gateway answers 400 for a page beyond the fleet's end --
+        // that is the end of the fleet, not a sync failure.
+        config(['integrations.manufacturers.bell.max_fleet_pages' => 3]);
+
+        $this->fakeToken();
+        Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
+            self::FLEET_PAGE_2_URL => Http::response('', 400),
+        ]);
+
+        $result = (new BellService($this->credentials()))->fetchMachines();
+
+        $this->assertTrue($result['success']);
+        $this->assertCount(1, $result['machines']);
     }
 
     public function test_fleet_requests_use_the_get_method(): void

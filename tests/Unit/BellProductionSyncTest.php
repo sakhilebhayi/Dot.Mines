@@ -28,7 +28,7 @@ class BellProductionSyncTest extends TestCase
 
     private const TOKEN_URL = 'https://sso.bellequipment.com/connect/token';
 
-    private const FLEET_URL = 'https://b-fleet03.bellequipment.com:8080/Fleet';
+    private const FLEET_URL = 'https://b-fleet03.bellequipment.com:8080/Fleet/1';
 
     private const LOAD_COUNT_URL = 'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*/CumulativeLoadCount/*';
 
