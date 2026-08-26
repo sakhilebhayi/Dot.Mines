@@ -378,6 +378,35 @@ XML;
         Http::assertSentCount(2); // 1 token + exactly 1 Fleet call, shared.
     }
 
+    public function test_a_sync_records_how_many_machines_the_integration_has(): void
+    {
+        // machines_count is shown in Integration Manager and returned by
+        // two API endpoints, but nothing ever wrote it -- every working
+        // integration reported 0 machines (production, 2026-08-26: 26
+        // machines synced, counter still 0).
+        $this->fakeToken();
+        Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<TimeSeries/>', 200),
+        ]);
+
+        $team = Team::factory()->create();
+        $integration = Integration::factory()->forProvider('bell')->create([
+            'team_id' => $team->id,
+            'credentials' => $this->credentials(),
+            'machines_count' => 0,
+        ]);
+
+        app(IntegrationService::class)->syncMachines($integration);
+
+        $this->assertSame(1, $integration->fresh()->machines_count);
+        $this->assertSame(
+            Machine::where('integration_id', $integration->id)->count(),
+            $integration->fresh()->machines_count,
+            'The counter must match the machines actually stored.',
+        );
+    }
+
     public function test_a_throttled_deep_pass_releases_its_hourly_window_for_the_next_sync(): void
     {
         // The deep pass claims an hourly window BEFORE doing its work. If
