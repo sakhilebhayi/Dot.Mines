@@ -33,6 +33,16 @@ class PurgePhantomMachines extends Command
 
     protected $description = 'Report, and optionally remove, seed-artefact machines that were never real';
 
+    /**
+     * Resolved once. The schema does not change while the command runs, and
+     * re-deriving it per machine meant introspecting every table in the
+     * database for every row -- on a 26-machine fleet that was thousands of
+     * information_schema queries and minutes of wall time.
+     *
+     * @var list<array{0: string, 1: string}>|null
+     */
+    private ?array $references = null;
+
     public function handle(): int
     {
         if ($this->option('audit')) {
@@ -221,7 +231,9 @@ class PurgePhantomMachines extends Command
         /** @var Collection<string, int> $counts */
         $counts = collect();
 
-        foreach ($this->machineReferences() as [$table, $column]) {
+        $this->references ??= $this->machineReferences();
+
+        foreach ($this->references as [$table, $column]) {
             $count = DB::table($table)->where($column, $machine->id)->count();
 
             if ($count > 0) {
