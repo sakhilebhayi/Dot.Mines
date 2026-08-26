@@ -356,6 +356,7 @@ class IntegrationService
         );
 
         $synced = 0;
+        $deepPassThrottled = false;
         foreach ($machineList as $machineData) {
             $machine = $this->syncMachine($integration, $machineData);
 
@@ -371,6 +372,10 @@ class IntegrationService
                 if ($deepSync) {
                     $this->syncMachineAlertsFromService($service, $machine);
 
+                    if ($service instanceof BaseManufacturerService && $service->wasThrottled()) {
+                        $deepPassThrottled = true;
+                    }
+
                     // Production used to stop dead here: Bell's cumulative
                     // load/payload counters were fetched into
                     // MachineMetric.raw_data and never turned into the
@@ -383,11 +388,20 @@ class IntegrationService
             $synced++;
         }
 
+        // A throttled deep pass hands its hourly window back: the machine
+        // list synced fine, but the per-machine extras (alerts, production
+        // counters) were refused. Holding the window would skip them for a
+        // full hour over a transient squeeze, so the next sync retries.
+        if ($deepSync && $deepPassThrottled) {
+            Cache::forget('integration_deep_sync_'.$integration->id);
+        }
+
         return [
             'success' => true,
             'message' => "Synced {$synced} machines",
             'count' => $synced,
             'deep_sync' => $deepSync,
+            'deep_sync_throttled' => $deepPassThrottled,
         ];
     }
 

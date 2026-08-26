@@ -18,6 +18,14 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
 
     protected ?string $lastError = null;
 
+    /**
+     * Whether the provider throttled the most recent call. Distinct from a
+     * plain failure: throttling is transient and the same request will
+     * succeed once the provider's window reopens, so callers should back
+     * off and retry rather than treat the integration as broken.
+     */
+    protected bool $throttled = false;
+
     protected int $timeout = 30;
 
     protected int $retries = 3;
@@ -431,6 +439,14 @@ abstract class BaseManufacturerService implements ManufacturerServiceInterface
     public function getLastError(): ?string
     {
         return $this->lastError;
+    }
+
+    /**
+     * True when the provider throttled the most recent call.
+     */
+    public function wasThrottled(): bool
+    {
+        return $this->throttled;
     }
 
     /**
