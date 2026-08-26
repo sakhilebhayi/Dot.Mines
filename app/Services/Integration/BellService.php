@@ -26,12 +26,18 @@ use Throwable;
  *    https://sso.bellequipment.com/connect/token (client_id
  *    "ISO_Export_Service", scope "ISO_Exports", client_authenticated via
  *    client_secret) -- see getAccessToken()/fetchNewToken().
- *  - A single POST /Fleet snapshot endpoint returning every piece of
+ *  - A single GET /Fleet snapshot endpoint returning every piece of
  *    equipment visible to the account, with current status inline
  *    (location, cumulative hours, fuel, DEF%, odometer, engine running).
- *  - Twelve POST /Fleet/Equipment/{id}/{Metric}/{startUTC}/{endUTC}
+ *  - Twelve GET /Fleet/Equipment/{id}/{Metric}/{startUTC}/{endUTC}
  *    time-series endpoints for historical drill-down per machine
  *    (locations, caution codes, cumulative totals, etc).
+ *
+ * All data endpoints are GET, per ISO 15143-3. This class originally
+ * POSTed them -- the local mock server was built to mirror the code, so
+ * every test and E2E pass stayed green while the real b-fleet03 gateway
+ * answered 405 Method Not Allowed to each authenticated sync (first seen
+ * in production 2026-08-26, ~17 hours of frozen telemetry).
  *
  * Responses are XML (ISO 15143-3's wire format), parsed defensively via
  * XPath local-name() lookups so this survives whatever exact element
@@ -553,7 +559,7 @@ class BellService extends BaseManufacturerService
                 $response = Http::withToken($token)
                     ->withHeaders(['Accept' => 'application/xml'])
                     ->timeout($this->timeout)
-                    ->post($url);
+                    ->get($url);
 
                 if ($response->successful()) {
                     $xml = $this->parseXml($response->body());
