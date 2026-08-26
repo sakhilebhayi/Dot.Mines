@@ -12,6 +12,11 @@ use App\Support\ApiPayload;
  */
 class ErrorRateCheck implements GuardianCheck
 {
+    /**
+     * @psalm-suppress PossiblyUnusedMethod -- resolved by the container
+     * (app(ErrorRateCheck::class) from GuardianHealthController), which
+     * psalm cannot see.
+     */
     public function __construct(private readonly ErrorCounter $counter) {}
 
     #[\Override]

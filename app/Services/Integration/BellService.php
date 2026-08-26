@@ -158,7 +158,7 @@ class BellService extends BaseManufacturerService
         $holdsLock = false;
 
         try {
-            $holdsLock = $lock->block(20);
+            $holdsLock = $lock->block(20) === true;
         } catch (Throwable) {
             $holdsLock = false;
         }
