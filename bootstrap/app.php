@@ -58,9 +58,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Feed the guardian's hourly error counter from every reported
-        // throwable. ErrorCounter::record() swallows its own failures, so
-        // this hook can never break real error handling.
+        // Feed 1 of the guardian's hourly error counter: every reported
+        // throwable (feed 2 is the CountGuardianLogErrors listener, which
+        // catches error-level log writes the report pipeline never sees).
+        // ErrorCounter::record() swallows its own failures, so this hook
+        // can never break real error handling.
         $exceptions->report(function (Throwable $e): void {
             app(ErrorCounter::class)->record($e);
         });
