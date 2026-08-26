@@ -1,0 +1,95 @@
+name: Purge Phantom Machines
+
+# Runs machines:purge-phantom on production over the same pinned SSH path
+# deploy.yml uses. Defaults to INSPECT: leave `ids` empty to list candidates
+# and their dependent rows without changing anything. Supply ids only once
+# you have read that report.
+#
+# Deliberately not a general remote shell: the command is fixed, and the
+# only operator-supplied value is a list of integers, validated as such
+# here and re-validated against the candidate set by the command itself.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "inspect" to list candidates, or "delete" to remove the ids below'
+        required: true
+        default: inspect
+      ids:
+        description: 'Space-separated machine ids to delete (required when confirm=delete)'
+        required: false
+        default: ''
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    name: Inspect or purge phantom machines
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate inputs
+        env:
+          CONFIRM: ${{ github.event.inputs.confirm }}
+          IDS: ${{ github.event.inputs.ids }}
+        run: |
+          set -euo pipefail
+          case "$CONFIRM" in
+            inspect|delete) ;;
+            *) echo '::error::confirm must be "inspect" or "delete".'; exit 1 ;;
+          esac
+          if [ "$CONFIRM" = "delete" ]; then
+            if [ -z "$IDS" ]; then
+              echo '::error::confirm=delete requires ids.'
+              exit 1
+            fi
+            # Integers only: this string is interpolated into a remote
+            # command, so anything else is refused before it travels.
+            if ! printf '%s' "$IDS" | grep -Eq '^[0-9]+( [0-9]+)*$'; then
+              echo '::error::ids must be space-separated integers.'
+              exit 1
+            fi
+          fi
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Run command
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+              -p "${{ secrets.DEPLOY_PORT || '22' }}" \
+              "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+              DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}" \
+              DEPLOY_PHP="${{ secrets.DEPLOY_PHP || 'php' }}" \
+              CONFIRM="${{ github.event.inputs.confirm }}" \
+              IDS="${{ github.event.inputs.ids }}" \
+              'bash -s' <<'PURGE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          PHP="${DEPLOY_PHP:-php}"
+
+          if [ "$CONFIRM" = "inspect" ]; then
+            $PHP artisan machines:purge-phantom --no-interaction
+            exit 0
+          fi
+
+          ARGS=""
+          for id in $IDS; do
+            ARGS="$ARGS --id=$id"
+          done
+
+          echo "== Before"
+          $PHP artisan machines:purge-phantom --no-interaction
+
+          echo "== Deleting:$ARGS"
+          # shellcheck disable=SC2086
+          $PHP artisan machines:purge-phantom --confirm $ARGS --no-interaction
+          PURGE
