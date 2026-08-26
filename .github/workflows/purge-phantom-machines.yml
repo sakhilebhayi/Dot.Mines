@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type "inspect" to list candidates, or "delete" to remove the ids below'
+        description: 'Type "audit" to list the whole fleet, "inspect" for candidates, or "delete" to remove the ids below'
         required: true
         default: inspect
       ids:
@@ -39,8 +39,8 @@ jobs:
         run: |
           set -euo pipefail
           case "$CONFIRM" in
-            inspect|delete) ;;
-            *) echo '::error::confirm must be "inspect" or "delete".'; exit 1 ;;
+            audit|inspect|delete) ;;
+            *) echo '::error::confirm must be "audit", "inspect" or "delete".'; exit 1 ;;
           esac
           if [ "$CONFIRM" = "delete" ]; then
             if [ -z "$IDS" ]; then
@@ -75,6 +75,11 @@ jobs:
           set -euo pipefail
           cd "$DEPLOY_PATH"
           PHP="${DEPLOY_PHP:-php}"
+
+          if [ "$CONFIRM" = "audit" ]; then
+            $PHP artisan machines:purge-phantom --audit --no-interaction
+            exit 0
+          fi
 
           if [ "$CONFIRM" = "inspect" ]; then
             $PHP artisan machines:purge-phantom --no-interaction
