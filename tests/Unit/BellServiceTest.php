@@ -80,6 +80,26 @@ class BellServiceTest extends TestCase
 XML;
     }
 
+    public function test_fleet_requests_use_the_get_method(): void
+    {
+        // The real b-fleet03 gateway answers 405 to POST /Fleet after auth
+        // (production, 2026-08-26); ISO 15143-3 data endpoints are GET.
+        // The URL-keyed fakes below never asserted the verb, which is how
+        // a POST shipped and passed every test while production failed.
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response($this->fleetXml(), 200)]);
+
+        (new BellService($this->credentials()))->fetchMachines();
+
+        Http::assertSent(function ($request) {
+            return str_starts_with($request->url(), self::FLEET_URL)
+                ? $request->method() === 'GET'
+                : true;
+        });
+        Http::assertNotSent(fn ($request) => str_starts_with($request->url(), self::FLEET_URL)
+            && $request->method() !== 'GET');
+    }
+
     public function test_test_connection_succeeds_with_a_valid_token_and_fleet_response(): void
     {
         $this->fakeToken();
