@@ -97,6 +97,27 @@ class DataHealthChecksTest extends TestCase
         $this->assertSame('healthy', app(TelemetryIngestionCheck::class)->run()->status());
     }
 
+    public function test_telemetry_check_measures_ingestion_not_how_busy_the_fleet_is(): void
+    {
+        // A machine parked overnight legitimately has an old reading. That
+        // is fleet activity, not platform health -- and judging ingestion
+        // by the provider's own reading timestamp reported CRITICAL on
+        // production (2026-08-26) one minute after 26 rows landed cleanly.
+        $team = Team::factory()->create();
+        Integration::factory()->connected()->create(['team_id' => $team->id, 'provider' => 'bell']);
+        MachineMetric::factory()->create([
+            'team_id' => $team->id,
+            'recorded_at' => now()->subHours(3),   // machine last reported 3h ago
+            'created_at' => now()->subMinute(),     // but we ingested it a minute ago
+        ]);
+
+        $result = app(TelemetryIngestionCheck::class)->run();
+
+        $this->assertSame('healthy', $result->status());
+        $this->assertLessThan(120, $result->toArray()['metrics']['newest_ingest_age_seconds']);
+        $this->assertGreaterThan(3000, $result->toArray()['metrics']['newest_reading_age_seconds']);
+    }
+
     public function test_telemetry_check_goes_critical_when_ingestion_stopped(): void
     {
         $team = Team::factory()->create();
