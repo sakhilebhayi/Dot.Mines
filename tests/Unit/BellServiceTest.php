@@ -10,6 +10,7 @@ use App\Models\Team;
 use App\Services\Integration\BellService;
 use App\Services\Integration\IntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -28,6 +29,10 @@ class BellServiceTest extends TestCase
 
     private const FLEET_URL = 'https://b-fleet03.bellequipment.com:8080/Fleet';
 
+    /**
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
     private function credentials(array $overrides = []): array
     {
         return array_merge([
@@ -91,12 +96,12 @@ XML;
 
         (new BellService($this->credentials()))->fetchMachines();
 
-        Http::assertSent(function ($request) {
+        Http::assertSent(function (Request $request): bool {
             return str_starts_with($request->url(), self::FLEET_URL)
                 ? $request->method() === 'GET'
                 : true;
         });
-        Http::assertNotSent(fn ($request) => str_starts_with($request->url(), self::FLEET_URL)
+        Http::assertNotSent(fn (Request $request): bool => str_starts_with($request->url(), self::FLEET_URL)
             && $request->method() !== 'GET');
     }
 
