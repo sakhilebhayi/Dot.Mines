@@ -15,6 +15,7 @@ use App\Mail\WelcomeMail;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Feed\FeedEventNormaliser;
+use App\Services\Guardian\ErrorCounter;
 use App\Services\RealtimeEventScheduler;
 use App\Services\TeamRoleProvisioner;
 use App\Services\Webhooks\HostResolver;
@@ -52,6 +53,12 @@ class AppServiceProvider extends ServiceProvider
             WebhookUrlGuard::class,
             fn (Application $app): WebhookUrlGuard => new WebhookUrlGuard($app->make(HostResolver::class))
         );
+
+        // Must be a singleton: the counter's two feeds (the exception
+        // handler's report hook and the MessageLogged listener) dedupe a
+        // reported-then-logged exception through shared in-memory state.
+        // Separate instances would count it twice.
+        $this->app->singleton(ErrorCounter::class);
     }
 
     /**
