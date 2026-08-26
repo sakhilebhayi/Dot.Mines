@@ -40,6 +40,11 @@ class ErrorCounter
     /** @var array<int, true> object ids of throwables feed 1 already counted */
     private array $countedExceptionIds = [];
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod -- called from the exception
+     * handler's report hook in bootstrap/app.php, outside psalm's source
+     * dirs.
+     */
     public function record(\Throwable $e): void
     {
         try {
