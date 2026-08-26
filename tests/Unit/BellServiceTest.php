@@ -9,6 +9,7 @@ use App\Models\MachineMetric;
 use App\Models\Team;
 use App\Services\Integration\BellService;
 use App\Services\Integration\IntegrationService;
+use App\Support\ApiPayload;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -327,7 +328,7 @@ XML;
         Http::assertSentCount(2);
     }
 
-    public function test_snapshot_cache_expires_and_failures_are_never_cached(): void
+    public function test_snapshot_cache_holds_for_bells_own_data_cadence(): void
     {
         $this->fakeToken();
         Http::fake([self::FLEET_URL => Http::response($this->fleetXml(), 200)]);
@@ -335,11 +336,59 @@ XML;
         $service = new BellService($this->credentials());
         $service->fetchMachines();
 
-        // Past the micro-cache window a fresh snapshot is fetched.
-        $this->travel(241)->seconds();
+        // Bell rejects a second call barely 30 seconds after a successful
+        // one, so the window is its 15-minute publication cadence -- not a
+        // few minutes. Inside it, consumers share the one snapshot.
+        $this->travel(14)->minutes();
+        $service->fetchMachines();
+
+        Http::assertSentCount(2); // 1 token + 1 Fleet fetch: still cached.
+    }
+
+    public function test_snapshot_cache_expires_past_the_configured_window(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response($this->fleetXml(), 200)]);
+
+        $service = new BellService($this->credentials());
+        $service->fetchMachines();
+
+        $this->travel(ApiPayload::int(config('integrations.manufacturers.bell.fleet_cache_seconds'), 900) + 1)->seconds();
         $service->fetchMachines();
 
         Http::assertSentCount(3); // 1 token + 2 Fleet fetches across the cache boundary.
+    }
+
+    public function test_per_machine_reads_reuse_one_cached_fleet_call(): void
+    {
+        // The sync asks for each machine's metrics in turn. Before this was
+        // cached at the fetch layer, a 26-machine fleet meant 26 live Bell
+        // calls in seconds -- and Bell rejects the second call outright, so
+        // every sync died partway through.
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response($this->fleetXml(), 200)]);
+
+        $service = new BellService($this->credentials());
+        $service->fetchMachines();
+        $metrics = $service->fetchMachineMetrics('ASA B50E#9086');
+        $service->fetchMachineMetrics('ASA B50E#9086');
+
+        $this->assertSame(22.0, $metrics['fuel_level']);
+        Http::assertSentCount(2); // 1 token + exactly 1 Fleet call, shared.
+    }
+
+    public function test_a_failed_snapshot_is_never_cached(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response('', 405)]);
+
+        $service = new BellService($this->credentials());
+        $this->assertFalse($service->fetchMachines()['success']);
+        $this->assertFalse($service->fetchMachines()['success']);
+
+        // A rejected snapshot must never be replayed from cache: both
+        // attempts reach Bell (1 token + 2 Fleet).
+        Http::assertSentCount(3);
     }
 
     public function test_a_401_forces_exactly_one_token_refresh_and_retry(): void
