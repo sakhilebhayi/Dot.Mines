@@ -42,6 +42,22 @@ return [
         'critical_per_hour' => (int) env('GUARDIAN_ERRORS_CRITICAL', 50),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Quiet Hours
+    |--------------------------------------------------------------------------
+    | Freshness only means something while machines are running. Quiet is
+    | normally INFERRED from the fleet's own state (no machine active), which
+    | needs no configuration and adapts to each team's shift pattern. Set an
+    | explicit "HH:MM-HH:MM" window here only if you would rather state the
+    | hours than have them inferred; it may cross midnight.
+    */
+
+    'quiet_hours' => [
+        'window' => env('GUARDIAN_QUIET_HOURS'),
+        'timezone' => env('GUARDIAN_QUIET_HOURS_TZ'),
+    ],
+
     // Data-freshness checks express staleness as a multiple of each
     // integration's own sync interval: beyond 2x the data is late, beyond
     // 4x it has effectively stopped.

@@ -6,6 +6,7 @@ use App\Models\Integration;
 use App\Models\MachineMetric;
 use App\Services\Guardian\CheckResult;
 use App\Services\Guardian\Contracts\GuardianCheck;
+use App\Services\Guardian\FleetActivity;
 use App\Support\ApiPayload;
 use Illuminate\Support\Carbon;
 
@@ -26,6 +27,12 @@ use Illuminate\Support\Carbon;
  */
 class TelemetryIngestionCheck implements GuardianCheck
 {
+    /**
+     * @psalm-suppress PossiblyUnusedMethod -- resolved by the container
+     * from GuardianHealthController's check registry.
+     */
+    public function __construct(private readonly FleetActivity $fleet) {}
+
     #[\Override]
     public function key(): string
     {
@@ -68,9 +75,12 @@ class TelemetryIngestionCheck implements GuardianCheck
             300,
         );
 
+        $quiet = $this->fleet->isQuiet();
+
         $metrics = [
             'newest_ingest_age_seconds' => $ageSeconds,
             'newest_reading_age_seconds' => $readingAgeSeconds,
+            'fleet_quiet' => $quiet,
             'baseline_interval_seconds' => $baselineInterval,
             // Kept under its original name so anything already reading this
             // metric (dashboards, the guardian's archived incidents) keeps
@@ -78,6 +88,13 @@ class TelemetryIngestionCheck implements GuardianCheck
             // claimed to measure.
             'newest_metric_age_seconds' => $ageSeconds,
         ];
+
+        // A resting fleet is not a broken platform. FleetActivity only
+        // reports quiet when the syncs that would prove otherwise are
+        // themselves healthy, so this can never excuse a failing sync.
+        if ($quiet) {
+            return CheckResult::healthy($this->fleet->describe(), $metrics);
+        }
 
         $warningX = ApiPayload::float(config('guardian.freshness.warning_multiplier'), 2.0);
         $criticalX = ApiPayload::float(config('guardian.freshness.critical_multiplier'), 4.0);
