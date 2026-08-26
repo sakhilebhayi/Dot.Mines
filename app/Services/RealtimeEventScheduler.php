@@ -98,8 +98,11 @@ class RealtimeEventScheduler
     private static function scheduleAlertGeneration(): void
     {
         try {
-            $teams = Team::where('status', 'active')
-                ->has('machines', '>', 0)
+            // Teams have no status column (standard Jetstream schema);
+            // filtering on one made this query throw on EVERY tick, so
+            // alert generation never ran in production. Eligibility is
+            // "has machines", nothing more.
+            $teams = Team::has('machines', '>', 0)
                 ->get();
 
             foreach ($teams as $team) {
@@ -126,8 +129,8 @@ class RealtimeEventScheduler
     private static function scheduleGeofenceDetection(): void
     {
         try {
-            $teams = Team::where('status', 'active')
-                ->has('geofences', '>', 0)
+            // Same missing-column trap as scheduleAlertGeneration() above.
+            $teams = Team::has('geofences', '>', 0)
                 ->has('machines', '>', 0)
                 ->get();
 
