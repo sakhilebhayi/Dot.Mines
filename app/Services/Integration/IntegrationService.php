@@ -196,6 +196,7 @@ class IntegrationService
             'last_sync_at' => now(),
             'last_sync_status' => 'success',
             'last_error' => null,
+            'machines_count' => $integration->machines()->count(),
         ]);
 
         $message = in_array('production', $capabilities, true) || count($machineList) === 0
@@ -395,6 +396,13 @@ class IntegrationService
         if ($deepSync && $deepPassThrottled) {
             Cache::forget('integration_deep_sync_'.$integration->id);
         }
+
+        // Integration Manager and two API endpoints publish this count, but
+        // nothing ever wrote it -- every working integration reported 0
+        // machines. Counted from the machines actually stored rather than
+        // from $synced, so a partial sync cannot leave a number that
+        // disagrees with the table behind it.
+        $integration->update(['machines_count' => $integration->machines()->count()]);
 
         return [
             'success' => true,
