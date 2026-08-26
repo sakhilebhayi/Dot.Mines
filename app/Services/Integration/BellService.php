@@ -26,18 +26,26 @@ use Throwable;
  *    https://sso.bellequipment.com/connect/token (client_id
  *    "ISO_Export_Service", scope "ISO_Exports", client_authenticated via
  *    client_secret) -- see getAccessToken()/fetchNewToken().
- *  - A single GET /Fleet snapshot endpoint returning every piece of
- *    equipment visible to the account, with current status inline
+ *  - A PAGINATED GET /Fleet/{page} snapshot endpoint (1-based) returning
+ *    the equipment visible to the account, with current status inline
  *    (location, cumulative hours, fuel, DEF%, odometer, engine running).
  *  - Twelve GET /Fleet/Equipment/{id}/{Metric}/{startUTC}/{endUTC}
  *    time-series endpoints for historical drill-down per machine
  *    (locations, caution codes, cumulative totals, etc).
  *
- * All data endpoints are GET, per ISO 15143-3. This class originally
- * POSTed them -- the local mock server was built to mirror the code, so
- * every test and E2E pass stayed green while the real b-fleet03 gateway
- * answered 405 Method Not Allowed to each authenticated sync (first seen
- * in production 2026-08-26, ~17 hours of frozen telemetry).
+ * Both corrections above came from probing the live gateway on
+ * 2026-08-26, after the guardian surfaced frozen telemetry:
+ *
+ *  - This class POSTed its reads; ISO 15143-3 data endpoints are GET.
+ *  - It called BARE /Fleet, which answers 405 Method Not Allowed to GET,
+ *    POST and OPTIONS alike, with no Allow header. /Fleet/1 returns the
+ *    real snapshot; /Fleet/2 answers 400 past the end of the fleet.
+ *
+ * Neither fault could surface in tests, because the local mock server was
+ * built to serve exactly what this client sent -- bare /Fleet over POST --
+ * so the fixtures agreed with the bug. Bell sync had therefore NEVER
+ * succeeded in production. The tests now assert the verb and the page
+ * path explicitly so the fixtures can no longer drift from the real API.
  *
  * Responses are XML (ISO 15143-3's wire format), parsed defensively via
  * XPath local-name() lookups so this survives whatever exact element
@@ -102,7 +110,7 @@ class BellService extends BaseManufacturerService
     public function testConnection(): bool
     {
         try {
-            $xml = $this->requestXml('/Fleet');
+            $xml = $this->requestFleetPage();
 
             return $xml !== null;
         } catch (Throwable $e) {
@@ -138,17 +146,15 @@ class BellService extends BaseManufacturerService
         }
 
         try {
-            $xml = $this->requestXml('/Fleet');
+            $equipmentNodes = $this->fleetEquipmentNodes();
 
-            if ($xml === null) {
+            if ($equipmentNodes === null) {
                 return [
                     'success' => false,
                     'error' => $this->lastError ?? 'No response from Bell Fleet endpoint',
                     'machines' => [],
                 ];
             }
-
-            $equipmentNodes = $this->parser->extractEquipmentNodes($xml);
 
             // Seed the EquipmentID->PIN map from the snapshot we already
             // hold, so the per-machine time-series calls that follow a sync
@@ -300,13 +306,13 @@ class BellService extends BaseManufacturerService
     public function fetchMachineMetrics(string $machineId): array
     {
         try {
-            $xml = $this->requestXml('/Fleet');
+            $equipmentNodes = $this->fleetEquipmentNodes();
 
-            if ($xml === null) {
+            if ($equipmentNodes === null) {
                 return [];
             }
 
-            foreach ($this->parser->extractEquipmentNodes($xml) as $node) {
+            foreach ($equipmentNodes as $node) {
                 $header = $node->xpath(".//*[local-name()='EquipmentHeader']")[0] ?? $node;
 
                 if ($this->parser->findValue($header, ['EquipmentID']) === $machineId) {
@@ -436,14 +442,14 @@ class BellService extends BaseManufacturerService
             return $this->pinByEquipmentId = $cached;
         }
 
-        $xml = $this->requestXml('/Fleet');
+        $equipmentNodes = $this->fleetEquipmentNodes();
 
-        if ($xml === null) {
+        if ($equipmentNodes === null) {
             // Do not cache a failure -- the next call should try again.
             return [];
         }
 
-        $map = $this->parser->buildPinMap($this->parser->extractEquipmentNodes($xml));
+        $map = $this->parser->buildPinMap($equipmentNodes);
 
         if ($map !== []) {
             Cache::put($cacheKey, $map, now()->addMinutes(15));
@@ -537,10 +543,57 @@ class BellService extends BaseManufacturerService
     }
 
     /**
-     * POSTs to a Bell ISO 15143-3 data endpoint (every endpoint in the
-     * published Postman collection uses POST, including pure reads) with a
-     * bearer token, retrying transient failures and refreshing the token
-     * once if it's rejected as expired/invalid mid-retry.
+     * Fetch one page of the fleet snapshot. ISO 15143-3 paginates the
+     * fleet: the endpoint is /Fleet/{page}, 1-based. Bare /Fleet answers
+     * 405 Method Not Allowed to GET, POST and OPTIONS alike.
+     */
+    private function requestFleetPage(int $page = 1): ?SimpleXMLElement
+    {
+        return $this->requestXml('/Fleet/'.$page);
+    }
+
+    /**
+     * Every Equipment node across the fleet's pages.
+     *
+     * Returns null only when the FIRST page fails -- that is a real sync
+     * failure. A later page failing (the live gateway answers 400 past the
+     * end of the fleet) simply ends the walk, because pagination has no
+     * "last page" marker to read.
+     *
+     * @return list<SimpleXMLElement>|null
+     */
+    private function fleetEquipmentNodes(): ?array
+    {
+        $maxPages = max(1, ApiPayload::int(config('integrations.manufacturers.bell.max_fleet_pages'), 1));
+        $nodes = [];
+
+        for ($page = 1; $page <= $maxPages; $page++) {
+            $xml = $this->requestFleetPage($page);
+
+            if ($xml === null) {
+                if ($page === 1) {
+                    return null;
+                }
+
+                break;
+            }
+
+            $pageNodes = $this->parser->extractEquipmentNodes($xml);
+
+            if ($pageNodes === []) {
+                break;
+            }
+
+            $nodes = array_merge($nodes, $pageNodes);
+        }
+
+        return $nodes;
+    }
+
+    /**
+     * GETs a Bell ISO 15143-3 data endpoint with a bearer token, retrying
+     * transient failures and refreshing the token once if it's rejected as
+     * expired/invalid mid-retry.
      */
     private function requestXml(string $path): ?SimpleXMLElement
     {
