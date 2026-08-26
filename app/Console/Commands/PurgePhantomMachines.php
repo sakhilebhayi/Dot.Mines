@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Schema;
 class PurgePhantomMachines extends Command
 {
     protected $signature = 'machines:purge-phantom
+                            {--audit : List the whole fleet read-only, so a phantom can be identified rather than guessed at}
                             {--id=* : Machine ids to remove; omit to inspect candidates only}
                             {--confirm : Actually delete. Without this the command only reports.}';
 
@@ -34,6 +35,10 @@ class PurgePhantomMachines extends Command
 
     public function handle(): int
     {
+        if ($this->option('audit')) {
+            return $this->audit();
+        }
+
         $candidates = $this->candidates();
 
         /** @var list<string> $requested */
@@ -130,6 +135,53 @@ class PurgePhantomMachines extends Command
         $this->line('');
         $this->info("Done. {$deleted} removed. Fleet now: ".Machine::query()->count()
             .' machines, '.Machine::query()->where('status', 'active')->count().' active.');
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * The whole fleet, read-only, with the fields that distinguish a real
+     * machine from a seed artefact.
+     *
+     * The candidate rules below are a guess until someone has looked: the
+     * first version matched nothing in production because it assumed a
+     * phantom would have no integration and no position, and the real row
+     * did not fit. This exists so the rules can be set from the data.
+     */
+    private function audit(): int
+    {
+        /**
+         * @psalm-suppress UnnecessaryVarAnnotation -- phpstan needs it (larastan infers stdClass here)
+         *
+         * @phpstan-var Collection<int, Machine> $machines
+         */
+        $machines = Machine::query()->orderBy('id')->get();
+
+        if ($machines->isEmpty()) {
+            $this->info('No machines at all.');
+
+            return self::SUCCESS;
+        }
+
+        $rows = $machines->map(fn (Machine $machine): array => [
+            $machine->id,
+            mb_strimwidth($machine->name, 0, 28, '…'),
+            $machine->machine_type,
+            $machine->manufacturer_id === null ? 'NULL' : ($machine->manufacturer_id === '' ? "''" : $machine->manufacturer_id),
+            $machine->integration_id ?? '—',
+            $machine->status,
+            $machine->last_location_update?->toDateTimeString() ?? 'never',
+            $this->dependentsFor($machine)->sum(),
+        ]);
+
+        $this->table(
+            ['ID', 'Name', 'Type', 'Manufacturer id', 'Integr.', 'Status', 'Last seen', 'Dep. rows'],
+            $rows->all(),
+        );
+
+        $this->line('');
+        $this->info('Fleet: '.$machines->count().' machines, '
+            .$machines->where('status', 'active')->count().' active. Read-only; nothing changed.');
 
         return self::SUCCESS;
     }

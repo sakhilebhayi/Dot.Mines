@@ -23,6 +23,19 @@ class PurgePhantomMachinesTest extends TestCase
         ]);
     }
 
+    public function test_audit_lists_the_fleet_without_changing_anything(): void
+    {
+        $phantom = $this->phantom();
+        $real = Machine::factory()->create(['manufacturer_id' => 'BELL-0001']);
+
+        $this->artisan('machines:purge-phantom --audit')
+            ->expectsOutputToContain('Read-only; nothing changed')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('machines', ['id' => $phantom->id]);
+        $this->assertDatabaseHas('machines', ['id' => $real->id]);
+    }
+
     public function test_it_reports_without_deleting_by_default(): void
     {
         $phantom = $this->phantom();
