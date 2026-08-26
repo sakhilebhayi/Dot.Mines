@@ -80,7 +80,7 @@ class PurgePhantomMachines extends Command
         }
 
         $this->line('');
-        $this->warn('Phantom candidates (no manufacturer id, no integration, never seen):');
+        $this->warn('Phantom candidates (no manufacturer id, no integration -- nothing feeds them):');
         $this->line('');
 
         $rows = $candidates->map(function (Machine $machine): array {
