@@ -88,8 +88,10 @@ class DataHealthChecksTest extends TestCase
     {
         $team = Team::factory()->create();
         Integration::factory()->connected()->create(['team_id' => $team->id, 'provider' => 'bell']);
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'status' => 'active']);
         MachineMetric::factory()->create([
             'team_id' => $team->id,
+            'machine_id' => $machine->id,
             'recorded_at' => now()->subMinutes(10),
             'created_at' => now()->subMinutes(10),
         ]);
@@ -105,8 +107,10 @@ class DataHealthChecksTest extends TestCase
         // production (2026-08-26) one minute after 26 rows landed cleanly.
         $team = Team::factory()->create();
         Integration::factory()->connected()->create(['team_id' => $team->id, 'provider' => 'bell']);
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'status' => 'active']);
         MachineMetric::factory()->create([
             'team_id' => $team->id,
+            'machine_id' => $machine->id,
             'recorded_at' => now()->subHours(3),   // machine last reported 3h ago
             'created_at' => now()->subMinute(),     // but we ingested it a minute ago
         ]);
@@ -122,8 +126,11 @@ class DataHealthChecksTest extends TestCase
     {
         $team = Team::factory()->create();
         Integration::factory()->connected()->create(['team_id' => $team->id, 'provider' => 'bell']);
+        // Machines ARE working -- which is what makes silence a fault.
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'status' => 'active']);
         MachineMetric::factory()->create([
             'team_id' => $team->id,
+            'machine_id' => $machine->id,
             'recorded_at' => now()->subHours(3),
             'created_at' => now()->subHours(3),
         ]);
@@ -132,6 +139,89 @@ class DataHealthChecksTest extends TestCase
 
         $this->assertSame('critical', $result->status());
         $this->assertGreaterThan(0, $result->toArray()['metrics']['newest_metric_age_seconds']);
+    }
+
+    public function test_telemetry_is_not_faulted_while_the_whole_fleet_is_idle(): void
+    {
+        // A parked fleet produces no readings. That is the machines resting,
+        // not the platform failing -- and reporting it as a fault every
+        // night trains people to ignore the one night it matters.
+        $team = Team::factory()->create();
+        Integration::factory()->connected()->create([
+            'team_id' => $team->id, 'provider' => 'bell',
+            'last_sync_at' => now()->subMinutes(3), 'last_sync_status' => 'success',
+        ]);
+        $idle = Machine::factory()->create(['team_id' => $team->id, 'status' => 'idle']);
+        Machine::factory()->create(['team_id' => $team->id, 'status' => 'offline']);
+        MachineMetric::factory()->create([
+            'team_id' => $team->id,
+            'machine_id' => $idle->id, // MachineFactory picks a RANDOM status; pin it.
+            'recorded_at' => now()->subHours(3),
+            'created_at' => now()->subHours(3),
+        ]);
+
+        $result = app(TelemetryIngestionCheck::class)->run();
+
+        $this->assertSame('healthy', $result->status());
+        $this->assertStringContainsString('idle', $result->toArray()['message']);
+        $this->assertTrue($result->toArray()['metrics']['fleet_quiet']);
+    }
+
+    public function test_telemetry_is_still_faulted_when_a_machine_is_running(): void
+    {
+        // One machine working means readings are expected. Silence now is a
+        // real signal, and the quiet-hours allowance must not swallow it.
+        $team = Team::factory()->create();
+        Integration::factory()->connected()->create([
+            'team_id' => $team->id, 'provider' => 'bell',
+            'last_sync_at' => now()->subMinutes(3), 'last_sync_status' => 'success',
+        ]);
+        $active = Machine::factory()->create(['team_id' => $team->id, 'status' => 'active']);
+        MachineMetric::factory()->create([
+            'team_id' => $team->id,
+            'machine_id' => $active->id,
+            'recorded_at' => now()->subHours(3),
+            'created_at' => now()->subHours(3),
+        ]);
+
+        $this->assertSame('critical', app(TelemetryIngestionCheck::class)->run()->status());
+    }
+
+    public function test_an_idle_fleet_does_not_excuse_a_failing_sync(): void
+    {
+        // The dangerous case: a broken sync leaves machines looking idle
+        // because nothing is updating them. Quiet hours must never be able
+        // to explain away a sync that is actually failing.
+        $team = Team::factory()->create();
+        Integration::factory()->connected()->create([
+            'team_id' => $team->id, 'provider' => 'bell',
+            'last_sync_at' => now()->subHours(2), 'last_sync_status' => 'failed',
+        ]);
+        $idle = Machine::factory()->create(['team_id' => $team->id, 'status' => 'idle']);
+        MachineMetric::factory()->create([
+            'team_id' => $team->id,
+            'machine_id' => $idle->id,
+            'recorded_at' => now()->subHours(3),
+            'created_at' => now()->subHours(3),
+        ]);
+
+        $this->assertSame('critical', app(TelemetryIngestionCheck::class)->run()->status());
+    }
+
+    public function test_production_freshness_is_not_faulted_while_the_fleet_is_idle(): void
+    {
+        $team = Team::factory()->create();
+        Integration::factory()->connected()->create([
+            'team_id' => $team->id,
+            'capabilities' => ['fleet', 'production'],
+            'last_sync_at' => now()->subMinutes(3), 'last_sync_status' => 'success',
+        ]);
+        $this->insertProductionRecord($team, updatedAt: now()->subHours(8), machineStatus: 'idle');
+
+        $result = app(ProductionFreshnessCheck::class)->run();
+
+        $this->assertSame('healthy', $result->status());
+        $this->assertTrue($result->toArray()['metrics']['fleet_quiet']);
     }
 
     public function test_production_check_is_unknown_without_production_capable_integrations(): void
@@ -165,9 +255,12 @@ class DataHealthChecksTest extends TestCase
         $this->assertSame('critical', app(ProductionFreshnessCheck::class)->run()->status());
     }
 
-    private function insertProductionRecord(Team $team, Carbon $updatedAt): void
+    private function insertProductionRecord(Team $team, Carbon $updatedAt, string $machineStatus = 'active'): void
     {
-        $machine = Machine::factory()->create(['team_id' => $team->id]);
+        // Stated, not left to chance: MachineFactory randomises status, and
+        // whether a machine is running now decides whether frozen
+        // production is a fault or just a quiet shift.
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'status' => $machineStatus]);
 
         DB::table('production_records')->insert([
             'team_id' => $team->id,

@@ -5,6 +5,7 @@ namespace App\Services\Guardian\Checks;
 use App\Models\Integration;
 use App\Services\Guardian\CheckResult;
 use App\Services\Guardian\Contracts\GuardianCheck;
+use App\Services\Guardian\FleetActivity;
 use App\Support\ApiPayload;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -21,6 +22,12 @@ use Illuminate\Support\Facades\DB;
  */
 class ProductionFreshnessCheck implements GuardianCheck
 {
+    /**
+     * @psalm-suppress PossiblyUnusedMethod -- resolved by the container
+     * from GuardianHealthController's check registry.
+     */
+    public function __construct(private readonly FleetActivity $fleet) {}
+
     #[\Override]
     public function key(): string
     {
@@ -56,7 +63,17 @@ class ProductionFreshnessCheck implements GuardianCheck
 
         $ageSeconds = max(0, (int) Carbon::parse((string) $newestUpdatedAt)->diffInSeconds(now()));
 
-        $metrics = ['newest_production_write_age_seconds' => $ageSeconds];
+        $quiet = $this->fleet->isQuiet();
+        $metrics = [
+            'newest_production_write_age_seconds' => $ageSeconds,
+            'fleet_quiet' => $quiet,
+        ];
+
+        // Production only accrues while machines move; see the note in
+        // TelemetryIngestionCheck for why this cannot mask a failing sync.
+        if ($quiet) {
+            return CheckResult::healthy($this->fleet->describe(), $metrics);
+        }
 
         if ($ageSeconds >= ApiPayload::int(config('guardian.freshness.production_critical_seconds'), 21600)) {
             return CheckResult::critical('Production data has stopped updating.', $metrics);
