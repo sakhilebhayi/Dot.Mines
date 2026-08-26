@@ -33,6 +33,6 @@ jobs:
             echo "No log files in storage/logs."
             exit 0
           fi
-          echo "== $latest (last 120 lines)"
-          tail -120 "$latest"
+          echo "== $latest (last 100 non-scheduler lines)"
+          grep -vE "Running \['artisan'|artisan' integrations:sync-due|schedule:run" "$latest" | tail -100
           LOGS
