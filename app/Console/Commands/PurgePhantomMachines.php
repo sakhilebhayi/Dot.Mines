@@ -197,9 +197,19 @@ class PurgePhantomMachines extends Command
     }
 
     /**
-     * A machine no manufacturer claims, no integration owns, and that has
-     * never reported a position. All three must hold: a real machine that
-     * is merely offline still has an integration and a history.
+     * A machine no manufacturer claims and no integration owns.
+     *
+     * The first version also required that it had never reported a position,
+     * and that is why it matched nothing: the production phantom carries a
+     * stale position from the day the seed ran. Absence of a position was
+     * never the right test anyway -- what makes a machine real is that
+     * something is feeding it, and the phantom is fed by nothing.
+     *
+     * Candidacy is deliberately broad and cheap; the load-bearing guard is
+     * the dependent-row check at delete time, which refuses any machine that
+     * has accumulated history. A real machine cannot avoid accumulating it.
+     * Deletion additionally requires the operator to name the id, having
+     * read --audit first.
      *
      * @return Collection<int, Machine>
      */
@@ -213,7 +223,6 @@ class PurgePhantomMachines extends Command
         $machines = Machine::query()
             ->where(fn ($query) => $query->whereNull('manufacturer_id')->orWhere('manufacturer_id', ''))
             ->whereNull('integration_id')
-            ->whereNull('last_location_update')
             ->get();
 
         return $machines;

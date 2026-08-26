@@ -85,6 +85,40 @@ class PurgePhantomMachinesTest extends TestCase
         $this->assertDatabaseHas('machines', ['id' => $real->id]);
     }
 
+    public function test_a_stale_position_does_not_save_a_phantom(): void
+    {
+        // The production phantom carries a position from the day the seed
+        // ran. Requiring "never reported a position" is what made the first
+        // version match nothing at all.
+        $phantom = Machine::factory()->create([
+            'manufacturer_id' => null,
+            'integration_id' => null,
+            'last_location_update' => now()->subDays(9),
+            'status' => 'active',
+        ]);
+
+        $this->artisan("machines:purge-phantom --confirm --id={$phantom->id}")
+            ->assertSuccessful();
+
+        $this->assertDatabaseMissing('machines', ['id' => $phantom->id]);
+    }
+
+    public function test_a_machine_an_integration_owns_is_never_a_candidate(): void
+    {
+        // Fed by something, so real -- even with no manufacturer id.
+        $integration = Integration::factory()->create();
+        $owned = Machine::factory()->create([
+            'manufacturer_id' => null,
+            'integration_id' => $integration->id,
+        ]);
+
+        $this->artisan("machines:purge-phantom --confirm --id={$owned->id}")
+            ->expectsOutputToContain('Not a phantom candidate')
+            ->assertFailed();
+
+        $this->assertDatabaseHas('machines', ['id' => $owned->id]);
+    }
+
     public function test_it_refuses_when_dependent_rows_exist(): void
     {
         // The load-bearing rail: deleting a machine cascades to ~15 tables,
