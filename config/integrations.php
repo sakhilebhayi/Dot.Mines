@@ -108,6 +108,14 @@ return [
             // request against a limiter that has throttled this server
             // before (2026-08-21). Raise it if a fleet outgrows one page.
             'max_fleet_pages' => (int) env('BELL_MAX_FLEET_PAGES', 1),
+            // Bell rate-limits HARD and answers 405 (not 429) when it
+            // throttles: measured live on 2026-08-26, a second /Fleet/1
+            // call 30 seconds after a successful one was rejected, and two
+            // concurrent calls were both rejected. Bell's own data cadence
+            // is 15 minutes, so caching a successful snapshot for that long
+            // costs no freshness and keeps the whole app inside ~4 calls an
+            // hour -- the location, status and sync jobs all share it.
+            'fleet_cache_seconds' => (int) env('BELL_FLEET_CACHE_SECONDS', 900),
             'client_id_env' => 'BELL_CLIENT_ID', // Bell issues 'ISO_Export_Service' to every ISO export consumer.
             'scope' => 'ISO_Exports',
             'username_env' => 'BELL_USERNAME',
@@ -120,7 +128,7 @@ return [
             // other manufacturers in this file.
             'auth_type' => 'oauth2_password',
             'supported_endpoints' => [
-                'fleet' => '/Fleet',
+                'fleet' => '/Fleet/{page}', // paginated, 1-based; bare /Fleet answers 405
                 'locations' => '/Fleet/Equipment/{equipmentId}/Locations/{startDateUTC}/{endDateUTC}',
                 'operatingHours' => '/Fleet/Equipment/{equipmentId}/CumulativeOperatingHours/{startDateUTC}/{endDateUTC}',
                 'idleHours' => '/Fleet/Equipment/{equipmentId}/CumulativeIdleHours/{startDateUTC}/{endDateUTC}',

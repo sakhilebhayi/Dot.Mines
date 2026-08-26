@@ -133,15 +133,44 @@ class BellService extends BaseManufacturerService
     {
         // Micro-cache: location and status jobs both consume the snapshot
         // within the same scheduler window; one Bell call serves both.
-        // 240s guarantees at most ONE Bell call per 5-minute scheduler
-        // window regardless of how job timing aligns -- observed live
-        // (2026-08-21 21:02) that Bell's limiter 405s even back-to-back
-        // calls a minute apart. Still far inside Bell's own 15-minute
-        // data cadence, so no consumer can observe extra staleness.
+        // Bell's limiter is the binding constraint, not our own appetite:
+        // measured live on 2026-08-26, a second /Fleet/1 call 30 seconds
+        // after a successful one is rejected with 405, and two concurrent
+        // calls are both rejected. The cache window therefore matches
+        // Bell's own 15-minute data cadence (config fleet_cache_seconds),
+        // so the location, status and sync jobs together stay inside about
+        // four calls an hour without any consumer seeing staler data than
+        // Bell itself publishes.
         /** @var array{success: bool, machines: list<array<string, mixed>>, count: int}|null $cached */
         $cached = Cache::get($this->fleetSnapshotCacheKey());
 
         if (is_array($cached)) {
+            return $cached;
+        }
+
+        // The scheduler starts the location and status jobs in the SAME
+        // second, so both miss the cache and used to fire concurrent Bell
+        // calls that the limiter rejected outright. The loser of this lock
+        // waits for the winner's response, then reads it from the cache
+        // below. A lock timeout is not fatal: we would rather make one
+        // extra call than skip a sync entirely.
+        $lock = Cache::lock($this->fleetSnapshotCacheKey().'_lock', 60);
+        $holdsLock = false;
+
+        try {
+            $holdsLock = $lock->block(20);
+        } catch (Throwable) {
+            $holdsLock = false;
+        }
+
+        /** @var array{success: bool, machines: list<array<string, mixed>>, count: int}|null $cached */
+        $cached = Cache::get($this->fleetSnapshotCacheKey());
+
+        if (is_array($cached)) {
+            if ($holdsLock) {
+                $lock->release();
+            }
+
             return $cached;
         }
 
@@ -179,7 +208,11 @@ class BellService extends BaseManufacturerService
 
             // Only successful snapshots are cached -- a failure must be
             // retried by the next caller, never replayed for 60 seconds.
-            Cache::put($this->fleetSnapshotCacheKey(), $result, now()->addSeconds(240));
+            Cache::put(
+                $this->fleetSnapshotCacheKey(),
+                $result,
+                now()->addSeconds(max(60, ApiPayload::int(config('integrations.manufacturers.bell.fleet_cache_seconds'), 900))),
+            );
 
             return $result;
         } catch (Throwable $e) {
@@ -190,6 +223,10 @@ class BellService extends BaseManufacturerService
                 'error' => $e->getMessage(),
                 'machines' => [],
             ];
+        } finally {
+            if ($holdsLock) {
+                $lock->release();
+            }
         }
     }
 
@@ -564,6 +601,34 @@ class BellService extends BaseManufacturerService
      */
     private function fleetEquipmentNodes(): ?array
     {
+        // Cached at the FETCH layer, so every consumer -- the fleet sync,
+        // each machine's metrics, and the PIN map -- shares one Bell call.
+        // Caching only in fetchMachines() was not enough: a sync reads each
+        // machine's metrics in turn, which meant one live call per machine
+        // (26 in seconds on this account) and Bell rejects the second call
+        // outright. Equipment nodes are cached as XML text because
+        // SimpleXMLElement cannot be serialised.
+        $cacheKey = $this->fleetSnapshotCacheKey().'_nodes';
+
+        /** @var list<string>|null $cachedXml */
+        $cachedXml = Cache::get($cacheKey);
+
+        if (is_array($cachedXml)) {
+            $restored = [];
+
+            foreach ($cachedXml as $fragment) {
+                $node = $this->parseXml($fragment);
+
+                if ($node !== null) {
+                    $restored[] = $node;
+                }
+            }
+
+            if ($restored !== []) {
+                return $restored;
+            }
+        }
+
         $maxPages = max(1, ApiPayload::int(config('integrations.manufacturers.bell.max_fleet_pages'), 1));
         $nodes = [];
 
@@ -585,6 +650,17 @@ class BellService extends BaseManufacturerService
             }
 
             $nodes = array_merge($nodes, $pageNodes);
+        }
+
+        if ($nodes !== []) {
+            Cache::put(
+                $cacheKey,
+                array_values(array_filter(array_map(
+                    static fn (SimpleXMLElement $node): ?string => $node->asXML() === false ? null : (string) $node->asXML(),
+                    $nodes,
+                ))),
+                now()->addSeconds(max(60, ApiPayload::int(config('integrations.manufacturers.bell.fleet_cache_seconds'), 900))),
+            );
         }
 
         return $nodes;
