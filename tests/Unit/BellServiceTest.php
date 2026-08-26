@@ -12,6 +12,7 @@ use App\Services\Integration\IntegrationService;
 use App\Support\ApiPayload;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -375,6 +376,87 @@ XML;
 
         $this->assertSame(22.0, $metrics['fuel_level']);
         Http::assertSentCount(2); // 1 token + exactly 1 Fleet call, shared.
+    }
+
+    public function test_a_throttled_deep_pass_releases_its_hourly_window_for_the_next_sync(): void
+    {
+        // The deep pass claims an hourly window BEFORE doing its work. If
+        // the provider throttles it partway, holding that window means
+        // alerts and production counters are skipped for a full hour on a
+        // transient squeeze. A throttled pass must hand the window back.
+        $this->fakeToken();
+        Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
+            // Every per-machine time-series call is throttled.
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('', 405),
+        ]);
+
+        $team = Team::factory()->create();
+        $integration = Integration::factory()->forProvider('bell')->create([
+            'team_id' => $team->id,
+            'credentials' => $this->credentials(),
+        ]);
+
+        $result = app(IntegrationService::class)->syncMachines($integration);
+
+        // The machine list itself still synced -- only the deep extras were
+        // throttled, so this is a partial success, not a failed sync.
+        $this->assertTrue($result['success']);
+        $this->assertTrue($result['deep_sync']);
+        $this->assertNull(
+            Cache::get('integration_deep_sync_'.$integration->id),
+            'A throttled deep pass must release its window so the next sync retries.',
+        );
+    }
+
+    public function test_a_clean_deep_pass_keeps_its_hourly_window(): void
+    {
+        $this->fakeToken();
+        Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*' => Http::response('<TimeSeries/>', 200),
+        ]);
+
+        $team = Team::factory()->create();
+        $integration = Integration::factory()->forProvider('bell')->create([
+            'team_id' => $team->id,
+            'credentials' => $this->credentials(),
+        ]);
+
+        app(IntegrationService::class)->syncMachines($integration);
+
+        $this->assertNotNull(
+            Cache::get('integration_deep_sync_'.$integration->id),
+            'A clean deep pass holds its window so the next sync skips the extras.',
+        );
+    }
+
+    public function test_a_405_is_reported_as_provider_throttling_not_a_generic_error(): void
+    {
+        // Bell signals throttling with 405 rather than 429. Reported as a
+        // bare "API error" it cost two rounds of misdiagnosis (it reads as
+        // a method fault), and it makes a transient squeeze look like a
+        // broken integration.
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response('', 405)]);
+
+        $service = new BellService($this->credentials());
+        $result = $service->fetchMachines();
+
+        $this->assertFalse($result['success']);
+        $this->assertTrue($service->wasThrottled());
+        $this->assertStringContainsString('throttl', strtolower((string) $service->getLastError()));
+    }
+
+    public function test_a_healthy_call_does_not_report_throttling(): void
+    {
+        $this->fakeToken();
+        Http::fake([self::FLEET_URL => Http::response($this->fleetXml(), 200)]);
+
+        $service = new BellService($this->credentials());
+        $service->fetchMachines();
+
+        $this->assertFalse($service->wasThrottled());
     }
 
     public function test_a_failed_snapshot_is_never_cached(): void

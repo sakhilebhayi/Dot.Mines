@@ -673,6 +673,7 @@ class BellService extends BaseManufacturerService
      */
     private function requestXml(string $path): ?SimpleXMLElement
     {
+        $this->throttled = false;
         $token = $this->getAccessToken();
 
         if (($token === null || $token === '' || $token === '0')) {
@@ -723,6 +724,22 @@ class BellService extends BaseManufacturerService
                     }
 
                     continue;
+                }
+
+                // Bell signals throttling with 405, not 429. Naming it as
+                // throttling matters twice over: it reads as a method fault
+                // otherwise (which cost two rounds of misdiagnosis on
+                // 2026-08-26), and it lets callers back off and retry
+                // instead of recording a broken integration.
+                if ($response->status() === 405) {
+                    $this->throttled = true;
+                    $this->lastError = 'Bell throttled this request (HTTP 405). The same call succeeds once its window reopens.';
+                    Log::warning('Bell integration: throttled by provider', [
+                        'url' => $url,
+                        'status' => 405,
+                    ]);
+
+                    return null;
                 }
 
                 $this->lastError = "Bell API returned status {$response->status()}: {$response->body()}";
