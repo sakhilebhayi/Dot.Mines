@@ -761,7 +761,13 @@ class IntegrationService
                         'priority' => $alertData['priority'] ?? 'medium',
                         'status' => $status,
                         'triggered_at' => now(),
-                        'metadata' => ['external_id' => $externalId],
+                        // The interpreter's technical details (code, source,
+                        // severity_raw, component) ride along for the alert
+                        // detail view; external_id stays ours for dedupe.
+                        'metadata' => array_merge(
+                            ApiPayload::assoc($alertData['metadata'] ?? []),
+                            ['external_id' => $externalId],
+                        ),
                     ]);
                 }
             }

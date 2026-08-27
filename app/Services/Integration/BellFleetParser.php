@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration;
 
+use Illuminate\Support\Carbon;
 use SimpleXMLElement;
 
 /**
@@ -54,6 +55,10 @@ final class BellFleetParser
         $externalId = $this->findValue($header, ['EquipmentID']);
         $latitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Latitude') ?? $this->findValue($equipment, ['Latitude']));
         $longitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Longitude') ?? $this->findValue($equipment, ['Longitude']));
+        // Deliberately the LOCATION section's own datetime (falling back
+        // to the flattened TelemetryDate): the live map's "position
+        // reported X ago" is only honest if it is stamped with when the
+        // position was reported, not when any other section last ticked.
         $telemetryDate = $this->sectionDatetime($equipment, 'Location')
             ?? $this->findValue($equipment, ['TelemetryDate'])
             ?? now()->toIso8601String();
@@ -98,7 +103,15 @@ final class BellFleetParser
     {
         $latitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Latitude') ?? $this->findValue($equipment, ['Latitude']));
         $longitude = $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Longitude') ?? $this->findValue($equipment, ['Longitude']));
-        $telemetryDate = $this->sectionDatetime($equipment, 'Location')
+        // The NEWEST section datetime, not Location's: every ISO section
+        // carries its own timestamp, and a stationary machine keeps
+        // reporting cumulative counters (hours, payload) under a frozen
+        // Location datetime. recorded_at drives the §19 dedupe in
+        // IntegrationService::syncMachineMetrics(), so stamping it with
+        // Location's time made the dedupe discard every row whose only
+        // news was cumulative -- the Fleet page then froze on stale
+        // hours/tonnage while the API had newer values.
+        $telemetryDate = $this->newestSectionDatetime($equipment)
             ?? $this->findValue($equipment, ['TelemetryDate'])
             ?? now()->toIso8601String();
         $engineRunning = $this->parseEngineRunning($equipment);
@@ -201,6 +214,41 @@ final class BellFleetParser
         $value = isset($matches[0]) ? (string) ($matches[0]['datetime'] ?? '') : '';
 
         return $value !== '' ? $value : null;
+    }
+
+    /**
+     * The newest datetime any telemetry section on this equipment node
+     * reports -- the machine's honest "last said anything" moment.
+     * Sections update independently on live Bell hardware, so no single
+     * section's timestamp can stand in for the node's freshness.
+     */
+    public function newestSectionDatetime(SimpleXMLElement $equipment): ?string
+    {
+        $nodes = $equipment->xpath(".//*[@*[local-name()='datetime']]");
+
+        $newestRaw = null;
+        $newestParsed = null;
+
+        foreach (is_array($nodes) ? $nodes : [] as $node) {
+            $value = trim((string) ($node['datetime'] ?? ''));
+
+            if ($value === '') {
+                continue;
+            }
+
+            try {
+                $parsed = Carbon::parse($value);
+            } catch (\Throwable) {
+                continue; // an unparseable stamp cannot win "newest"
+            }
+
+            if ($newestParsed === null || $parsed->greaterThan($newestParsed)) {
+                $newestParsed = $parsed;
+                $newestRaw = $value; // keep the provider's own string
+            }
+        }
+
+        return $newestRaw;
     }
 
     /**

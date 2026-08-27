@@ -306,6 +306,39 @@
                         </div>
                     @endif
 
+                    {{-- Technical details: the raw OEM code and source for
+                         technicians. The human message above is what normal
+                         users act on; this is the debugging trail. --}}
+                    @if(data_get($selectedAlert->metadata, 'code'))
+                        <div class="md:col-span-2 border-t border-[var(--line)] pt-3">
+                            <div class="text-xs font-semibold text-[var(--sand)] uppercase mb-1">Technical details</div>
+                            <dl class="text-sm text-[var(--sand)] space-y-1">
+                                <div class="flex gap-2">
+                                    <dt class="text-[var(--sand)]/70">Code:</dt>
+                                    <dd class="font-mono">{{ data_get($selectedAlert->metadata, 'code') }}</dd>
+                                </div>
+                                @if(data_get($selectedAlert->metadata, 'component'))
+                                    <div class="flex gap-2">
+                                        <dt class="text-[var(--sand)]/70">Affected system:</dt>
+                                        <dd>{{ data_get($selectedAlert->metadata, 'component') }}</dd>
+                                    </div>
+                                @endif
+                                @if(data_get($selectedAlert->metadata, 'severity_raw'))
+                                    <div class="flex gap-2">
+                                        <dt class="text-[var(--sand)]/70">Reported severity:</dt>
+                                        <dd>{{ data_get($selectedAlert->metadata, 'severity_raw') }}</dd>
+                                    </div>
+                                @endif
+                                @if(data_get($selectedAlert->metadata, 'source'))
+                                    <div class="flex gap-2">
+                                        <dt class="text-[var(--sand)]/70">Source:</dt>
+                                        <dd>{{ data_get($selectedAlert->metadata, 'source') }}</dd>
+                                    </div>
+                                @endif
+                            </dl>
+                        </div>
+                    @endif
+
                     {{-- Location / Context --}}
                     @if($isSpeedAlert)
                         <!-- Expanded speed alert context -->
