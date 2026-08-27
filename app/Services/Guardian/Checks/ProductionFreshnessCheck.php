@@ -6,6 +6,7 @@ use App\Models\Integration;
 use App\Services\Guardian\CheckResult;
 use App\Services\Guardian\Contracts\GuardianCheck;
 use App\Services\Guardian\FleetActivity;
+use App\Services\Guardian\ProviderTelemetry;
 use App\Support\ApiPayload;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -73,6 +74,23 @@ class ProductionFreshnessCheck implements GuardianCheck
         // TelemetryIngestionCheck for why this cannot mask a failing sync.
         if ($quiet) {
             return CheckResult::healthy($this->fleet->describe(), $metrics);
+        }
+
+        // Production is calculated FROM provider telemetry. When the
+        // provider's own readings have stalled (ProviderDataFreshnessCheck
+        // surfaces that), frozen production is the starved input, not a
+        // platform fault -- and the redeploy runbook cannot feed it.
+        $readingAge = ProviderTelemetry::newestReadingAgeSeconds();
+        $freshnessCriticalX = ApiPayload::float(config('guardian.freshness.critical_multiplier'), 4.0);
+
+        if ($readingAge !== null
+            && $readingAge >= (float) ProviderTelemetry::baselineIntervalSeconds() * $freshnessCriticalX) {
+            $metrics['newest_reading_age_seconds'] = $readingAge;
+
+            return CheckResult::unknown(
+                'Provider telemetry is stale; production freshness cannot be judged while its input starves.',
+                $metrics,
+            );
         }
 
         if ($ageSeconds >= ApiPayload::int(config('guardian.freshness.production_critical_seconds'), 21600)) {

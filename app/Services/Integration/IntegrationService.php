@@ -12,6 +12,7 @@ use App\Models\MineArea;
 use App\Models\ProductionRecord;
 use App\Models\ProductionTarget;
 use App\Services\Billing\MachineProvisioningService;
+use App\Services\Guardian\MetricIngestProbe;
 use App\Support\ApiPayload;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -675,7 +676,27 @@ class IntegrationService
             /** @var mixed $recordedAt */
             $recordedAt = $metrics['recorded_at'] ?? null;
 
+            // Normalise to the cast's storage format before comparing:
+            // providers send strings (Bell: raw ISO 8601 from XML), the
+            // column stores 'Y-m-d H:i:s', and a raw-string comparison
+            // that misses re-stores every unchanged snapshot as a fresh
+            // row -- exactly what §19 exists to prevent.
+            if (is_string($recordedAt) || $recordedAt instanceof \DateTimeInterface) {
+                try {
+                    $recordedAt = Carbon::parse($recordedAt)->format('Y-m-d H:i:s');
+                } catch (\Throwable) {
+                    // Unparseable: keep the raw value; the save's own cast
+                    // will have the final word.
+                }
+            }
+
             if ($recordedAt !== null && MachineMetric::where('machine_id', $machine->id)->where('recorded_at', $recordedAt)->exists()) {
+                // A dedupe-skip is still the pipeline working: it ran,
+                // compared, and rightly stored nothing. Record that, or
+                // the guardian cannot tell a stalled provider feed from
+                // a dead ingest path.
+                MetricIngestProbe::record();
+
                 return;
             }
 
@@ -683,6 +704,7 @@ class IntegrationService
             $metric->machine_id = $machine->id;
             $metric->team_id = $machine->team_id;
             $metric->save();
+            MetricIngestProbe::record();
         } catch (\Throwable $e) {
             Log::warning('Failed to sync machine metrics', [
                 'machine_id' => $machine->id,
