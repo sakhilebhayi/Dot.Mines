@@ -153,12 +153,29 @@
                 </h2>
 
                 @if(count($dailyChart) > 0)
-                    <div class="space-y-6">
-                        @php 
-                            $maxTonnage = collect($dailyChart)->max('tonnage') ?: 1;
-                            $maxLoads = collect($dailyChart)->max('loads') ?: 1;
-                        @endphp
+                    @php
+                        $maxTonnage = collect($dailyChart)->max('tonnage') ?: 1;
+                        $maxLoads = collect($dailyChart)->max('loads') ?: 1;
+                        $columnCount = count($dailyChart);
+                        // Thin axis labels to ~10 per chart: a label on every
+                        // column set each column's min-content width (a rotated
+                        // element keeps its unrotated layout box), so flex could
+                        // not shrink the row and a month/year range overflowed
+                        // the card. Thinned labels are absolutely positioned --
+                        // out of layout flow, they can never widen a column.
+                        // A colliding axis is as unreadable as a missing
+                        // one: past ten columns thin to ~6 labels, and CSS
+                        // hides every other one below the sm breakpoint --
+                        // Blade cannot know the card's rendered width, but
+                        // the breakpoint can.
+                        $labelEvery = $columnCount > 10 ? max(1, (int) ceil($columnCount / 6)) : 1;
+                        $gapClass = $columnCount > 45 ? 'gap-px' : 'gap-1';
+                    @endphp
 
+                    {{-- overflow-hidden here is containment for the decorative
+                         label/tooltip spill only; column sizing itself is fixed
+                         by min-w-0 + absolute labels above. --}}
+                    <div class="space-y-6 overflow-hidden">
                         {{-- Percentage bar heights need a DEFINITE-height track:
                              the old markup put height:% on a child of an
                              auto-height flex column, which resolves to 0, so
@@ -166,9 +183,9 @@
                         <!-- Tonnage Chart -->
                         <div>
                             <h3 class="text-sm font-medium text-[var(--sand)] mb-3">Tonnage (T)</h3>
-                            <div class="flex items-end gap-1">
+                            <div class="flex items-end {{ $gapClass }}">
                                 @foreach($dailyChart as $day)
-                                    <div class="flex-1 flex flex-col items-center group">
+                                    <div class="flex-1 min-w-0 flex flex-col items-center group">
                                         <div class="w-full h-28 flex items-end">
                                             <div class="w-full bg-green-500 hover:bg-green-600 rounded-t transition-all relative"
                                                  style="height: {{ $maxTonnage > 0 ? ($day['tonnage'] / $maxTonnage * 100) : 0 }}%; {{ $day['tonnage'] > 0 ? 'min-height: 3px;' : '' }}"
@@ -178,7 +195,13 @@
                                                 </span>
                                             </div>
                                         </div>
-                                        <span class="text-xs text-[var(--sand)] rotate-45 origin-left mt-2">{{ $day['date'] }}</span>
+                                        @if($loop->index % $labelEvery === 0)
+                                            <div class="relative h-6 w-full" data-chart-label>
+                                                <span class="absolute {{ $loop->first ? 'left-0' : 'left-1/2 -translate-x-1/2' }} {{ (intdiv($loop->index, $labelEvery) % 2) === 1 ? 'hidden sm:block' : '' }} top-1 text-xs text-[var(--sand)] whitespace-nowrap">{{ \Illuminate\Support\Carbon::parse($day['date'])->format('M j') }}</span>
+                                            </div>
+                                        @else
+                                            <div class="h-6 w-full"></div>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>
@@ -187,9 +210,9 @@
                         <!-- Loads Chart -->
                         <div>
                             <h3 class="text-sm font-medium text-[var(--sand)] mb-3">Loads</h3>
-                            <div class="flex items-end gap-1">
+                            <div class="flex items-end {{ $gapClass }}">
                                 @foreach($dailyChart as $day)
-                                    <div class="flex-1 flex flex-col items-center group">
+                                    <div class="flex-1 min-w-0 flex flex-col items-center group">
                                         <div class="w-full h-28 flex items-end">
                                             <div class="w-full bg-blue-500 hover:bg-blue-600 rounded-t transition-all relative"
                                                  style="height: {{ $maxLoads > 0 ? ($day['loads'] / $maxLoads * 100) : 0 }}%; {{ $day['loads'] > 0 ? 'min-height: 3px;' : '' }}"
@@ -199,6 +222,13 @@
                                                 </span>
                                             </div>
                                         </div>
+                                        @if($loop->index % $labelEvery === 0)
+                                            <div class="relative h-6 w-full" data-chart-label>
+                                                <span class="absolute {{ $loop->first ? 'left-0' : 'left-1/2 -translate-x-1/2' }} {{ (intdiv($loop->index, $labelEvery) % 2) === 1 ? 'hidden sm:block' : '' }} top-1 text-xs text-[var(--sand)] whitespace-nowrap">{{ \Illuminate\Support\Carbon::parse($day['date'])->format('M j') }}</span>
+                                            </div>
+                                        @else
+                                            <div class="h-6 w-full"></div>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>

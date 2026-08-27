@@ -540,7 +540,7 @@ XML, 200),
         $this->assertSame('2026-06-02T11:00:00Z', $location['timestamp']);
     }
 
-    public function test_fetch_machine_alerts_maps_caution_codes_to_the_alert_shape_sync_expects(): void
+    public function test_fetch_machine_alerts_interprets_caution_codes_for_humans(): void
     {
         $this->fakeToken();
         Http::fake([
@@ -555,13 +555,37 @@ XML, 200),
         $alerts = (new BellService($this->credentials()))->fetchMachineAlerts('ASA B50E#9086');
 
         $this->assertCount(1, $alerts);
-        $this->assertStringContainsString('E204', $alerts[0]['title']);
+        // A bare unmapped code renders as a human message; the raw code
+        // lives under metadata for technicians -- never in the headline.
+        $this->assertSame('Machine alert', $alerts[0]['title']);
+        $this->assertStringNotContainsString('ISO 15143-3', $alerts[0]['description']);
+        $this->assertSame('E204', $alerts[0]['metadata']['code']);
         $this->assertSame('sensor', $alerts[0]['type']);
         $this->assertSame('medium', $alerts[0]['priority']);
         // 'active', not the legacy 'new' -- the alerts table's
         // chk_alert_status_values constraint rejects 'new' on Postgres.
         $this->assertSame('active', $alerts[0]['status']);
         $this->assertNotEmpty($alerts[0]['external_id']);
+    }
+
+    public function test_fetch_machine_alerts_uses_bells_own_description_and_severity_when_present(): void
+    {
+        $this->fakeToken();
+        Http::fake([
+            self::FLEET_URL => Http::response($this->fleetXml(), 200),
+            'https://b-fleet03.bellequipment.com:8080/Fleet/Equipment/*/CautionCodes/*' => Http::response(<<<'XML'
+<CautionCodesTimeSeries>
+  <Reading ReadingUTC="2026-06-02T09:00:00Z" Value="E204" CodeDescription="Hydraulic oil pressure low" CodeSeverity="High" CodeSource="Hydraulic system"/>
+</CautionCodesTimeSeries>
+XML, 200),
+        ]);
+
+        $alerts = (new BellService($this->credentials()))->fetchMachineAlerts('ASA B50E#9086');
+
+        $this->assertCount(1, $alerts);
+        $this->assertSame('Hydraulic oil pressure low', $alerts[0]['title']);
+        $this->assertSame('high', $alerts[0]['priority']);
+        $this->assertSame('Hydraulic system', $alerts[0]['metadata']['component']);
     }
 
     /**
@@ -641,7 +665,11 @@ XML, 200),
 
         $alert = Alert::where('machine_id', $machine->id)->first();
         $this->assertNotNull($alert, 'A real caution-code alert should have been synced into the alerts table.');
-        $this->assertStringContainsString('E204', $alert->title);
+        // Users read a human message; the raw OEM code persists under
+        // metadata for technicians (and proves syncMachineAlerts carried
+        // the interpreter's technical details through to the database).
+        $this->assertSame('Machine alert', $alert->title);
+        $this->assertSame('E204', data_get($alert->metadata, 'code'));
         $this->assertSame('active', $alert->status, "Synced alerts must use a status the chk_alert_status_values constraint allows, not the legacy 'new'.");
 
         // Syncing again must not duplicate the same caution code.

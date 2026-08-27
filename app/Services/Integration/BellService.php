@@ -367,9 +367,12 @@ class BellService extends BaseManufacturerService
     }
 
     /**
-     * Bell's caution codes are raw manufacturer fault codes -- this
-     * integration has no access to Bell's fault-code-to-description lookup
-     * table, so codes are surfaced as-is rather than guessed at.
+     * Bell's caution codes arrive as raw manufacturer fault codes.
+     * BellAlertInterpreter turns them into what a user should read --
+     * Bell's own CodeDescription/CodeSeverity/CodeSource when the API
+     * sends them, the curated catalog when documented, and a plain
+     * "Machine alert" otherwise -- with the raw code preserved under
+     * metadata for technicians. Raw ISO jargon is never the headline.
      *
      * @return list<array<string, mixed>>
      */
@@ -378,20 +381,27 @@ class BellService extends BaseManufacturerService
     {
         try {
             $readings = $this->fetchTimeSeries($machineId, 'cautionCodes', now()->subDay(), now());
+            $interpreter = BellAlertInterpreter::fromConfig();
 
             // Field names match what IntegrationService::syncMachineAlerts()
-            // reads off each alert (title/description/type/priority/status),
-            // the same shape BaseManufacturerService::parseAlerts() produces
-            // for the other manufacturer services.
-            return array_map(fn (array $reading) => [
-                'external_id' => $machineId.'-'.$reading['timestamp'].'-'.$reading['value'],
-                'title' => 'Bell caution code '.$reading['value'],
-                'description' => 'Caution code '.$reading['value'].' reported by Bell ISO 15143-3 telemetry.',
-                'type' => 'sensor',
-                'priority' => 'medium',
-                'status' => 'active',
-                'timestamp' => $reading['timestamp'],
-            ], $readings);
+            // reads off each alert (title/description/type/priority/status/
+            // metadata), the same shape BaseManufacturerService::parseAlerts()
+            // produces for the other manufacturer services.
+            return array_map(function (array $reading) use ($machineId, $interpreter) {
+                $code = trim($reading['value']);
+                $interpreted = $interpreter->interpret($code, $reading['attributes']);
+
+                return [
+                    'external_id' => $machineId.'-'.$reading['timestamp'].'-'.$code,
+                    'title' => $interpreted['title'],
+                    'description' => $interpreted['description'],
+                    'type' => $interpreted['type'],
+                    'priority' => $interpreted['priority'],
+                    'status' => 'active',
+                    'timestamp' => $reading['timestamp'],
+                    'metadata' => $interpreted['technical'],
+                ];
+            }, $readings);
         } catch (Throwable $e) {
             $this->logError('Failed to fetch Bell machine alerts', $e);
 
