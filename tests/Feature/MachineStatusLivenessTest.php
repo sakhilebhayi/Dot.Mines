@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Events\MachineOffline;
+use App\Jobs\MachineLocationUpdateJob;
 use App\Jobs\MachineStatusMonitoringJob;
 use App\Livewire\Fleet;
 use App\Models\Integration;
@@ -223,6 +224,33 @@ XML);
         app(IntegrationService::class)->syncMachine($integration, (new BellFleetParser)->parseEquipmentNode($node));
 
         $this->assertSame('idle', Machine::where('manufacturer_id', 'ASA NEW#0001')->first()->status);
+    }
+
+    // ---- the location job must not write statuses at all ----
+
+    public function test_the_location_job_never_forces_a_machine_active(): void
+    {
+        // The locations feed carries no status key, so its old
+        // `$location['status'] ?? 'active'` default fired on EVERY
+        // update -- painting the whole parked fleet 'active' every 20
+        // seconds. Status is owned by the sync (engine truth) and the
+        // monitor (connectivity); the location job owns coordinates.
+        Event::fake();
+        $this->fakeBell();
+        [$team, $integration] = $this->connectedBell();
+        $machine = $this->machine($team, $integration, [
+            'status' => 'idle',
+            // Stored position differs from the snapshot's so the job
+            // sees a change and takes its update path.
+            'last_location_latitude' => -25.0,
+            'last_location_longitude' => 28.0,
+        ]);
+
+        (new MachineLocationUpdateJob($integration))->handle(app(IntegrationService::class));
+
+        $machine->refresh();
+        $this->assertSame('idle', $machine->status);
+        $this->assertEqualsWithDelta(-26.0231, $machine->last_location_latitude, 0.001);
     }
 
     // ---- the Fleet cards must account for every machine ----

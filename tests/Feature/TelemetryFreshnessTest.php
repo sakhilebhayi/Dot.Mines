@@ -111,6 +111,41 @@ XML);
         $this->assertSame(52000.0, (float) data_get($latest->raw_data, 'cumulative_payload'));
     }
 
+    public function test_speed_is_mapped_when_the_location_section_carries_it(): void
+    {
+        // Live Bell omits Speed today, but the ISO shape allows it --
+        // when a provider sends it, it must reach the speed column the
+        // dispatch classifier reads instead of being dropped.
+        $metric = (new BellFleetParser)->buildCurrentMetric(new SimpleXMLElement(<<<'XML'
+<Equipment>
+  <EquipmentHeader OEMName="BELL" Model="B50E" EquipmentID="ASA B50E#9086" SerialNumber="9086"/>
+  <Location datetime="2026-08-27T10:00:00Z">
+    <Latitude>-26.1</Latitude>
+    <Longitude>28.0</Longitude>
+    <Speed>23.5</Speed>
+  </Location>
+</Equipment>
+XML));
+
+        $this->assertSame(23.5, $metric['speed']);
+    }
+
+    public function test_speed_is_null_not_zero_when_the_provider_omits_it(): void
+    {
+        // null means "not reported"; 0 would claim the machine is
+        // measured stationary. The dispatch classifier falls back to
+        // position-derived movement only on null.
+        $metric = (new BellFleetParser)->buildCurrentMetric($this->equipmentXml(
+            locationDatetime: '2026-08-27T06:00:00Z',
+            hoursDatetime: '2026-08-27T08:30:00Z',
+            hours: '1200.5',
+            payloadDatetime: '2026-08-27T08:15:00Z',
+            payload: '50000',
+        ));
+
+        $this->assertNull($metric['speed']);
+    }
+
     public function test_an_unchanged_snapshot_is_still_deduped(): void
     {
         $team = Team::factory()->create();

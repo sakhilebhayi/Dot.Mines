@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\GeofenceEntry;
 use App\Models\Machine;
 use App\Models\MachineMetric;
+use App\Support\Geo;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 
 /**
  * Live fleet dispatch snapshot: where every machine is and what it is doing
@@ -37,6 +39,26 @@ class DispatchService
             ->sortBy('name')
             ->values();
 
+        // Up to two hours of recent position rows per machine, one query
+        // for the whole fleet: live Bell sends no Speed field, so movement
+        // is derived from consecutive positions when the machine's own
+        // reading is absent. (Per-machine queries here were an N+1 once
+        // already -- see the latestMetric note below.)
+        /**
+         * @psalm-suppress UnnecessaryVarAnnotation -- phpstan needs it (larastan infers stdClass here)
+         *
+         * @phpstan-var Collection<int, \Illuminate\Database\Eloquent\Collection<int, MachineMetric>> $recentPositions
+         */
+        $recentPositions = MachineMetric::query()
+            ->whereIn('machine_id', $machines->pluck('id'))
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('recorded_at', '>=', now()->subHours(2))
+            ->orderByDesc('recorded_at')
+            ->orderByDesc('id')
+            ->get(['machine_id', 'latitude', 'longitude', 'recorded_at'])
+            ->groupBy('machine_id');
+
         // One open geofence entry per machine (exit_time null = still inside).
         $openEntries = GeofenceEntry::query()
             ->whereIn('machine_id', $machines->pluck('id'))
@@ -66,7 +88,9 @@ class DispatchService
             $entry = $openEntries->get($machine->id);
             $zone = $entry?->geofence;
 
-            [$state, $basis] = $this->classify($machine, $metric, $fresh, $zone?->type);
+            $derivedKmh = $this->derivedSpeedKmh($recentPositions->get($machine->id));
+
+            [$state, $basis] = $this->classify($machine, $metric, $fresh, $zone?->type, $derivedKmh);
 
             $counts[$state]++;
 
@@ -75,7 +99,7 @@ class DispatchService
                 'state' => $state,
                 'basis' => $basis,
                 'zone' => $zone?->name,
-                'speed' => $fresh ? (float) ($metric->speed ?? 0) : null,
+                'speed' => $fresh ? (float) ($metric->speed ?? $derivedKmh ?? 0) : null,
                 'latitude' => $machine->last_location_latitude,
                 'longitude' => $machine->last_location_longitude,
                 'updated_at' => $recordedAt,
@@ -90,9 +114,51 @@ class DispatchService
     }
 
     /**
+     * Average speed between the machine's two newest distinct position
+     * readings, or null when there is nothing honest to derive from.
+     *
+     * @param  Collection<int, MachineMetric>|null  $positions
+     */
+    private function derivedSpeedKmh($positions): ?float
+    {
+        if ($positions === null || $positions->count() < 2) {
+            return null;
+        }
+
+        $latest = $positions->first();
+        $latestAt = $latest?->recorded_at;
+
+        if ($latest === null || $latestAt === null) {
+            return null;
+        }
+
+        $previous = $positions->skip(1)->first(
+            fn (MachineMetric $row): bool => $row->recorded_at !== null && ! $row->recorded_at->equalTo($latestAt)
+        );
+
+        if ($previous === null || $previous->recorded_at === null) {
+            return null;
+        }
+
+        $hours = $previous->recorded_at->diffInSeconds($latestAt) / 3600.0;
+
+        // Under a minute apart the estimate is GPS noise, not movement.
+        if ($hours < 1.0 / 60.0) {
+            return null;
+        }
+
+        return Geo::distanceKm(
+            (float) $previous->latitude,
+            (float) $previous->longitude,
+            (float) $latest->latitude,
+            (float) $latest->longitude,
+        ) / $hours;
+    }
+
+    /**
      * @return array{0: string, 1: string}
      */
-    private function classify(Machine $machine, ?MachineMetric $metric, bool $fresh, ?string $zoneType): array
+    private function classify(Machine $machine, ?MachineMetric $metric, bool $fresh, ?string $zoneType, ?float $derivedKmh = null): array
     {
         if ($metric === null || ! $fresh) {
             return ['no_telemetry', $metric === null
@@ -100,7 +166,8 @@ class DispatchService
                 : 'Last reading is older than '.self::FRESH_MINUTES.' minutes.'];
         }
 
-        $speed = (float) ($metric->speed ?? 0);
+        $reported = $metric->speed;
+        $speed = $reported ?? 0.0;
         /** @psalm-suppress MixedAssignment */
         $engineRunning = data_get($metric->raw_data, 'engine_running');
 
@@ -108,8 +175,16 @@ class DispatchService
             return ['parked', 'Engine reported off.'];
         }
 
-        if ($speed >= self::TRAVEL_SPEED_KMH) {
+        if ($reported !== null && $speed >= self::TRAVEL_SPEED_KMH) {
             return ['travelling', sprintf('Moving at %.0f km/h.', $speed)];
+        }
+
+        // The provider sent no speed reading at all: movement derived
+        // from consecutive positions is the only honest signal left. A
+        // reported speed -- including an affirmative 0 -- always
+        // outranks this estimate.
+        if ($reported === null && $derivedKmh !== null && $derivedKmh >= self::TRAVEL_SPEED_KMH) {
+            return ['travelling', sprintf('Moved ~%.0f km/h between the last two readings.', $derivedKmh)];
         }
 
         // Stationary with the engine not reported off: the zone type is the

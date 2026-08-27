@@ -122,13 +122,18 @@ class MachineLocationUpdateJob implements ShouldBeUnique, ShouldQueue
                 // never the job's run time -- same honesty rule as
                 // IntegrationService::syncMachine(): a machine that stopped
                 // reporting must visibly age, not look perpetually fresh.
+                // No status write here: the locations feed carries no
+                // status key, so the old `?? 'active'` default fired on
+                // every update and painted the whole parked fleet active
+                // every 20 seconds. Status is owned by the sync (engine
+                // truth) and the monitoring job (connectivity) -- this
+                // job owns coordinates.
                 $machine->update([
                     'last_location_latitude' => $location['latitude'] ?? null,
                     'last_location_longitude' => $location['longitude'] ?? null,
                     'last_location_update' => isset($location['timestamp'])
                         ? Carbon::parse((string) $location['timestamp'])
                         : now(),
-                    'status' => $location['status'] ?? 'active',
                 ]);
 
                 // Broadcast the update in real-time
