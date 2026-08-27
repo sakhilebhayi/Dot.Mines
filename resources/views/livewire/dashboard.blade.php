@@ -176,6 +176,17 @@
             </div>
         </div>
 
+        @php
+            $workingStates = $dispatch['counts']['loading'] + $dispatch['counts']['dumping']
+                + $dispatch['counts']['travelling'] + $dispatch['counts']['idling'];
+        @endphp
+        @if (count($dispatch['machines']) > 0 && $workingStates === 0)
+            {{-- A parked fleet is a finished shift, not a failure. --}}
+            <p class="text-[var(--sand)]/80 text-sm mb-3">
+                Fleet is quiet &mdash; no machines are working right now. Live states appear here as soon as a machine starts up.
+            </p>
+        @endif
+
         @if (count($dispatch['machines']) === 0)
             <p class="text-[var(--sand)] text-sm py-4 text-center">No machines in the fleet yet. <a href="{{ route('fleet') }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">Add machines</a> to see live dispatch.</p>
         @else

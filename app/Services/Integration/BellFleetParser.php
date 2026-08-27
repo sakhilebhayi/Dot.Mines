@@ -133,6 +133,12 @@ final class BellFleetParser
             'latitude' => $this->isValidLatitude($latitude) ? $latitude : null,
             'longitude' => $this->isValidLongitude($longitude) ? $longitude : null,
             'fuel_level' => $this->isValidPercent($fuelRemaining) ? $fuelRemaining : null,
+            // Live Bell omits Speed today; when a provider sends it, the
+            // dispatch classifier must get the machine's own reading.
+            // null (never 0) when absent: 0 claims "measured stationary",
+            // and the classifier falls back to position-derived movement
+            // only on null.
+            'speed' => $this->toFloatOrNull($this->sectionValue($equipment, 'Location', 'Speed') ?? $this->findValue($equipment, ['Speed'])),
             // Live Bell nests these under sections whose CHILD names
             // collide (CumulativeIdleHours/Hour vs CumulativeOperatingHours/
             // Hour, DEFRemaining/Percent vs FuelRemaining/Percent), so every
