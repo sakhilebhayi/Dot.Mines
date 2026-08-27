@@ -10,6 +10,7 @@ use App\Support\ApiPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -98,6 +99,10 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
                     'integration_id' => $this->integration->id,
                 ]);
 
+                // Still run the timeout sweep: hearing nothing from the
+                // provider is exactly when silent machines accumulate.
+                $this->checkForTimedOutMachines();
+
                 return;
             }
 
@@ -175,9 +180,21 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
      *
      * @param  array<string, mixed>  $status
      */
+    /**
+     * Determine machine status based on integration data.
+     *
+     * This job owns CONNECTIVITY only. Activity truth (active vs idle)
+     * is written by the sync from engine state; the snapshot presence
+     * signal that feeds this job says "connected", never "working" --
+     * the /Fleet snapshot lists the whole fleet, parked or hauling, so
+     * treating its 'active' as an activity claim would show every
+     * machine as operating around the clock.
+     *
+     * @param  array<string, mixed>  $status
+     */
     private function determineStatus(array $status, Machine $machine): string
     {
-        // Check if integration reports the machine as offline/disconnected
+        // An explicit offline from the provider is always believed.
         if (isset($status['online']) && ! $status['online']) {
             return 'offline';
         }
@@ -186,44 +203,33 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
             return 'offline';
         }
 
-        // Check if location update is too old (haven't heard from machine in 5+ minutes)
-        if ($machine->last_location_update) {
-            $minutesSinceUpdate = $machine->last_location_update->diffInMinutes(now());
+        // Liveness: has ANYTHING been heard inside the provider's own
+        // cadence window? Judged on position OR telemetry -- a stationary
+        // machine keeps reporting counters under a frozen GPS timestamp.
+        // The old rule here was a hard-coded 5 minutes against location
+        // only, which is unsatisfiable on a 15-minute provider: it
+        // declared the whole fleet offline between every sync and pinned
+        // the Active/Idle/Maintenance cards at zero.
+        $heardAt = $machine->lastHeardAt();
 
-            if ($minutesSinceUpdate > 5) {
-                return 'offline';
-            }
+        if ($heardAt === null || $heardAt->diffInSeconds(now()) > $this->offlineAfterSeconds()) {
+            return 'offline';
         }
 
-        // Use status from integration if provided
-        if (isset($status['status'])) {
-            $statusMap = [
-                'active' => 'active',
-                'idle' => 'idle',
-                'maintenance' => 'maintenance',
-                'offline' => 'offline',
-                'standby' => 'idle',
-                'stopped' => 'idle',
-            ];
+        // Alive. A machine coming back from offline revives as idle --
+        // never invented as active -- and the next sync restores the
+        // real engine state.
+        return $machine->status === 'offline' ? 'idle' : $machine->status;
+    }
 
-            $normalizedStatus = $statusMap[strtolower(ApiPayload::str($status['status'] ?? null))] ?? 'active';
-
-            // Only mark as offline if specifically indicated
-            if ($normalizedStatus !== 'offline') {
-                return $normalizedStatus;
-            }
-        }
-
-        // Default: keep previous status if no definitive status provided
-        // But mark as offline if location is stale
-        if ($machine->last_location_update) {
-            $minutesSinceUpdate = $machine->last_location_update->diffInMinutes(now());
-            if ($minutesSinceUpdate > 5) {
-                return 'offline';
-            }
-        }
-
-        return $machine->status;
+    /**
+     * Nothing heard for twice the integration's declared cadence means
+     * offline -- the same "2x its own interval" convention the guardian's
+     * sync-freshness check uses. For Bell (900s) that is 30 minutes.
+     */
+    private function offlineAfterSeconds(): int
+    {
+        return 2 * $this->integration->syncIntervalSeconds();
     }
 
     /**
@@ -232,11 +238,25 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
     private function checkForTimedOutMachines(): void
     {
         try {
-            // Find machines that haven't updated location in more than 5 minutes
+            // Machines we HAVE heard from before, from which nothing --
+            // no position, no telemetry -- has arrived within the
+            // provider's cadence window. Never-heard machines are left
+            // alone; silence cannot time out what never spoke.
+            $cutoff = now()->subSeconds($this->offlineAfterSeconds());
+
             $timedOutMachines = Machine::where('integration_id', $this->integration->id)
                 ->where('status', '!=', 'offline')
-                ->whereNotNull('last_location_update')
-                ->where('last_location_update', '<', now()->subMinutes(5))
+                ->where(function (Builder $query): void {
+                    $query->whereNotNull('last_location_update')
+                        ->orWhereHas('metrics');
+                })
+                ->where(function (Builder $query) use ($cutoff): void {
+                    $query->whereNull('last_location_update')
+                        ->orWhere('last_location_update', '<', $cutoff);
+                })
+                ->whereDoesntHave('metrics', function (Builder $query) use ($cutoff): void {
+                    $query->where('recorded_at', '>=', $cutoff);
+                })
                 ->get();
 
             foreach ($timedOutMachines as $machine) {
@@ -244,7 +264,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
 
                 event(new MachineOffline(
                     machine: $machine,
-                    reason: 'No location update for 5+ minutes',
+                    reason: 'No telemetry heard within the provider sync window',
                     lastLocation: ($machine->last_location_latitude !== null && $machine->last_location_latitude !== 0.0) && ($machine->last_location_longitude !== null && $machine->last_location_longitude !== 0.0) ? [
                         'latitude' => $machine->last_location_latitude,
                         'longitude' => $machine->last_location_longitude,

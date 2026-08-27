@@ -690,6 +690,9 @@ class Fleet extends Component
             'active' => Machine::where('team_id', $team->id)->where('status', 'active')->count(),
             'idle' => Machine::where('team_id', $team->id)->where('status', 'idle')->count(),
             'maintenance' => Machine::where('team_id', $team->id)->where('status', 'maintenance')->count(),
+            // Machines the liveness monitor has timed out. Without this
+            // bucket a parked fleet rendered as an unexplained 0/0/0.
+            'offline' => Machine::where('team_id', $team->id)->where('status', 'offline')->count(),
         ];
 
         // Real daily performance from stored telemetry + production data,
