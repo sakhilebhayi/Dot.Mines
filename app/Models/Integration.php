@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ApiPayload;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Database\Factories\IntegrationFactory;
@@ -162,5 +163,26 @@ class Integration extends Model
             'last_error' => $error,
             'status' => 'error',
         ]);
+    }
+
+    /**
+     * The provider's declared sync cadence in seconds (Bell 900, most
+     * others 300 via the jobs default). Anything judging liveness or
+     * freshness must measure against THIS, not a wall-clock guess -- a
+     * 5-minute liveness rule against a 15-minute provider declared the
+     * whole fleet offline between every sync.
+     */
+    public function syncIntervalSeconds(): int
+    {
+        $interval = ApiPayload::int(
+            config("integrations.manufacturers.{$this->provider}.sync_interval"),
+            0,
+        );
+
+        if ($interval > 0) {
+            return $interval;
+        }
+
+        return ApiPayload::int(config('integrations.jobs.machines_sync_interval'), 300);
     }
 }

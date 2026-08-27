@@ -87,7 +87,7 @@
     </div>
 
     <!-- Status Statistics with animation -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-3 bg-green-500/15 rounded-lg">
@@ -151,6 +151,28 @@
             @if ($statusStats['maintenance'] === 0)
                 <div class="text-center py-2">
                     <span class="text-xs text-[var(--sand)]">No machines under maintenance. <button wire:click="openCreateModal" class="text-[var(--gold)] underline">Add machine</button>.</span>
+                </div>
+            @endif
+        </div>
+
+        <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-zinc-500/15 rounded-lg">
+                    <svg class="w-6 h-6 text-zinc-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 2.523l8.367 8.368zm1.414-1.414L6.523 5.11a6 6 0 018.368 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-[var(--sand)] text-sm font-medium mb-1">Offline</p>
+            <p class="text-4xl font-display font-semibold text-[var(--stone)]" x-data="{ count: 0 }" x-init="() => { let target = {{ $statusStats['offline'] }}; let duration = 2000; let increment = target / (duration / 16); let timer = setInterval(() => { count += increment; if (count >= target) { count = target; clearInterval(timer); } }, 16); }">
+                <span x-text="Math.floor(count)">0</span>
+            </p>
+            <p class="text-xs text-zinc-400 mt-2 font-medium">
+                Not reporting
+            </p>
+            @if ($statusStats['offline'] === 0)
+                <div class="text-center py-2">
+                    <span class="text-xs text-[var(--sand)]">All machines reporting.</span>
                 </div>
             @endif
         </div>

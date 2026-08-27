@@ -386,4 +386,26 @@ class Machine extends Model
             ['created_at' => 'max', 'id' => 'max']
         );
     }
+
+    /**
+     * When was ANYTHING last heard from this machine -- position update
+     * or telemetry reading, whichever is newer. A stationary machine's
+     * GPS timestamp freezes for hours while its counters keep reporting,
+     * so liveness judged on location alone calls working machines dead.
+     */
+    public function lastHeardAt(): ?Carbon
+    {
+        $locationAt = $this->last_location_update;
+        $metricAt = $this->latestMetric?->recorded_at;
+
+        if ($locationAt === null) {
+            return $metricAt;
+        }
+
+        if ($metricAt === null) {
+            return $locationAt;
+        }
+
+        return $metricAt->greaterThan($locationAt) ? $metricAt : $locationAt;
+    }
 }

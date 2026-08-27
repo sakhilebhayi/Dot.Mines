@@ -613,7 +613,9 @@ class IntegrationService
                         'serial_number' => $machineData['serial_number'] ?? null,
                         'manufacturer_id' => $externalId,
                         'integration_id' => $integration->id,
-                        'status' => $machineData['status'] ?? 'idle',
+                        'status' => in_array($machineData['status'] ?? null, ['unknown', null], true)
+                            ? 'idle'
+                            : $machineData['status'],
                         'last_location_latitude' => $newLocation['latitude'] ?? null,
                         'last_location_longitude' => $newLocation['longitude'] ?? null,
                         // The provider's own reading time, not the sync moment --
@@ -627,7 +629,12 @@ class IntegrationService
                 );
             } else {
                 $machine->update([
-                    'status' => $machineData['status'] ?? 'idle',
+                    // 'unknown' means the provider omitted engine state,
+                    // not that the machine entered a state called unknown
+                    // -- keep what we knew rather than un-knowing it.
+                    'status' => ($machineData['status'] ?? null) === 'unknown'
+                        ? $machine->status
+                        : ($machineData['status'] ?? 'idle'),
                     'last_location_latitude' => $newLocation['latitude'] ?? $machine->last_location_latitude,
                     'last_location_longitude' => $newLocation['longitude'] ?? $machine->last_location_longitude,
                     // Only advance the position timestamp when a position
