@@ -7,6 +7,7 @@ use App\Services\Guardian\Checks\DatabaseCheck;
 use App\Services\Guardian\Checks\ErrorRateCheck;
 use App\Services\Guardian\Checks\IntegrationSyncCheck;
 use App\Services\Guardian\Checks\ProductionFreshnessCheck;
+use App\Services\Guardian\Checks\ProviderDataFreshnessCheck;
 use App\Services\Guardian\Checks\QueueCheck;
 use App\Services\Guardian\Checks\SchedulerCheck;
 use App\Services\Guardian\Checks\TelemetryIngestionCheck;
@@ -35,6 +36,7 @@ class GuardianHealthController extends Controller
         ErrorRateCheck::class,
         IntegrationSyncCheck::class,
         TelemetryIngestionCheck::class,
+        ProviderDataFreshnessCheck::class,
         ProductionFreshnessCheck::class,
     ];
 

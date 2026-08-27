@@ -7,6 +7,7 @@ use App\Models\MachineMetric;
 use App\Services\Guardian\CheckResult;
 use App\Services\Guardian\Contracts\GuardianCheck;
 use App\Services\Guardian\FleetActivity;
+use App\Services\Guardian\MetricIngestProbe;
 use App\Support\ApiPayload;
 use Illuminate\Support\Carbon;
 
@@ -76,6 +77,7 @@ class TelemetryIngestionCheck implements GuardianCheck
         );
 
         $quiet = $this->fleet->isQuiet();
+        $probeAge = MetricIngestProbe::ageSeconds();
 
         $metrics = [
             'newest_ingest_age_seconds' => $ageSeconds,
@@ -87,6 +89,7 @@ class TelemetryIngestionCheck implements GuardianCheck
             // working; it now tracks ingestion, which is what it always
             // claimed to measure.
             'newest_metric_age_seconds' => $ageSeconds,
+            'pipeline_probe_age_seconds' => $probeAge,
         ];
 
         // A resting fleet is not a broken platform. FleetActivity only
@@ -98,6 +101,21 @@ class TelemetryIngestionCheck implements GuardianCheck
 
         $warningX = ApiPayload::float(config('guardian.freshness.warning_multiplier'), 2.0);
         $criticalX = ApiPayload::float(config('guardian.freshness.critical_multiplier'), 4.0);
+
+        // Since the §19 dedupe, a row is only written when the provider's
+        // own reading advances -- so a stale max(created_at) has two very
+        // different causes. A fresh probe proves the pipeline processed
+        // the latest snapshot and rightly had nothing to store: that is
+        // the provider stalling (ProviderDataFreshnessCheck's job), not
+        // an ingestion fault, and a redeploy would fix nothing.
+        if ($ageSeconds >= (float) $baselineInterval * $warningX
+            && $probeAge !== null
+            && $probeAge < (float) $baselineInterval * $warningX) {
+            return CheckResult::healthy(
+                'Ingestion pipeline alive -- the provider has published no new readings to store.',
+                $metrics,
+            );
+        }
 
         if ($ageSeconds >= (float) $baselineInterval * $criticalX) {
             return CheckResult::critical('Telemetry ingestion has stopped -- no rows written.', $metrics);
