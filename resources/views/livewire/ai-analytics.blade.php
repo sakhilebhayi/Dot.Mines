@@ -5,7 +5,7 @@
             <div>
                 <h1 class="text-3xl font-bold text-[var(--stone)]">AI Analytics &amp; Insights</h1>
                 <p class="mt-1 text-sm text-[var(--sand)]">
-                    Comprehensive analytics and performance metrics for AI optimization
+                    Analytics and performance metrics for the optimisation agents
                 </p>
             </div>
             <div class="flex gap-2">
@@ -134,7 +134,7 @@
             <h3 class="text-lg font-semibold text-[var(--stone)] mb-6">AI Agent Performance</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 @foreach($agentPerformance as $agent)
-                <div class="bg-gradient-to-br from-white/5 to-white/10 rounded-lg p-4 border border-[var(--line)] hover:shadow-md transition-shadow">
+                <div class="bg-white/5 rounded-lg p-4 border border-[var(--line)] hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="font-semibold text-[var(--stone)] text-sm">{{ $agent['name'] }}</h4>
                         <span class="text-xs px-2 py-1 rounded-full bg-blue-900 text-blue-200">
@@ -185,7 +185,7 @@
                         <span class="text-xs text-[var(--sand)] w-20">{{ \Carbon\Carbon::parse($item->date)->format('M d') }}</span>
                         <div class="flex-1">
                             <div class="w-full bg-white/10 rounded-full h-6 relative overflow-hidden">
-                                <div class="h-6 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500" 
+                                <div class="h-6 bg-green-400 rounded-full flex items-center justify-end pr-2 transition-all duration-500" 
                                      style="width: {{ ($item->savings / $maxSavings) * 100 }}%">
                                     <span class="text-xs font-medium text-[var(--stone)]">R{{ number_format($item->savings, 0) }}</span>
                                 </div>
@@ -209,7 +209,7 @@
                         <span class="text-xs text-[var(--sand)] w-20">{{ \Carbon\Carbon::parse($item->date)->format('M d') }}</span>
                         <div class="flex-1">
                             <div class="w-full bg-white/10 rounded-full h-6 relative overflow-hidden">
-                                <div class="h-6 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500" 
+                                <div class="h-6 bg-blue-400 rounded-full flex items-center justify-end pr-2 transition-all duration-500" 
                                      style="width: {{ $item->rate }}%">
                                     <span class="text-xs font-medium text-[var(--stone)]">{{ round($item->rate, 1) }}%</span>
                                 </div>

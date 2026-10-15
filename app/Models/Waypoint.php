@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $notes
  * @property int|null $estimated_time_from_previous
  * @property float|null $distance_from_previous
- * @property string $icon
  * @property string $color
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -61,20 +60,6 @@ class Waypoint extends Model
     public function route(): BelongsTo
     {
         return $this->belongsTo(Route::class);
-    }
-
-    /**
-     * Get icon for waypoint type
-     */
-    protected function getIconAttribute(): string
-    {
-        return match ($this->waypoint_type) {
-            'fuel_station' => '⛽',
-            'loading_point' => '📦',
-            'dump_point' => '🚮',
-            'geofence' => '🚧',
-            default => '📍',
-        };
     }
 
     /**

@@ -59,41 +59,18 @@
         <div class="flex-1 p-8 max-w-5xl">
             @if($activeSection === 'getting-started')
                 <div class="prose prose-invert max-w-none">
-                    <h1>Welcome to Mines Fleet Manager</h1>
-                    <p class="lead">Mines is a comprehensive fleet management platform designed specifically for mining operations. Track your equipment in real-time, manage fuel consumption, schedule maintenance, and optimize your fleet operations.</p>
+                    <h1>Getting started</h1>
+                    <p class="lead">Dot.Mines holds the fleet record for a mining operation: machines, their positions and telemetry, fuel, maintenance, geofences and the people who operate them. This documentation is organised by feature; use the sidebar to jump to a topic.</p>
 
-                    <div class="alert alert-info mt-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span>This documentation is organized by feature. Use the sidebar navigation to jump to specific topics.</span>
-                    </div>
-
-                    <h2>Key Features</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
-                        <div class="card bg-base-200">
-                            <div class="card-body">
-                                <h3 class="card-title">Real-Time Tracking</h3>
-                                <p>Monitor your entire fleet on a live map with GPS tracking, speed monitoring, and location history.</p>
-                            </div>
-                        </div>
-                        <div class="card bg-base-200">
-                            <div class="card-body">
-                                <h3 class="card-title">Fuel Management</h3>
-                                <p>Track fuel consumption, manage tanks, record transactions, and analyze fuel efficiency across your fleet.</p>
-                            </div>
-                        </div>
-                        <div class="card bg-base-200">
-                            <div class="card-body">
-                                <h3 class="card-title">Maintenance Tracking</h3>
-                                <p>Schedule preventative maintenance, track machine health, manage work orders, and reduce downtime.</p>
-                            </div>
-                        </div>
-                        <div class="card bg-base-200">
-                            <div class="card-body">
-                                <h3 class="card-title">Geofencing</h3>
-                                <p>Define zones, track entry/exit events, monitor tonnage, and analyze productivity by area.</p>
-                            </div>
-                        </div>
-                    </div>
+                    <h2>What the platform covers</h2>
+                    <ul>
+                        <li><strong>Fleet:</strong> every machine, its status, assignments and metrics, read from OEM telemetry where a manufacturer connection exists.</li>
+                        <li><strong>Live map and geofences:</strong> positions on a map, mine areas, geofence entry and exit events.</li>
+                        <li><strong>Fuel:</strong> tanks, allocations, transactions, budgets and consumption per machine.</li>
+                        <li><strong>Maintenance:</strong> preventive and corrective bookings, service history and health alerts.</li>
+                        <li><strong>Operators:</strong> licences, medicals, inductions and machine assignments.</li>
+                        <li><strong>Integrations and API:</strong> manufacturer connections, outbound webhooks and the versioned REST API used by other Dot platforms.</li>
+                    </ul>
 
                     <h2>Platform Requirements</h2>
                     <ul>
@@ -347,7 +324,7 @@
             @if($activeSection === 'fuel-management')
                 <div class="prose prose-invert max-w-none">
                     <h1>Fuel Management</h1>
-                    <p>Comprehensive fuel tracking and analysis for your fleet.</p>
+                    <p>Fuel tracking and analysis for the fleet.</p>
 
                     <h2>Fuel Tanks</h2>
                     <h3>Adding Tanks</h3>
@@ -518,7 +495,7 @@
                     </ul>
 
                     <h2>Maintenance Analytics</h2>
-                    <p>View comprehensive maintenance metrics:</p>
+                    <p>Maintenance metrics on the dashboard:</p>
                     <ul>
                         <li>Total maintenance cost by machine</li>
                         <li>Average repair time</li>
@@ -994,7 +971,7 @@
             @if($activeSection === 'reports')
                 <div class="prose prose-invert max-w-none">
                     <h1>Reports</h1>
-                    <p>Generate comprehensive reports on fleet operations.</p>
+                    <p>Generate reports on fleet operations.</p>
 
                     <h2>Available Reports</h2>
                     <ul>
@@ -1152,75 +1129,75 @@
                             <tbody>
                                 <tr>
                                     <td>View dashboard, machines, live map, geofences</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
                                 </tr>
                                 <tr>
                                     <td>Create/update machines and geofences</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>No</td>
+                                    <td>No</td>
                                 </tr>
                                 <tr>
                                     <td>Delete machines and geofences</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>No</td>
+                                    <td>No</td>
+                                    <td>No</td>
                                 </tr>
                                 <tr>
                                     <td>View reports</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>-</td>
-                                    <td>✓</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>No</td>
+                                    <td>Yes</td>
                                 </tr>
                                 <tr>
                                     <td>Generate reports</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>No</td>
+                                    <td>No</td>
                                 </tr>
                                 <tr>
                                     <td>Acknowledge alerts</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>-</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>No</td>
                                 </tr>
                                 <tr>
                                     <td>Resolve alerts</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>No</td>
+                                    <td>No</td>
                                 </tr>
                                 <tr>
                                     <td>Manage integrations</td>
-                                    <td>✓</td>
-                                    <td>✓</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td>Yes</td>
+                                    <td>Yes</td>
+                                    <td>No</td>
+                                    <td>No</td>
+                                    <td>No</td>
                                 </tr>
                                 <tr>
                                     <td>Manage team members &amp; billing</td>
-                                    <td>✓</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td>Yes</td>
+                                    <td>No</td>
+                                    <td>No</td>
+                                    <td>No</td>
+                                    <td>No</td>
                                 </tr>
                             </tbody>
                         </table>

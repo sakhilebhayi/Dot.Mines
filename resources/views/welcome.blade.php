@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Dot.Mines — Fleet operations software for mining</title>
+        <title>Dot.Mines · Fleet operations software for mining</title>
         <meta name="description" content="Track every truck, drill, and loader in real time. Catch maintenance before it becomes downtime. One live view of the fleet, built for mining operations.">
 
         <!-- Favicon -->
@@ -13,7 +13,7 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght;600;700&family=IBM+Plex+Sans:wght;500;600&family=IBM+Plex+Mono:wght;500;600&display=swap" rel="stylesheet">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -27,9 +27,9 @@
                 --stone: #f4efe4;
                 --sand: #c9b896;
                 --line: rgba(244, 239, 228, 0.12);
-                --font-display: 'Outfit', system-ui, sans-serif;
-                --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
-                --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+                --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
+                --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+                --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
                 --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
             }
             html { background: var(--ink); }
@@ -67,10 +67,9 @@
             [x-cloak] { display: none !important; }
 
             .hero-photo { background-image: url('https://images.unsplash.com/photo-1523848309072-c199db53f137?q=80&w=2400&auto=format&fit=crop'); }
-            .hero-scrim-vertical { background: linear-gradient(180deg, rgba(33,26,20,0.55) 0%, rgba(33,26,20,0.72) 45%, #211a14 92%); }
-            .hero-scrim-horizontal { background: linear-gradient(90deg, #211a14 0%, rgba(33,26,20,0.55) 38%, transparent 68%); }
+            .hero-scrim-vertical { background: rgba(33,26,20,0.74); }
             .cta-photo { background-image: url('https://images.unsplash.com/photo-1709489662983-3674d790b224?q=80&w=2400&auto=format&fit=crop'); }
-            .cta-scrim { background: linear-gradient(180deg, #211a14 0%, rgba(33,26,20,0.82) 50%, #211a14 100%); }
+            .cta-scrim { background: rgba(33,26,20,0.86); }
 
             /* ThreeUI-inspired depth, kept cheap: CSS perspective + a 2D-canvas
                wireframe. No WebGL, no libraries, zero bundle impact. */
@@ -79,11 +78,7 @@
             @media (prefers-reduced-motion: reduce) {
                 .tilt { transform: none !important; transition: none; }
             }
-            .pit-frame {
-                background:
-                    radial-gradient(120% 90% at 70% 20%, rgba(217, 158, 43, 0.08) 0%, transparent 55%),
-                    var(--ink);
-            }
+            .pit-frame { background: var(--ink); }
         </style>
     </head>
     <body class="antialiased">
@@ -92,7 +87,7 @@
         <header
             x-data="{ scrolled: false, mobileMenuOpen: false }"
             @scroll.window="scrolled = window.pageYOffset > 24"
-            :class="scrolled ? 'bg-[#211a14]/95 backdrop-blur-md border-b border-[var(--line)]' : 'border-b border-transparent'"
+            :class="scrolled ? 'bg-[#211a14]/95 border-b border-[var(--line)]' : 'border-b border-transparent'"
             class="fixed top-0 left-0 right-0 z-50 transition-colors duration-300"
         >
             <nav class="max-w-[1400px] mx-auto px-5 sm:px-8 py-3 flex items-center justify-between">
@@ -159,9 +154,8 @@
             <!-- Photo: excavators at a mine, by Dominik Vanyi, unsplash.com/photos/Mk2ls9UBO2E -->
             <div class="absolute inset-0 bg-cover bg-center hero-photo"></div>
             <div class="absolute inset-0 hero-scrim-vertical"></div>
-            <div class="absolute inset-0 hero-scrim-horizontal"></div>
 
-            <!-- Headframe silhouette — line-art nod to the real headframe icon in the Dot.Mines mark -->
+            <!-- Headframe silhouette: line-art nod to the real headframe icon in the Dot.Mines mark -->
             <svg class="hidden lg:block absolute right-[6%] bottom-0 h-[78%] w-auto opacity-[0.14] pointer-events-none" viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M60 320V60L100 10L140 60V320" stroke="#f4efe4" stroke-width="3"/>
                 <path d="M60 60H140" stroke="#f4efe4" stroke-width="3"/>
@@ -173,10 +167,6 @@
 
             <div class="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8 pt-32 pb-16 sm:pb-20 w-full">
                 <div class="max-w-2xl reveal" data-reveal>
-                    <p class="font-mono text-xs tracking-[0.18em] uppercase text-[var(--gold)] mb-6">
-                        Fleet operations software
-                    </p>
-
                     <h1 class="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-[var(--stone)] mb-6">
                         Run the pit.<br>Not the paperwork.
                     </h1>
@@ -198,8 +188,8 @@
                 </div>
             </div>
 
-            <!-- Live data strip — instrumentation-styled, not a fabricated metric -->
-            <div class="relative z-10 w-full border-t border-[var(--line)] bg-[#211a14]/60 backdrop-blur-sm">
+            <!-- Live data strip, instrumentation-styled, not a fabricated metric -->
+            <div class="relative z-10 w-full border-t border-[var(--line)] bg-[#211a14]/60">
                 <div class="max-w-[1400px] mx-auto px-5 sm:px-8 py-4 flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--sand)]">
                     <span>GPS &amp; geofencing</span>
                     <span class="text-[var(--gold)]">·</span>
@@ -216,7 +206,6 @@
         <section id="features" class="py-24 sm:py-28 px-5 sm:px-8">
             <div class="max-w-[1400px] mx-auto">
                 <div class="max-w-xl mb-16 reveal" data-reveal>
-                    <p class="font-mono text-xs tracking-[0.18em] uppercase text-[var(--gold)] mb-4">What it does</p>
                     <h2 class="font-display font-semibold text-3xl sm:text-4xl text-[var(--stone)] leading-tight">
                         Everything the fleet office runs on, in one place
                     </h2>
@@ -225,17 +214,16 @@
                 <div class="grid md:grid-cols-2 border-t border-[var(--line)]">
                     @php
                         $features = [
-                            ['tag' => 'Tracking', 'title' => 'Live fleet tracking', 'body' => 'Real-time GPS on interactive maps, with geofence monitoring, route history, and location analytics for every unit on site.'],
-                            ['tag' => 'Analytics', 'title' => 'AI-assisted analytics', 'body' => 'Productivity insights and predictive maintenance signals, surfaced from your own fleet data rather than a generic benchmark.'],
-                            ['tag' => 'Fuel', 'title' => 'Fuel management', 'body' => 'Track consumption, monitor costs in ZAR, and get alerted on abnormal usage before it eats into the budget.'],
-                            ['tag' => 'Maintenance', 'title' => 'Maintenance scheduling', 'body' => 'Automated reminders by hours or calendar, full service history, and preventive workflows that keep units off the workshop.'],
-                            ['tag' => 'Alerts', 'title' => 'Smart alerts', 'body' => 'Instant notifications for maintenance windows, geofence breaches, and anomalies — by email, SMS, or in-app.'],
-                            ['tag' => 'Reports', 'title' => 'Custom reports', 'body' => 'Build reports for any period, export to PDF or Excel, and schedule them to reach stakeholders automatically.'],
+                            ['title' => 'Live fleet tracking', 'body' => 'Real-time GPS on interactive maps, with geofence monitoring, route history, and location analytics for every unit on site.'],
+                            ['title' => 'AI-assisted analytics', 'body' => 'Productivity insights and predictive maintenance signals, surfaced from your own fleet data rather than a generic benchmark.'],
+                            ['title' => 'Fuel management', 'body' => 'Track consumption, monitor costs in ZAR, and get alerted on abnormal usage before it eats into the budget.'],
+                            ['title' => 'Maintenance scheduling', 'body' => 'Automated reminders by hours or calendar, full service history, and preventive workflows that keep units off the workshop.'],
+                            ['title' => 'Smart alerts', 'body' => 'Instant notifications for maintenance windows, geofence breaches, and anomalies, by email, SMS, or in-app.'],
+                            ['title' => 'Custom reports', 'body' => 'Build reports for any period, export to PDF or Excel, and schedule them to reach stakeholders automatically.'],
                         ];
                     @endphp
                     @foreach ($features as $i => $f)
-                        <div class="tilt-wrap row-hover border-b border-[var(--line)] {{ $i % 2 === 0 ? 'md:border-r' : '' }} px-1 py-8 sm:py-10 transition-colors reveal" data-reveal data-tilt>
-                            <p class="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--gold)] mb-3">{{ $f['tag'] }}</p>
+                        <div class="tilt-wrap row-hover border-b border-[var(--line)] {{ $i % 2 === 0 ? 'md:border-r' : '' }} px-5 py-8 sm:py-10 transition-colors reveal" data-reveal data-tilt>
                             <h3 class="font-display font-semibold text-xl text-[var(--stone)] mb-2.5">{{ $f['title'] }}</h3>
                             <p class="text-[var(--sand)] leading-relaxed max-w-md">{{ $f['body'] }}</p>
                         </div>
@@ -250,19 +238,18 @@
         <section id="realtime" class="py-24 sm:py-28 px-5 sm:px-8">
             <div class="max-w-[1400px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                 <div class="reveal" data-reveal>
-                    <p class="font-mono text-xs tracking-[0.18em] uppercase text-[var(--gold)] mb-4">Real-time operations</p>
                     <h2 class="font-display font-semibold text-3xl sm:text-4xl text-[var(--stone)] leading-tight mb-5">
                         Watch the pit move, live
                     </h2>
                     <p class="text-[var(--sand)] leading-relaxed max-w-md mb-8">
-                        Dot.Mines reads your OEM telemetry directly — positions, engine state, fuel,
-                        and the machines' own cumulative load counters — and turns it into a live
+                        Dot.Mines reads your OEM telemetry directly: positions, engine state, fuel,
+                        and the machines' own cumulative load counters, and turns it into a live
                         operational picture that never pretends to know more than the data does.
                     </p>
                     <ul class="space-y-4 max-w-md">
                         <li class="flex gap-3">
                             <span class="mt-1.5 size-1.5 rounded-full bg-[var(--gold)] shrink-0" aria-hidden="true"></span>
-                            <p class="text-[var(--sand)] leading-relaxed"><span class="text-[var(--stone)] font-medium">Production from the source.</span> Loads, cycles, and tonnes derived from each machine's cumulative counters — per truck, per day, reconciled.</p>
+                            <p class="text-[var(--sand)] leading-relaxed"><span class="text-[var(--stone)] font-medium">Production from the source.</span> Loads, cycles, and tonnes derived from each machine's cumulative counters, per truck, per day, reconciled.</p>
                         </li>
                         <li class="flex gap-3">
                             <span class="mt-1.5 size-1.5 rounded-full bg-[var(--gold)] shrink-0" aria-hidden="true"></span>
@@ -270,7 +257,7 @@
                         </li>
                         <li class="flex gap-3">
                             <span class="mt-1.5 size-1.5 rounded-full bg-[var(--gold)] shrink-0" aria-hidden="true"></span>
-                            <p class="text-[var(--sand)] leading-relaxed"><span class="text-[var(--stone)] font-medium">Honest freshness.</span> Every operational view shows how old its data is — stale never masquerades as live.</p>
+                            <p class="text-[var(--sand)] leading-relaxed"><span class="text-[var(--stone)] font-medium">Honest freshness.</span> Every operational view shows how old its data is: stale never masquerades as live.</p>
                         </li>
                     </ul>
                 </div>
@@ -289,7 +276,6 @@
             <div class="max-w-[1400px] mx-auto">
                 <div class="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-12 lg:gap-20">
                     <div class="reveal" data-reveal>
-                        <p class="font-mono text-xs tracking-[0.18em] uppercase text-[var(--gold)] mb-4">Built for the operation</p>
                         <h2 class="font-display font-semibold text-3xl sm:text-4xl text-[var(--stone)] leading-tight mb-5">
                             Runs one site or twenty, from a browser
                         </h2>
@@ -303,7 +289,7 @@
                             $capabilities = [
                                 ['title' => 'Cloud-based infrastructure', 'body' => 'Secure hosting with automatic backups. Access your data from anywhere, on any device.'],
                                 ['title' => 'Multi-site support', 'body' => 'Manage every mining site from a single dashboard, no matter how many locations you run.'],
-                                ['title' => 'Audit & compliance', 'body' => 'A full audit trail for every action — compliance reports, safety incidents, and operational logs.'],
+                                ['title' => 'Audit & compliance', 'body' => 'A full audit trail for every action: compliance reports, safety incidents, and operational logs.'],
                                 ['title' => 'Unlimited data retention', 'body' => 'Years of historical data with no storage limits, for long-term trend analysis and compliance.'],
                                 ['title' => '24/7 support & onboarding', 'body' => 'A support team and onboarding process built for teams that can\'t afford to be offline.'],
                                 ['title' => 'Custom dashboards', 'body' => 'Build the views your team actually reads, and export the rest in the format you need.'],

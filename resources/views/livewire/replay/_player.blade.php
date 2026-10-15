@@ -1,11 +1,11 @@
 {{-- Playback player: progress, transport controls, speed and options (R7 split) --}}
     <!-- Enhanced Playback Player -->
-    <div class="bg-gradient-to-br from-[var(--ink-soft)] to-[var(--ink)] rounded-xl p-6 shadow-2xl border border-[var(--line)] mb-6">
+    <div class="bg-[var(--ink-soft)] rounded-xl p-6 shadow-2xl border border-[var(--line)] mb-6">
         @if($selectedMachine && $totalPositions > 0)
             <!-- Player Header -->
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-[var(--gold)] to-[var(--gold-soft)] rounded-lg flex items-center justify-center shadow-lg">
+                    <div class="w-12 h-12 bg-[var(--gold)] rounded-lg flex items-center justify-center shadow-lg">
                         <svg class="w-6 h-6 text-[var(--ink)]" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
                             <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v6h16V7a2 2 0 00-2-2H4z" clip-rule="evenodd"/>
@@ -26,9 +26,9 @@
             <div class="mb-6">
                 <div class="relative h-3 bg-white/10 rounded-full overflow-hidden mb-2">
                     <!-- Background progress -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-[var(--gold)]/20 to-[var(--gold-soft)]/20"></div>
+                    <div class="absolute inset-0 bg-[var(--gold)]/20"></div>
                     <!-- Active progress -->
-                    <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-soft)] transition-all duration-300" 
+                    <div class="absolute inset-y-0 left-0 bg-[var(--gold)] transition-all duration-300" 
                          style="width: {{ $totalPositions > 0 ? (($currentPosition + 1) / $totalPositions * 100) : 0 }}%">
                     </div>
                     <!-- Glow effect -->
@@ -68,7 +68,7 @@
                 <!-- Play/Pause Button -->
                 @if($isPlaying)
                     <button wire:click="pause"
-                            class="p-3 bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 rounded-lg transition-all transform hover:scale-105 group"
+                            class="p-3 bg-yellow-500 hover:bg-yellow-600 rounded-lg transition-all transform hover:scale-105 group"
                             title="Pause">
                         <svg class="w-5 h-5 text-[var(--stone)]" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M5 4a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V4zm8 0a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2h-2a2 2 0 01-2-2V4z"/>
@@ -76,7 +76,7 @@
                     </button>
                 @else
                     <button wire:click="play" data-speed="{{ $playbackSpeed }}"
-                            class="p-3 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg transition-all transform hover:scale-105 group"
+                            class="p-3 bg-green-500 hover:bg-green-600 rounded-lg transition-all transform hover:scale-105 group"
                             title="Play">
                         <svg class="w-5 h-5 text-[var(--stone)]" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.34-5.89a1.5 1.5 0 000-2.54L6.3 2.84z"/>

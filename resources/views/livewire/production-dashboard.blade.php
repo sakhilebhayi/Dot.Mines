@@ -310,7 +310,7 @@
                 @if(count($fatigueData) > 0)
                     <!-- Fatigue Summary Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-gradient-to-br from-green-900/20 to-green-800/20 rounded-lg p-4 border border-green-700/40">
+                        <div class="bg-green-900/20 rounded-lg p-4 border border-green-700/40">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-2xl font-bold text-green-300">{{ $fatigueStats['well_rested'] }}</p>
@@ -324,7 +324,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-gradient-to-br from-yellow-900/20 to-yellow-800/20 rounded-lg p-4 border border-yellow-700/40">
+                        <div class="bg-yellow-900/20 rounded-lg p-4 border border-yellow-700/40">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-2xl font-bold text-yellow-300">{{ $fatigueStats['needs_monitoring'] }}</p>
@@ -338,7 +338,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-gradient-to-br from-orange-900/20 to-orange-800/20 rounded-lg p-4 border border-orange-700/40">
+                        <div class="bg-orange-900/20 rounded-lg p-4 border border-orange-700/40">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-2xl font-bold text-orange-300">{{ $fatigueStats['high_fatigue'] }}</p>
@@ -352,7 +352,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-gradient-to-br from-red-900/20 to-red-800/20 rounded-lg p-4 border border-red-700/40">
+                        <div class="bg-red-900/20 rounded-lg p-4 border border-red-700/40">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-2xl font-bold text-red-300">{{ $fatigueStats['needs_rest'] }}</p>
@@ -386,7 +386,7 @@
                                     <tr class="hover:bg-white/5 transition-colors">
                                         <td class="px-4 py-3 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-8 w-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-[var(--stone)] text-xs font-bold">
+                                                <div class="flex-shrink-0 h-8 w-8 bg-blue-400 rounded-full flex items-center justify-center text-[var(--stone)] text-xs font-bold">
                                                     {{ substr($fatigue['operator_name'], 0, 2) }}
                                                 </div>
                                                 <div class="ml-3">

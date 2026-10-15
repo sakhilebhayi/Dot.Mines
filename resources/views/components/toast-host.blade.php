@@ -49,7 +49,7 @@
             x-transition:leave="transition ease-in duration-200 motion-reduce:duration-0"
             x-transition:leave-start="opacity-100 transform translate-x-0"
             x-transition:leave-end="opacity-0 transform translate-x-8 motion-reduce:translate-x-0"
-            class="relative rounded-lg shadow-2xl p-4 flex items-start gap-3 backdrop-blur-sm"
+            class="relative rounded-lg shadow-2xl p-4 flex items-start gap-3"
             :class="{
                 'bg-green-600/90 border border-green-500': notification.type === 'success',
                 'bg-red-600/90 border border-red-500': notification.type === 'error',

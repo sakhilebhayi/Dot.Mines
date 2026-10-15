@@ -33,9 +33,9 @@
         <!-- Header -->
         <div class="p-4 border-b border-[var(--line)]">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-[var(--stone)]">
+                <h2 class="text-lg font-semibold text-[var(--stone)]">
                     Notifications
-                </h3>
+                </h2>
                 @if($unreadCount > 0)
                 <button wire:click="acknowledgeAll" class="text-xs text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium">
                     Mark all as read
@@ -105,7 +105,6 @@
             </div>
             @empty
             <div class="p-8 text-center">
-                <div class="text-4xl mb-2">✅</div>
                 <p class="text-sm text-[var(--sand)]">No unread alerts</p>
                 <p class="text-xs text-[var(--sand)]/70 mt-1">All systems running smoothly</p>
             </div>

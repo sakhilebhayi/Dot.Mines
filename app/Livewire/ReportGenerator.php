@@ -52,37 +52,30 @@ class ReportGenerator extends Component
         'production' => [
             'label' => 'Production Summary',
             'description' => 'Total material extracted, production rates, and efficiency metrics',
-            'icon' => '📊',
         ],
         'fleet_utilization' => [
             'label' => 'Fleet Utilization',
             'description' => 'Machine availability, usage hours, and capacity utilization',
-            'icon' => '🚜',
         ],
         'maintenance_schedule' => [
             'label' => 'Maintenance Schedule',
             'description' => 'Scheduled maintenance, service history, and upcoming services',
-            'icon' => '🔧',
         ],
         'fuel_consumption' => [
             'label' => 'Fuel Consumption',
             'description' => 'Fuel usage, consumption rates, and cost analysis',
-            'icon' => '⛽',
         ],
         'material_tracking' => [
             'label' => 'Material Tracking',
             'description' => 'Material movement, geofence entries/exits, and inventory',
-            'icon' => '📦',
         ],
         'downtime_analysis' => [
             'label' => 'Downtime Analysis',
             'description' => 'Machine downtime events, root causes, and impact analysis',
-            'icon' => '⏸️',
         ],
         'compliance' => [
             'label' => 'Compliance (MHSA/DMRE)',
             'description' => 'Violation register with remediation deadlines, resolution status, and compliance score for regulator submission',
-            'icon' => '📋',
         ],
     ];
 

@@ -39,6 +39,7 @@ class MintIntegrationToken extends Command
     public function handle(): int
     {
         $emailArg = $this->argument('email');
+        /** @psalm-suppress RedundantCondition, TypeDoesNotContainType -- phpstan types argument() as array|string|null */
         $email = is_string($emailArg) ? $emailArg : '';
         $team = Team::find((int) $this->argument('team'));
         $user = User::query()->where('email', $email)->first();
@@ -55,8 +56,8 @@ class MintIntegrationToken extends Command
             return self::FAILURE;
         }
 
-        if ((int) $user->current_team_id !== (int) $team->id) {
-            $this->warn('Current team of '.$user->email.' is #'.(int) $user->current_team_id.', not #'.$team->id.'. The API scopes every call to the current team: switch it (POST /api/v1/user/team/'.$team->id.') or the integrator will see the wrong fleet.');
+        if ($user->current_team_id !== $team->id) {
+            $this->warn('Current team of '.$user->email.' is #'.($user->current_team_id ?? 0).', not #'.$team->id.'. The API scopes every call to the current team: switch it (POST /api/v1/user/team/'.$team->id.') or the integrator will see the wrong fleet.');
         }
 
         foreach (self::CHECKS as [$permission, $consequence]) {

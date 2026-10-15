@@ -29,7 +29,7 @@
                     wire:click="assignSelectedMachines"
                     class="px-6 py-2 bg-[var(--gold)] text-[var(--ink)] rounded-lg hover:bg-[var(--gold-soft)] transition font-display font-semibold"
                 >
-                    ✓ Assign Selected ({{ count($selectedMachineIds) }})
+                    Assign Selected ({{ count($selectedMachineIds) }})
                 </button>
             @endif
         </div>

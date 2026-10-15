@@ -101,7 +101,7 @@
                 <span x-text="Math.floor(count)">0</span>
             </p>
             <p class="text-xs text-green-400 mt-2 font-medium flex items-center gap-1">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
                 Operating now
             </p>
             @if ($statusStats['active'] === 0)
@@ -205,8 +205,8 @@
                 </div>
                 <div class="space-y-3">
                     @foreach($topPerformers as $index => $machine)
-                    <div class="flex items-center gap-3 p-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
-                        <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-[var(--stone)] font-bold text-sm">
+                    <div class="flex items-center gap-3 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <div class="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-[var(--stone)] font-bold text-sm">
                             {{ $index + 1 }}
                         </div>
                         <div class="flex-1 min-w-0">
@@ -253,8 +253,8 @@
                 </div>
                 <div class="space-y-3">
                     @foreach($worstPerformers as $index => $machine)
-                    <div class="flex items-center gap-3 p-3 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-lg border border-red-500/20">
-                        <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center text-[var(--stone)] font-bold text-sm">
+                    <div class="flex items-center gap-3 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                        <div class="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-[var(--stone)] font-bold text-sm">
                             {{ $index + 1 }}
                         </div>
                         <div class="flex-1 min-w-0">
@@ -296,7 +296,7 @@
     </div>
     @endif
 
-    <!-- AI-Powered Fleet Optimization -->
+    <!-- Fleet Optimization -->
     @if($aiRecommendations->count() > 0 || $aiInsights->count() > 0)
     <div class="mb-6">
         <div class="flex items-center gap-2 mb-4">
@@ -304,13 +304,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
             </svg>
             <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">AI Fleet Optimization</h2>
-            <span class="badge badge-primary">AI-Powered</span>
+            <span class="badge badge-primary">Recommendations</span>
         </div>
 
         <!-- AI Fleet Recommendations - Full Width -->
         @if($aiRecommendations->count() > 0)
         <div class="mb-6">
-            <div class="bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] rounded-lg shadow-lg p-6 border border-[var(--line)]">
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)]">
                 <h3 class="text-xl font-display font-semibold mb-4 flex items-center gap-2 text-[var(--stone)]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -319,7 +319,7 @@
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($aiRecommendations as $recommendation)
-                        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="bg-white/10 rounded-lg p-4 border border-[var(--line)]">
                             <div class="flex items-start justify-between mb-2">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
@@ -386,7 +386,7 @@
                             </details>
                             @endif
 
-                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-[var(--line)]">
                                 @isset($recommendation['confidence_score'])
                                     <span class="text-xs text-[var(--sand)]">AI Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
                                 @endisset
@@ -404,7 +404,7 @@
 
             <!-- AI Fleet Insights - Full Width -->
             @if($aiInsights->count() > 0)
-            <div class="bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] rounded-lg shadow-lg p-6 border border-[var(--line)]">
+            <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 border border-[var(--line)]">
                 <h3 class="text-xl font-display font-semibold mb-4 flex items-center gap-2 text-[var(--stone)]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -413,7 +413,7 @@
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($aiInsights as $insight)
-                        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="bg-white/10 rounded-lg p-4 border border-[var(--line)]">
                             <div class="flex items-start justify-between mb-2">
                                 <span class="font-semibold">{{ $insight['title'] }}</span>
                                 <span class="badge
@@ -529,7 +529,7 @@
                         $icon = $iconMap[$machineType] ?? '/machine-emojis/service-truck.svg';
                     @endphp
                     <div class="bg-[var(--ink)] rounded-xl shadow-lg border border-[var(--line)] hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
-                        <div class="flex flex-col items-center justify-center p-4 border-b border-[var(--line)] bg-gradient-to-b from-[var(--gold)]/10 to-[var(--gold)]/5">
+                        <div class="flex flex-col items-center justify-center p-4 border-b border-[var(--line)] bg-[var(--gold)]/10
                             <img src="{{ asset($icon) }}" alt="Machine Icon" class="w-20 h-20 object-contain mb-2 drop-shadow-lg">
                             <a href="{{ route('fleet.show', $machine) }}" class="text-lg font-display font-semibold text-[var(--stone)] hover:text-[var(--gold)] hover:underline text-center block">{{ $machine->name }}</a>
                             <div class="flex justify-center mt-1">
@@ -559,11 +559,11 @@
                                     <a href="{{ route('operators.show', $operatorAssignment->operator) }}"
                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--gold)]/15 text-[var(--gold)] hover:bg-[var(--gold)]/25 transition"
                                        title="Operator — view profile">
-                                        👤 {{ $operatorAssignment->operator->name }}
+                                        {{ $operatorAssignment->operator->name }}
                                     </a>
                                     @if ($this->canManageOperators)
                                         <button wire:click="unassignOperator({{ $machine->id }})" wire:confirm="Unassign {{ $operatorAssignment->operator->name }} from {{ $machine->name }}?"
-                                                class="text-[10px] text-[var(--sand)] hover:text-[var(--stone)]" title="Unassign operator">✕</button>
+                                                class="text-[10px] text-[var(--sand)] hover:text-[var(--stone)]" title="Unassign operator">Unassign</button>
                                     @endif
                                 @elseif ($this->canManageOperators)
                                     <button wire:click="openAssignOperator({{ $machine->id }})"
@@ -579,7 +579,7 @@
                             <div class="flex items-center gap-2 mb-2">
                                 @if ($machine->status === 'active')
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/15 text-green-400 border border-green-500/25">
-                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
                                         Active
                                     </span>
                                 @elseif ($machine->status === 'idle')
@@ -698,7 +698,6 @@
             </div>
         @else
             <div class="p-12 text-center">
-                <div class="text-6xl mb-4">🚜</div>
                 <h3 class="text-xl font-display font-semibold text-[var(--stone)] mb-2">No machines found</h3>
                 <p class="text-[var(--sand)] text-sm mb-4">
                     @if($search || $statusFilter)
@@ -1071,11 +1070,11 @@
                                 <span class="text-[var(--stone)] font-semibold">{{ $row['operator']->name }}</span>
                                 <span class="text-[var(--sand)] text-xs"> · {{ $row['operator']->employee_number }}</span>
                                 @if ($row['eligible'] && $row['warnings'] === [])
-                                    <span class="block text-green-300 text-xs mt-0.5">🟢 Eligible</span>
+                                    <span class="block text-green-300 text-xs mt-0.5">Eligible</span>
                                 @elseif ($row['eligible'])
-                                    <span class="block text-yellow-300 text-xs mt-0.5">🟡 {{ $row['warnings'][0] }}</span>
+                                    <span class="block text-yellow-300 text-xs mt-0.5">{{ $row['warnings'][0] }}</span>
                                 @else
-                                    <span class="block text-red-300 text-xs mt-0.5">🔴 {{ $row['blockers'][0] }}</span>
+                                    <span class="block text-red-300 text-xs mt-0.5">{{ $row['blockers'][0] }}</span>
                                 @endif
                             </div>
                             <button wire:click="assignOperator({{ $row['operator']->id }})" wire:loading.attr="disabled"

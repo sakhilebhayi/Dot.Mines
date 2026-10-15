@@ -58,7 +58,7 @@ final class ManufacturerRegistry
     /**
      * Get available manufacturers
      *
-     * @return array<string, array{name: string, icon: string, description: string, status: string}>
+     * @return array<string, array{name: string, description: string, status: string}>
      */
     public function catalog(): array
     {
@@ -70,31 +70,31 @@ final class ManufacturerRegistry
         // true regardless of what credentials were entered, until that was
         // fixed to honestly report 'not yet available' instead.
         return [
-            'volvo' => ['name' => 'Volvo', 'icon' => '🔵', 'description' => 'Volvo Heavy Equipment', 'status' => 'available'],
-            'cat' => ['name' => 'Caterpillar', 'icon' => '🟡', 'description' => 'Caterpillar Heavy Equipment', 'status' => 'available'],
-            'komatsu' => ['name' => 'Komatsu', 'icon' => '🔶', 'description' => 'Komatsu Heavy Equipment', 'status' => 'available'],
-            'bell' => ['name' => 'Bell', 'icon' => '🟠', 'description' => 'Bell Equipment ISO 15143-3 Fleet API', 'status' => 'available'],
-            'hitachi' => ['name' => 'Hitachi', 'icon' => '🟧', 'description' => 'Hitachi Construction Machinery', 'status' => 'available'],
-            'john-deere' => ['name' => 'John Deere', 'icon' => '🟩', 'description' => 'John Deere Equipment', 'status' => 'coming_soon'],
-            'liebherr' => ['name' => 'Liebherr', 'icon' => '🟨', 'description' => 'Liebherr Mining Equipment', 'status' => 'available'],
-            'hyundai' => ['name' => 'Hyundai', 'icon' => '🟦', 'description' => 'Hyundai Construction Equipment', 'status' => 'available'],
-            'doosan' => ['name' => 'Doosan', 'icon' => '🟧', 'description' => 'Doosan Heavy Equipment', 'status' => 'available'],
-            'jcb' => ['name' => 'JCB', 'icon' => '🟨', 'description' => 'JCB Construction Equipment', 'status' => 'available'],
-            'case' => ['name' => 'CASE', 'icon' => '🟫', 'description' => 'CASE Construction Equipment', 'status' => 'coming_soon'],
-            'sany' => ['name' => 'Sany', 'icon' => '🟥', 'description' => 'Sany Heavy Equipment', 'status' => 'available'],
-            'xcmg' => ['name' => 'XCMG', 'icon' => '🟦', 'description' => 'XCMG Construction Equipment', 'status' => 'available'],
-            'kobelco' => ['name' => 'Kobelco', 'icon' => '🟦', 'description' => 'Kobelco Construction Machinery', 'status' => 'available'],
-            'new-holland' => ['name' => 'New Holland', 'icon' => '🟨', 'description' => 'New Holland Equipment', 'status' => 'coming_soon'],
-            'takeuchi' => ['name' => 'Takeuchi', 'icon' => '🟥', 'description' => 'Takeuchi Compact Equipment', 'status' => 'coming_soon'],
-            'kubota' => ['name' => 'Kubota', 'icon' => '🟧', 'description' => 'Kubota Construction Equipment', 'status' => 'available'],
-            'bobcat' => ['name' => 'Bobcat', 'icon' => '⬜', 'description' => 'Bobcat Compact Equipment', 'status' => 'coming_soon'],
-            'yanmar' => ['name' => 'Yanmar', 'icon' => '🟨', 'description' => 'Yanmar Mini Excavators', 'status' => 'coming_soon'],
-            'atlas-copco' => ['name' => 'Atlas Copco', 'icon' => '🟡', 'description' => 'Atlas Copco Drilling Equipment', 'status' => 'coming_soon'],
-            'sandvik' => ['name' => 'Sandvik', 'icon' => '🟥', 'description' => 'Sandvik Mining Equipment', 'status' => 'coming_soon'],
-            'epiroc' => ['name' => 'Epiroc', 'icon' => '🟦', 'description' => 'Epiroc Drilling Equipment', 'status' => 'available'],
-            'ctrack' => ['name' => 'C-Track', 'icon' => '📍', 'description' => 'C-Track GPS Tracking', 'status' => 'available'],
-            'roundebult' => ['name' => 'Roundebult', 'icon' => '⛏️', 'description' => 'Roundebult Mining Machines', 'status' => 'available'],
-            'kawasaki' => ['name' => 'Kawasaki', 'icon' => '🏗️', 'description' => 'Kawasaki Mining Equipment', 'status' => 'available'],
+            'volvo' => ['name' => 'Volvo', 'description' => 'Volvo Heavy Equipment', 'status' => 'available'],
+            'cat' => ['name' => 'Caterpillar', 'description' => 'Caterpillar Heavy Equipment', 'status' => 'available'],
+            'komatsu' => ['name' => 'Komatsu', 'description' => 'Komatsu Heavy Equipment', 'status' => 'available'],
+            'bell' => ['name' => 'Bell', 'description' => 'Bell Equipment ISO 15143-3 Fleet API', 'status' => 'available'],
+            'hitachi' => ['name' => 'Hitachi', 'description' => 'Hitachi Construction Machinery', 'status' => 'available'],
+            'john-deere' => ['name' => 'John Deere', 'description' => 'John Deere Equipment', 'status' => 'coming_soon'],
+            'liebherr' => ['name' => 'Liebherr', 'description' => 'Liebherr Mining Equipment', 'status' => 'available'],
+            'hyundai' => ['name' => 'Hyundai', 'description' => 'Hyundai Construction Equipment', 'status' => 'available'],
+            'doosan' => ['name' => 'Doosan', 'description' => 'Doosan Heavy Equipment', 'status' => 'available'],
+            'jcb' => ['name' => 'JCB', 'description' => 'JCB Construction Equipment', 'status' => 'available'],
+            'case' => ['name' => 'CASE', 'description' => 'CASE Construction Equipment', 'status' => 'coming_soon'],
+            'sany' => ['name' => 'Sany', 'description' => 'Sany Heavy Equipment', 'status' => 'available'],
+            'xcmg' => ['name' => 'XCMG', 'description' => 'XCMG Construction Equipment', 'status' => 'available'],
+            'kobelco' => ['name' => 'Kobelco', 'description' => 'Kobelco Construction Machinery', 'status' => 'available'],
+            'new-holland' => ['name' => 'New Holland', 'description' => 'New Holland Equipment', 'status' => 'coming_soon'],
+            'takeuchi' => ['name' => 'Takeuchi', 'description' => 'Takeuchi Compact Equipment', 'status' => 'coming_soon'],
+            'kubota' => ['name' => 'Kubota', 'description' => 'Kubota Construction Equipment', 'status' => 'available'],
+            'bobcat' => ['name' => 'Bobcat', 'description' => 'Bobcat Compact Equipment', 'status' => 'coming_soon'],
+            'yanmar' => ['name' => 'Yanmar', 'description' => 'Yanmar Mini Excavators', 'status' => 'coming_soon'],
+            'atlas-copco' => ['name' => 'Atlas Copco', 'description' => 'Atlas Copco Drilling Equipment', 'status' => 'coming_soon'],
+            'sandvik' => ['name' => 'Sandvik', 'description' => 'Sandvik Mining Equipment', 'status' => 'coming_soon'],
+            'epiroc' => ['name' => 'Epiroc', 'description' => 'Epiroc Drilling Equipment', 'status' => 'available'],
+            'ctrack' => ['name' => 'C-Track', 'description' => 'C-Track GPS Tracking', 'status' => 'available'],
+            'roundebult' => ['name' => 'Roundebult', 'description' => 'Roundebult Mining Machines', 'status' => 'available'],
+            'kawasaki' => ['name' => 'Kawasaki', 'description' => 'Kawasaki Mining Equipment', 'status' => 'available'],
         ];
     }
 }

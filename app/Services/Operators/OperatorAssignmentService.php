@@ -102,9 +102,7 @@ class OperatorAssignmentService
             ]);
 
             foreach ($machine->operatorAssignments()->whereIn('id', $relievedIds)->get() as $previous) {
-                if ($previous instanceof OperatorMachineAssignment) {
-                    OperatorUnassigned::dispatch($previous);
-                }
+                OperatorUnassigned::dispatch($previous);
             }
             OperatorAssigned::dispatch($assignment);
 

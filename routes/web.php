@@ -207,14 +207,9 @@ Route::middleware([
         return view('integrations.index');
     })->name('integrations');
 
-    // Outbound webhooks. Registered before /integrations/{integration} so the
-    // literal segment is not swallowed by the wildcard.
+    // Outbound webhooks.
     Route::get('/integrations/webhooks', WebhookManager::class)
         ->name('integrations.webhooks');
-
-    Route::get('/integrations/{integration}', function () {
-        return view('integrations.show');
-    })->name('integrations.show');
 
     // Billing & Subscriptions
     Route::get('/billing', BillingPortal::class)

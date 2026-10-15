@@ -115,7 +115,6 @@
                     </div>
                     <div id="map-loading" class="absolute inset-0 bg-[var(--ink)]/90 flex items-center justify-center z-50" style="display:none;">
                         <div class="text-center">
-                            <div class="text-6xl mb-4">🗺️</div>
                             <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--gold)]"></div>
                             <h3 class="text-xl font-semibold text-[var(--stone)] mt-4 mb-2">Loading map...</h3>
                             <p class="text-[var(--sand)] mb-2">Fetching live fleet and geofence data.</p>
