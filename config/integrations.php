@@ -456,6 +456,10 @@ return [
         'default_timeout' => 30,
         'default_sync_interval' => 300,
         'enable_webhooks' => env('INTEGRATION_WEBHOOKS_ENABLED', true),
+        // Outbound webhooks to private/loopback hosts are an SSRF primitive and
+        // are refused. A developer running the consumer on the same machine can
+        // allow them -- honoured only outside production, never in it.
+        'webhooks_allow_private_urls' => env('WEBHOOKS_ALLOW_PRIVATE_URLS', false),
         'enable_background_jobs' => env('INTEGRATION_BACKGROUND_JOBS_ENABLED', true),
         'log_api_calls' => env('INTEGRATION_LOG_API_CALLS', false),
     ],

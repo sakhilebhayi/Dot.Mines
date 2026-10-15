@@ -220,4 +220,24 @@ class IntegrationServiceTest extends TestCase
         $this->assertSame('active', $statuses['Legacy status']);
         $this->assertSame('acknowledged', $statuses['Valid status']);
     }
+
+    public function test_a_provider_alert_keeps_its_own_timestamp_beside_the_ingest_time(): void
+    {
+        $team = Team::factory()->create();
+        $integration = Integration::factory()->forProvider('hitachi')->create(['team_id' => $team->id]);
+
+        app(IntegrationService::class)->syncMachine($integration, [
+            'external_id' => 'HIT-002',
+            'status' => 'active',
+            'alerts' => [
+                ['external_id' => 'HIT-002-E204', 'title' => 'Caution code E204', 'description' => 'Reported by the machine', 'type' => 'engine', 'priority' => 'high', 'status' => 'active', 'timestamp' => '2026-10-15T04:30:00+02:00'],
+                ['external_id' => 'HIT-002-E205', 'title' => 'No time', 'type' => 'engine', 'priority' => 'low', 'status' => 'active', 'timestamp' => 'not a date'],
+            ],
+        ]);
+
+        $withTime = Alert::query()->where('title', 'Caution code E204')->firstOrFail();
+        $this->assertSame('2026-10-15T02:30:00+00:00', $withTime->source_triggered_at?->toIso8601String());
+        $this->assertNotNull($withTime->triggered_at);
+        $this->assertNull(Alert::query()->where('title', 'No time')->firstOrFail()->source_triggered_at, 'an unparseable provider time is left empty, never guessed');
+    }
 }

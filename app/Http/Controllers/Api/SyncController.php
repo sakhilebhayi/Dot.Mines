@@ -119,7 +119,7 @@ class SyncController extends Controller
     private function changesFor(string $scope, int $teamId, int $since, int $pageSize): array
     {
         $query = match ($scope) {
-            'fleet' => Machine::query()->with('latestMetric'),
+            'fleet' => Machine::query()->with(['latestMetric', 'latestEngineHoursMetric', 'integration']),
             'production' => ProductionRecord::query(),
             'notifications' => Notification::query(),
             'operators' => Operator::query(),
@@ -168,9 +168,17 @@ class SyncController extends Controller
                 'latitude' => $model->latestMetric?->latitude,
                 'longitude' => $model->latestMetric?->longitude,
                 'fuel_level' => $model->latestMetric?->fuel_level,
+                // engine_hours read a column no provider writes; kept for old
+                // clients, superseded by operating_hours (I-04).
                 'engine_hours' => $model->latestMetric?->total_hours,
+                'operating_hours' => $model->latestEngineHoursMetric?->operating_hours,
+                'operating_hours_recorded_at' => $model->latestEngineHoursMetric?->recorded_at?->toIso8601String(),
+                'fuel_level_unit' => $model->fuelLevelUnit(),
                 'payload' => $model->latestMetric?->load_weight,
                 'last_seen_at' => $model->latestMetric?->created_at?->toIso8601String(),
+                'last_heard_at' => $model->lastHeardAt()?->toIso8601String(),
+                'provider_cadence_seconds' => $model->integration?->syncIntervalSeconds(),
+                'stale' => $model->isStale(),
                 'sync_version' => $model->sync_version,
             ],
             $model instanceof ProductionRecord => [

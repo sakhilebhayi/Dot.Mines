@@ -35,6 +35,9 @@ class AlertResource extends JsonResource
             'mine_area_id' => $this->mine_area_id,
 
             'triggered_at' => $this->triggered_at->toIso8601String(),
+            // The provider's own time for the event (I-07); triggered_at is
+            // when Dot.Mines ingested it.
+            'source_triggered_at' => $this->source_triggered_at?->toIso8601String(),
             'acknowledged_at' => $this->acknowledged_at?->toIso8601String(),
             'resolved_at' => $this->resolved_at?->toIso8601String(),
             'acknowledged_by' => $this->acknowledged_by,

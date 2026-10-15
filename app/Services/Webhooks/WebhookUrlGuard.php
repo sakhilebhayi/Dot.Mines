@@ -54,12 +54,22 @@ class WebhookUrlGuard
         }
 
         foreach ($addresses as $address) {
-            if (! $this->isPublicAddress($address)) {
+            if (! $this->isPublicAddress($address) && ! $this->privateAddressesAllowed()) {
                 return "The host {$host} resolves to {$address}, which is not a public address.";
             }
         }
 
         return null;
+    }
+
+    /**
+     * Local development only: a consumer on the same machine (loopback or a
+     * private subnet) may be targeted when the operator opts in. Production
+     * ignores the flag entirely.
+     */
+    private function privateAddressesAllowed(): bool
+    {
+        return ! app()->isProduction() && config('integrations.global.webhooks_allow_private_urls') === true;
     }
 
     /**

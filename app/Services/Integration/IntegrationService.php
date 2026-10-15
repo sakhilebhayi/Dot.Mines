@@ -768,6 +768,7 @@ class IntegrationService
                         'priority' => $alertData['priority'] ?? 'medium',
                         'status' => $status,
                         'triggered_at' => now(),
+                        'source_triggered_at' => $this->providerTimestamp($alertData['timestamp'] ?? null),
                         // The interpreter's technical details (code, source,
                         // severity_raw, component) ride along for the alert
                         // detail view; external_id stays ours for dedupe.
@@ -783,6 +784,22 @@ class IntegrationService
                 'machine_id' => $machine->id,
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * The provider's own time for an alert, when the feed carried a usable one.
+     */
+    private function providerTimestamp(mixed $raw): ?Carbon
+    {
+        if (! is_string($raw) || trim($raw) === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($raw)->utc();
+        } catch (\Throwable) {
+            return null;
         }
     }
 

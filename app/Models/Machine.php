@@ -393,6 +393,27 @@ class Machine extends Model
      * GPS timestamp freezes for hours while its counters keep reporting,
      * so liveness judged on location alone calls working machines dead.
      */
+    /**
+     * Nothing heard for twice the provider's declared cadence: the same
+     * convention the status monitor uses to mark a machine offline.
+     */
+    public function isStale(): bool
+    {
+        $heardAt = $this->lastHeardAt();
+        $cadence = $this->integration?->syncIntervalSeconds() ?? 300;
+
+        return $heardAt === null || $heardAt->diffInSeconds(now()) > $cadence * 2;
+    }
+
+    /**
+     * The unit of fuel_level on this machine's metrics, when the provider
+     * declares one (Bell: a percentage of tank capacity).
+     */
+    public function fuelLevelUnit(): ?string
+    {
+        return $this->integration?->provider === 'bell' ? 'percent' : null;
+    }
+
     public function lastHeardAt(): ?Carbon
     {
         $locationAt = $this->last_location_update;

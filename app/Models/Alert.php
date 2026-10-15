@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Represents system alerts triggered by rules
  * Can be about machines, maintenance, fuel, or custom conditions
  *
+
+ * @property \Illuminate\Support\Carbon|null $source_triggered_at
  * @property int $id
  * @property int $team_id
  * @property int|null $machine_id
@@ -70,6 +72,7 @@ class Alert extends Model
         'priority', // critical, high, medium, low
         'status', // see self::STATUSES
         'triggered_at',
+        'source_triggered_at',
         'acknowledged_at',
         'resolved_at',
         'acknowledged_by',
@@ -80,6 +83,7 @@ class Alert extends Model
     /** @var array<string, string> */
     protected $casts = [
         'triggered_at' => 'datetime',
+        'source_triggered_at' => 'datetime',
         'acknowledged_at' => 'datetime',
         'resolved_at' => 'datetime',
         'metadata' => 'json',
