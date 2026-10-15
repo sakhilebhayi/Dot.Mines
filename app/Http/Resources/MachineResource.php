@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Machine;
+use App\Support\EquipmentType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -29,6 +30,9 @@ class MachineResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'machine_type' => $this->machine_type,
+            // The canonical class behind the free-text machine_type (the same
+            // vocabulary licences use), so integrators never re-guess it.
+            'equipment_type' => EquipmentType::normalise($this->machine_type),
             'model' => $this->model,
             'manufacturer' => $this->manufacturer,
             'registration_number' => $this->registration_number,

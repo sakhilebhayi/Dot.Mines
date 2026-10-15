@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasSyncVersion;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Database\Factories\OperatorFactory;
@@ -46,6 +47,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $employment_status
  * @property string|null $photo_path
  * @property string|null $notes
+ * @property int|null $sync_version
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read string $name
@@ -56,7 +58,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Operator extends Model
 {
     /** @use HasFactory<OperatorFactory> */
-    use HasFactory, HasTeamFilters, SoftDeletes;
+    use HasFactory, HasSyncVersion, HasTeamFilters, SoftDeletes;
 
     public const STATUS_ACTIVE = 'active';
 

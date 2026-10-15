@@ -3,10 +3,13 @@
 namespace Tests\Feature\Webhooks;
 
 use App\Events\AlertTriggered;
+use App\Events\OperatorAssigned;
 use App\Jobs\DeliverWebhookJob;
 use App\Models\Alert;
 use App\Models\Machine;
 use App\Models\MineArea;
+use App\Models\Operator;
+use App\Models\OperatorMachineAssignment;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\WebhookDelivery;
@@ -401,5 +404,25 @@ class WebhookDeliveryTest extends TestCase
             'status' => WebhookDelivery::STATUS_PENDING,
             'next_attempt_at' => now(),
         ]);
+    }
+
+    public function test_operator_assignment_events_reach_subscribed_endpoints_with_the_assignment_payload(): void
+    {
+        Queue::fake();
+        $team = $this->team();
+        $endpoint = WebhookEndpoint::create(['team_id' => $team->id, 'name' => 'Control room', 'url' => 'https://hooks.example.com/mines', 'secret' => 'whsec_test', 'events' => [WebhookEvent::OPERATOR_ASSIGNED, WebhookEvent::OPERATOR_UNASSIGNED], 'is_active' => true]);
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'name' => 'ADT-9']);
+        $operator = Operator::factory()->create(['team_id' => $team->id, 'first_name' => 'Operator', 'last_name' => 'One']);
+        $assignment = OperatorMachineAssignment::create(['team_id' => $team->id, 'operator_id' => $operator->id, 'machine_id' => $machine->id, 'assigned_at' => now()]);
+
+        $this->assertSame(1, app(WebhookDispatcher::class)->dispatch(new OperatorAssigned($assignment)));
+
+        $delivery = WebhookDelivery::query()->where('webhook_endpoint_id', $endpoint->id)->firstOrFail();
+        $this->assertSame(WebhookEvent::OPERATOR_ASSIGNED, $delivery->event);
+        $payload = $delivery->payload;
+        $this->assertSame($operator->id, $payload['data']['operator_id']);
+        $this->assertSame('ADT-9', $payload['data']['machine']['name']);
+        $this->assertSame('Operator One', $payload['data']['operator']['name']);
+        $this->assertArrayNotHasKey('phone', $payload['data']['operator']);
     }
 }

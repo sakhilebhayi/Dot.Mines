@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Machine;
 use App\Models\MineArea;
 use App\Models\Notification;
+use App\Models\Operator;
+use App\Models\OperatorMachineAssignment;
 use App\Models\ProductionRecord;
 use App\Models\SyncTombstone;
 use App\Models\User;
 use App\Services\Sync\SyncSequence;
+use App\Support\EquipmentType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -38,6 +41,8 @@ class SyncController extends Controller
         'production' => 'production_records',
         'notifications' => 'notifications',
         'reference' => 'mine_areas',
+        'operators' => 'operators',
+        'operator_assignments' => 'operator_machine_assignments',
     ];
 
     public function __invoke(Request $request): JsonResponse
@@ -117,6 +122,8 @@ class SyncController extends Controller
             'fleet' => Machine::query()->with('latestMetric'),
             'production' => ProductionRecord::query(),
             'notifications' => Notification::query(),
+            'operators' => Operator::query(),
+            'operator_assignments' => OperatorMachineAssignment::query(),
             default => MineArea::query(),
         };
 
@@ -155,6 +162,7 @@ class SyncController extends Controller
                 'id' => $model->id,
                 'name' => $model->name,
                 'machine_type' => $model->machine_type,
+                'equipment_type' => EquipmentType::normalise($model->machine_type),
                 'status' => $model->status,
                 'allocation_state' => $model->allocation_state,
                 'latitude' => $model->latestMetric?->latitude,
@@ -186,6 +194,26 @@ class SyncController extends Controller
                 'alert_level' => $model->alert_level,
                 'is_read' => $model->is_read,
                 'created_at' => $model->created_at->toIso8601String(),
+                'sync_version' => $model->sync_version,
+            ],
+            $model instanceof Operator => [
+                'id' => $model->id,
+                'employee_number' => $model->employee_number,
+                'first_name' => $model->first_name,
+                'last_name' => $model->last_name,
+                'preferred_name' => $model->preferred_name,
+                'employment_status' => $model->employment_status,
+                'default_shift' => $model->default_shift,
+                'mine_area_id' => $model->mine_area_id,
+                'sync_version' => $model->sync_version,
+            ],
+            $model instanceof OperatorMachineAssignment => [
+                'id' => $model->id,
+                'operator_id' => $model->operator_id,
+                'machine_id' => $model->machine_id,
+                'shift' => $model->shift,
+                'assigned_at' => $model->assigned_at->toIso8601String(),
+                'unassigned_at' => $model->unassigned_at?->toIso8601String(),
                 'sync_version' => $model->sync_version,
             ],
             $model instanceof MineArea => [

@@ -7,8 +7,11 @@ use App\Events\GeofenceEntryDetected;
 use App\Events\GeofenceExitDetected;
 use App\Events\MachineOffline;
 use App\Events\MaintenanceAlertTriggered;
+use App\Events\OperatorAssigned;
+use App\Events\OperatorUnassigned;
 use App\Http\Resources\AlertResource;
 use App\Http\Resources\MachineResource;
+use App\Http\Resources\OperatorAssignmentResource;
 use App\Models\GeofenceEntry;
 use App\Support\ApiPayload;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -41,6 +44,10 @@ final class WebhookEvent
 
     public const MAINTENANCE_PREDICTED = 'maintenance.predicted';
 
+    public const OPERATOR_ASSIGNED = 'operator.assigned';
+
+    public const OPERATOR_UNASSIGNED = 'operator.unassigned';
+
     /**
      * Event name => what it means, for the docs and the subscription UI.
      *
@@ -52,6 +59,8 @@ final class WebhookEvent
         self::GEOFENCE_EXITED => 'A machine left a geofenced zone, with the tonnage recorded for the visit.',
         self::MACHINE_OFFLINE => 'A machine stopped reporting and was marked offline.',
         self::MAINTENANCE_PREDICTED => 'Maintenance was predicted for a machine, with a probability and a date.',
+        self::OPERATOR_ASSIGNED => 'An operator was assigned to a machine (the previous operator, if any, was relieved).',
+        self::OPERATOR_UNASSIGNED => 'An operator\'s stretch on a machine ended.',
     ];
 
     /**
@@ -66,6 +75,8 @@ final class WebhookEvent
         GeofenceExitDetected::class => self::GEOFENCE_EXITED,
         MachineOffline::class => self::MACHINE_OFFLINE,
         MaintenanceAlertTriggered::class => self::MAINTENANCE_PREDICTED,
+        OperatorAssigned::class => self::OPERATOR_ASSIGNED,
+        OperatorUnassigned::class => self::OPERATOR_UNASSIGNED,
     ];
 
     /**
@@ -91,6 +102,7 @@ final class WebhookEvent
             $event instanceof GeofenceExitDetected => $event->entry->geofence?->team_id,
             $event instanceof MachineOffline => $event->machine->team_id,
             $event instanceof MaintenanceAlertTriggered => $event->teamId,
+            $event instanceof OperatorAssigned, $event instanceof OperatorUnassigned => $event->assignment->team_id,
             default => null,
         };
     }
@@ -106,6 +118,7 @@ final class WebhookEvent
             $event instanceof GeofenceExitDetected => self::crossing($event->entry, 'exited'),
             $event instanceof MachineOffline => self::offline($event),
             $event instanceof MaintenanceAlertTriggered => self::maintenance($event),
+            $event instanceof OperatorAssigned, $event instanceof OperatorUnassigned => self::fields(OperatorAssignmentResource::make($event->assignment->loadMissing(['operator', 'machine']))),
             default => null,
         };
     }
