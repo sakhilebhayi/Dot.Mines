@@ -47,6 +47,20 @@ class CoreChecksTest extends TestCase
         $this->assertSame('warning', app(QueueCheck::class)->run()->status());
     }
 
+    public function test_queue_check_does_not_count_delayed_retries_as_backlog(): void
+    {
+        config(['guardian.queue.pending_warning' => 2, 'guardian.queue.pending_critical' => 100]);
+
+        $this->insertPendingJobs(5, ageSeconds: -600); // available ten minutes from now
+
+        $result = (new QueueCheck)->run()->toArray();
+
+        $this->assertSame('healthy', $result['status']);
+        $this->assertSame(0, $result['metrics']['pending_jobs']);
+        $this->assertSame(5, $result['metrics']['delayed_jobs']);
+        $this->assertSame(0, $result['metrics']['oldest_pending_seconds']);
+    }
+
     public function test_queue_check_goes_critical_when_the_oldest_job_is_too_old(): void
     {
         config(['guardian.queue.oldest_critical_seconds' => 900]);
