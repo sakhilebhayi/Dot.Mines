@@ -34,14 +34,21 @@ jobs:
           echo '::error::Confirmation input was not "provision" -- aborting.'
           exit 1
 
-      - name: Refuse an empty token secret
+      - name: Validate the token secret
         env:
           DOT_MEMORY_TOKEN: ${{ secrets.DOT_MEMORY_TOKEN }}
         run: |
+          # A Sanctum bearer is "<id>|<64 hex>". Anything else (an extra
+          # pasted line, quotes, spaces) must never reach the server's shell.
           if [ -z "$DOT_MEMORY_TOKEN" ]; then
             echo '::error::Repository secret DOT_MEMORY_TOKEN is not set.'
             exit 1
           fi
+          if ! printf '%s' "$DOT_MEMORY_TOKEN" | grep -Eq '^[0-9]+\|[0-9a-f]{64}$'; then
+            echo '::error::DOT_MEMORY_TOKEN is not of the form <id>|<64 hex chars> (it may contain a stray line or quote). Set it again with: gh secret set DOT_MEMORY_TOKEN --repo sakhilebhayi/Dot.Mines --body "<id>|<plaintext>"'
+            exit 1
+          fi
+          echo "TOKEN_B64=$(printf '%s' "$DOT_MEMORY_TOKEN" | base64 | tr -d '\n')" >> "$GITHUB_ENV"
 
       - name: Set up SSH
         run: |
@@ -58,11 +65,14 @@ jobs:
               DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}" \
               DEPLOY_PHP="${{ secrets.DEPLOY_PHP || 'php' }}" \
               DOT_MEMORY_URL="${{ secrets.DOT_MEMORY_URL || 'https://memory.infodot.co.za' }}" \
-              DOT_MEMORY_TOKEN="${{ secrets.DOT_MEMORY_TOKEN }}" \
+              TOKEN_B64="$TOKEN_B64" \
               'bash -s' <<'PROVISION'
           set -euo pipefail
           cd "$DEPLOY_PATH"
           PHP="${DEPLOY_PHP:-php}"
+          # Base64 on the wire: only [A-Za-z0-9+/=] crosses the SSH command
+          # line, so no token character can ever be parsed as shell.
+          DOT_MEMORY_TOKEN="$(printf '%s' "$TOKEN_B64" | base64 -d)"
 
           # Idempotent upsert: drop any existing DOT_MEMORY_* lines, append
           # the current ones. Never echo the token.
