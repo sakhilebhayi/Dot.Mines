@@ -236,7 +236,7 @@ XML;
     }
 
     /**
-     * Data-quality guardrails from the AfriCoal integration spec: latitude
+     * Data-quality guardrails from the customer integration spec: latitude
      * must be within -90..90, fuel remaining within 0..100. Out-of-range
      * values are dropped to null rather than trusted and stored.
      */

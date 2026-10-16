@@ -130,4 +130,19 @@ class WebhookUrlGuardTest extends TestCase
         $this->assertNotNull($reason);
         $this->assertStringContainsString('https', $reason);
     }
+
+    public function test_private_addresses_are_allowed_locally_only_when_the_operator_opts_in(): void
+    {
+        $guard = $this->guardResolving('127.0.0.1');
+
+        config(['integrations.global.webhooks_allow_private_urls' => true]);
+        $this->assertNull($guard->rejectionReason('http://127.0.0.1:8018/webhooks/mines/1'), 'a developer may target a consumer on the same machine');
+
+        $this->app->detectEnvironment(fn (): string => 'production');
+        $this->assertNotNull($guard->rejectionReason('https://127.0.0.1/hook'), 'production ignores the flag');
+        $this->app->detectEnvironment(fn (): string => 'testing');
+
+        config(['integrations.global.webhooks_allow_private_urls' => false]);
+        $this->assertNotNull($guard->rejectionReason('http://127.0.0.1:8018/webhooks/mines/1'));
+    }
 }

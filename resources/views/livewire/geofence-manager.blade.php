@@ -65,13 +65,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
             <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Dispatch Intelligence</h2>
-            <span class="badge badge-primary">AI-Powered</span>
+            <span class="badge badge-primary">Recommendations</span>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Queue rebalancing recommendations -->
             @if($aiRecommendations->count() > 0)
-            <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] text-[var(--stone)] border border-[var(--line)]">
+            <div class="card bg-[var(--ink-soft)] text-[var(--stone)] border border-[var(--line)]">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +81,7 @@
                     </h3>
                     <div class="space-y-3">
                         @foreach($aiRecommendations as $recommendation)
-                        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="bg-white/10 rounded-lg p-4 border border-[var(--line)]">
                             <div class="flex items-start justify-between mb-2">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
@@ -158,7 +158,7 @@
                             </details>
                             @endif
 
-                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-[var(--line)]">
                                 <span class="text-xs text-[var(--sand)]">AI Confidence: {{ number_format($recommendation['confidence_score'] * 100, 0) }}%</span>
                                 @if(isset($recommendation['data']['center_latitude']))
                                     <button wire:click="openCreateModal" class="btn btn-xs btn-primary gap-1">
@@ -178,7 +178,7 @@
 
             <!-- AI Geofence Activity Insights -->
             @if($aiInsights->count() > 0)
-            <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] text-[var(--stone)] border border-[var(--line)]">
+            <div class="card bg-[var(--ink-soft)] text-[var(--stone)] border border-[var(--line)]">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@
                     </h3>
                     <div class="space-y-3">
                         @foreach($aiInsights as $insight)
-                        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="bg-white/10 rounded-lg p-4 border border-[var(--line)]">
                             <div class="flex items-start justify-between mb-2">
                                 <span class="font-semibold">{{ $insight['title'] }}</span>
                                 <span class="badge

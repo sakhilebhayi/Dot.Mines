@@ -258,9 +258,9 @@
                     <h3 class="text-lg font-semibold text-[var(--stone)]">{{ $selectedAlert->title }}</h3>
                     <button 
                         wire:click="closeDetails"
-                        class="text-[var(--sand)] hover:text-[var(--sand)]"
+                        class="text-[var(--sand)] hover:text-[var(--sand)]" aria-label="Close"
                     >
-                        ✕
+                        Close
                     </button>
                 </div>
 

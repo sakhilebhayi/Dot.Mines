@@ -19,15 +19,15 @@
             <div class="text-2xl font-display font-semibold text-[var(--stone)]">{{ $this->counts['total'] }}</div>
         </div>
         <button wire:click="$set('complianceFilter', 'compliant')" class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-4 text-left hover:border-[var(--line-strong)] transition">
-            <div class="text-[var(--sand)] text-sm">🟢 Compliant</div>
+            <div class="text-[var(--sand)] text-sm">Compliant</div>
             <div class="text-2xl font-display font-semibold text-green-300">{{ $this->counts['compliant'] }}</div>
         </button>
         <button wire:click="$set('complianceFilter', 'expiring')" class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-4 text-left hover:border-[var(--line-strong)] transition">
-            <div class="text-[var(--sand)] text-sm">🟡 Expiring Soon</div>
+            <div class="text-[var(--sand)] text-sm">Expiring Soon</div>
             <div class="text-2xl font-display font-semibold text-yellow-300">{{ $this->counts['expiring'] }}</div>
         </button>
         <button wire:click="$set('complianceFilter', 'non_compliant')" class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-4 text-left hover:border-[var(--line-strong)] transition">
-            <div class="text-[var(--sand)] text-sm">🔴 Non-Compliant</div>
+            <div class="text-[var(--sand)] text-sm">Non-Compliant</div>
             <div class="text-2xl font-display font-semibold text-red-300">{{ $this->counts['non_compliant'] }}</div>
         </button>
     </div>
@@ -102,11 +102,11 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($row['verdict'] === 'compliant')
-                                        <span class="inline-block px-2 py-1 bg-green-900 text-green-200 text-xs rounded">🟢 Compliant</span>
+                                        <span class="inline-block px-2 py-1 bg-green-900 text-green-200 text-xs rounded">Compliant</span>
                                     @elseif($row['verdict'] === 'expiring')
-                                        <span class="inline-block px-2 py-1 bg-yellow-900 text-yellow-200 text-xs rounded">🟡 Expiring Soon</span>
+                                        <span class="inline-block px-2 py-1 bg-yellow-900 text-yellow-200 text-xs rounded">Expiring Soon</span>
                                     @else
-                                        <span class="inline-block px-2 py-1 bg-red-900 text-red-200 text-xs rounded">🔴 Non-Compliant</span>
+                                        <span class="inline-block px-2 py-1 bg-red-900 text-red-200 text-xs rounded">Non-Compliant</span>
                                     @endif
                                 </td>
                             </tr>

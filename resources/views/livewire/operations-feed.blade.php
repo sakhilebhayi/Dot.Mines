@@ -82,7 +82,7 @@
                 <div wire:key="pinned-{{ $item->id }}" class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-5">
                     <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0">
-                            <span class="text-[var(--gold)] text-xs font-semibold uppercase tracking-wide">📌 Pinned</span>
+                            <span class="text-[var(--gold)] text-xs font-semibold uppercase tracking-wide">Pinned</span>
                             <h3 class="text-[var(--stone)] font-display font-semibold text-base mt-1.5 break-words">{{ $item->title }}</h3>
                             @if($item->body)<p class="text-[var(--sand)] text-sm mt-2 leading-relaxed whitespace-pre-line break-words">{{ $item->body }}</p>@endif
                             <p class="text-[var(--sand)] text-xs mt-3">
@@ -120,7 +120,7 @@
                                 @if($item->isSystem())
                                     <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-white/10 text-[var(--sand)]">System</span>
                                 @else
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-[var(--gold)]/20 text-[var(--gold)]">👤 {{ $item->user?->name ?? 'Team member' }}</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-[var(--gold)]/20 text-[var(--gold)]">{{ $item->user?->name ?? 'Team member' }}</span>
                                 @endif
                                 <span class="text-[var(--sand)] text-xs">{{ \App\Models\FeedItem::CATEGORIES[$item->category] ?? ucfirst($item->category) }}</span>
                                 <span class="text-[var(--sand)]/60 text-xs">·</span>
@@ -166,7 +166,7 @@
                                 @endforeach
                                 <button wire:click="toggleComments({{ $item->id }})"
                                         class="px-3 py-1.5 rounded-full text-sm border border-[var(--line)] text-[var(--sand)] hover:text-[var(--stone)] transition">
-                                    💬 {{ $item->comments_count ?? 0 }}
+                                    {{ $item->comments_count ?? 0 }} comments
                                 </button>
                             </div>
 
@@ -211,7 +211,7 @@
                                                         </div>
                                                     </div>
                                                     @if($comment->user_id === auth()->id() || $this->canPin)
-                                                        <button wire:click="deleteComment({{ $comment->id }})" class="text-[var(--sand)] hover:text-red-300 text-xs shrink-0 px-1.5 py-1">✕</button>
+                                                        <button wire:click="deleteComment({{ $comment->id }})" class="text-[var(--sand)] hover:text-red-300 text-xs shrink-0 px-1.5 py-1">Delete</button>
                                                     @endif
                                                 </div>
 
@@ -249,7 +249,7 @@
                                                                     </div>
                                                                 </div>
                                                                 @if($reply->user_id === auth()->id() || $this->canPin)
-                                                                    <button wire:click="deleteComment({{ $reply->id }})" class="text-[var(--sand)] hover:text-red-300 text-xs shrink-0 px-1.5 py-1">✕</button>
+                                                                    <button wire:click="deleteComment({{ $reply->id }})" class="text-[var(--sand)] hover:text-red-300 text-xs shrink-0 px-1.5 py-1">Delete</button>
                                                                 @endif
                                                             </div>
                                                         @endforeach
@@ -288,10 +288,10 @@
                         @if(($this->canPin && ! $item->isPinned()) || (! $item->isSystem() && ($item->user_id === auth()->id() || $this->canPin)))
                             <div class="flex items-center gap-1 shrink-0">
                                 @if($this->canPin && ! $item->isPinned())
-                                    <button wire:click="pin({{ $item->id }})" class="text-[var(--sand)] hover:text-[var(--stone)] text-xs px-1.5 py-1 rounded transition" title="Pin for 24 hours">📌</button>
+                                    <button wire:click="pin({{ $item->id }})" class="text-[var(--sand)] hover:text-[var(--stone)] text-xs px-1.5 py-1 rounded transition" title="Pin for 24 hours">Pin</button>
                                 @endif
                                 @if(! $item->isSystem() && ($item->user_id === auth()->id() || $this->canPin))
-                                    <button wire:click="deleteItem({{ $item->id }})" wire:confirm="Remove this post?" class="text-[var(--sand)] hover:text-red-300 text-xs px-1.5 py-1 rounded transition">✕</button>
+                                    <button wire:click="deleteItem({{ $item->id }})" wire:confirm="Remove this post?" class="text-[var(--sand)] hover:text-red-300 text-xs px-1.5 py-1 rounded transition">Delete</button>
                                 @endif
                             </div>
                         @endif

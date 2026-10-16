@@ -2,12 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Models\Integration;
 use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\Notification;
+use App\Models\Operator;
+use App\Models\OperatorMachineAssignment;
 use App\Models\SyncTombstone;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 /**
@@ -131,5 +135,62 @@ class SyncApiTest extends TestCase
         $user = $this->syncUser();
         $this->actingAs($user)->getJson('/api/v1/sync?since=0&scopes=billing')->assertStatus(422);
         $this->actingAs($user)->getJson('/api/v1/sync?since=0')->assertStatus(422);
+    }
+
+    public function test_operators_and_their_assignments_sync_with_the_machines_canonical_type(): void
+    {
+        $user = $this->syncUser();
+        $teamId = $user->currentTeam->id;
+        $machine = Machine::factory()->create(['team_id' => $teamId, 'machine_type' => 'adt']);
+        $operator = Operator::factory()->create(['team_id' => $teamId, 'first_name' => 'Operator', 'last_name' => 'One', 'employee_number' => 'E-1', 'phone' => '0800000000']);
+        $assignment = OperatorMachineAssignment::create(['team_id' => $teamId, 'operator_id' => $operator->id, 'machine_id' => $machine->id, 'shift' => 'day', 'assigned_at' => now()]);
+        Operator::factory()->create(['team_id' => $user->ownedTeams()->create(['name' => 'Other', 'personal_team' => false])->id]);
+
+        $delta = $this->actingAs($user)->getJson('/api/v1/sync?since=0&scopes=fleet,operators,operator_assignments')->assertOk()->json();
+
+        $this->assertSame('adt', $delta['changes']['fleet'][0]['equipment_type']);
+        $this->assertCount(1, $delta['changes']['operators']);
+        $row = $delta['changes']['operators'][0];
+        $this->assertSame(['id', 'employee_number', 'first_name', 'last_name', 'preferred_name', 'employment_status', 'default_shift', 'mine_area_id', 'sync_version'], array_keys($row));
+        $this->assertSame('E-1', $row['employee_number']);
+        $this->assertSame($assignment->id, $delta['changes']['operator_assignments'][0]['id']);
+        $this->assertNull($delta['changes']['operator_assignments'][0]['unassigned_at']);
+
+        $cursor = $delta['version'];
+        $assignment->update(['unassigned_at' => now(), 'reason' => 'End of shift']);
+        $operator->delete();
+
+        $next = $this->actingAs($user)->getJson("/api/v1/sync?since={$cursor}&scopes=operators,operator_assignments")->assertOk()->json();
+        $this->assertCount(1, $next['changes']['operator_assignments']);
+        $this->assertNotNull($next['changes']['operator_assignments'][0]['unassigned_at']);
+        $this->assertSame([['entity_type' => 'operators', 'entity_id' => $operator->id]], array_map(fn (array $t) => ['entity_type' => $t['entity_type'], 'entity_id' => $t['entity_id']], $next['deleted']));
+    }
+
+    public function test_the_fleet_scope_and_machine_resource_carry_liveness_engine_hours_and_units(): void
+    {
+        Carbon::setTestNow(now()->startOfSecond());
+        $user = $this->syncUser();
+        $teamId = $user->currentTeam->id;
+        $integration = Integration::factory()->forProvider('bell')->create(['team_id' => $teamId]);
+        $machine = Machine::factory()->create(['team_id' => $teamId, 'integration_id' => $integration->id, 'machine_type' => 'adt', 'last_location_update' => now()->subMinutes(10)]);
+        MachineMetric::factory()->create(['team_id' => $teamId, 'machine_id' => $machine->id, 'operating_hours' => 1234.5, 'recorded_at' => now()->subMinutes(5), 'fuel_level' => 61.0]);
+
+        $row = collect($this->actingAs($user)->getJson('/api/v1/sync?since=0&scopes=fleet')->assertOk()->json('changes.fleet'))->firstWhere('id', $machine->id);
+        $this->assertNotNull($row);
+        $this->assertSame(1234.5, $row['operating_hours']);
+        $this->assertNotNull($row['operating_hours_recorded_at']);
+        $this->assertSame('percent', $row['fuel_level_unit']);
+        $this->assertSame(900, $row['provider_cadence_seconds'], 'Bell declares a 15-minute cadence');
+        $this->assertFalse($row['stale']);
+        $this->assertSame(now()->subMinutes(5)->toIso8601String(), $row['last_heard_at'], 'the newest provider clock across position and telemetry');
+
+        $resource = $this->actingAs($user)->getJson('/api/v1/machines/'.$machine->id)->assertOk()->json('data');
+        $this->assertSame(1234.5, $resource['operating_hours']);
+        $this->assertSame('percent', $resource['fuel_level_unit']);
+        $this->assertArrayHasKey('stale', $resource);
+        $this->assertSame('adt', $resource['equipment_type']);
+
+        $this->travel(31)->minutes();
+        $this->assertTrue($this->actingAs($user)->getJson('/api/v1/machines/'.$machine->id)->json('data.stale'), 'nothing heard for twice the cadence');
     }
 }

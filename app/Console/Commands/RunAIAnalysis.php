@@ -49,11 +49,11 @@ class RunAIAnalysis extends Command
                 $totalInsights += $insights;
                 $totalSavings += $savings;
 
-                $this->line("  <fg=green>✓</> Generated {$recommendations} recommendations");
-                $this->line("  <fg=green>✓</> Discovered {$insights} insights");
+                $this->line("  <fg=green>OK</> Generated {$recommendations} recommendations");
+                $this->line("  <fg=green>OK</> Discovered {$insights} insights");
 
                 if ($savings > 0) {
-                    $this->line('  <fg=green>✓</> Potential savings: R'.number_format($savings, 2));
+                    $this->line('  <fg=green>OK</> Potential savings: R'.number_format($savings, 2));
                 }
 
                 // Show top 3 critical recommendations

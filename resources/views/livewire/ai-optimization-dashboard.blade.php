@@ -4,11 +4,11 @@
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div class="animate-slide-in-left">
-                <h1 class="text-3xl font-display font-semibold bg-gradient-to-r from-[var(--gold)] to-[var(--umber)] bg-clip-text text-transparent">
+                <h1 class="text-3xl font-display font-semibold text-[var(--gold)]">
                     AI Optimization Dashboard
                 </h1>
                 <p class="mt-1 text-sm text-[var(--sand)]">
-                    Intelligent recommendations and insights powered by AI
+                    Recommendations and insights from the analysis agents
                 </p>
             </div>
             <div class="flex gap-2 animate-slide-in-right">
@@ -57,7 +57,6 @@
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-sm font-medium text-[var(--sand)]">Total Recommendations</h3>
                     <div class="p-2 bg-[var(--gold)]/15 rounded-lg">
-                        <span class="text-2xl">📝</span>
                     </div>
                 </div>
                 <p class="text-3xl font-bold text-[var(--stone)]">{{ $stats['total_recommendations'] }}</p>
@@ -81,7 +80,6 @@
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-sm font-medium text-[var(--sand)]">Implemented</h3>
                     <div class="p-2 bg-green-500/15 rounded-lg">
-                        <span class="text-2xl">✅</span>
                     </div>
                 </div>
                 <p class="text-3xl font-bold text-green-400">{{ $stats['implemented_recommendations'] }}</p>
@@ -89,11 +87,10 @@
             </div>
 
             <!-- Total Savings -->
-            <div class="bg-gradient-to-br from-[var(--gold)] to-[var(--umber)] rounded-lg shadow-lg p-6 text-[var(--ink)] transform hover:scale-105 transition-all duration-200 hover:shadow-xl animate-scale-in" style="animation-delay: 0.4s">
+            <div class="bg-[var(--gold)] rounded-lg shadow-lg p-6 text-[var(--ink)] transform hover:scale-105 transition-all duration-200 hover:shadow-xl animate-scale-in" style="animation-delay: 0.4s">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-sm font-medium opacity-90">Potential Savings</h3>
-                    <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                        <span class="text-2xl">💰</span>
+                    <div class="p-2 bg-white/20 rounded-lg">
                     </div>
                 </div>
                 <p class="text-3xl font-bold">R{{ number_format($stats['potential_savings'], 0) }}</p>
@@ -232,11 +229,11 @@
                             <div class="flex gap-2">
                                 <button wire:click="promptRecommendationAction({{ $recommendation->id }}, 'implement')" 
                                     class="px-4 py-2 bg-green-600 text-[var(--stone)] rounded-lg hover:bg-green-700 transition text-sm font-medium transform hover:scale-105">
-                                    ✓ Implement
+                                    Implement
                                 </button>
                                 <button wire:click="promptRecommendationAction({{ $recommendation->id }}, 'reject')" 
                                     class="px-4 py-2 bg-white/10 text-[var(--sand)] rounded-lg hover:bg-white/20 transition text-sm font-medium">
-                                    ✕ Reject
+                                    Reject
                                 </button>
                             </div>
                             @endif
@@ -314,7 +311,6 @@
                     </div>
                 @empty
                     <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-12 text-center">
-                        <div class="text-6xl mb-4">🤖</div>
                         <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Recommendations Yet</h3>
                         <p class="text-[var(--sand)] mb-4">Run AI Analysis to generate intelligent recommendations</p>
                         <button wire:click="runAnalysis" wire:loading.attr="disabled" wire:target="runAnalysis"
@@ -371,7 +367,6 @@
                     <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
                         <div class="flex items-start gap-3">
                             <div class="p-2 bg-[var(--gold)]/15 rounded-lg">
-                                <span class="text-2xl">💡</span>
                             </div>
                             <div class="flex-1">
                                 <h3 class="font-semibold text-[var(--stone)] mb-1">{{ $insight->title }}</h3>
@@ -388,7 +383,6 @@
                     </div>
                 @empty
                     <div class="col-span-2 bg-[var(--ink-soft)] rounded-lg shadow-lg p-12 text-center">
-                        <div class="text-6xl mb-4">💡</div>
                         <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Insights Available</h3>
                         <p class="text-[var(--sand)]">Run AI Analysis to discover insights</p>
                     </div>
@@ -420,7 +414,7 @@
                                     </span>
                                     @if($alert->is_acknowledged)
                                     <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-900 text-green-200">
-                                        ✓ Acknowledged
+                                        Acknowledged
                                     </span>
                                     @endif
                                 </div>
@@ -441,7 +435,6 @@
                     </div>
                 @empty
                     <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-12 text-center">
-                        <div class="text-6xl mb-4">🚨</div>
                         <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Alerts</h3>
                         <p class="text-[var(--sand)]">All systems running smoothly</p>
                     </div>

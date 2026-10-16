@@ -8,7 +8,7 @@
 @section('message', "The page you're looking for may have moved, been renamed, or never existed. Double-check the link, or head somewhere we know works.")
 
 @section('actions')
-    <a href="/" class="press" style="padding: 12px 24px; background: var(--accent); color: #211a14; font-family: var(--font-display); font-weight: 600; font-size: 15px; border-radius: 999px; text-decoration: none;">Go home</a>
+    <a href="/" class="press" style="padding: 12px 24px; background: var(--signal); border: 1px solid var(--signal); color: #211a14; font-family: var(--font-display); font-weight: 600; font-size: 15px; border-radius: 2px; text-decoration: none;">Go home</a>
     @auth
     <a href="{{ route('dashboard') }}" class="press link-underline" style="padding: 12px 24px; color: var(--ink); font-size: 15px; text-decoration: none;">Go to dashboard</a>
     @else

@@ -214,7 +214,7 @@
 
         <!-- AI Optimization (NEW!) -->
         <a href="{{ route('ai-optimization') }}" 
-           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('ai-optimization*') ? 'bg-gradient-to-r from-[var(--gold)] to-[var(--umber)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-gradient-to-r hover:from-[var(--gold)] hover:to-[var(--umber)] hover:text-[var(--ink)]' }}"
+           class="nav-link px-4 py-3 rounded-lg transition-colors flex items-center gap-3 {{ request()->routeIs('ai-optimization*') ? 'bg-[var(--gold)] text-[var(--ink)]' : 'text-[var(--sand)] hover:bg-[var(--gold)] hover:text-[var(--ink)]' }}"
            :class="{ 'justify-center': !expanded }"
            :title="!expanded ? 'AI Optimization' : ''">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -23,7 +23,7 @@
         @endif
 
         <!-- Export -->
-        <div class="rounded-xl border border-white/10 bg-white/5 p-6">
+        <div class="rounded-xl border border-[var(--line)] bg-white/5 p-6">
             <h2 class="text-lg font-semibold text-[var(--stone)]">Export my data</h2>
             <p class="text-sm text-[var(--sand)] mt-1 mb-4">
                 Generates a JSON file with your profile, team memberships, operator
@@ -38,7 +38,7 @@
         </div>
 
         <!-- Request history -->
-        <div class="rounded-xl border border-white/10 bg-white/5 p-6">
+        <div class="rounded-xl border border-[var(--line)] bg-white/5 p-6">
             <h2 class="text-lg font-semibold text-[var(--stone)] mb-4">Request history</h2>
             @if ($requests->isEmpty())
                 <p class="text-sm text-[var(--sand)]">No privacy requests yet.</p>
@@ -54,7 +54,7 @@
                     </thead>
                     <tbody>
                         @foreach ($requests as $gdprRequest)
-                            <tr class="border-t border-white/10 text-[var(--stone)]">
+                            <tr class="border-t border-[var(--line)] text-[var(--stone)]">
                                 <td class="py-2 pr-4">{{ ucfirst($gdprRequest->type) }}</td>
                                 <td class="py-2 pr-4">{{ ucfirst($gdprRequest->status) }}</td>
                                 <td class="py-2 pr-4">{{ $gdprRequest->created_at->format('Y-m-d H:i') }}</td>
@@ -82,7 +82,7 @@
             <form method="POST" action="{{ route('gdpr.delete') }}" class="flex items-center gap-3">
                 @csrf
                 <input type="text" name="confirmation" placeholder="DELETE"
-                       class="rounded-lg bg-transparent border border-white/20 px-3 py-2 text-sm text-[var(--stone)] placeholder-[var(--sand)]/50" />
+                       class="rounded-lg bg-transparent border border-[var(--line)] px-3 py-2 text-sm text-[var(--stone)] placeholder-[var(--sand)]/50" />
                 <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium">
                     Delete my account
                 </button>

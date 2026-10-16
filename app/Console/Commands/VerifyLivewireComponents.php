@@ -73,9 +73,9 @@ class VerifyLivewireComponents extends Command
             $className = 'App\\Livewire\\'.str_replace(' ', '', ucwords(str_replace('-', ' ', $component)));
 
             if (class_exists($className)) {
-                $this->line("  <fg=green>✓</> {$component} ({$className})");
+                $this->line("  <fg=green>OK</> {$component} ({$className})");
             } else {
-                $this->line("  <fg=red>✗</> {$component} - Class {$className} not found");
+                $this->line("  <fg=red>FAIL</> {$component} - Class {$className} not found");
                 $errors[] = $component;
             }
         }
@@ -96,9 +96,9 @@ class VerifyLivewireComponents extends Command
             }
 
             if (class_exists($className)) {
-                $this->line("  <fg=green>✓</> {$component} ({$className})");
+                $this->line("  <fg=green>OK</> {$component} ({$className})");
             } else {
-                $this->line("  <fg=red>✗</> {$component} - Class {$className} not found");
+                $this->line("  <fg=red>FAIL</> {$component} - Class {$className} not found");
                 $errors[] = $component;
             }
         }
@@ -110,7 +110,7 @@ class VerifyLivewireComponents extends Command
             return self::FAILURE;
         }
 
-        $this->info('✓ All components are properly registered!');
+        $this->info('All components are properly registered!');
 
         return self::SUCCESS;
     }

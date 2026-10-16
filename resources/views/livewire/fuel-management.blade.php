@@ -20,7 +20,7 @@
 
     <!-- Current Month Allocation Card -->
     @if($currentAllocation)
-    <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink-soft)] text-[var(--stone)] mb-6 border border-[var(--line)]">
+    <div class="card bg-[var(--ink-soft)] text-[var(--stone)] mb-6 border border-[var(--line)]">
         <div class="card-body">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="card-title text-2xl">{{ $currentAllocation->period_name }} Fuel Allocation</h2>
@@ -254,7 +254,7 @@
     </div>
     @endif
 
-    <!-- AI-Powered Fuel Optimization Insights -->
+    <!-- Fuel Optimization Insights -->
     @if($aiRecommendations->count() > 0 || $aiInsights->count() > 0)
     <div class="mb-6">
         <div class="flex items-center gap-2 mb-4">
@@ -262,13 +262,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
             <h2 class="text-2xl font-display font-semibold">AI Fuel Optimization</h2>
-            <span class="badge badge-primary">Powered by AI</span>
+            <span class="badge badge-primary">Recommendations</span>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- AI Recommendations -->
             @if($aiRecommendations->count() > 0)
-            <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] text-[var(--stone)] border border-[var(--line)]">
+            <div class="card bg-[var(--ink-soft)] text-[var(--stone)] border border-[var(--line)]">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,7 +278,7 @@
                     </h3>
                     <div class="space-y-3">
                         @foreach($aiRecommendations as $recommendation)
-                        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="bg-white/10 rounded-lg p-4 border border-[var(--line)]">
                             <div class="flex items-start justify-between mb-2">
                                 <span class="font-semibold">{{ $recommendation['title'] }}</span>
                                 <span class="badge 
@@ -309,7 +309,7 @@
 
             <!-- AI Insights -->
             @if($aiInsights->count() > 0)
-            <div class="card bg-gradient-to-br from-[var(--umber)] to-[var(--ink)] text-[var(--stone)] border border-[var(--line)]">
+            <div class="card bg-[var(--ink-soft)] text-[var(--stone)] border border-[var(--line)]">
                 <div class="card-body">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,7 +319,7 @@
                     </h3>
                     <div class="space-y-3">
                         @foreach($aiInsights as $insight)
-                        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                        <div class="bg-white/10 rounded-lg p-4 border border-[var(--line)]">
                             <div class="flex items-start justify-between mb-2">
                                 <span class="font-semibold">{{ $insight['title'] }}</span>
                                 <span class="badge 

@@ -2,6 +2,8 @@
 
 namespace App\Services\Operators;
 
+use App\Events\OperatorAssigned;
+use App\Events\OperatorUnassigned;
 use App\Exceptions\IneligibleAssignmentException;
 use App\Models\ActivityLog;
 use App\Models\FeedItem;
@@ -54,6 +56,7 @@ class OperatorAssignmentService
         return DB::transaction(function () use ($operator, $machine, $assignedBy, $shift, $overrideReason, $check, $isOverride): OperatorMachineAssignment {
             // Close the machine's current assignment: a machine has one
             // operator at a time, and assigning a new one relieves the old.
+            $relievedIds = $machine->operatorAssignments()->whereNull('unassigned_at')->pluck('id')->all();
             OperatorMachineAssignment::query()->whereNull('unassigned_at')
                 ->where('machine_id', $machine->id)
                 ->update([
@@ -98,6 +101,11 @@ class OperatorAssignmentService
                 'dedupe_key' => 'assignment:'.$assignment->id,
             ]);
 
+            foreach ($machine->operatorAssignments()->whereIn('id', $relievedIds)->get() as $previous) {
+                OperatorUnassigned::dispatch($previous);
+            }
+            OperatorAssigned::dispatch($assignment);
+
             return $assignment;
         });
     }
@@ -138,6 +146,8 @@ class OperatorAssignmentService
             'action_url' => route('operators.show', ['operator' => $assignment->operator_id]),
             'dedupe_key' => 'unassignment:'.$assignment->id,
         ]);
+
+        OperatorUnassigned::dispatch($assignment);
 
         return $assignment->refresh();
     }

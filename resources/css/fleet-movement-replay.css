@@ -64,7 +64,7 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--umber) 100%);
+            background: var(--gold);
             cursor: grab;
             box-shadow: 0 4px 12px rgba(217, 158, 43, 0.6);
             border: 3px solid white;
@@ -85,7 +85,7 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--umber) 100%);
+            background: var(--gold);
             cursor: grab;
             box-shadow: 0 4px 12px rgba(217, 158, 43, 0.6);
             border: 3px solid white;

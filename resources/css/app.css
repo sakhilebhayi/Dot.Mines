@@ -56,9 +56,9 @@
     --stone: #f4efe4;
     --sand: #c9b896;
     --line: rgba(244, 239, 228, 0.12);
-    --font-display: 'Outfit', system-ui, sans-serif;
-    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 .font-display { font-family: var(--font-display); }
 .font-mono { font-family: var(--font-mono); }

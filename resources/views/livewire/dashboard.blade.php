@@ -34,12 +34,12 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <a href="{{ route('mine-areas') }}" class="flex flex-col gap-2 p-4 rounded-lg border {{ $totalMineAreas > 0 ? 'border-[var(--line)] opacity-60' : 'border-[var(--gold)]/50 hover:border-[var(--gold)]' }} transition-colors">
                         <span class="text-xs font-mono uppercase tracking-wide text-[var(--gold)]">Step 1</span>
-                        <span class="font-semibold text-[var(--stone)]">{{ $totalMineAreas > 0 ? 'Mine area created ✓' : 'Create a mine area' }}</span>
+                        <span class="font-semibold text-[var(--stone)]">{{ $totalMineAreas > 0 ? 'Mine area created' : 'Create a mine area' }}</span>
                         <span class="text-xs text-[var(--sand)]">Define the site your machines and geofences belong to.</span>
                     </a>
                     <a href="{{ route('fleet') }}" class="flex flex-col gap-2 p-4 rounded-lg border {{ $totalMachines > 0 ? 'border-[var(--line)] opacity-60' : 'border-[var(--gold)]/50 hover:border-[var(--gold)]' }} transition-colors">
                         <span class="text-xs font-mono uppercase tracking-wide text-[var(--gold)]">Step 2</span>
-                        <span class="font-semibold text-[var(--stone)]">{{ $totalMachines > 0 ? 'Machine added ✓' : 'Add your first machine' }}</span>
+                        <span class="font-semibold text-[var(--stone)]">{{ $totalMachines > 0 ? 'Machine added' : 'Add your first machine' }}</span>
                         <span class="text-xs text-[var(--sand)]">Register a machine to start tracking location and status.</span>
                     </a>
                     <a href="{{ route('teams.show', auth()->user()->currentTeam) }}" class="flex flex-col gap-2 p-4 rounded-lg border border-[var(--line)] hover:border-[var(--gold)] transition-colors">
@@ -121,7 +121,7 @@
         </div>
 
         <!-- Geofences Card -->
-        <div class="bg-gradient-to-br from-[var(--gold)] to-[var(--umber)] rounded-lg shadow-lg p-6 text-[var(--ink)] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in min-w-[260px] md:min-w-0" style="animation-delay: 0.4s">
+        <div class="bg-[var(--gold)] rounded-lg shadow-lg p-6 text-[var(--ink)] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-scale-in min-w-[260px] md:min-w-0" style="animation-delay: 0.4s">
             <div class="flex items-center justify-between mb-4">
                 <div class="p-3 bg-[var(--ink)]/15 rounded-lg">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,7 +351,7 @@
                                 </button>
                             @else
                                 <span class="px-3 py-1 text-xs bg-green-500/15 text-green-400 rounded font-medium">
-                                    ✓ {{ ucfirst($alert['status']) }}
+                                    {{ ucfirst($alert['status']) }}
                                 </span>
                             @endif
                         </div>
@@ -359,7 +359,6 @@
                 </div>
             @else
                 <div class="text-center py-12">
-                    <div class="text-6xl mb-4">✅</div>
                     <h3 class="text-lg font-semibold text-[var(--stone)] mb-2">All Clear!</h3>
                     <p class="text-[var(--sand)] text-sm">No active alerts at the moment. <a href="{{ route('alerts') }}" class="text-[var(--gold)] hover:text-[var(--gold-soft)]">View all alerts</a>.</p>
                 </div>

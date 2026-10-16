@@ -37,7 +37,6 @@
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 mb-8">
         @foreach($availableManufacturers as $key => $mfr)
             <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-4 text-center">
-                <div class="text-3xl mb-2">{{ $mfr['icon'] }}</div>
                 <h3 class="text-[var(--stone)] font-semibold">{{ $mfr['name'] }}</h3>
                 <p class="text-[var(--sand)] text-xs mt-1">{{ $mfr['description'] }}</p>
                 <div class="mt-3">
@@ -72,9 +71,6 @@
                             <tr class="border-t border-[var(--line)] hover:bg-white/5 transition">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        <span class="text-2xl mr-3">
-                                            {{ $availableManufacturers[$integration['provider']]['icon'] ?? '📦' }}
-                                        </span>
                                         <div>
                                             <p class="text-[var(--stone)] font-medium">
                                                 {{ $availableManufacturers[$integration['provider']]['name'] ?? ucfirst($integration['provider']) }}
@@ -187,7 +183,6 @@
         </div>
     @else
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg p-12 text-center">
-            <div class="text-4xl mb-4">📦</div>
             <h3 class="text-xl font-semibold text-[var(--stone)] mb-2">No Integrations Yet</h3>
             <p class="text-[var(--sand)] mb-6">Get started by adding your first equipment manufacturer integration</p>
             <button 
@@ -224,7 +219,7 @@
                             <option value="">Select a manufacturer...</option>
                             @foreach($availableManufacturers as $key => $mfr)
                                 <option value="{{ $key }}">
-                                    {{ $mfr['icon'] }} {{ $mfr['name'] }}@if(($mfr['status'] ?? 'available') === 'coming_soon') (Coming Soon){{ ' ' }}@endif
+                                    {{ $mfr['name'] }}@if(($mfr['status'] ?? 'available') === 'coming_soon') (Coming Soon){{ ' ' }}@endif
                                 </option>
                             @endforeach
                         </select>
@@ -344,10 +339,8 @@
             <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-xl max-w-md w-full mx-4">
                 <div class="p-6 text-center">
                     @if($testResult['success'])
-                        <div class="text-5xl mb-4">✅</div>
                         <h3 class="text-xl font-bold text-green-400 mb-2">Connected</h3>
                     @else
-                        <div class="text-5xl mb-4">❌</div>
                         <h3 class="text-xl font-bold text-red-400 mb-2">Connection Failed</h3>
                     @endif
                     <p class="text-[var(--sand)]">{{ $testResult['message'] ?? '' }}</p>
@@ -357,7 +350,7 @@
                     <div class="px-6 pb-4 text-sm text-left">
                         @foreach($testResult['checks'] as $label => $passed)
                             <div class="flex items-center gap-2 py-1">
-                                <span>{{ $passed ? '✓' : '✗' }}</span>
+                                <span>{{ $passed ? 'Pass' : 'Fail' }}</span>
                                 <span class="text-[var(--stone)]">{{ ucfirst(str_replace('_', ' ', $label)) }}</span>
                             </div>
                         @endforeach
@@ -370,7 +363,7 @@
                         <div class="flex flex-wrap gap-2">
                             @foreach($testResult['capabilities'] as $capability)
                                 <span class="text-xs px-2 py-1 rounded bg-[var(--gold)]/10 text-[var(--gold)]">
-                                    ✓ {{ ucfirst($capability) }}
+                                    {{ ucfirst($capability) }}
                                 </span>
                             @endforeach
                         </div>

@@ -20,11 +20,11 @@
         </div>
         <div class="flex items-center gap-3">
             @if($this->compliance['verdict'] === 'compliant')
-                <span class="px-3 py-1.5 bg-green-900 text-green-200 rounded-lg text-sm font-semibold">🟢 Compliant</span>
+                <span class="px-3 py-1.5 bg-green-900 text-green-200 rounded-lg text-sm font-semibold">Compliant</span>
             @elseif($this->compliance['verdict'] === 'expiring')
-                <span class="px-3 py-1.5 bg-yellow-900 text-yellow-200 rounded-lg text-sm font-semibold">🟡 Expiring Soon</span>
+                <span class="px-3 py-1.5 bg-yellow-900 text-yellow-200 rounded-lg text-sm font-semibold">Expiring Soon</span>
             @else
-                <span class="px-3 py-1.5 bg-red-900 text-red-200 rounded-lg text-sm font-semibold">🔴 Non-Compliant</span>
+                <span class="px-3 py-1.5 bg-red-900 text-red-200 rounded-lg text-sm font-semibold">Non-Compliant</span>
             @endif
             @can('update', $operator)
                 <select wire:change="setEmploymentStatus($event.target.value)"
@@ -55,13 +55,13 @@
                             <td class="py-2 text-[var(--stone)]">{{ $item['label'] }}</td>
                             <td class="py-2">
                                 @if($item['status'] === 'valid' || $item['status'] === 'perpetual')
-                                    <span class="text-green-300">🟢 Valid</span>
+                                    <span class="text-green-300">Valid</span>
                                 @elseif($item['status'] === 'expiring')
-                                    <span class="text-yellow-300">🟡 Expiring Soon</span>
+                                    <span class="text-yellow-300">Expiring Soon</span>
                                 @elseif($item['status'] === 'missing')
-                                    <span class="text-red-300">🔴 Missing</span>
+                                    <span class="text-red-300">Missing</span>
                                 @else
-                                    <span class="text-red-300">🔴 Expired</span>
+                                    <span class="text-red-300">Expired</span>
                                 @endif
                             </td>
                             <td class="py-2 text-[var(--sand)]">{{ $item['detail'] }}</td>
@@ -81,7 +81,7 @@
                 <div wire:key="auth-{{ $auth['type'] }}" class="flex items-center justify-between px-3 py-2 rounded border {{ $auth['authorised'] ? 'border-green-900 bg-green-900/10' : 'border-[var(--line)]' }}">
                     <span class="text-[var(--stone)] text-sm">{{ $auth['label'] }}</span>
                     @if($auth['authorised'])
-                        <span class="text-green-300 text-xs">✓ {{ $auth['licence']?->expires_on?->format('d/m/Y') ?? 'No expiry' }}</span>
+                        <span class="text-green-300 text-xs">{{ $auth['licence']?->expires_on?->format('d/m/Y') ?? 'No expiry' }}</span>
                     @elseif($auth['licence'] !== null)
                         <span class="text-red-300 text-xs">Lapsed</span>
                     @else
@@ -234,7 +234,7 @@
                                 <td class="py-2 text-[var(--sand)]">{{ $assignment->assignedBy?->name ?? '—' }}</td>
                                 <td class="py-2">
                                     @if($assignment->was_override)
-                                        <span class="text-yellow-300 text-xs" title="{{ $assignment->override_reason }}">⚠ Override: {{ $assignment->override_reason }}</span>
+                                        <span class="text-yellow-300 text-xs" title="{{ $assignment->override_reason }}">Override: {{ $assignment->override_reason }}</span>
                                     @elseif($assignment->reason)
                                         <span class="text-[var(--sand)] text-xs">{{ $assignment->reason }}</span>
                                     @else — @endif
@@ -271,7 +271,7 @@
                        class="px-3 py-1.5 text-sm border border-[var(--line-strong)] text-[var(--sand)] hover:text-[var(--stone)] rounded transition">Download</a>
                     @can('update', $operator)
                         <button wire:click="deleteDocument({{ $document->id }})" wire:confirm="Remove {{ $document->title }}?"
-                                class="px-2 py-1.5 text-sm text-red-300 hover:text-red-200 transition">✕</button>
+                                class="px-2 py-1.5 text-sm text-red-300 hover:text-red-200 transition">Remove</button>
                     @endcan
                 </div>
             </div>

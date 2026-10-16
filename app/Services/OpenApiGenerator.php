@@ -43,6 +43,7 @@ final class OpenApiGenerator
         'notifications' => 'In-app notifications for the signed-in user, with read tracking.',
         'integrations' => 'Manufacturer and telematics connections, their sync status, and the machines they discovered.',
         'assignments' => 'Which machines are assigned to which mine areas, and the assignment history.',
+        'operators' => 'The operator register: who may drive, their employment status, and who is on which machine (assignments live under /machines/{id}/operator-assignments).',
         'live-locations' => 'A lightweight snapshot of every machine with a known position.',
         'user' => 'The signed-in user and their current team.',
         'sync' => 'Incremental deltas since a cursor, for keeping a local cache warm without re-fetching everything.',

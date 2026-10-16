@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasSyncVersion;
 use App\Traits\HasTeamFilters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -26,10 +27,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $was_override
  * @property string|null $override_reason
  * @property array<int, string>|null $overridden_failures
+ * @property int|null $sync_version
+ * @property-read Operator|null $operator
+ * @property-read Machine|null $machine
  */
 class OperatorMachineAssignment extends Model
 {
-    use HasTeamFilters;
+    use HasSyncVersion, HasTeamFilters;
 
     /** @var array<int, string> */
     protected $fillable = [

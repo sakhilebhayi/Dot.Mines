@@ -35,7 +35,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CaAzvj6v.css",
+    "file": "assets/app-DDj2ACnI.css",
     "name": "app",
     "names": [
       "app.css"
@@ -54,12 +54,12 @@
     ]
   },
   "resources/js/fleet-movement-replay.js": {
-    "file": "assets/fleet-movement-replay-B7ZovUYu.js",
+    "file": "assets/fleet-movement-replay-DtFemQN5.js",
     "name": "fleet-movement-replay",
     "src": "resources/js/fleet-movement-replay.js",
     "isEntry": true,
     "css": [
-      "assets/fleet-movement-replay-Dz5fC4KU.css"
+      "assets/fleet-movement-replay-lU-x2qxU.css"
     ]
   },
   "resources/js/live-map.js": {

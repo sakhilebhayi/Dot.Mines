@@ -281,7 +281,7 @@
                             </button>
                         @else
                             <div class="mt-4 bg-green-600 text-[var(--stone)] px-4 py-3 rounded-lg text-center font-medium">
-                                ✓ Route Saved Successfully
+                                Route saved
                             </div>
                         @endif
                     </div>
@@ -295,7 +295,6 @@
                 
                 @if(count($routes) === 0)
                     <div class="text-center py-12">
-                        <div class="text-6xl mb-4">🗺️</div>
                         <h3 class="text-lg font-semibold text-[var(--stone)] mb-2">No routes saved yet</h3>
                         <p class="text-[var(--sand)] mb-2">Start planning your first optimal route to improve efficiency and save fuel.</p>
                         <ul class="text-sm text-[var(--sand)] mb-4 space-y-1">

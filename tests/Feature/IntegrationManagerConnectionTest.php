@@ -119,7 +119,7 @@ class IntegrationManagerConnectionTest extends TestCase
         Livewire::actingAs($owner)
             ->test(IntegrationManager::class)
             ->set('formData.provider', 'bell')
-            ->set('formData.name', 'AfriCoal Bell Fleet')
+            ->set('formData.name', 'Pilot Bell Fleet')
             ->set('formData.connection_type', 'api')
             ->set('formData.sync_frequency', 'manual')
             ->set('formData.credentials.username', 'katisot-fleetauth@bell.co.za')
@@ -128,7 +128,7 @@ class IntegrationManagerConnectionTest extends TestCase
             ->call('createIntegration')
             ->assertHasNoErrors();
 
-        $integration = Integration::firstWhere('name', 'AfriCoal Bell Fleet');
+        $integration = Integration::firstWhere('name', 'Pilot Bell Fleet');
         $this->assertNotNull($integration);
         $this->assertSame('katisot-fleetauth@bell.co.za', $integration->credentials['username']);
         $this->assertSame('real-password', $integration->credentials['password']);

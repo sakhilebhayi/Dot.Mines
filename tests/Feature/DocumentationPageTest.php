@@ -36,7 +36,7 @@ class DocumentationPageTest extends TestCase
         $response = $this->actingAs($user)->get('/documentation');
 
         $response->assertOk();
-        $response->assertSee('Welcome to Mines Fleet Manager');
+        $response->assertSee('Getting started');
         $response->assertSee('prose-invert', false);
     }
 

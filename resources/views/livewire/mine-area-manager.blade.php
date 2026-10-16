@@ -271,11 +271,11 @@
 
                     @if($boundaryCoordinates)
                         <div class="bg-green-600/20 border border-green-600 rounded-lg p-3">
-                            <p class="text-green-300 text-sm">✓ Boundary drawn on map</p>
+                            <p class="text-green-300 text-sm">Boundary drawn on map</p>
                         </div>
                     @else
                         <div class="bg-yellow-600/20 border border-yellow-600 rounded-lg p-3">
-                            <p class="text-yellow-300 text-sm">⚠ Draw a boundary on the map to get started</p>
+                            <p class="text-yellow-300 text-sm">Draw a boundary on the map to get started</p>
                         </div>
                     @endif
 

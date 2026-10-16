@@ -8,9 +8,11 @@ use App\Http\Controllers\Api\IntegrationController;
 use App\Http\Controllers\Api\MachineAssignmentController;
 use App\Http\Controllers\Api\MachineController;
 use App\Http\Controllers\Api\MachineHealthController;
+use App\Http\Controllers\Api\MachineOperatorAssignmentController;
 use App\Http\Controllers\Api\MaintenanceRecordController;
 use App\Http\Controllers\Api\MaintenanceScheduleController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OperatorController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\WebhookEndpointController;
@@ -85,11 +87,21 @@ Route::prefix('machines')->group(function () {
     Route::post('/{machine}/location', [MachineController::class, 'updateLocation']);  // Update location
     Route::get('/{machine}/alerts', [MachineController::class, 'alerts'])
         ->middleware('cache.headers:short');                           // Get active alerts (1 min cache)
+    Route::post('/{machine}/operator-assignments', [MachineOperatorAssignmentController::class, 'store']);   // Assign an operator (eligibility-gated)
+    Route::delete('/{machine}/operator-assignments', [MachineOperatorAssignmentController::class, 'destroy']); // Unassign the current operator
 });
 
 /**
  * Geofence endpoints
  */
+/**
+ * Operators (read-only register; assignments are under /machines/{id}/operator-assignments)
+ */
+Route::prefix('operators')->group(function () {
+    Route::get('/', [OperatorController::class, 'index']);              // List operators
+    Route::get('/{operator}', [OperatorController::class, 'show']);     // Get operator
+});
+
 Route::prefix('geofences')->group(function () {
     Route::get('/', [GeofenceController::class, 'index']);              // List geofences
     Route::post('/', [GeofenceController::class, 'store']);             // Create geofence

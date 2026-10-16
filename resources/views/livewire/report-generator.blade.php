@@ -57,7 +57,6 @@
                                         class="block p-4 rounded-lg border-2 cursor-pointer transition {{ $reportType === $key ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--line)] bg-white/5 hover:border-[var(--line)]' }}"
                                     >
                                         <div class="flex flex-col items-start gap-2">
-                                            <div class="text-2xl">{{ $type['icon'] }}</div>
                                             <div class="font-medium text-[var(--stone)]">{{ $type['label'] }}</div>
                                             <div class="text-sm text-[var(--sand)] leading-relaxed">{{ $type['description'] }}</div>
                                         </div>
