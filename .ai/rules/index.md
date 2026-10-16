@@ -18,3 +18,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | routes/api.php, routes/api_v1.php | .ai/rules/routes.md |
 | app/Services/OpenApiGenerator.php | .ai/rules/services.md |
 | resources/views/** | .ai/rules/views.md |
+| .github/workflows/*.yml | .ai/rules/deploy.md |
