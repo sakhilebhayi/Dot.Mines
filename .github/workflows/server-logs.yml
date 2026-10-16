@@ -48,3 +48,21 @@ jobs:
           echo "== memory:status (read-only)"
           php artisan memory:status
           STATUS
+
+      - name: Scheduler evidence
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+              "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+              DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}" \
+              'bash -s' <<'SCHED'
+          set -uo pipefail
+          cd "$DEPLOY_PATH"
+          echo "== schedule:list (memory entries)"
+          php artisan schedule:list 2>&1 | grep -i "memory" || echo "(no memory entries in the schedule)"
+          echo "== crontab lines mentioning artisan"
+          crontab -l 2>/dev/null | grep artisan || echo "(none visible to this user)"
+          echo "== scheduler output lines about memory:flush (newest 15, all log files)"
+          grep -h "memory:flush" storage/logs/*.log 2>/dev/null | tail -15 || true
+          echo "== last 5 scheduler 'Running' lines of any kind"
+          grep -h "Running \['artisan'" storage/logs/*.log 2>/dev/null | tail -5 || true
+          SCHED
