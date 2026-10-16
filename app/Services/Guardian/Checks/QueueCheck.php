@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\DB;
  * Production drains the database queue from the scheduler's cron tick, so
  * a growing jobs table or an old available_at means the drain stopped (or
  * cannot keep up) -- exactly the failure that once piled 996 jobs onto
- * unserviced queues while every page kept loading.
+ * unserviced queues while every page kept loading. Jobs scheduled for the
+ * future (explicit retries with a delay) are counted separately as
+ * delayed_jobs and never trip the backlog thresholds.
  */
 class QueueCheck implements GuardianCheck
 {
@@ -27,11 +29,19 @@ class QueueCheck implements GuardianCheck
     public function run(): CheckResult
     {
         try {
-            $pending = DB::table('jobs')->count();
+            $now = now()->getTimestamp();
+
+            // Backlog is what a worker could run right now. Jobs whose
+            // available_at lies in the future are scheduled retries (webhook
+            // deliveries backing off, for instance): they are reported, but
+            // a hundred of them is not a drain that stopped.
+            $pending = DB::table('jobs')->where('available_at', '<=', $now)->count();
+            $delayed = DB::table('jobs')->where('available_at', '>', $now)->count();
 
             /** @psalm-suppress MixedAssignment -- query-builder aggregates are untyped */
             $oldestAvailableAt = DB::table('jobs')
                 ->whereNull('reserved_at')
+                ->where('available_at', '<=', $now)
                 ->min('available_at');
 
             $oldestPendingSeconds = $oldestAvailableAt === null
@@ -49,6 +59,7 @@ class QueueCheck implements GuardianCheck
 
         $metrics = [
             'pending_jobs' => $pending,
+            'delayed_jobs' => $delayed,
             'oldest_pending_seconds' => $oldestPendingSeconds,
             'failed_last_hour' => $failedLastHour,
         ];
