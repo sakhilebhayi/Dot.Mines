@@ -36,3 +36,15 @@ jobs:
           echo "== $latest (last 100 non-scheduler lines)"
           grep -vE "Running \['artisan'|artisan' integrations:sync-due|schedule:run" "$latest" | tail -100
           LOGS
+
+      - name: Dot.Memory outbox status
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+              "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+              DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}" \
+              'bash -s' <<'STATUS'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          echo "== memory:status (read-only)"
+          php artisan memory:status
+          STATUS
