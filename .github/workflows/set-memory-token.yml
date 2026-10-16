@@ -1,0 +1,78 @@
+name: Provision Memory Token
+
+# Upserts DOT_MEMORY_URL and DOT_MEMORY_TOKEN in the production .env over
+# the same pinned SSH path deploy.yml uses, then rebuilds the config cache
+# so the running app picks them up. Same recipe as set-guardian-token.yml.
+# Run AFTER the deploy that ships config/services.php's memory block.
+# Rotate by updating the DOT_MEMORY_TOKEN repository secret and re-running.
+#
+# The token is a Dot.Memory service token: on Dot.Memory, run
+# provision-service-token.yml with service=dot-mines and the sha256 of a
+# locally generated plaintext; the bearer value is "<id>|<plaintext>".
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "provision" to confirm writing DOT_MEMORY_* to production'
+        required: true
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    name: Set DOT_MEMORY_* on mines.infodot.co.za
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 5
+
+    steps:
+      - name: Refuse unconfirmed runs
+        if: ${{ github.event.inputs.confirm != 'provision' }}
+        run: |
+          echo '::error::Confirmation input was not "provision" -- aborting.'
+          exit 1
+
+      - name: Refuse an empty token secret
+        env:
+          DOT_MEMORY_TOKEN: ${{ secrets.DOT_MEMORY_TOKEN }}
+        run: |
+          if [ -z "$DOT_MEMORY_TOKEN" ]; then
+            echo '::error::Repository secret DOT_MEMORY_TOKEN is not set.'
+            exit 1
+          fi
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Provision token
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+              -p "${{ secrets.DEPLOY_PORT || '22' }}" \
+              "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+              DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}" \
+              DEPLOY_PHP="${{ secrets.DEPLOY_PHP || 'php' }}" \
+              DOT_MEMORY_URL="${{ secrets.DOT_MEMORY_URL || 'https://memory.infodot.co.za' }}" \
+              DOT_MEMORY_TOKEN="${{ secrets.DOT_MEMORY_TOKEN }}" \
+              'bash -s' <<'PROVISION'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          PHP="${DEPLOY_PHP:-php}"
+
+          # Idempotent upsert: drop any existing DOT_MEMORY_* lines, append
+          # the current ones. Never echo the token.
+          touch .env
+          grep -v -e '^DOT_MEMORY_URL=' -e '^DOT_MEMORY_TOKEN=' .env > .env.memory-tmp || true
+          printf 'DOT_MEMORY_URL=%s\n' "$DOT_MEMORY_URL" >> .env.memory-tmp
+          printf 'DOT_MEMORY_TOKEN=%s\n' "$DOT_MEMORY_TOKEN" >> .env.memory-tmp
+          mv .env.memory-tmp .env
+
+          # Rebuild the cached config so the running app reads the new values.
+          $PHP artisan config:cache
+          echo "DOT_MEMORY_URL and DOT_MEMORY_TOKEN provisioned and config cache rebuilt."
+          PROVISION
