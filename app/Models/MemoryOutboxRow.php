@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $last_error
  * @property CarbonInterface|null $next_attempt_at
  * @property CarbonInterface|null $sent_at
+ * @property CarbonInterface|null $created_at
+ * @property CarbonInterface|null $updated_at
  */
 class MemoryOutboxRow extends Model
 {

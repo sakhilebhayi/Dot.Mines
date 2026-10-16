@@ -33,7 +33,7 @@ class MemoryStatus extends Command
         if ($newest === null) {
             $this->line('Newest row: none (no loop event has been recorded yet)');
         } else {
-            $this->line('Newest row: '.$newest->stage.' '.$newest->event_id.' created '.$newest->created_at?->toDateTimeString().' attempts '.$newest->attempts.' sent '.($newest->sent_at?->toDateTimeString() ?? 'no'));
+            $this->line('Newest row: '.$newest->stage.' '.$newest->event_id.' created '.($newest->created_at?->toDateTimeString() ?? 'unknown').' attempts '.$newest->attempts.' sent '.($newest->sent_at?->toDateTimeString() ?? 'no'));
         }
 
         $failed = MemoryOutboxRow::query()->whereNotNull('last_error')->orderByDesc('updated_at')->first();
