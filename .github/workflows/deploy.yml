@@ -113,6 +113,20 @@ jobs:
             ln -sfn "mines/public/${target}" "../${target}"
           done
 
+          # The scheduler is the heartbeat of this app on shared hosting: it
+          # drains the queue, runs integration syncs, the guardian beat and
+          # the Dot.Memory flush. cron runs with a minimal PATH, so the line
+          # carries the ABSOLUTE path of the PHP this shell resolved and keeps
+          # its last output in a log file. Rewritten on every deploy (marker),
+          # so a missing or stale line is repaired by the next deploy.
+          PHP_BIN="$(command -v "$PHP")"
+          MARK="# dot-mines"
+          {
+            crontab -l 2>/dev/null | grep -v "$MARK" || true
+            echo "* * * * * cd $DEPLOY_PATH && $PHP_BIN artisan schedule:run > storage/logs/cron-scheduler.log 2>&1 $MARK scheduler"
+          } | crontab -
+          echo "== Scheduler cron line installed ($PHP_BIN)"
+
           # Workers pick up new code via the restart signal (no sudo needed).
           $PHP artisan queue:restart
 
