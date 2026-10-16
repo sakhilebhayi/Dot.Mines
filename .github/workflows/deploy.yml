@@ -1,11 +1,16 @@
 name: Deploy to Production
 
-# Manual-only by design: merging to main does NOT auto-deploy. Trigger from
-# the Actions tab (or `gh workflow run deploy.yml`) when a release is ready.
-# To switch to auto-deploy later, add:
-#   push:
-#     branches: [main]
+# Runs automatically after "CI - Security & Static Analysis" finishes GREEN
+# on main (every merge), and manually from the Actions tab (or
+# `gh workflow run deploy.yml -f confirm=deploy`) to redeploy the current
+# main. A red CI run never deploys: the job's `if` below checks the
+# conclusion. Adding "Quality Gate (all checks must pass)" as a required
+# status check on main keeps a red PR from being mergeable at all.
 on:
+  workflow_run:
+    workflows: ["CI - Security & Static Analysis"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       confirm:
@@ -23,6 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 15
+    # Only a successful CI run deploys; a manual run must be confirmed.
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      || (github.event_name == 'workflow_dispatch' && github.event.inputs.confirm == 'deploy')
 
     # Required repository secrets (Settings -> Secrets and variables -> Actions):
     #   DEPLOY_HOST         e.g. mines.infodot.co.za
@@ -47,12 +56,6 @@ jobs:
     # hosting -- the step degrades to a warning:
     #   deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart reverb
     steps:
-      - name: Refuse unconfirmed runs
-        if: ${{ github.event.inputs.confirm != 'deploy' }}
-        run: |
-          echo '::error::Confirmation input was not "deploy" -- aborting.'
-          exit 1
-
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
