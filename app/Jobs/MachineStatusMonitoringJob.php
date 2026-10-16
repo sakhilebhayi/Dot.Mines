@@ -6,6 +6,7 @@ use App\Events\MachineOffline;
 use App\Models\Integration;
 use App\Models\Machine;
 use App\Services\Integration\IntegrationService;
+use App\Services\Memory\MemoryLoopRecorder;
 use App\Support\ApiPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -143,6 +144,7 @@ class MachineStatusMonitoringJob implements ShouldBeUnique, ShouldQueue
                         ]);
                     } elseif ($oldStatus === 'offline' && $newStatus !== 'offline') {
                         // Machine came back online
+                        app(MemoryLoopRecorder::class)->machineOnline($machine, $newStatus);
                         Log::info('Machine came back online', [
                             'machine_id' => $machine->id,
                             'new_status' => $newStatus,

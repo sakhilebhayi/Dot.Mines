@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
+ * @property-read Machine|null $machine
  * @property int $team_id
  * @property int|null $machine_id
  * @property int|null $maintenance_schedule_id

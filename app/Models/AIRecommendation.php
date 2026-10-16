@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property int $id
+ * @property int|null $related_machine_id
  * @property string|null $status
  * @property Carbon|null $created_at
  * @property int $team_id
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $title
  * @property string $description
  * @property-read Team|null $team
+ * @property-read Machine|null $machine
  */
 class AIRecommendation extends Model
 {

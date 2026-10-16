@@ -117,3 +117,8 @@ Schedule::call(fn () => SyncSequence::prune())
 Schedule::call(fn () => SchedulerHeartbeat::beat())
     ->name('guardian-scheduler-heartbeat')
     ->everyMinute();
+
+// Dot.Memory intelligence loop: send what the outbox holds, prune sent rows.
+// A scheduled command, not a queued job: the queue runs --tries=1 from cron.
+Schedule::command('memory:flush')->everyMinute()->withoutOverlapping();
+Schedule::command('memory:prune')->dailyAt('03:20');
