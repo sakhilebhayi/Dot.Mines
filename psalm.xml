@@ -41,6 +41,8 @@
         <directory name="app/Console/Commands"/>
         <directory name="app/Jobs"/>
         <directory name="app/Listeners"/>
+        <!-- Observers: created()/updated() are invoked by Eloquent. -->
+        <directory name="app/Observers"/>
         <directory name="app/Mail"/>
         <directory name="app/Notifications"/>
         <directory name="app/Policies"/>

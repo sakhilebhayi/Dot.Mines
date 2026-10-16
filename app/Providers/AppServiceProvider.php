@@ -8,12 +8,21 @@ use App\Events\GeofenceEntryDetected;
 use App\Events\GeofenceExitDetected;
 use App\Events\MachineOffline;
 use App\Events\MaintenanceAlertTriggered;
+use App\Listeners\MemoryLoopSubscriber;
 use App\Listeners\NotifyOnJobFailed;
 use App\Listeners\WebhookEventSubscriber;
 use App\Livewire\AINotifications;
 use App\Mail\WelcomeMail;
+use App\Models\AIRecommendation;
+use App\Models\AiRecommendationAction;
+use App\Models\Alert;
+use App\Models\MaintenanceRecord;
 use App\Models\Team;
 use App\Models\User;
+use App\Observers\Memory\AiRecommendationActionLoopObserver;
+use App\Observers\Memory\AiRecommendationLoopObserver;
+use App\Observers\Memory\AlertLoopObserver;
+use App\Observers\Memory\MaintenanceRecordLoopObserver;
 use App\Services\Feed\FeedEventNormaliser;
 use App\Services\Guardian\ErrorCounter;
 use App\Services\RealtimeEventScheduler;
@@ -213,6 +222,14 @@ class AppServiceProvider extends ServiceProvider
         // moment. The subscriber only queues work; nothing here talks to a
         // customer's server on the request that raised the event.
         Event::subscribe(WebhookEventSubscriber::class);
+
+        // Ecosystem intelligence loop: what the mine did, remembered in
+        // Dot.Memory (docs/superpowers/specs/2026-10-16-memory-loop-design.md).
+        Event::subscribe(MemoryLoopSubscriber::class);
+        Alert::observe(AlertLoopObserver::class);
+        MaintenanceRecord::observe(MaintenanceRecordLoopObserver::class);
+        AIRecommendation::observe(AiRecommendationLoopObserver::class);
+        AiRecommendationAction::observe(AiRecommendationActionLoopObserver::class);
 
         // Listen for failed queue jobs and notify monitoring
         Event::listen(JobFailed::class, function (JobFailed $event) {

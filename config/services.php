@@ -35,6 +35,16 @@ return [
         ],
     ],
 
+    // Dot.Memory: the ecosystem intelligence loop. One platform-level
+    // service token (provision-service-token.yml on Dot.Memory, service
+    // dot-mines). Unset = the loop is inert. See docs/superpowers/specs/2026-10-16-memory-loop-design.md.
+    'memory' => [
+        'url' => env('DOT_MEMORY_URL'),
+        'token' => env('DOT_MEMORY_TOKEN'),
+        'timeout' => (int) env('DOT_MEMORY_TIMEOUT', 10),
+        'outbox_retention_days' => (int) env('DOT_MEMORY_OUTBOX_RETENTION_DAYS', 30),
+    ],
+
     'paystack' => [
         'secret' => env('PAYSTACK_SECRET_KEY'),
         'public_key' => env('PAYSTACK_PUBLIC_KEY'),
