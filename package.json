@@ -26,7 +26,7 @@
     },
     "dependencies": {
         "alpinejs": "^3.16.1",
-        "apexcharts": "^5.10.3",
+        "apexcharts": "^6.10.0",
         "chart.js": "^4.5.1",
         "leaflet": "^1.9.4",
         "leaflet-draw": "^1.0.4",
