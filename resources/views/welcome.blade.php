@@ -112,11 +112,6 @@
                             <a href="{{ route('login') }}" class="hidden sm:block text-sm font-medium text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
                                 Sign in
                             </a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="press px-5 py-2.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] text-sm font-display font-semibold rounded-lg transition-colors">
-                                    Start free trial
-                                </a>
-                            @endif
                         @endauth
 
                         <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden press p-2 -mr-2 text-[var(--stone)]" aria-label="Toggle menu">
@@ -177,8 +172,8 @@
 
                     @guest
                         <div class="flex flex-wrap items-center gap-4">
-                            <a href="{{ route('register') }}" class="press px-7 py-3.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] font-display font-semibold rounded-lg transition-colors">
-                                Start free trial
+                            <a href="{{ route('login') }}" class="press px-7 py-3.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] font-display font-semibold rounded-lg transition-colors">
+                                Sign in
                             </a>
                             <a href="#features" class="press flex items-center gap-2 px-7 py-3.5 text-[var(--stone)] font-medium rounded-lg border border-[var(--line)] hover:border-[var(--sand)] transition-colors">
                                 See what it tracks
@@ -317,15 +312,12 @@
                     See your fleet the way your team already thinks about it
                 </h2>
                 <p class="text-[var(--sand)] leading-relaxed mb-10 max-w-lg mx-auto">
-                    Free for 14 days. No hardware, no credit card, no call with a sales team required to try it.
+                    Dot.Mines accounts are created by invitation. If your team has invited you, sign in to get started.
                 </p>
 
                 @guest
                     <div class="flex flex-wrap justify-center gap-4">
-                        <a href="{{ route('register') }}" class="press px-8 py-3.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] font-display font-semibold rounded-lg transition-colors">
-                            Start free trial
-                        </a>
-                        <a href="{{ route('login') }}" class="press px-8 py-3.5 text-[var(--stone)] font-medium rounded-lg border border-[var(--line)] hover:border-[var(--sand)] transition-colors">
+                        <a href="{{ route('login') }}" class="press px-8 py-3.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] font-display font-semibold rounded-lg transition-colors">
                             Sign in
                         </a>
                     </div>
