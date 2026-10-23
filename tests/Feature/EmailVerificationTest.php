@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Fortify\CreateNewUser;
 use App\Models\Team;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -35,16 +37,17 @@ class EmailVerificationTest extends TestCase
     {
         Notification::fake();
 
-        $response = $this->post('/register', [
+        // Public /register is closed (see RegistrationClosedTest), so drive the same two steps Fortify's
+        // registration controller performs: create the user, then fire the Registered event.
+        $user = app(CreateNewUser::class)->create([
             'name' => 'New Miner',
             'email' => 'miner@example.com',
             'password' => 'S3cure-password!',
             'password_confirmation' => 'S3cure-password!',
             'terms' => true,
         ]);
+        event(new Registered($user));
 
-        $response->assertRedirect();
-        $user = User::where('email', 'miner@example.com')->firstOrFail();
         Notification::assertSentTo($user, VerifyEmailNotification::class);
         $this->assertContains(
             ShouldQueue::class,

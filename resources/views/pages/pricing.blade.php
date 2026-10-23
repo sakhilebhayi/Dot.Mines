@@ -34,8 +34,8 @@
     </div>
 
     <div class="text-center">
-        <a href="{{ route('register') }}" class="inline-block bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] font-display font-semibold px-8 py-3.5 rounded-lg transition-colors">
-            Start free trial
+        <a href="{{ route('login') }}" class="inline-block bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] font-display font-semibold px-8 py-3.5 rounded-lg transition-colors">
+            Sign in
         </a>
         <p class="text-[var(--sand)] text-xs mt-3">
             You'll only be billed once you add machines to your team. Manage or cancel anytime from the Billing page in your account menu.

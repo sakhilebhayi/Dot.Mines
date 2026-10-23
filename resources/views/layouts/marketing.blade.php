@@ -50,9 +50,6 @@
                         <a href="{{ route('login') }}" class="hidden sm:block text-sm font-medium text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
                             Sign in
                         </a>
-                        <a href="{{ route('register') }}" class="px-5 py-2.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] text-sm font-display font-semibold rounded-lg transition-colors">
-                            Start free trial
-                        </a>
                     @endauth
 
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 -mr-2 text-[var(--stone)]" aria-label="Toggle menu">
