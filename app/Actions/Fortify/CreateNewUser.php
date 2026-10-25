@@ -47,7 +47,7 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * Create a personal team for the user.
      */
-    protected function createTeam(User $user): void
+    public function createTeam(User $user): void
     {
         $team = Team::forceCreate([
             'user_id' => $user->id,
