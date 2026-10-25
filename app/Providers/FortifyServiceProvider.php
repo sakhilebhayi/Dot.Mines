@@ -10,9 +10,11 @@ use App\Support\ApiPayload;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
+use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -37,6 +39,8 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
+        $this->keepRegisterRouteWhenSignUpIsClosed();
+
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower(ApiPayload::str($request->input(Fortify::username()))).'|'.($request->ip() ?? 'unknown'));
 
@@ -55,5 +59,16 @@ class FortifyServiceProvider extends ServiceProvider
         RateLimiter::for('fortify', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());
         });
+    }
+
+    private function keepRegisterRouteWhenSignUpIsClosed(): void
+    {
+        // Public sign-up is closed: accounts are created by invitation or by an administrator, never by the visitor.
+        // With the registration feature off Fortify does not define /register at all, so keep the named `register`
+        // route resolving (links, cached routes and old bookmarks land on the login page instead of a 404 or a
+        // route exception). The redirect answers every HTTP verb, so a direct POST /register creates nothing either.
+        if (! Features::enabled(Features::registration())) {
+            Route::redirect('/register', '/login')->name('register');
+        }
     }
 }

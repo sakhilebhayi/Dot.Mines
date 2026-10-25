@@ -149,7 +149,9 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Public sign-up is closed: accounts are created by invitation or by an administrator. Registration is only
+        // switched on, deliberately, with ALLOW_REGISTRATION=true.
+        ...(filter_var(env('ALLOW_REGISTRATION', false), FILTER_VALIDATE_BOOLEAN) ? [Features::registration()] : []),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::updateProfileInformation(),

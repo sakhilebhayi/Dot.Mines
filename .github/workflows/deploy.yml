@@ -89,12 +89,63 @@ jobs:
             exit 1
           fi
 
+          # ---- application-folder guard (tolerant: it can never fail the deploy)
+          # $DEPLOY_PATH sits inside the docroot (~/<host>/<key>), so without a deny file the web server hands out
+          # its database, logs and vendor/ (four other platforms were found doing exactly that on 2026-10-20). This
+          # makes sure $DEPLOY_PATH/.htaccess contains `Require all denied`, the same way the App Folder Guard
+          # workflow in InfoDot does. The body is a subshell with `set +e`: every outcome, a failed write included,
+          # is one log line and the deploy carries on. It skips itself when the folder looks like a docroot (parent
+          # is $HOME, or index.php beside artisan with no public/index.php), because denying a docroot takes the
+          # site down. It runs BEFORE maintenance mode. Mines tracks its own .htaccess in git, so the
+          # `git reset --hard` below restores the tracked text and drops the line again: the guard is called a
+          # second time right after the reset. (Untracked, the file would survive the reset as it does elsewhere.)
+          guard_app_folder() (
+            set +e
+            WHEN="$1"
+            F="$DEPLOY_PATH/.htaccess"
+            if [ ! -f "$DEPLOY_PATH/artisan" ]; then echo "== App-folder guard ($WHEN): skipped (no artisan in $DEPLOY_PATH)"; exit 0; fi
+            PARENT="$(cd "$(dirname "$DEPLOY_PATH")" 2>/dev/null && pwd -P)"
+            HOME_REAL="$(cd "${HOME:-/nonexistent}" 2>/dev/null && pwd -P)"
+            if [ -z "$PARENT" ] || [ "$PARENT" = "$HOME_REAL" ]; then
+              echo "== App-folder guard ($WHEN): skipped (the app folder is directly in the home folder or its parent is unknown; it may be the docroot)"; exit 0
+            fi
+            if [ -f "$DEPLOY_PATH/index.php" ] && [ ! -f "$DEPLOY_PATH/public/index.php" ]; then
+              echo "== App-folder guard ($WHEN): skipped (index.php beside artisan and no public/index.php: this looks like a docroot)"; exit 0
+            fi
+            if [ -f "$F" ] && grep -q 'Require all denied' "$F"; then
+              echo "== App-folder guard ($WHEN): already present"
+            elif [ -f "$F" ]; then
+              if git -C "$DEPLOY_PATH" ls-files --error-unmatch .htaccess > /dev/null 2>&1; then
+                # tracked: git already holds the original, no copy needed
+                if printf '\n# Dot: the application folder is never served.\nRequire all denied\n' >> "$F"; then
+                  echo "== App-folder guard ($WHEN): appended to the tracked .htaccess (git holds the original)"
+                else
+                  echo "::warning::App-folder guard ($WHEN): could not append to $F (deploy continues)"
+                fi
+              elif cp "$F" "$F.before-guard" && printf '\n# Dot: the application folder is never served.\nRequire all denied\n' >> "$F"; then
+                echo "== App-folder guard ($WHEN): appended to the existing .htaccess (original kept as .htaccess.before-guard)"
+              else
+                echo "::warning::App-folder guard ($WHEN): could not append to $F (deploy continues)"
+              fi
+            else
+              if printf '# Dot: the application folder is never served.\nRequire all denied\n' > "$F"; then
+                echo "== App-folder guard ($WHEN): written (new .htaccess)"
+              else
+                echo "::warning::App-folder guard ($WHEN): could not write $F (deploy continues)"
+              fi
+            fi
+            exit 0
+          )
+          guard_app_folder "before maintenance mode" || true
+
           git fetch origin main
 
           # Maintenance mode only for the risky window (migrations).
           $PHP artisan down --retry=30 || true
 
           git reset --hard origin/main
+          # The reset restored the tracked .htaccess; put the deny line back at once.
+          guard_app_folder "after reset" || true
           $COMPOSER install --no-interaction --optimize-autoloader --no-dev
 
           # Built frontend assets are COMMITTED in public/build -- no npm here.
@@ -145,18 +196,36 @@ jobs:
           if ! read_crontab "$OLD"; then
             echo "::error::crontab -l answered empty or failed five times ($(cat "$ERR")). Refusing to write a crontab I could not read."; exit 1
           fi
+          KEY="${MARK#\# dot-}"
+          EXPECT_MINE=1
           OTHERS=$(grep -v "$MARK" "$OLD" | grep -c . || true)
           {
             grep -v "$MARK" "$OLD" || true
-            echo "* * * * * cd $DEPLOY_PATH && $PHP_BIN artisan schedule:run > storage/logs/cron-scheduler.log 2>&1 $MARK"
+            echo "* * * * * cd $DEPLOY_PATH && exec $PHP_BIN artisan schedule:run > storage/logs/cron-scheduler.log 2>&1 $MARK"
           } > "$NEW"
+          # Runner mode (InfoDot docs/programme R-1): when the account runs the bounded-concurrency cron runner
+          # (InfoDot: Cron Runner workflow, "install"), this app's commands go to ~/.dot-cron.d/$KEY.cron and the
+          # runner starts them, at most 4 at a time, away from second 0. Its own crontab lines are removed (a migration
+          # on deploy). Without the runner the lines above are installed as before.
+          if [ -x "$HOME/bin/dot-cron-runner" ] && grep -q '# dot-cron-runner' "$OLD"; then
+            CMDS="$(grep -F -- "$MARK" "$NEW" | sed -E 's/^[^ ]+ [^ ]+ [^ ]+ [^ ]+ [^ ]+ //; s/ *# dot-[a-z0-9-]*$//' || true)"
+            mkdir -p "$HOME/.dot-cron.d"
+            if [ -n "$CMDS" ]; then
+              printf '%s\n' "$CMDS" > "$HOME/.dot-cron.d/$KEY.cron.tmp" && mv "$HOME/.dot-cron.d/$KEY.cron.tmp" "$HOME/.dot-cron.d/$KEY.cron"
+            else
+              rm -f "$HOME/.dot-cron.d/$KEY.cron"
+            fi
+            grep -v -F -- "$MARK" "$NEW" > "$NEW.t" || true; mv "$NEW.t" "$NEW"
+            EXPECT_MINE=0
+            echo "== runner mode: $(printf '%s' "$CMDS" | grep -c . || true) command(s) written to ~/.dot-cron.d/$KEY.cron, none left in the crontab"
+          fi
           crontab "$NEW"
           read_crontab "$CHK" || : > "$CHK"
           AFTER=$(grep -v "$MARK" "$CHK" | grep -c . || true)
           MINE=$(grep -c "$MARK" "$CHK" || true)
-          if [ "$AFTER" != "$OTHERS" ] || [ "$MINE" != "1" ]; then
+          if [ "$AFTER" != "$OTHERS" ] || [ "$MINE" != "$EXPECT_MINE" ]; then
             crontab "$OLD"
-            echo "::error::crontab verification failed (other lines before=$OTHERS after=$AFTER, mine=$MINE); the previous crontab was restored."; exit 1
+            echo "::error::crontab verification failed (other lines before=$OTHERS after=$AFTER, mine=$MINE, expected=$EXPECT_MINE); the previous crontab was restored."; exit 1
           fi
           rm -f "$OLD" "$NEW" "$CHK" "$ERR"; flock -u 9
           echo "== crontab: $MINE line(s) for $MARK installed, $OTHERS other line(s) preserved"
@@ -199,5 +268,36 @@ jobs:
         if: failure()
         run: |
           echo '::error::Deploy failed. If it failed during or after migrations, the site may have been left in maintenance mode intentionally -- inspect the server before running `php artisan up`.'
+
+      # The application folder must not answer over HTTP. Public requests only (no SSH, nothing is read), after
+      # `php artisan up` and the health check, so it can only turn a finished run red, never leave the site down.
+      # It sits after the failure notice so a red probe does not print that notice's "maintenance mode" advice.
+      # 200 is a leak; 301/302/403/404 are fine. Found 2026-10-20 serving its database, logs and vendor/ on four
+      # other platforms. Only status codes are printed.
+      - name: Probe the application folder from outside
+        if: ${{ !cancelled() }}
+        env:
+          SITE_URL: https://mines.infodot.co.za
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -uo pipefail
+          KEY="$(basename "$DEPLOY_PATH")"
+          [ -n "$KEY" ] && [ "$KEY" != "/" ] || { echo "::error::cannot work out the app folder name; the probe did not run"; exit 1; }
+          EXPOSED=0
+          UNREACHED=0
+          for P in .env .env.bak-secrets artisan composer.json composer.lock database/database.sqlite storage/logs/laravel.log vendor/autoload.php phpunit.xml; do
+            CODE=$(curl -s -o /dev/null -m 15 -w '%{http_code}' "$SITE_URL/$KEY/$P" || true)
+            case "$CODE" in
+              200) echo "::error::EXPOSED /$KEY/$P answered 200"; EXPOSED=1 ;;
+              000|"") echo "000 /$KEY/$P (no answer)"; UNREACHED=$((UNREACHED + 1)) ;;
+              *) echo "$CODE /$KEY/$P" ;;
+            esac
+          done
+          [ "$UNREACHED" -eq 0 ] || echo "::warning::$UNREACHED probe request(s) got no answer; those paths are unverified."
+          if [ "$EXPOSED" -ne 0 ]; then
+            echo "::error::The application folder is readable over HTTP (database, logs or vendor/ may be downloadable). Run the App Folder Guard workflow in InfoDot (mode apply) or add the deny file by hand, then re-run."
+            exit 1
+          fi
+          echo "== App-folder probe: no sensitive path answered 200 ($((9 - UNREACHED)) of 9 paths verified)."
 
 # registration-kick: touched to force Actions to (re)index this workflow
