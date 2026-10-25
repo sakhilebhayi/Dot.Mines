@@ -103,6 +103,15 @@ jobs:
             set +e
             WHEN="$1"
             F="$DEPLOY_PATH/.htaccess"
+            # Once the subdomain's document root is <app>/public (the docroot move, InfoDot docs S-2e) the app
+            # folder is not served at all, and a deny file in it would block the whole site: do not write one.
+            # The host's own answer decides; a marker file is the fallback if the lookup fails.
+            APP_REAL="$(cd "$DEPLOY_PATH" 2>/dev/null && pwd -P)" || APP_REAL=""
+            CURRENT_DOCROOT="$(uapi --output=json DomainInfo single_domain_data domain=mines.infodot.co.za 2>/dev/null | sed -n 's/.*"documentroot" *: *"\([^"]*\)".*/\1/p' | head -1)"
+            if [ -n "$APP_REAL" ] && { [ "$CURRENT_DOCROOT" = "$APP_REAL/public" ] || [ -f "$DEPLOY_PATH/.docroot-is-public" ]; }; then
+              echo "== app-folder guard: skipped (the document root is $APP_REAL/public; the app folder is not served)"
+              exit 0
+            fi
             if [ ! -f "$DEPLOY_PATH/artisan" ]; then echo "== App-folder guard ($WHEN): skipped (no artisan in $DEPLOY_PATH)"; exit 0; fi
             PARENT="$(cd "$(dirname "$DEPLOY_PATH")" 2>/dev/null && pwd -P)"
             HOME_REAL="$(cd "${HOME:-/nonexistent}" 2>/dev/null && pwd -P)"
