@@ -839,7 +839,7 @@
         <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-[var(--line)] text-[var(--stone)] shadow-lg" x-on:click.stop>
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-display font-semibold text-[var(--stone)]">Book Maintenance</h2>
-                <button wire:click="closeBookingModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                <button aria-label="Close" wire:click="closeBookingModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>

@@ -84,8 +84,10 @@
                     <tbody>
                         @foreach($this->rows as $row)
                             <tr wire:key="operator-{{ $row['operator']->id }}"
+                                tabindex="0"
                                 onclick="window.location='{{ route('operators.show', $row['operator']) }}'"
-                                class="border-b border-[var(--line)] cursor-pointer hover:bg-[var(--ink)] transition">
+                                onkeydown="if(event.key==='Enter'){window.location='{{ route('operators.show', $row['operator']) }}'}"
+                                class="border-b border-[var(--line)] cursor-pointer hover:bg-[var(--ink)] transition focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--sand)]">
                                 <td class="px-6 py-4">
                                     <span class="text-[var(--stone)] font-semibold">{{ $row['operator']->name }}</span>
                                     @if($row['operator']->default_shift)

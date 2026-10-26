@@ -95,7 +95,7 @@
         <div class="bg-[var(--ink-soft)] rounded-lg p-6 max-w-lg w-full mx-4 border border-[var(--line)] shadow-lg" x-on:click.stop>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold">Refuel Tank</h3>
-                <button class="text-[var(--sand)] hover:text-[var(--stone)]" wire:click="closeRefuelModal">
+                <button aria-label="Close" class="text-[var(--sand)] hover:text-[var(--stone)]" wire:click="closeRefuelModal">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>

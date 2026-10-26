@@ -27,7 +27,7 @@
                 <span class="px-3 py-1.5 bg-red-900 text-red-200 rounded-lg text-sm font-semibold">Non-Compliant</span>
             @endif
             @can('update', $operator)
-                <select wire:change="setEmploymentStatus($event.target.value)"
+                <select aria-label="Employment status" wire:change="setEmploymentStatus($event.target.value)"
                         class="px-3 py-1.5 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                     @foreach(\App\Models\Operator::STATUSES as $value => $label)
                         <option value="{{ $value }}" @selected($operator->employment_status === $value)>{{ $label }}</option>

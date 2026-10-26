@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('mine-areas') }}" class="text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
+                    <a href="{{ route('mine-areas') }}" aria-label="Back to mine areas" class="text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     </a>
                     <div>
@@ -707,7 +707,7 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)] text-[var(--stone)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Assign Machine to {{ $mineArea->name }}</h2>
-                    <button wire:click="closeAssignModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeAssignModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -744,7 +744,7 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Add Production Record</h2>
-                    <button wire:click="closeProductionModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeProductionModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -812,7 +812,7 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Set Production Target</h2>
-                    <button wire:click="closeTargetModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeTargetModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -874,7 +874,7 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Upload Mine Plan</h2>
-                    <button wire:click="closeUploadModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeUploadModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -929,7 +929,7 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Create Area Alert</h2>
-                    <button wire:click="closeAlertModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeAlertModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -982,7 +982,7 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Link Geofence to {{ $mineArea->name }}</h2>
-                    <button wire:click="closeGeofenceModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeGeofenceModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>

@@ -724,7 +724,7 @@
                     <h2 class="text-2xl font-bold text-[var(--stone)]">
                         {{ $editingMachineId ? 'Edit Machine' : 'Add New Machine' }}
                     </h2>
-                    <button wire:click="closeModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -930,7 +930,7 @@
             <div class="bg-[var(--ink-soft)] rounded-lg border border-[var(--line)] p-6 w-full max-w-md" @click.stop>
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold text-[var(--stone)]">Assign to Excavator</h2>
-                    <button wire:click="closeAssignModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeAssignModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>

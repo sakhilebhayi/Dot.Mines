@@ -367,7 +367,7 @@
                     <h2 class="text-xl font-bold text-[var(--stone)]">
                         {{ $editingMineAreaId ? 'Edit Mine Area' : 'Create New Mine Area' }}
                     </h2>
-                    <button type="button"
+                    <button type="button" aria-label="Close"
                         wire:click="@if($editingMineAreaId) closeEditModal @else closeCreateModal @endif"
                         class="text-[var(--sand)] hover:text-[var(--stone)]"
                     >

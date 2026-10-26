@@ -173,7 +173,7 @@
                                         <p class="text-sm text-[var(--sand)]">{{ $member['email'] }}</p>
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <select 
+                                        <select aria-label="Team member role"
                                             wire:change="updateUserRole({{ $member['id'] }}, $event.target.value)"
                                             class="bg-white/5 text-[var(--stone)] px-3 py-1 rounded border border-[var(--line)] text-sm"
                                         >
