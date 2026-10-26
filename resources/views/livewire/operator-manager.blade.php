@@ -34,21 +34,21 @@
 
     {{-- Filters --}}
     <div class="flex flex-wrap gap-3 mb-6">
-        <input type="search" wire:model.live.debounce.300ms="search" placeholder="Search name or employee number…"
+        <input aria-label="Search name or employee number" type="search" wire:model.live.debounce.300ms="search" placeholder="Search name or employee number…"
                class="flex-1 min-w-64 px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
-        <select wire:model.live="statusFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
+        <select aria-label="Statusfilter" wire:model.live="statusFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
             <option value="">All statuses</option>
             @foreach(\App\Models\Operator::STATUSES as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
             @endforeach
         </select>
-        <select wire:model.live="equipmentFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
+        <select aria-label="Equipmentfilter" wire:model.live="equipmentFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
             <option value="">All equipment</option>
             @foreach($this->equipmentTypes as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
             @endforeach
         </select>
-        <select wire:model.live="complianceFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
+        <select aria-label="Compliancefilter" wire:model.live="complianceFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
             <option value="">All compliance</option>
             <option value="compliant">Compliant</option>
             <option value="expiring">Expiring soon</option>
@@ -123,34 +123,34 @@
             <x-slot name="content">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Employee number</label>
-                        <input type="text" wire:model="form.employee_number" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-manager-form-employee-number" class="block text-sm text-[var(--stone)] mb-1">Employee number</label>
+                        <input id="livewire-operator-manager-form-employee-number" type="text" wire:model="form.employee_number" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                         @error('form.employee_number') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Default shift</label>
-                        <select wire:model="form.default_shift" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-manager-form-default-shift" class="block text-sm text-[var(--stone)] mb-1">Default shift</label>
+                        <select id="livewire-operator-manager-form-default-shift" wire:model="form.default_shift" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                             <option value="day">Day (06:00–18:00)</option>
                             <option value="night">Night (18:00–06:00)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">First name</label>
-                        <input type="text" wire:model="form.first_name" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-manager-form-first-name" class="block text-sm text-[var(--stone)] mb-1">First name</label>
+                        <input id="livewire-operator-manager-form-first-name" type="text" wire:model="form.first_name" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                         @error('form.first_name') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Last name</label>
-                        <input type="text" wire:model="form.last_name" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-manager-form-last-name" class="block text-sm text-[var(--stone)] mb-1">Last name</label>
+                        <input id="livewire-operator-manager-form-last-name" type="text" wire:model="form.last_name" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                         @error('form.last_name') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Phone</label>
-                        <input type="text" wire:model="form.phone" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-manager-form-phone" class="block text-sm text-[var(--stone)] mb-1">Phone</label>
+                        <input id="livewire-operator-manager-form-phone" type="text" wire:model="form.phone" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Job title</label>
-                        <input type="text" wire:model="form.job_title" placeholder="Machine Operator" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-manager-form-job-title" class="block text-sm text-[var(--stone)] mb-1">Job title</label>
+                        <input id="livewire-operator-manager-form-job-title" type="text" wire:model="form.job_title" placeholder="Machine Operator" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                 </div>
                 <p class="text-[var(--sand)] text-xs mt-4">Licences, medical fitness and training are added from the operator's page after creation.</p>

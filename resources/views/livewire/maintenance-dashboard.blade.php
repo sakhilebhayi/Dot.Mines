@@ -16,7 +16,7 @@
 
     <!-- Period Selector -->
     <div class="mb-6 flex items-center gap-4">
-        <select wire:model.live="selectedPeriod" class="select select-bordered bg-white/5 border-[var(--line)] text-[var(--stone)] [&>option]:text-[var(--ink)]">
+        <select aria-label="Selectedperiod" wire:model.live="selectedPeriod" class="select select-bordered bg-white/5 border-[var(--line)] text-[var(--stone)] [&>option]:text-[var(--ink)]">
             <option value="today">Today</option>
             <option value="week">This Week</option>
             <option value="month">This Month</option>
@@ -849,8 +849,8 @@
             <form wire:submit.prevent="bookMaintenance" class="space-y-4">
                 <!-- Machine Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Machine *</label>
-                    <select wire:model="machine_id" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
+                    <label for="livewire-maintenance-dashboard-machine-id" class="block text-sm font-medium text-[var(--sand)] mb-2">Machine *</label>
+                    <select id="livewire-maintenance-dashboard-machine-id" wire:model="machine_id" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
                         <option value="">Select a machine...</option>
                         @foreach($machines as $machine)
                             <option value="{{ $machine->id }}">{{ $machine->name }} - {{ $machine->model }}</option>
@@ -862,8 +862,8 @@
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Maintenance Type -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Maintenance Type *</label>
-                            <select wire:model="maintenance_type" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
+                        <label for="livewire-maintenance-dashboard-maintenance-type" class="block text-sm font-medium text-[var(--sand)] mb-2">Maintenance Type *</label>
+                            <select id="livewire-maintenance-dashboard-maintenance-type" wire:model="maintenance_type" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
                             <option value="preventive">Preventive</option>
                             <option value="corrective">Corrective</option>
                             <option value="predictive">Predictive</option>
@@ -880,8 +880,8 @@
 
                     <!-- Priority -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Priority *</label>
-                        <select wire:model="priority" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
+                        <label for="livewire-maintenance-dashboard-priority" class="block text-sm font-medium text-[var(--sand)] mb-2">Priority *</label>
+                        <select id="livewire-maintenance-dashboard-priority" wire:model="priority" class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-100 bg-[var(--ink-soft)]" required>
                             <option value="low">Low</option>
                             <option value="medium">Medium</option>
                             <option value="high">High</option>
@@ -893,8 +893,8 @@
 
                 <!-- Title -->
                 <div>
-                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Title *</label>
-                    <input 
+                    <label for="livewire-maintenance-dashboard-title" class="block text-sm font-medium text-[var(--sand)] mb-2">Title *</label>
+                    <input id="livewire-maintenance-dashboard-title" 
                         type="text" 
                         wire:model="title" 
                         class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
@@ -906,8 +906,8 @@
 
                 <!-- Description -->
                 <div>
-                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Description</label>
-                    <textarea 
+                    <label for="livewire-maintenance-dashboard-description" class="block text-sm font-medium text-[var(--sand)] mb-2">Description</label>
+                    <textarea id="livewire-maintenance-dashboard-description" 
                         wire:model="description" 
                         class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                         rows="3" 
@@ -919,8 +919,8 @@
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Scheduled Date -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Scheduled Date *</label>
-                        <input 
+                        <label for="livewire-maintenance-dashboard-scheduled-date" class="block text-sm font-medium text-[var(--sand)] mb-2">Scheduled Date *</label>
+                        <input id="livewire-maintenance-dashboard-scheduled-date" 
                             type="datetime-local" 
                             wire:model="scheduled_date" 
                             class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
@@ -931,8 +931,8 @@
 
                     <!-- Estimated Duration -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Estimated Duration (hours)</label>
-                        <input 
+                        <label for="livewire-maintenance-dashboard-estimated-duration-hours" class="block text-sm font-medium text-[var(--sand)] mb-2">Estimated Duration (hours)</label>
+                        <input id="livewire-maintenance-dashboard-estimated-duration-hours" 
                             type="number" 
                             wire:model="estimated_duration_hours" 
                             step="0.5" 
@@ -947,8 +947,8 @@
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Estimated Cost -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Estimated Cost (ZAR)</label>
-                        <input 
+                        <label for="livewire-maintenance-dashboard-estimated-cost" class="block text-sm font-medium text-[var(--sand)] mb-2">Estimated Cost (ZAR)</label>
+                        <input id="livewire-maintenance-dashboard-estimated-cost" 
                             type="number" 
                             wire:model="estimated_cost" 
                             step="0.01" 
@@ -961,8 +961,8 @@
 
                     <!-- Required Parts -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Required Parts</label>
-                        <input 
+                        <label for="livewire-maintenance-dashboard-required-parts" class="block text-sm font-medium text-[var(--sand)] mb-2">Required Parts</label>
+                        <input id="livewire-maintenance-dashboard-required-parts" 
                             type="text" 
                             wire:model="required_parts" 
                             class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
@@ -974,8 +974,8 @@
 
                 <!-- Technician Notes -->
                 <div>
-                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Technician Notes</label>
-                    <textarea 
+                    <label for="livewire-maintenance-dashboard-technician-notes" class="block text-sm font-medium text-[var(--sand)] mb-2">Technician Notes</label>
+                    <textarea id="livewire-maintenance-dashboard-technician-notes" 
                         wire:model="technician_notes" 
                         class="w-full px-4 py-2 border border-[var(--line)] rounded-lg focus:ring-2 focus:ring-blue-500 bg-[var(--ink-soft)] text-gray-100" 
                         rows="2" 

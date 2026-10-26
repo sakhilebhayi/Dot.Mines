@@ -102,8 +102,8 @@
         <div class="bg-[var(--ink-soft)] rounded-lg shadow-lg p-4 mb-6">
             <div class="flex flex-wrap gap-4">
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-[var(--sand)] mb-1">Category</label>
-                    <select wire:model.live="filters.category" class="w-full rounded-lg border-[var(--line)] bg-white/5 border border-[var(--line)] text-[var(--stone)] transition-all duration-200 focus:ring-2 focus:ring-[var(--gold)]">
+                    <label for="livewire-ai-optimization-dashboard-filters-category" class="block text-sm font-medium text-[var(--sand)] mb-1">Category</label>
+                    <select id="livewire-ai-optimization-dashboard-filters-category" wire:model.live="filters.category" class="w-full rounded-lg border-[var(--line)] bg-white/5 border border-[var(--line)] text-[var(--stone)] transition-all duration-200 focus:ring-2 focus:ring-[var(--gold)]">
                         <option value="">All Categories</option>
                         <option value="fleet">Fleet Optimization</option>
                         <option value="fuel">Fuel Management</option>
@@ -115,8 +115,8 @@
                 </div>
 
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-[var(--sand)] mb-1">Priority</label>
-                    <select wire:model.live="filters.priority" class="w-full rounded-lg border-[var(--line)] bg-white/5 border border-[var(--line)] text-[var(--stone)] transition-all duration-200 focus:ring-2 focus:ring-[var(--gold)]">
+                    <label for="livewire-ai-optimization-dashboard-filters-priority" class="block text-sm font-medium text-[var(--sand)] mb-1">Priority</label>
+                    <select id="livewire-ai-optimization-dashboard-filters-priority" wire:model.live="filters.priority" class="w-full rounded-lg border-[var(--line)] bg-white/5 border border-[var(--line)] text-[var(--stone)] transition-all duration-200 focus:ring-2 focus:ring-[var(--gold)]">
                         <option value="">All Priorities</option>
                         <option value="critical">Critical</option>
                         <option value="high">High</option>
@@ -126,8 +126,8 @@
                 </div>
 
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-[var(--sand)] mb-1">Status</label>
-                    <select wire:model.live="filters.status" class="w-full rounded-lg border-[var(--line)] bg-white/5 border border-[var(--line)] text-[var(--stone)] transition-all duration-200 focus:ring-2 focus:ring-[var(--gold)]">
+                    <label for="livewire-ai-optimization-dashboard-filters-status" class="block text-sm font-medium text-[var(--sand)] mb-1">Status</label>
+                    <select id="livewire-ai-optimization-dashboard-filters-status" wire:model.live="filters.status" class="w-full rounded-lg border-[var(--line)] bg-white/5 border border-[var(--line)] text-[var(--stone)] transition-all duration-200 focus:ring-2 focus:ring-[var(--gold)]">
                         <option value="">All Statuses</option>
                         <option value="pending">Pending</option>
                         <option value="implementing">Implementing</option>
@@ -341,8 +341,8 @@
 
                                 @if($pendingRecommendationAction === 'reject')
                                     <div>
-                                        <label class="block text-xs font-medium text-[var(--sand)] mb-1">Reason for rejecting (required)</label>
-                                        <textarea wire:model="rejectReason" rows="2" class="w-full text-sm rounded border-[var(--line)] dark:bg-[var(--ink)] dark:text-[var(--stone)]"></textarea>
+                                        <label for="livewire-ai-optimization-dashboard-rejectreason" class="block text-xs font-medium text-[var(--sand)] mb-1">Reason for rejecting (required)</label>
+                                        <textarea id="livewire-ai-optimization-dashboard-rejectreason" wire:model="rejectReason" rows="2" class="w-full text-sm rounded border-[var(--line)] dark:bg-[var(--ink)] dark:text-[var(--stone)]"></textarea>
                                     </div>
                                 @endif
                             </div>

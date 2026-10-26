@@ -167,14 +167,14 @@
             <x-slot name="title">Add a webhook endpoint</x-slot>
 
             <x-slot name="content">
-                <label class="block text-sm text-[var(--stone)] mb-1">URL</label>
-                <input type="url" wire:model="url" placeholder="https://your-system.example.com/mines-events"
+                <label for="livewire-webhook-manager-url" class="block text-sm text-[var(--stone)] mb-1">URL</label>
+                <input id="livewire-webhook-manager-url" type="url" wire:model="url" placeholder="https://your-system.example.com/mines-events"
                        class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                 <p class="text-[var(--sand)] text-xs mt-1">Must be https, and must be reachable from the public internet.</p>
                 @error('url') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
 
-                <label class="block text-sm text-[var(--stone)] mb-1 mt-4">Description <span class="text-[var(--sand)]">(optional)</span></label>
-                <input type="text" wire:model="description" placeholder="Ops pager"
+                <label for="livewire-webhook-manager-description" class="block text-sm text-[var(--stone)] mb-1 mt-4">Description <span class="text-[var(--sand)]">(optional)</span></label>
+                <input id="livewire-webhook-manager-description" type="text" wire:model="description" placeholder="Ops pager"
                        class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                 @error('description') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
 

@@ -458,13 +458,13 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Search -->
             <div>
-                <label class="block text-sm font-medium text-[var(--sand)] mb-2 flex items-center gap-2">
+                <label for="livewire-fleet-search" class="block text-sm font-medium text-[var(--sand)] mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                     Search Machines
                 </label>
-                <input 
+                <input id="livewire-fleet-search" 
                     type="text" 
                     wire:model.live="search" 
                     placeholder="Name, model, or manufacturer..."
@@ -474,13 +474,13 @@
 
             <!-- Status Filter -->
             <div>
-                <label class="block text-sm font-medium text-[var(--sand)] mb-2 flex items-center gap-2">
+                <label for="livewire-fleet-statusfilter" class="block text-sm font-medium text-[var(--sand)] mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                     </svg>
                     Status Filter
                 </label>
-                <select 
+                <select id="livewire-fleet-statusfilter" 
                     wire:model.live="statusFilter"
                     class="w-full px-4 py-2.5 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:border-transparent transition-all"
                 >
@@ -493,13 +493,13 @@
 
             <!-- Sort By -->
             <div>
-                <label class="block text-sm font-medium text-[var(--sand)] mb-2 flex items-center gap-2">
+                <label for="livewire-fleet-sortby" class="block text-sm font-medium text-[var(--sand)] mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                     </svg>
                     Sort By
                 </label>
-                <select 
+                <select id="livewire-fleet-sortby" 
                     wire:model.live="sortBy"
                     class="w-full px-4 py-2.5 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:border-transparent transition-all"
                 >
@@ -735,8 +735,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Name -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Machine Name *</label>
-                            <input 
+                            <label for="livewire-fleet-name" class="block text-sm font-medium text-[var(--sand)] mb-2">Machine Name *</label>
+                            <input id="livewire-fleet-name" 
                                 type="text" 
                                 wire:model="name" 
                                 placeholder="e.g., Volvo Excavator #1"
@@ -747,8 +747,8 @@
 
                         <!-- Machine Type -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Machine Type *</label>
-                            <select 
+                            <label for="livewire-fleet-machinetype" class="block text-sm font-medium text-[var(--sand)] mb-2">Machine Type *</label>
+                            <select id="livewire-fleet-machinetype" 
                                 wire:model="machineType"
                                 class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
                             >
@@ -768,8 +768,8 @@
 
                         <!-- Manufacturer -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Manufacturer</label>
-                            <select 
+                            <label for="livewire-fleet-manufacturer" class="block text-sm font-medium text-[var(--sand)] mb-2">Manufacturer</label>
+                            <select id="livewire-fleet-manufacturer" 
                                 wire:model="manufacturer"
                                 class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
                             >
@@ -803,8 +803,8 @@
 
                         <!-- Model -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Model *</label>
-                            <input 
+                            <label for="livewire-fleet-model" class="block text-sm font-medium text-[var(--sand)] mb-2">Model *</label>
+                            <input id="livewire-fleet-model" 
                                 type="text" 
                                 wire:model="model" 
                                 placeholder="e.g., A45G"
@@ -815,8 +815,8 @@
 
                         <!-- Status -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Status *</label>
-                            <select 
+                            <label for="livewire-fleet-status" class="block text-sm font-medium text-[var(--sand)] mb-2">Status *</label>
+                            <select id="livewire-fleet-status" 
                                 wire:model="status"
                                 class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
                             >
@@ -829,8 +829,8 @@
 
                         <!-- Serial Number -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Serial Number</label>
-                            <input 
+                            <label for="livewire-fleet-serialnumber" class="block text-sm font-medium text-[var(--sand)] mb-2">Serial Number</label>
+                            <input id="livewire-fleet-serialnumber" 
                                 type="text" 
                                 wire:model="serialNumber" 
                                 placeholder="e.g., SN123456789"
@@ -841,8 +841,8 @@
 
                         <!-- Capacity -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Capacity (tons)</label>
-                            <input 
+                            <label for="livewire-fleet-capacity" class="block text-sm font-medium text-[var(--sand)] mb-2">Capacity (tons)</label>
+                            <input id="livewire-fleet-capacity" 
                                 type="number" 
                                 wire:model="capacity" 
                                 step="0.01"
@@ -854,8 +854,8 @@
 
                         <!-- Latitude -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Latitude</label>
-                            <input 
+                            <label for="livewire-fleet-latitude" class="block text-sm font-medium text-[var(--sand)] mb-2">Latitude</label>
+                            <input id="livewire-fleet-latitude" 
                                 type="number" 
                                 wire:model="latitude" 
                                 step="0.0001"
@@ -867,8 +867,8 @@
 
                         <!-- Longitude -->
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Longitude</label>
-                            <input 
+                            <label for="livewire-fleet-longitude" class="block text-sm font-medium text-[var(--sand)] mb-2">Longitude</label>
+                            <input id="livewire-fleet-longitude" 
                                 type="number" 
                                 wire:model="longitude" 
                                 step="0.0001"
@@ -939,11 +939,11 @@
 
                 <div class="mb-6">
                     @if($assignMode === 'assign_adts_to_excavator')
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Assign ADTs</label>
+                        <label for="livewire-fleet-selectedadtids" class="block text-sm font-medium text-[var(--sand)] mb-2">Assign ADTs</label>
                         @if($adts->count() === 0)
                             <p class="text-[var(--sand)] text-sm">No ADTs available. Create ADT machines first.</p>
                         @else
-                            <select multiple wire:model="selectedAdtIds" class="w-full h-40 px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]">
+                            <select id="livewire-fleet-selectedadtids" multiple wire:model="selectedAdtIds" class="w-full h-40 px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]">
                                 @foreach($adts as $adt)
                                     <option value="{{ $adt->id }}">{{ $adt->name }} ({{ ucfirst($adt->machine_type) }})</option>
                                 @endforeach
@@ -951,9 +951,9 @@
                             <p class="text-xs text-[var(--sand)] mt-2">Tip: hold Ctrl/Cmd (or use touch gestures) to select multiple ADTs.</p>
                         @endif
                     @else
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Select Excavator</label>
+                        <label for="livewire-fleet-selectedexcavatorid" class="block text-sm font-medium text-[var(--sand)] mb-2">Select Excavator</label>
                         @php $assigning = \App\Models\Machine::find($assigningMachineId); @endphp
-                        <select wire:model="selectedExcavatorId" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]">
+                        <select id="livewire-fleet-selectedexcavatorid" wire:model="selectedExcavatorId" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]">
                             <option value="">Choose an excavator...</option>
                             @foreach ($excavators as $excavator)
                                 @php
@@ -1043,7 +1043,7 @@
         <x-dialog-modal wire:model.live="assignOperatorMachineId">
             <x-slot name="title">Assign an operator</x-slot>
             <x-slot name="content">
-                <input type="search" wire:model.live.debounce.300ms="operatorSearch" placeholder="Search operators…"
+                <input aria-label="Search operators" type="search" wire:model.live.debounce.300ms="operatorSearch" placeholder="Search operators…"
                        class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)] mb-3">
 
                 @if ($assignmentBlockers !== [])
@@ -1055,8 +1055,8 @@
                             @endforeach
                         </ul>
                         @can('create', \App\Models\Operator::class)
-                            <label class="block mt-2 text-[var(--sand)]">Compliance override — reason (audited):</label>
-                            <input type="text" wire:model="overrideReason" placeholder="e.g. Supervised training"
+                            <label for="livewire-fleet-overridereason" class="block mt-2 text-[var(--sand)]">Compliance override — reason (audited):</label>
+                            <input id="livewire-fleet-overridereason" type="text" wire:model="overrideReason" placeholder="e.g. Supervised training"
                                    class="w-full mt-1 px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                         @endcan
                     </div>

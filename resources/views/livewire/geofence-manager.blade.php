@@ -247,8 +247,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Search -->
             <div>
-                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Search Geofences</label>
-                <input 
+                <label for="livewire-geofence-manager-search" class="block text-sm font-medium text-[var(--sand)] mb-2">Search Geofences</label>
+                <input id="livewire-geofence-manager-search" 
                     type="text" 
                     wire:model.live="search" 
                     placeholder="Name or description..."
@@ -258,8 +258,8 @@
 
             <!-- Sort By -->
             <div>
-                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Sort By</label>
-                <select 
+                <label for="livewire-geofence-manager-sortby" class="block text-sm font-medium text-[var(--sand)] mb-2">Sort By</label>
+                <select id="livewire-geofence-manager-sortby" 
                     wire:model.live="sortBy"
                     class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
                 >
@@ -375,8 +375,8 @@
                 <form wire:submit="saveGeofence" class="space-y-4">
                     <!-- Mine Area Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Mine Area *</label>
-                        <select 
+                        <label for="livewire-geofence-manager-mineareaid" class="block text-sm font-medium text-[var(--sand)] mb-2">Mine Area *</label>
+                        <select id="livewire-geofence-manager-mineareaid" 
                             wire:model="mineAreaId"
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
                             required
@@ -392,8 +392,8 @@
 
                     <!-- Name -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Geofence Name *</label>
-                        <input 
+                        <label for="livewire-geofence-manager-name" class="block text-sm font-medium text-[var(--sand)] mb-2">Geofence Name *</label>
+                        <input id="livewire-geofence-manager-name" 
                             type="text" 
                             wire:model="name" 
                             placeholder="e.g., North Pit Zone"
@@ -404,8 +404,8 @@
 
                     <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Description</label>
-                        <textarea 
+                        <label for="livewire-geofence-manager-description" class="block text-sm font-medium text-[var(--sand)] mb-2">Description</label>
+                        <textarea id="livewire-geofence-manager-description" 
                             wire:model="description" 
                             placeholder="Optional description..."
                             rows="3"
@@ -416,8 +416,8 @@
 
                     <!-- Type -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Geofence Type *</label>
-                        <select 
+                        <label for="livewire-geofence-manager-type" class="block text-sm font-medium text-[var(--sand)] mb-2">Geofence Type *</label>
+                        <select id="livewire-geofence-manager-type" 
                             wire:model="type"
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
                         >
@@ -432,8 +432,8 @@
                     <!-- Center Coordinates -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Center Latitude *</label>
-                            <input 
+                            <label for="livewire-geofence-manager-centerlatitude" class="block text-sm font-medium text-[var(--sand)] mb-2">Center Latitude *</label>
+                            <input id="livewire-geofence-manager-centerlatitude" 
                                 type="number" 
                                 wire:model="centerLatitude" 
                                 step="0.0001"
@@ -444,8 +444,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-2">Center Longitude *</label>
-                            <input 
+                            <label for="livewire-geofence-manager-centerlongitude" class="block text-sm font-medium text-[var(--sand)] mb-2">Center Longitude *</label>
+                            <input id="livewire-geofence-manager-centerlongitude" 
                                 type="number" 
                                 wire:model="centerLongitude" 
                                 step="0.0001"

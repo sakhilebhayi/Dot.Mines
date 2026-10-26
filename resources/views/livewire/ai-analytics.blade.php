@@ -9,7 +9,7 @@
                 </p>
             </div>
             <div class="flex gap-2">
-                <select wire:model.live="timeRange" class="rounded-lg border border-[var(--line)] bg-white/5 text-[var(--stone)] px-3 py-2">
+                <select aria-label="Timerange" wire:model.live="timeRange" class="rounded-lg border border-[var(--line)] bg-white/5 text-[var(--stone)] px-3 py-2">
                     <option value="7">Last 7 days</option>
                     <option value="30">Last 30 days</option>
                     <option value="90">Last 90 days</option>

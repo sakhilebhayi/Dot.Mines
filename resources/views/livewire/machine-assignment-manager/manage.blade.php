@@ -4,8 +4,8 @@
     <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-lg p-6">
         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
             <div class="flex-1 min-w-0">
-                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Search</label>
-                <input
+                <label for="livewire-machine-assignment-manager-manage-searchterm" class="block text-sm font-medium text-[var(--sand)] mb-2">Search</label>
+                <input id="livewire-machine-assignment-manager-manage-searchterm"
                     type="text"
                     wire:model.live="searchTerm"
                     placeholder="Search assigned machines..."
@@ -31,7 +31,7 @@
                 <thead class="bg-white/5 border-b border-[var(--line)]">
                     <tr>
                         <th class="px-6 py-3 text-left">
-                            <input
+                            <input aria-label="Selectall"
                                 type="checkbox"
                                 wire:model.live="selectAll"
                                 @change="$wire.toggleSelectAll()"
@@ -49,7 +49,7 @@
                     @foreach($assignedMachines as $machine)
                         <tr class="hover:bg-white/5 transition">
                             <td class="px-6 py-4">
-                                <input
+                                <input aria-label="Selectedmachineids"
                                     type="checkbox"
                                     wire:model.live="selectedMachineIds"
                                     value="{{ $machine->id }}"

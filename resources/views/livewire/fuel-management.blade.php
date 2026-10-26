@@ -107,18 +107,18 @@
                     <div class="text-[var(--stone)]">{{ $tanks->firstWhere('id', $refuelTankId)?->name ?? 'Selected Tank' }}</div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Quantity (Liters)</label>
-                    <input type="number" step="0.01" min="0.01" wire:model.live="refuelQuantity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                    <label for="livewire-fuel-management-refuelquantity" class="block text-sm font-medium mb-1">Quantity (Liters)</label>
+                    <input id="livewire-fuel-management-refuelquantity" type="number" step="0.01" min="0.01" wire:model.live="refuelQuantity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                     @error('refuelQuantity') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Unit Price ({{ $teamCurrency }})</label>
-                    <input type="number" step="0.01" min="0" wire:model.live="refuelUnitPrice" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                    <label for="livewire-fuel-management-refuelunitprice" class="block text-sm font-medium mb-1">Unit Price ({{ $teamCurrency }})</label>
+                    <input id="livewire-fuel-management-refuelunitprice" type="number" step="0.01" min="0" wire:model.live="refuelUnitPrice" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                     @error('refuelUnitPrice') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Notes</label>
-                    <input type="text" wire:model.live="refuelNotes" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                    <label for="livewire-fuel-management-refuelnotes" class="block text-sm font-medium mb-1">Notes</label>
+                    <input id="livewire-fuel-management-refuelnotes" type="text" wire:model.live="refuelNotes" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" wire:click="closeRefuelModal" class="btn btn-ghost">Cancel</button>
@@ -145,7 +145,7 @@
 
     <!-- Period Selector -->
     <div class="mb-6 flex items-center gap-4">
-        <select wire:model.live="selectedPeriod" class="select select-bordered bg-white/5 border-[var(--line)] text-[var(--stone)] [&>option]:text-[var(--ink)]">
+        <select aria-label="Selectedperiod" wire:model.live="selectedPeriod" class="select select-bordered bg-white/5 border-[var(--line)] text-[var(--stone)] [&>option]:text-[var(--ink)]">
             <option value="today">Today</option>
             <option value="week">This Week</option>
             <option value="month">This Month</option>
@@ -610,8 +610,8 @@
                     <!-- Dispense Fuel Form -->
                     <form wire:submit.prevent="recordDispensingTransaction" class="space-y-4">
                         <div>
-                            <label class="block font-medium mb-1">Tank</label>
-                            <select wire:model.live="transactionTankId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
+                            <label for="livewire-fuel-management-transactiontankid" class="block font-medium mb-1">Tank</label>
+                            <select id="livewire-fuel-management-transactiontankid" wire:model.live="transactionTankId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Tank</option>
                                 @foreach($tanks as $tank)
                                     <option value="{{ $tank->id }}">{{ $tank->name }} ({{ $tank->fuel_type }}) @if($tank->status !== 'active') — {{ ucfirst($tank->status) }} @endif</option>
@@ -630,8 +630,8 @@
                             @endif
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Machine</label>
-                            <select wire:model.live="transactionMachineId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
+                            <label for="livewire-fuel-management-transactionmachineid" class="block font-medium mb-1">Machine</label>
+                            <select id="livewire-fuel-management-transactionmachineid" wire:model.live="transactionMachineId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Machine</option>
                                 @foreach($machines as $machine)
                                     <option value="{{ $machine->id }}">{{ $machine->name }} ({{ $machine->machine_type }})</option>
@@ -640,8 +640,8 @@
                             @error('transactionMachineId') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Quantity (Liters)</label>
-                            <input type="number" min="1" wire:model.live="transactionQuantity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-transactionquantity" class="block font-medium mb-1">Quantity (Liters)</label>
+                            <input id="livewire-fuel-management-transactionquantity" type="number" min="1" wire:model.live="transactionQuantity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('transactionQuantity') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         @if($transactionError)
@@ -659,18 +659,18 @@
                     <!-- Set Monthly Allocation Form -->
                     <form wire:submit.prevent="saveAllocation" class="space-y-4">
                         <div>
-                            <label class="block font-medium mb-1">Year</label>
-                            <input type="number" min="2020" max="2100" wire:model.live="allocationYear" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-allocationyear" class="block font-medium mb-1">Year</label>
+                            <input id="livewire-fuel-management-allocationyear" type="number" min="2020" max="2100" wire:model.live="allocationYear" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocationYear') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Month</label>
-                            <input type="number" min="1" max="12" wire:model.live="allocationMonth" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-allocationmonth" class="block font-medium mb-1">Month</label>
+                            <input id="livewire-fuel-management-allocationmonth" type="number" min="1" max="12" wire:model.live="allocationMonth" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocationMonth') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Mine Area</label>
-                            <select wire:model.live="mineAreaId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
+                            <label for="livewire-fuel-management-mineareaid" class="block font-medium mb-1">Mine Area</label>
+                            <select id="livewire-fuel-management-mineareaid" wire:model.live="mineAreaId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Area</option>
                                 @foreach($mineAreas as $area)
                                     <option value="{{ $area->id }}">{{ $area->name }}</option>
@@ -679,18 +679,18 @@
                             @error('mineAreaId') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Allocated Liters</label>
-                            <input type="number" min="1" wire:model.live="allocatedLiters" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-allocatedliters" class="block font-medium mb-1">Allocated Liters</label>
+                            <input id="livewire-fuel-management-allocatedliters" type="number" min="1" wire:model.live="allocatedLiters" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocatedLiters') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Fuel Price Per Liter (ZAR)</label>
-                            <input type="number" min="0.01" step="0.01" wire:model.live="fuelPricePerLiter" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-fuelpriceperliter" class="block font-medium mb-1">Fuel Price Per Liter (ZAR)</label>
+                            <input id="livewire-fuel-management-fuelpriceperliter" type="number" min="0.01" step="0.01" wire:model.live="fuelPricePerLiter" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('fuelPricePerLiter') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Notes</label>
-                            <input type="text" wire:model.live="allocationNotes" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-allocationnotes" class="block font-medium mb-1">Notes</label>
+                            <input id="livewire-fuel-management-allocationnotes" type="text" wire:model.live="allocationNotes" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('allocationNotes') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div class="flex justify-between gap-2">
@@ -709,23 +709,23 @@
                     <form wire:submit.prevent="saveTank" class="space-y-4">
                         <!-- Removed existing-tank select to only allow creating a new tank -->
                         <div>
-                            <label class="block font-medium mb-1">Tank Name</label>
-                            <input type="text" wire:model.live="tankName" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-tankname" class="block font-medium mb-1">Tank Name</label>
+                            <input id="livewire-fuel-management-tankname" type="text" wire:model.live="tankName" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('tankName') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Fuel Type</label>
-                            <input type="text" wire:model.live="tankFuelType" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-tankfueltype" class="block font-medium mb-1">Fuel Type</label>
+                            <input id="livewire-fuel-management-tankfueltype" type="text" wire:model.live="tankFuelType" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('tankFuelType') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Capacity (Liters)</label>
-                            <input type="number" min="1" wire:model.live="tankCapacity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-tankcapacity" class="block font-medium mb-1">Capacity (Liters)</label>
+                            <input id="livewire-fuel-management-tankcapacity" type="number" min="1" wire:model.live="tankCapacity" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('tankCapacity') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Mine Area</label>
-                            <select wire:model.live="tankMineAreaId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
+                            <label for="livewire-fuel-management-tankmineareaid" class="block font-medium mb-1">Mine Area</label>
+                            <select id="livewire-fuel-management-tankmineareaid" wire:model.live="tankMineAreaId" class="select select-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]">
                                 <option value="">Select Area</option>
                                 @foreach($mineAreas as $area)
                                     <option value="{{ $area->id }}">{{ $area->name }}</option>
@@ -734,8 +734,8 @@
                             @error('tankMineAreaId') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Minimum Level (Liters)</label>
-                            <input type="number" min="0" wire:model.live="tankMinimumLevel" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
+                            <label for="livewire-fuel-management-tankminimumlevel" class="block font-medium mb-1">Minimum Level (Liters)</label>
+                            <input id="livewire-fuel-management-tankminimumlevel" type="number" min="0" wire:model.live="tankMinimumLevel" class="input input-bordered w-full bg-[var(--ink)] border-[var(--line)] text-[var(--stone)]" />
                             @error('tankMinimumLevel') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div class="flex justify-end gap-2">
