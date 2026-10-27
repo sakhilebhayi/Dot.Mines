@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('mine-areas') }}" class="text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
+                    <a href="{{ route('mine-areas') }}" aria-label="Back to mine areas" class="text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     </a>
                     <div>
@@ -707,14 +707,14 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)] text-[var(--stone)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Assign Machine to {{ $mineArea->name }}</h2>
-                    <button wire:click="closeAssignModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeAssignModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
                 <form wire:submit="assignMachine" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Select Machine <span class="text-red-500">*</span></label>
-                        <select wire:model="selectedMachineId" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label for="livewire-mine-area-detail-selectedmachineid" class="block text-sm font-medium text-[var(--sand)] mb-1">Select Machine <span class="text-red-500">*</span></label>
+                        <select id="livewire-mine-area-detail-selectedmachineid" wire:model="selectedMachineId" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-blue-500 outline-none">
                             <option value="">-- Choose a machine --</option>
                             @foreach($availableMachines as $machine)
                                 <option value="{{ $machine->id }}">
@@ -726,8 +726,8 @@
                         @error('selectedMachineId') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Reason for Assignment</label>
-                        <input type="text" wire:model="assignmentReason" placeholder="e.g., Scheduled rotation, increased production demand..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label for="livewire-mine-area-detail-assignmentreason" class="block text-sm font-medium text-[var(--sand)] mb-1">Reason for Assignment</label>
+                        <input id="livewire-mine-area-detail-assignmentreason" type="text" wire:model="assignmentReason" placeholder="e.g., Scheduled rotation, increased production demand..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div class="flex gap-3 pt-3 border-t border-[var(--line)]">
                         <button type="button" wire:click="closeAssignModal" class="flex-1 px-4 py-2 bg-white/10 text-[var(--stone)] rounded-lg hover:bg-gray-600">Cancel</button>
@@ -744,20 +744,20 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Add Production Record</h2>
-                    <button wire:click="closeProductionModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeProductionModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
                 <form wire:submit="saveProductionRecord" class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Date <span class="text-red-500">*</span></label>
-                            <input type="date" wire:model="productionDate" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
+                            <label for="livewire-mine-area-detail-productiondate" class="block text-sm font-medium text-[var(--sand)] mb-1">Date <span class="text-red-500">*</span></label>
+                            <input id="livewire-mine-area-detail-productiondate" type="date" wire:model="productionDate" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
                             @error('productionDate') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Shift</label>
-                            <select wire:model="productionShift" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
+                            <label for="livewire-mine-area-detail-productionshift" class="block text-sm font-medium text-[var(--sand)] mb-1">Shift</label>
+                            <select id="livewire-mine-area-detail-productionshift" wire:model="productionShift" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
                                 <option value="day">Day Shift</option>
                                 <option value="night">Night Shift</option>
                                 <option value="continuous">Continuous</option>
@@ -765,8 +765,8 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Machine (optional)</label>
-                        <select wire:model="productionMachineId" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
+                        <label for="livewire-mine-area-detail-productionmachineid" class="block text-sm font-medium text-[var(--sand)] mb-1">Machine (optional)</label>
+                        <select id="livewire-mine-area-detail-productionmachineid" wire:model="productionMachineId" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
                             <option value="">-- Area total --</option>
                             @foreach($assignedMachines as $machine)
                                 <option value="{{ $machine->id }}">{{ $machine->name }}</option>
@@ -775,17 +775,17 @@
                     </div>
                     <div class="grid grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Produced <span class="text-red-500">*</span></label>
-                            <input type="number" step="0.01" wire:model="quantityProduced" placeholder="0.00" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
+                            <label for="livewire-mine-area-detail-quantityproduced" class="block text-sm font-medium text-[var(--sand)] mb-1">Produced <span class="text-red-500">*</span></label>
+                            <input id="livewire-mine-area-detail-quantityproduced" type="number" step="0.01" wire:model="quantityProduced" placeholder="0.00" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
                             @error('quantityProduced') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Target</label>
-                            <input type="number" step="0.01" wire:model="targetQuantity" placeholder="0.00" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
+                            <label for="livewire-mine-area-detail-targetquantity" class="block text-sm font-medium text-[var(--sand)] mb-1">Target</label>
+                            <input id="livewire-mine-area-detail-targetquantity" type="number" step="0.01" wire:model="targetQuantity" placeholder="0.00" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Unit</label>
-                            <select wire:model="productionUnit" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
+                            <label for="livewire-mine-area-detail-productionunit" class="block text-sm font-medium text-[var(--sand)] mb-1">Unit</label>
+                            <select id="livewire-mine-area-detail-productionunit" wire:model="productionUnit" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none">
                                 <option value="tonnes">Tonnes</option>
                                 <option value="cubic_meters">m³</option>
                                 <option value="loads">Loads</option>
@@ -794,8 +794,8 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Notes</label>
-                        <textarea wire:model="productionNotes" rows="2" placeholder="Any additional notes..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none"></textarea>
+                        <label for="livewire-mine-area-detail-productionnotes" class="block text-sm font-medium text-[var(--sand)] mb-1">Notes</label>
+                        <textarea id="livewire-mine-area-detail-productionnotes" wire:model="productionNotes" rows="2" placeholder="Any additional notes..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-green-500 outline-none"></textarea>
                     </div>
                     <div class="flex gap-3 pt-3 border-t border-[var(--line)]">
                         <button type="button" wire:click="closeProductionModal" class="flex-1 px-4 py-2 bg-white/10 text-[var(--stone)] rounded-lg hover:bg-gray-600">Cancel</button>
@@ -812,14 +812,14 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Set Production Target</h2>
-                    <button wire:click="closeTargetModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeTargetModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
                 <form wire:submit="saveProductionTarget" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Period Type</label>
-                        <select wire:model="targetPeriodType" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
+                        <label for="livewire-mine-area-detail-targetperiodtype" class="block text-sm font-medium text-[var(--sand)] mb-1">Period Type</label>
+                        <select id="livewire-mine-area-detail-targetperiodtype" wire:model="targetPeriodType" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
@@ -829,25 +829,25 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Start Date <span class="text-red-500">*</span></label>
-                            <input type="date" wire:model="targetStartDate" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
+                            <label for="livewire-mine-area-detail-targetstartdate" class="block text-sm font-medium text-[var(--sand)] mb-1">Start Date <span class="text-red-500">*</span></label>
+                            <input id="livewire-mine-area-detail-targetstartdate" type="date" wire:model="targetStartDate" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
                             @error('targetStartDate') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">End Date <span class="text-red-500">*</span></label>
-                            <input type="date" wire:model="targetEndDate" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
+                            <label for="livewire-mine-area-detail-targetenddate" class="block text-sm font-medium text-[var(--sand)] mb-1">End Date <span class="text-red-500">*</span></label>
+                            <input id="livewire-mine-area-detail-targetenddate" type="date" wire:model="targetEndDate" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
                             @error('targetEndDate') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Target Quantity <span class="text-red-500">*</span></label>
-                            <input type="number" step="0.01" wire:model="targetValue" placeholder="0.00" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
+                            <label for="livewire-mine-area-detail-targetvalue" class="block text-sm font-medium text-[var(--sand)] mb-1">Target Quantity <span class="text-red-500">*</span></label>
+                            <input id="livewire-mine-area-detail-targetvalue" type="number" step="0.01" wire:model="targetValue" placeholder="0.00" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
                             @error('targetValue') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Unit</label>
-                            <select wire:model="targetUnit" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
+                            <label for="livewire-mine-area-detail-targetunit" class="block text-sm font-medium text-[var(--sand)] mb-1">Unit</label>
+                            <select id="livewire-mine-area-detail-targetunit" wire:model="targetUnit" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
                                 <option value="tonnes">Tonnes</option>
                                 <option value="cubic_meters">m³</option>
                                 <option value="loads">Loads</option>
@@ -856,8 +856,8 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
-                        <input type="text" wire:model="targetDescription" placeholder="e.g., Q1 production target for gold ore..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
+                        <label for="livewire-mine-area-detail-targetdescription" class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
+                        <input id="livewire-mine-area-detail-targetdescription" type="text" wire:model="targetDescription" placeholder="e.g., Q1 production target for gold ore..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
                     </div>
                     <div class="flex gap-3 pt-3 border-t border-[var(--line)]">
                         <button type="button" wire:click="closeTargetModal" class="flex-1 px-4 py-2 bg-white/10 text-[var(--stone)] rounded-lg hover:bg-gray-600">Cancel</button>
@@ -874,41 +874,41 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Upload Mine Plan</h2>
-                    <button wire:click="closeUploadModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeUploadModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
                 <form wire:submit="uploadMinePlan" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Title <span class="text-red-500">*</span></label>
-                        <input type="text" wire:model="planTitle" placeholder="e.g., North Pit Phase 3 Extraction Plan" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none">
+                        <label for="livewire-mine-area-detail-plantitle" class="block text-sm font-medium text-[var(--sand)] mb-1">Title <span class="text-red-500">*</span></label>
+                        <input id="livewire-mine-area-detail-plantitle" type="text" wire:model="planTitle" placeholder="e.g., North Pit Phase 3 Extraction Plan" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none">
                         @error('planTitle') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
-                        <textarea wire:model="planDescription" rows="2" placeholder="Describe this mine plan..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"></textarea>
+                        <label for="livewire-mine-area-detail-plandescription" class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
+                        <textarea id="livewire-mine-area-detail-plandescription" wire:model="planDescription" rows="2" placeholder="Describe this mine plan..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">File <span class="text-red-500">*</span></label>
-                        <input type="file" wire:model="planFile" class="w-full text-sm text-[var(--sand)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[var(--gold)]/20 file:text-[var(--gold)] hover:file:bg-[var(--gold)]/30">
+                        <label for="livewire-mine-area-detail-planfile" class="block text-sm font-medium text-[var(--sand)] mb-1">File <span class="text-red-500">*</span></label>
+                        <input id="livewire-mine-area-detail-planfile" type="file" wire:model="planFile" class="w-full text-sm text-[var(--sand)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[var(--gold)]/20 file:text-[var(--gold)] hover:file:bg-[var(--gold)]/30">
                         <p class="text-xs text-[var(--sand)]/70 mt-1">Supported: PDF, DWG, DXF, KML, KMZ, Shapefiles, Images (max 50MB)</p>
                         @error('planFile') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div class="grid grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Version</label>
-                            <input type="text" wire:model="planVersion" placeholder="1.0" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none">
+                            <label for="livewire-mine-area-detail-planversion" class="block text-sm font-medium text-[var(--sand)] mb-1">Version</label>
+                            <input id="livewire-mine-area-detail-planversion" type="text" wire:model="planVersion" placeholder="1.0" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Status</label>
-                            <select wire:model="planStatus" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none">
+                            <label for="livewire-mine-area-detail-planstatus" class="block text-sm font-medium text-[var(--sand)] mb-1">Status</label>
+                            <select id="livewire-mine-area-detail-planstatus" wire:model="planStatus" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none">
                                 <option value="draft">Draft</option>
                                 <option value="active">Active</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Effective Date</label>
-                            <input type="date" wire:model="planEffectiveDate" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none">
+                            <label for="livewire-mine-area-detail-planeffectivedate" class="block text-sm font-medium text-[var(--sand)] mb-1">Effective Date</label>
+                            <input id="livewire-mine-area-detail-planeffectivedate" type="date" wire:model="planEffectiveDate" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none">
                         </div>
                     </div>
                     <div class="flex gap-3 pt-3 border-t border-[var(--line)]">
@@ -929,24 +929,24 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Create Area Alert</h2>
-                    <button wire:click="closeAlertModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeAlertModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
                 <form wire:submit="createAreaAlert" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Alert Title <span class="text-red-500">*</span></label>
-                        <input type="text" wire:model="alertTitle" placeholder="e.g., Slope instability detected in Zone B" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-red-500 outline-none">
+                        <label for="livewire-mine-area-detail-alerttitle" class="block text-sm font-medium text-[var(--sand)] mb-1">Alert Title <span class="text-red-500">*</span></label>
+                        <input id="livewire-mine-area-detail-alerttitle" type="text" wire:model="alertTitle" placeholder="e.g., Slope instability detected in Zone B" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-red-500 outline-none">
                         @error('alertTitle') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
-                        <textarea wire:model="alertDescription" rows="3" placeholder="Provide details about the alert..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-red-500 outline-none"></textarea>
+                        <label for="livewire-mine-area-detail-alertdescription" class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
+                        <textarea id="livewire-mine-area-detail-alertdescription" wire:model="alertDescription" rows="3" placeholder="Provide details about the alert..." class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-red-500 outline-none"></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Type</label>
-                            <select wire:model="alertType" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-red-500 outline-none">
+                            <label for="livewire-mine-area-detail-alerttype" class="block text-sm font-medium text-[var(--sand)] mb-1">Type</label>
+                            <select id="livewire-mine-area-detail-alerttype" wire:model="alertType" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-red-500 outline-none">
                                 <option value="area">Area</option>
                                 <option value="safety">Safety</option>
                                 <option value="environmental">Environmental</option>
@@ -958,8 +958,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Priority</label>
-                            <select wire:model="alertPriority" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-red-500 outline-none">
+                            <label for="livewire-mine-area-detail-alertpriority" class="block text-sm font-medium text-[var(--sand)] mb-1">Priority</label>
+                            <select id="livewire-mine-area-detail-alertpriority" wire:model="alertPriority" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-red-500 outline-none">
                                 <option value="low">Low</option>
                                 <option value="medium">Medium</option>
                                 <option value="high">High</option>
@@ -982,14 +982,14 @@
             <div class="bg-[var(--ink-soft)] rounded-lg shadow-xl max-w-lg w-full border border-[var(--line)]">
                 <div class="p-6 border-b border-[var(--line)] flex items-center justify-between">
                     <h2 class="text-lg font-bold text-[var(--stone)]">Link Geofence to {{ $mineArea->name }}</h2>
-                    <button wire:click="closeGeofenceModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
+                    <button aria-label="Close" wire:click="closeGeofenceModal" class="text-[var(--sand)] hover:text-[var(--stone)]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
                 <form wire:submit="linkGeofence" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Select Geofence <span class="text-red-500">*</span></label>
-                        <select wire:model="selectedGeofenceId" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
+                        <label for="livewire-mine-area-detail-selectedgeofenceid" class="block text-sm font-medium text-[var(--sand)] mb-1">Select Geofence <span class="text-red-500">*</span></label>
+                        <select id="livewire-mine-area-detail-selectedgeofenceid" wire:model="selectedGeofenceId" class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/10 text-[var(--stone)] focus:ring-2 focus:ring-purple-500 outline-none">
                             <option value="">-- Choose a geofence --</option>
                             @foreach($availableGeofences as $geofence)
                                 <option value="{{ $geofence->id }}">

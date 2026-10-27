@@ -27,7 +27,7 @@
                 <span class="px-3 py-1.5 bg-red-900 text-red-200 rounded-lg text-sm font-semibold">Non-Compliant</span>
             @endif
             @can('update', $operator)
-                <select wire:change="setEmploymentStatus($event.target.value)"
+                <select aria-label="Employment status" wire:change="setEmploymentStatus($event.target.value)"
                         class="px-3 py-1.5 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                     @foreach(\App\Models\Operator::STATUSES as $value => $label)
                         <option value="{{ $value }}" @selected($operator->employment_status === $value)>{{ $label }}</option>
@@ -285,12 +285,12 @@
         <x-dialog-modal wire:model.live="showDocumentModal">
             <x-slot name="title">Upload a document</x-slot>
             <x-slot name="content">
-                <label class="block text-sm text-[var(--stone)] mb-1">Title</label>
-                <input type="text" wire:model="documentTitle" placeholder="ADT licence — front" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                <label for="livewire-operator-detail-documenttitle" class="block text-sm text-[var(--stone)] mb-1">Title</label>
+                <input id="livewire-operator-detail-documenttitle" type="text" wire:model="documentTitle" placeholder="ADT licence — front" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                 @error('documentTitle') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
 
-                <label class="block text-sm text-[var(--stone)] mb-1 mt-4">Type</label>
-                <select wire:model="documentKind" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                <label for="livewire-operator-detail-documentkind" class="block text-sm text-[var(--stone)] mb-1 mt-4">Type</label>
+                <select id="livewire-operator-detail-documentkind" wire:model="documentKind" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     @foreach(\App\Models\OperatorDocument::KINDS as $value => $label)
                         @if($value !== 'medical' || $this->canManageMedical)
                             <option value="{{ $value }}">{{ $label }}</option>
@@ -298,8 +298,8 @@
                     @endforeach
                 </select>
 
-                <label class="block text-sm text-[var(--stone)] mb-1 mt-4">File <span class="text-[var(--sand)]">(PDF, JPG or PNG · max 10 MB)</span></label>
-                <input type="file" wire:model="documentFile" accept=".pdf,.jpg,.jpeg,.png" class="w-full text-[var(--sand)]">
+                <label for="livewire-operator-detail-documentfile" class="block text-sm text-[var(--stone)] mb-1 mt-4">File <span class="text-[var(--sand)]">(PDF, JPG or PNG · max 10 MB)</span></label>
+                <input id="livewire-operator-detail-documentfile" type="file" wire:model="documentFile" accept=".pdf,.jpg,.jpeg,.png" class="w-full text-[var(--sand)]">
                 <div wire:loading wire:target="documentFile" class="text-[var(--sand)] text-xs mt-1">Uploading…</div>
                 @error('documentFile') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
             </x-slot>
@@ -340,17 +340,17 @@
             <x-slot name="content">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="sm:col-span-2">
-                        <label class="block text-sm text-[var(--stone)] mb-1">Title</label>
-                        <input type="text" wire:model="qualificationForm.title" placeholder="ADT Operator" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-qualificationform-title" class="block text-sm text-[var(--stone)] mb-1">Title</label>
+                        <input id="livewire-operator-detail-qualificationform-title" type="text" wire:model="qualificationForm.title" placeholder="ADT Operator" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                         @error('qualificationForm.title') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Licence number</label>
-                        <input type="text" wire:model="qualificationForm.licence_number" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-qualificationform-licence-number" class="block text-sm text-[var(--stone)] mb-1">Licence number</label>
+                        <input id="livewire-operator-detail-qualificationform-licence-number" type="text" wire:model="qualificationForm.licence_number" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Authorises equipment</label>
-                        <select wire:model="qualificationForm.equipment_type" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-qualificationform-equipment-type" class="block text-sm text-[var(--stone)] mb-1">Authorises equipment</label>
+                        <select id="livewire-operator-detail-qualificationform-equipment-type" wire:model="qualificationForm.equipment_type" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                             <option value="">None — not equipment-specific</option>
                             @foreach(\App\Support\EquipmentType::CATALOGUE as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
@@ -358,16 +358,16 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Issuing authority</label>
-                        <input type="text" wire:model="qualificationForm.issuing_authority" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-qualificationform-issuing-authority" class="block text-sm text-[var(--stone)] mb-1">Issuing authority</label>
+                        <input id="livewire-operator-detail-qualificationform-issuing-authority" type="text" wire:model="qualificationForm.issuing_authority" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Issued</label>
-                        <input type="date" wire:model="qualificationForm.issued_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-qualificationform-issued-on" class="block text-sm text-[var(--stone)] mb-1">Issued</label>
+                        <input id="livewire-operator-detail-qualificationform-issued-on" type="date" wire:model="qualificationForm.issued_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Expires</label>
-                        <input type="date" wire:model="qualificationForm.expires_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-qualificationform-expires-on" class="block text-sm text-[var(--stone)] mb-1">Expires</label>
+                        <input id="livewire-operator-detail-qualificationform-expires-on" type="date" wire:model="qualificationForm.expires_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                         @error('qualificationForm.expires_on') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -386,32 +386,32 @@
             <x-slot name="content">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Fitness finding</label>
-                        <select wire:model="medicalForm.fitness" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-medicalform-fitness" class="block text-sm text-[var(--stone)] mb-1">Fitness finding</label>
+                        <select id="livewire-operator-detail-medicalform-fitness" wire:model="medicalForm.fitness" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                             @foreach(\App\Models\OperatorMedical::FITNESS_LABELS as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Certificate number</label>
-                        <input type="text" wire:model="medicalForm.certificate_number" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-medicalform-certificate-number" class="block text-sm text-[var(--stone)] mb-1">Certificate number</label>
+                        <input id="livewire-operator-detail-medicalform-certificate-number" type="text" wire:model="medicalForm.certificate_number" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Provider</label>
-                        <input type="text" wire:model="medicalForm.provider" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-medicalform-provider" class="block text-sm text-[var(--stone)] mb-1">Provider</label>
+                        <input id="livewire-operator-detail-medicalform-provider" type="text" wire:model="medicalForm.provider" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Examined</label>
-                        <input type="date" wire:model="medicalForm.examined_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-medicalform-examined-on" class="block text-sm text-[var(--stone)] mb-1">Examined</label>
+                        <input id="livewire-operator-detail-medicalform-examined-on" type="date" wire:model="medicalForm.examined_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Expires</label>
-                        <input type="date" wire:model="medicalForm.expires_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-medicalform-expires-on" class="block text-sm text-[var(--stone)] mb-1">Expires</label>
+                        <input id="livewire-operator-detail-medicalform-expires-on" type="date" wire:model="medicalForm.expires_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-sm text-[var(--stone)] mb-1">Restrictions <span class="text-[var(--sand)]">(if any)</span></label>
-                        <textarea wire:model="medicalForm.restrictions" rows="2" placeholder="e.g. No night shift" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]"></textarea>
+                        <label for="livewire-operator-detail-medicalform-restrictions" class="block text-sm text-[var(--stone)] mb-1">Restrictions <span class="text-[var(--sand)]">(if any)</span></label>
+                        <textarea id="livewire-operator-detail-medicalform-restrictions" wire:model="medicalForm.restrictions" rows="2" placeholder="e.g. No night shift" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]"></textarea>
                     </div>
                 </div>
             </x-slot>
@@ -429,13 +429,13 @@
             <x-slot name="content">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="sm:col-span-2">
-                        <label class="block text-sm text-[var(--stone)] mb-1">Course</label>
-                        <input type="text" wire:model="trainingForm.course" placeholder="Site Induction" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-trainingform-course" class="block text-sm text-[var(--stone)] mb-1">Course</label>
+                        <input id="livewire-operator-detail-trainingform-course" type="text" wire:model="trainingForm.course" placeholder="Site Induction" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                         @error('trainingForm.course') <p class="text-red-300 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Category</label>
-                        <select wire:model="trainingForm.category" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-trainingform-category" class="block text-sm text-[var(--stone)] mb-1">Category</label>
+                        <select id="livewire-operator-detail-trainingform-category" wire:model="trainingForm.category" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                             <option value="">—</option>
                             @foreach(\App\Models\OperatorTraining::CATEGORIES as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
@@ -443,8 +443,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Equipment <span class="text-[var(--sand)]">(if machine-specific)</span></label>
-                        <select wire:model="trainingForm.equipment_type" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-trainingform-equipment-type" class="block text-sm text-[var(--stone)] mb-1">Equipment <span class="text-[var(--sand)]">(if machine-specific)</span></label>
+                        <select id="livewire-operator-detail-trainingform-equipment-type" wire:model="trainingForm.equipment_type" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                             <option value="">—</option>
                             @foreach(\App\Support\EquipmentType::CATALOGUE as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
@@ -452,12 +452,12 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Completed</label>
-                        <input type="date" wire:model="trainingForm.completed_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-trainingform-completed-on" class="block text-sm text-[var(--stone)] mb-1">Completed</label>
+                        <input id="livewire-operator-detail-trainingform-completed-on" type="date" wire:model="trainingForm.completed_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                     <div>
-                        <label class="block text-sm text-[var(--stone)] mb-1">Renew by</label>
-                        <input type="date" wire:model="trainingForm.expires_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
+                        <label for="livewire-operator-detail-trainingform-expires-on" class="block text-sm text-[var(--stone)] mb-1">Renew by</label>
+                        <input id="livewire-operator-detail-trainingform-expires-on" type="date" wire:model="trainingForm.expires_on" class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)]">
                     </div>
                 </div>
             </x-slot>

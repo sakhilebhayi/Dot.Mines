@@ -91,7 +91,7 @@
                     <div class="p-6 border-b border-[var(--line)]">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <input 
+                                <input aria-label="Search mine areas" 
                                     type="text"
                                     wire:model.live="search"
                                     placeholder="Search mine areas..."
@@ -99,7 +99,7 @@
                                 >
                             </div>
                             <div>
-                                <select 
+                                <select aria-label="Statusfilter" 
                                     wire:model.live="statusFilter"
                                     class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                                 >
@@ -281,8 +281,8 @@
 
                     <form wire:submit.prevent="saveMineAreaWithBoundary" class="space-y-3">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Name *</label>
-                            <input 
+                            <label for="livewire-mine-area-manager-name" class="block text-sm font-medium text-[var(--sand)] mb-1">Name *</label>
+                            <input id="livewire-mine-area-manager-name" 
                                 type="text"
                                 wire:model="name"
                                 placeholder="Mine area name"
@@ -292,8 +292,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
-                            <textarea 
+                            <label for="livewire-mine-area-manager-description" class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
+                            <textarea id="livewire-mine-area-manager-description" 
                                 wire:model="description"
                                 placeholder="Area description"
                                 rows="2"
@@ -302,8 +302,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Location</label>
-                            <input 
+                            <label for="livewire-mine-area-manager-location" class="block text-sm font-medium text-[var(--sand)] mb-1">Location</label>
+                            <input id="livewire-mine-area-manager-location" 
                                 type="text"
                                 wire:model="location"
                                 placeholder="Location details"
@@ -312,8 +312,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Status *</label>
-                            <select 
+                            <label for="livewire-mine-area-manager-status" class="block text-sm font-medium text-[var(--sand)] mb-1">Status *</label>
+                            <select id="livewire-mine-area-manager-status" 
                                 wire:model="status"
                                 class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
@@ -324,8 +324,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Name</label>
-                            <input 
+                            <label for="livewire-mine-area-manager-manager-name" class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Name</label>
+                            <input id="livewire-mine-area-manager-manager-name" 
                                 type="text"
                                 wire:model="manager_name"
                                 placeholder="Manager name"
@@ -367,7 +367,7 @@
                     <h2 class="text-xl font-bold text-[var(--stone)]">
                         {{ $editingMineAreaId ? 'Edit Mine Area' : 'Create New Mine Area' }}
                     </h2>
-                    <button type="button"
+                    <button type="button" aria-label="Close"
                         wire:click="@if($editingMineAreaId) closeEditModal @else closeCreateModal @endif"
                         class="text-[var(--sand)] hover:text-[var(--stone)]"
                     >
@@ -380,10 +380,10 @@
                 <form wire:submit="saveMineArea" class="p-6 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">
+                            <label for="livewire-mine-area-manager-name" class="block text-sm font-medium text-[var(--sand)] mb-1">
                                 Name <span class="text-red-500">*</span>
                             </label>
-                            <input 
+                            <input id="livewire-mine-area-manager-name" 
                                 type="text"
                                 wire:model="name"
                                 placeholder="Enter mine area name"
@@ -393,10 +393,10 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">
+                            <label for="livewire-mine-area-manager-status" class="block text-sm font-medium text-[var(--sand)] mb-1">
                                 Status <span class="text-red-500">*</span>
                             </label>
-                            <select 
+                            <select id="livewire-mine-area-manager-status" 
                                 wire:model="status"
                                 class="w-full px-3 py-2 border border-[var(--line)] rounded-lg bg-white/5 text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
                             >
@@ -409,8 +409,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
-                        <textarea 
+                        <label for="livewire-mine-area-manager-description" class="block text-sm font-medium text-[var(--sand)] mb-1">Description</label>
+                        <textarea id="livewire-mine-area-manager-description" 
                             wire:model="description"
                             placeholder="Describe the mine area"
                             rows="3"
@@ -421,8 +421,8 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Location</label>
-                            <input 
+                            <label for="livewire-mine-area-manager-location" class="block text-sm font-medium text-[var(--sand)] mb-1">Location</label>
+                            <input id="livewire-mine-area-manager-location" 
                                 type="text"
                                 wire:model="location"
                                 placeholder="e.g., North Pit, South Zone"
@@ -432,8 +432,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Area Size (hectares)</label>
-                            <input 
+                            <label for="livewire-mine-area-manager-area-size-hectares" class="block text-sm font-medium text-[var(--sand)] mb-1">Area Size (hectares)</label>
+                            <input id="livewire-mine-area-manager-area-size-hectares" 
                                 type="number"
                                 step="0.01"
                                 wire:model.live="area_size_hectares"
@@ -446,8 +446,8 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Name</label>
-                            <input 
+                            <label for="livewire-mine-area-manager-manager-name" class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Name</label>
+                            <input id="livewire-mine-area-manager-manager-name" 
                                 type="text"
                                 wire:model="manager_name"
                                 placeholder="Mining operations manager"
@@ -457,8 +457,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Contact</label>
-                            <input 
+                            <label for="livewire-mine-area-manager-manager-contact" class="block text-sm font-medium text-[var(--sand)] mb-1">Manager Contact</label>
+                            <input id="livewire-mine-area-manager-manager-contact" 
                                 type="text"
                                 wire:model="manager_contact"
                                 placeholder="Phone or email"

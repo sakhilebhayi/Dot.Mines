@@ -81,7 +81,7 @@
             </p>
             <form method="POST" action="{{ route('gdpr.delete') }}" class="flex items-center gap-3">
                 @csrf
-                <input type="text" name="confirmation" placeholder="DELETE"
+                <input aria-label="DELETE" type="text" name="confirmation" placeholder="DELETE"
                        class="rounded-lg bg-transparent border border-[var(--line)] px-3 py-2 text-sm text-[var(--stone)] placeholder-[var(--sand)]/50" />
                 <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium">
                     Delete my account

@@ -4,8 +4,8 @@
     <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg shadow-lg p-6">
         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
             <div class="flex-1 min-w-0">
-                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Search</label>
-                <input
+                <label for="livewire-machine-assignment-manager-assign-searchterm" class="block text-sm font-medium text-[var(--sand)] mb-2">Search</label>
+                <input id="livewire-machine-assignment-manager-assign-searchterm"
                     type="text"
                     wire:model.live="searchTerm"
                     placeholder="Search other machines..."
@@ -13,8 +13,8 @@
                 />
             </div>
             <div class="w-full sm:w-auto">
-                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Filter</label>
-                <select
+                <label for="livewire-machine-assignment-manager-assign-filterstatus" class="block text-sm font-medium text-[var(--sand)] mb-2">Filter</label>
+                <select id="livewire-machine-assignment-manager-assign-filterstatus"
                     wire:model.live="filterStatus"
                     class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] focus:border-transparent"
                 >
@@ -49,7 +49,7 @@
                 <thead class="bg-white/5 border-b border-[var(--line)]">
                     <tr>
                         <th class="px-6 py-3 text-left">
-                            <input
+                            <input aria-label="Selectall"
                                 type="checkbox"
                                 wire:model.live="selectAll"
                                 @change="$wire.toggleSelectAll()"
@@ -66,7 +66,7 @@
                     @foreach($machines as $machine)
                         <tr class="hover:bg-white/5 transition">
                             <td class="px-6 py-4">
-                                <input
+                                <input aria-label="Selectedmachineids"
                                     type="checkbox"
                                     wire:model.live="selectedMachineIds"
                                     value="{{ $machine->id }}"
@@ -130,8 +130,8 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-[var(--sand)] mb-2">Notes (Optional)</label>
-                    <textarea
+                    <label for="livewire-machine-assignment-manager-assign-selectednotes" class="block text-sm font-medium text-[var(--sand)] mb-2">Notes (Optional)</label>
+                    <textarea id="livewire-machine-assignment-manager-assign-selectednotes"
                         wire:model="selectedNotes"
                         placeholder="Add notes for this assignment..."
                         rows="3"

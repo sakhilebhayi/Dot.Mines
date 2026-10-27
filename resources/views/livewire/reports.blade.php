@@ -21,8 +21,8 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <!-- Mine Area Filter -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Mine Area</label>
-                    <select
+                    <label for="livewire-reports-selectedmineareaid" class="block text-sm text-[var(--sand)] mb-2">Mine Area</label>
+                    <select id="livewire-reports-selectedmineareaid"
                         wire:model.live="selectedMineAreaId"
                         class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
@@ -35,8 +35,8 @@
 
                 <!-- Geofence Filter -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Geofence</label>
-                    <select
+                    <label for="livewire-reports-selectedgeofenceid" class="block text-sm text-[var(--sand)] mb-2">Geofence</label>
+                    <select id="livewire-reports-selectedgeofenceid"
                         wire:model.live="selectedGeofenceId"
                         class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
@@ -49,8 +49,8 @@
 
                 <!-- Machine Name Filter -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Machine Name</label>
-                    <select
+                    <label for="livewire-reports-selectedmachineid" class="block text-sm text-[var(--sand)] mb-2">Machine Name</label>
+                    <select id="livewire-reports-selectedmachineid"
                         wire:model.live="selectedMachineId"
                         class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
@@ -66,8 +66,8 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Search -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Search Reports</label>
-                    <input 
+                    <label for="livewire-reports-search" class="block text-sm text-[var(--sand)] mb-2">Search Reports</label>
+                    <input id="livewire-reports-search" 
                         type="text" 
                         wire:model.live="search" 
                         placeholder="Search by name or description..."
@@ -77,8 +77,8 @@
 
                 <!-- Report Type Filter -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Report Type</label>
-                    <select 
+                    <label for="livewire-reports-selectedtype" class="block text-sm text-[var(--sand)] mb-2">Report Type</label>
+                    <select id="livewire-reports-selectedtype" 
                         wire:model.live="selectedType"
                         class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
@@ -91,8 +91,8 @@
 
                 <!-- Status Filter -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Status</label>
-                    <select 
+                    <label for="livewire-reports-selectedstatus" class="block text-sm text-[var(--sand)] mb-2">Status</label>
+                    <select id="livewire-reports-selectedstatus" 
                         wire:model.live="selectedStatus"
                         class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >

@@ -7,50 +7,50 @@
             <div class="menu">
                 <li class="menu-title">Getting Started</li>
                 <ul>
-                    <li><a wire:click="setSection('getting-started')" class="{{ $activeSection === 'getting-started' ? 'active' : '' }}">Overview</a></li>
-                    <li><a wire:click="setSection('quick-start')" class="{{ $activeSection === 'quick-start' ? 'active' : '' }}">Quick Start Guide</a></li>
-                    <li><a wire:click="setSection('dashboard')" class="{{ $activeSection === 'dashboard' ? 'active' : '' }}">Dashboard</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('getting-started')" class="{{ $activeSection === 'getting-started' ? 'active' : '' }}">Overview</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('quick-start')" class="{{ $activeSection === 'quick-start' ? 'active' : '' }}">Quick Start Guide</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('dashboard')" class="{{ $activeSection === 'dashboard' ? 'active' : '' }}">Dashboard</a></li>
                 </ul>
 
                 <li class="menu-title mt-4">Fleet Management</li>
                 <ul>
-                    <li><a wire:click="setSection('fleet')" class="{{ $activeSection === 'fleet' ? 'active' : '' }}">Fleet Overview</a></li>
-                    <li><a wire:click="setSection('machine-tracking')" class="{{ $activeSection === 'machine-tracking' ? 'active' : '' }}">Machine Tracking</a></li>
-                    <li><a wire:click="setSection('live-map')" class="{{ $activeSection === 'live-map' ? 'active' : '' }}">Live Map</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('fleet')" class="{{ $activeSection === 'fleet' ? 'active' : '' }}">Fleet Overview</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('machine-tracking')" class="{{ $activeSection === 'machine-tracking' ? 'active' : '' }}">Machine Tracking</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('live-map')" class="{{ $activeSection === 'live-map' ? 'active' : '' }}">Live Map</a></li>
                 </ul>
 
                 <li class="menu-title mt-4">Operations</li>
                 <ul>
-                    <li><a wire:click="setSection('geofences')" class="{{ $activeSection === 'geofences' ? 'active' : '' }}">Geofences</a></li>
-                    <li><a wire:click="setSection('mine-areas')" class="{{ $activeSection === 'mine-areas' ? 'active' : '' }}">Mine Areas</a></li>
-                    <li><a wire:click="setSection('fuel-management')" class="{{ $activeSection === 'fuel-management' ? 'active' : '' }}">Fuel Management</a></li>
-                    <li><a wire:click="setSection('maintenance')" class="{{ $activeSection === 'maintenance' ? 'active' : '' }}">Maintenance</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('geofences')" class="{{ $activeSection === 'geofences' ? 'active' : '' }}">Geofences</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('mine-areas')" class="{{ $activeSection === 'mine-areas' ? 'active' : '' }}">Mine Areas</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('fuel-management')" class="{{ $activeSection === 'fuel-management' ? 'active' : '' }}">Fuel Management</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('maintenance')" class="{{ $activeSection === 'maintenance' ? 'active' : '' }}">Maintenance</a></li>
                 </ul>
 
                 <li class="menu-title mt-4">Analytics & Reports</li>
                 <ul>
-                    <li><a wire:click="setSection('reports')" class="{{ $activeSection === 'reports' ? 'active' : '' }}">Reports</a></li>
-                    <li><a wire:click="setSection('alerts')" class="{{ $activeSection === 'alerts' ? 'active' : '' }}">Alerts</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('reports')" class="{{ $activeSection === 'reports' ? 'active' : '' }}">Reports</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('alerts')" class="{{ $activeSection === 'alerts' ? 'active' : '' }}">Alerts</a></li>
                 </ul>
 
                 <li class="menu-title mt-4">Integrations</li>
                 <ul>
-                    <li><a wire:click="setSection('integrations-overview')" class="{{ $activeSection === 'integrations-overview' ? 'active' : '' }}">Overview</a></li>
-                    <li><a wire:click="setSection('api-access')" class="{{ $activeSection === 'api-access' ? 'active' : '' }}">API Access</a></li>
-                    <li><a wire:click="setSection('api-reference')" class="{{ $activeSection === 'api-reference' ? 'active' : '' }}">API Reference</a></li>
-                    <li><a wire:click="setSection('webhooks')" class="{{ $activeSection === 'webhooks' ? 'active' : '' }}">Webhooks</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('integrations-overview')" class="{{ $activeSection === 'integrations-overview' ? 'active' : '' }}">Overview</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('api-access')" class="{{ $activeSection === 'api-access' ? 'active' : '' }}">API Access</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('api-reference')" class="{{ $activeSection === 'api-reference' ? 'active' : '' }}">API Reference</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('webhooks')" class="{{ $activeSection === 'webhooks' ? 'active' : '' }}">Webhooks</a></li>
                 </ul>
 
                 <li class="menu-title mt-4">Administration</li>
                 <ul>
-                    <li><a wire:click="setSection('team-management')" class="{{ $activeSection === 'team-management' ? 'active' : '' }}">Team Management</a></li>
-                    <li><a wire:click="setSection('user-roles')" class="{{ $activeSection === 'user-roles' ? 'active' : '' }}">User Roles</a></li>
-                    <li><a wire:click="setSection('settings')" class="{{ $activeSection === 'settings' ? 'active' : '' }}">Settings</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('team-management')" class="{{ $activeSection === 'team-management' ? 'active' : '' }}">Team Management</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('user-roles')" class="{{ $activeSection === 'user-roles' ? 'active' : '' }}">User Roles</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('settings')" class="{{ $activeSection === 'settings' ? 'active' : '' }}">Settings</a></li>
                 </ul>
 
                 <li class="menu-title mt-4">Engineering</li>
                 <ul>
-                    <li><a wire:click="setSection('engineering-reports')" class="{{ $activeSection === 'engineering-reports' ? 'active' : '' }}">Engineering Reports</a></li>
+                    <li><a href="#" wire:click.prevent="setSection('engineering-reports')" class="{{ $activeSection === 'engineering-reports' ? 'active' : '' }}">Engineering Reports</a></li>
                 </ul>
             </div>
         </div>

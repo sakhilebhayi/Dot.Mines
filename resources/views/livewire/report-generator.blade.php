@@ -37,8 +37,8 @@
             @if($step === 1)
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Report Name</label>
-                        <input 
+                        <label for="livewire-report-generator-reportname" class="block text-sm font-medium text-[var(--sand)] mb-2">Report Name</label>
+                        <input id="livewire-report-generator-reportname" 
                             type="text" 
                             wire:model="reportName" 
                             placeholder="e.g., January Production Summary"
@@ -67,8 +67,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Description (Optional)</label>
-                        <textarea 
+                        <label for="livewire-report-generator-description" class="block text-sm font-medium text-[var(--sand)] mb-2">Description (Optional)</label>
+                        <textarea id="livewire-report-generator-description" 
                             wire:model="description" 
                             placeholder="Add any notes or context for this report..."
                             rows="4"
@@ -83,8 +83,8 @@
             @if($step === 2)
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Start Date</label>
-                        <input 
+                        <label for="livewire-report-generator-startdate" class="block text-sm font-medium text-[var(--sand)] mb-2">Start Date</label>
+                        <input id="livewire-report-generator-startdate" 
                             type="date" 
                             wire:model="startDate"
                             class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
@@ -93,8 +93,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">End Date</label>
-                        <input 
+                        <label for="livewire-report-generator-enddate" class="block text-sm font-medium text-[var(--sand)] mb-2">End Date</label>
+                        <input id="livewire-report-generator-enddate" 
                             type="date" 
                             wire:model="endDate"
                             class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
@@ -209,8 +209,8 @@
 
                         @if($autoSchedule)
                             <div class="mt-4 ml-8">
-                                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Schedule Frequency</label>
-                                <select 
+                                <label for="livewire-report-generator-schedulefrequency" class="block text-sm font-medium text-[var(--sand)] mb-2">Schedule Frequency</label>
+                                <select id="livewire-report-generator-schedulefrequency" 
                                     wire:model="scheduleFrequency"
                                     class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                                 >

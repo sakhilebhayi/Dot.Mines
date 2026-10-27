@@ -114,8 +114,8 @@
                 <form wire:submit.prevent="calculateRoute" class="space-y-4">
                     <!-- Route Name -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Route Name *</label>
-                        <input type="text" wire:model="name" 
+                        <label for="livewire-route-planning-name" class="block text-sm font-medium text-[var(--sand)] mb-2">Route Name *</label>
+                        <input id="livewire-route-planning-name" type="text" wire:model="name" 
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]"
                             placeholder="e.g., Loading Zone to Dump Site A">
                         @error('name') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
@@ -123,16 +123,16 @@
 
                     <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Description</label>
-                        <textarea wire:model="description" rows="3"
+                        <label for="livewire-route-planning-description" class="block text-sm font-medium text-[var(--sand)] mb-2">Description</label>
+                        <textarea id="livewire-route-planning-description" wire:model="description" rows="3"
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]"
                             placeholder="Optional route description"></textarea>
                     </div>
 
                     <!-- Machine Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Assign to Machine (Optional)</label>
-                        <select wire:model="machineId" 
+                        <label for="livewire-route-planning-machineid" class="block text-sm font-medium text-[var(--sand)] mb-2">Assign to Machine (Optional)</label>
+                        <select id="livewire-route-planning-machineid" wire:model="machineId" 
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
                             <option value="">-- Select Machine --</option>
                             @foreach($machines as $machine)
@@ -143,8 +143,8 @@
 
                     <!-- Mine Area Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Mine Area (Optional)</label>
-                        <select wire:model="mineAreaId" 
+                        <label for="livewire-route-planning-mineareaid" class="block text-sm font-medium text-[var(--sand)] mb-2">Mine Area (Optional)</label>
+                        <select id="livewire-route-planning-mineareaid" wire:model="mineAreaId" 
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
                             <option value="">-- Select Mine Area --</option>
                             @foreach($mineAreas as $area)
@@ -155,8 +155,8 @@
 
                     <!-- Route Type -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Route Type</label>
-                        <select wire:model="routeType" 
+                        <label for="livewire-route-planning-routetype" class="block text-sm font-medium text-[var(--sand)] mb-2">Route Type</label>
+                        <select id="livewire-route-planning-routetype" wire:model="routeType" 
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
                             <option value="optimal">Optimal (Balanced)</option>
                             <option value="shortest">Shortest Distance</option>
@@ -166,8 +166,8 @@
 
                     <!-- Speed Limit -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Speed Limit (km/h)</label>
-                        <input type="number" wire:model="speedLimit" min="1" max="200" step="1"
+                        <label for="livewire-route-planning-speedlimit" class="block text-sm font-medium text-[var(--sand)] mb-2">Speed Limit (km/h)</label>
+                        <input id="livewire-route-planning-speedlimit" type="number" wire:model="speedLimit" min="1" max="200" step="1"
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]"
                             placeholder="e.g., 40">
                         <p class="text-xs text-[var(--sand)] mt-1">Set a speed limit for this route. Alerts will trigger when machines exceed this limit.</p>

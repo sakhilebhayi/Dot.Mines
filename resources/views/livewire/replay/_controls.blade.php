@@ -1,8 +1,8 @@
 {{-- Machine / date-range selection and recent activities (R7 split) --}}
     <!-- Machine Selection -->
     <div class="mb-4">
-        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Select Machine</label>
-        <select wire:model.live="selectedMachine" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
+        <label for="livewire-replay-controls-selectedmachine" class="block text-sm font-medium text-[var(--sand)] mb-2">Select Machine</label>
+        <select id="livewire-replay-controls-selectedmachine" wire:model.live="selectedMachine" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
             <option value="">-- Choose a Machine --</option>
             @foreach($machines as $machineType => $machineGroup)
                 <optgroup label="{{ strtoupper(str_replace('_', ' ', $machineType)) }}">
@@ -16,13 +16,13 @@
 
     <!-- Date Range -->
     <div class="mb-4">
-        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Start Date</label>
-        <input type="date" wire:model="startDate" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
+        <label for="livewire-replay-controls-startdate" class="block text-sm font-medium text-[var(--sand)] mb-2">Start Date</label>
+        <input id="livewire-replay-controls-startdate" type="date" wire:model="startDate" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-[var(--sand)] mb-2">End Date</label>
-        <input type="date" wire:model="endDate" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
+        <label for="livewire-replay-controls-enddate" class="block text-sm font-medium text-[var(--sand)] mb-2">End Date</label>
+        <input id="livewire-replay-controls-enddate" type="date" wire:model="endDate" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)]">
     </div>
 
     <!-- Action Buttons -->
