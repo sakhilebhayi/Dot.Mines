@@ -110,6 +110,12 @@ jobs:
             CURRENT_DOCROOT="$(uapi --output=json DomainInfo single_domain_data domain=mines.infodot.co.za 2>/dev/null | sed -n 's/.*"documentroot" *: *"\([^"]*\)".*/\1/p' | head -1)"
             if [ -n "$APP_REAL" ] && { [ "$CURRENT_DOCROOT" = "$APP_REAL/public" ] || [ -f "$DEPLOY_PATH/.docroot-is-public" ]; }; then
               echo "== app-folder guard: skipped (the document root is $APP_REAL/public; the app folder is not served)"
+              # Mines TRACKS a root .htaccess that rewrites every request into public/. With the document root already
+              # public/, that file in the PARENT folder still runs, rewrites to public/public/... and every URL answers 404
+              # (seen on Agents, 2026-10-26). `git reset --hard` restores it on every deploy, so move it aside each time.
+              if [ -f "$F" ]; then
+                if mv -f "$F" "$F.docroot-is-public-disabled"; then echo "== app-folder .htaccess: moved aside (the document root is public/)"; else echo "::warning::could not move $F aside (deploy continues)"; fi
+              fi
               exit 0
             fi
             if [ ! -f "$DEPLOY_PATH/artisan" ]; then echo "== App-folder guard ($WHEN): skipped (no artisan in $DEPLOY_PATH)"; exit 0; fi
