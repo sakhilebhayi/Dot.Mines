@@ -32,10 +32,8 @@ use App\Services\Webhooks\WebhookUrlGuard;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Events\JobFailed;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -110,10 +108,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // /up answered 200 whenever PHP booted, even with the database down. The framework dispatches DiagnosingHealth
-        // before it renders the page: a failing query turns the answer into a 500 (the exception text is never shown).
-        Event::listen(DiagnosingHealth::class, fn () => DB::select('select 1'));
-
         // Register console commands so scanning is available in CI
         if ($this->app->runningInConsole()) {
             $this->commands([
