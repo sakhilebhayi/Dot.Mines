@@ -103,6 +103,21 @@ jobs:
             set +e
             WHEN="$1"
             F="$DEPLOY_PATH/.htaccess"
+            # Once the subdomain's document root is <app>/public (the docroot move, InfoDot docs S-2e) the app
+            # folder is not served at all, and a deny file in it would block the whole site: do not write one.
+            # The host's own answer decides; a marker file is the fallback if the lookup fails.
+            APP_REAL="$(cd "$DEPLOY_PATH" 2>/dev/null && pwd -P)" || APP_REAL=""
+            CURRENT_DOCROOT="$(uapi --output=json DomainInfo single_domain_data domain=mines.infodot.co.za 2>/dev/null | sed -n 's/.*"documentroot" *: *"\([^"]*\)".*/\1/p' | head -1)"
+            if [ -n "$APP_REAL" ] && { [ "$CURRENT_DOCROOT" = "$APP_REAL/public" ] || [ -f "$DEPLOY_PATH/.docroot-is-public" ]; }; then
+              echo "== app-folder guard: skipped (the document root is $APP_REAL/public; the app folder is not served)"
+              # Mines TRACKS a root .htaccess that rewrites every request into public/. With the document root already
+              # public/, that file in the PARENT folder still runs, rewrites to public/public/... and every URL answers 404
+              # (seen on Agents, 2026-10-26). `git reset --hard` restores it on every deploy, so move it aside each time.
+              if [ -f "$F" ]; then
+                if mv -f "$F" "$F.docroot-is-public-disabled"; then echo "== app-folder .htaccess: moved aside (the document root is public/)"; else echo "::warning::could not move $F aside (deploy continues)"; fi
+              fi
+              exit 0
+            fi
             if [ ! -f "$DEPLOY_PATH/artisan" ]; then echo "== App-folder guard ($WHEN): skipped (no artisan in $DEPLOY_PATH)"; exit 0; fi
             PARENT="$(cd "$(dirname "$DEPLOY_PATH")" 2>/dev/null && pwd -P)"
             HOME_REAL="$(cd "${HOME:-/nonexistent}" 2>/dev/null && pwd -P)"
