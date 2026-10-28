@@ -211,8 +211,8 @@
 
                     <!-- Provider Selection -->
                     <div>
-                        <label class="block text-[var(--stone)] font-medium mb-2">Manufacturer *</label>
-                        <select 
+                        <label for="livewire-integration-manager-formdata-provider" class="block text-[var(--stone)] font-medium mb-2">Manufacturer *</label>
+                        <select id="livewire-integration-manager-formdata-provider" 
                             wire:model="formData.provider"
                             class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] focus:outline-none focus:border-[var(--gold)]"
                         >
@@ -274,41 +274,41 @@
                     <!-- API Key -->
                     <div>
                         @if($formData['provider'] === 'ctrack')
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
-                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
-                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
-                            <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.ctrack.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-api-key" class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-api-key" type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-api-secret" class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-api-secret" type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-endpoint" class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-endpoint" type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.ctrack.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @elseif($formData['provider'] === 'john-deere')
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">OAuth Client ID *</label>
-                            <input type="text" wire:model="formData.credentials.client_id" placeholder="Enter Client ID" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">OAuth Client Secret *</label>
-                            <input type="password" wire:model="formData.credentials.client_secret" placeholder="Enter Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
-                            <input type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.deere.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-client-id" class="block text-[var(--stone)] font-medium mb-2 mt-4">OAuth Client ID *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-client-id" type="text" wire:model="formData.credentials.client_id" placeholder="Enter Client ID" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-client-secret" class="block text-[var(--stone)] font-medium mb-2 mt-4">OAuth Client Secret *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-client-secret" type="password" wire:model="formData.credentials.client_secret" placeholder="Enter Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-endpoint" class="block text-[var(--stone)] font-medium mb-2 mt-4">Endpoint URL *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-endpoint" type="text" wire:model="formData.credentials.endpoint" placeholder="https://api.deere.com/..." class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @elseif($formData['provider'] === 'bell')
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">ISO Export Username *</label>
-                            <input type="text" wire:model="formData.credentials.username" placeholder="yourcompany-fleetauth@bell.co.za" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Password *</label>
-                            <input type="password" wire:model="formData.credentials.password" placeholder="Enter your Bell ISO export password" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Client Secret *</label>
-                            <input type="password" wire:model="formData.credentials.client_secret" placeholder="Enter your Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Client ID</label>
-                            <input type="text" wire:model="formData.credentials.client_id" placeholder="ISO_Export_Service" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-username" class="block text-[var(--stone)] font-medium mb-2 mt-4">ISO Export Username *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-username" type="text" wire:model="formData.credentials.username" placeholder="yourcompany-fleetauth@bell.co.za" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-password" class="block text-[var(--stone)] font-medium mb-2 mt-4">Password *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-password" type="password" wire:model="formData.credentials.password" placeholder="Enter your Bell ISO export password" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-client-secret" class="block text-[var(--stone)] font-medium mb-2 mt-4">Client Secret *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-client-secret" type="password" wire:model="formData.credentials.client_secret" placeholder="Enter your Client Secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-client-id" class="block text-[var(--stone)] font-medium mb-2 mt-4">Client ID</label>
+                            <input id="livewire-integration-manager-formdata-credentials-client-id" type="text" wire:model="formData.credentials.client_id" placeholder="ISO_Export_Service" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                             <p class="text-[var(--sand)] text-xs mt-1">Bell issues this to every ISO 15143-3 export consumer -- leave as-is unless Bell told you otherwise.</p>
                         @elseif(in_array($formData['provider'], ['atlas-copco','sandvik','epiroc']))
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
-                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
-                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">Site Code *</label>
-                            <input type="text" wire:model="formData.credentials.site_code" placeholder="Enter site code" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-api-key" class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-api-key" type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-api-secret" class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-api-secret" type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-site-code" class="block text-[var(--stone)] font-medium mb-2 mt-4">Site Code *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-site-code" type="text" wire:model="formData.credentials.site_code" placeholder="Enter site code" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @else
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
-                            <input type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
-                            <label class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
-                            <input type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-api-key" class="block text-[var(--stone)] font-medium mb-2 mt-4">API Key *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-api-key" type="password" wire:model="formData.credentials.api_key" placeholder="Enter your API key" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
+                            <label for="livewire-integration-manager-formdata-credentials-api-secret" class="block text-[var(--stone)] font-medium mb-2 mt-4">API Secret *</label>
+                            <input id="livewire-integration-manager-formdata-credentials-api-secret" type="password" wire:model="formData.credentials.api_secret" placeholder="Enter your API secret" class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]" />
                         @endif
                         <p class="text-[var(--sand)] text-sm mt-2">
                             Tip: Your credentials are encrypted and stored securely. You can test the connection before saving.

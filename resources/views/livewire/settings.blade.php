@@ -37,8 +37,8 @@
 
                     <!-- Team Name -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Team Name</label>
-                        <input 
+                        <label for="livewire-settings-teamname" class="block text-sm font-medium text-[var(--sand)] mb-2">Team Name</label>
+                        <input id="livewire-settings-teamname" 
                             type="text" 
                             wire:model="teamName"
                             class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
@@ -48,8 +48,8 @@
 
                     <!-- Team Email -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Team Email</label>
-                        <input 
+                        <label for="livewire-settings-teamemail" class="block text-sm font-medium text-[var(--sand)] mb-2">Team Email</label>
+                        <input id="livewire-settings-teamemail" 
                             type="email" 
                             wire:model="teamEmail"
                             class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
@@ -59,8 +59,8 @@
 
                     <!-- Timezone -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Timezone</label>
-                        <select 
+                        <label for="livewire-settings-timezone" class="block text-sm font-medium text-[var(--sand)] mb-2">Timezone</label>
+                        <select id="livewire-settings-timezone" 
                             wire:model="timezone"
                             class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                         >
@@ -72,8 +72,8 @@
 
                     <!-- Language -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Language</label>
-                        <select 
+                        <label for="livewire-settings-language" class="block text-sm font-medium text-[var(--sand)] mb-2">Language</label>
+                        <select id="livewire-settings-language" 
                             wire:model="language"
                             class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                         >
@@ -85,8 +85,8 @@
 
                     <!-- Currency -->
                     <div>
-                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Currency</label>
-                        <select 
+                        <label for="livewire-settings-currency" class="block text-sm font-medium text-[var(--sand)] mb-2">Currency</label>
+                        <select id="livewire-settings-currency" 
                             wire:model="currency"
                             class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                         >
@@ -131,8 +131,8 @@
                             <h3 class="text-lg font-semibold text-[var(--stone)]">Invite New User</h3>
                             
                             <div>
-                                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Email Address</label>
-                                <input 
+                                <label for="livewire-settings-inviteemail" class="block text-sm font-medium text-[var(--sand)] mb-2">Email Address</label>
+                                <input id="livewire-settings-inviteemail" 
                                     type="email" 
                                     wire:model="inviteEmail"
                                     placeholder="user@example.com"
@@ -142,8 +142,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-[var(--sand)] mb-2">Role</label>
-                                <select 
+                                <label for="livewire-settings-selectedrole" class="block text-sm font-medium text-[var(--sand)] mb-2">Role</label>
+                                <select id="livewire-settings-selectedrole" 
                                     wire:model="selectedRole"
                                     class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                                 >
@@ -173,7 +173,7 @@
                                         <p class="text-sm text-[var(--sand)]">{{ $member['email'] }}</p>
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <select 
+                                        <select aria-label="Team member role"
                                             wire:change="updateUserRole({{ $member['id'] }}, $event.target.value)"
                                             class="bg-white/5 text-[var(--stone)] px-3 py-1 rounded border border-[var(--line)] text-sm"
                                         >
@@ -255,7 +255,7 @@
                         <div class="bg-white/5 rounded-lg p-4 border border-[var(--line)]">
                             <p class="font-medium text-[var(--stone)]">Notification Bell Threshold</p>
                             <p class="text-sm text-[var(--sand)] mb-3">Only show alerts at or above this severity in the notification bell. Critical alerts always show, regardless of this setting.</p>
-                            <select
+                            <select aria-label="Notificationminseverity"
                                 wire:model="notificationMinSeverity"
                                 class="w-full bg-white/5 text-[var(--stone)] px-3 py-2 rounded border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none">
                                 <option value="low">All alerts (low and up)</option>
@@ -285,16 +285,16 @@
                             @if($quietHoursEnabled)
                                 <div class="grid grid-cols-2 gap-4 pt-2">
                                     <div>
-                                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">Start Time</label>
-                                        <input 
+                                        <label for="livewire-settings-quiethoursstart" class="block text-sm font-medium text-[var(--sand)] mb-2">Start Time</label>
+                                        <input id="livewire-settings-quiethoursstart" 
                                             type="time" 
                                             wire:model="quietHoursStart"
                                             class="w-full bg-white/5 text-[var(--stone)] px-3 py-2 rounded border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                                         >
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-[var(--sand)] mb-2">End Time</label>
-                                        <input 
+                                        <label for="livewire-settings-quiethoursend" class="block text-sm font-medium text-[var(--sand)] mb-2">End Time</label>
+                                        <input id="livewire-settings-quiethoursend" 
                                             type="time" 
                                             wire:model="quietHoursEnd"
                                             class="w-full bg-white/5 text-[var(--stone)] px-3 py-2 rounded border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"

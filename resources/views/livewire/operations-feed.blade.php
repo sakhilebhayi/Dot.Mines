@@ -24,13 +24,13 @@
     {{-- Composer --}}
     @if($showComposer && $this->canPost)
         <div class="bg-[var(--ink-soft)] border border-[var(--line)] rounded-xl p-5 mb-8">
-            <input type="text" wire:model="postTitle" placeholder="What does the team need to know?"
+            <input aria-label="What does the team need to know?" type="text" wire:model="postTitle" placeholder="What does the team need to know?"
                    class="w-full px-3.5 py-2.5 bg-[var(--ink)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
             @error('postTitle') <p class="text-red-300 text-sm mt-2">{{ $message }}</p> @enderror
-            <textarea wire:model="postBody" rows="2" placeholder="Details (optional) — e.g. Dump Area B closed until 15:00, redirect ADTs to Dump Area A."
+            <textarea aria-label="Details — e.g. Dump Area B closed until 15:00, redirect ADTs to Dump Area A" wire:model="postBody" rows="2" placeholder="Details (optional) — e.g. Dump Area B closed until 15:00, redirect ADTs to Dump Area A."
                       class="w-full mt-3 px-3.5 py-2.5 bg-[var(--ink)] border border-[var(--line)] rounded-lg text-[var(--stone)] leading-relaxed"></textarea>
             <div class="flex items-center justify-between gap-3 mt-4">
-                <select wire:model="postCategory" class="px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
+                <select aria-label="Postcategory" wire:model="postCategory" class="px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                     @foreach(\App\Models\FeedItem::CATEGORIES as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
@@ -58,15 +58,15 @@
             @endforeach
         </div>
         <div class="flex flex-wrap gap-3">
-            <input type="search" wire:model.live.debounce.400ms="search" placeholder="Search the feed…"
+            <input aria-label="Search the feed" type="search" wire:model.live.debounce.400ms="search" placeholder="Search the feed…"
                    class="flex-1 min-w-48 px-3.5 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
-            <select wire:model.live="timeWindow" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
+            <select aria-label="Timewindow" wire:model.live="timeWindow" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                 <option value="">All time</option>
                 <option value="today">Today</option>
                 <option value="24h">Last 24 hours</option>
                 <option value="week">This week</option>
             </select>
-            <select wire:model.live="machineFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
+            <select aria-label="Machinefilter" wire:model.live="machineFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                 <option value="">All machines</option>
                 @foreach($this->machines as $machine)
                     <option value="{{ $machine->id }}">{{ $machine->name }}</option>
@@ -259,7 +259,7 @@
                                                 {{-- Inline reply composer --}}
                                                 @if($replyingTo === $comment->id || $comment->replies->contains('id', $replyingTo))
                                                     <div class="mt-3 ml-4 pl-3 flex gap-2.5">
-                                                        <input type="text" wire:model="replyBody" wire:keydown.enter="addReply" placeholder="Reply…"
+                                                        <input aria-label="Reply" type="text" wire:model="replyBody" wire:keydown.enter="addReply" placeholder="Reply…"
                                                                class="flex-1 px-3.5 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                                                         <button wire:click="addReply" wire:loading.attr="disabled"
                                                                 class="px-4 py-2 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg text-sm font-semibold transition">Reply</button>
@@ -273,7 +273,7 @@
                                     </div>
                                     @if($this->canComment)
                                         <div class="flex gap-2.5 mt-4 pt-4 border-t border-[var(--line)]">
-                                            <input type="text" wire:model="commentBody" wire:keydown.enter="addComment" placeholder="Add a comment…"
+                                            <input aria-label="Add a comment" type="text" wire:model="commentBody" wire:keydown.enter="addComment" placeholder="Add a comment…"
                                                    class="flex-1 px-3.5 py-2.5 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                                             <button wire:click="addComment" wire:loading.attr="disabled"
                                                     class="px-4 py-2.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg text-sm font-semibold transition">Send</button>

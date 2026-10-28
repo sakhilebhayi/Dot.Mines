@@ -41,8 +41,8 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <!-- Search -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Search Alerts</label>
-                    <input 
+                    <label for="livewire-alerts-search" class="block text-sm text-[var(--sand)] mb-2">Search Alerts</label>
+                    <input id="livewire-alerts-search" 
                         type="text" 
                         wire:model.live="search" 
                         placeholder="Search by title or description..."
@@ -52,8 +52,8 @@
 
                 <!-- Priority Filter -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Priority</label>
-                    <select 
+                    <label for="livewire-alerts-selectedpriority" class="block text-sm text-[var(--sand)] mb-2">Priority</label>
+                    <select id="livewire-alerts-selectedpriority" 
                         wire:model.live="selectedPriority"
                         class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
@@ -67,8 +67,8 @@
 
                 <!-- Status Filter -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Status</label>
-                    <select 
+                    <label for="livewire-alerts-selectedstatus" class="block text-sm text-[var(--sand)] mb-2">Status</label>
+                    <select id="livewire-alerts-selectedstatus" 
                         wire:model.live="selectedStatus"
                         class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >
@@ -81,8 +81,8 @@
 
                 <!-- Type Filter -->
                 <div>
-                    <label class="block text-sm text-[var(--sand)] mb-2">Type</label>
-                    <select 
+                    <label for="livewire-alerts-selectedtype" class="block text-sm text-[var(--sand)] mb-2">Type</label>
+                    <select id="livewire-alerts-selectedtype" 
                         wire:model.live="selectedType"
                         class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
                     >

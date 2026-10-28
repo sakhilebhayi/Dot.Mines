@@ -38,7 +38,7 @@
                 </div>
                 
                 <!-- Seekbar -->
-                <input type="range" 
+                <input type="range" aria-label="Replay position"
                        id="replay-slider"
                        min="0" 
                        max="{{ max(0, $totalPositions - 1) }}" 
