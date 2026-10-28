@@ -25,3 +25,6 @@ RedirectMatch 403 ^/vendor/
 RedirectMatch 403 ^/bootstrap/
 RedirectMatch 403 ^/database/
 RedirectMatch 403 ^/tests/
+
+# Dot: the application folder is never served.
+Require all denied
