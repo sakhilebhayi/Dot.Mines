@@ -13,7 +13,7 @@
         "laravel/jetstream": "^5.4",
         "laravel/reverb": "^1.7",
         "laravel/sanctum": "^4.0",
-        "laravel/scout": "^10.23",
+        "laravel/scout": "^11.9",
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.6.4",
         "phpoffice/phpspreadsheet": "^5.9",
