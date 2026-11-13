@@ -67,7 +67,7 @@
                 // Final fallback: use first URI segment
                 if (! $pageTitle) {
                     $firstSegment = explode('/', trim(request()->path(), '/'))[0] ?? null;
-                    $pageTitle = $firstSegment ? ucfirst(str_replace('-', ' ', $firstSegment)) : 'Mines';
+                    $pageTitle = $firstSegment ? ucfirst(str_replace('-', ' ', $firstSegment)) : 'Dot.Mines';
                 }
             @endphp
 

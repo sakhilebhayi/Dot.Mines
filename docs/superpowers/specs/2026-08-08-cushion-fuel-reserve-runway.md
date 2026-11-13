@@ -81,7 +81,7 @@ existing `Dashboard` component's team-null-guard pattern
 alongside the existing Statistics Cards section. Card markup matches this
 repo's existing Tailwind convention (`bg-white dark:bg-gray-800 rounded-lg
 shadow-lg p-6 border border-gray-200 dark:border-gray-700`), not the
-inline-style convention used in Dot.Finance/Dot.Billing — each platform's
+inline-style convention used in Dot.Finance — each platform's
 own established styling is followed, not a forced shared visual system.
 
 ## Testing Plan
