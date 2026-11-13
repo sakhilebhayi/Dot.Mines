@@ -175,6 +175,11 @@ class Dashboard extends Component
 
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
 
+        // Same gate as the Alerts page: AlertPolicy::acknowledge (own team
+        // and the acknowledge_alerts permission). Without it a read-only
+        // viewer could acknowledge from the board.
+        $this->authorize('acknowledge', $alert);
+
         $alert->update([
             'status' => 'acknowledged',
             'acknowledged_at' => now(),

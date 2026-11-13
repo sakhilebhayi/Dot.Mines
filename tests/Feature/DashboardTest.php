@@ -6,6 +6,7 @@ use App\Livewire\Dashboard;
 use App\Models\Alert;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\TeamRoleProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -94,6 +95,8 @@ class DashboardTest extends TestCase
             'status' => 'active',
             'triggered_at' => now(),
         ]);
+
+        TeamRoleProvisioner::assignRole($user, $team, 'admin');
 
         Livewire::actingAs($user)
             ->test(Dashboard::class)
