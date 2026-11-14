@@ -34,6 +34,7 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property string $password
  * @property string|null $remember_token
  * @property int|null $current_team_id
+ * @property string|null $infodot_user_uuid InfoDot's stable user id, set by the SSO link (never mass assignable)
  * @property-read Team|null $currentTeam
  * @property string|null $profile_photo_path
  * @property bool $two_factor_confirmed

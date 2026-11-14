@@ -61,4 +61,26 @@ return [
 
     'handoff_ttl' => env('ECOSYSTEM_HANDOFF_TTL', 5),
 
+    /*
+    |--------------------------------------------------------------------------
+    | InfoDot sign-in receiver (R-52 section 6)
+    |--------------------------------------------------------------------------
+    | Dot.Mines redeems InfoDot's single-use launch token like every other Dot app (POST /auth/ecosystem), but it only
+    | LINKS accounts: public sign-up is closed here, so an unknown person is refused and nothing is created. See
+    | App\Actions\Ecosystem\LinkUserFromInfoDot.
+    |
+    |  redeem_url  InfoDot's redeem endpoint. Its HOST must equal the host InfoDot posts from (the Origin check).
+    |  platform    this platform's key in InfoDot's registry.
+    |  secret      the per-platform secret; must equal InfoDot's ECOSYSTEM_SECRET_MINES. Empty = receiver off.
+    |  provision   INFODOT_PROVISION_USERS. DEFAULT FALSE. Only an explicit true lets an unknown InfoDot person get a new,
+    |              role-less Mines account; leave false while Mines sign-up is closed and entitlement is not enforced.
+    */
+    'infodot' => [
+        'redeem_url' => env('INFODOT_REDEEM_URL', 'https://infodot.co.za/api/ecosystem/redeem'),
+        'platform' => env('INFODOT_PLATFORM_KEY', 'mines'),
+        'secret' => env('INFODOT_SERVICE_SECRET'),
+        'timeout' => (int) env('INFODOT_REDEEM_TIMEOUT', 5),
+        'provision' => filter_var(env('INFODOT_PROVISION_USERS', false), FILTER_VALIDATE_BOOLEAN),
+    ],
+
 ];

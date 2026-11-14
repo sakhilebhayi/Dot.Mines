@@ -87,7 +87,10 @@ class SecurityHeaders
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
         // Referrer Policy - Control how much referrer information is shared
-        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        // A response that already chose a stricter policy (the InfoDot sign-in handoff sends no-referrer) keeps it.
+        if (! $response->headers->has('Referrer-Policy')) {
+            $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        }
 
         // Authenticated (operational) pages must never be indexed by search
         // engines -- robots.txt is advisory only, this header is binding.

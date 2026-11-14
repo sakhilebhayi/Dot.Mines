@@ -68,7 +68,10 @@ class SessionCookieCorsHardeningTest extends TestCase
     {
         $template = (string) file_get_contents(base_path('.env.example'));
 
-        $this->assertStringContainsString('SESSION_SAME_SITE=strict', $template, '.env.example used to ship lax, silently downgrading fresh deploys.');
+        // R-52 section 6: lax, deliberately (it matches .env.production.example). Strict drops the session cookie on any
+        // cross-site entry (an emailed link, the InfoDot launch post), which reads as a logout. The config default stays strict.
+        $this->assertStringContainsString('SESSION_SAME_SITE=lax', $template);
+        $this->assertStringNotContainsString('SESSION_SAME_SITE=strict', $template);
         $this->assertStringContainsString('SESSION_SECURE_COOKIE=true', $template);
         $this->assertStringContainsString('SESSION_HTTP_ONLY=true', $template);
         $this->assertStringContainsString('CORS_ALLOWED_ORIGINS', $template);
