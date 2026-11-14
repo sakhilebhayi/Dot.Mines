@@ -7,6 +7,7 @@ use App\Models\FeedItem;
 use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\MaintenanceRecord;
+use App\Models\OperatorMachineAssignment;
 use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Models\User;
@@ -172,10 +173,15 @@ class Dashboard extends Component
      * Open alerts, newest first, plus the per-machine view of the same set.
      * One query for the team's open alerts (capped), one count.
      *
-     * @return array{rows: list<array<string, mixed>>, total: int, byMachine: array<int, list<array<string, mixed>>>}
+     * @return array<string, mixed>
      */
     private function openAlerts(int $teamId): array
     {
+        /**
+         * @psalm-suppress UnnecessaryVarAnnotation -- phpstan needs it (larastan infers stdClass here)
+         *
+         * @phpstan-var Collection<int, Alert> $open
+         */
         $open = Alert::query()
             ->where('team_id', $teamId)
             ->where('status', 'active')
@@ -254,7 +260,9 @@ class Dashboard extends Component
             $heard = $row['updated_at'];
             $fuel = $machine->latestFuelMetric;
             $hours = $machine->latestEngineHoursMetric;
-            $operator = $machine->operatorAssignments->first()?->operator;
+            /** @var Collection<int, OperatorMachineAssignment> $assignments */
+            $assignments = $machine->getRelation('operatorAssignments');
+            $operator = $assignments->first()?->operator;
             $open = $alertsByMachine[$machine->id] ?? [];
             $state = (string) $row['state'];
             $speed = $row['speed'];
@@ -309,7 +317,7 @@ class Dashboard extends Component
      * the same service the Production page uses. Null when nothing was
      * recorded, so the page shows no chart rather than an empty one.
      *
-     * @return array{days: list<array<string, mixed>>, produced: float, target: float, percent: ?int, unit: string}|null
+     * @return array<string, mixed>|null
      */
     private function production(int $teamId): ?array
     {
