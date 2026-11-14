@@ -15,7 +15,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.23",
         "laravel/tinker": "^2.10.1",
-        "livewire/livewire": "^3.6.4",
+        "livewire/livewire": "^4.4.8",
         "phpoffice/phpspreadsheet": "^5.9",
         "sentry/sentry-laravel": "^4.0"
     },
