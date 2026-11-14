@@ -190,17 +190,20 @@ class DashboardDispatchTest extends TestCase
         $this->assertSame(1, $snapshot['counts']['idling']);
     }
 
-    public function test_a_fully_parked_fleet_reads_as_quiet_not_as_failure(): void
+    public function test_a_fully_parked_fleet_reads_as_parked_not_as_failure(): void
     {
         // A parked fleet used to render as a wall of red chips and
         // zeroes -- discouraging, and wrong: nothing is broken, the
-        // shift is over.
+        // shift is over. Parked is an open ring in the neutral colour;
+        // only silence takes the signal colour.
         $this->machineWithReading(['speed' => 0, 'raw_data' => ['engine_running' => false]]);
         $this->machineWithReading(['speed' => 0, 'raw_data' => ['engine_running' => false]]);
         $user = User::where('current_team_id', $this->team->id)->firstOrFail();
 
         $html = Livewire::actingAs($user)->test(Dashboard::class)->html();
 
-        $this->assertStringContainsString('Fleet is quiet', $html);
+        $this->assertSame(2, substr_count($html, 'data-s="parked"'));
+        $this->assertStringContainsString('2 parked', $html);
+        $this->assertStringNotContainsString('data-s="none"', $html);
     }
 }

@@ -1,11 +1,9 @@
-{{-- Skeleton for KPI-and-cards pages (dashboard-family). Shapes match the
-     real layout so the swap-in doesn't jump (brief: skeletons resemble the
-     content they replace). --}}
-<div class="p-4 sm:p-6 space-y-6">
-    {{-- No KPI row: the counts are in the landing above, already painted. --}}
-    <x-skeleton variant="chart" />
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <x-skeleton variant="card" />
-        <x-skeleton variant="card" />
+{{-- Skeleton for the operations board: hairline rows at the real row height,
+     static, no shimmer and no spinner, so nothing jumps when the board arrives. --}}
+<div class="dm-stack" aria-busy="true" aria-label="Loading the fleet board">
+    <div class="dm-skel">
+        @foreach (range(1, 6) as $row)
+            <div class="dm-skel__row"><i></i><i></i><i></i></div>
+        @endforeach
     </div>
 </div>

@@ -137,7 +137,7 @@ class DashboardLandingTest extends TestCase
         $response = $this->actingAs($member)->get('/dashboard');
         $response->assertOk();
         $response->assertSee('data-landing-setup', false);
-        $response->assertSee('there is no mine area and no machine yet.');
+        $response->assertSee('There is no mine area and no machine yet.');
 
         $action = $this->primaryAction($response);
         $this->assertSame(route($route), $action['href']);
@@ -146,10 +146,6 @@ class DashboardLandingTest extends TestCase
 
         if (in_array($role, ['operator', 'viewer'], true)) {
             $response->assertSee('An administrator or fleet manager still has to do what is left.');
-        }
-
-        foreach (['machines', 'marked-active', 'active-alerts', 'geofences', 'mine-areas'] as $reading) {
-            $this->assertSame('0', $this->reading($response, $reading), $reading);
         }
     }
 
@@ -175,76 +171,64 @@ class DashboardLandingTest extends TestCase
         $response = $this->actingAs($operator)->get('/dashboard');
 
         $this->assertSame(route('map'), $this->primaryAction($response)['href']);
-        $response->assertSee('the whole fleet is marked active and no alerts are open.');
+        $response->assertSee('No alerts are open. All two machines are marked active.');
         $response->assertDontSee('data-landing-setup', false);
     }
 
-    public function test_the_welcome_uses_the_real_first_name_and_team_name(): void
+    public function test_the_landing_names_the_team_and_drops_the_greeting_and_marketing_line(): void
     {
         [$member] = $this->memberWithRole('operator', 'Thandi Mokoena');
 
         $response = $this->actingAs($member)->get('/dashboard');
 
-        $response->assertSee(', Thandi.');
-        $response->assertDontSee('Thandi Mokoena.');
         $response->assertSee('Kopano Colliery');
+        $response->assertDontSee('Good morning');
+        $response->assertDontSee('Good afternoon');
+        $response->assertDontSee('Good evening');
+        $response->assertDontSee('Know where every machine is and what it is doing.');
+        $response->assertDontSee('data-landing-logo', false);
     }
 
-    private function reading(TestResponse $response, string $key): ?string
-    {
-        $found = preg_match('/data-reading="'.preg_quote($key, '/').'">([^<]*)</', (string) $response->getContent(), $m);
-
-        return $found === 1 ? trim($m[1]) : null;
-    }
-
-    public function test_every_figure_on_the_landing_is_a_count_of_seeded_records(): void
+    public function test_the_headline_counts_are_the_seeded_records_of_this_team_only(): void
     {
         [$member, $team] = $this->memberWithRole('operator');
         $this->seedWorkingMine($team);
 
-        // Another team's records must never leak into the readings.
+        // Another team's records must never leak into the sentence.
         $other = Team::factory()->create(['user_id' => User::factory()->create()->id]);
         Machine::factory()->count(7)->create(['team_id' => $other->id, 'status' => 'active']);
+        Alert::factory()->count(4)->create(['team_id' => $other->id, 'status' => 'active']);
 
         $response = $this->actingAs($member)->get('/dashboard');
 
-        $this->assertSame('5', $this->reading($response, 'machines'));
-        $this->assertSame('3', $this->reading($response, 'marked-active'));
-        $this->assertSame('2', $this->reading($response, 'active-alerts'));
-        $this->assertSame('4', $this->reading($response, 'geofences'));
-        $this->assertSame('1', $this->reading($response, 'mine-areas'));
-        $response->assertSee('part of the fleet is marked active and alerts are open.');
-
-        // The landing itself (headline, welcome, action, setup, readings)
-        // carries no digits beyond those five counts, the primary action's
-        // alert count and the date. Strip those and nothing numeric remains.
-        $html = (string) $response->getContent();
-        $start = strpos($html, '<section aria-labelledby="landing-headline"');
-        $end = strpos($html, '</section>', (int) $start);
-        $this->assertNotFalse($start);
-        $this->assertNotFalse($end);
-
-        $landing = substr($html, $start, $end - $start);
-        $landing = (string) preg_replace('/<span[^>]*x-data=.*?<\/time>\s*<\/span>|<span class="inline-flex[^>]*>No data yet<\/span>/s', '', $landing);
-        $text = trim((string) preg_replace('/\s+/', ' ', strip_tags($landing)));
-        $text = str_replace(now()->format('D j M Y'), '', $text);
-        $text = str_replace('Review 2 active alerts', '', $text);
-
-        preg_match_all('/\d+/', $text, $numbers);
-        $this->assertSame(['5', '3', '2', '4', '1'], $numbers[0]);
+        $response->assertSee('Two alerts are open. Three of five machines are marked active.');
+        $response->assertSee('Review 2 active alerts');
     }
 
-    public function test_the_landing_shows_the_original_logo_file_unaltered(): void
+    public function test_the_headline_age_is_the_telemetry_own_time_not_the_render_time(): void
+    {
+        [$member, $team] = $this->memberWithRole('viewer');
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'status' => 'active']);
+
+        $this->actingAs($member)->get('/dashboard')->assertSee('no telemetry recorded yet');
+
+        \App\Models\MachineMetric::factory()->create([
+            'team_id' => $team->id, 'machine_id' => $machine->id, 'recorded_at' => now()->subMinutes(12),
+        ]);
+
+        $this->actingAs($member)->get('/dashboard')->assertSee('latest telemetry recorded', false)->assertSee('12 minutes');
+    }
+
+    public function test_the_original_logo_files_are_unaltered_and_the_sidebar_carries_the_mark_once(): void
     {
         [$member] = $this->memberWithRole('viewer');
 
-        $response = $this->actingAs($member)->get('/dashboard');
-
-        $response->assertSee('data-landing-logo', false);
-        $response->assertSee(asset('images/logo-light.png'), false);
-
         $this->assertSame(self::LOGO_LIGHT_SHA256, hash_file('sha256', public_path('images/logo-light.png')));
         $this->assertSame(self::LOGO_SHA256, hash_file('sha256', public_path('images/logo.png')));
+
+        $html = (string) $this->actingAs($member)->get('/dashboard')->getContent();
+        $this->assertSame(1, substr_count($html, asset('images/mark.png')), 'the brand mark appears once, in the sidebar');
+        $this->assertStringNotContainsString('images/logo-light.png', $html);
     }
 
     public function test_the_way_back_to_infodot_is_the_shared_switcher_not_two_interim_links(): void
@@ -268,12 +252,13 @@ class DashboardLandingTest extends TestCase
         );
     }
 
-    public function test_what_the_old_tiles_linked_to_is_still_reachable_from_the_landing(): void
+    public function test_what_the_old_tiles_linked_to_is_still_reachable(): void
     {
-        [$member] = $this->memberWithRole('viewer');
+        [$member] = $this->memberWithRole('admin');
 
         $response = $this->actingAs($member)->get('/dashboard');
 
+        // Fleet, map, alerts, geofences and mine areas stay one click away in the sidebar.
         foreach (['fleet', 'map', 'alerts', 'geofences', 'mine-areas'] as $route) {
             $response->assertSee('href="'.route($route).'"', false);
         }
