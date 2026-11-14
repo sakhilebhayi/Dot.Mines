@@ -42,12 +42,7 @@
                 <!-- Search -->
                 <div>
                     <label for="livewire-alerts-search" class="block text-sm text-[var(--sand)] mb-2">Search Alerts</label>
-                    <input id="livewire-alerts-search" 
-                        type="text" 
-                        wire:model.live="search" 
-                        placeholder="Search by title or description..."
-                        class="w-full bg-white/5 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
-                    >
+                    <x-dot.filter-search id="livewire-alerts-search" wire:model.live="search" placeholder="Search by title or description..." label="Search Alerts" />
                 </div>
 
                 <!-- Priority Filter -->

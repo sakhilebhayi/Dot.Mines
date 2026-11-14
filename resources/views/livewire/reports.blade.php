@@ -67,12 +67,7 @@
                 <!-- Search -->
                 <div>
                     <label for="livewire-reports-search" class="block text-sm text-[var(--sand)] mb-2">Search Reports</label>
-                    <input id="livewire-reports-search" 
-                        type="text" 
-                        wire:model.live="search" 
-                        placeholder="Search by name or description..."
-                        class="w-full bg-white/10 text-[var(--stone)] px-4 py-2 rounded-lg border border-[var(--line)] focus:border-[var(--gold)] focus:outline-none"
-                    >
+                    <x-dot.filter-search id="livewire-reports-search" wire:model.live="search" placeholder="Search by name or description..." label="Search Reports" />
                 </div>
 
                 <!-- Report Type Filter -->

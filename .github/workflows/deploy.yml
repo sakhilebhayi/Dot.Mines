@@ -175,7 +175,7 @@ jobs:
           # mines/public, so each public asset entry must be linked in.
           # Idempotent (-sfn); sw.js must live at the webroot ROOT for the
           # service worker's scope to cover the whole app.
-          for target in build images audio machine-emojis sw.js; do
+          for target in build dot-ui dot-ui-host.css images audio machine-emojis sw.js; do
             ln -sfn "mines/public/${target}" "../${target}"
           done
 

@@ -58,8 +58,7 @@
             @endforeach
         </div>
         <div class="flex flex-wrap gap-3">
-            <input aria-label="Search the feed" type="search" wire:model.live.debounce.400ms="search" placeholder="Search the feed…"
-                   class="flex-1 min-w-48 px-3.5 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
+            <x-dot.filter-search id="livewire-operations-feed-search" wire:model.live.debounce.400ms="search" placeholder="Search the feed…" label="Search the feed" class="flex-1 min-w-48" />
             <select aria-label="Timewindow" wire:model.live="timeWindow" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)] text-sm">
                 <option value="">All time</option>
                 <option value="today">Today</option>

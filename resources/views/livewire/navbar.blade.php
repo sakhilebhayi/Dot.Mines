@@ -76,6 +76,16 @@
 
         <!-- Right Section -->
         <div class="flex items-center gap-4">
+            {{-- Shared Dot Apps switcher. Mines has its own sign-in and cannot ask InfoDot what a company holds, so the
+                 model is the plain one: core platforms through InfoDot, with a visible line saying so. --}}
+            <x-dot.switcher
+                platform="mines"
+                :model="\App\Support\PlainSwitcherModel::build()"
+                logos="/dot-ui/img/platforms"
+                :notice="\App\Support\PlainSwitcherModel::NOTICE"
+                :notice-detail="\App\Support\PlainSwitcherModel::NOTICE_DETAIL"
+                wire:ignore.self />
+
             <!-- Team Info -->
             @if ($team)
                 <div class="text-right hidden sm:block">

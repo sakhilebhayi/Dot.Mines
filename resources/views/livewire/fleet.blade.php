@@ -464,12 +464,7 @@
                     </svg>
                     Search Machines
                 </label>
-                <input id="livewire-fleet-search" 
-                    type="text" 
-                    wire:model.live="search" 
-                    placeholder="Name, model, or manufacturer..."
-                    class="w-full px-4 py-2.5 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:border-transparent transition-all"
-                />
+                <x-dot.filter-search id="livewire-fleet-search" wire:model.live="search" placeholder="Name, model, or manufacturer..." label="Search Machines" />
             </div>
 
             <!-- Status Filter -->
@@ -1043,8 +1038,7 @@
         <x-dialog-modal wire:model.live="assignOperatorMachineId">
             <x-slot name="title">Assign an operator</x-slot>
             <x-slot name="content">
-                <input aria-label="Search operators" type="search" wire:model.live.debounce.300ms="operatorSearch" placeholder="Search operators…"
-                       class="w-full px-3 py-2 bg-[var(--ink)] border border-[var(--line)] rounded text-[var(--stone)] mb-3">
+                <x-dot.filter-search id="livewire-fleet-operator-search" wire:model.live.debounce.300ms="operatorSearch" placeholder="Search operators…" label="Search operators" class="mb-3" />
 
                 @if ($assignmentBlockers !== [])
                     <div class="mb-3 px-3 py-2 bg-red-900/20 border border-red-900 rounded text-red-200 text-sm">

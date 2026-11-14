@@ -91,12 +91,7 @@
                     <div class="p-6 border-b border-[var(--line)]">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <input aria-label="Search mine areas" 
-                                    type="text"
-                                    wire:model.live="search"
-                                    placeholder="Search mine areas..."
-                                    class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] placeholder-[var(--sand)]/60 focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)] outline-none"
-                                >
+                                <x-dot.filter-search id="livewire-mine-area-manager-search" wire:model.live="search" placeholder="Search mine areas..." label="Search mine areas" />
                             </div>
                             <div>
                                 <select aria-label="Statusfilter" 

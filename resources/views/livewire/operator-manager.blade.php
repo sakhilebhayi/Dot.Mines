@@ -34,8 +34,7 @@
 
     {{-- Filters --}}
     <div class="flex flex-wrap gap-3 mb-6">
-        <input aria-label="Search name or employee number" type="search" wire:model.live.debounce.300ms="search" placeholder="Search name or employee number…"
-               class="flex-1 min-w-64 px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
+        <x-dot.filter-search id="livewire-operator-manager-search" wire:model.live.debounce.300ms="search" placeholder="Search name or employee number…" label="Search name or employee number" class="flex-1 min-w-64" />
         <select aria-label="Statusfilter" wire:model.live="statusFilter" class="px-3 py-2 bg-[var(--ink-soft)] border border-[var(--line)] rounded-lg text-[var(--stone)]">
             <option value="">All statuses</option>
             @foreach(\App\Models\Operator::STATUSES as $value => $label)
