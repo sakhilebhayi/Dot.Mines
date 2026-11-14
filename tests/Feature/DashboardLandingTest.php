@@ -6,6 +6,7 @@ use App\Livewire\DashboardLanding;
 use App\Models\Alert;
 use App\Models\Geofence;
 use App\Models\Machine;
+use App\Models\MachineMetric;
 use App\Models\MineArea;
 use App\Models\Team;
 use App\Models\User;
@@ -212,7 +213,7 @@ class DashboardLandingTest extends TestCase
 
         $this->actingAs($member)->get('/dashboard')->assertSee('no telemetry recorded yet');
 
-        \App\Models\MachineMetric::factory()->create([
+        MachineMetric::factory()->create([
             'team_id' => $team->id, 'machine_id' => $machine->id, 'recorded_at' => now()->subMinutes(12),
         ]);
 

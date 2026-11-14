@@ -261,7 +261,8 @@
    no motion beyond appearing; only the machine panel and the chart settle.
    ========================================================== */
 @layer components {
-    .dm-stack { display: grid; gap: 32px; max-width: 1320px; }
+    .dm-stack { display: grid; gap: 32px; max-width: 1320px; font-size: 14px; line-height: 1.45; }
+    .dm-lede, .dm-setup { font-size: 14px; line-height: 1.45; }
     .dm-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
     .dm-soft { color: var(--sand); }
     .dm-signal { color: var(--color-error); }
@@ -302,7 +303,7 @@
 
     /* ---- sections ---- */
     .dm-head { display: flex; align-items: center; gap: 16px; min-height: 40px; border-bottom: 1px solid var(--line); }
-    .dm-head h3 { margin: 0; font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+    .dm-head h3 { margin: 0; white-space: nowrap; font-family: var(--font-display); font-size: 16px; font-weight: 600; }
     .dm-meta { color: var(--sand); font-size: 12px; }
     .dm-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
     .dm-empty-line { margin: 0; padding: 16px 0; color: var(--sand); border-bottom: 1px solid var(--line); }
@@ -324,13 +325,14 @@
     .dm-when { color: var(--sand); font-size: 12px; white-space: nowrap; }
 
     /* ---- fleet: master and detail ---- */
-    .dm-md { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 0 32px; align-items: start; }
+    .dm-md { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0 24px; align-items: start; }
     .dm-filter { width: 220px; min-height: 32px; padding: 0 12px; background: var(--ink); border: 1px solid var(--line); border-radius: 8px; color: var(--stone); }
     .dm-filter::placeholder { color: var(--sand); opacity: .8; }
+    .dm-scroll { overflow-x: auto; }
     .dm-tbl { width: 100%; border-collapse: collapse; }
-    .dm-tbl th { text-align: left; font-weight: 500; color: var(--sand); font-size: 12px; height: 30px; padding: 0 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .dm-tbl th { text-align: left; font-weight: 500; color: var(--sand); font-size: 12px; height: 30px; padding: 0 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
     .dm-tbl th.dm-r { text-align: right; }
-    .dm-tbl td { height: 40px; padding: 0 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .dm-tbl td { height: 40px; padding: 0 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
     .dm-row { cursor: pointer; animation: dm-appear 160ms ease-out both; }
     .dm-row:nth-child(2) { animation-delay: 30ms; } .dm-row:nth-child(3) { animation-delay: 60ms; }
     .dm-row:nth-child(4) { animation-delay: 90ms; } .dm-row:nth-child(5) { animation-delay: 120ms; }
@@ -342,6 +344,7 @@
     .dm-name { font-weight: 500; text-decoration: none; }
     .dm-name:hover { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 3px; }
     .dm-sub { color: var(--sand); font-size: 12px; margin-left: 8px; }
+    @media (max-width: 1499px) { .dm-sub { display: none; } }
     .dm-state { display: inline-flex; align-items: center; gap: 8px; }
     .dm-state::before { content: ''; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--sand); flex: none; }
     .dm-state[data-s="moving"]::before { background: var(--stone); border-color: var(--stone); }

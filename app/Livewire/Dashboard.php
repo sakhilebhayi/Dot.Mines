@@ -54,7 +54,7 @@ class Dashboard extends Component
      */
     public function placeholder(): View
     {
-        return view('livewire.placeholders.dashboard');
+        return view('livewire.placeholders.dashboard-board');
     }
 
     public function mount(): void

@@ -7,6 +7,7 @@ use App\Models\Alert;
 use App\Models\Machine;
 use App\Models\MachineMetric;
 use App\Models\MaintenanceRecord;
+use App\Models\MineArea;
 use App\Models\ProductionRecord;
 use App\Models\Team;
 use App\Models\User;
@@ -140,7 +141,7 @@ class DashboardBoardTest extends TestCase
         [$viewer, $team] = $this->memberWithRole('viewer');
         $this->alert($team, 'critical', 'Engine Over Temperature');
         Machine::factory()->create(['team_id' => $team->id]);
-        \App\Models\MineArea::factory()->create(['team_id' => $team->id]);
+        MineArea::factory()->create(['team_id' => $team->id]);
 
         $html = (string) $this->actingAs($viewer)->get('/dashboard')->getContent();
 

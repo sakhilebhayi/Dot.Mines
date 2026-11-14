@@ -34,7 +34,7 @@
                             <b>{{ $alert['title'] }}</b>
                             <span>{{ $alert['type'] }}@if ($alert['machine']), {{ $alert['machine'] }}@endif</span>
                         </span>
-                        <span class="dm-when dm-num">{{ $alert['age'] }} ago</span>
+                        <span class="dm-when dm-num">{{ $alert['age'] }}</span>
                         @if ($canAck)
                             <button type="button" wire:click="acknowledgeAlert({{ $alert['id'] }})" wire:loading.attr="disabled"
                                     class="dm-btn dm-btn--quiet" data-acknowledge>Acknowledge</button>
@@ -72,6 +72,7 @@
             @if (count($rows) === 0)
                 <p class="dm-empty-line">No machines in the fleet yet. <a class="dm-link" href="{{ route('fleet') }}">Add machines</a> to see where they are and what they are doing.</p>
             @else
+                <div class="dm-scroll">
                 <table class="dm-tbl" aria-label="Fleet now">
                     <thead>
                         <tr>
@@ -107,6 +108,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
                 <p class="dm-empty-line" x-show="none" x-cloak>No machine matches your filter. <button type="button" class="dm-link dm-linkbtn" x-on:click="q = ''">Clear the filter</button></p>
             @endif
         </div>
@@ -118,6 +120,7 @@
                         <h4>{{ $m['name'] }}</h4>
                         <p class="dm-basis">{{ $m['basis'] }}</p>
                         <dl class="dm-kv">
+                            <div><dt>Type</dt><dd>{{ $m['type'] }}</dd><span class="dm-age"></span></div>
                             <div><dt>Marked</dt><dd>{{ $m['marked'] }}</dd><span class="dm-age"></span></div>
                             <div><dt>Operator</dt><dd>{{ $m['operator'] ?? 'Not assigned' }}</dd><span class="dm-age"></span></div>
                             <div><dt>Last heard</dt><dd @class(['dm-signal' => $m['stale']])>{{ $m['heardLong'] ?? 'Never' }}</dd><span class="dm-age"></span></div>
@@ -234,7 +237,7 @@
     <footer class="dm-foot" data-region="status-row">
         <span>
             @if ($freshAt)
-                Telemetry recorded <span @class(['dm-num', 'dm-signal' => $freshAt->diffInMinutes(now()) > \App\Livewire\Dashboard::STALE_AFTER_MINUTES])>{{ $freshAt->diffForHumans(short: true) }}</span> ago
+                Telemetry recorded <span @class(['dm-num', 'dm-signal' => $freshAt->diffInMinutes(now()) > \App\Livewire\Dashboard::STALE_AFTER_MINUTES])>{{ $freshAt->diffForHumans(short: true) }}</span>
             @else
                 No telemetry recorded yet
             @endif
