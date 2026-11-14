@@ -33,8 +33,6 @@
     --dsw-ink-2: var(--sand);
     --dsw-rule: rgba(244, 239, 228, 0.22);
     --dsw-tile-ink: #1b2124;
-    /* the "You are here" tag is dark on the plate; its text defaults to the paper colour, which is dark here */
-    --dsw-tile-tag-ink: #f6f4ee;
 }
 
 /* Navbar fit on a phone: with the switcher beside the bell and the account button, the page title and the action gaps

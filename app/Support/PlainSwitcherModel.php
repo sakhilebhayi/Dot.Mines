@@ -14,9 +14,8 @@ use Dot\Ui\PlatformSwitcher;
  * what is or is not switched on, and a visible line that says why.
  *
  * The platform list comes from the package's central registry data (dot-ui/data/categories.json), never from
- * config/ecosystem.php, so a platform added there appears with no Mines edit. The package keeps its degraded builder
- * private, because every other host reaches it by failing to ask InfoDot; Mines is a host that never asks, so it
- * reaches the same builder directly instead of inventing a second list.
+ * config/ecosystem.php, so a platform added there appears with no Mines edit. The package exposes this model as
+ * PlatformSwitcher::plain(), for exactly the hosts that never ask InfoDot.
  */
 /** @psalm-suppress UnusedClass Used from resources/views/livewire/navbar.blade.php. */
 class PlainSwitcherModel
@@ -32,10 +31,8 @@ class PlainSwitcherModel
      */
     public static function build(): array
     {
-        $switcher = PlatformSwitcher::fromConfig(self::PLATFORM);
-
         /** @var array<array-key, mixed> $model */
-        $model = (new \ReflectionMethod($switcher, 'degraded'))->invoke($switcher, null);
+        $model = PlatformSwitcher::plain(self::PLATFORM, self::NOTICE, self::NOTICE_DETAIL);
 
         return $model;
     }
