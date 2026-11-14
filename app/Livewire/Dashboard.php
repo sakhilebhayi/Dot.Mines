@@ -8,7 +8,6 @@ use App\Models\FeedItem;
 use App\Models\Geofence;
 use App\Models\Machine;
 use App\Models\MachineMetric;
-use App\Models\MineArea;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\DispatchService;
@@ -42,8 +41,6 @@ class Dashboard extends Component
     public int $activeAlerts = 0;
 
     public int $totalGeofences = 0;
-
-    public int $totalMineAreas = 0;
 
     /** @var array<int|string, mixed> */
     public array $recentAlerts = [];
@@ -113,12 +110,10 @@ class Dashboard extends Component
 
         $this->totalMachines = (int) (is_numeric($stats['total_machines'] ?? null) ? $stats['total_machines'] : 0);
         $this->activeMachines = (int) (is_numeric($stats['active_machines'] ?? null) ? $stats['active_machines'] : 0);
-        // Ensure active alerts count is accurate for the current team (bypass stale cache)
-        $this->activeAlerts = Alert::where('team_id', $team->id)
-            ->where('status', 'active')
-            ->count();
+        // The live active-alert count is read by the landing above the board
+        // (DashboardLanding), which re-reads it whenever an alert is acknowledged here.
+        $this->activeAlerts = (int) (is_numeric($stats['active_alerts'] ?? null) ? $stats['active_alerts'] : 0);
         $this->totalGeofences = (int) (is_numeric($stats['total_geofences'] ?? null) ? $stats['total_geofences'] : 0);
-        $this->totalMineAreas = MineArea::where('team_id', $team->id)->count();
 
         // Recent Alerts (with eager loading)
         $this->recentAlerts = Alert::where('team_id', $team->id)
@@ -179,6 +174,11 @@ class Dashboard extends Component
         }
 
         $alert = Alert::where('team_id', $team->id)->findOrFail($alertId);
+
+        // Same gate as the Alerts page: AlertPolicy::acknowledge (own team
+        // and the acknowledge_alerts permission). Without it a read-only
+        // viewer could acknowledge from the board.
+        $this->authorize('acknowledge', $alert);
 
         $alert->update([
             'status' => 'acknowledged',
