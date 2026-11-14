@@ -1,9 +1,9 @@
 <nav class="bg-[var(--ink-soft)] border-b border-[var(--line)] sticky top-0 z-40"
      x-data="{ mobileOpen: false }"
      @mobile-nav-changed.window="mobileOpen = $event.detail.open">
-    <div class="px-6 py-4 flex justify-between items-center">
+    <div class="px-6 py-4 flex justify-between items-center gap-3">
         <!-- Left Section -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 min-w-0 mines-nav-gap">
             <!-- Mobile nav toggle -->
             <button
                 @click="window.mobileNav.toggle()"
@@ -71,11 +71,11 @@
                 }
             @endphp
 
-            <h1 class="text-2xl font-display font-semibold text-[var(--stone)]">{{ $pageTitle }}</h1>
+            <h1 class="text-2xl font-display font-semibold text-[var(--stone)] min-w-0 mines-nav-title">{{ $pageTitle }}</h1>
         </div>
 
         <!-- Right Section -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 shrink-0 mines-nav-gap">
             {{-- Shared Dot Apps switcher. Mines has its own sign-in and cannot ask InfoDot what a company holds, so the
                  model is the plain one: core platforms through InfoDot, with a visible line saying so. --}}
             <x-dot.switcher
@@ -88,7 +88,7 @@
 
             <!-- Team Info -->
             @if ($team)
-                <div class="text-right hidden sm:block">
+                <div class="text-right hidden lg:block">
                     <div class="text-sm text-[var(--sand)]">Current Team</div>
                     <div class="text-sm font-semibold text-[var(--stone)]">{{ $team->name }}</div>
                 </div>
@@ -136,7 +136,7 @@
                     <div class="w-8 h-8 bg-[var(--gold)] rounded-full flex items-center justify-center">
                         <span class="text-sm font-bold text-[var(--ink)]">{{ substr($user?->name ?? 'U', 0, 1) }}</span>
                     </div>
-                    <span class="text-sm text-[var(--sand)] hidden sm:block">{{ $user?->name }}</span>
+                    <span class="text-sm text-[var(--sand)] hidden lg:block">{{ $user?->name }}</span>
                 </button>
 
                 <!-- Profile Dropdown -->

@@ -124,6 +124,21 @@ class DotUiRolloutTest extends TestCase
         $this->assertStringNotContainsString(' style=', substr($panel, 0, (int) strpos($panel, '<livewire') ?: 9000));
     }
 
+    public function test_every_layout_that_renders_the_navbar_loads_the_shared_assets(): void
+    {
+        foreach (['layouts/app', 'components/layouts/app'] as $layout) {
+            $source = (string) file_get_contents(resource_path('views/'.$layout.'.blade.php'));
+            $this->assertStringContainsString("@livewire('navbar')", $source, $layout);
+            $this->assertStringContainsString("@include('layouts._dot-ui-head')", $source, $layout);
+        }
+
+        // /alerts is bound as a Livewire route target and uses the component layout: it must style the switcher too.
+        $html = (string) $this->actingAs($this->member())->get('/alerts')->assertOk()->getContent();
+        $this->assertStringContainsString('/dot-ui/css/dot-switcher.css', $html);
+        $this->assertStringContainsString('/dot-ui/js/dot-switcher.js', $html);
+        $this->assertSame(1, substr_count($html, 'data-dsw data-state="degraded" data-platform="mines"'));
+    }
+
     public function test_the_logos_are_the_packaged_originals(): void
     {
         $manifest = json_decode((string) file_get_contents(public_path('dot-ui/img/platforms/manifest.json')), true);

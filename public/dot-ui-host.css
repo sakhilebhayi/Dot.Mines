@@ -17,6 +17,8 @@
     --dsr-filter-bg: rgba(255, 255, 255, 0.05);
     --dsr-filter-border-hover: var(--sand);
     --dsr-filter-border-focus: var(--gold);
+    /* Mines' selects and inputs sit at 44px; the shared filter follows them (44px on touch already). */
+    --dsr-filter-h: 44px;
 }
 
 /* Switcher half: a dark host. The trigger sits on the dark navbar; the panel takes the Mines surface, the logo plates
@@ -31,4 +33,20 @@
     --dsw-ink-2: var(--sand);
     --dsw-rule: rgba(244, 239, 228, 0.22);
     --dsw-tile-ink: #1b2124;
+    /* the "You are here" tag is dark on the plate; its text defaults to the paper colour, which is dark here */
+    --dsw-tile-tag-ink: #f6f4ee;
+}
+
+/* Navbar fit on a phone: with the switcher beside the bell and the account button, the page title and the action gaps
+   tighten under 640px so nothing clips or scrolls sideways (the committed Tailwind bundle is not rebuilt for this). */
+@media (max-width: 639px) {
+    .mines-nav-gap {
+        gap: 0.5rem;
+    }
+
+    .mines-nav-title {
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+        overflow-wrap: anywhere;
+    }
 }
