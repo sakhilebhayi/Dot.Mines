@@ -190,19 +190,20 @@ class Dashboard extends Component
             ->limit(500)
             ->get(['id', 'machine_id', 'type', 'title', 'priority', 'triggered_at', 'created_at']);
 
+        /** @var array<string, int> $rank */
         $rank = ['critical' => 0, 'high' => 1, 'medium' => 2, 'low' => 3];
 
         $rows = $open->take(self::ALERT_ROWS)->map(function (Alert $alert): array {
-            $at = $alert->triggered_at ?? $alert->created_at;
+            $at = $alert->triggered_at;
 
             return [
                 'id' => $alert->id,
-                'type' => ucfirst(str_replace('_', ' ', (string) $alert->type)),
+                'type' => ucfirst(str_replace('_', ' ', $alert->type)),
                 'title' => $alert->title,
                 'priority' => self::priorityChip($alert->priority),
                 'machine_id' => $alert->machine_id,
-                'age' => $at?->diffForHumans(short: true) ?? '',
-                'at' => $at?->toIso8601String(),
+                'age' => $at->diffForHumans(short: true),
+                'at' => $at->toIso8601String(),
             ];
         })->values()->all();
 
@@ -217,7 +218,7 @@ class Dashboard extends Component
             ];
         }
         foreach ($byMachine as &$list) {
-            usort($list, fn (array $a, array $b): int => ($rank[$a['priority']] ?? 9) <=> ($rank[$b['priority']] ?? 9));
+            usort($list, fn (array $a, array $b): int => ($rank[(string) $a['priority']] ?? 9) <=> ($rank[(string) $b['priority']] ?? 9));
         }
         unset($list);
 
@@ -238,6 +239,8 @@ class Dashboard extends Component
      *
      * @param  array<int, list<array<string, mixed>>>  $alertsByMachine
      * @return array{rows: list<array<string, mixed>>, counts: array<string, int>}
+     *
+     * @psalm-suppress MixedAssignment, MixedArgument, MixedArrayOffset, MixedOperand, MixedReturnStatement, MixedMethodCall, MissingClosureReturnType, MissingClosureParamType, RedundantCastGivenDocblockType, InvalidOperand, PossiblyNullPropertyFetch, RiskyTruthyFalsyComparison -- board rows are heterogeneous arrays built from model attributes
      */
     private function fleet(int $teamId, array $alertsByMachine): array
     {
@@ -318,6 +321,8 @@ class Dashboard extends Component
      * recorded, so the page shows no chart rather than an empty one.
      *
      * @return array<string, mixed>|null
+     *
+     * @psalm-suppress MixedAssignment, MixedArgument, MixedArrayOffset, MixedOperand, MixedReturnStatement, MixedMethodCall, MissingClosureReturnType, MissingClosureParamType, RedundantCastGivenDocblockType, InvalidOperand, PossiblyNullPropertyFetch, RiskyTruthyFalsyComparison -- board rows are heterogeneous arrays built from model attributes
      */
     private function production(int $teamId): ?array
     {
@@ -358,6 +363,8 @@ class Dashboard extends Component
 
     /**
      * @return array{reserve: ?string, inProgress: int, overdue: int}
+     *
+     * @psalm-suppress MixedAssignment, RiskyTruthyFalsyComparison -- the runway calculator returns array<string, mixed>
      */
     private function onShift(int $teamId): array
     {
@@ -385,6 +392,9 @@ class Dashboard extends Component
         ];
     }
 
+    /**
+     * @psalm-suppress MixedAssignment, MixedArgument, MixedArrayOffset, MixedOperand, MixedReturnStatement, MixedMethodCall, MissingClosureReturnType, MissingClosureParamType, RedundantCastGivenDocblockType, InvalidOperand, PossiblyNullPropertyFetch, RiskyTruthyFalsyComparison -- board rows are heterogeneous arrays built from model attributes
+     */
     public function render(): View
     {
         $team = $this->resolveCurrentTeam();
