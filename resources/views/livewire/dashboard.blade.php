@@ -161,7 +161,7 @@
                     $days = $production['days'];
                     $n = count($days);
                     $max = max(1.0, ...array_map(fn ($d) => max($d['produced'], $d['target']), $days));
-                    $plotTop = 16; $plotBottom = 160; $plotH = $plotBottom - $plotTop;
+                    $plotTop = 30; $plotBottom = 160; $plotH = $plotBottom - $plotTop;
                     $slot = 630 / max($n, 1);
                     $bw = min(48, $slot * 0.55);
                     $unit = $production['unit'];
@@ -170,6 +170,9 @@
                 <svg class="dm-chart" viewBox="0 0 660 188" role="img" aria-labelledby="dm-ct dm-cd">
                     <title id="dm-ct">Production per day, last {{ $n }} {{ $n === 1 ? 'day' : 'days' }} with records</title>
                     <desc id="dm-cd">{{ $n }} daily {{ $n === 1 ? 'bar' : 'bars' }} against each day's target; {{ $fmt($production['produced']) }} {{ $unit }} produced in total{{ $production['target'] > 0 ? ' against '.$fmt($production['target']).' '.$unit : '' }}.</desc>
+                    <line class="dm-grid" x1="30" x2="660" y1="{{ $plotTop }}" y2="{{ $plotTop }}"/>
+                    <text class="dm-ytick" x="0" y="{{ $plotTop - 5 }}" text-anchor="start">{{ $fmt($max) }} {{ $unit }}</text>
+                    <text class="dm-ytick" x="26" y="{{ $plotBottom + 4 }}" text-anchor="end">0</text>
                     <line class="dm-axis" x1="30" x2="660" y1="{{ $plotBottom }}" y2="{{ $plotBottom }}"/>
                     <g class="dm-bars">
                         @foreach ($days as $k => $d)
@@ -177,7 +180,7 @@
                                 $h = $d['produced'] / $max * $plotH;
                                 $x = 30 + $slot * $k + ($slot - $bw) / 2;
                             @endphp
-                            <rect class="dm-bar" x="{{ round($x, 1) }}" y="{{ round($plotBottom - $h, 1) }}" width="{{ round($bw, 1) }}" height="{{ round($h, 1) }}"><title>{{ $d['label'] }}: {{ $fmt($d['produced']) }} {{ $unit }} produced{{ $d['target'] > 0 ? ', target '.$fmt($d['target']).' '.$unit : '' }}</title></rect>
+                            <rect @class(['dm-bar', 'dm-bar--met' => $d['target'] > 0 && $d['produced'] >= $d['target']]) x="{{ round($x, 1) }}" y="{{ round($plotBottom - $h, 1) }}" width="{{ round($bw, 1) }}" height="{{ round($h, 1) }}"><title>{{ $d['label'] }}: {{ $fmt($d['produced']) }} {{ $unit }} produced{{ $d['target'] > 0 ? ', target '.$fmt($d['target']).' '.$unit : '' }}</title></rect>
                         @endforeach
                     </g>
                     @foreach ($days as $k => $d)
@@ -186,10 +189,14 @@
                             @php $ty = $plotBottom - $d['target'] / $max * $plotH; @endphp
                             <line class="dm-tgt" x1="{{ round($x - 6, 1) }}" x2="{{ round($x + $bw + 6, 1) }}" y1="{{ round($ty, 1) }}" y2="{{ round($ty, 1) }}"/>
                         @endif
+                        @if ($d['target'] > 0)
+                            @php $pct = (int) round($d['produced'] / $d['target'] * 100); @endphp
+                            <text @class(['dm-pct', 'dm-pctl', 'dm-pct--short' => $pct < 100]) x="{{ round($x + $bw / 2, 1) }}" y="{{ round(min($plotBottom - $d['produced'] / $max * $plotH, $ty) - 8, 1) }}" text-anchor="middle">{{ $pct }} %</text>
+                        @endif
                         <text x="{{ round($x + $bw / 2, 1) }}" y="178" text-anchor="middle">{{ $d['label'] }}</text>
                     @endforeach
                 </svg>
-                <div class="dm-legend"><span><i class="k1"></i>Produced</span><span><i class="k2"></i>Target for the day</span></div>
+                <div class="dm-legend"><span><i class="k1"></i>Produced</span><span><i class="k2"></i>Target for the day</span><span>Lighter bars met that day's target. The figure above each bar is produced as a share of it</span></div>
                 <div class="dm-sumrow" data-production-total>
                     <span class="dm-num dm-big">{{ $fmt($production['produced']) }} {{ $unit }}</span>
                     @if ($production['target'] > 0)

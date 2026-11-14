@@ -228,7 +228,12 @@ class DashboardBoardTest extends TestCase
 
         $this->assertStringContainsString('3 150 t', $html);
         $this->assertStringContainsString('of 3 750 t target, 84 %', $html);
-        $this->assertSame(3, substr_count($html, 'class="dm-bar"'));
+        $this->assertSame(3, preg_match_all('/<rect class="dm-bar[ "]/', $html));
+        // Direct labels are the true share of each day's target; only the day that met it is marked.
+        $this->assertStringContainsString('80 %', $html);
+        $this->assertStringContainsString('100 %', $html);
+        $this->assertStringContainsString('72 %', $html);
+        $this->assertSame(1, substr_count($html, 'dm-bar dm-bar--met'));
         $this->assertStringContainsString('<title id="dm-ct">', $html);
         $this->assertStringNotContainsString('7 777', $html);
     }
@@ -298,7 +303,8 @@ class DashboardBoardTest extends TestCase
 
         preg_match('/@media \(prefers-reduced-motion: reduce\) \{(.*?)\n    \}/s', $dash, $reduce);
         $this->assertNotEmpty($reduce, 'a reduced-motion block exists');
-        foreach (['.dm-lede__text', '.dm-alerts li', '.dm-row', '.dm-panel', '.dm-bar'] as $animated) {
+        $this->assertStringContainsString('dm-ring', (string) file_get_contents(resource_path('views/components/dm-contours.blade.php')));
+        foreach (['.dm-lede__text', '.dm-alerts li', '.dm-row', '.dm-panel', '.dm-bar', '.dm-ring', '.dm-pctl'] as $animated) {
             $this->assertStringContainsString($animated, $reduce[1], $animated.' is switched off for reduced motion');
         }
     }
