@@ -248,12 +248,7 @@
             <!-- Search -->
             <div>
                 <label for="livewire-geofence-manager-search" class="block text-sm font-medium text-[var(--sand)] mb-2">Search Geofences</label>
-                <input id="livewire-geofence-manager-search" 
-                    type="text" 
-                    wire:model.live="search" 
-                    placeholder="Name or description..."
-                    class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] placeholder-[var(--sand)]/60 focus:outline-none focus:border-[var(--gold)]"
-                />
+                <x-dot.filter-search id="livewire-geofence-manager-search" wire:model.live="search" placeholder="Name or description..." label="Search Geofences" />
             </div>
 
             <!-- Sort By -->

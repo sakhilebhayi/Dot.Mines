@@ -20,10 +20,6 @@
                 <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines"
                      width="1181" height="886" data-landing-logo
                      class="h-20 w-auto sm:h-24">
-                <nav aria-label="Dot ecosystem" class="flex items-center gap-5 text-sm text-[var(--sand)]">
-                    <a href="{{ $this->infodotUrl }}/home" class="inline-flex min-h-11 items-center {{ $linkClass }}">InfoDot</a>
-                    <a href="{{ $this->infodotUrl }}/platforms" class="inline-flex min-h-11 items-center {{ $linkClass }}">Platforms</a>
-                </nav>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">

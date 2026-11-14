@@ -23,6 +23,8 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+        @include('layouts._dot-ui-head')
+
         <!-- Leaflet CSS is now loaded per-component to avoid Livewire morphdom issues -->
 
         <!-- Styles -->

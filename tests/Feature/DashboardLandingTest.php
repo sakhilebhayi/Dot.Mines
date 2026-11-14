@@ -247,15 +247,17 @@ class DashboardLandingTest extends TestCase
         $this->assertSame(self::LOGO_SHA256, hash_file('sha256', public_path('images/logo.png')));
     }
 
-    public function test_the_way_back_to_infodot_is_two_plain_links(): void
+    public function test_the_way_back_to_infodot_is_the_shared_switcher_not_two_interim_links(): void
     {
         [$member] = $this->memberWithRole('viewer');
 
-        $response = $this->actingAs($member)->get('/dashboard');
+        $html = (string) $this->actingAs($member)->get('/dashboard')->getContent();
 
-        $html = (string) $response->getContent();
-        $this->assertMatchesRegularExpression('#<a href="https://infodot\.co\.za/home"[^>]*>InfoDot</a>#', $html);
-        $this->assertMatchesRegularExpression('#<a href="https://infodot\.co\.za/platforms"[^>]*>Platforms</a>#', $html);
+        // The interim InfoDot / Platforms pair is gone; the switcher in the header carries InfoDot's tile and
+        // "See all platforms", so the way back is still one click away.
+        $this->assertStringNotContainsString('aria-label="Dot ecosystem"', $html);
+        $this->assertMatchesRegularExpression('#<a href="https://infodot\.co\.za/platforms" class="dsw-all">See all platforms</a>#', $html);
+        $this->assertStringContainsString('href="https://infodot.co.za/home"', $html);
     }
 
     public function test_the_landing_is_in_the_first_response_not_behind_the_lazy_load(): void

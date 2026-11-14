@@ -1,0 +1,50 @@
+/*
+ * Dot.Mines host mapping for the shared dot-ui package (public/dot-ui/, hash-pinned, never edited here).
+ * Maps the package's surface tokens onto Mines' own brand tokens (--ink, --ink-soft, --stone, --sand, --gold, --line,
+ * defined in resources/css/app.css). Plain CSS in its own file so the committed public/build bundle is untouched.
+ * Load after dot-tokens.css, dot-search.css and dot-switcher.css.
+ */
+
+/* Search half: the compact in-page filter (and the dropdown tokens, should a header search ever be added). */
+:root {
+    --dsr-panel: var(--ink-soft);
+    --dsr-hover: rgba(255, 255, 255, 0.05);
+    --dsr-rule: var(--line);
+    --dsr-rule-strong: rgba(244, 239, 228, 0.22);
+    --dsr-text: var(--stone);
+    --dsr-text-2: var(--sand);
+    --dsr-text-3: var(--sand);
+    --dsr-filter-bg: rgba(255, 255, 255, 0.05);
+    --dsr-filter-border-hover: var(--sand);
+    --dsr-filter-border-focus: var(--gold);
+    /* Mines' selects and inputs sit at 44px; the shared filter follows them (44px on touch already). */
+    --dsr-filter-h: 44px;
+}
+
+/* Switcher half: a dark host. The trigger sits on the dark navbar; the panel takes the Mines surface, the logo plates
+   stay white because the original logos are drawn for white. */
+.dsw {
+    --dsw-btn-ink: var(--stone);
+    --dsw-btn-border: rgba(244, 239, 228, 0.28);
+    --dsw-btn-bg-hover: rgba(255, 255, 255, 0.06);
+    --dsw-focus: var(--gold);
+    --dsw-paper: var(--ink-soft);
+    --dsw-ink: var(--stone);
+    --dsw-ink-2: var(--sand);
+    --dsw-rule: rgba(244, 239, 228, 0.22);
+    --dsw-tile-ink: #1b2124;
+}
+
+/* Navbar fit on a phone: with the switcher beside the bell and the account button, the page title and the action gaps
+   tighten under 640px so nothing clips or scrolls sideways (the committed Tailwind bundle is not rebuilt for this). */
+@media (max-width: 639px) {
+    .mines-nav-gap {
+        gap: 0.5rem;
+    }
+
+    .mines-nav-title {
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+        overflow-wrap: anywhere;
+    }
+}

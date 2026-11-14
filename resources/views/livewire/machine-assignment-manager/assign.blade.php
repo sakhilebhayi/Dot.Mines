@@ -5,12 +5,7 @@
         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
             <div class="flex-1 min-w-0">
                 <label for="livewire-machine-assignment-manager-assign-searchterm" class="block text-sm font-medium text-[var(--sand)] mb-2">Search</label>
-                <input id="livewire-machine-assignment-manager-assign-searchterm"
-                    type="text"
-                    wire:model.live="searchTerm"
-                    placeholder="Search other machines..."
-                    class="w-full px-4 py-2 bg-white/5 border border-[var(--line)] rounded-lg text-[var(--stone)] focus:ring-2 focus:ring-[var(--gold)] focus:border-transparent"
-                />
+                <x-dot.filter-search id="livewire-machine-assignment-manager-assign-searchterm" wire:model.live="searchTerm" placeholder="Search other machines..." label="Search" />
             </div>
             <div class="w-full sm:w-auto">
                 <label for="livewire-machine-assignment-manager-assign-filterstatus" class="block text-sm font-medium text-[var(--sand)] mb-2">Filter</label>

@@ -24,6 +24,8 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+        @include('layouts._dot-ui-head')
+
         <!-- Styles -->
         @livewireStyles
     </head>
