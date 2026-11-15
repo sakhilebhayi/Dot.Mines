@@ -34,17 +34,34 @@
     "file": "assets/marker-icon-hN30_KVU.png",
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
+  "public/dot-ui/fonts/roboto/roboto-latin-ext-wght-normal.woff2": {
+    "file": "assets/roboto-latin-ext-wght-normal-DYIxWhlt.woff2",
+    "src": "public/dot-ui/fonts/roboto/roboto-latin-ext-wght-normal.woff2"
+  },
+  "public/dot-ui/fonts/roboto/roboto-latin-wght-normal.woff2": {
+    "file": "assets/roboto-latin-wght-normal-ccAYIvAh.woff2",
+    "src": "public/dot-ui/fonts/roboto/roboto-latin-wght-normal.woff2"
+  },
+  "public/dot-ui/img/arrow-mask.png": {
+    "file": "assets/arrow-mask-BvtlvTEr.png",
+    "src": "public/dot-ui/img/arrow-mask.png"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-BIjg0kIJ.css",
+    "file": "assets/app-kfounl0O.css",
     "name": "app",
     "names": [
       "app.css"
     ],
     "src": "resources/css/app.css",
-    "isEntry": true
+    "isEntry": true,
+    "assets": [
+      "assets/roboto-latin-ext-wght-normal-DYIxWhlt.woff2",
+      "assets/roboto-latin-wght-normal-ccAYIvAh.woff2",
+      "assets/arrow-mask-BvtlvTEr.png"
+    ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-xesu001w.js",
+    "file": "assets/app-D_J_lPrY.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

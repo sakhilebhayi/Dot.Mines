@@ -122,9 +122,9 @@
                     @endphp
 
                     <div class="bg-[var(--ink-soft)] rounded-lg border {{ $priorityClasses }} p-4 hover:border-[var(--gold)]/50 transition">
-                        <div class="flex items-start justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                             <!-- Alert Info -->
-                            <div class="flex-1">
+                            <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-3 mb-2">
                                     <!-- Priority Badge -->
                                     <span class="px-2 py-1 text-xs font-semibold rounded {{ 
@@ -172,8 +172,8 @@
                                 </div>
                             </div>
 
-                            <!-- Actions -->
-                            <div class="flex items-center gap-2">
+                            <!-- Actions: they wrap on a narrow screen instead of running off it -->
+                            <div class="flex flex-wrap items-center gap-2">
                                 <button 
                                     wire:click="showDetails({{ $alert->id }})"
                                     class="px-3 py-1 text-sm bg-white/5 text-[var(--sand)] hover:bg-white/10 rounded transition"

@@ -114,14 +114,18 @@ class R52RobotoAndHeaderTest extends TestCase
         $html = (string) $this->get('/dashboard')->assertOk()->getContent();
 
         $this->assertMatchesRegularExpression('#<html[^>]*class="[^"]*dot-roboto#', $html);
-        $this->assertStringContainsString('/dot-ui/css/dot-roboto.css', $html);
-        $this->assertStringContainsString('/dot-ui/css/dot-type.css', $html);
-        $this->assertStringContainsString('as="font" type="font/woff2" crossorigin', $html);
-        $css = File::get(public_path('dot-ui/css/dot-roboto.css'));
-        $this->assertStringContainsString("font-family: 'Roboto'", $css);
+        $this->assertMatchesRegularExpression('#<link rel="preload" href="[^"]*/build/assets/roboto-latin-wght-normal-[^"]+\.woff2" as="font" type="font/woff2" crossorigin>#', $html);
+
+        $manifest = json_decode((string) file_get_contents(public_path('build/manifest.json')), true);
+        $css = File::get(public_path('build/'.$manifest['resources/css/app.css']['file']));
+        $this->assertStringContainsString('font-family:Roboto', str_replace([' ', "'", '"'], '', $css));
+        $this->assertStringContainsString('font-display:swap', str_replace(' ', '', $css));
+        $this->assertStringContainsString('--dot-font-sans', $css);
         foreach (['latin', 'latin-ext'] as $subset) {
-            $this->assertFileExists(public_path("dot-ui/fonts/roboto/roboto-{$subset}-wght-normal.woff2"));
+            $this->assertFileExists(public_path("dot-ui/fonts/roboto/roboto-{$subset}-wght-normal.woff2"), 'the hash-pinned source');
+            $this->assertNotEmpty(glob(public_path("build/assets/roboto-{$subset}-wght-normal-*.woff2")), "$subset is emitted into the build");
         }
+        $this->assertDoesNotMatchRegularExpression('#url\(\s*[\'"]?https?://#', $css, 'no stylesheet url() leaves this origin');
         $this->assertFileDoesNotExist(public_path('dot-ui/css/dot-fonts.css'), 'the legacy Archivo files are not shipped by dot-ui 0.6.0');
     }
 
@@ -146,12 +150,14 @@ class R52RobotoAndHeaderTest extends TestCase
         foreach (['/', '/features', '/pricing', '/login', '/offline'] as $path) {
             $html = (string) $this->get($path)->assertOk()->getContent();
             $this->assertStringContainsString('dot-roboto', $html, $path);
+            $this->assertMatchesRegularExpression('#/build/assets/app-[^"]+\.css#', $html, "$path: Roboto comes with the bundled stylesheet");
             $this->assertStringNotContainsString('fonts.googleapis', $html, $path);
             $this->assertStringNotContainsString('IBM Plex', $html, $path);
         }
         $error = (string) $this->get('/no-such-page')->assertNotFound()->getContent();
         $this->assertStringContainsString('dot-roboto', $error);
         $this->assertStringNotContainsString('fonts.googleapis', $error);
+        $this->assertStringContainsString('/dot-ui/css/dot-roboto.css', $error, 'the error page has no Vite bundle, so it links the package file itself');
     }
 
     public function test_the_layout_shell_is_written_once(): void

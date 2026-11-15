@@ -1,7 +1,7 @@
 <div>
 <div class="w-full">
     <div class="p-6">
-        <div class="mb-6 flex justify-between items-start">
+        <div class="mb-6 flex flex-wrap justify-between items-start gap-4">
             <div>
                 <h1 class="text-3xl font-display font-semibold">Maintenance & Health Monitoring</h1>
                 <p class="text-[var(--sand)] mt-2">Track machine health, schedule maintenance, and manage work orders</p>

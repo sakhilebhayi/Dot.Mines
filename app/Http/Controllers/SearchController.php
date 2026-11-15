@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Support\Search\MinesSearch;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 /**
  * The full results page behind the header search: the same scoped search, a longer list per group. A plain GET, so it works with no
@@ -15,7 +15,7 @@ class SearchController extends Controller
     public function index(Request $request, MinesSearch $search): View
     {
         $validated = $request->validate(['q' => ['nullable', 'string', 'max:'.(MinesSearch::MAX_LENGTH * 2)]]);
-        $q = trim((string) ($validated['q'] ?? ''));
+        $q = trim($validated['q'] ?? '');
         $typed = MinesSearch::isSearchable($q);
         $user = $request->user();
 

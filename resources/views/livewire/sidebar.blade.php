@@ -46,6 +46,7 @@
                     <a href="{{ route($link['route']) }}"
                        class="mines-nav__link"
                        title="{{ $link['label'] }}"
+                       aria-label="{{ $link['label'] }}"
                        @if (request()->routeIs($link['match'])) aria-current="page" @endif>
                         <svg class="mines-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             @foreach ($link['icon'] as $d)<path d="{{ $d }}"/>@endforeach

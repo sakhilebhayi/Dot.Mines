@@ -10,7 +10,10 @@ use App\Models\MineArea;
 use App\Models\Operator;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The header search (R-52). A real search over what Dot.Mines holds, scoped the way the pages are scoped, and then some:
@@ -53,11 +56,10 @@ class MinesSearch
     public function search(User $user, string $term, int $perGroup = 4): array
     {
         $teamId = $user->current_team_id;
-        if (! self::isSearchable($term) || $teamId === null || (int) $teamId === 0) {
+        if (! self::isSearchable($term) || $teamId === null || $teamId === 0) {
             return [];
         }
 
-        $teamId = (int) $teamId;
         $words = self::words($term);
         $can = $this->permissions($user);
 
@@ -142,16 +144,20 @@ class MinesSearch
      */
     private function machines(int $teamId, array $words, int $limit): array
     {
-        return $this->like($this->team(Machine::query(), $teamId), ['name', 'machine_type', 'manufacturer', 'model', 'serial_number', 'registration_number'], $words)
-            ->orderBy('name')->limit($limit)->get()
-            ->map(fn (Machine $m): SearchHit => new SearchHit(
-                'Machines',
-                (string) $m->name,
-                $this->sub([$m->machine_type ? ucfirst(str_replace('_', ' ', (string) $m->machine_type)) : null, $m->model ?? $m->manufacturer, $m->status]),
-                route('fleet.show', $m->id),
-                $m->serial_number ?: $m->registration_number,
-                $m->status ? ucfirst((string) $m->status) : null,
-            ))->all();
+        $query = Machine::query()->withoutGlobalScope('team')->where('machines.team_id', $teamId);
+
+        /** @var Collection<int, Machine> $rows */
+        $rows = $this->like($query, ['name', 'machine_type', 'manufacturer', 'model', 'serial_number', 'registration_number'], $words)
+            ->orderBy('name')->limit($limit)->get();
+
+        return array_values($rows->map(fn (Machine $m): SearchHit => new SearchHit(
+            'Machines',
+            $m->name,
+            $this->sub([ucfirst(str_replace('_', ' ', $m->machine_type)), $this->text($m->model ?? $m->manufacturer), $m->status]),
+            route('fleet.show', $m->id),
+            filled($m->serial_number) ? $m->serial_number : $m->registration_number,
+            ucfirst($m->status),
+        ))->all());
     }
 
     /**
@@ -160,27 +166,29 @@ class MinesSearch
      */
     private function alerts(int $teamId, array $words, int $limit): array
     {
-        $query = $this->team(Alert::query(), $teamId);
+        $query = Alert::query()->withoutGlobalScope('team')->where('alerts.team_id', $teamId);
         foreach ($words as $word) {
             $like = '%'.$word.'%';
             $query->where(function (Builder $q) use ($like, $teamId): void {
-                $q->whereRaw('LOWER('.$this->wrap($q, 'title').') LIKE ?', [$like])
-                    ->orWhereRaw('LOWER('.$this->wrap($q, 'description').') LIKE ?', [$like])
-                    ->orWhereRaw('LOWER('.$this->wrap($q, 'type').') LIKE ?', [$like])
+                $q->whereRaw('LOWER('.$this->wrap('alerts.title').') LIKE ?', [$like])
+                    ->orWhereRaw('LOWER('.$this->wrap('alerts.description').') LIKE ?', [$like])
+                    ->orWhereRaw('LOWER('.$this->wrap('alerts.type').') LIKE ?', [$like])
                     // the machine's name too, still inside the same team
-                    ->orWhereIn('machine_id', fn ($m) => $m->select('id')->from('machines')->where('team_id', $teamId)->whereRaw('LOWER(name) LIKE ?', [$like]));
+                    ->orWhereIn('alerts.machine_id', $this->machineIdsNamed($teamId, $like));
             });
         }
 
-        return $query->with('machine:id,name')->orderByDesc('triggered_at')->limit($limit)->get()
-            ->map(fn (Alert $a): SearchHit => new SearchHit(
-                'Alerts',
-                (string) $a->title,
-                $this->sub([$a->machine?->name, ucfirst((string) $a->status)]),
-                route('alerts', ['q' => $a->title]),
-                null,
-                ucfirst((string) $a->priority),
-            ))->all();
+        /** @var Collection<int, Alert> $rows */
+        $rows = $query->with('machine:id,name')->orderByDesc('triggered_at')->limit($limit)->get();
+
+        return array_values($rows->map(fn (Alert $a): SearchHit => new SearchHit(
+            'Alerts',
+            $a->title,
+            $this->sub([$a->machine?->name, ucfirst($a->status)]),
+            route('alerts', ['q' => $a->title]),
+            null,
+            ucfirst($a->priority),
+        ))->all());
     }
 
     /**
@@ -189,26 +197,28 @@ class MinesSearch
      */
     private function maintenance(int $teamId, array $words, int $limit): array
     {
-        $query = $this->team(MaintenanceRecord::query(), $teamId);
+        $query = MaintenanceRecord::query()->withoutGlobalScope('team')->where('maintenance_records.team_id', $teamId);
         foreach ($words as $word) {
             $like = '%'.$word.'%';
             $query->where(function (Builder $q) use ($like, $teamId): void {
-                $q->whereRaw('LOWER('.$this->wrap($q, 'title').') LIKE ?', [$like])
-                    ->orWhereRaw('LOWER('.$this->wrap($q, 'work_order_number').') LIKE ?', [$like])
-                    ->orWhereRaw('LOWER('.$this->wrap($q, 'description').') LIKE ?', [$like])
-                    ->orWhereIn('machine_id', fn ($m) => $m->select('id')->from('machines')->where('team_id', $teamId)->whereRaw('LOWER(name) LIKE ?', [$like]));
+                $q->whereRaw('LOWER('.$this->wrap('maintenance_records.title').') LIKE ?', [$like])
+                    ->orWhereRaw('LOWER('.$this->wrap('maintenance_records.work_order_number').') LIKE ?', [$like])
+                    ->orWhereRaw('LOWER('.$this->wrap('maintenance_records.description').') LIKE ?', [$like])
+                    ->orWhereIn('maintenance_records.machine_id', $this->machineIdsNamed($teamId, $like));
             });
         }
 
-        return $query->with('machine:id,name')->orderByDesc('scheduled_date')->limit($limit)->get()
-            ->map(fn (MaintenanceRecord $r): SearchHit => new SearchHit(
-                'Maintenance',
-                (string) $r->title,
-                $this->sub([$r->machine?->name, $r->status ? ucfirst(str_replace('_', ' ', (string) $r->status)) : null]),
-                route('maintenance'),
-                $r->work_order_number,
-                $r->priority ? ucfirst((string) $r->priority) : null,
-            ))->all();
+        /** @var Collection<int, MaintenanceRecord> $rows */
+        $rows = $query->with('machine:id,name')->orderByDesc('scheduled_date')->limit($limit)->get();
+
+        return array_values($rows->map(fn (MaintenanceRecord $r): SearchHit => new SearchHit(
+            'Maintenance',
+            $r->title,
+            $this->sub([$r->machine?->name, ucfirst(str_replace('_', ' ', $r->status))]),
+            route('maintenance'),
+            $r->work_order_number,
+            ucfirst($r->priority),
+        ))->all());
     }
 
     /**
@@ -219,16 +229,20 @@ class MinesSearch
     {
         // The operator register is personal data: the fields are the name and the employee number a supervisor already sees
         // in the list. Medical, licence and contact details are never searched or shown here.
-        return $this->like($this->team(Operator::query(), $teamId), ['first_name', 'last_name', 'preferred_name', 'employee_number', 'job_title'], $words)
-            ->orderBy('last_name')->orderBy('first_name')->limit($limit)->get()
-            ->map(fn (Operator $o): SearchHit => new SearchHit(
-                'Operators',
-                $o->name,
-                $this->sub([$o->job_title, $o->employment_status && $o->employment_status !== 'active' ? (string) $o->employment_status : null]),
-                route('operators.show', $o->id),
-                $o->employee_number,
-                null,
-            ))->all();
+        $query = Operator::query()->withoutGlobalScope('team')->where('operators.team_id', $teamId);
+
+        /** @var Collection<int, Operator> $rows */
+        $rows = $this->like($query, ['first_name', 'last_name', 'preferred_name', 'employee_number', 'job_title'], $words)
+            ->orderBy('last_name')->orderBy('first_name')->limit($limit)->get();
+
+        return array_values($rows->map(fn (Operator $o): SearchHit => new SearchHit(
+            'Operators',
+            $o->name,
+            $this->sub([$o->job_title, $o->employment_status !== 'active' ? $o->employment_status : null]),
+            route('operators.show', $o->id),
+            $o->employee_number,
+            null,
+        ))->all());
     }
 
     /**
@@ -241,13 +255,19 @@ class MinesSearch
     {
         $hits = [];
         if ($areas) {
-            foreach ($this->like($this->team(MineArea::query(), $teamId), ['name', 'description', 'location'], $words)->orderBy('name')->limit($limit)->get() as $area) {
-                $hits[] = new SearchHit('Zones', (string) $area->name, $this->sub(['Mine area', $area->location]), route('mine-areas.show', $area->id), null, 'Area');
+            $query = MineArea::query()->where('mine_areas.team_id', $teamId);
+            /** @var Collection<int, MineArea> $areaRows */
+            $areaRows = $this->like($query, ['name', 'description', 'location'], $words)->orderBy('name')->limit($limit)->get();
+            foreach ($areaRows as $area) {
+                $hits[] = new SearchHit('Zones', $area->name, $this->sub(['Mine area', $area->location]), route('mine-areas.show', $area->id), null, 'Area');
             }
         }
         if ($fences) {
-            foreach ($this->like($this->team(Geofence::query(), $teamId), ['name', 'description', 'type'], $words)->orderBy('name')->limit($limit)->get() as $fence) {
-                $hits[] = new SearchHit('Zones', (string) $fence->name, $this->sub([$fence->type ? ucfirst((string) $fence->type) : 'Geofence']), route('geofences.show', $fence->id), null, 'Geofence');
+            $query = Geofence::query()->withoutGlobalScope('team')->where('geofences.team_id', $teamId);
+            /** @var Collection<int, Geofence> $fenceRows */
+            $fenceRows = $this->like($query, ['name', 'description', 'type'], $words)->orderBy('name')->limit($limit)->get();
+            foreach ($fenceRows as $fence) {
+                $hits[] = new SearchHit('Zones', $fence->name, $this->sub([ucfirst($fence->type)]), route('geofences.show', $fence->id), null, 'Geofence');
             }
         }
 
@@ -255,21 +275,17 @@ class MinesSearch
     }
 
     /**
-     * The explicit team pin. `withoutGlobalScope('team')` drops the trait's own filter (which skips itself when the request has no
-     * team) so the one `team_id = ?` below is the only rule, and cannot be silently absent. Soft-delete scopes stay.
+     * The ids of this team's machines whose name matches (a subquery, so the machine's name can be searched without leaving the team).
      *
-     * @template TModel of Model
-     *
-     * @param  Builder<TModel>  $query
-     * @return Builder<TModel>
+     * @return \Closure(QueryBuilder): QueryBuilder
      */
-    private function team(Builder $query, int $teamId): Builder
+    private function machineIdsNamed(int $teamId, string $like): \Closure
     {
-        return $query->withoutGlobalScope('team')->where($query->getModel()->getTable().'.team_id', $teamId);
+        return fn (QueryBuilder $sub): QueryBuilder => $sub->select('id')->from('machines')->where('team_id', $teamId)->whereRaw('LOWER(name) LIKE ?', [$like]);
     }
 
     /**
-     * Every word must match one of the columns (a lower-cased, parameterised LIKE).
+     * Every word must appear in at least one of the columns (a lower-cased, parameterised LIKE).
      *
      * @template TModel of Model
      *
@@ -280,11 +296,12 @@ class MinesSearch
      */
     private function like(Builder $query, array $columns, array $words): Builder
     {
+        $table = $query->getModel()->getTable();
         foreach ($words as $word) {
             $like = '%'.$word.'%';
-            $query->where(function (Builder $q) use ($columns, $like): void {
+            $query->where(function (Builder $q) use ($columns, $like, $table): void {
                 foreach ($columns as $column) {
-                    $q->orWhereRaw('LOWER('.$this->wrap($q, $column).') LIKE ?', [$like]);
+                    $q->orWhereRaw('LOWER('.$this->wrap($table.'.'.$column).') LIKE ?', [$like]);
                 }
             });
         }
@@ -292,10 +309,15 @@ class MinesSearch
         return $query;
     }
 
-    /** @param  Builder<Model>  $query */
-    private function wrap(Builder $query, string $column): string
+    private function wrap(string $identifier): string
     {
-        return $query->getQuery()->getGrammar()->wrap($column);
+        return DB::connection()->getQueryGrammar()->wrap($identifier);
+    }
+
+    /** a column the model does not type: its string, or null */
+    private function text(mixed $value): ?string
+    {
+        return is_string($value) && $value !== '' ? $value : null;
     }
 
     /** @param  list<string|null>  $parts */

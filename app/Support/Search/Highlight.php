@@ -15,7 +15,10 @@ final class Highlight
         }
 
         $pattern = '/('.implode('|', array_map(fn (string $w): string => preg_quote($w, '/'), $words)).')/iu';
-        $parts = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) ?: [$text];
+        $parts = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        if ($parts === false) {
+            $parts = [$text];
+        }
         $html = '';
         foreach ($parts as $part) {
             $isMatch = in_array(mb_strtolower($part), $words, true);

@@ -69,7 +69,8 @@ function setupRippleEffects() {
     rippleButtons.forEach(button => {
         button.classList.add('ripple-added');
         button.style.position = 'relative';
-        button.style.overflow = 'hidden';
+        // clip, not hidden: `hidden` lets a flex item shrink below its text (tab rows and sort buttons were cut mid-word)
+        button.style.overflow = 'clip';
 
         button.addEventListener('click', function (e) {
             const ripple = document.createElement('span');

@@ -190,7 +190,7 @@ html[data-rail="true"] .mines-rail-toggle__ic { transform: rotate(180deg); }
 /* Collapsed rail: icons only, the group labels become hairlines. */
 html[data-rail="true"] .mines-nav { padding-inline: 8px; }
 html[data-rail="true"] .mines-nav__label,
-html[data-rail="true"] .mines-nav__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html[data-rail="true"] .mines-nav__text { display: none; }
 html[data-rail="true"] .mines-nav__group + .mines-nav__group { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 html[data-rail="true"] .mines-nav__link, html[data-rail="true"] .mines-rail-toggle { justify-content: center; padding: 0; }
 html[data-rail="true"] .mines-rail-toggle { margin-inline: 8px; }
@@ -224,8 +224,8 @@ html[data-rail="true"] .mines-rail-toggle { margin-inline: 8px; }
     .mines-sidebar__close:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
     .mines-rail-toggle { display: none; }
     html[data-rail="true"] .mines-nav { padding-inline: 12px; }
-    html[data-rail="true"] .mines-nav__label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
-    html[data-rail="true"] .mines-nav__text { position: static; width: auto; height: auto; overflow: hidden; clip: auto; white-space: nowrap; }
+    html[data-rail="true"] .mines-nav__label { display: block; }
+    html[data-rail="true"] .mines-nav__text { display: block; }
     html[data-rail="true"] .mines-nav__link { justify-content: flex-start; padding: 0 12px; }
     html[data-rail="true"] .mines-nav__group + .mines-nav__group { margin-top: 12px; padding-top: 0; border-top: 0; }
 }
@@ -241,8 +241,34 @@ html[data-rail="true"] .mines-rail-toggle { margin-inline: 8px; }
     .mines-main :is(button, [role="button"], select, textarea, summary, a.inline-flex, a[class*="px-"], a[class*="btn"], .dm-btn, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]):not([type="file"])) { min-height: 44px; }
     .mines-main :is(button, [role="button"]) { min-width: 44px; }
     .mines-main :is(a.dm-name, a.dm-link, a.underline, button.underline, button.dm-linkbtn) { display: inline-flex; align-items: center; min-height: 44px; }
+    /* A text link inside a line of text keeps its line: its hit area grows by padding that a negative margin takes back. */
+    .mines-main :is(p, li, dd, .text-sm, .text-xs, .text-lg) > a:not([class*="px-"]):not([class*="btn"]):not(.dm-btn):not(.dm-name):not(.dm-link):not(.underline),
+    .mines-main a.font-display:not([class*="px-"]) { display: inline-block; padding-block: 12px; margin-block: -12px; }
     .mines-main input[type="checkbox"], .mines-main input[type="radio"] { min-width: 20px; min-height: 20px; }
     .mines-main label:has(> input[type="checkbox"]), .mines-main label:has(> input[type="radio"]) { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; }
+}
+
+/* ---- Narrow screens: rows wrap, tables scroll under a hint, nothing runs off the edge ------------------------------------- */
+@media (max-width: 1024px) {
+    /* A flex row of buttons or links wraps instead of pushing the page sideways; a wrapping row never exceeds its parent. */
+    .mines-page .flex-wrap { max-width: 100%; }
+    .mines-page .flex:is(.gap-2, .gap-3, .gap-4):has(> :is(button, a, input, select)) { flex-wrap: wrap; }
+    .mines-page .flex > :is(input, select) { min-width: 0; max-width: 100%; }
+    .mines-page .flex.justify-between { flex-wrap: wrap; row-gap: 12px; }
+    .mines-page .flex > :is(div, section) { min-width: 0; }
+
+    /* A table wider than its card scrolls inside the card (it used to be cut off by overflow: hidden), with an edge shadow as the hint. */
+    .mines-page div:has(> table) {
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        background:
+            linear-gradient(to right, var(--ink-soft, #2c2319) 30%, rgba(44, 35, 25, 0)) 0 0 / 40px 100% no-repeat local,
+            linear-gradient(to left, var(--ink-soft, #2c2319) 30%, rgba(44, 35, 25, 0)) 100% 0 / 40px 100% no-repeat local,
+            linear-gradient(to right, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)) 0 0 / 14px 100% no-repeat scroll,
+            linear-gradient(to left, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)) 100% 0 / 14px 100% no-repeat scroll;
+    }
+    .mines-main :is(td, th) > a:not([class*="px-"]):not([class*="btn"]) { display: inline-flex; align-items: center; min-height: 44px; }
 }
 
 /* The map's own controls and credits are Roboto too (Leaflet ships Helvetica Neue and Lucida Console). */
@@ -252,3 +278,6 @@ html[data-rail="true"] .mines-rail-toggle { margin-inline: 8px; }
 .leaflet-bar a,
 .leaflet-touch .leaflet-bar a { font-family: var(--dot-font-sans); }
 .leaflet-bar a { min-width: 44px; min-height: 44px; line-height: 44px; }
+
+/* Under 480px the bar has no room for the name: the mark is the brand (HEADER.md "Sidebar shells"). */
+@media (max-width: 479px) { .dh-brand__name { display: none; } }
