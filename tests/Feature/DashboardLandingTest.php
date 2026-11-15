@@ -220,7 +220,7 @@ class DashboardLandingTest extends TestCase
         $this->actingAs($member)->get('/dashboard')->assertSee('latest telemetry recorded', false)->assertSee('12 minutes');
     }
 
-    public function test_the_original_logo_files_are_unaltered_and_the_sidebar_carries_the_mark_once(): void
+    public function test_the_original_logo_files_are_unaltered_and_the_header_carries_the_mark_once(): void
     {
         [$member] = $this->memberWithRole('viewer');
 
@@ -228,7 +228,7 @@ class DashboardLandingTest extends TestCase
         $this->assertSame(self::LOGO_SHA256, hash_file('sha256', public_path('images/logo.png')));
 
         $html = (string) $this->actingAs($member)->get('/dashboard')->getContent();
-        $this->assertSame(1, substr_count($html, asset('images/mark.png')), 'the brand mark appears once, in the sidebar');
+        $this->assertSame(1, substr_count($html, asset('images/mark.png')), 'the brand mark appears once, in the header (the sidebar drawer carries the name only)');
         $this->assertStringNotContainsString('images/logo-light.png', $html);
     }
 

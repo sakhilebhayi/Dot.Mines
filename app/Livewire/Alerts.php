@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -19,6 +20,7 @@ class Alerts extends Component
     use NotifiesUser;
     use WithPagination;
 
+    #[Url(as: 'q', except: '')]
     public string $search = '';
 
     public string $sortBy = 'created_at';
@@ -89,8 +91,11 @@ class Alerts extends Component
 
         return Alert::where('team_id', $team->id)
             ->when($this->search, function (Builder $query) {
-                $query->where('title', 'like', "%{$this->search}%")
-                    ->orWhere('description', 'like', "%{$this->search}%");
+                // grouped: an `or` must never sit beside the team filter at the top level
+                $query->where(function (Builder $match): void {
+                    $match->where('title', 'like', "%{$this->search}%")
+                        ->orWhere('description', 'like', "%{$this->search}%");
+                });
             })
             ->when($this->selectedPriority !== 'all', function (Builder $query) {
                 $query->where('priority', $this->selectedPriority);

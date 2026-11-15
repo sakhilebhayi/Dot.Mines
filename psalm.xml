@@ -62,6 +62,8 @@
         <directory name="app/Mail"/>
         <directory name="app/Notifications"/>
         <directory name="app/Http"/>
+        <!-- Search hits: the properties are read by the Blade views (the header dropdown and the results page). -->
+        <directory name="app/Support/Search"/>
       </errorLevel>
     </PossiblyUnusedProperty>
     <PossiblyUnusedParam>
@@ -95,8 +97,17 @@
         <directory name="app/View"/>
         <directory name="app/Http"/>
         <directory name="app/Providers"/>
+        <!-- Highlight is called from Blade (the header dropdown and the results page). -->
+        <file name="app/Support/Search/Highlight.php"/>
       </errorLevel>
     </UnusedClass>
+    <!-- phpstan cannot see through HasTeamFilters (it types the query as a raw query builder), so the search rows are annotated for it;
+         psalm infers some of them and calls the annotation unnecessary. -->
+    <UnnecessaryVarAnnotation>
+      <errorLevel type="suppress">
+        <file name="app/Support/Search/MinesSearch.php"/>
+      </errorLevel>
+    </UnnecessaryVarAnnotation>
   </issueHandlers>
 
   <plugins>

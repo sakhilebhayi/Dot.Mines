@@ -109,14 +109,32 @@ class DotUiRolloutTest extends TestCase
     {
         $html = (string) $this->actingAs($this->member())->get('/dashboard')->getContent();
 
-        foreach (['dot-fonts', 'dot-tokens', 'dot-search', 'dot-switcher-fonts', 'dot-switcher'] as $css) {
-            $this->assertStringContainsString('/dot-ui/css/'.$css.'.css', $html);
+        // R-52: the package's CSS and JS are bundled (minified) into the Vite entry instead of eleven requests. The hash-pinned
+        // sources stay in public/dot-ui (the drift test), and every one of them is read by the bundle.
+        foreach (['dot-roboto', 'dot-type', 'dot-tokens', 'dot-search', 'dot-switcher', 'dot-header'] as $css) {
             $this->assertFileExists(public_path('dot-ui/css/'.$css.'.css'));
+            $this->assertStringNotContainsString('/dot-ui/css/'.$css.'.css', $html, "$css is in the bundle, not a request of its own");
         }
-        $this->assertStringContainsString('/dot-ui-host.css', $html);
+        foreach (['dot-search', 'dot-search-results', 'dot-switcher', 'dot-nav'] as $js) {
+            $this->assertFileExists(public_path('dot-ui/js/'.$js.'.js'));
+            $this->assertStringNotContainsString('/dot-ui/js/'.$js.'.js', $html);
+        }
+        // 0.6.1: the bundle reads the minified files (one stylesheet, one script); the readable files stay distributed.
+        $this->assertFileExists(public_path('dot-ui/css/dot-ui.min.css'));
+        $this->assertFileExists(public_path('dot-ui/js/dot-ui.min.js'));
         $this->assertFileExists(public_path('dot-ui-host.css'));
-        $this->assertFileExists(public_path('dot-ui/js/dot-switcher.js'));
-        $this->assertMatchesRegularExpression('#<script src="[^"]*/dot-ui/js/dot-switcher\.js" nonce="[0-9a-f]{24}" defer>#', $html);
+
+        $manifest = json_decode((string) file_get_contents(public_path('build/manifest.json')), true);
+        $css = (string) file_get_contents(public_path('build/'.$manifest['resources/css/app.css']['file']));
+        foreach (['.dsr-input', '.dsr-go', '.dh-bar', '.dh-account__btn', '.dsw-bay', '.dot-roboto', '.mines-sidebar', '--dh-bg:', '--dsw-paper:'] as $rule) {
+            $this->assertStringContainsString($rule, $css, "the bundled stylesheet carries $rule");
+        }
+        $js = (string) file_get_contents(public_path('build/'.$manifest['resources/js/app.js']['file']));
+        $this->assertStringContainsString('DotNav', $js);
+        $this->assertStringContainsString('data-dsw-trigger', $js);
+
+        $this->assertMatchesRegularExpression('#<link rel="stylesheet" href="[^"]*/build/assets/app-[^"]+\.css"#', $html);
+        $this->assertMatchesRegularExpression('#<script type="module" src="[^"]*/build/assets/app-[^"]+\.js"#', $html);
         $this->assertDoesNotMatchRegularExpression('#https?://[^"\']*dot-ui#', str_replace(url('/'), '/', $html));
 
         $start = (int) strpos($html, 'class="dsw dsw--header"');
@@ -134,8 +152,8 @@ class DotUiRolloutTest extends TestCase
 
         // /alerts is bound as a Livewire route target and uses the component layout: it must style the switcher too.
         $html = (string) $this->actingAs($this->member())->get('/alerts')->assertOk()->getContent();
-        $this->assertStringContainsString('/dot-ui/css/dot-switcher.css', $html);
-        $this->assertStringContainsString('/dot-ui/js/dot-switcher.js', $html);
+        $this->assertMatchesRegularExpression('#/build/assets/app-[^"]+\.css#', $html);
+        $this->assertMatchesRegularExpression('#/build/assets/app-[^"]+\.js#', $html);
         $this->assertSame(1, substr_count($html, 'data-dsw data-state="degraded" data-platform="mines"'));
     }
 

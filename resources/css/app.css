@@ -1,5 +1,14 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
+/* Roboto + the shared type scale (dot-ui): font-sans, font-mono, text-dot-*. Outside any @layer. */
+@import "../../dot-ui/tailwind/tailwind-theme.css";
+
+/* dot-ui 0.6.1 (Roboto, the type scale, the pill search, the switcher, the header: the one minified bundle) and the Mines mapping, bundled
+   with the app instead of seven separate requests: they are render-blocking, and on a cold load over a slow link the bytes before first
+   paint ARE the LCP. The files stay hash-pinned in public/dot-ui (the drift test); this only reads them. Order matters:
+   the package first, the host mapping after it (both unlayered). */
+@import "../../public/dot-ui/css/dot-ui.min.css";
+@import "../../public/dot-ui-host.css";
 
 /* daisyUI 5 is configured HERE, not in tailwind.config.js: the old v4-style
    JS config block was silently ignored, so every daisyui component (stat,
@@ -56,9 +65,11 @@
     --stone: #f4efe4;
     --sand: #c9b896;
     --line: rgba(244, 239, 228, 0.12);
-    --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
-    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    /* R-52: Roboto is the one face (self-hosted, public/dot-ui). The display face is Roboto too; monospace stays only for
+       readings and identifiers (.dm-num, ids, coordinates). */
+    --font-display: var(--dot-font-sans);
+    --font-body: var(--dot-font-sans);
+    --font-mono: var(--dot-font-mono);
 }
 .font-display { font-family: var(--font-display); }
 .font-mono { font-family: var(--font-mono); }
@@ -398,7 +409,8 @@
     .dm-skel__row i { display: block; height: 10px; border-radius: 5px; background: rgba(244, 239, 228, .08); }
 
     @keyframes dm-appear { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes dm-settle { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    /* from .01, not 0: a fully transparent element is not an LCP candidate, so the headline's 260ms settle used to push the page's LCP back by its own duration (and by far more on a slow CPU). The settle looks the same. */
+    @keyframes dm-settle { from { opacity: 0.01; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     @keyframes dm-bench { from { opacity: 0; transform: scale(.94); } to { opacity: var(--o, 1); transform: none; } }
     @keyframes dm-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
     .dm-lede__text, .dm-lede__act { animation: dm-settle 260ms cubic-bezier(.16, 1, .3, 1) both; }

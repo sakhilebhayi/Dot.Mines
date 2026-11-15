@@ -52,7 +52,9 @@ class SecurityHeaders
         // of a nonce/hash in a directive makes browsers IGNORE
         // 'unsafe-inline' there. Inline styles are a far weaker injection
         // vector than scripts; script-src stays nonce-locked.
-        $styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://fonts.bunny.net https://unpkg.com";
+        // R-52: no font host in style-src or font-src. Roboto is served from this origin (public/dot-ui/fonts/roboto), and the
+        // old Google Fonts link never worked (a malformed URL answered 400), so nothing is lost.
+        $styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com";
 
         $csp = "default-src 'self'; ".
                "script-src {$scriptSrc}; ".
@@ -65,7 +67,7 @@ class SecurityHeaders
                // attribute vector (not style-src-elem, not script-src) keeps new <style> tags and
                // all scripts nonce-locked while still allowing this first-party JS to toggle styles.
                "style-src-attr 'self' 'unsafe-inline'; ".
-               "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net; ".
+               "font-src 'self'; ".
                "img-src 'self' data: https: blob:; ".
                "connect-src 'self' https://unpkg.com https://cdnjs.cloudflare.com https://*.pusher.com https://*.pusherapp.com ws: wss:; ".
                "frame-ancestors 'none';";

@@ -111,7 +111,8 @@ class ToastNotificationLayoutTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertOk();
-        $response->assertSee('flex-1 flex flex-col min-w-0', false);
+        // R-52: the column is the shared shell's .mines-main (min-width: 0 in public/dot-ui-host.css; MobileNavigationTest pins the rule)
+        $response->assertSee('class="mines-main"', false);
     }
 
     /**
@@ -130,7 +131,8 @@ class ToastNotificationLayoutTest extends TestCase
         $response = $this->actingAs($user)->get('/alerts');
 
         $response->assertOk();
-        $response->assertSee('flex-1 flex flex-col min-w-0', false);
+        // R-52: the column is the shared shell's .mines-main (min-width: 0 in public/dot-ui-host.css; MobileNavigationTest pins the rule)
+        $response->assertSee('class="mines-main"', false);
     }
 
     /**

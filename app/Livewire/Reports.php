@@ -96,8 +96,11 @@ class Reports extends Component
 
         return Report::where('team_id', $team->id)
             ->when($searchTerm, function (Builder $query) use ($searchTerm) {
-                $query->where('title', 'like', '%'.$searchTerm.'%')
-                    ->orWhere('description', 'like', '%'.$searchTerm.'%');
+                // grouped: an `or` must never sit beside the team filter at the top level
+                $query->where(function (Builder $match) use ($searchTerm): void {
+                    $match->where('title', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('description', 'like', '%'.$searchTerm.'%');
+                });
             })
             ->when($this->selectedMineAreaId, function (Builder $query) {
                 $query->where('filters->mine_area_id', $this->selectedMineAreaId);

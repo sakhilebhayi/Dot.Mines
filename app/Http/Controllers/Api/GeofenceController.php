@@ -38,8 +38,11 @@ class GeofenceController extends Controller
 
         if ($request->filled('search')) {
             $search = ApiPayload::str($request->input('search'));
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%");
+            // grouped: an `or` must never sit beside the team scope or the type filter below
+            $query->where(function ($match) use ($search): void {
+                $match->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
         if ($request->filled('type')) {

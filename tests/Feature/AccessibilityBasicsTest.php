@@ -43,9 +43,10 @@ class AccessibilityBasicsTest extends TestCase
         $response->assertOk();
         // Notification bell (icon-only, with SR-announced unread state).
         $response->assertSee('aria-label="Notifications', false);
-        // Account menu trigger (icon-only on small screens).
-        $response->assertSee('aria-label="Open account menu"', false);
-        // Mobile navigation toggle (pre-existing, pinned so it stays).
-        $response->assertSee('aria-label="Toggle navigation menu"', false);
+        // Account menu trigger (the shared header's button names the person).
+        $response->assertSee('aria-label="Account menu', false);
+        // Mobile navigation toggle (the shared header's menu button, adopt mode: it opens the sidebar).
+        $response->assertSee('aria-label="Open navigation"', false);
+        $response->assertSee('aria-controls="mines-sidebar"', false);
     }
 }
