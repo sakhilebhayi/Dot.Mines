@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth dot-roboto">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,9 +11,7 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght;600;700&family=IBM+Plex+Sans:wght;500;600&family=IBM+Plex+Mono:wght;500;600&display=swap" rel="stylesheet">
+        @include('layouts._roboto-head')
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -27,14 +25,15 @@
                 --stone: #f4efe4;
                 --sand: #c9b896;
                 --line: rgba(244, 239, 228, 0.12);
-                --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
-                --font-body: 'IBM Plex Sans', system-ui, sans-serif;
-                --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+                --font-display: var(--dot-font-sans);
+                --font-body: var(--dot-font-sans);
+                --font-mono: var(--dot-font-mono);
                 --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
             }
             html { background: var(--ink); }
             body { font-family: var(--font-body); background: var(--ink); color: var(--stone); }
             .font-display { font-family: var(--font-display); }
+            .font-sans { font-family: var(--font-body); }
             .font-mono { font-family: var(--font-mono); }
 
             .press { transition: transform 160ms var(--ease-out); }
@@ -95,7 +94,7 @@
                     <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="h-16 sm:h-20 w-auto">
                 </a>
 
-                <div class="hidden md:flex items-center gap-8 font-mono text-[13px] tracking-wide uppercase text-[var(--sand)]">
+                <div class="hidden md:flex items-center gap-8 font-sans text-[13px] tracking-wide uppercase text-[var(--sand)]">
                     <a href="#capabilities" class="link-underline hover:text-[var(--stone)] pb-0.5">Product</a>
                     <a href="#features" class="link-underline hover:text-[var(--stone)] pb-0.5">Features</a>
                     <a href="#realtime" class="link-underline hover:text-[var(--stone)] pb-0.5">Real-time</a>
@@ -133,7 +132,7 @@
                  x-transition:leave-end="opacity-0"
                  class="md:hidden border-t border-[var(--line)] bg-[#211a14]"
                  x-cloak>
-                <div class="flex flex-col px-5 py-4 gap-1 font-mono text-sm uppercase tracking-wide">
+                <div class="flex flex-col px-5 py-4 gap-1 font-sans text-sm uppercase tracking-wide">
                     <a href="#capabilities" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Product</a>
                     <a href="#features" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Features</a>
                     <a href="{{ route('pricing') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Pricing</a>
@@ -185,7 +184,7 @@
 
             <!-- Live data strip, instrumentation-styled, not a fabricated metric -->
             <div class="relative z-10 w-full border-t border-[var(--line)] bg-[#211a14]/60">
-                <div class="max-w-[1400px] mx-auto px-5 sm:px-8 py-4 flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--sand)]">
+                <div class="max-w-[1400px] mx-auto px-5 sm:px-8 py-4 flex flex-wrap gap-x-8 gap-y-2 font-sans text-[11px] tracking-[0.14em] uppercase text-[var(--sand)]">
                     <span>GPS &amp; geofencing</span>
                     <span class="text-[var(--gold)]">·</span>
                     <span>Fuel &amp; consumption</span>
@@ -260,7 +259,7 @@
                 <div class="reveal" data-reveal>
                     <div class="pit-frame relative rounded-2xl border border-[var(--line)] overflow-hidden aspect-[4/3]">
                         <canvas id="pit-canvas" class="absolute inset-0 w-full h-full" aria-hidden="true"></canvas>
-                        <p class="absolute bottom-3 right-4 font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--sand)]/50 select-none">Stylised illustration</p>
+                        <p class="absolute bottom-3 right-4 font-sans text-[10px] tracking-[0.14em] uppercase text-[var(--sand)]/50 select-none">Stylised illustration</p>
                     </div>
                 </div>
             </div>
@@ -331,13 +330,13 @@
                 <a href="/" class="flex items-center gap-2.5">
                     <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="h-11 w-auto opacity-90">
                 </a>
-                <div class="flex items-center gap-6 font-mono text-xs tracking-wide uppercase text-[var(--sand)]">
+                <div class="flex items-center gap-6 font-sans text-xs tracking-wide uppercase text-[var(--sand)]">
                     <a href="{{ route('pricing') }}" class="hover:text-[var(--stone)] transition-colors">Pricing</a>
                     <a href="{{ route('policy.show') }}" class="hover:text-[var(--stone)] transition-colors">Privacy</a>
                     <a href="{{ route('cookies') }}" class="hover:text-[var(--stone)] transition-colors">Cookies</a>
                     <a href="{{ route('terms.show') }}" class="hover:text-[var(--stone)] transition-colors">Terms</a>
                 </div>
-                <p class="font-mono text-xs tracking-wide text-[var(--sand)]">
+                <p class="font-sans text-xs tracking-wide text-[var(--sand)]">
                     &copy; {{ date('Y') }} Dot.Mines. Fleet operations software for mining.
                 </p>
             </div>

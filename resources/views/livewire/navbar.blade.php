@@ -1,81 +1,70 @@
-<nav class="bg-[var(--ink-soft)] border-b border-[var(--line)] sticky top-0 z-40"
-     x-data="{ mobileOpen: false }"
-     @mobile-nav-changed.window="mobileOpen = $event.detail.open">
-    <div class="px-6 py-4 flex justify-between items-center gap-3">
-        <!-- Left Section -->
-        <div class="flex items-center gap-4 min-w-0 mines-nav-gap">
-            <!-- Mobile nav toggle -->
-            <button
-                @click="window.mobileNav.toggle()"
-                type="button"
-                class="md:hidden -ml-2 p-2 rounded-lg text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] transition-colors"
-                aria-label="Toggle navigation menu"
-                aria-controls="mobile-sidebar"
-                :aria-expanded="mobileOpen.toString()"
+@php
+    // The account menu: the seven destinations that used to sit in one flat list are two labelled groups.
+    $accountMenu = $user ? [
+        'name' => $user->name,
+        'email' => $user->email,
+        'team' => $team?->name,
+        'links' => array_values(array_filter([
+            ['heading' => 'Account'],
+            ['label' => 'My profile', 'href' => route('profile.show'), 'current' => request()->routeIs('profile.show')],
+            $team ? ['label' => 'Team', 'href' => route('teams.show', $team), 'current' => request()->routeIs('teams.*')] : null,
+            ['label' => 'Billing', 'href' => route('billing.index'), 'current' => request()->routeIs('billing.*')],
+            ['heading' => 'Workspace'],
+            ['label' => 'Settings', 'href' => route('settings'), 'current' => request()->routeIs('settings')],
+            ['label' => 'Integrations', 'href' => route('integrations'), 'current' => request()->routeIs('integrations*')],
+            ['label' => 'API tokens', 'href' => route('api-tokens.index'), 'current' => request()->routeIs('api-tokens.*')],
+            ['label' => 'Documentation', 'href' => route('documentation'), 'current' => request()->routeIs('documentation')],
+        ])),
+        'signOut' => ['action' => route('logout'), 'label' => 'Log out'],
+    ] : null;
+@endphp
+{{-- Livewire needs one root; it steps out of the layout (display: contents) so the header stays sticky against the page. --}}
+<div class="mines-hdr">
+    {{-- One shared header (dot-ui): brand, the live state, the centred search, the Dot Apps switcher, alerts and the account.
+         Mines is a sidebar shell, so there is no primary nav here: the menu button opens the sidebar (adopt mode). --}}
+    <x-dot.header id="dh" brand-href="{{ route('dashboard') }}" brand-label="Dot.Mines, dashboard" :account="$accountMenu"
+        drawer-target="mines-sidebar" menu-label="Open navigation" search-label="Search Dot.Mines" skip="#main-content"
+        :context="$team?->name">
+        <x-slot:brand>
+            <span class="mines-mark"><img src="{{ asset('images/mark.png') }}" alt="" width="34" height="34"></span>
+            <span class="dh-brand__name">Dot.Mines</span>
+        </x-slot:brand>
+
+        <x-slot:status>
+            {{-- Two honest states, both client-side: the realtime socket (driven by the 'realtime-connection-changed' event from
+                 resources/js/livewire-realtime.js) and the sync state (resources/js/local/connectivity.js). They sit in the bar
+                 instead of floating over the page. Under 520px only the lamps show; the words are in the accessible name. --}}
+            <div
+                x-data="{ state: 'connecting' }"
+                x-init="window.addEventListener('realtime-connection-changed', (e) => { state = e.detail.state })"
+                class="mines-lamp"
+                role="img"
+                :aria-label="{
+                    connected: 'Live updates connected',
+                    connecting: 'Connecting to live updates',
+                    reconnecting: 'Reconnecting to live updates',
+                    disconnected: 'Live updates disconnected',
+                }[state]"
+                :title="{
+                    connected: 'Live updates connected',
+                    connecting: 'Connecting to live updates…',
+                    reconnecting: 'Reconnecting to live updates…',
+                    disconnected: 'Live updates disconnected',
+                }[state]"
             >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
+                <span class="mines-lamp__dot" :data-state="state"></span>
+            </div>
+            <div data-connectivity-pill class="hidden mines-cp" role="status" aria-live="polite">
+                <span data-connectivity-dot class="inline-block w-2 h-2 rounded-full bg-zinc-500"></span>
+                <span data-connectivity-label class="dh-status__text">Connecting</span>
+            </div>
+        </x-slot:status>
 
-            @php
-                $routeName = optional(request()->route())->getName();
-                    $mapping = [
-                    'dashboard' => 'Dashboard',
-                    'fleet' => 'Fleet Management',
-                    'fleet.replay' => 'Fleet Replay',
-                    'fleet.route-planning' => 'Route Planning',
-                        'map' => 'Live Operations Map',
-                    'geofences' => 'Geofences',
-                    'geofences.show' => 'Geofence Details',
-                    'mine-areas' => 'Mine Areas',
-                    'mine-areas.show' => 'Mine Area',
-                    'reports' => 'Reports',
-                    'report-generator' => 'Generate Report',
-                        'alerts' => 'Operational Alerts',
-                    'production' => 'Production',
-                    'fuel' => 'Fuel Management',
-                    'maintenance' => 'Maintenance',
-                    'ai-optimization' => 'AI Optimization',
-                    'ai-analytics' => 'AI Analytics',
-                    'documentation' => 'Documentation',
-                    'integrations' => 'Integrations',
-                    'billing.index' => 'Billing',
-                    'settings' => 'Settings',
-                    'teams.show' => 'Team Settings',
-                    'api-tokens.index' => 'API Tokens',
-                ];
+        <x-slot:search>
+            <livewire:header-search />
+        </x-slot:search>
 
-                $pageTitle = null;
-                if ($routeName && isset($mapping[$routeName])) {
-                    $pageTitle = $mapping[$routeName];
-                } else {
-                    // Fallbacks by pattern matching
-                    if (str_starts_with($routeName ?? '', 'fleet')) {
-                        $pageTitle = 'Fleet Management';
-                    } elseif (str_starts_with($routeName ?? '', 'geofences')) {
-                        $pageTitle = 'Geofences';
-                    } elseif (str_starts_with($routeName ?? '', 'mine-areas')) {
-                        $pageTitle = 'Mine Areas';
-                    } elseif (str_starts_with($routeName ?? '', 'reports')) {
-                        $pageTitle = 'Reports';
-                    } elseif (str_starts_with($routeName ?? '', 'ai-')) {
-                        $pageTitle = 'AI';
-                    }
-                }
-
-                // Final fallback: use first URI segment
-                if (! $pageTitle) {
-                    $firstSegment = explode('/', trim(request()->path(), '/'))[0] ?? null;
-                    $pageTitle = $firstSegment ? ucfirst(str_replace('-', ' ', $firstSegment)) : 'Dot.Mines';
-                }
-            @endphp
-
-            <h1 class="text-2xl font-display font-semibold text-[var(--stone)] min-w-0 mines-nav-title">{{ $pageTitle }}</h1>
-        </div>
-
-        <!-- Right Section -->
-        <div class="flex items-center gap-4 shrink-0 mines-nav-gap">
+        <x-slot:tools>
             {{-- Shared Dot Apps switcher. Mines has its own sign-in and cannot ask InfoDot what a company holds, so the
                  model is the plain one: core platforms through InfoDot, with a visible line saying so. --}}
             <x-dot.switcher
@@ -85,101 +74,7 @@
                 :notice="\App\Support\PlainSwitcherModel::NOTICE"
                 :notice-detail="\App\Support\PlainSwitcherModel::NOTICE_DETAIL"
                 wire:ignore.self />
-
-            <!-- Team Info -->
-            @if ($team)
-                <div class="text-right hidden lg:block">
-                    <div class="text-sm text-[var(--sand)]">Current Team</div>
-                    <div class="text-sm font-semibold text-[var(--stone)]">{{ $team->name }}</div>
-                </div>
-            @endif
-
-            <!--
-                Real-time connection indicator. Driven entirely client-side by
-                the 'realtime-connection-changed' window event dispatched from
-                resources/js/livewire-realtime.js's connection monitor -- no
-                server roundtrip, since connection state is only known in the
-                browser. Users should never be left assuming they're seeing
-                live data while the socket is actually down.
-            -->
-            <div
-                x-data="{ state: 'connecting' }"
-                x-init="window.addEventListener('realtime-connection-changed', (e) => { state = e.detail.state })"
-                class="hidden sm:flex items-center gap-1.5"
-                :title="{
-                    connected: 'Live updates connected',
-                    connecting: 'Connecting to live updates…',
-                    reconnecting: 'Reconnecting to live updates…',
-                    disconnected: 'Live updates disconnected',
-                }[state]"
-            >
-                <span
-                    class="w-2 h-2 rounded-full"
-                    :class="{
-                        connected: 'bg-green-500',
-                        connecting: 'bg-amber-500 animate-pulse',
-                        reconnecting: 'bg-amber-500 animate-pulse',
-                        disconnected: 'bg-red-500',
-                    }[state]"
-                ></span>
-            </div>
-
-            <!-- Notifications (real AI alert data, not the static sample content this used to show) -->
             <livewire:ai-notifications />
-
-            <!-- User Profile -->
-            <div class="relative">
-                <button wire:click="toggleProfileMenu"
-                    class="flex items-center gap-2 p-2 hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[var(--gold)] rounded-lg transition-colors"
-                    aria-label="Open account menu"
-                    aria-haspopup="true">
-                    <div class="w-8 h-8 bg-[var(--gold)] rounded-full flex items-center justify-center">
-                        <span class="text-sm font-bold text-[var(--ink)]">{{ substr($user?->name ?? 'U', 0, 1) }}</span>
-                    </div>
-                    <span class="text-sm text-[var(--sand)] hidden lg:block">{{ $user?->name }}</span>
-                </button>
-
-                <!-- Profile Dropdown -->
-                @if ($profileMenuOpen)
-                    <div class="absolute right-0 mt-2 bg-[var(--ink-soft)] rounded-lg shadow-lg border border-[var(--line)] w-48">
-                        <div class="p-4 border-b border-[var(--line)]">
-                            <p class="text-sm font-semibold text-[var(--stone)]">{{ $user?->name }}</p>
-                            <p class="text-xs text-[var(--sand)]">{{ $user?->email }}</p>
-                        </div>
-                        <div class="p-2 space-y-1">
-                            <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
-                                My Profile
-                            </a>
-                            <a href="{{ route('settings') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
-                                Settings
-                            </a>
-                            <a href="{{ route('documentation') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
-                                Documentation
-                            </a>
-                            <a href="{{ route('integrations') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
-                                Integrations
-                            </a>
-                            <a href="{{ route('api-tokens.index') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
-                                API Tokens
-                            </a>
-                            <a href="{{ route('teams.show', auth()->user()->currentTeam) }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
-                                Team
-                            </a>
-                            <a href="{{ route('billing.index') }}" class="block px-4 py-2 text-sm text-[var(--sand)] hover:bg-white/5 hover:text-[var(--stone)] rounded-lg transition-colors">
-                                Billing
-                            </a>
-                        </div>
-                        <div class="p-2 border-t border-[var(--line)]">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 rounded-lg transition-colors">
-                                    Logout
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-</nav>
+        </x-slot:tools>
+    </x-dot.header>
+</div>

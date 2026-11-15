@@ -9,17 +9,23 @@
  * All deleted -- only behavior that reaches today's DOM remains.
  */
 
+// R-52: the shared dot-ui controls (header, search pill, switcher, drawer), the sidebar, the notification panel and the dashboard
+// (alert rows and the Acknowledge button: no motion on alert states) keep their own look and behaviour. This layer used to
+// rewrite their inline position/overflow and scale them on hover, which moved the search pill's arrow out of its field.
+const OWN_BEHAVIOUR = '.dh, .dh-drawer, .dsr, .dsw, [data-dsw], .mines-sidebar, .mines-bell, .dm-stack, [data-landing]';
+const enhanceable = (selector) => Array.from(document.querySelectorAll(selector)).filter((el) => !el.closest(OWN_BEHAVIOUR));
+
 document.addEventListener('DOMContentLoaded', enhanceInteractions);
 document.addEventListener('livewire:navigated', enhanceInteractions);
 
 function enhanceInteractions() {
     // Transition utility classes for buttons and inputs
-    const buttons = document.querySelectorAll('button:not(.animated), a[class*="btn"]:not(.animated)');
+    const buttons = enhanceable('button:not(.animated), a[class*="btn"]:not(.animated)');
     buttons.forEach(button => {
         button.classList.add('animated', 'btn-animate');
     });
 
-    const inputs = document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not(.animated), textarea:not(.animated), select:not(.animated)');
+    const inputs = enhanceable('input:not([type="checkbox"]):not([type="radio"]):not(.animated), textarea:not(.animated), select:not(.animated)');
     inputs.forEach(input => {
         input.classList.add('animated', 'input-animate');
     });
@@ -29,7 +35,7 @@ function enhanceInteractions() {
 }
 
 function setupButtonHoverEffects() {
-    const hoverButtons = document.querySelectorAll('button:not(.hover-enhanced), a[class*="bg-"]:not(.hover-enhanced)');
+    const hoverButtons = enhanceable('button:not(.hover-enhanced), a[class*="bg-"]:not(.hover-enhanced)');
     hoverButtons.forEach(button => {
         button.classList.add('hover-enhanced');
 
@@ -58,7 +64,7 @@ function setupButtonHoverEffects() {
 }
 
 function setupRippleEffects() {
-    const rippleButtons = document.querySelectorAll('button:not(.no-ripple):not(.ripple-added), a[class*="btn"]:not(.no-ripple):not(.ripple-added)');
+    const rippleButtons = enhanceable('button:not(.no-ripple):not(.ripple-added), a[class*="btn"]:not(.no-ripple):not(.ripple-added)');
 
     rippleButtons.forEach(button => {
         button.classList.add('ripple-added');

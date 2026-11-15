@@ -36,6 +36,6 @@ class ApiTokensPageTest extends TestCase
         $response = $this->actingAs($user)->get(route('api-tokens.index'));
 
         $response->assertOk();
-        $response->assertSee('API Tokens');
+        $response->assertSee('API tokens');
     }
 }

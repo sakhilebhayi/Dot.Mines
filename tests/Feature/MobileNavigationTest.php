@@ -8,16 +8,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * The sidebar had zero responsive breakpoints at any viewport -- confirmed
- * live at 375px: it ate the full screen width at its desktop size (w-64/
- * w-20), leaving no room for page content, which wrapped one word per line.
- * There was no way to reach any other page on a phone.
+ * The sidebar had zero responsive breakpoints at any viewport (it ate the full screen width at 375px), then a hand-written
+ * Alpine/CustomEvent drawer with its own backdrop in each of two duplicated layouts. R-52 replaced all of it with the shared
+ * dot-ui header's menu button in "adopt" mode: dot-nav.js opens the platform's own sidebar, draws the scrim on <body>, locks the
+ * page, traps focus and closes on Escape, a scrim tap, the close button and a link tap.
  *
- * This can't exercise the actual Alpine/CustomEvent interaction (that needs
- * a real browser -- verified manually: hamburger opens the drawer, the X
- * button/backdrop-click/Escape all close it, desktop is pixel-identical to
- * before), but it locks in the structural markup the JS behavior depends on
- * so a future edit can't silently drop it.
+ * This cannot exercise the interaction (that needs a real browser: the r52 harness's mobile-nav check does, at nine widths); it
+ * pins the markup and the CSS rules the behaviour depends on, on both layouts, so an edit cannot silently drop them.
  */
 class MobileNavigationTest extends TestCase
 {
@@ -32,72 +29,63 @@ class MobileNavigationTest extends TestCase
         return $user;
     }
 
-    public function test_sidebar_is_off_canvas_on_mobile_and_static_on_desktop(): void
+    public function test_the_menu_button_opens_the_sidebar_in_adopt_mode(): void
     {
-        $response = $this->actingAs($this->actingUser())->get('/dashboard');
+        $html = (string) $this->actingAs($this->actingUser())->get('/dashboard')->assertOk()->getContent();
 
-        $response->assertOk();
-        // Off-canvas by default (mobile), restored to normal flex flow and
-        // always visible from md: up (desktop) -- the two states that used
-        // to not exist at all.
-        $response->assertSee('id="mobile-sidebar"', false);
-        $response->assertSee('-translate-x-full', false);
-        $response->assertSee('md:relative', false);
-        $response->assertSee('md:translate-x-0', false);
+        $this->assertStringContainsString('class="dh dh--nonav dh--adopt"', $html);
+        $this->assertStringContainsString('data-dh-menu-button', $html);
+        $this->assertStringContainsString('aria-controls="mines-sidebar"', $html);
+        $this->assertStringContainsString('aria-expanded="false"', $html);
+        $this->assertMatchesRegularExpression('#<aside [^>]*id="mines-sidebar"#', $html);
     }
 
-    public function test_navbar_has_a_mobile_only_hamburger_toggle(): void
+    public function test_the_sidebar_has_a_close_button_and_no_second_drawer_or_backdrop(): void
     {
-        $response = $this->actingAs($this->actingUser())->get('/dashboard');
+        foreach (['/dashboard', '/alerts'] as $path) {
+            $html = (string) $this->actingAs($this->actingUser())->get($path)->assertOk()->getContent();
 
-        $response->assertOk();
-        $response->assertSee('aria-controls="mobile-sidebar"', false);
-        $response->assertSee('md:hidden', false);
-        $response->assertSee('window.mobileNav.toggle()', false);
-    }
-
-    /**
-     * This used to only assert the substring 'window.mobileNav.close()',
-     * which the sidebar's own mobile close button also emits -- so the test
-     * passed regardless of whether a backdrop element existed at all. It
-     * now asserts the backdrop's own distinguishing markup: the fixed
-     * full-screen overlay div, gated to mobile, wired to the same close
-     * call on click.
-     */
-    public function test_page_has_a_mobile_backdrop_that_closes_the_drawer(): void
-    {
-        $response = $this->actingAs($this->actingUser())->get('/dashboard');
-
-        $response->assertOk();
-        $response->assertSee('fixed inset-0 bg-black/60 z-[45] md:hidden', false);
-        $response->assertSee('@click="window.mobileNav.close()"', false);
+            $this->assertStringContainsString('data-dh-close', $html, $path);
+            $this->assertStringContainsString('aria-label="Close navigation"', $html, $path);
+            $this->assertStringNotContainsString('bg-black/60 z-[45]', $html, "$path: the hand-written backdrop is gone, dot-ui draws the scrim on body");
+            $this->assertStringNotContainsString('mobile-nav-changed', $html, $path);
+        }
     }
 
     /**
-     * Correction: an earlier version of this test (and the comment above
-     * the backdrop block itself, and the commit that added it) claimed
-     * components/layouts/app.blade.php is "not reached by any route" and
-     * only asserted the string was present in the file. That was wrong.
-     * config('livewire.layout') = 'components.layouts.app' makes this file
-     * the default layout for every Livewire component bound directly as a
-     * route target with no #[Layout(...)] override -- including /alerts,
-     * used here. This now proves the backdrop actually reaches a real
-     * response on one of those routes, not just that the string exists
-     * somewhere in the file.
+     * The three requirements of dot-ui's sidebar-shell recipe (HEADER.md): the open sidebar sits above the scrim, a closed one
+     * is out of the tab order (a delayed visibility), and on a desktop it sits under the header instead of sliding under it.
      */
-    public function test_the_sibling_livewire_default_layout_also_has_the_backdrop(): void
+    public function test_the_stylesheet_carries_the_off_canvas_and_the_desktop_rules(): void
     {
-        $response = $this->actingAs($this->actingUser())->get('/alerts');
+        $css = (string) file_get_contents(public_path('dot-ui-host.css'));
 
-        $response->assertOk();
-        $response->assertSee('fixed inset-0 bg-black/60 z-[45] md:hidden', false);
+        $this->assertStringContainsString('@media (max-width: 860px)', $css, "the header's own breakpoint");
+        $this->assertMatchesRegularExpression('#\.mines-sidebar\s*\{[^}]*transform: translateX\(-100%\);[^}]*visibility: hidden;[^}]*transition: transform 0\.22s ease, visibility 0s linear 0\.22s#s', $css);
+        $this->assertStringContainsString('.mines-sidebar[data-dh-open] { transform: none; visibility: visible; transition-delay: 0s; }', $css);
+        $this->assertStringContainsString('top: var(--dot-header-offset, 56px);', $css, 'sticky under the header on a desktop');
+        $this->assertStringContainsString('z-index: 125;', $css, 'above dot-ui\'s scrim (120)');
     }
 
-    public function test_sidebar_has_a_mobile_only_close_button(): void
+    public function test_the_rail_choice_is_applied_before_first_paint_and_remembered(): void
     {
-        $response = $this->actingAs($this->actingUser())->get('/dashboard');
+        $html = (string) $this->actingAs($this->actingUser())->get('/dashboard')->assertOk()->getContent();
 
-        $response->assertOk();
-        $response->assertSee('Close navigation menu', false);
+        $this->assertStringContainsString("localStorage.getItem('sidebarOpen')", $html);
+        $this->assertStringContainsString("setAttribute('data-rail', 'true')", $html);
+        $this->assertStringContainsString('data-rail-toggle', $html);
+        $this->assertStringContainsString('window.innerWidth < 1280', $html, 'a tablet starts as a rail');
+    }
+
+    /** the main column must be allowed to shrink below its content, or a wide table pushes the page sideways */
+    public function test_the_main_column_has_min_width_zero_on_both_layouts(): void
+    {
+        $css = (string) file_get_contents(public_path('dot-ui-host.css'));
+        $this->assertMatchesRegularExpression('#\.mines-main\s*\{[^}]*min-width: 0;#', $css);
+
+        foreach (['/dashboard', '/alerts'] as $path) {
+            $html = (string) $this->actingAs($this->actingUser())->get($path)->assertOk()->getContent();
+            $this->assertStringContainsString('<main id="main-content" class="mines-main"', $html, $path);
+        }
     }
 }

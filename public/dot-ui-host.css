@@ -1,14 +1,16 @@
 /*
  * Dot.Mines host mapping for the shared dot-ui package (public/dot-ui/, hash-pinned, never edited here).
- * Maps the package's surface tokens onto Mines' own brand tokens (--ink, --ink-soft, --stone, --sand, --gold, --line,
- * defined in resources/css/app.css). Plain CSS in its own file so the committed public/build bundle is untouched.
- * Load after dot-tokens.css, dot-search.css and dot-switcher.css.
+ * Maps the package's tokens onto Mines' own brand tokens (--ink, --ink-soft, --stone, --sand, --gold, --line, defined in
+ * resources/css/app.css) and carries the few rules of the shell that sit on dot-ui's header: the brand plate, the live-state
+ * lamps in the status slot, the notification panel and the sidebar (dot-ui "adopt" mode). Plain, UNLAYERED CSS in its own file
+ * so the committed public/build bundle does not carry it. Load after dot-tokens.css, dot-search.css, dot-switcher.css and
+ * dot-header.css.
  */
 
-/* Search half: the compact in-page filter (and the dropdown tokens, should a header search ever be added). */
 :root {
+    /* Search (the pill's dropdown and the compact in-page filter). */
     --dsr-panel: var(--ink-soft);
-    --dsr-hover: rgba(255, 255, 255, 0.05);
+    --dsr-hover: rgba(255, 255, 255, 0.06);
     --dsr-rule: var(--line);
     --dsr-rule-strong: rgba(244, 239, 228, 0.22);
     --dsr-text: var(--stone);
@@ -17,12 +19,26 @@
     --dsr-filter-bg: rgba(255, 255, 255, 0.05);
     --dsr-filter-border-hover: var(--sand);
     --dsr-filter-border-focus: var(--gold);
-    /* Mines' selects and inputs sit at 44px; the shared filter follows them (44px on touch already). */
+    --dsr-focus-ring: var(--gold);
+    /* Mines' selects and inputs sit at 44px; the shared filter follows them. */
     --dsr-filter-h: 44px;
+
+    /* Header: the dark control-room bar. */
+    --dh-bg: var(--ink-soft);
+    --dh-ink: var(--stone);
+    --dh-ink-2: var(--sand);
+    --dh-rule: var(--line);
+    --dh-hover: rgba(255, 255, 255, 0.07);
+    --dh-accent: var(--gold);
+    --dh-focus: var(--gold);
+    --dh-avatar-bg: var(--gold);
+    --dh-avatar-ink: var(--ink);
+    --dh-logo-h: 30px;
+    --dh-search-w: clamp(280px, 30vw, 560px);
 }
 
-/* Switcher half: a dark host. The trigger sits on the dark navbar; the panel takes the Mines surface, the logo plates
-   stay white because the original logos are drawn for white. */
+/* Switcher: a dark host. The trigger sits on the dark bar; the panel takes the Mines surface, the logo plates stay white because
+   the original logos are drawn for white. */
 .dsw {
     --dsw-btn-ink: var(--stone);
     --dsw-btn-border: rgba(244, 239, 228, 0.28);
@@ -35,16 +51,204 @@
     --dsw-tile-ink: #1b2124;
 }
 
-/* Navbar fit on a phone: with the switcher beside the bell and the account button, the page title and the action gaps
-   tighten under 640px so nothing clips or scrolls sideways (the committed Tailwind bundle is not rebuilt for this). */
-@media (max-width: 639px) {
-    .mines-nav-gap {
-        gap: 0.5rem;
-    }
+/* ---- Header pieces ---------------------------------------------------------------------------------------------- */
 
-    .mines-nav-title {
-        font-size: 1.125rem;
-        line-height: 1.75rem;
-        overflow-wrap: anywhere;
-    }
+/* The Livewire root of the navbar steps out of the layout so the header stays sticky against the page. */
+.mines-hdr { display: contents; }
+
+/* The original mark sits on a light plate, as it always did in the sidebar. */
+.mines-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: var(--stone);
+    overflow: hidden;
 }
+.dh-brand .mines-mark img { height: 32px; width: 32px; object-fit: contain; }
+.dh-brand__name { font-weight: 600; }
+
+/* Live state: the realtime lamp and the sync pill. Both are written by script (livewire-realtime.js, local/connectivity.js). */
+.mines-lamp { display: none; align-items: center; justify-content: center; width: 20px; height: 44px; flex: none; }
+@media (min-width: 481px) { .mines-lamp { display: inline-flex; } }
+.mines-lamp__dot { width: 8px; height: 8px; border-radius: 50%; background: #71717a; }
+.mines-lamp__dot[data-state="connected"] { background: #10b981; }
+.mines-lamp__dot[data-state="connecting"], .mines-lamp__dot[data-state="reconnecting"] { background: #f59e0b; }
+.mines-lamp__dot[data-state="disconnected"] { background: #ef4444; }
+
+.mines-cp { align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; border-width: 0; font-size: 12px; font-weight: 500; line-height: 1; min-width: 0; }
+.mines-cp:not(.hidden) { display: inline-flex; }
+/* Below 520px the word goes (the lamp and the accessible name stay): six 44px controls already fill a 320px bar. */
+@media (max-width: 519px) { .mines-cp .dh-status__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+
+/* ---- Notification panel (the shared bell button, a sheet under the bar) --------------------------------------------- */
+.mines-bell { display: flex; }
+.mines-bell__panel {
+    position: fixed;
+    top: calc(var(--dot-header-offset, 56px) + 4px);
+    right: max(var(--dot-gutter, 12px), 8px);
+    z-index: 130;
+    width: min(380px, calc(100vw - 16px));
+    max-height: min(70vh, 520px);
+    max-height: min(70dvh, 520px);
+    display: flex;
+    flex-direction: column;
+    background: var(--ink-soft);
+    border: 1px solid rgba(244, 239, 228, 0.22);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+.mines-bell__panel[x-cloak] { display: none; }
+.mines-bell__list { overflow-y: auto; overscroll-behavior: contain; min-height: 0; flex: 1 1 auto; }
+.mines-bell__act {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 44px; min-width: 44px; padding: 0 8px;
+    background: none; border: 0; cursor: pointer;
+    color: var(--gold-soft); font: 500 14px/1.2 var(--dot-font-sans); text-decoration: none;
+}
+.mines-bell__act:hover { color: var(--stone); }
+.mines-bell__act:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.mines-bell__act--block { display: flex; width: 100%; }
+
+/* ---- Search results page ---------------------------------------------------------------------------------------- */
+.mines-search { max-width: 880px; }
+.mines-search__title { margin: 0 0 4px; font-size: 24px; font-weight: 600; line-height: 1.2; color: var(--stone); }
+.mines-search__lede, .mines-search__none { margin: 0 0 24px; color: var(--sand); font-size: 14px; line-height: 1.5; }
+.mines-search__group { margin: 0 0 28px; }
+.mines-search__head { display: flex; align-items: center; gap: 8px; margin: 0; min-height: 40px; font-size: 14px; font-weight: 600; color: var(--stone); border-bottom: 1px solid var(--line); }
+.mines-search__count { color: var(--sand); font-weight: 400; font-size: 12px; }
+.mines-search__list { list-style: none; margin: 0; padding: 0; }
+.mines-search__row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; min-height: 52px; padding: 10px 4px; border-bottom: 1px solid var(--line); color: var(--stone); text-decoration: none; }
+.mines-search__row:hover { background: rgba(255, 255, 255, 0.05); }
+.mines-search__row:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.mines-search__ref { font-family: var(--dot-font-mono); font-size: 12px; color: var(--sand); }
+.mines-search__rowtitle { font-weight: 500; overflow-wrap: anywhere; }
+.mines-search__rowtitle mark { background: rgba(217, 158, 43, 0.3); color: inherit; border-radius: 2px; }
+.mines-search__sub { flex-basis: 100%; font-size: 12px; color: var(--sand); }
+.mines-search__chips { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 12px; }
+.mines-search__chip { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 8px; color: var(--stone); text-decoration: none; font-size: 14px; }
+.mines-search__chip:hover { border-color: var(--sand); }
+.mines-search__chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ---- Shell: the header on top, the sidebar and the page in the row under it ------------------------------------------ */
+.mines-shell { display: flex; align-items: flex-start; min-height: calc(100vh - var(--dot-header-h, 56px)); min-height: calc(100dvh - var(--dot-header-h, 56px)); }
+.mines-main { flex: 1 1 0; min-width: 0; background: var(--ink); }
+.mines-main:focus { outline: none; }
+.mines-main__head { padding: 16px 24px; border-bottom: 1px solid var(--line); }
+.mines-page { padding: 16px; }
+@media (min-width: 640px) { .mines-page { padding: 24px; } }
+
+/* Sidebar: sticky under the header on a desktop (it never slides under it), an icon rail when collapsed. */
+.mines-sidebar {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    width: 256px;
+    position: sticky;
+    top: var(--dot-header-offset, 56px);
+    align-self: flex-start;
+    height: calc(100vh - var(--dot-header-offset, 56px));
+    height: calc(100dvh - var(--dot-header-offset, 56px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--ink-soft);
+    border-right: 1px solid var(--line);
+}
+html[data-rail="true"] .mines-sidebar { width: 72px; }
+.mines-sidebar__head { display: none; }
+.mines-ic { width: 20px; height: 20px; flex: none; }
+
+.mines-nav { padding: 12px; }
+.mines-nav__group + .mines-nav__group { margin-top: 12px; }
+.mines-nav__label { padding: 4px 12px 6px; font-size: 12px; font-weight: 500; line-height: 1.3; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sand); opacity: 0.85; }
+.mines-nav__link {
+    display: flex; align-items: center; gap: 12px;
+    min-height: 44px; padding: 0 12px; border-radius: 8px;
+    color: var(--sand); text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.2;
+    white-space: nowrap;
+}
+.mines-nav__link:hover { background: rgba(255, 255, 255, 0.06); color: var(--stone); }
+.mines-nav__link:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.mines-nav__link[aria-current="page"] { background: var(--gold); color: var(--ink); }
+.mines-nav__text { overflow: hidden; text-overflow: ellipsis; }
+
+.mines-rail-toggle {
+    display: flex; align-items: center; gap: 12px;
+    margin: auto 12px 12px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; cursor: pointer;
+    background: rgba(217, 158, 43, 0.1); color: var(--gold-soft); font: 500 14px/1.2 var(--dot-font-sans);
+}
+.mines-rail-toggle:hover { background: rgba(217, 158, 43, 0.2); }
+.mines-rail-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.mines-rail-toggle__ic { transition: transform 0.2s ease; }
+html[data-rail="true"] .mines-rail-toggle__ic { transform: rotate(180deg); }
+
+/* Collapsed rail: icons only, the group labels become hairlines. */
+html[data-rail="true"] .mines-nav { padding-inline: 8px; }
+html[data-rail="true"] .mines-nav__label,
+html[data-rail="true"] .mines-nav__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html[data-rail="true"] .mines-nav__group + .mines-nav__group { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+html[data-rail="true"] .mines-nav__link, html[data-rail="true"] .mines-rail-toggle { justify-content: center; padding: 0; }
+html[data-rail="true"] .mines-rail-toggle { margin-inline: 8px; }
+
+/* Phone and tablet (860px and under, the header's own breakpoint): the sidebar is off-canvas and the header's menu button
+   opens it (dot-ui adopt mode). The three requirements of HEADER.md "Sidebar shells": a close button inside, a delayed
+   visibility so the closed menu is out of the tab order, and the grid does not shrink it. */
+@media (max-width: 860px) {
+    .mines-shell { display: block; min-height: 0; }
+    .mines-sidebar {
+        position: fixed;
+        top: 0; bottom: 0; left: 0;
+        height: auto;
+        z-index: 125;
+        align-self: stretch;
+        transform: translateX(-100%);
+        visibility: hidden;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        transition: transform 0.22s ease, visibility 0s linear 0.22s;
+        border-right: 1px solid var(--line);
+    }
+    .mines-sidebar,
+    html[data-rail="true"] .mines-sidebar { width: min(320px, 88vw); }
+    .mines-sidebar[data-dh-open] { transform: none; visibility: visible; transition-delay: 0s; }
+    .mines-sidebar__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 64px; padding: 0 8px 0 16px; border-bottom: 1px solid var(--line); flex: none; }
+    .mines-sidebar__brand { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--stone); text-decoration: none; min-width: 0; }
+    .mines-sidebar__name { display: flex; flex-direction: column; font-size: 18px; font-weight: 600; line-height: 1.15; white-space: nowrap; }
+    .mines-sidebar__name small { font-size: 12px; font-weight: 400; color: var(--sand); }
+    .mines-sidebar__close { display: inline-grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; color: var(--sand); cursor: pointer; }
+    .mines-sidebar__close:hover { background: rgba(255, 255, 255, 0.06); color: var(--stone); }
+    .mines-sidebar__close:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+    .mines-rail-toggle { display: none; }
+    html[data-rail="true"] .mines-nav { padding-inline: 12px; }
+    html[data-rail="true"] .mines-nav__label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
+    html[data-rail="true"] .mines-nav__text { position: static; width: auto; height: auto; overflow: hidden; clip: auto; white-space: nowrap; }
+    html[data-rail="true"] .mines-nav__link { justify-content: flex-start; padding: 0 12px; }
+    html[data-rail="true"] .mines-nav__group + .mines-nav__group { margin-top: 12px; padding-top: 0; border-top: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mines-sidebar, .mines-rail-toggle__ic { transition: none; }
+}
+
+/* ---- Touch and glare (rugged phones and tablets) ------------------------------------------------------------------------
+   Controls in the page are at least 44px on a phone, a tablet and any coarse pointer. Unlayered on purpose: the page's own
+   Tailwind utilities (px-4 py-2, w-8 h-8) are layered and would otherwise win. Desktop mouse layouts keep their denser rows. */
+@media (max-width: 1024px), (pointer: coarse) {
+    .mines-main :is(button, [role="button"], select, textarea, summary, a.inline-flex, a[class*="px-"], a[class*="btn"], .dm-btn, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]):not([type="file"])) { min-height: 44px; }
+    .mines-main :is(button, [role="button"]) { min-width: 44px; }
+    .mines-main :is(a.dm-name, a.dm-link, a.underline, button.underline, button.dm-linkbtn) { display: inline-flex; align-items: center; min-height: 44px; }
+    .mines-main input[type="checkbox"], .mines-main input[type="radio"] { min-width: 20px; min-height: 20px; }
+    .mines-main label:has(> input[type="checkbox"]), .mines-main label:has(> input[type="radio"]) { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; }
+}
+
+/* The map's own controls and credits are Roboto too (Leaflet ships Helvetica Neue and Lucida Console). */
+.leaflet-container,
+.leaflet-container .leaflet-control-attribution,
+.leaflet-container .leaflet-control,
+.leaflet-bar a,
+.leaflet-touch .leaflet-bar a { font-family: var(--dot-font-sans); }
+.leaflet-bar a { min-width: 44px; min-height: 44px; line-height: 44px; }

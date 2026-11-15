@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark dot-roboto">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,10 +15,6 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght;600;700&family=IBM+Plex+Sans:wght;500;600&family=IBM+Plex+Mono:wght;500;600&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -62,7 +58,7 @@
             }
         </style>
     </head>
-    <body class="antialiased bg-[var(--ink)] text-[var(--stone)]" style="font-family: var(--font-body);">
+    <body class="antialiased bg-[var(--ink)] text-[var(--stone)]">
         <!-- Keyboard users skip the sidebar/navbar on every page load -->
         <a href="#main-content"
            class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-[var(--gold)] focus:text-[var(--ink)] focus:rounded-lg">
@@ -105,43 +101,15 @@
             @endforeach
         @endif
         
-        <!-- Mobile nav backdrop -->
-        <div
-            x-data="{ mobileOpen: false }"
-            @mobile-nav-changed.window="mobileOpen = $event.detail.open"
-            x-show="mobileOpen"
-            x-transition:enter="transition-opacity ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition-opacity ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click="window.mobileNav.close()"
-            class="fixed inset-0 bg-black/60 z-[45] md:hidden"
-            style="display: none;"
-            aria-hidden="true"
-        ></div>
+        {{-- Header: the shared dot-ui bar (brand, live state, search, Dot Apps, alerts, account). Sidebar and page share the row under it. --}}
+        @livewire('navbar')
 
-        <div class="min-h-screen flex">
-            <!-- Sidebar Navigation -->
-            @livewire('sidebar')
-
-            <!-- Main Content -->
-            <div class="flex-1 flex flex-col min-w-0">
-                <!-- Top Navigation -->
-                @livewire('navbar')
-
-                <!-- Page Content -->
-                <main id="main-content" class="flex-1 overflow-auto bg-[var(--ink)]">
-                    <div class="p-6 page-transition">
-                        @yield('content')
-                        @isset($slot)
-                            {{ $slot }}
-                        @endisset
-                    </div>
-                </main>
-            </div>
-        </div>
+        <x-shell :transition="true">
+            @yield('content')
+            @isset($slot)
+                {{ $slot }}
+            @endisset
+        </x-shell>
 
         @stack('modals')
 
@@ -197,6 +165,5 @@
             };
         </script>
         @endauth
-        <x-connectivity-pill />
 </body>
 </html>

@@ -9,33 +9,42 @@
 // Enable flow, never opened because `x-show="show"` never received the
 // entangled update).
 
-// Shared mobile-nav drawer state. The sidebar, navbar, and backdrop are
-// three separate Livewire/Blade roots, so a plain local `x-data` property on
-// one isn't visible to the others.
-//
-// Plain window CustomEvents instead of Alpine.store(): they don't depend on
-// Alpine at all, so nav state can't be caught in any Alpine boot-order or
-// instance issue. Each Blade root keeps its own local `mobileOpen` and stays
-// in sync by listening for 'mobile-nav-changed'.
-let mobileNavOpen = false;
-
-function setMobileNavOpen(open) {
-	if (mobileNavOpen === open) return;
-	mobileNavOpen = open;
-	document.body.classList.toggle('overflow-hidden', open);
-	window.dispatchEvent(new CustomEvent('mobile-nav-changed', { detail: { open } }));
-}
-
+// Navigation shell (R-52). Two pieces, neither owned by Alpine or Livewire:
+//  1. The phone / tablet menu is the shared dot-ui header's menu button in "adopt" mode: dot-nav.js opens the sidebar
+//     (#mines-sidebar, [data-dh-open]), draws the scrim on <body>, locks the page, traps focus and closes on Escape, a scrim
+//     tap, the close button and a link tap. window.mobileNav stays as a thin shim for the overlay code below, which closes
+//     the menu when a modal opens.
+//  2. The desktop icon rail: html[data-rail] (set before first paint by the head script in layouts/_dot-ui-head.blade.php,
+//     remembered in localStorage under the same key as before), toggled by [data-rail-toggle].
 window.mobileNav = {
-	toggle: () => setMobileNavOpen(!mobileNavOpen),
-	close: () => setMobileNavOpen(false),
+	toggle: () => {},
+	close: () => window.DotNav?.closeDrawer?.(),
 };
 
-window.addEventListener('keydown', (event) => {
-	if (event.key === 'Escape' && mobileNavOpen) {
-		setMobileNavOpen(false);
+function syncRailToggle() {
+	const rail = document.documentElement.getAttribute('data-rail') === 'true';
+	document.querySelectorAll('[data-rail-toggle]').forEach((button) => {
+		button.setAttribute('aria-pressed', rail ? 'true' : 'false');
+		button.setAttribute('aria-label', rail ? 'Expand the sidebar' : 'Collapse the sidebar');
+	});
+}
+
+document.addEventListener('click', (event) => {
+	const button = event.target instanceof Element ? event.target.closest('[data-rail-toggle]') : null;
+	if (!button) return;
+	const rail = document.documentElement.getAttribute('data-rail') !== 'true';
+	document.documentElement.setAttribute('data-rail', rail ? 'true' : 'false');
+	try {
+		localStorage.setItem('sidebarOpen', rail ? 'false' : 'true');
+	} catch (e) {
+		// storage blocked: the choice simply does not persist
 	}
+	syncRailToggle();
 });
+
+document.addEventListener('DOMContentLoaded', syncRailToggle);
+document.addEventListener('livewire:navigated', syncRailToggle);
+
 import './bootstrap';
 import './animations';  // Enhanced UX/UI animations
 import './livewire-realtime';

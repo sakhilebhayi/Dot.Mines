@@ -8,6 +8,7 @@ use App\Http\Controllers\MinePlanDownloadController;
 use App\Http\Controllers\OperatorDocumentController;
 use App\Http\Controllers\RealtimeHealthController;
 use App\Http\Controllers\ReportDownloadController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\WebhookController;
 use App\Livewire\AIAnalytics;
 use App\Livewire\AIOptimizationDashboard;
@@ -191,6 +192,10 @@ Route::middleware([
     // Mine Operations Feed
     Route::get('/feed', OperationsFeed::class)
         ->name('feed');
+
+    // Header search, full results page (R-52): team-scoped and permission-aware (App\Support\Search\MinesSearch).
+    Route::get('/search', [SearchController::class, 'index'])
+        ->name('search');
 
     // Operator management
     Route::get('/operators', OperatorManager::class)

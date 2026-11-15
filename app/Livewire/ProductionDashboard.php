@@ -203,9 +203,12 @@ class ProductionDashboard extends Component
         $query = ProductionRecord::forTeam($this->teamId);
 
         if ($this->search) {
-            $query->whereHas('mineArea', function (Builder $q) {
-                $q->where('name', 'like', "%{$this->search}%");
-            })->orWhere('notes', 'like', "%{$this->search}%");
+            // grouped: the `or` used to sit beside forTeam() at the top level, so a note in ANOTHER team's records matched too
+            $query->where(function (Builder $match): void {
+                $match->whereHas('mineArea', function (Builder $q) {
+                    $q->where('name', 'like', "%{$this->search}%");
+                })->orWhere('notes', 'like', "%{$this->search}%");
+            });
         }
 
         if (($this->mineAreaFilter !== null && $this->mineAreaFilter !== 0)) {

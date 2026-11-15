@@ -109,7 +109,8 @@ class DotUiRolloutTest extends TestCase
     {
         $html = (string) $this->actingAs($this->member())->get('/dashboard')->getContent();
 
-        foreach (['dot-fonts', 'dot-tokens', 'dot-search', 'dot-switcher-fonts', 'dot-switcher'] as $css) {
+        // 0.6.0 ships no Archivo or stencil CSS (dot-fonts, dot-switcher-fonts): Roboto and the type scale come with the header.
+        foreach (['dot-roboto', 'dot-type', 'dot-tokens', 'dot-search', 'dot-switcher', 'dot-header'] as $css) {
             $this->assertStringContainsString('/dot-ui/css/'.$css.'.css', $html);
             $this->assertFileExists(public_path('dot-ui/css/'.$css.'.css'));
         }

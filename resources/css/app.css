@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
+/* Roboto + the shared type scale (dot-ui): font-sans, font-mono, text-dot-*. Outside any @layer. */
+@import "../../dot-ui/tailwind/tailwind-theme.css";
 
 /* daisyUI 5 is configured HERE, not in tailwind.config.js: the old v4-style
    JS config block was silently ignored, so every daisyui component (stat,
@@ -56,9 +58,11 @@
     --stone: #f4efe4;
     --sand: #c9b896;
     --line: rgba(244, 239, 228, 0.12);
-    --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
-    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    /* R-52: Roboto is the one face (self-hosted, public/dot-ui). The display face is Roboto too; monospace stays only for
+       readings and identifiers (.dm-num, ids, coordinates). */
+    --font-display: var(--dot-font-sans);
+    --font-body: var(--dot-font-sans);
+    --font-mono: var(--dot-font-mono);
 }
 .font-display { font-family: var(--font-display); }
 .font-mono { font-family: var(--font-mono); }

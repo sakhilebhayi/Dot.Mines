@@ -4,7 +4,8 @@
  * - Navigations are network-first; when the network is gone the cached
  *   /offline shell renders the IndexedDB snapshot (brief §11).
  * - /build/* assets are cache-first: Vite hashes filenames, so a cached
- *   asset can never be stale.
+ *   asset can never be stale. The Roboto files (/dot-ui/fonts/) are cached
+ *   the same way so the offline shell is still set in Roboto.
  * - /api/ and /livewire/ are NEVER touched: authenticated dynamic responses
  *   must not land in Cache API (brief §20); IndexedDB holds structured data
  *   instead, written by the in-page sync client.
@@ -50,7 +51,7 @@ self.addEventListener('fetch', (event) => {
 		return;
 	}
 
-	if (url.pathname.startsWith('/build/')) {
+	if (url.pathname.startsWith('/build/') || url.pathname.startsWith('/dot-ui/fonts/')) {
 		event.respondWith(
 			caches.match(request).then((cached) => cached ?? fetch(request).then((response) => {
 				if (response.ok) {
