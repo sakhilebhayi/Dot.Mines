@@ -3,16 +3,11 @@
 /* Roboto + the shared type scale (dot-ui): font-sans, font-mono, text-dot-*. Outside any @layer. */
 @import "../../dot-ui/tailwind/tailwind-theme.css";
 
-/* dot-ui (Roboto, the type scale, the pill search, the switcher, the header) and the Mines mapping, bundled and minified here
-   instead of seven separate requests: they are render-blocking, and on a cold load over a slow link the bytes before first
+/* dot-ui 0.6.1 (Roboto, the type scale, the pill search, the switcher, the header: the one minified bundle) and the Mines mapping, bundled
+   with the app instead of seven separate requests: they are render-blocking, and on a cold load over a slow link the bytes before first
    paint ARE the LCP. The files stay hash-pinned in public/dot-ui (the drift test); this only reads them. Order matters:
    the package first, the host mapping after it (both unlayered). */
-@import "../../public/dot-ui/css/dot-roboto.css";
-@import "../../public/dot-ui/css/dot-type.css";
-@import "../../public/dot-ui/css/dot-tokens.css";
-@import "../../public/dot-ui/css/dot-search.css";
-@import "../../public/dot-ui/css/dot-switcher.css";
-@import "../../public/dot-ui/css/dot-header.css";
+@import "../../public/dot-ui/css/dot-ui.min.css";
 @import "../../public/dot-ui-host.css";
 
 /* daisyUI 5 is configured HERE, not in tailwind.config.js: the old v4-style

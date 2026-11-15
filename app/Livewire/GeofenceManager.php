@@ -223,8 +223,11 @@ class GeofenceManager extends Component
 
         $geofencesQuery = Geofence::where('team_id', $team->id)
             ->when($this->search, function (Builder $query): mixed {
-                return $query->where('name', 'like', "%{$this->search}%")
-                    ->orWhere('description', 'like', "%{$this->search}%");
+                // grouped: an `or` must never sit beside the team filter at the top level
+                return $query->where(function (Builder $match): void {
+                    $match->where('name', 'like', "%{$this->search}%")
+                        ->orWhere('description', 'like', "%{$this->search}%");
+                });
             })
             ->orderBy($this->sortBy, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10);

@@ -119,6 +119,9 @@ class DotUiRolloutTest extends TestCase
             $this->assertFileExists(public_path('dot-ui/js/'.$js.'.js'));
             $this->assertStringNotContainsString('/dot-ui/js/'.$js.'.js', $html);
         }
+        // 0.6.1: the bundle reads the minified files (one stylesheet, one script); the readable files stay distributed.
+        $this->assertFileExists(public_path('dot-ui/css/dot-ui.min.css'));
+        $this->assertFileExists(public_path('dot-ui/js/dot-ui.min.js'));
         $this->assertFileExists(public_path('dot-ui-host.css'));
 
         $manifest = json_decode((string) file_get_contents(public_path('build/manifest.json')), true);

@@ -168,7 +168,7 @@ class R52RobotoAndHeaderTest extends TestCase
         $error = (string) $this->get('/no-such-page')->assertNotFound()->getContent();
         $this->assertStringContainsString('dot-roboto', $error);
         $this->assertStringNotContainsString('fonts.googleapis', $error);
-        $this->assertStringContainsString('/dot-ui/css/dot-roboto.css', $error, 'the error page has no Vite bundle, so it links the package file itself');
+        $this->assertStringContainsString('/dot-ui/css/dot-roboto.min.css', $error, 'the error page has no Vite bundle, so it links the package file itself');
     }
 
     public function test_the_layout_shell_is_written_once(): void

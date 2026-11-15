@@ -45,12 +45,10 @@ document.addEventListener('click', (event) => {
 document.addEventListener('DOMContentLoaded', syncRailToggle);
 document.addEventListener('livewire:navigated', syncRailToggle);
 
-// dot-ui behaviour (search pill, results keyboard model, switcher, header: window.DotNav), bundled and minified with the app
-// instead of four separate requests. The files stay hash-pinned in public/dot-ui; order matters (the header script reads the others).
-import '../../public/dot-ui/js/dot-search.js';
-import '../../public/dot-ui/js/dot-search-results.js';
-import '../../public/dot-ui/js/dot-switcher.js';
-import '../../public/dot-ui/js/dot-nav.js';
+// dot-ui 0.6.1 behaviour (search pill, results keyboard model, switcher, header: window.DotNav), bundled with the app instead of four separate
+// requests. dot-ui.min.js is the eager bundle (nothing lazy): dot-ui-core.min.js loads its results controller by URL next to the script that
+// carries it, which inside this bundle would be /build/assets/. The file stays hash-pinned in public/dot-ui.
+import '../../public/dot-ui/js/dot-ui.min.js';
 import './bootstrap';
 import './animations';  // Enhanced UX/UI animations
 import './livewire-realtime';

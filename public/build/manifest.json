@@ -47,7 +47,7 @@
     "src": "public/dot-ui/img/arrow-mask.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-K_dg51fY.css",
+    "file": "assets/app-JBl6VBCr.css",
     "name": "app",
     "names": [
       "app.css"
@@ -61,7 +61,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-D_J_lPrY.js",
+    "file": "assets/app-DuIqC3uD.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
