@@ -17,16 +17,16 @@
 
             <div>
                 <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                <x-input id="email" class="block mt-1 w-full min-h-[44px]" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
             </div>
 
             <div class="mt-4">
                 <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
+                <x-input id="password" class="block mt-1 w-full min-h-[44px]" type="password" name="password" required autocomplete="current-password" />
             </div>
 
             <div class="block mt-4">
-                <label for="remember_me" class="flex items-center">
+                <label for="remember_me" class="flex items-center min-h-[44px]">
                     <x-checkbox id="remember_me" name="remember" />
                     <span class="ms-2 text-sm text-[var(--sand)]">{{ __('Remember me') }}</span>
                 </label>
@@ -34,7 +34,7 @@
 
             <div class="flex items-center justify-end mt-4">
                 @if (Route::has('password.request'))
-                    <a class="underline text-sm text-[var(--gold)] hover:text-[var(--gold-soft)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--gold)]" href="{{ route('password.request') }}">
+                    <a class="inline-flex items-center min-h-[44px] underline text-sm text-[var(--gold)] hover:text-[var(--gold-soft)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--gold)]" href="{{ route('password.request') }}">
                         {{ __('Forgot your password?') }}
                     </a>
                 @endif
