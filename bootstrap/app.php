@@ -37,6 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // unsigned curl against production exposed it.
         $middleware->validateCsrfTokens(except: [
             'webhooks/*',
+            // InfoDot's launch form posts here from another origin and cannot hold a Mines CSRF token. The route
+            // protects itself instead: the Origin/Referer host must be InfoDot's, and the single-use token is
+            // redeemed server to server with this platform's secret (see EcosystemAuthController).
+            'auth/ecosystem',
         ]);
 
         $middleware->alias([

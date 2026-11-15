@@ -25,6 +25,7 @@ use Laravel\Jetstream\Team as JetstreamTeam;
  * @property string $currency
  * @property string $language
  * @property string|null $email
+ * @property string|null $infodot_team_uuid the InfoDot company this team is linked to (mines:link-infodot-team)
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read User $owner

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\EcosystemAuthController;
 use App\Http\Controllers\EmailUnsubscribeController;
 use App\Http\Controllers\GdprController;
 use App\Http\Controllers\GuardianHealthController;
@@ -39,6 +40,13 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Laravel\Jetstream\Jetstream;
 use Livewire\Mechanisms\HandleRequests\HandleRequests;
+
+// R-52: InfoDot's launch form posts a single-use token here (CSRF-exempt in bootstrap/app.php, protected by the
+// Origin check and a server-side redeem). A token in a URL (GET) is never read.
+Route::post('/auth/ecosystem', [EcosystemAuthController::class, 'handle'])
+    ->middleware('throttle:30,1')
+    ->name('ecosystem.auth');
+Route::get('/auth/ecosystem', [EcosystemAuthController::class, 'legacy']);
 
 Route::get('/', function () {
     return view('welcome');
