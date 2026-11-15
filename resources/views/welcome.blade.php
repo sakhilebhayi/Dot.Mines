@@ -94,10 +94,10 @@
                 </a>
 
                 <div class="hidden md:flex items-center gap-8 font-sans text-[13px] tracking-wide uppercase text-[var(--sand)]">
-                    <a href="#capabilities" class="link-underline hover:text-[var(--stone)] pb-0.5">Product</a>
-                    <a href="#features" class="link-underline hover:text-[var(--stone)] pb-0.5">Features</a>
-                    <a href="#realtime" class="link-underline hover:text-[var(--stone)] pb-0.5">Real-time</a>
-                    <a href="{{ route('pricing') }}" class="link-underline hover:text-[var(--stone)] pb-0.5">Pricing</a>
+                    <a href="#capabilities" class="link-underline inline-flex items-center min-h-[44px] hover:text-[var(--stone)] pb-0.5">Product</a>
+                    <a href="#features" class="link-underline inline-flex items-center min-h-[44px] hover:text-[var(--stone)] pb-0.5">Features</a>
+                    <a href="#realtime" class="link-underline inline-flex items-center min-h-[44px] hover:text-[var(--stone)] pb-0.5">Real-time</a>
+                    <a href="{{ route('pricing') }}" class="link-underline inline-flex items-center min-h-[44px] hover:text-[var(--stone)] pb-0.5">Pricing</a>
                 </div>
 
                 @if (Route::has('login'))
@@ -107,12 +107,12 @@
                                 Dashboard
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="hidden sm:block text-sm font-medium text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
+                            <a href="{{ route('login') }}" class="hidden sm:inline-flex items-center justify-center min-h-[44px] min-w-[44px] text-sm font-medium text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
                                 Sign in
                             </a>
                         @endauth
 
-                        <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden press p-2 -mr-2 text-[var(--stone)]" aria-label="Toggle menu">
+                        <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden press inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 -mr-2 text-[var(--stone)]" aria-label="Toggle menu">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 7h16M4 12h16M4 17h16"></path>
                                 <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M6 18L18 6M6 6l12 12"></path>
@@ -143,7 +143,7 @@
         </header>
 
         <!-- Hero -->
-        <section class="relative min-h-[100dvh] flex items-end overflow-hidden">
+        <section class="relative min-h-[100dvh] flex flex-col justify-end overflow-hidden">
             <!-- Photo: excavators at a mine, by Dominik Vanyi, unsplash.com/photos/Mk2ls9UBO2E -->
             <div class="absolute inset-0 bg-cover bg-center hero-photo"></div>
             <div class="absolute inset-0 hero-scrim-vertical"></div>
@@ -330,10 +330,10 @@
                     <img src="{{ asset('images/logo-light.png') }}" alt="Dot.Mines" class="h-11 w-auto opacity-90">
                 </a>
                 <div class="flex items-center gap-6 font-sans text-xs tracking-wide uppercase text-[var(--sand)]">
-                    <a href="{{ route('pricing') }}" class="hover:text-[var(--stone)] transition-colors">Pricing</a>
-                    <a href="{{ route('policy.show') }}" class="hover:text-[var(--stone)] transition-colors">Privacy</a>
-                    <a href="{{ route('cookies') }}" class="hover:text-[var(--stone)] transition-colors">Cookies</a>
-                    <a href="{{ route('terms.show') }}" class="hover:text-[var(--stone)] transition-colors">Terms</a>
+                    <a href="{{ route('pricing') }}" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] hover:text-[var(--stone)] transition-colors">Pricing</a>
+                    <a href="{{ route('policy.show') }}" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] hover:text-[var(--stone)] transition-colors">Privacy</a>
+                    <a href="{{ route('cookies') }}" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] hover:text-[var(--stone)] transition-colors">Cookies</a>
+                    <a href="{{ route('terms.show') }}" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] hover:text-[var(--stone)] transition-colors">Terms</a>
                 </div>
                 <p class="font-sans text-xs tracking-wide text-[var(--sand)]">
                     &copy; {{ date('Y') }} Dot.Mines. Fleet operations software for mining.
