@@ -175,7 +175,8 @@ class DashboardLanding extends Component
     }
 
     /**
-     * The state of the mine in words, ahead of any figure.
+     * The state of the mine in words, ahead of any figure: open alerts first,
+     * then how much of the fleet is marked active.
      */
     public function getStateSentenceProperty(): string
     {
@@ -185,19 +186,26 @@ class DashboardLanding extends Component
                 : 'No machines are registered yet.';
         }
 
-        $fleet = match (true) {
-            $this->activeMachines === 0 => 'No machine is marked active',
-            $this->activeMachines === $this->totalMachines => 'The whole fleet is marked active',
-            default => 'Part of the fleet is marked active',
-        };
-
         $alerts = match (true) {
-            $this->activeAlerts === 0 => 'no alerts are open',
-            $this->activeAlerts === 1 => 'one alert is open',
-            default => 'alerts are open',
+            $this->activeAlerts === 0 => 'No alerts are open.',
+            $this->activeAlerts === 1 => 'One alert is open.',
+            default => ucfirst(self::words($this->activeAlerts)).' alerts are open.',
         };
 
-        return $fleet.' and '.$alerts.'.';
+        $fleet = match (true) {
+            $this->activeMachines === 0 => 'No machine is marked active.',
+            $this->activeMachines === $this->totalMachines && $this->totalMachines === 1 => 'The machine is marked active.',
+            $this->activeMachines === $this->totalMachines => 'All '.self::words($this->totalMachines).' machines are marked active.',
+            default => ucfirst(self::words($this->activeMachines)).' of '.self::words($this->totalMachines).' machines are marked active.',
+        };
+
+        return $alerts.' '.$fleet;
+    }
+
+    /** Whole numbers up to nine in words, larger ones as digits. */
+    private static function words(int $n): string
+    {
+        return ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][$n] ?? (string) $n;
     }
 
     /**

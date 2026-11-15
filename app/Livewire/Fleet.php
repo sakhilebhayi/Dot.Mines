@@ -656,9 +656,12 @@ class Fleet extends Component
         $machinesQuery = Machine::where('team_id', $team->id)
             ->with(['excavator', 'latestEngineHoursMetric', 'latestMetric', 'operatorAssignments' => fn (Relation $q) => $q->whereNull('unassigned_at')->with('operator')])
             ->when($this->search, function (Builder $query): mixed {
-                return $query->where('name', 'like', "%{$this->search}%")
-                    ->orWhere('model', 'like', "%{$this->search}%")
-                    ->orWhere('manufacturer', 'like', "%{$this->search}%");
+                // grouped: an `or` must never sit beside the team filter at the top level
+                return $query->where(function (Builder $match): void {
+                    $match->where('name', 'like', "%{$this->search}%")
+                        ->orWhere('model', 'like', "%{$this->search}%")
+                        ->orWhere('manufacturer', 'like', "%{$this->search}%");
+                });
             })
             ->when($this->statusFilter, function (Builder $query): mixed {
                 return $query->where('status', $this->statusFilter);

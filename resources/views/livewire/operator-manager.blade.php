@@ -1,12 +1,12 @@
 <div class="px-6 py-8">
-    <div class="mb-8 flex items-center justify-between">
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h2 class="text-3xl font-display font-semibold text-[var(--stone)]">Operators</h2>
             <p class="text-[var(--sand)] mt-2">The people operating the fleet — employment, licences and compliance in one place</p>
         </div>
         @can('create', \App\Models\Operator::class)
             <button wire:click="$set('showCreateModal', true)"
-                    class="px-6 py-3 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-display font-semibold transition">
+                    class="px-6 py-3 shrink-0 whitespace-nowrap bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] rounded-lg font-display font-semibold transition">
                 + Add Operator
             </button>
         @endcan

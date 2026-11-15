@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dot-roboto">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,9 +20,7 @@
             <link rel="icon" href="{{ asset($faviconPath) }}">
         @endif
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+        @include('layouts._roboto-head')
 
         {{-- No Vite bundle on purpose: an error page must render even when the build is missing. --}}
         <style>
@@ -38,9 +36,9 @@
                 /* Names the per-code pages still use. */
                 --accent: var(--signal);
                 --ink: var(--text);
-                --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
-                --font-body: 'IBM Plex Sans', system-ui, sans-serif;
-                --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+                --font-display: var(--dot-font-sans);
+                --font-body: var(--dot-font-sans);
+                --font-mono: var(--dot-font-mono);
             }
             * { box-sizing: border-box; }
             html { background: var(--ground); }
@@ -62,13 +60,13 @@
             .card__head { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--rule); }
             .card__head .icon { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; }
             .card__head .icon svg { width: 28px; height: 28px; }
-            .card__code { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-quiet); }
+            .card__code { font-family: var(--font-body); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-quiet); }
             .card__body { padding: 22px 20px 24px; }
             .card__body h1 { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 1.15; margin: 0 0 10px; }
             .card__body p { margin: 0 0 24px; color: var(--text-muted); font-size: 16px; line-height: 1.55; }
             .card__actions { display: flex; flex-wrap: wrap; gap: 10px; }
             footer { border-top: 1px solid var(--rule); padding: 20px 0; }
-            footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; font-family: var(--font-mono); font-size: 12px; color: var(--text-quiet); }
+            footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; font-family: var(--font-body); font-size: 12px; color: var(--text-quiet); }
         </style>
     </head>
     <body>

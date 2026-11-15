@@ -12,8 +12,6 @@ class Navbar extends Component
 {
     use RealtimeUpdates;
 
-    public bool $profileMenuOpen = false;
-
     /**
      * The navbar (and the notification bell it hosts) is present on every
      * authenticated page, so real-time subscriptions are initialized here
@@ -31,11 +29,6 @@ class Navbar extends Component
         $this->subscribeToTeamAlerts();
         $this->subscribeToMaintenanceAlerts();
         $this->subscribeToComplianceViolations();
-    }
-
-    public function toggleProfileMenu(): void
-    {
-        $this->profileMenuOpen = ! $this->profileMenuOpen;
     }
 
     public function logout(): void

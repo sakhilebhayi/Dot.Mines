@@ -3,11 +3,11 @@
     "file": "assets/maps-1DTFk8zz.css",
     "src": "_maps-1DTFk8zz.css"
   },
-  "_maps-TDwnvVcm.js": {
-    "file": "assets/maps-TDwnvVcm.js",
+  "_maps-CUXt2WDH.js": {
+    "file": "assets/maps-CUXt2WDH.js",
     "name": "maps",
     "imports": [
-      "_rolldown-runtime-DcNxTHDL.js"
+      "_rolldown-runtime-DwynqlJ6.js"
     ],
     "css": [
       "assets/maps-1DTFk8zz.css"
@@ -18,8 +18,8 @@
       "assets/marker-icon-hN30_KVU.png"
     ]
   },
-  "_rolldown-runtime-DcNxTHDL.js": {
-    "file": "assets/rolldown-runtime-DcNxTHDL.js",
+  "_rolldown-runtime-DwynqlJ6.js": {
+    "file": "assets/rolldown-runtime-DwynqlJ6.js",
     "name": "rolldown-runtime"
   },
   "node_modules/leaflet/dist/images/layers-2x.png": {
@@ -34,23 +34,40 @@
     "file": "assets/marker-icon-hN30_KVU.png",
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
+  "public/dot-ui/fonts/roboto/roboto-latin-ext-wght-normal.woff2": {
+    "file": "assets/roboto-latin-ext-wght-normal-DYIxWhlt.woff2",
+    "src": "public/dot-ui/fonts/roboto/roboto-latin-ext-wght-normal.woff2"
+  },
+  "public/dot-ui/fonts/roboto/roboto-latin-wght-normal.woff2": {
+    "file": "assets/roboto-latin-wght-normal-ccAYIvAh.woff2",
+    "src": "public/dot-ui/fonts/roboto/roboto-latin-wght-normal.woff2"
+  },
+  "public/dot-ui/img/arrow-mask.png": {
+    "file": "assets/arrow-mask-BvtlvTEr.png",
+    "src": "public/dot-ui/img/arrow-mask.png"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-BA2IYmNM.css",
+    "file": "assets/app-JBl6VBCr.css",
     "name": "app",
     "names": [
       "app.css"
     ],
     "src": "resources/css/app.css",
-    "isEntry": true
+    "isEntry": true,
+    "assets": [
+      "assets/roboto-latin-ext-wght-normal-DYIxWhlt.woff2",
+      "assets/roboto-latin-wght-normal-ccAYIvAh.woff2",
+      "assets/arrow-mask-BvtlvTEr.png"
+    ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DnZcU-go.js",
+    "file": "assets/app-DuIqC3uD.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_rolldown-runtime-DcNxTHDL.js",
-      "_maps-TDwnvVcm.js"
+      "_rolldown-runtime-DwynqlJ6.js",
+      "_maps-CUXt2WDH.js"
     ]
   },
   "resources/js/fleet-movement-replay.js": {

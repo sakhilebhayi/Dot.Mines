@@ -55,7 +55,10 @@ class LazyPagePlaceholdersTest extends TestCase
 
             $html = $component->placeholder()->render();
 
-            $this->assertStringContainsString('animate-pulse', $html, "{$class} placeholder");
+            // The dashboard board's skeleton is deliberately static hairline rows
+            // at the real row height (R-51: no shimmer on an operations screen).
+            $shape = $class === Dashboard::class ? 'dm-skel__row' : 'animate-pulse';
+            $this->assertStringContainsString($shape, $html, "{$class} placeholder");
             $this->assertStringContainsString('role="status"', $html, "{$class} placeholder");
         }
     }

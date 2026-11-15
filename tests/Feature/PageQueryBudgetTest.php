@@ -106,13 +106,16 @@ class PageQueryBudgetTest extends TestCase
     public static function pageBudgets(): array
     {
         return [
+            // 34 -> 36 (R-52): the header search lists the pages a person may open, which reads the person's
+            // permissions once on every page (a role check, plus one permission query for a non-admin). Two
+            // queries, shared by the dropdown and not per machine.
             // 32 -> 34 (2026-11): the signed-in landing above the board is in
             // the first response and reads its figures live, not from the
             // 5-minute stats cache: one grouped machine count, alerts,
             // geofences, mine areas, newest telemetry, and at most a role
             // check plus one permission query. None is per machine. The
             // board's own uncached alert count and mine-area count went.
-            'dashboard' => ['/dashboard', 34],
+            'dashboard' => ['/dashboard', 36],
             'fleet' => ['/fleet', 42],
             'live map' => ['/map', 22],
             'fleet replay' => ['/fleet/replay', 15],

@@ -1,4 +1,3 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
 import aspectRatio from '@tailwindcss/aspect-ratio';
@@ -15,10 +14,8 @@ export default {
 
     theme: {
         extend: {
-            fontFamily: {
-                sans: ['IBM Plex Sans', ...defaultTheme.fontFamily.sans],
-                mono: ['IBM Plex Mono', ...defaultTheme.fontFamily.mono],
-            },
+            // Roboto (sans) and the platform monospace come from the dot-ui theme imported in resources/css/app.css
+            // (--font-sans / --font-mono). The previous face was never actually served (its font link was malformed), so nothing is lost.
             colors: {
                 slate: {
                     950: '#0f172a',

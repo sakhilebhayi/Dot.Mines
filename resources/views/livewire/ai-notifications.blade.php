@@ -1,43 +1,31 @@
-<div class="relative" x-data="{ open: @entangle('showPanel') }">
-    <!-- Notification Bell -->
-    <button @click="open = !open"
-        class="relative p-2 text-[var(--sand)] hover:text-[var(--stone)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] rounded-lg transition-colors"
+<div class="mines-bell" x-data="{ open: @entangle('showPanel') }" @keydown.escape.window="open = false" @click.outside="open = false">
+    <!-- Notification Bell: the shared header's bell button (dot-ui classes); the open state stays Livewire's (entangled), so a
+         re-render of this component can never close or reopen the panel by itself. -->
+    <button type="button" @click="open = !open"
+        class="dh-icon-btn dh-bell"
         aria-label="Notifications{{ $unreadCount > 0 ? ' ('.$unreadCount.' unread)' : '' }}"
         aria-haspopup="true"
+        aria-controls="mines-bell-panel"
         :aria-expanded="open.toString()">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="dh-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
         </svg>
         @if($unreadCount > 0)
-        {{-- Contained inside the button (no translate off the edge) so the
-             header can never clip it; ring separates it from the bell. --}}
-        <span class="absolute top-0.5 right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold leading-none text-white bg-red-500 rounded-full ring-2 ring-[var(--ink)]"
-            aria-hidden="true">
-            {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-        </span>
+        <span class="dh-badge" aria-hidden="true">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
         @endif
     </button>
 
-    <!-- Notification Panel -->
-    <div x-show="open" 
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 transform scale-95"
-         x-transition:enter-end="opacity-100 transform scale-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 transform scale-100"
-         x-transition:leave-end="opacity-0 transform scale-95"
-         @click.away="open = false"
-         class="absolute right-0 mt-2 w-96 bg-[var(--ink-soft)] rounded-lg shadow-xl border border-[var(--line)] z-50"
-         style="display: none;">
-        
+    <!-- Notification Panel: a sheet under the header, always inside the viewport. No transition: an alert simply appears. -->
+    <div x-show="open" x-cloak id="mines-bell-panel" role="region" aria-label="Notifications" class="mines-bell__panel">
+
         <!-- Header -->
         <div class="p-4 border-b border-[var(--line)]">
             <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-[var(--stone)]">
+                <h2 class="text-base font-semibold text-[var(--stone)]">
                     Notifications
                 </h2>
                 @if($unreadCount > 0)
-                <button wire:click="acknowledgeAll" class="text-xs text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium">
+                <button type="button" wire:click="acknowledgeAll" class="mines-bell__act">
                     Mark all as read
                 </button>
                 @endif
@@ -95,8 +83,8 @@
                                     · {{ $notification['location'] }}
                                 @endif
                             </span>
-                            <button wire:click="acknowledge({{ $notification['id'] }}, '{{ $notification['source'] }}')"
-                                class="text-xs text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium flex-shrink-0">
+                            <button type="button" wire:click="acknowledge({{ $notification['id'] }}, '{{ $notification['source'] }}')"
+                                class="mines-bell__act flex-shrink-0">
                                 Acknowledge
                             </button>
                         </div>
@@ -115,7 +103,7 @@
         @if($notifications->count() > 0)
         <div class="p-3 border-t border-[var(--line)]">
             <a href="{{ route('alerts') }}"
-               class="block text-center text-sm text-[var(--gold)] hover:text-[var(--gold-soft)] font-medium"
+               class="mines-bell__act mines-bell__act--block"
                @click="open = false">
                 View all alerts →
             </a>
