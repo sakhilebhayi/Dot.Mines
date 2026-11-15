@@ -46,7 +46,7 @@ class MinesSearchTest extends TestCase
 
     private function fixtures(Team $team, string $marker): void
     {
-        $machine = Machine::factory()->create(['team_id' => $team->id, 'name' => "{$marker} Haul Truck", 'manufacturer' => 'Bell', 'serial_number' => "SN-{$marker}"]);
+        $machine = Machine::factory()->create(['team_id' => $team->id, 'name' => "{$marker} Haul Truck", 'machine_type' => 'adt', 'manufacturer' => 'Bell', 'serial_number' => "SN-{$marker}", 'registration_number' => "RG-{$marker}"]);
         Alert::factory()->create(['team_id' => $team->id, 'machine_id' => $machine->id, 'title' => "{$marker} engine over temperature", 'priority' => 'critical']);
         MaintenanceRecord::factory()->create(['team_id' => $team->id, 'machine_id' => $machine->id, 'title' => "{$marker} hydraulic service", 'work_order_number' => "WO-{$marker}"]);
         Operator::factory()->create(['team_id' => $team->id, 'first_name' => $marker, 'last_name' => 'Dlamini', 'employee_number' => "EMP-{$marker}"]);
@@ -157,7 +157,7 @@ class MinesSearchTest extends TestCase
     {
         [$manager, $team] = $this->member('fleet_manager');
         $this->fixtures($team, 'Zulu');
-        Machine::factory()->create(['team_id' => $team->id, 'name' => 'Plain Loader']);
+        Machine::factory()->create(['team_id' => $team->id, 'name' => 'Plain Loader', 'machine_type' => 'dozer']);
         $this->actingAs($manager);
         $search = app(MinesSearch::class);
 
