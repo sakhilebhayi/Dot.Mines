@@ -64,6 +64,17 @@ class R52RobotoAndHeaderTest extends TestCase
         }
     }
 
+    public function test_there_is_one_skip_link_not_two(): void
+    {
+        $this->actingAs($this->member());
+
+        foreach (['/dashboard', '/alerts'] as $path) {
+            $html = (string) $this->get($path)->assertOk()->getContent();
+            $this->assertSame(1, substr_count($html, 'Skip to'), "$path: the layout's skip link only; the header prints none");
+            $this->assertStringContainsString('href="#main-content"', $html);
+        }
+    }
+
     public function test_the_phone_menu_is_the_sidebar_in_adopt_mode(): void
     {
         $this->actingAs($this->member());

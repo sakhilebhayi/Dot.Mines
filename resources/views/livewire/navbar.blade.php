@@ -23,7 +23,7 @@
     {{-- One shared header (dot-ui): brand, the live state, the centred search, the Dot Apps switcher, alerts and the account.
          Mines is a sidebar shell, so there is no primary nav here: the menu button opens the sidebar (adopt mode). --}}
     <x-dot.header id="dh" brand-href="{{ route('dashboard') }}" brand-label="Dot.Mines, dashboard" :account="$accountMenu"
-        drawer-target="mines-sidebar" menu-label="Open navigation" search-label="Search Dot.Mines" skip="#main-content"
+        drawer-target="mines-sidebar" menu-label="Open navigation" search-label="Search Dot.Mines"
         :context="$team?->name">
         <x-slot:brand>
             <span class="mines-mark"><img src="{{ asset('images/mark.png') }}" alt="" width="34" height="34"></span>

@@ -252,6 +252,8 @@ html[data-rail="true"] .mines-rail-toggle { margin-inline: 8px; }
 @media (max-width: 1024px) {
     /* A flex row of buttons or links wraps instead of pushing the page sideways; a wrapping row never exceeds its parent. */
     .mines-page .flex-wrap { max-width: 100%; }
+    .mines-page .flex:has(> .badge) { flex-wrap: wrap; row-gap: 8px; }
+    .mines-page .badge { max-width: 100%; height: auto; min-height: 24px; white-space: normal; }
     .mines-page .flex:is(.gap-2, .gap-3, .gap-4):has(> :is(button, a, input, select)) { flex-wrap: wrap; }
     .mines-page .flex > :is(input, select) { min-width: 0; max-width: 100%; }
     .mines-page .flex.justify-between { flex-wrap: wrap; row-gap: 12px; }
@@ -281,3 +283,9 @@ html[data-rail="true"] .mines-rail-toggle { margin-inline: 8px; }
 
 /* Under 480px the bar has no room for the name: the mark is the brand (HEADER.md "Sidebar shells"). */
 @media (max-width: 479px) { .dh-brand__name { display: none; } }
+
+/* A page that pads its own root (p-6, px-6) sits inside the shell's page padding: on a phone that was 40 to 48px a side. */
+@media (max-width: 639px) {
+    .mines-page > div:is(.p-6, .px-6) { padding-inline: 0; }
+    .mines-page .min-w-0 { overflow-wrap: anywhere; }
+}
