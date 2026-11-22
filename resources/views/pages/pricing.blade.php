@@ -34,7 +34,7 @@
     </div>
 
     <div class="text-center">
-        <a href="{{ route('login') }}" class="inline-block bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] font-display font-semibold px-8 py-3.5 rounded-lg transition-colors">
+        <a href="{{ \App\Support\CentralSignIn::login() }}" class="inline-block bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] font-display font-semibold px-8 py-3.5 rounded-lg transition-colors">
             Sign in
         </a>
         <p class="text-[var(--sand)] text-xs mt-3">

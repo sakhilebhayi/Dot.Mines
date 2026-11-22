@@ -44,7 +44,7 @@
                             Dashboard
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="hidden sm:block text-sm font-medium text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
+                        <a href="{{ \App\Support\CentralSignIn::login() }}" class="hidden sm:block text-sm font-medium text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
                             Sign in
                         </a>
                     @endauth
@@ -72,7 +72,7 @@
                     <a href="{{ route('welcome') }}#features" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Features</a>
                     <a href="{{ route('pricing') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Pricing</a>
                     @guest
-                        <a href="{{ route('login') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Sign in</a>
+                        <a href="{{ \App\Support\CentralSignIn::login() }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Sign in</a>
                     @endguest
                 </div>
             </div>

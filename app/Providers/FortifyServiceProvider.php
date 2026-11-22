@@ -68,7 +68,12 @@ class FortifyServiceProvider extends ServiceProvider
         // route resolving (links, cached routes and old bookmarks land on the login page instead of a 404 or a
         // route exception). The redirect answers every HTTP verb, so a direct POST /register creates nothing either.
         if (! Features::enabled(Features::registration())) {
-            Route::redirect('/register', '/login')->name('register');
+            // R-54: with central sign-in on the redirect goes straight to InfoDot's create-account screen (flag off: /login, as always).
+            Route::any('/register', fn () => redirect(
+                config('dotsso.enabled') && ! config('dotsso.allow_local_login')
+                    ? route('dotsso.login', ['screen' => 'register'])
+                    : '/login'
+            ))->name('register');
         }
     }
 }

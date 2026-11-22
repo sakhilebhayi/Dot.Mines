@@ -13,7 +13,7 @@
 @section('message', $message)
 
 @section('actions')
-    <a href="{{ route('login') }}" class="press" style="padding: 12px 24px; background: var(--signal); border: 1px solid var(--signal); color: #211a14; font-family: var(--font-display); font-weight: 600; font-size: 15px; border-radius: 2px; text-decoration: none;">Sign in to Dot.Mines</a>
+    <a href="{{ \App\Support\CentralSignIn::login() }}" class="press" style="padding: 12px 24px; background: var(--signal); border: 1px solid var(--signal); color: #211a14; font-family: var(--font-display); font-weight: 600; font-size: 15px; border-radius: 2px; text-decoration: none;">{{ \App\Support\CentralSignIn::active() ? 'Sign in with InfoDot' : 'Sign in to Dot.Mines' }}</a>
     @if ($retryUrl)
         <a href="{{ $retryUrl }}" class="press link-underline" style="padding: 12px 24px; color: var(--ink); font-size: 15px; text-decoration: none;">Try again from InfoDot</a>
     @elseif ($infodotUrl)

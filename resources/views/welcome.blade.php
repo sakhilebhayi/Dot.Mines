@@ -107,7 +107,7 @@
                                 Dashboard
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="hidden sm:inline-flex items-center justify-center min-h-[44px] min-w-[44px] text-sm font-medium text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
+                            <a href="{{ \App\Support\CentralSignIn::login() }}" class="hidden sm:inline-flex items-center justify-center min-h-[44px] min-w-[44px] text-sm font-medium text-[var(--sand)] hover:text-[var(--stone)] transition-colors">
                                 Sign in
                             </a>
                         @endauth
@@ -136,7 +136,7 @@
                     <a href="#features" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Features</a>
                     <a href="{{ route('pricing') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Pricing</a>
                     @guest
-                        <a href="{{ route('login') }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Sign in</a>
+                        <a href="{{ \App\Support\CentralSignIn::login() }}" class="px-3 py-2.5 text-[var(--sand)] hover:text-[var(--stone)]">Sign in</a>
                     @endguest
                 </div>
             </div>
@@ -170,7 +170,7 @@
 
                     @guest
                         <div class="flex flex-wrap items-center gap-4">
-                            <a href="{{ route('login') }}" class="press px-7 py-3.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] font-display font-semibold rounded-lg transition-colors">
+                            <a href="{{ \App\Support\CentralSignIn::login() }}" class="press px-7 py-3.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] font-display font-semibold rounded-lg transition-colors">
                                 Sign in
                             </a>
                             <a href="#features" class="press flex items-center gap-2 px-7 py-3.5 text-[var(--stone)] font-medium rounded-lg border border-[var(--line)] hover:border-[var(--sand)] transition-colors">
@@ -315,7 +315,7 @@
 
                 @guest
                     <div class="flex flex-wrap justify-center gap-4">
-                        <a href="{{ route('login') }}" class="press px-8 py-3.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] font-display font-semibold rounded-lg transition-colors">
+                        <a href="{{ \App\Support\CentralSignIn::login() }}" class="press px-8 py-3.5 bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[#211a14] font-display font-semibold rounded-lg transition-colors">
                             Sign in
                         </a>
                     </div>

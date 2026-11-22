@@ -39,6 +39,22 @@ class RegistrationClosedTest extends TestCase
         $this->get('/register')->assertRedirect('/login');
     }
 
+    /** R-54: with central sign-in on, /register sends people to InfoDot's create-account screen; Mines still creates nothing itself. */
+    public function test_with_central_sign_in_on_register_goes_to_infodot_and_still_creates_nothing(): void
+    {
+        config(['dotsso.enabled' => true]);
+        $users = User::count();
+        $teams = Team::count();
+
+        $this->get('/register')->assertRedirect(route('dotsso.login', ['screen' => 'register']));
+        $this->post('/register', ['name' => 'X', 'email' => 'x@example.test', 'password' => 'Str0ng-pass-1234', 'password_confirmation' => 'Str0ng-pass-1234'])
+            ->assertRedirect(route('dotsso.login', ['screen' => 'register']));
+
+        $this->assertSame($users, User::count());
+        $this->assertSame($teams, Team::count());
+        $this->get('/')->assertOk()->assertDontSee('Create account')->assertDontSee('Sign up');
+    }
+
     public function test_posting_to_register_redirects_and_creates_no_user_or_team(): void
     {
         $teams = Team::count();
