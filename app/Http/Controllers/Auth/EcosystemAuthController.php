@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Actions\Ecosystem\LinkOutcome;
 use App\Actions\Ecosystem\LinkUserFromInfoDot;
+use App\Exceptions\ClaimRequired;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\InfoDot\IdentityClient;
 use App\Services\InfoDot\InfoDotUnavailable;
 use App\Support\ApiPayload;
+use App\Support\CentralSignIn;
+use Dot\SsoClient\Support\ClaimService;
+use Dot\SsoClient\Support\DeepLink;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -96,6 +100,23 @@ class EcosystemAuthController extends Controller
         ],
     ];
 
+    /**
+     * The same refusals worded for central sign-in (DOTSSO_ENABLED on): nothing here points back at a Mines password, which
+     * is no longer a way in. Keys not listed keep their wording above (none of them mentions a password).
+     *
+     * @var array<string, string>
+     */
+    private const CENTRAL_MESSAGES = [
+        'origin_rejected' => 'For your safety Dot.Mines only accepts a sign-in that InfoDot sends. Start again with the button below.',
+        'token_missing' => 'No sign-in code arrived. Start again with the button below.',
+        'not_configured' => 'Dot.Mines has not been connected to InfoDot on this server. Tell your administrator.',
+        'infodot_unavailable' => 'Sign-in through InfoDot is unavailable for a moment. Try again shortly.',
+        'token_refused' => 'Sign-in codes work once and only for a minute. Start again with the button below to get a fresh one.',
+        LinkOutcome::BAD_IDENTITY => 'Your InfoDot account needs a verified email address before it can open Dot.Mines. Verify it in InfoDot, then start again.',
+        LinkOutcome::NO_ACCOUNT => 'Dot.Mines accounts are created by invitation. Ask your Dot.Mines administrator to invite you with the email address you use on InfoDot. Nothing was created.',
+        LinkOutcome::MINES_EMAIL_UNVERIFIED => 'A Dot.Mines account exists for this email, but that address has not been confirmed there. Start again to confirm it with a code we email you.',
+    ];
+
     public function legacy(): RedirectResponse
     {
         // A token in a URL is never read (nor wanted): the old GET shape just goes to the sign-in page.
@@ -136,7 +157,15 @@ class EcosystemAuthController extends Controller
             return $this->refused('wrong_platform');
         }
 
-        $outcome = $link->resolve($identity);
+        // R-54: with central sign-in on, a validated in-app destination posted with the launch is honoured (flag off: ignored, as before).
+        $destination = config('dotsso.enabled') ? DeepLink::clean($request->post('redirect'), $request) : null;
+
+        try {
+            $outcome = $link->resolve($identity);
+        } catch (ClaimRequired $claim) {
+            // Unverified or authority-carrying account: nothing is replaced or wiped; the person proves the address with a code first.
+            return app(ClaimService::class)->begin($request, $claim->user, $claim->claims, $destination, '');
+        }
 
         if (! $outcome->user instanceof User) {
             $infodotUser = ApiPayload::assoc($identity['user'] ?? null);
@@ -156,6 +185,9 @@ class EcosystemAuthController extends Controller
         if ($this->hasTwoFactor($user)) {
             // The existing Fortify challenge finishes the sign-in (it logs the user in and regenerates the session).
             $request->session()->put(['login.id' => $user->getKey(), 'login.remember' => false]);
+            if ($destination !== null) {
+                $request->session()->put('url.intended', $destination);
+            }
             TwoFactorAuthenticationChallenged::dispatch($user);
             Log::info('Mines SSO verified by InfoDot; sending to the two-factor challenge.', ['user_id' => $user->id]);
 
@@ -165,7 +197,7 @@ class EcosystemAuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard', [], 303)->withHeaders($this->privateHeaders());
+        return ($destination !== null ? redirect()->to($destination, 303) : redirect()->route('dashboard', [], 303))->withHeaders($this->privateHeaders());
     }
 
     private function hasTwoFactor(User $user): bool
@@ -203,6 +235,10 @@ class EcosystemAuthController extends Controller
     {
         $copy = self::REASONS[$reason] ?? self::REASONS['token_refused'];
 
+        if (CentralSignIn::active() && isset(self::CENTRAL_MESSAGES[$reason])) {
+            $copy['message'] = self::CENTRAL_MESSAGES[$reason];
+        }
+
         Log::warning('Mines SSO refused.', ['reason' => $reason, ...$context]);
 
         $infodot = rtrim(ApiPayload::str(config('ecosystem.platforms.infodot.url')), '/');
@@ -212,7 +248,7 @@ class EcosystemAuthController extends Controller
             'reason' => $reason,
             'title' => $copy['title'],
             'message' => $copy['message'],
-            'retryUrl' => $copy['retry'] && $infodot !== '' ? $infodot.'/go/mines' : null,
+            'retryUrl' => $copy['retry'] && $infodot !== '' ? (CentralSignIn::active() ? CentralSignIn::login() : $infodot.'/go/mines') : null,
             'infodotUrl' => $infodot !== '' ? $infodot : null,
         ], $copy['status'])->withHeaders($this->privateHeaders());
     }

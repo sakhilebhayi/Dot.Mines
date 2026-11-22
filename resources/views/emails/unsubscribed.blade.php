@@ -23,7 +23,7 @@
             @endif
             You can turn them back on any time under Settings &rsaquo; Notifications.
         </p>
-        <a href="{{ route('login') }}">Go to {{ config('app.name') }}</a>
+        <a href="{{ \App\Support\CentralSignIn::login() }}">Go to {{ config('app.name') }}</a>
     </div>
 </body>
 </html>

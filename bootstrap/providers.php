@@ -14,4 +14,6 @@ return [
     FortifyServiceProvider::class,
     JetstreamServiceProvider::class,
     AIServiceProvider::class,
+    Dot\SsoClient\DotSsoServiceProvider::class,
+    App\Providers\MinesSsoServiceProvider::class,
 ];

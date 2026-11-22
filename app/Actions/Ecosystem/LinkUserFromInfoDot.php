@@ -2,8 +2,11 @@
 
 namespace App\Actions\Ecosystem;
 
+use App\Exceptions\ClaimRequired;
 use App\Models\Team;
 use App\Models\User;
+use App\Sso\InvitedAccount;
+use App\Sso\MinesProvisioner;
 use App\Support\ApiPayload;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +25,12 @@ use Illuminate\Support\Str;
  *    Mines user is not already linked to a different InfoDot identity.
  * 3. A uuid linked to one Mines user is never re-pointed at another.
  * 4. No match: refused (or, only with the provision flag, a role-less account is created).
+ *
+ * R-54: only while central sign-in is switched on (DOTSSO_ENABLED), this fallback receiver follows the shared package's
+ * rules: an unverified account, or one that carries authority (admin or owner role, company-team owner, two-step
+ * sign-in), is not refused or linked silently but sent to the emailed-code claim flow (ClaimRequired); and a person with
+ * no account is admitted only when a pending team invitation names the address (InvitedAccount). With the flag off every
+ * line below behaves exactly as it always did.
  */
 class LinkUserFromInfoDot
 {
@@ -44,18 +53,35 @@ class LinkUserFromInfoDot
 
         $user = User::query()->where(DB::raw('lower(email)'), $email)->first();
 
+        $central = (bool) config('dotsso.enabled');
+        $claims = ['sub' => $uuid, 'email' => $email, 'name' => Str::limit(ApiPayload::str($info['name'] ?? null) ?: Str::before($email, '@'), 255, '')];
+
         if (! $user) {
-            return $this->provisionEnabled()
-                ? $this->provision($uuid, $email, ApiPayload::str($info['name'] ?? null))
-                : LinkOutcome::refused(LinkOutcome::NO_ACCOUNT);
+            if ($this->provisionEnabled()) {
+                return $this->provision($uuid, $email, ApiPayload::str($info['name'] ?? null));
+            }
+
+            if ($central && InvitedAccount::allowed($email)) {
+                return LinkOutcome::found(InvitedAccount::create($email, $claims['name'], $uuid));
+            }
+
+            return LinkOutcome::refused(LinkOutcome::NO_ACCOUNT);
         }
 
         if ($user->email_verified_at === null) {
+            if ($central && blank($user->infodot_user_uuid)) {
+                throw new ClaimRequired($user, $claims);
+            }
+
             return LinkOutcome::refused(LinkOutcome::MINES_EMAIL_UNVERIFIED);
         }
 
         if (filled($user->infodot_user_uuid)) {
             return LinkOutcome::refused(LinkOutcome::LINKED_ELSEWHERE);
+        }
+
+        if ($central && MinesProvisioner::carriesAuthority($user)) {
+            throw new ClaimRequired($user, $claims);
         }
 
         try {

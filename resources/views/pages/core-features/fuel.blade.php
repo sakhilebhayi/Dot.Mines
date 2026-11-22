@@ -12,7 +12,7 @@
             <li>Exportable fuel and cost reports</li>
         </ul>
         <div>
-            <a href="{{ route('login') }}" class="inline-block bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] font-display font-semibold px-6 py-2.5 rounded-lg transition-colors">
+            <a href="{{ \App\Support\CentralSignIn::login() }}" class="inline-block bg-[var(--gold)] hover:bg-[var(--gold-soft)] text-[var(--ink)] font-display font-semibold px-6 py-2.5 rounded-lg transition-colors">
                 Sign in
             </a>
         </div>
