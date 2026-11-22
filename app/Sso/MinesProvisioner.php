@@ -22,24 +22,27 @@ use Illuminate\Support\Facades\Mail;
  */
 class MinesProvisioner implements UserProvisioner
 {
+    #[\Override]
     public function findByUuid(string $uuid): ?Authenticatable
     {
         return User::query()->where('infodot_user_uuid', $uuid)->first();
     }
 
+    #[\Override]
     public function findByEmail(string $email): ?Authenticatable
     {
-        /** @var User|null $user */
         $user = User::query()->whereRaw('lower(email) = ?', [mb_strtolower(trim($email))])->first();
 
-        return $user;
+        return $user instanceof User ? $user : null;
     }
 
+    #[\Override]
     public function uuidOf(Authenticatable $user): ?string
     {
         return $user instanceof User ? $user->infodot_user_uuid : null;
     }
 
+    #[\Override]
     public function hasVerifiedEmail(Authenticatable $user): bool
     {
         return $user instanceof User && $user->email_verified_at !== null && ! self::carriesAuthority($user);
@@ -52,6 +55,7 @@ class MinesProvisioner implements UserProvisioner
             || $user->ownedTeams()->where('personal_team', false)->exists();
     }
 
+    #[\Override]
     public function link(Authenticatable $user, string $uuid): void
     {
         if ($user instanceof User) {
@@ -59,6 +63,7 @@ class MinesProvisioner implements UserProvisioner
         }
     }
 
+    #[\Override]
     public function confirmEmail(Authenticatable $user): void
     {
         if ($user instanceof User && $user->email_verified_at === null) {
@@ -66,6 +71,7 @@ class MinesProvisioner implements UserProvisioner
         }
     }
 
+    #[\Override]
     public function create(array $claims): ?Authenticatable
     {
         if (! InvitedAccount::allowed($claims['email'])) {
@@ -77,11 +83,13 @@ class MinesProvisioner implements UserProvisioner
         return InvitedAccount::create($claims['email'], $claims['name'], $claims['sub']);
     }
 
+    #[\Override]
     public function afterSignIn(Authenticatable $user, array $claims): void
     {
         // Nothing. The team is never chosen here: EnsureTeamContext and the person's own memberships decide.
     }
 
+    #[\Override]
     public function sendClaimCode(Authenticatable $user, string $code, int $minutes): void
     {
         if ($user instanceof User) {

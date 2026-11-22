@@ -11,7 +11,7 @@ class CentralSignIn
 {
     public static function active(): bool
     {
-        return (bool) config('dotsso.enabled') && ! (bool) config('dotsso.allow_local_login');
+        return config('dotsso.enabled') === true && config('dotsso.allow_local_login') !== true;
     }
 
     public static function login(): string
@@ -19,7 +19,11 @@ class CentralSignIn
         return self::active() ? route('dotsso.login') : route('login');
     }
 
-    /** The invitation email's button: central sign-in that returns to the signed accept link. */
+    /**
+     * The invitation email's button: central sign-in that returns to the signed accept link.
+     *
+     * @psalm-suppress PossiblyUnusedMethod -- called from emails/team-invitation.blade.php
+     */
     public static function loginThen(string $next): string
     {
         return route('dotsso.login', ['next' => $next]);

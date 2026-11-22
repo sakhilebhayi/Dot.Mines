@@ -25,6 +25,9 @@ class CaptureSsoNext
             }
         }
 
-        return $next($request);
+        $response = $next($request);
+        assert($response instanceof Response);
+
+        return $response;
     }
 }

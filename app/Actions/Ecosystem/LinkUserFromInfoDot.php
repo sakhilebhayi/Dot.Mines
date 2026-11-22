@@ -53,7 +53,7 @@ class LinkUserFromInfoDot
 
         $user = User::query()->where(DB::raw('lower(email)'), $email)->first();
 
-        $central = (bool) config('dotsso.enabled');
+        $central = config('dotsso.enabled') === true;
         $claims = ['sub' => $uuid, 'email' => $email, 'name' => Str::limit(ApiPayload::str($info['name'] ?? null) ?: Str::before($email, '@'), 255, '')];
 
         if (! $user) {

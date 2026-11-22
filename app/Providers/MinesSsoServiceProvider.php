@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Middleware\CaptureSsoNext;
 use App\Sso\MinesSsoController;
+use App\Support\ApiPayload;
 use Dot\SsoClient\Http\Controllers\SsoController;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
@@ -19,7 +20,6 @@ class MinesSsoServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        /** @var Router $router */
         $router = $this->app->make(Router::class);
         $router->pushMiddlewareToGroup('web', CaptureSsoNext::class);
 
@@ -34,7 +34,7 @@ class MinesSsoServiceProvider extends ServiceProvider
      */
     public function enforceLaxSession(): void
     {
-        if (config('dotsso.enabled') && strtolower((string) config('session.same_site')) === 'strict') {
+        if (config('dotsso.enabled') && strtolower(ApiPayload::str(config('session.same_site'))) === 'strict') {
             config(['session.same_site' => 'lax']);
         }
     }

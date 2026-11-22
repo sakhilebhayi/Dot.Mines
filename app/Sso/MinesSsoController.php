@@ -36,7 +36,7 @@ class MinesSsoController extends SsoController
             'login.id' => $user->getKey(),
             'login.remember' => false,
             // The back-channel logout record: if InfoDot signs this identity out before the code is entered, the session ends.
-            'dotsso.session' => ['sub' => $claims['sub'], 'at_ms' => (int) floor(microtime(true) * 1000), 'id_token' => $idToken],
+            'dotsso.session' => ['sub' => $claims['sub'], 'at_ms' => (int) floor(microtime(true) * 1000.0), 'id_token' => $idToken],
         ]);
 
         if ($deepLink !== null) {
