@@ -6,6 +6,8 @@ use App\Providers\BroadcastServiceProvider;
 use App\Providers\FortifyServiceProvider;
 use App\Providers\HealthCheckServiceProvider;
 use App\Providers\JetstreamServiceProvider;
+use App\Providers\MinesSsoServiceProvider;
+use Dot\SsoClient\DotSsoServiceProvider;
 
 return [
     AppServiceProvider::class,
@@ -14,6 +16,6 @@ return [
     FortifyServiceProvider::class,
     JetstreamServiceProvider::class,
     AIServiceProvider::class,
-    Dot\SsoClient\DotSsoServiceProvider::class,
-    App\Providers\MinesSsoServiceProvider::class,
+    DotSsoServiceProvider::class,
+    MinesSsoServiceProvider::class,
 ];
