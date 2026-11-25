@@ -6,6 +6,7 @@ use App\Http\Middleware\CacheControlHeaders;
 use App\Http\Middleware\EnforceDownloadRateLimit;
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureAdminHasTwoFactor;
+use App\Http\Middleware\EnsurePlatformAvailable;
 use App\Http\Middleware\EnsureTeamContext;
 use App\Http\Middleware\EnsureTokenAbility;
 use App\Http\Middleware\ForceHttps;
@@ -59,6 +60,8 @@ return Application::configure(basePath: dirname(__DIR__))
             ForceHttps::class,
             SecurityHeaders::class,
             EnforceDownloadRateLimit::class,
+            // R-61: only does anything when ecosystem.availability.check is true (default false); see the class.
+            EnsurePlatformAvailable::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
