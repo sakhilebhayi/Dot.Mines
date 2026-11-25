@@ -83,4 +83,28 @@ return [
         'provision' => filter_var(env('INFODOT_PROVISION_USERS', false), FILTER_VALIDATE_BOOLEAN),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | InfoDot availability check (R-61) -- OFF by default
+    |--------------------------------------------------------------------------
+    | Dot.Mines decides its own access (InfoDot never enforces a company entitlement for it). This switch only lets
+    | InfoDot's maintenance switch hold: while on, a signed-in person's WEB screens answer 503 when InfoDot says Dot.Mines
+    | is not available for the person's current team's InfoDot company. It asks about `available` ONLY, never `entitled`.
+    | The API, device and telemetry traffic, webhooks, health checks, sign-in/2FA, the InfoDot handoff and the data-subject
+    | (GDPR) routes are never blocked. See App\Http\Middleware\EnsurePlatformAvailable.
+    |
+    | TO TURN IT ON LATER: set MINES_AVAILABILITY_CHECK=true on the host and run `php artisan config:cache`. It also needs
+    | INFODOT_SERVICE_SECRET (above) to be configured; without the secret every answer is "unknown" and Mines carries on.
+    |
+    |  check    MINES_AVAILABILITY_CHECK. DEFAULT FALSE: with it false no request is made and nothing changes.
+    |  url      MINES_AVAILABILITY_URL, optional, with a {uuid} placeholder. Default: InfoDot's host from redeem_url +
+    |           /api/ecosystem/companies/{uuid}/platforms
+    |  timeout  MINES_AVAILABILITY_TIMEOUT seconds, default 3.
+    */
+    'availability' => [
+        'check' => filter_var(env('MINES_AVAILABILITY_CHECK', false), FILTER_VALIDATE_BOOLEAN),
+        'url' => env('MINES_AVAILABILITY_URL'),
+        'timeout' => (int) env('MINES_AVAILABILITY_TIMEOUT', 3),
+    ],
+
 ];
