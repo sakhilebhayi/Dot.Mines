@@ -20,8 +20,8 @@ class RealtimeEventScheduler
      * the jobs that power the real-time update system:
      *
      * - Machine location updates (every 5 minutes -- API-bound)
-     * - Alert generation (every 30 seconds -- database-only)
-     * - Geofence crossing detection (every 30 seconds -- database-only)
+     * - Alert generation (every 5 minutes -- database-only)
+     * - Geofence crossing detection (every 5 minutes -- database-only)
      * - Machine status monitoring (every 5 minutes -- API-bound)
      *
      * All jobs queue independently and are non-blocking.
@@ -41,17 +41,24 @@ class RealtimeEventScheduler
             ->name('schedule-location-updates')
             ->onOneServer();
 
-        // Alert generation: Every 30 seconds to catch new conditions
+        // Alert generation: every five minutes. It ran every 30 seconds, and a
+        // sub-minute event keeps `schedule:run` alive for the whole minute: on
+        // the shared host Mines' scheduler alone was ~40% of every minute's
+        // cron work and the host killed it (exit 137) on 2026-11-27 with the
+        // account at 100% CPU. Positions only change every five minutes
+        // anyway (schedule-location-updates below), so a faster check finds
+        // nothing new.
         $schedule->call(function () {
             self::scheduleAlertGeneration();
-        })->everyThirtySeconds()
+        })->everyFiveMinutes()
             ->name('schedule-alert-generation')
             ->onOneServer();
 
-        // Geofence detection: Every 30 seconds for responsive geofencing
+        // Geofence detection: every five minutes, for the same reason: a
+        // crossing can only appear after a location update.
         $schedule->call(function () {
             self::scheduleGeofenceDetection();
-        })->everyThirtySeconds()
+        })->everyFiveMinutes()
             ->name('schedule-geofence-detection')
             ->onOneServer();
 

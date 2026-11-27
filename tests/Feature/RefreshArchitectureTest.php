@@ -47,13 +47,21 @@ class RefreshArchitectureTest extends TestCase
         }
     }
 
-    public function test_database_only_schedules_keep_their_faster_cadence(): void
+    public function test_database_only_schedules_run_every_five_minutes_not_sub_minute(): void
     {
         foreach (['schedule-alert-generation', 'schedule-geofence-detection'] as $name) {
             $event = $this->scheduledEvent($name);
 
-            $this->assertNotNull($event);
-            $this->assertSame(30, $event->repeatSeconds, "{$name} is database-only work and stays at 30s.");
+            $this->assertNotNull($event, "{$name} must stay scheduled.");
+            $this->assertSame('*/5 * * * *', $event->expression, "{$name} follows the five-minute location updates.");
+            $this->assertNull($event->repeatSeconds, "{$name} must not run sub-minute: it keeps schedule:run alive all minute on the shared host.");
+        }
+    }
+
+    public function test_no_schedule_runs_sub_minute(): void
+    {
+        foreach (app(Schedule::class)->events() as $event) {
+            $this->assertNull($event->repeatSeconds, ($event->description ?: (string) $event->command).' must not run sub-minute on the shared host.');
         }
     }
 
