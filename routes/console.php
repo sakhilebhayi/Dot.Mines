@@ -120,5 +120,7 @@ Schedule::call(fn () => SchedulerHeartbeat::beat())
 
 // Dot.Memory intelligence loop: send what the outbox holds, prune sent rows.
 // A scheduled command, not a queued job: the queue runs --tries=1 from cron.
-Schedule::command('memory:flush')->everyMinute()->withoutOverlapping();
+// Every five minutes: each run starts a separate PHP process, and the shared
+// host's CPU is the limit (2026-11-27); the outbox keeps rows until sent.
+Schedule::command('memory:flush')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('memory:prune')->dailyAt('03:20');
